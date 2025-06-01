@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "macros.h"
+#include "string_helpers.h"
 
 namespace ark {
 class PandArgBase;
@@ -85,12 +86,31 @@ private:
     bool wasSet_ {false};
 };
 
+template <typename T>
+struct ArgView {
+    using Type = T;
+};
+
+template <>
+struct ArgView<std::string> {
+    // Use 'const &' instead of `string_view` because of `c_str()` use-cases.
+    using Type = const std::string &;
+};
+
+template <>
+struct ArgView<arg_list_t> {
+    // Use 'const &' instead of `string_view` because of `c_str()` use-cases.
+    using Type = const arg_list_t &;
+};
+
 template <typename T,
           enable_if_t<is_same_v<std::string, T> || is_same_v<double, T> || is_same_v<bool, T> || is_same_v<int, T> ||
                       // CC-OFFNXT(G.FMT.10) project code style
                       is_same_v<uint32_t, T> || is_same_v<uint64_t, T> || is_same_v<arg_list_t, T>> * = nullptr>
 class PandArg : public PandArgBase {
 public:
+    using ViewT = typename ArgView<T>::Type;
+
     explicit PandArg(const std::string &name, T defaultVal, const std::string &desc)
         : PandArgBase(name, desc, this->EvalType()), defaultVal_(defaultVal), realVal_(defaultVal)
     {
@@ -118,12 +138,12 @@ public:
     {
     }
 
-    T GetValue() const
+    ViewT GetValue() const
     {
         return realVal_;
     }
 
-    T GetDefaultValue() const
+    ViewT GetDefaultValue() const
     {
         return defaultVal_;
     }
@@ -796,7 +816,7 @@ private:
     {
         std::string paramStr(argstr);
         if (IsRationalNumber(paramStr)) {
-            arg->SetValue(std::stod(paramStr));
+            arg->SetValue(strtod(paramStr.data(), nullptr));
         } else {
             errstr_ +=
                 "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + paramStr + "\"\n";

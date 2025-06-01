@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,8 @@ namespace ark::compiler {
 namespace {
 constexpr ZeroInst *ZERO_INST {nullptr};
 }  // namespace
+
+using BasicBlockState = EscapeAnalysis::BasicBlockState;
 
 class VirtualState {
 public:
@@ -204,7 +206,7 @@ private:
     DataType::Type type_;
 };
 
-class BasicBlockState {
+class EscapeAnalysis::BasicBlockState {
 public:
     explicit BasicBlockState(ArenaAllocator *alloc) : states_(alloc->Adapter()), stateValues_(alloc->Adapter()) {}
 
@@ -417,88 +419,6 @@ void EscapeAnalysis::Dump()
     DumpVStates();
     DumpMStates();
     DumpAliases();
-}
-
-void EscapeAnalysis::LiveInAnalysis::ProcessBlock(BasicBlock *block)
-{
-    auto &liveIns = liveIn_[block->GetId()];
-
-    for (auto succ : block->GetSuccsBlocks()) {
-        liveIns |= liveIn_[succ->GetId()];
-        for (auto phiInst : succ->PhiInsts()) {
-            auto phiInput = phiInst->CastToPhi()->GetPhiInput(block);
-            if (phiInput->GetBasicBlock() != block && DataType::IsReference(phiInput->GetType())) {
-                liveIns.SetBit(phiInput->GetId());
-                AddInst(phiInput);
-            }
-        }
-    }
-
-    for (auto inst : block->InstsReverse()) {
-        if (DataType::IsReference(inst->GetType())) {
-            liveIns.ClearBit(inst->GetId());
-        }
-        for (auto &input : inst->GetInputs()) {
-            auto inputInst = input.GetInst();
-            if (!DataType::IsReference(inputInst->GetType())) {
-                continue;
-            }
-            liveIns.SetBit(inputInst->GetId());
-            AddInst(inputInst);
-            auto dfInput = inst->GetDataFlowInput(inputInst);
-            if (dfInput != inputInst) {
-                liveIns.SetBit(dfInput->GetId());
-                AddInst(dfInput);
-            }
-        }
-    }
-
-    // Loop header's live-ins are alive throughout the whole loop.
-    // If current block is a header then propagate its live-ins
-    // to all current loop's blocks as well as to all inner loops.
-    auto loop = block->GetLoop();
-    if (loop->IsRoot() || loop->GetHeader() != block) {
-        return;
-    }
-    for (auto loopBlock : graph_->GetVectorBlocks()) {
-        if (loopBlock == nullptr || loopBlock == block) {
-            continue;
-        }
-        if (loopBlock->GetLoop() == loop || loopBlock->GetLoop()->IsInside(loop)) {
-            auto &loopBlockLiveIns = liveIn_[loopBlock->GetId()];
-            loopBlockLiveIns |= liveIns;
-        }
-    }
-}
-
-bool EscapeAnalysis::LiveInAnalysis::Run()
-{
-    bool hasAllocs = false;
-    for (auto block : graph_->GetBlocksRPO()) {
-        if (hasAllocs) {
-            break;
-        }
-        for (auto inst : block->Insts()) {
-            hasAllocs = hasAllocs || EscapeAnalysis::IsAllocInst(inst);
-            if (hasAllocs) {
-                break;
-            }
-        }
-    }
-    if (!hasAllocs) {
-        return false;
-    }
-
-    liveIn_.clear();
-    for (size_t idx = 0; idx < graph_->GetVectorBlocks().size(); ++idx) {
-        liveIn_.emplace_back(graph_->GetLocalAllocator());
-    }
-
-    auto &rpo = graph_->GetBlocksRPO();
-    for (auto it = rpo.rbegin(), end = rpo.rend(); it != end; ++it) {
-        ProcessBlock(*it);
-    }
-    return true;
 }
 
 // Create state corresponding to the beginning of the basic block by merging
@@ -842,7 +762,7 @@ bool EscapeAnalysis::RunImpl()
 #endif
     Initialize();
 
-    if (!liveIns_.Run()) {
+    if (!liveIns_.Run(true)) {
         return false;
     }
 
@@ -1150,14 +1070,15 @@ void EscapeAnalysis::VisitCmpRef(Inst *inst, ConditionCode cc)
 
 void EscapeAnalysis::VisitAllocation(Inst *inst)
 {
-    ASSERT(IsAllocInst(inst));
+    ASSERT(LiveInAnalysis::IsAllocInst(inst));
     VisitSaveStateUser(inst);
 
     // There are several reasons to materialize an object right at the allocation site:
     // (1) the object is an input for some instruction inside a catch block
     // (2) we already marked the object as one requiring materialization
-    bool materialize =
-        inst->GetFlag(inst_flags::Flags::CATCH_INPUT) || materializationInfo_.find(inst) != materializationInfo_.end();
+    bool materialize = inst->GetFlag(inst_flags::Flags::CATCH_INPUT) ||
+                       materializationInfo_.find(inst) != materializationInfo_.end() ||
+                       inst->IsReferenceForNativeApiCall();
 
     if (!relaxClassRestrictions_) {
         auto klassInput = inst->GetInput(0).GetInst();
@@ -1264,7 +1185,7 @@ void EscapeAnalysis::HandleMaterializationSite(Inst *inst)
 
     for (auto &t : instsMap) {
         // skip aliases
-        if (!EscapeAnalysis::IsAllocInst(t.first) || t.first == inst) {
+        if (!LiveInAnalysis::IsAllocInst(t.first) || t.first == inst) {
             continue;
         }
         auto candidateInst = t.first;
@@ -1581,7 +1502,7 @@ void ScalarReplacement::MaterializeAtExistingSaveState(SaveStateInst *saveState,
 {
     auto previousSaveState = saveState;
     for (auto t : state) {
-        if (t.second == nullptr || !EscapeAnalysis::IsAllocInst(t.first)) {
+        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first)) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1598,7 +1519,7 @@ void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, V
     auto block = site->GetBasicBlock();
     auto ssInsertionPoint = site;
     for (auto t : state) {
-        if (t.second == nullptr || !EscapeAnalysis::IsAllocInst(t.first) || t.first == site) {
+        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first) || t.first == site) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1621,7 +1542,7 @@ void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst
 {
     ASSERT(block->IsEmpty());
     for (auto t : state) {
-        if (t.second == nullptr || !EscapeAnalysis::IsAllocInst(t.first)) {
+        if (t.second == nullptr || !LiveInAnalysis::IsAllocInst(t.first)) {
             continue;
         }
         auto origAlloc = t.first;
@@ -1832,7 +1753,7 @@ void ScalarReplacement::ResolvePhiInputs()
         for (size_t idx = 0; idx < inputs.size(); idx++) {
             auto inputInst = ResolveAlias(inputs[idx], inst);
             ASSERT(inputInst != nullptr);
-            if (EscapeAnalysis::IsAllocInst(inputInst)) {
+            if (LiveInAnalysis::IsAllocInst(inputInst)) {
                 inputInst = ResolveAllocation(inputInst, preds[idx]);
             }
             inst->AppendInput(inputInst);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <atomic>
 
 #include "assembler/assembly-parser.h"
 #include "libpandafile/file.h"
@@ -113,7 +114,8 @@ public:
 
     static bool ExtractIsActive(const Sampler *sPtr)
     {
-        return sPtr->isActive_;
+        // Atomic with acquire order reason: To ensure start/stop load correctly
+        return sPtr->isActive_.load(std::memory_order_acquire);
     }
 
     uint32_t GetThreadId()
@@ -430,10 +432,10 @@ static void CommunicatorStressWritterThread(const ThreadCommunicator *com, const
     }
 }
 
+static constexpr uint32_t MESSAGES_AMOUNT = TEST_CYCLE_THRESHOLD * 100;
+
 TEST_F(SamplerTest, ThreadCommunicatorMultithreadTest)
 {
-    constexpr uint32_t MESSAGES_AMOUNT = TEST_CYCLE_THRESHOLD * 100;
-
     ThreadCommunicator communicator;
     SampleInfo sampleOutput;
     SampleInfo sampleInput;

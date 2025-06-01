@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,27 +35,30 @@ static PandaString ClassNameToDescriptorString(char const *name)
     return str;
 }
 
+static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, uint8_t const *descr)
+{
+    Job::ErrorHandler handler;
+    auto klass = linker->GetClass(descr, true, ctx, &handler);
+    if (klass != nullptr) {
+        return Type {klass};
+    }
+    return Type {};
+}
+
 TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     : service_ {service},
       plugin_ {plugin::GetLanguagePlugin(lang)},
       langCtx_ {ark::plugins::GetLanguageContextBase(lang)},
-      linkerCtx_ {service->GetClassLinker()->GetExtension(LanguageContext {langCtx_})->GetBootContext()}
+      bootLinkerCtx_ {service->GetClassLinker()->GetExtension(LanguageContext {langCtx_})->GetBootContext()}
 {
     ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
     auto compute = [&](uint8_t const *descr) -> Type {
-        if (descr != nullptr) {
-            Job::ErrorHandler handler;
-            auto *klass = service->GetClassLinker()->GetClass(descr, true, linkerCtx_, &handler);
-            if (klass == nullptr) {
-                return Type {};
-            }
-            return Type {klass};
-        }
-        return Type {};
+        return descr != nullptr ? BootDescriptorToType(descr) : Type {};
     };
 
     class_ = compute(langCtx_.GetClassClassDescriptor());
     object_ = compute(langCtx_.GetObjectClassDescriptor());
+    string_ = compute(langCtx_.GetStringClassDescriptor());
     // Throwable is not given to us as descriptor for some reason. NOTE(gogabr): correct this.
     auto throwableClassName = langCtx_.GetVerificationTypeThrowable();
     if (throwableClassName != nullptr) {
@@ -67,19 +70,9 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     plugin_->TypeSystemSetup(this);
 }
 
-Class const *TypeSystem::DescriptorToClass(uint8_t const *descr)
+Type TypeSystem::BootDescriptorToType(uint8_t const *descr)
 {
-    Job::ErrorHandler handler;
-    return service_->GetClassLinker()->GetClass(descr, true, linkerCtx_, &handler);
-}
-
-Type TypeSystem::DescriptorToType(uint8_t const *descr)
-{
-    auto cls = DescriptorToClass(descr);
-    if (cls == nullptr) {
-        return Type {};
-    }
-    return Type {cls};
+    return DescriptorToType(service_->GetClassLinker(), bootLinkerCtx_, descr);
 }
 
 void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass)
@@ -127,9 +120,13 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
 
     methodOfId_[methodId] = method;
 
+    auto const resolveType = [this, method](const uint8_t *descr) {
+        return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), descr);
+    };
+
     MethodSignature sig;
     if (method->GetReturnType().IsReference()) {
-        sig.result = DescriptorToType(method->GetRefReturnType().data);
+        sig.result = resolveType(method->GetRefReturnType().data);
     } else {
         sig.result = Type::FromTypeId(method->GetReturnType().GetId());
     }
@@ -137,7 +134,7 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
     for (size_t i = 0; i < method->GetNumArgs(); i++) {
         Type argType;
         if (method->GetArgType(i).IsReference()) {
-            argType = DescriptorToType(method->GetRefArgType(refIdx++).data);
+            argType = resolveType(method->GetRefArgType(refIdx++).data);
         } else {
             argType = Type::FromTypeId(method->GetArgType(i).GetId());
         }

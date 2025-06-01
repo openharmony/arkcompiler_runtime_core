@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,10 @@ from runner.plugins.ets.ets_templates.params import Params
 from runner.plugins.ets.ets_templates.template import Template
 
 
-TEMPLATE_EXTENSION = ".sts"
-OUT_EXTENSION = ".sts"
+TEMPLATE_EXTENSION = ".ets"
+OUT_EXTENSION = ".ets"
+TEMPLATE_EXTENSION_TS = ".ts"
+OUT_EXTENSION_TS = ".ts"
 
 _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.benchmark")
 
@@ -37,11 +39,11 @@ class Benchmark:
         self.__input = test_path
         self.__output = output.parent
         self.__name = test_path.name
-        self.__full_name = test_full_name[:-len(TEMPLATE_EXTENSION)]
+        self.__full_name = Path(test_full_name).with_suffix('').name
 
     def generate(self) -> List[str]:
         Log.all(_LOGGER, f"Generating test: {self.__name}")
-        name_without_ext, _ = self.__name.split(".")
+        name_without_ext = self.__input.stem
         params = Params(self.__input, name_without_ext).generate()
 
         template = Template(self.__input, params)
@@ -54,7 +56,8 @@ class Benchmark:
             name = f"{name_without_ext}_{i}" if len(rendered_tests) > 1 else name_without_ext
             full_name = f"{self.__full_name}_{i}" if len(rendered_tests) > 1 else self.__full_name
             test_content = template.generate_test(test, full_name)
-            file_path = self.__output / f"{name}{OUT_EXTENSION}"
+            suffix = Path(self.__name).suffix
+            file_path = self.__output / f"{name}{suffix}"
             write_2_file(file_path=file_path, content=test_content)
             tests.append(str(file_path))
 

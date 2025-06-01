@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,10 @@ namespace ark::tooling::inspector {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ServerEndpointBase : public EndpointBase, public Server {
 public:
+    using MethodResponse = Expected<std::unique_ptr<JsonSerializable>, JRPCError>;
+    using Handler = std::function<MethodResponse(const std::string &, const JsonObject &params)>;
+
+public:
     void OnValidate(std::function<void()> &&handler) override
     {
         onValidate_ = std::move(handler);
@@ -46,9 +50,7 @@ public:
     void Call(const std::string &sessionId, const char *method,
               std::function<void(JsonObjectBuilder &)> &&params) override;
 
-    void OnCall(const char *method,
-                std::function<void(const std::string &sessionId, JsonObjectBuilder &result, const JsonObject &params)>
-                    &&handler) override;
+    void OnCall(const char *method, Handler &&handler) override;
 
 protected:
     std::function<void()> onValidate_ = []() {};  // NOLINT(misc-non-private-member-variables-in-classes)

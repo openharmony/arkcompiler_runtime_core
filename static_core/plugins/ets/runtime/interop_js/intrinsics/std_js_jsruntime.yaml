@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,13 +24,18 @@ coretypes:
 - managed_class: std.interop.js.JSValue
   mirror_class: ark::ets::interop::js::JSValue
 
+- managed_class: escompat.BigInt
+  mirror_class: ark::ets::EtsBigInt
+
+- managed_class: std.core.Type
+  mirror_class: ark::ets::EtsTypeAPIType
 
 intrinsics_namespace: ark::ets::interop::js::intrinsics
 
 
-####################
-# std.js.JSRuntime #
-####################
+############################
+# std.interop.js.JSRuntime #
+############################
 intrinsics:
   - name: JSRuntimeFinalizationRegistryCallback
     space: ets
@@ -88,6 +93,17 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
+    clear_flags: [can_throw, heap_inv, no_cse]
+
+  - name: JSRuntimeNewJSValueBigInt
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: newJSValueBigInt
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ escompat.BigInt ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueBigIntIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
   - name: JSRuntimeGetValueDouble
@@ -148,6 +164,17 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+  - name: JSRuntimeGetPropertyJSValueByKey
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getPropertyJSValue
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueyByKeyIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
   - name: JSRuntimeGetPropertyDouble
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -190,6 +217,17 @@ intrinsics:
       ret: void
       args: [ std.interop.js.JSValue, std.core.String, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeSetElementJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: setElementJSValue
+    static: true
+    signature:
+      ret: void
+      args: [ std.interop.js.JSValue, i32, std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetElementJSValueIntrinsic
     clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeSetPropertyDouble
@@ -291,6 +329,43 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+  - name: JSRuntimeCreateArray
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: createArray
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateArrayIntrinsic
+    clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeInstantiate
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: instantiate
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args:
+        - std.interop.js.JSValue
+        - std.interop.js.JSValue[]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstantiateIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeInstanceOf
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: instanceOfStaticType
+    static: true
+    signature:
+      ret: u1
+      args:
+        - std.interop.js.JSValue
+        - std.core.Type
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfStaticTypeIntrinsic
+    clear_flags: []
+
   - name: JSRuntimeInstanceOfDynamic
     space: ets
     class_name: std.interop.js.JSRuntime
@@ -356,6 +431,119 @@ intrinsics:
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
     clear_flags: [can_throw, heap_inv]
+
+  - name: JSRuntimeHasProperty
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: hasProperty
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.core.String]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeGetProperty
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: getProperty
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeHasPropertyJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: hasPropertyJSValue
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasPropertyJSValueIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeHasElement
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: hasElement
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, i32]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasElementIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeHasOwnProperty
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: hasOwnProperty
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.core.String]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeHasOwnPropertyJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: hasOwnPropertyJSValue
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue, std.interop.js.JSValue]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeHasOwnPropertyJSValueIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeTypeOf
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: typeOf
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeTypeOfIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeIsPromise
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: isPromise
+    static: true
+    signature:
+      ret: u1
+      args: [ std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeIsPromiseIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeInvoke
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: invoke
+    static: true
+    signature:
+      ret: std.interop.js.JSValue
+      args:
+        - std.interop.js.JSValue
+        - std.interop.js.JSValue
+        - std.interop.js.JSValue[]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInvokeIntrinsic
+    clear_flags: []
+
+  - name: JSRuntimeXgc
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: xgc
+    static: true
+    signature:
+      ret: i64
+      args: [ ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeXgcStartIntrinsic
+    clear_flags: []
 
 ####################
 # std.js.JSValue #
@@ -429,7 +617,7 @@ intrinsics:
     interop_intrinsic_kind: creates_local
     peephole_func: PeepholeResolveQualifiedJSCall
     clear_flags: [ no_dce ]
-  
+
   # Not implemented, must be removed before codegen
   - name: CompilerLoadResolvedJSFunction
     space: ets
@@ -806,9 +994,9 @@ intrinsics:
     interop_intrinsic_kind: unwrap
     clear_flags: [heap_inv]
 
-###########################
-# std.core.PromiseInterop #
-###########################
+#################################
+# std.interop.js.PromiseInterop #
+#################################
   - name: PromiseInteropResolve
     space: ets
     class_name: std.interop.js.PromiseInterop

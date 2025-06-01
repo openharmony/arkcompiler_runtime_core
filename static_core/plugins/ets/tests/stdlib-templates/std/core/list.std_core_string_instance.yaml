@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1237,10 +1237,10 @@
     param_init_data_types: {inputs: "int[]"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: char,
-    expected_test_data_item_type: char,
-    expected_data_type: "char[]",
-    expected_test_data: '[67 as char, 1050 as char]',
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "int[]",
+    expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
 
@@ -1833,7 +1833,7 @@
     object_type: String,
 
     init_object_data_type: "String[]",
-    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
+    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie", "\uFDDD!@#$%&^*()1234567890\ude51asdhncbchkiw\uFFFD"]',
 
     param_types: {},
     param_nature: {},
@@ -1843,7 +1843,7 @@
     method_return_type: "String",
     expected_test_data_item_type: "String",
     expected_data_type: "String[]",
-    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie"]',
+    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie", "﷝!@#$%&^*()1234567890�asdhncbchkiw�"]',
     verify_test_result_function: compareStringTrivial
   }
 

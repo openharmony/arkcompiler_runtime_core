@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,102 +12,101 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const tsInt = 1;
-exports.tsInt = tsInt;
-exports.MainClass = class MainClass {
+export const tsInt = 1;
+export class MainClass {
 	constructor(value) {
 		this._value = value;
 	}
 };
-exports.IIFEClass = (function () {
+export let IIFEClass = (function () {
 	return class {
 		constructor(value) {
 			this._value = value;
 		}
 	};
 })();
-exports.AnonymousClass = class {
+export let AnonymousClass = class {
 	constructor(value) {
 		this._value = value;
 	}
 };
-exports.ParentClass = class ParentClass {
+export class ParentClass {
 	constructor(otherClass) {
 		this._otherClass = new otherClass(tsInt);
 	}
 };
-exports.createClassWithArgFromTs = function createClassWithArgFromTs(arg) {
-	return new exports.ParentClass(arg);
+export function createClassWithArgFromTs(arg) {
+	return new ParentClass(arg);
 };
-exports.createMainClassFromTs = function createMainClassFromTs() {
-	return new exports.ParentClass(exports.MainClass);
+export function createMainClassFromTs() {
+	return new ParentClass(MainClass);
 };
-exports.mainClassInstance = new exports.ParentClass(exports.MainClass);
-exports.createAnonymousClassFromTs = function createAnonymousClassFromTs() {
-	return new exports.ParentClass(exports.AnonymousClass);
+export let mainClassInstance = new ParentClass(MainClass);
+export function createAnonymousClassFromTs() {
+	return new ParentClass(AnonymousClass);
 };
-exports.anonymousClassInstance = new exports.ParentClass(exports.AnonymousClass);
-exports.createIIFEClassFromTs = function createIIFEClassFromTs() {
-	return new exports.ParentClass(exports.IIFEClass);
+export let anonymousClassInstance = new ParentClass(AnonymousClass);
+export function createIIFEClassFromTs() {
+	return new ParentClass(IIFEClass);
 };
-exports.iifeClassInstance = new exports.ParentClass(exports.IIFEClass);
-exports.ChildClass = class ChildClass extends exports.ParentClass {
+export let iifeClassInstance = new ParentClass(IIFEClass);
+export class ChildClass extends ParentClass {
 	constructor(otherClass) {
 		super(otherClass);
 	}
 };
-exports.createChildClassWithArgFromTs = function createChildClassWithArgFromTs(arg) {
-	return new exports.ChildClass(arg);
+export function createChildClassWithArgFromTs(arg) {
+	return new ChildClass(arg);
 };
-exports.createChildClassWithMainFromTs = function createChildClassWithMainFromTs() {
-	return new exports.ChildClass(exports.MainClass);
+export function createChildClassWithMainFromTs() {
+	return new ChildClass(MainClass);
 };
-exports.childClassWithMainInstance = new exports.ChildClass(exports.MainClass);
-exports.createChildClassWithAnonymousFromTs = function createChildClassWithAnonymousFromTs() {
-	return new exports.ChildClass(exports.MainClass);
+export let childClassWithMainInstance = new ChildClass(MainClass);
+export function createChildClassWithAnonymousFromTs() {
+	return new ChildClass(MainClass);
 };
-exports.childClassWithAnonymousInstance = new exports.ChildClass(exports.MainClass);
-exports.createChildClassWithIIFEFromTs = function createChildClassWithIIFEFromTs() {
-	return new exports.ChildClass(exports.IIFEClass);
+export let childClassWithAnonymousInstance = new ChildClass(MainClass);
+export function createChildClassWithIIFEFromTs() {
+	return new ChildClass(IIFEClass);
 };
-exports.childClassWithIIFEInstance = new exports.ChildClass(exports.IIFEClass);
-exports.AnonymousClassCreateClass = class {
+export let childClassWithIIFEInstance = new ChildClass(IIFEClass);
+export let AnonymousClassCreateClass = class {
 	constructor(otherClass) {
 		this._otherClass = new otherClass(tsInt);
 	}
 };
-exports.createAnonymousClassCreateClassWithArgFromTs = function createAnonymousClassCreateClassWithArgFromTs(arg) {
-	return new exports.AnonymousClassCreateClass(arg);
+export function createAnonymousClassCreateClassWithArgFromTs(arg) {
+	return new AnonymousClassCreateClass(arg);
 };
-exports.createAnonymousClassCreateClassFromTs = function createAnonymousClassCreateClassFromTs() {
-	return new exports.AnonymousClassCreateClass(exports.MainClass);
+export function createAnonymousClassCreateClassFromTs() {
+	return new AnonymousClassCreateClass(MainClass);
 };
-exports.createAnonymousClassCreateIIFEClassFromTs = function createAnonymousClassCreateIIFEClassFromTs() {
-	return new exports.AnonymousClassCreateClass(exports.IIFEClass);
+export function createAnonymousClassCreateIIFEClassFromTs() {
+	return new AnonymousClassCreateClass(IIFEClass);
 };
-exports.anonymousClassCreateMainInstance = new exports.AnonymousClassCreateClass(exports.MainClass);
-exports.anonymousClassCreateIIFEInstance = new exports.AnonymousClassCreateClass(exports.IIFEClass);
-exports.IIFECreateClassMain = (function (ctor, value) {
+export let anonymousClassCreateMainInstance = new AnonymousClassCreateClass(MainClass);
+export let anonymousClassCreateIIFEInstance = new AnonymousClassCreateClass(IIFEClass);
+export let IIFECreateClassMain = (function (ctor, value) {
 	return new ctor(value);
-})(exports.MainClass, tsInt);
-exports.IIFECreateClassAnonymous = (function (ctor, value) {
+})(MainClass, tsInt);
+export let IIFECreateClassAnonymous = (function (ctor, value) {
 	return new ctor(value);
-})(exports.AnonymousClass, tsInt);
-exports.IIFECreateClass = (function (ctor, value) {
+})(AnonymousClass, tsInt);
+export let IIFECreateClass = (function (ctor, value) {
 	return new ctor(value);
-})(exports.IIFEClass, tsInt);
-exports.MethodClass = class MethodClass {
+})(IIFEClass, tsInt);
+export class MethodClass {
 	init(anyClass, value) {
 		return new anyClass(value);
 	}
 };
-exports.createClassFunction = function createClassFunction(arg, val) {
-	return new arg(val);
+export function CreateClassFunction(Arg, val) {
+	return new Arg(val);
 };
-exports.createClassArrowFunction = function createClassArrowFunction(arg, val) {
-	return new arg(val);
+export function CreateClassArrowFunction(Arg, val) {
+	return new Arg(val);
 };
-exports.checkInstance = function checkInstance(MainClass, instance) {
+export function checkInstance(MainClass, instance) {
 	if (typeof MainClass !== 'function' || typeof instance !== 'object' || instance === null) {
 		throw new TypeError('must be a class');
 	}

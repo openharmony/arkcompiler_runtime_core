@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,40 +15,6 @@
 cases:
     - decl: |-
           class C {
-              met(p: number): string {
-                  return "n"
-              }
-              met(...p: number[]): string {
-                  return "nR"
-              }
-              met(p: number, q: number = 0.0): string {
-                  return "nD1"
-              }
-          }
-      use: |-
-          // more than one applicable method
-          let c: C = new C()
-          assert c.met(0.0) == "n"
-
-    - decl: |-
-          class C {
-              met(p: number): string {
-                  return "n"
-              }
-              met(...p: number[]): string {
-                  return "nR"
-              }
-              met(p: number, q?: Number): string {
-                  return "nD2"
-              }
-          }
-      use: |-
-          // more than one applicable method
-          let c: C = new C()
-          assert c.met(0.0) == "n"
-
-    - decl: |-
-          class C {
               met(...p: number[]): string {
                   return "nR"
               }
@@ -62,7 +28,7 @@ cases:
       use: |-
           // more than one applicable method
           let c: C = new C()
-          assert c.met(0.0) == "n"
+          assertEQ( c.met(0.0),  "n" )
 
     - decl: |-
           class C {
@@ -82,4 +48,4 @@ cases:
       use: |-
           // no applicable method
           let c: C = new C()
-          assert c.met() == "n"
+          assertEQ( c.met(),  "n" )

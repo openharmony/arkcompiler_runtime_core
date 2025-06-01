@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,8 +243,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     if (UNLIKELY(call_ == nullptr)) {
         UNREACHABLE();
     }
-    static_cast<CallInst *>(call_)->SetCanNativeException(method_ == nullptr ||
-                                                          GetRuntime()->HasNativeException(method_));
+    builder_->SetCallNativeFlags(static_cast<CallInst *>(call_), method_);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -713,7 +712,7 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
     auto runtime = GetRuntime();
     auto fieldIndex = bcInst->GetId(0).AsIndex();
     auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
-    auto field = runtime->ResolveField(GetMethod(), fieldId, !GetGraph()->IsAotMode(), nullptr);
+    auto field = runtime->ResolveField(GetMethod(), fieldId, false, !GetGraph()->IsAotMode(), nullptr);
     if (type != DataType::REFERENCE) {
         type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
@@ -801,7 +800,7 @@ void InstBuilder::BuildStoreObject(const BytecodeInstruction *bcInst, DataType::
     auto runtime = GetRuntime();
     auto fieldIndex = bcInst->GetId(0).AsIndex();
     auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
-    auto field = runtime->ResolveField(GetMethod(), fieldId, !GetGraph()->IsAotMode(), nullptr);
+    auto field = runtime->ResolveField(GetMethod(), fieldId, false, !GetGraph()->IsAotMode(), nullptr);
     if (type != DataType::REFERENCE) {
         type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
@@ -836,7 +835,7 @@ void InstBuilder::BuildStoreObject(const BytecodeInstruction *bcInst, DataType::
 Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t typeId, Inst *saveState)
 {
     uint32_t classId;
-    auto field = GetRuntime()->ResolveField(GetMethod(), typeId, !GetGraph()->IsAotMode(), &classId);
+    auto field = GetRuntime()->ResolveField(GetMethod(), typeId, true, !GetGraph()->IsAotMode(), &classId);
     if (field == nullptr || ForceUnresolved()) {
         // The static field is unresolved, so we have to resolve it and then load
         // 1. Create an instruction to resolve an object's static field.
@@ -855,6 +854,7 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
     }
 
     ASSERT(field != nullptr);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
@@ -900,7 +900,7 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
     AddInstruction(saveState);
 
     uint32_t classId;
-    auto field = GetRuntime()->ResolveField(GetMethod(), typeId, !GetGraph()->IsAotMode(), &classId);
+    auto field = GetRuntime()->ResolveField(GetMethod(), typeId, true, !GetGraph()->IsAotMode(), &classId);
     auto pc = GetPc(bcInst->GetAddress());
 
     if (field == nullptr || ForceUnresolved()) {
@@ -930,6 +930,7 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
     }
 
     ASSERT(field != nullptr);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
@@ -1306,6 +1307,7 @@ void InstBuilder::BuildInitObjectMultiDimensionalArray(const BytecodeInstruction
     auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
     auto classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId);
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    ASSERT(classId != 0);
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->ResolveType(GetGraph()->GetMethod(), classId));
@@ -1360,6 +1362,7 @@ CallInst *InstBuilder::BuildCallStaticForInitObject(const BytecodeInstruction *b
     }
     call->ReserveInputs(inputsCount);
     call->AllocateInputTypes(graph_->GetAllocator(), inputsCount);
+    SetCallNativeFlags(call, method);
     return call;
 }
 

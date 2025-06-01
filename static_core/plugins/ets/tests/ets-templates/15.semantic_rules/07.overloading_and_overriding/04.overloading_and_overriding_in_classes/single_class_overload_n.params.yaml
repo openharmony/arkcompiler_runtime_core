@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,90 +41,80 @@ cases:
       constructor(i: Number, j: number) { res = 24;}
     use: |-
       new Base<String, Number>();
-      assert(res == 1);
+      assertEQ( res, 1);
       new Base<String, Number>(1 as short);
-      assert(res == 2);
+      assertEQ( res, 2);
       new Base<String, Number>(new Short());
-      assert(res == 3);
+      assertEQ( res, 3);
       new Base<String, Number>(1 as int);
-      assert(res == 4);
+      assertEQ( res, 4);
       new Base<String, Number>(new Int());
-      assert(res == 5);
+      assertEQ( res, 5);
       new Base<String, Number>(1 as long);
-      assert(res == 6);
+      assertEQ( res, 6);
       new Base<String, Number>(new Long());
-      assert(res == 7);
+      assertEQ( res, 7);
       new Base<String, Number>(1.1 as float);
-      assert(res == 8);
+      assertEQ( res, 8);
       new Base<String, Number>(new Float());
-      assert(res == 9);
+      assertEQ( res, 9);
       new Base<String, Number>(1.2 as double);
-      assert(res == 10);
+      assertEQ( res, 10);
       new Base<String, Number>(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
       new Base<String, Number>(c'A');
-      assert(res == 12);
+      assertEQ( res, 12);
       new Base<String, Number>(new Char());
-      assert(res == 13);
+      assertEQ( res, 13);
       new Base<String, Number>("some str");
-      assert(res == 14);
+      assertEQ( res, 14);
       new Base<String, Number>(1 as byte);
-      assert(res == 15);
+      assertEQ( res, 15);
       new Base<String, Number>(new Byte());
-      assert(res == 16);
+      assertEQ( res, 16);
       new Base<String, Number>(false);
-      assert(res == 17);
+      assertEQ( res, 17);
       new Base<String, Number>(new Boolean());
-      assert(res == 18);
+      assertEQ( res, 18);
       new Base<String, Number>(1 as int, 1 as int);
-      assert(res == 19);
+      assertEQ( res, 19);
       new Base<Number, String>(new Gen<Number>());
-      assert(res == 20);
+      assertEQ( res, 20);
       new Base<Number, String>(new Gen2<Number, String>());
-      assert(res == 21);
+      assertEQ( res, 21);
       new Base<String, Number>(undefined);
-      assert(res == 22);
+      assertEQ( res, 22);
       new Base<String, Number>(null);
-      assert(res == 22);
+      assertEQ( res, 22);
       new Base<String, Number>(1.1 as number, new Number());
-      assert(res == 23);
+      assertEQ( res, 23);
       new Base<String, Number>(new Number(), 1.1 as number);
-      assert(res == 24);
+      assertEQ( res, 24);
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: number) { res = 1;}
       foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number) { res = 1;}
       foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number|undefined|null) { res = 1;}
       foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();
 
   # Instance methods
   - decl: |-
@@ -153,65 +143,61 @@ cases:
     use: |-
       let a = new Base<Number, String>();
       a.foo();
-      assert(res == 1);
+      assertEQ( res, 1);
       a.foo(1 as short);
-      assert(res == 2);
+      assertEQ( res, 2);
       a.foo(new Short());
-      assert(res == 3);
+      assertEQ( res, 3);
       a.foo(1 as int);
-      assert(res == 4);
+      assertEQ( res, 4);
       a.foo(new Int());
-      assert(res == 5);
+      assertEQ( res, 5);
       a.foo(1 as long);
-      assert(res == 6);
+      assertEQ( res, 6);
       a.foo(new Long());
-      assert(res == 7);
+      assertEQ( res, 7);
       a.foo(1.1 as float);
-      assert(res == 8);
+      assertEQ( res, 8);
       a.foo(new Float());
-      assert(res == 9);
+      assertEQ( res, 9);
       a.foo(1.2 as double);
-      assert(res == 10);
+      assertEQ( res, 10);
       a.foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
       a.foo(c'A');
-      assert(res == 12);
+      assertEQ( res, 12);
       a.foo(new Char());
-      assert(res == 13);
+      assertEQ( res, 13);
       a.foo("some str");
-      assert(res == 14);
+      assertEQ( res, 14);
       a.foo(1 as byte);
-      assert(res == 15);
+      assertEQ( res, 15);
       a.foo(new Byte());
-      assert(res == 16);
+      assertEQ( res, 16);
       a.foo(false);
-      assert(res == 17);
+      assertEQ( res, 17);
       a.foo(new Boolean());
-      assert(res == 18);
+      assertEQ( res, 18);
       a.foo(1 as int, 1 as int);
-      assert(res == 19);
+      assertEQ( res, 19);
       a.foo(new Gen<Number>());
-      assert(res == 20);
+      assertEQ( res, 20);
       a.foo(new Gen2<Number, String>());
-      assert(res == 21);
+      assertEQ( res, 21);
       a.foo(undefined);
-      assert(res == 22);
+      assertEQ( res, 22);
       a.foo(null);
-      assert(res == 22);
+      assertEQ( res, 22);
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo() { res = 1;}
       foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
@@ -220,29 +206,21 @@ cases:
         res = 2;
         return 1 as byte;
       }
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: number) { res = 1;}
       foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number) { res = 1;}
       foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       foo(i: Number|undefined|null) { res = 1;}
       foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();
 
   # Static methods
   - decl: |-
@@ -267,62 +245,58 @@ cases:
       static foo(i: int, j: int) { res = 19;}
       static foo(i: Number|undefined|null) { res = 20;}
     use: |-
-      Base<Number, String>.foo();
-      assert(res == 1);
-      Base<Number, String>.foo(1 as short);
-      assert(res == 2);
-      Base<Number, String>.foo(new Short());
-      assert(res == 3);
-      Base<Number, String>.foo(1 as int);
-      assert(res == 4);
-      Base<Number, String>.foo(new Int());
-      assert(res == 5);
-      Base<Number, String>.foo(1 as long);
-      assert(res == 6);
-      Base<Number, String>.foo(new Long());
-      assert(res == 7);
-      Base<Number, String>.foo(1.1 as float);
-      assert(res == 8);
-      Base<Number, String>.foo(new Float());
-      assert(res == 9);
-      Base<Number, String>.foo(1.2 as double);
-      assert(res == 10);
-      Base<Number, String>.foo(new Number());
-      assert(res == 11);
-      Base<Number, String>.foo(c'A');
-      assert(res == 12);
-      Base<Number, String>.foo(new Char());
-      assert(res == 13);
-      Base<Number, String>.foo("some str");
-      assert(res == 14);
-      Base<Number, String>.foo(1 as byte);
-      assert(res == 15);
-      Base<Number, String>.foo(new Byte());
-      assert(res == 16);
-      Base<Number, String>.foo(false);
-      assert(res == 17);
-      Base<Number, String>.foo(new Boolean());
-      assert(res == 18);
-      Base<Number, String>.foo(1 as int, 1 as int);
-      assert(res == 19);
-      Base<Number, String>.foo(undefined);
-      assert(res == 20);
-      Base<Number, String>.foo(null);
-      assert(res == 20);
+      Base.foo();
+      assertEQ( res, 1);
+      Base.foo(1 as short);
+      assertEQ( res, 2);
+      Base.foo(new Short());
+      assertEQ( res, 3);
+      Base.foo(1 as int);
+      assertEQ( res, 4);
+      Base.foo(new Int());
+      assertEQ( res, 5);
+      Base.foo(1 as long);
+      assertEQ( res, 6);
+      Base.foo(new Long());
+      assertEQ( res, 7);
+      Base.foo(1.1 as float);
+      assertEQ( res, 8);
+      Base.foo(new Float());
+      assertEQ( res, 9);
+      Base.foo(1.2 as double);
+      assertEQ( res, 10);
+      Base.foo(new Number());
+      assertEQ( res, 11);
+      Base.foo(c'A');
+      assertEQ( res, 12);
+      Base.foo(new Char());
+      assertEQ( res, 13);
+      Base.foo("some str");
+      assertEQ( res, 14);
+      Base.foo(1 as byte);
+      assertEQ( res, 15);
+      Base.foo(new Byte());
+      assertEQ( res, 16);
+      Base.foo(false);
+      assertEQ( res, 17);
+      Base.foo(new Boolean());
+      assertEQ( res, 18);
+      Base.foo(1 as int, 1 as int);
+      assertEQ( res, 19);
+      Base.foo(undefined);
+      assertEQ( res, 20);
+      Base.foo(null);
+      assertEQ( res, 20);
 
   - tags: negative, compile-only
     decl: |-
       static foo() { res = 1;}
       static foo() { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo() { res = 1;}
       static foo(): int { res = 2; return 1;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
@@ -331,26 +305,18 @@ cases:
         res = 2;
         return 1 as byte;
       }
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: number) { res = 1;}
       static foo(j: number) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: Number) { res = 1;}
       static foo(j: Double) { res = 2;}
-    use: |-
-      new Base();
 
   - tags: negative, compile-only
     decl: |-
       static foo(i: Number|undefined|null) { res = 1;}
       static foo(j: undefined|null|Number) { res = 2;}
-    use: |-
-      new Base();

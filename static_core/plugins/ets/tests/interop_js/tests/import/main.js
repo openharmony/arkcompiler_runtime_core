@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,103 +13,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.User = exports.tsReg = exports.tsDate = exports.tsFunction = 
-exports.arr = exports.tsObject = exports.TsClass = exports.tsBigInt = 
-exports.tsNewSymbol = exports.tsSymbol = exports.tsNull = 
-exports.tsUndefined = exports.tsFalse = exports.tsTrue = 
-exports.tsString = exports.tsNumber = void 0;
-exports.increment = increment;
-exports.concatString = concatString;
-exports.changeTrue = changeTrue;
-exports.changeFalse = changeFalse;
-exports.changeUndefined = changeUndefined;
-exports.changeNull = changeNull;
-exports.changeSymbol = changeSymbol;
-exports.changeBigInt = changeBigInt;
-exports.changeTsClass = changeTsClass;
-exports.changeObject = changeObject;
-exports.changeArray = changeArray;
-exports.changeFunction = changeFunction;
-exports.changeDate = changeDate;
-exports.changeRegExp = changeRegExp;
-exports.default = defaultFu;
-// Primitive types
-exports.tsNumber = 1;
-exports.tsString = 'Alice';
-exports.tsTrue = true;
-exports.tsFalse = false;
-exports.tsNull = null;
-exports.tsSymbol = Symbol('id');
-exports.tsNewSymbol = Symbol('new');
-exports.tsBigInt = 9007199254740991n;
-function increment() {
-    return exports.tsNumber++;
+
+export let tsNumber = 1;
+export let tsString = 'Alice';
+export let tsTrue = true;
+export let tsFalse = false;
+export let tsNull = null;
+export let tsSymbol = Symbol('id');
+export let tsNewSymbol = Symbol('new');
+export let tsBigInt = 9007199254740991n;
+export let tsUndefined = undefined;
+export function increment() {
+    return tsNumber++;
 }
-function concatString() {
-    return exports.tsString += exports.tsString;
+export function concatString() {
+    return tsString += tsString;
 }
-function changeTrue() {
-    return exports.tsTrue = !exports.tsTrue;
+export function changeTrue() {
+    return tsTrue = !tsTrue;
 }
-function changeFalse() {
-    return exports.tsFalse = !exports.tsFalse;
+export function changeFalse() {
+    return tsFalse = !tsFalse;
 }
-function changeUndefined() {
-    return exports.tsUndefined = exports.tsNumber;
+export function changeUndefined() {
+    return tsUndefined = tsNumber;
 }
-function changeNull() {
-    return exports.tsNull = exports.tsNumber;
+export function changeNull() {
+    return tsNull = tsNumber;
 }
-function changeSymbol() {
-    return exports.tsSymbol = exports.tsNewSymbol;
+export function changeSymbol() {
+    return tsSymbol = tsNewSymbol;
 }
-function changeBigInt() {
-    return exports.tsBigInt = exports.tsBigInt - exports.tsBigInt;
+export function changeBigInt() {
+    return tsBigInt = tsBigInt - tsBigInt;
 }
 //Objects
-let TsClass = /** @class */ (function () {
+export let TsClass = /** @class */ (function () {
     function tsClass() {
-        this.name = exports.tsString;
+        this.name = tsString;
     }
     return tsClass;
 }());
-exports.TsClass = TsClass;
-function changeTsClass(obj) {
-    console.log(obj, 'TS LOG<<');
-    obj.name = exports.tsString + exports.tsString;
+export function changeTsClass(obj) {
+    print(obj, 'TS LOG<<');
+    obj.name = tsString + tsString;
 }
-exports.tsObject = {
+export let tsObject = {
     value: 'tsString',
 };
-function changeObject() {
-    exports.tsObject.value = exports.tsString + exports.tsString;
+export function changeObject() {
+    tsObject.value = tsString + tsString;
 }
-exports.arr = [exports.tsNumber];
-function changeArray() {
-    exports.arr.push(exports.tsNumber);
+export let arr = [tsNumber];
+export function changeArray() {
+    arr.push(tsNumber);
 }
-let tsFunction = function () { return exports.tsNumber; };
-exports.tsFunction = tsFunction;
-function changeFunction() {
-    exports.tsFunction = function () { return exports.tsNumber + exports.tsNumber; };
+export let tsFunction = function () { return tsNumber; };
+
+export function changeFunction() {
+    tsFunction = function () { return tsNumber + tsNumber; };
 }
-exports.tsDate = new Date();
-function changeDate() {
-    exports.tsDate.setFullYear(exports.tsDate.getFullYear() + 1);
+export let tsDate = new Date();
+export function changeDate() {
+    tsDate.setFullYear(tsDate.getFullYear() + 1);
 }
-;
-exports.tsReg = new RegExp('abc');
-function changeRegExp() {
-    exports.tsReg = new RegExp('xyz');
+
+export let tsReg = new RegExp('abc');
+export function changeRegExp() {
+    tsReg = new RegExp('xyz');
 }
-;
-function defaultFu() {
-    return exports.tsNumber;
+
+export function defaultFu() {
+    return tsNumber;
 }
-let User = /** @class */ (function () {
+export let User = /** @class */ (function () {
     function user() {
     }
     return user;
 }());
-exports.User = User;

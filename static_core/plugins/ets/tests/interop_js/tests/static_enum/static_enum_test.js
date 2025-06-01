@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,53 +14,43 @@
  */
 
 function assertEq(a, b) {
-	// console.log(`assertEq: '${a}' === '${b}'`)
-	if (a !== b) {
-		console.log(`assertEq failed: '${a}' === '${b}'`);
-		process.exit(1);
-	}
+    if (a !== b) {
+        throw Error(`assertEq failed: '${a}' == '${b}'`);
+    }
 }
+
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+globalThis.etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 
 function runTest() {
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	const etsOpts = {
-		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-		'gc-trigger-type': 'heap-trigger',
-		'load-runtimes': 'ets',
-		'compiler-enable-jit': 'false',
-		'enable-an': 'false',
-		'run-gc-in-place': 'true',
-	};
-	const createRes = etsVm.createRuntime(etsOpts);
-	if (!createRes) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
-	}
+    const etsOpts = {
+        'log-level': 'error',
+        'log-components': 'ets_interop_js',
+        'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
+        'panda-files': gtestAbcPath,
+        'gc-trigger-type': 'heap-trigger',
+        'compiler-enable-jit': 'false',
+        'run-gc-in-place': 'true',
+    };
+    const createRes = etsVm.createRuntime(etsOpts);
+    if (!createRes) {
+        throw Error('Failed to create ETS runtime');
+    }
 
-	testFunction(etsVm);
-	testValues(etsVm);
-}
+    const Color = etsVm.getClass('Lstatic_enum_test/Color;');
+    let red = Color.RED;
+    assertEq(Color.RED.valueOf(), 1);
+    assertEq(Color.GREEN.valueOf(), 2);
+    assertEq(Color.YELLOW.valueOf(), 3);
+    assertEq(Color.BLACK.valueOf(), 4);
+    assertEq(Color.BLUE.valueOf(), 5);
 
-function testFunction(etsVm) {
-	const sumDouble = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test1');
-	assertEq(test1(), 0);
-	const sumString = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test2');
-	assertEq(test2(), true);
-}
-
-function testValues(etsVm) {
-	const Color = etsVm.getClass('Lstatic_enum_test/Color;');
-	assertEq(Color.RED, 1);
-	assertEq(Color.GREEN, 2);
-	assertEq(Color.YELLOW, 3);
-	assertEq(Color.BLACK, 4);
-	assertEq(Color.BLUE, 5);
-
-	const Direction = etsVm.getClass('Lstatic_enum_test/Direction;');
-
-	assertEq(Direction.Up, 1);
-	assertEq(Direction.Down, -1);
+    const Level = etsVm.getClass('Lstatic_enum_test/Level;');
+    assertEq(Level.DEBUG.valueOf(), 'Debug');
+    assertEq(Level.RELEASE.valueOf(), 'Release');
 }
 
 runTest();

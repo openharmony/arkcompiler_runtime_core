@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 .record std.core.String <external>
 .function u1 std.core.String.equals(std.core.String a0, std.core.Object a1) <external>
 .record std.core.Object <external>
-.record std.core.NoSuchFieldError <external> {
+.record std.core.LinkerUnresolvedFieldError <external> {
     std.core.String message <external>
 }
 .record A {}
@@ -28,21 +28,23 @@
     i32 foo
 }
 
-.function void C.bar(C a0, i32 a1) <access.function=public> {
+.function void C.<set>bar(C a0, i32 a1) <access.function=public> {
     mov.obj v0, a0
     lda a1
     stobj v0, C.foo
     return.void
 }
 
-.union_field i32 bar
-.union_field i32 baz
+.record $NamedAccessMeta-i32 {
+    i32 bar
+    i32 baz
+}
 
 .function i32 test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name a0, baz
+    ets.ldobj.name a0, $NamedAccessMeta-i32.baz
     movi v0, 5
     add2 v0
-    ets.stobj.name a1, bar
+    ets.stobj.name a1, $NamedAccessMeta-i32.bar
     return
 }
 
@@ -73,7 +75,7 @@ try_end:
     jmp try_end_handler
 try_begin_handler:
     sta.obj v0
-    ldobj.v.obj v1, v0, std.core.NoSuchFieldError.message
+    ldobj.v.obj v1, v0, std.core.LinkerUnresolvedFieldError.message
     lda.str "Class A does not have field and getter with name baz"
     sta.obj v0
     call.short std.core.String.equals, v0, v1
@@ -99,4 +101,4 @@ error4:
     return
 }
 
-.catch std.core.NoSuchFieldError, try_begin, try_end, try_begin_handler
+.catch std.core.LinkerUnresolvedFieldError, try_begin, try_end, try_begin_handler

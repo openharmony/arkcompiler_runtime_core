@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "runtime/coroutines/coroutine.h"
 #include "ets_interop_js_gtest.h"
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
 
@@ -41,7 +42,7 @@ public:
 TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
 {
     std::string messageCollector;  // it's empty string
-    uv_loop_t *loop = uv_default_loop();
+    uv_loop_t *loop = EventLoop::GetEventLoop();
     EventLoopCallbackPosterFactoryImpl factory;
     {
         auto poster = factory.CreatePoster();
@@ -50,18 +51,20 @@ TEST_F(EventLoopCallbackPosterTest, ManyPostsTest)
         // after 2 posts poster will be deleted with final post of deleter
     }
     ASSERT_EQ(messageCollector, "");
-    uv_run(loop, uv_run_mode::UV_RUN_DEFAULT);
+    // run loop only once to avoid deadlock due to mainPoster in runtime
+    uv_run(loop, uv_run_mode::UV_RUN_ONCE);
     ASSERT_EQ(messageCollector, GetAllWordInCorrectOrder());
 }
 
 TEST_F(EventLoopCallbackPosterTest, DeletingInPostTest)
 {
-    uv_loop_t *loop = uv_default_loop();
+    uv_loop_t *loop = EventLoop::GetEventLoop();
     EventLoopCallbackPosterFactoryImpl factory;
     auto poster = factory.CreatePoster();
+    // run loop only once to avoid deadlock due to mainPoster in runtime
     poster->Post([&poster] { poster = nullptr; });
     ASSERT_NE(poster.get(), nullptr);
-    uv_run(loop, uv_run_mode::UV_RUN_DEFAULT);
+    uv_run(loop, uv_run_mode::UV_RUN_ONCE);
     ASSERT_EQ(poster.get(), nullptr);
 }
 

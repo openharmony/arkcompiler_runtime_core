@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,29 @@
 
 namespace ark::pandasm {
 
+static panda_file::BaseMethodItem *GetMethodForHybridOpcode(const std::string &id,
+    const std::unordered_map<std::string, panda_file::BaseMethodItem *> &firstSearchTable,
+    const std::unordered_map<std::string, panda_file::BaseMethodItem *> &secondSearchTable)
+{
+    auto it = firstSearchTable.find(id);
+    if (it == firstSearchTable.end()) {
+        auto it2 = secondSearchTable.find(id);
+        if (it2 == secondSearchTable.end()) {
+            return nullptr;
+        }
+        return it2->second;
+    }
+    return it->second;
+}
+
 // NOLINTBEGIN(readability-container-size-empty)
 
 // NOLINTNEXTLINE(misc-definitions-in-headers,readability-function-size)
 bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
+    const std::unordered_map<std::string, panda_file::BaseMethodItem *> &staticMethods,
     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
+    const std::unordered_map<std::string, panda_file::BaseFieldItem *> &staticFields,
     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
     const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
@@ -71,9 +88,17 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %       ni += 1
 %     elsif op.id?
 %       if insn.properties.include?('method_id')
-%         ops << 'methods.find(ids[0])->second->GetIndex(method)'
+%         if insn.properties.include?('call_virt') && ((insn.mnemonic.include? '.virt') || (insn.mnemonic.include? '.polymorphic'))
+%           ops << 'methods.find(ids[0])->second->GetIndex(method)'
+%         else
+%           ops << 'foundMethod->GetIndex(method)'
+%         end
+%       elsif insn.properties.include?('static_method_id')
+%         ops << 'foundMethod->GetIndex(method)'
 %       elsif insn.properties.include?('field_id')
 %         ops << 'fields.find(ids[0])->second->GetIndex(method)'
+%       elsif insn.properties.include?('static_field_id')
+%         ops << 'staticFields.find(ids[0])->second->GetIndex(method)'
 %       elsif insn.properties.include?('type_id')
 %         ops << 'classes.find(ids[0])->second->GetIndex(method)'
 %       elsif insn.properties.include?('string_id')
@@ -95,11 +120,33 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 % end
     case Opcode::<%= insn.asm_token %>: {
 % if insn.properties.include?('method_id')
+%   if insn.properties.include?('call_virt') && ((insn.mnemonic.include? '.virt') || (insn.mnemonic.include? '.polymorphic'))
         if (ids.empty() || (methods.find(ids[0]) == methods.cend())) {
+            return false;
+        }
+%   else
+        if (ids.empty()) {
+            return false;
+        }
+        auto *foundMethod = GetMethodForHybridOpcode(ids[0], methods, staticMethods);
+        if (foundMethod == nullptr) {
+            return false;
+        }
+%   end
+% elsif insn.properties.include?('static_method_id')
+        if (ids.empty()) {
+            return false;
+        }
+        auto *foundMethod = GetMethodForHybridOpcode(ids[0], staticMethods, methods);
+        if (foundMethod == nullptr) {
             return false;
         }
 % elsif insn.properties.include?('field_id')
         if (ids.empty() || (fields.find(ids[0]) == fields.cend())) {
+            return false;
+        }
+% elsif insn.properties.include?('static_field_id')
+        if (ids.empty() || (staticFields.find(ids[0]) == staticFields.cend())) {
             return false;
         }
 % elsif insn.properties.include?('type_id')

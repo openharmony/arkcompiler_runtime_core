@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "utils/arena_containers.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/include/method.h"
 #include "utils/expected.h"
 
 namespace ark::compiler {
@@ -49,9 +50,12 @@ public:
         return bootClassContext_;
     }
 
+    void ParseClassContextToFile(std::string_view context);
+
     void SetBootClassContext(PandaString context)
     {
         bootClassContext_ = std::move(context);
+        ParseClassContextToFile(bootClassContext_);
     }
 
     PandaString GetAppClassContext() const
@@ -62,6 +66,7 @@ public:
     void SetAppClassContext(PandaString context)
     {
         appClassContext_ = std::move(context);
+        ParseClassContextToFile(appClassContext_);
     }
 
     void VerifyClassHierarchy();
@@ -149,11 +154,34 @@ public:
         return !aotFiles_.empty();
     }
 
+    void TryAddMethodToProfile(const Method *method)
+    {
+        auto pfName = method->GetPandaFile()->GetFullFileName();
+        if (profiledPandaFiles_.find(pfName) != profiledPandaFiles_.end()) {
+            os::memory::LockHolder lock {profiledMethodsLock_};
+            profiledMethods_.push_back(method);
+        }
+    }
+
+    PandaVector<const Method *> &GetProfiledMethods()
+    {
+        return profiledMethods_;
+    }
+
+    PandaUnorderedSet<std::string_view> &GetProfiledPandaFiles()
+    {
+        return profiledPandaFiles_;
+    }
+
 private:
     PandaVector<std::unique_ptr<AotFile>> aotFiles_;
     PandaUnorderedMap<std::string, AotPandaFile> filesMap_;
     PandaString bootClassContext_;
     PandaString appClassContext_;
+
+    mutable os::memory::Mutex profiledMethodsLock_;
+    PandaVector<const Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
+    PandaUnorderedSet<std::string_view> profiledPandaFiles_;
 
     os::memory::RecursiveMutex aotStringRootsLock_;
     PandaVector<ObjectHeader **> aotStringGcRoots_;
@@ -164,6 +192,10 @@ private:
 
 class AotClassContextCollector {
 public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char DELIMETER = ':';
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char HASH_DELIMETER = '*';
     explicit AotClassContextCollector(PandaString *acc, bool useAbsPath = true) : acc_(acc), useAbsPath_(useAbsPath) {};
     bool operator()(const panda_file::File &pf);
 

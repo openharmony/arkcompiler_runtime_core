@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,6 +54,7 @@ class BenchUnit:
                  tags: Optional[Iterable[str]] = None,
                  bugs: Optional[Iterable[str]] = None) -> None:
         self.path: Path = Path(path)
+        self.src_for_es2panda_override: Optional[Path] = None
         self.__src: Optional[Path] = self.path.joinpath(src) if src else None
         self.__libs: List[Path] = [
             self.path.joinpath(lib) for lib in libs] if libs else []

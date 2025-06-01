@@ -165,7 +165,7 @@ function apply_patches() {
 function process_manifest() {
     local manifest="$1"
 
-    while read -r component
+    while read -r component || [[ -n $component ]] # '-n' check for case if we forgot new line at the end of file
     do
         component=$(echo "$component" | perl -lane 'chomp; s/^\s+//; s/\s+$//; print $_')
 
@@ -238,9 +238,13 @@ if [[ "$ARK_INSTALL_NODE" == "yes" ]] ; then
             wget -q -P ${ARK_THIRD_PARTY_DIR}/nodejs https://nodejs.org/dist/${NODE_VERSION}/${ARCHIVE_NAME}
             tar -xJf ${ARK_THIRD_PARTY_DIR}/nodejs/${ARCHIVE_NAME} -C ${ARK_THIRD_PARTY_DIR}/nodejs
             rm ${ARK_THIRD_PARTY_DIR}/nodejs/${ARCHIVE_NAME}
+            echo "-- Downloading nodejs stub lib for tsbindings windows"
+            NODE_API_STUB_LIB="libnode_api-windows.zip"
+            wget -q -P ${ARK_THIRD_PARTY_DIR}/nodejs https://github.com/napi-bindings/node-api-stub/releases/download/8.0.0/${NODE_API_STUB_LIB}
+            unzip ${ARK_THIRD_PARTY_DIR}/nodejs/${NODE_API_STUB_LIB} -d ${ARK_THIRD_PARTY_DIR}/nodejs/node-${NODE_VERSION}-${DISTRO}/lib/
+            rm ${ARK_THIRD_PARTY_DIR}/nodejs/${NODE_API_STUB_LIB}
         fi
     fi
-
     exit 0
 fi
 

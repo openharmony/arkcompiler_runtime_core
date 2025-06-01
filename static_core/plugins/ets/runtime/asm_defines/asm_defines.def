@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,29 @@
  */
 // NOLINTBEGIN(readability-identifier-naming)
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
-DEFINE_VALUE(ETS_COROUTINE_UNDEFINED_OBJECT_OFFSET, ark::ets::EtsCoroutine::GetTlsUndefinedObjectOffset())
+DEFINE_VALUE(ETS_COROUTINE_NULL_VALUE_OFFSET, ark::ets::EtsCoroutine::GetTlsNullValueOffset())
+DEFINE_VALUE(ETS_COROUTINE_ANI_ENV_OFFSET, ark::ets::EtsCoroutine::GetTlsNapiEnvOffset())
 
 DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
+
+DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
+
+DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsArrayObject<ark::ets::EtsObject>::GetBufferOffset())
+DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
+             ark::ets::EtsArrayObject<ark::ets::EtsObject>::GetActualLengthOffset())
+
+DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetBufferOffset())
+DEFINE_VALUE(TYPED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetLengthIntOffset())
+DEFINE_VALUE(TYPED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetByteOffsetOffset())
+DEFINE_VALUE(TYPED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetArrayBufferBackedOffset())
+
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetBufferOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetLengthIntOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetByteOffsetOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetArrayBufferBackedOffset())
+
+DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
+
+DEFINE_VALUE(SHARED_ARRAY_BUFFER_SHARED_MEMORY_OFFSET, ark::ets::EtsEscompatSharedArrayBuffer::GetSharedMemoryOffset())
+DEFINE_VALUE(SHARED_MEMORY_DATA_OFFSET, ark::ets::EtsEscompatSharedMemory::GetDataOffset())
 // NOLINTEND(readability-identifier-naming)

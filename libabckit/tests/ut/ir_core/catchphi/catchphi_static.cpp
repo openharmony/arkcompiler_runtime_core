@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
                                             "catchphi_static/ETSGLOBAL", "main");
-    EXPECT_TRUE(helpers::Match(output, "CATCH\nCATCH\n"));
+    EXPECT_TRUE(helpers::Match(output, "CATCH\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
@@ -63,7 +63,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified.abc",
                                        "catchphi_static/ETSGLOBAL", "main");
-    EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\nCATCH\n\\[Error: abckit_error\\]\n"));
+    EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\nCATCH\n"));
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive, extension=c

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,9 +150,7 @@ private:
     std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     std::string LiteralValueToString(const pandasm::LiteralArray::Literal &lit) const;
     void Serialize(const pandasm::Record &record, std::ostream &os, bool printInformation = false) const;
-    void SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation,
-                         bool isUnion = false) const;
-    void SerializeUnionFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const;
+    void SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const;
     void Serialize(const pandasm::Function::CatchBlock &catchBlock, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &annList, std::ostream &os) const;
     void SerializeLineNumberTable(const panda_file::LineNumberTable &lineNumberTable, std::ostream &os) const;
@@ -266,7 +264,8 @@ private:
     ark::panda_file::SourceLang fileLanguage_ = ark::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> recordNameToId_ {};
-    std::map<std::string, panda_file::File::EntityId> methodNameToId_ {};
+    std::map<std::string, panda_file::File::EntityId> methodStaticNameToId_ {};
+    std::map<std::string, panda_file::File::EntityId> methodInstanceNameToId_ {};
 
     std::map<std::string, std::vector<pandasm::Field>> externalFieldTable_ {};
     std::map<std::string, std::vector<std::string>> externalFieldsInfoTable_ {};

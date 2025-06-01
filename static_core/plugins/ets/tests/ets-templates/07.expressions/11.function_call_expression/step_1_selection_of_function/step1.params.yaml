@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,7 @@ cases:
           }
       use: |-
           // select the most-specific function
-          assert foo(new Number()) == "N"
+          assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -39,7 +39,7 @@ cases:
           }
       use: |-
           // select the most-specific function
-          assert foo(new Number()) == "UT"
+          assertEQ( foo(new Number()), "UT" )
 
 
     - decl: |-
@@ -55,7 +55,7 @@ cases:
           }
       use: |-
           // select the most-specific function without boxing/unboxing
-          assert foo(new Number()) == "UT"
+          assertEQ( foo(new Number()), "UT" )
 
 
     - decl: |-
@@ -67,8 +67,8 @@ cases:
           }
       use: |-
           // select the most-specific function without boxing/unboxing
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "NN"
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "NN" )
 
 
     - decl: |-
@@ -77,8 +77,8 @@ cases:
           }
       use: |-
           // select function with with unboxing
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "n"
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "n" )
 
 
     - decl: |-
@@ -90,8 +90,8 @@ cases:
           }
       use: |-
           // select function with boxing
-          assert foo(0.0) == "N"
-          assert foo(new Number()) == "N"
+          assertEQ( foo(0.0), "N" )
+          assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -106,8 +106,8 @@ cases:
           }
       use: |-
           // select function with rest parameter
-          assert foo(0.0) == "nR"
-          assert foo(new Number()) == "NR"
+          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -116,8 +116,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and unboxing
-          assert foo(0.0) == "nR"
-          assert foo(new Number()) == "nR"
+          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(new Number()), "nR" )
 
 
     - decl: |-
@@ -129,8 +129,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and boxing
-          assert foo(0.0) == "NR"
-          assert foo(new Number()) == "NR"
+          assertEQ( foo(0.0), "NR" )
+          assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -145,8 +145,8 @@ cases:
           }
       use: |-
           // select function with default parameter
-          assert foo(0.0) == "nD1"
-          assert foo(new Number()) == "ND1"
+          assertEQ( foo(0.0), "nD1" )
+          assertEQ( foo(new Number()), "ND1" )
 
 
     - decl: |-
@@ -155,8 +155,8 @@ cases:
           }
       use: |-
           // select function with default parameter and unboxing
-          assert foo(0.0) == "nD1"
-          assert foo(new Number()) == "nD1"
+          assertEQ( foo(0.0), "nD1" )
+          assertEQ( foo(new Number()), "nD1" )
 
 
     - decl: |-
@@ -168,8 +168,8 @@ cases:
           }
       use: |-
           // select function with default parameter and boxing
-          assert foo(0.0) == "ND1"
-          assert foo(new Number()) == "ND1"
+          assertEQ( foo(0.0), "ND1" )
+          assertEQ( foo(new Number()), "ND1" )
 
 
     - decl: |-
@@ -184,8 +184,8 @@ cases:
           }
       use: |-
           // select function with undefined parameter
-          assert foo(0.0) == "nD2"
-          assert foo(new Number()) == "ND2"
+          assertEQ( foo(0.0), "nD2" )
+          assertEQ( foo(new Number()), "ND2" )
 
 
     - decl: |-
@@ -194,8 +194,8 @@ cases:
           }
       use: |-
           // select function with undefined parameter and unboxing
-          assert foo(0.0) == "nD2"
-          assert foo(new Number()) == "nD2"
+          assertEQ( foo(0.0), "nD2" )
+          assertEQ( foo(new Number()), "nD2" )
 
 
     - decl: |-
@@ -207,8 +207,8 @@ cases:
           }
       use: |-
           // select function with undefined parameter and boxing
-          assert foo(0.0) == "ND2"
-          assert foo(new Number()) == "ND2"
+          assertEQ( foo(0.0), "ND2" )
+          assertEQ( foo(new Number()), "ND2" )
 
 
     - decl: |-
@@ -223,8 +223,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assert foo(0.0) == "nR"
-          assert foo(new Number()) == "ND1"
+          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(new Number()), "ND1" )
 
 
     - decl: |-
@@ -239,8 +239,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and undefined parameter
-          assert foo(0.0) == "nR"
-          assert foo(new Number()) == "ND2"
+          assertEQ( foo(0.0), "nR" )
+          assertEQ( foo(new Number()), "ND2" )
 
 
     - decl: |-
@@ -255,8 +255,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assert foo(0.0) == "nD1"
-          assert foo(new Number()) == "NR"
+          assertEQ( foo(0.0), "nD1" )
+          assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -271,8 +271,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assert foo(0.0) == "nD2"
-          assert foo(new Number()) == "NR"
+          assertEQ( foo(0.0), "nD2" )
+          assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -290,8 +290,8 @@ cases:
           }
       use: |-
           // select function without boxing/unboxing and without rest
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "N"
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -306,8 +306,8 @@ cases:
           }
       use: |-
           // select function with unboxing and without rest
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "n"
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "n" )
 
 
     - decl: |-
@@ -322,94 +322,8 @@ cases:
           }
       use: |-
           // select function with boxing and without rest
-          assert foo(0.0) == "N"
-          assert foo(new Number()) == "N"
-
-
-    - decl: |-
-          function foo(p: number): string {
-              return "n"
-          }
-          function foo(p: Number): string {
-              return "N"
-          }
-          function foo(p: number, q: number = 0.0): string {
-              return "nD1"
-          }
-          function foo(p: Number, q: number = 0.0): string {
-              return "ND1"
-          }
-      use: |-
-          // select function without boxing/unboxing and without default parameter
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "N"
-
-
-    - decl: |-
-          function foo(p: number): string {
-              return "n"
-          }
-          function foo(p: number, q: number = 0.0): string {
-              return "nD1"
-          }
-          function foo(p: Number, q: number = 0.0): string {
-              return "ND1"
-          }
-      use: |-
-          // select function with unboxing and without default parameter
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "n"
-
-
-    - decl: |-
-          function foo(p: Number): string {
-              return "N"
-          }
-          function foo(p: number, q: number = 0.0): string {
-              return "nD1"
-          }
-          function foo(p: Number, q: number = 0.0): string {
-              return "ND1"
-          }
-      use: |-
-          // select function with boxing and without default parameter
-          assert foo(0.0) == "N"
-          assert foo(new Number()) == "N"
-
-
-    - decl: |-
-          function foo(p: number): string {
-              return "n"
-          }
-          function foo(p: Number): string {
-              return "N"
-          }
-          function foo(p: number, q?: Number): string {
-              return "nD2"
-          }
-          function foo(p: Number, q?: Number): string {
-              return "ND2"
-          }
-      use: |-
-          // select function without boxing/unboxing and without undefined parameter
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "N"
-
-
-    - decl: |-
-          function foo(p: number): string {
-              return "n"
-          }
-          function foo(p: number, q?: Number): string {
-              return "nD2"
-          }
-          function foo(p: Number, q?: Number): string {
-              return "ND2"
-          }
-      use: |-
-          // select function with unboxing and without undefined parameter
-          assert foo(0.0) == "n"
-          assert foo(new Number()) == "n"
+          assertEQ( foo(0.0), "N" )
+          assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -427,8 +341,8 @@ cases:
           }
       use: |-
           // select function with boxing and without undefined parameter
-          assert foo(0.0) == "N"
-          assert foo(new Number()) == "N"
+          assertEQ( foo(0.0), "N" )
+          assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -472,13 +386,124 @@ cases:
           }
       use: |-
           // value types
-          assert foo(true) == "b"
-          assert foo(true, false) == "bR"
-          assert foo(true, false, true) == "bR"
+          assertEQ( foo(true), "b" )
+          assertEQ( foo(true, false), "bR" )
+          assertEQ( foo(true, false, true), "bR" )
 
           // reference types
-          assert foo(new Boolean(true)) == "B"
-          assert foo(new Boolean(true), new Boolean(true)) == "BR"
-          assert foo(new Boolean(true), new Boolean(true), new Boolean(true)) == "BR"
+          assertEQ( foo(new Boolean(true)), "B" )
+          assertEQ( foo(new Boolean(true), new Boolean(true)), "BR" )
+          assertEQ( foo(new Boolean(true), new Boolean(true), new Boolean(true)), "BR" )
 
-          assert foo() == "b1" || foo() == "b2" || foo() == "bR" || foo() == "B1" || foo() == "B2" || foo() == "BR"
+          assertTrue( foo() == "b1" || foo() == "b2" || foo() == "bR" || foo() == "B1" || foo() == "B2" || foo() == "BR" )
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(...p: number[]): string {
+              return "nR"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+      use: |-
+          // more than one applicable function
+          assertEQ( foo(0.0), "n" )
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(...p: number[]): string {
+              return "nR"
+          }
+          function foo(p: number, q?: Number): string {
+              return "nD2"
+          }
+      use: |-
+          // more than one applicable function
+          assertEQ( foo(0.0), "n" )
+
+    - decl: |-
+          type UT = int | number  // normalized to Number
+          function foo(p: Number): string {
+              return "N"
+          }
+          function foo(p: UT): string {
+              return "UT"
+          }
+      use: |-
+          // duplicate functions
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: Number): string {
+          return "N"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function without boxing/unboxing and without default parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function with unboxing and without default parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "ND1" )
+
+
+    - decl: |-
+          function foo(p: Number): string {
+              return "N"
+          }
+          function foo(p: number, q: number = 0.0): string {
+              return "nD1"
+          }
+          function foo(p: Number, q: number = 0.0): string {
+              return "ND1"
+          }
+      use: |-
+          // select function with boxing and without default parameter
+          assertEQ( foo(0.0), "nD1" )
+          assertEQ( foo(new Number()), "N" )
+
+
+    - decl: |-
+          function foo(p: number): string {
+              return "n"
+          }
+          function foo(p: Number): string {
+              return "N"
+          }
+          function foo(p: number, q?: Number): string {
+              return "nD2"
+          }
+          function foo(p: Number, q?: Number): string {
+              return "ND2"
+          }
+      use: |-
+          // select function without boxing/unboxing and without undefined parameter
+          assertEQ( foo(0.0), "n" )
+          assertEQ( foo(new Number()), "N" )
+

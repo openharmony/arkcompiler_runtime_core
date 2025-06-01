@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,17 +35,21 @@ namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&jsCallback));
     ASSERT(status == napi_ok);
 
-    jsCallback->Run();
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
-
-    if (coro->HasPendingException()) {
+    bool hasException = false;
+    {
+        ScopedManagedCodeThread managedScope(coro);
+        jsCallback->Run();
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
+        hasException = coro->HasPendingException();
+    }
+    if (hasException) {
         napi_throw_error(env, nullptr, "EtsVM internal error");
     }
     napi_value undefined;
@@ -55,55 +59,51 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 
 void JsJobQueue::Post(EtsObject *callback)
 {
-    auto postProc = [callback] {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        napi_env env = InteropCtx::Current(coro)->GetJSEnv();
-        napi_deferred deferred;
-        napi_value undefined;
-        napi_value jsPromise;
-        napi_value thenFn;
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS(coro);
 
-        napi_get_undefined(env, &undefined);
-        napi_status status = napi_create_promise(env, &deferred, &jsPromise);
-        if (status != napi_ok) {
-            InteropCtx::Fatal("Cannot allocate a Promise instance");
-        }
-        status = napi_get_named_property(env, jsPromise, "then", &thenFn);
-        ASSERT(status == napi_ok);
-        (void)status;
-
-        auto *jsCallback = JsCallback::Create(coro, callback);
-        napi_value thenCallback;
-        status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
-        if (status != napi_ok) {
-            InteropCtx::Fatal("Cannot create a function");
-        }
-
-        napi_value thenPromise;
-        status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
-        ASSERT(status == napi_ok);
-        (void)status;
-
-        napi_resolve_deferred(env, deferred, undefined);
-    };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &postProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        postProc();
+    auto *ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return;
     }
+    napi_env env = ctx->GetJSEnv();
+
+    napi_deferred deferred;
+    napi_value undefined;
+    napi_value jsPromise;
+    napi_value thenFn;
+
+    napi_get_undefined(env, &undefined);
+    napi_status status = napi_create_promise(env, &deferred, &jsPromise);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot allocate a Promise instance");
+    }
+    status = napi_get_named_property(env, jsPromise, "then", &thenFn);
+    ASSERT(status == napi_ok);
+    (void)status;
+
+    auto *jsCallback = JsCallback::Create(coro, callback);
+    napi_value thenCallback;
+    status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot create a function");
+    }
+
+    napi_value thenPromise;
+    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
+    ASSERT(status == napi_ok);
+    (void)status;
+
+    napi_resolve_deferred(env, deferred, undefined);
 }
 
-static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callback_info info)
+static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callback_info info, bool isResolved)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;
@@ -112,13 +112,27 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call napi_get_cb_info!");
     }
+    ASSERT(promiseRef != nullptr);
 
-    EtsHandleScope hScope(coro);
-    EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
-    vm->GetGlobalObjectStorage()->Remove(promiseRef);
+    {
+        ScopedManagedCodeThread managedScope(coro);
+        EtsHandleScope hScope(coro);
+        EtsHandle<EtsPromise> promiseHandle(coro,
+                                            EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
+        vm->GetGlobalObjectStorage()->Remove(promiseRef);
 
-    auto jsval = JSValue::Create(coro, ctx, value);
-    ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+        if (isResolved) {
+            auto jsval = JSValue::Create(coro, ctx, value);
+            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
+                                                    ark::ets::ToEtsBoolean(false));
+        } else {
+            auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
+            ASSERT(refconv != nullptr);
+            auto error = refconv->Unwrap(ctx, value);
+            ASSERT(error != nullptr);
+            ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), error, ark::ets::ToEtsBoolean(false));
+        }
+    }
 
     vm->GetCoroutineManager()->Schedule();
 
@@ -127,14 +141,28 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     return undefined;
 }
 
+static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return OnJsPromiseCompleted(env, info, true);
+}
+
+static napi_value OnJsPromiseRejected(napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    return OnJsPromiseCompleted(env, info, false);
+}
+
 void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     InteropCtx *ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return;
+    }
     napi_env env = ctx->GetJSEnv();
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    napi_value jsPromise = storage->GetReference(jsObject)->GetJsObject(env);
+    napi_value jsPromise = storage->GetJsObject(jsObject, env);
 
     napi_value thenFn;
     napi_status status = napi_get_named_property(env, jsPromise, "then", &thenFn);
@@ -143,16 +171,21 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
     }
 
     mem::Reference *promiseRef = vm->GetGlobalObjectStorage()->Add(etsPromise, mem::Reference::ObjectType::GLOBAL);
+    ScopedNativeCodeThread nativeScope(coro);
+    std::array<napi_value, 2U> thenCallback {};
 
-    // NOTE(konstanting, #I67QXC): OnJsPromiseRejected
-    napi_value thenCallback;
-    status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback);
+    status = napi_create_function(env, nullptr, 0, OnJsPromiseResolved, promiseRef, &thenCallback[0]);
+    if (status != napi_ok) {
+        InteropCtx::Fatal("Cannot create a function");
+    }
+
+    status = napi_create_function(env, nullptr, 0, OnJsPromiseRejected, promiseRef, &thenCallback[1]);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot create a function");
     }
 
     napi_value thenResult;
-    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenResult);
+    status = napi_call_function(env, jsPromise, thenFn, 2U, thenCallback.data(), &thenResult);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call then() from a JS Promise");
     }
@@ -160,17 +193,9 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
-    auto addLinkProc = [&]() { CreatePromiseLink(source, EtsPromise::FromEtsObject(target)); };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    if (Coroutine::GetCurrent() != mainCoro) {
-        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &addLinkProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        addLinkProc();
-    }
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    INTEROP_CODE_SCOPE_ETS(coro);
+    CreatePromiseLink(source, EtsPromise::FromEtsObject(target));
 }
 
 /* static */

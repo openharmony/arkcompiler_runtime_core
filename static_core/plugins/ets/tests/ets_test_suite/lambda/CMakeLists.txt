@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ set(lambda_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 foreach(test ${lambda_tests})
     set(test_out_dir "${lambda_tests_out_dir}/${test}")
 
-    set(test_src "${lambda_tests_in_dir}/${test}.sts")
+    set(test_src "${lambda_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_lambda_${test})
 
     run_ets_code_verifier(${test_src} ${test_out_dir} ${target}-ets-verifier)

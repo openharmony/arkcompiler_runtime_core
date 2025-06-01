@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,21 @@
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
-#include "runtime/handle_scope-inl.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
-#include "runtime/mem/local_object_handle.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_field.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
+#include "plugins/ets/runtime/types/ets_string.h"
+#include "runtime/handle_scope-inl.h"
+
+#ifdef PANDA_ETS_INTEROP_JS
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#endif /* PANDA_ETS_INTEROP_JS */
 
 namespace ark::ets::intrinsics {
 
@@ -32,15 +39,25 @@ EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
     return cls->GetName();
 }
 
+EtsRuntimeLinker *StdCoreClassGetLinker(EtsClass *cls)
+{
+    return EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(cls->GetLoadContext());
+}
+
 EtsClass *StdCoreClassOf(EtsObject *obj)
 {
     ASSERT(obj != nullptr);
     return obj->GetClass();
 }
 
-EtsClass *StdCoreClassOfCaller()
+EtsClass *StdCoreClassCurrent()
 {
     return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 0);
+}
+
+EtsClass *StdCoreClassOfCaller()
+{
+    return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 1);
 }
 
 void StdCoreClassInitialize(EtsClass *cls)
@@ -62,64 +79,78 @@ EtsString *StdCoreClassGetDescriptor(EtsClass *cls)
 
 EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    const auto throwCreateInstanceErr = [coro, cls](std::string_view msg) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
-                               PandaString(msg) + " " + cls->GetDescriptor());
-    };
-
-    if (UNLIKELY(!cls->GetRuntimeClass()->IsInstantiable() || cls->IsArrayClass())) {
-        throwCreateInstanceErr("Cannot instantiate");
-        return nullptr;
-    }
-
-    EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), ":V");
-    if (UNLIKELY(ctor == nullptr)) {
-        throwCreateInstanceErr("No default constructor in");
-        return nullptr;
-    }
-
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    if (UNLIKELY(!cls->IsInitialized() && !linker->InitializeClass(coro, cls))) {
-        return nullptr;
-    }
-    EtsObject *obj = EtsObject::Create(cls);
-    if (UNLIKELY(obj == nullptr)) {
-        return nullptr;
-    }
-
-    LocalObjectHandle objHandle(coro, obj);
-    std::array<Value, 1> args {Value(obj->GetCoreType())};
-    ctor->GetPandaMethod()->Invoke(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
-        return nullptr;
-    }
-    return objHandle.GetPtr();
+    ASSERT(cls != nullptr);
+    return cls->CreateInstance();
 }
 
-EtsClass *StdCoreRuntimeLinkerLoadClassInternal(EtsClass *ctxClassObj, EtsString *clsName, uint8_t init)
+EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    ClassLinkerContext *ctx = ctxClassObj->GetRuntimeClass()->GetLoadContext();
-
-    PandaString name = clsName->GetMutf8();
+    const auto name = clsName->GetMutf8();
     PandaString descriptor;
-    ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    return runtimeLinker->FindLoadedClass(classDescriptor);
+}
 
-    EtsClass *klass = linker->GetClass(descriptor.c_str(), false, ctx);
-    if (UNLIKELY(klass == nullptr)) {
-        ASSERT(coro->HasPendingException());
+void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
+{
+    auto *ext = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension();
+    ext->RegisterContext([ext, runtimeLinker]() {
+        ASSERT(runtimeLinker->GetClassLinkerContext() == nullptr);
+        auto allocator = ext->GetClassLinker()->GetAllocator();
+        auto *ctx = allocator->New<EtsClassLinkerContext>(runtimeLinker);
+        runtimeLinker->SetClassLinkerContext(ctx);
+        return ctx;
+    });
+#ifdef PANDA_ETS_INTEROP_JS
+    // At first call to ets from js, no available class linker context on the stack
+    // Thus, register the first available application class linker context as default class linker context for interop
+    // Tracked in #24199
+    interop::js::InteropCtx::InitializeDefaultLinkerCtxIfNeeded(runtimeLinker);
+#endif /* PANDA_ETS_INTEROP_JS */
+}
+
+EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
+{
+    const auto name = clsName->GetMutf8();
+    PandaString descriptor;
+    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    // Use core ClassLinker in order to pass nullptr as error handler,
+    // as exception is thrown in managed RuntimeLinker.loadClass
+    auto *linker = Runtime::GetCurrent()->GetClassLinker();
+    auto *ctx = EtsRuntimeLinker::FromCoreType(runtimeLinker)->GetClassLinkerContext();
+    ASSERT(ctx->IsBootContext());
+    auto *klass = linker->GetClass(classDescriptor, true, ctx, nullptr);
+    if (klass == nullptr) {
         return nullptr;
     }
 
     if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, klass))) {
+        if (UNLIKELY(!linker->InitializeClass(coro, klass))) {
             ASSERT(coro->HasPendingException());
             return nullptr;
         }
     }
-    return klass;
+    return EtsClass::FromRuntimeClass(klass);
+}
+
+EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+        auto *method = stack.GetMethod();
+        if (LIKELY(method != nullptr)) {
+            auto *cls = method->GetClass();
+            ASSERT(cls != nullptr);
+            auto *ctx = cls->GetLoadContext();
+            ASSERT(ctx != nullptr);
+            if (!ctx->IsBootContext()) {
+                return reinterpret_cast<EtsClassLinkerContext *>(ctx)->GetRuntimeLinker();
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace ark::ets::intrinsics

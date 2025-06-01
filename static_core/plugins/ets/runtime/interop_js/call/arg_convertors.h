@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,18 +44,17 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
+    if (IsNull(env, jsVal)) {
+        if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
+            storeRes(ctx->GetNullValue()->GetCoreType());
+            return true;
+        }
+    }
     if (klass == ctx->GetJSValueClass()) {
         return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
     if (klass == ctx->GetStringClass()) {
         return UnwrapVal<JSConvertString>(ctx, env, jsVal, storeRes);
-    }
-    if (IsUndefined(env, jsVal)) {
-        if (UNLIKELY(!klass->IsAssignableFrom(ctx->GetUndefinedClass()))) {
-            return false;
-        }
-        storeRes(ctx->GetUndefinedObject()->GetCoreType());
-        return true;
     }
     // start slowpath
     auto refconv = JSRefConvertResolve<true>(ctx, klass);
@@ -115,7 +114,7 @@ template <typename FStore, typename GetClass>
     auto id = type.GetId();
     auto env = ctx->GetJSEnv();
     if (id == panda_file::Type::TypeId::REFERENCE) {
-        if (IsNull(env, jsVal)) {
+        if (IsUndefined(env, jsVal)) {
             storeRes(nullptr);
             return true;
         }
@@ -228,11 +227,11 @@ template <typename FRead>
 
     ObjectHeader *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
     if (UNLIKELY(ref == nullptr)) {
-        *resSlot = GetNull(env);
+        *resSlot = GetUndefined(env);
         return true;
     }
-    if (UNLIKELY(ref == ctx->GetUndefinedObject()->GetCoreType())) {
-        *resSlot = GetUndefined(env);
+    if (UNLIKELY(ref == ctx->GetNullValue()->GetCoreType())) {
+        *resSlot = GetNull(env);
         return true;
     }
 
@@ -245,8 +244,11 @@ template <typename FRead>
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath
+    auto coro = EtsCoroutine::GetCurrent();
+    HandleScope<ObjectHeader *> scope(coro);
+    VMHandle<ObjectHeader> handle(coro, ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
-    return setResult(refconv->Wrap(ctx, EtsObject::FromCoreType(ref)));
+    return setResult(refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr())));
 }
 
 template <typename FRead>

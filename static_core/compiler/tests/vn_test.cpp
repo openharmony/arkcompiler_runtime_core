@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1050,7 +1050,7 @@ TEST_F(VNTest, VnTestLoadAfterInit)
             INST(4U, Opcode::InitClass).Inputs(1U).TypeId(1U);
             INST(5U, Opcode::CallStatic).v0id().InputsAutoType(1U);
             INST(6U, Opcode::LoadClass).ref().Inputs(1U).TypeId(1U);
-            INST(7U, Opcode::CheckCast).b().Inputs(0U, 6U, 1U).TypeId(1U);
+            INST(7U, Opcode::CheckCast).Inputs(0U, 6U, 1U).TypeId(1U);
             INST(8U, Opcode::Return).b().Inputs(3U);
         }
     }
@@ -1065,7 +1065,7 @@ TEST_F(VNTest, VnTestLoadAfterInit)
             INST(3U, Opcode::IsInstance).b().Inputs(0U, 2U, 1U).TypeId(1U);
             INST(4U, Opcode::InitClass).Inputs(1U).TypeId(1U);
             INST(5U, Opcode::CallStatic).v0id().InputsAutoType(1U);
-            INST(7U, Opcode::CheckCast).b().Inputs(0U, 2U, 1U).TypeId(1U);
+            INST(7U, Opcode::CheckCast).Inputs(0U, 2U, 1U).TypeId(1U);
             INST(8U, Opcode::Return).b().Inputs(3U);
         }
     }
@@ -1089,7 +1089,7 @@ TEST_F(VNTest, VnTestLoadAndInit)
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).TypeId(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U).TypeId(1U);
             INST(4U, Opcode::LoadClass).ref().Inputs(1U).TypeId(1U);
-            INST(5U, Opcode::CheckCast).b().Inputs(0U, 4U, 1U).TypeId(1U);
+            INST(5U, Opcode::CheckCast).Inputs(0U, 4U, 1U).TypeId(1U);
             INST(6U, Opcode::InitClass).Inputs(1U).TypeId(1U);
             INST(7U, Opcode::LoadAndInitClass).ref().Inputs(1U).TypeId(1U);
             INST(8U, Opcode::NewObject).ref().Inputs(7U, 1U).TypeId(1U);
@@ -1105,7 +1105,7 @@ TEST_F(VNTest, VnTestLoadAndInit)
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).TypeId(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U).TypeId(1U);
-            INST(5U, Opcode::CheckCast).b().Inputs(0U, 2U, 1U).TypeId(1U);
+            INST(5U, Opcode::CheckCast).Inputs(0U, 2U, 1U).TypeId(1U);
             INST(8U, Opcode::NewObject).ref().Inputs(2U, 1U).TypeId(1U);
             INST(9U, Opcode::ReturnVoid).v0id();
         }

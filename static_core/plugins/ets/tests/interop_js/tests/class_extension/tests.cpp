@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,63 +23,63 @@ class EtsInteropJsClassExtension : public EtsInteropTest {};
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_can_extend_TS_user_class)
 {
-    // Please uncomment extendUserClass fn in index.sts before running
+    // Please uncomment extendUserClass fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("extendUserClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "extendUserClass");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_can_extend_TS_native_class)
 {
-    // Please uncomment extendNativeClass fn in index.sts before running
+    // Please uncomment extendNativeClass fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("extendNativeClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "extendNativeClass");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_extended_class_is_instanceOf_JS_user_class)
 {
-    // Please uncomment extendedUserClassIsInstanceOf fn in index.sts before running
+    // Please uncomment extendedUserClassIsInstanceOf fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("extendedUserClassIsInstanceOf");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "extendedUserClassIsInstanceOf");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_extended_class_is_instanceOf_JS_native_class)
 {
-    // Please uncomment extendedNativeClassIsInstanceOf fn in index.sts before running
+    // Please uncomment extendedNativeClassIsInstanceOf fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("extendedNativeClassIsInstanceOf");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "extendedNativeClassIsInstanceOf");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_extended_class_can_access_super_method)
 {
-    // Please uncomment canAccessSuperMethod fn in index.sts before running
+    // Please uncomment canAccessSuperMethod fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("canAccessSuperMethod");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "canAccessSuperMethod");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_extended_class_can_add_getter_method)
 {
-    // Please uncomment canAddGetter fn in index.sts before running
+    // Please uncomment canAddGetter fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("canAddGetter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "canAddGetter");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_eTS_extended_class_can_set_protected_property)
 {
-    // Please uncomment canSetProtectedValue fn in index.sts before running
+    // Please uncomment canSetProtectedValue fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("canSetProtectedValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "canSetProtectedValue");
     ASSERT_EQ(ret, true);
 }
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_JS_can_extend_eTS_user_class)
 {
-    // Please uncomment extendUserClass fn in index.sts before running
+    // Please uncomment extendUserClass fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallJsMethod<bool>("extendUserClass", "index.js");
     ASSERT_EQ(ret, true);
@@ -87,7 +87,7 @@ TEST_F(EtsInteropJsClassExtension, DISABLED_JS_can_extend_eTS_user_class)
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_JS_can_extend_eTS_native_class)
 {
-    // Please uncomment extendNativeClass fn in index.sts before running
+    // Please uncomment extendNativeClass fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallJsMethod<bool>("extendNativeClass", "index.js");
     ASSERT_EQ(ret, true);
@@ -95,7 +95,7 @@ TEST_F(EtsInteropJsClassExtension, DISABLED_JS_can_extend_eTS_native_class)
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_JS_respects_eTS_protected_modifier)
 {
-    // Please uncomment jsRespectsProtectedModifier fn in index.sts before running
+    // Please uncomment jsRespectsProtectedModifier fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallJsMethod<bool>("jsRespectsProtectedModifier", "index.js");
     ASSERT_EQ(ret, true);
@@ -103,7 +103,7 @@ TEST_F(EtsInteropJsClassExtension, DISABLED_JS_respects_eTS_protected_modifier)
 // NOTE Disabled until #17693 is resolved
 TEST_F(EtsInteropJsClassExtension, DISABLED_JS_respects_eTS_static_modifier)
 {
-    // Please uncomment jsRespectsStaticModifier fn in index.sts before running
+    // Please uncomment jsRespectsStaticModifier fn in index.ets before running
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallJsMethod<bool>("jsRespectsStaticModifier", "index.js");
     ASSERT_EQ(ret, true);

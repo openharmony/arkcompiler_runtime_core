@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -593,10 +593,30 @@ intrinsics:
   is_fastpath: false
   need_param_locations: false
 
-- name: AbckitIsUndefined
+- name: AbckitStrictEquals
   space: abckit
-  class_name: "IsUndefined"
-  method_name: "ets.isundefined"
+  class_name: "StrictEquals"
+  method_name: "ets.strictequals"
+  compiler_only: true
+  private: false
+  static: true
+  safepoint_after_call: false
+  signature:
+    ret: i32
+    args: [ ref, ref ]
+  clear_flags: ["acc_read", "require_state", "can_throw", "heap_inv", "no_dce", "no_cse", "no_hoist"]
+  set_flags: ["commutative"]
+  is_stub: false
+  additional_temps: 0
+  codegen_arch: []
+  need_nullcheck: []
+  is_fastpath: false
+  need_param_locations: false
+
+- name: AbckitIsNullValue
+  space: abckit
+  class_name: "IsNullValue"
+  method_name: "ets.isnullvalue"
   compiler_only: true
   private: false
   static: true

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@ interface IState {
     runErr: ILog[]
     disasmOut: ILog[]
     disasmErr: ILog[]
+    verifierOut: ILog[]
+    verifierErr: ILog[]
     out: ILog[]
     err: ILog[]
 }
@@ -34,6 +36,8 @@ const initialState: IState = {
     runErr: [],
     disasmOut: [],
     disasmErr: [],
+    verifierOut: [],
+    verifierErr: [],
     out: [],
     err: []
 };
@@ -52,6 +56,12 @@ const logsSlice = createSlice({
             state.runOut = action.payload;
         },
         setRunErrLogs(state, action: PayloadAction<ILog[]>) {
+            state.runErr = action.payload;
+        },
+        setVerifierOutLogs(state, action: PayloadAction<ILog[]>) {
+            state.runOut = action.payload;
+        },
+        setVerifierErrLogs(state, action: PayloadAction<ILog[]>) {
             state.runErr = action.payload;
         },
         setDisasmOutLogs(state, action: PayloadAction<ILog[]>) {
@@ -76,6 +86,8 @@ export const {
     setRunErrLogs,
     setDisasmOutLogs,
     setDisasmErrLogs,
+    setVerifierOutLogs,
+    setVerifierErrLogs,
     setOutLogs,
     setErrLogs
 } = logsSlice.actions;

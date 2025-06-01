@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,13 +29,15 @@ static std::optional<Method *> FindMethodInVTable(Class *klass, Method *imethod,
     auto vtable = klass->GetVTable();
     Method *candidate = nullptr;
 
+    // Must take context of the class which is being loaded
+    auto *ctx = klass->GetLoadContext();
     for (size_t i = vtable.size(); i != 0;) {
         i--;
         auto kmethod = vtable[i];
         if (kmethod->GetName() != imethod->GetName()) {
             continue;
         }
-        if (!ETSProtoIsOverriddenBy(imethod->GetProtoId(), kmethod->GetProtoId())) {
+        if (!ETSProtoIsOverriddenBy(ctx, imethod->GetProtoId(), kmethod->GetProtoId())) {
             continue;
         }
         if (candidate != nullptr) {
@@ -170,16 +172,11 @@ void EtsITableBuilder::DumpITable([[maybe_unused]] Class *klass)
     LOG(DEBUG, CLASS_LINKER) << "itable of class " << klass->GetName() << ":";
     auto itable = klass->GetITable();
     size_t idxI = 0;
-    size_t idxM = 0;
     for (size_t i = 0; i < itable.Size(); i++) {
         auto entry = itable[i];
         auto interface = entry.GetInterface();
         LOG(DEBUG, CLASS_LINKER) << "[ interface - " << idxI++ << " ] " << interface->GetName() << ":";
-        auto methods = entry.GetMethods();
-        for (auto *method : methods) {
-            LOG(DEBUG, CLASS_LINKER) << "[ method - " << idxM++ << " ] " << method->GetFullName() << " - "
-                                     << method->GetFileId().GetOffset();
-        }
+        // #22950 itable has nullptr entries
     }
 #endif  // NDEBUG
 }

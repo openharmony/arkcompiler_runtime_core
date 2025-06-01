@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,48 +12,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-globalThis.require = require;
+
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
 function runTest(test, warmup, iters) {
-	console.log('Running test ' + test);
-	let penv = process.env;
-	let etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi');
-	// NB: Consider setting compiler-enable-jit=false for local run
-	const etsVmRes = etsVm.createRuntime({
+	print('Running test ' + test);
+
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = { // NB: Consider setting compiler-enable-jit=false for local run
 		'log-level': 'info',
 		'log-components': 'ets_interop_js',
-		'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
 		'run-gc-in-place': 'true',
-	});
+	};
 
-	if (!etsVmRes) {
-		console.error('Failed to create ETS runtime');
-		return 1;
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
 
-	globalThis.jsCode = require('./code.js');
-	if (warmup > 0 && etsVm) {
-		etsVm.call(test, warmup);
+	const runTestImpl = etsVm.getFunction('Ltest_frontend/ETSGLOBAL;', test);
+	if (warmup > 0) {
+		runTestImpl(warmup);
 	}
 
 	const MS2NS = 1000000;
 	let start = Date.now();
-	etsVm.call(test, iters);
+	runTestImpl(iters);
 	let timeNs = (Date.now() - start) * MS2NS;
-	console.log('js interop test ' + test + ': ' + timeNs / iters + ' ns/iter, iters: ' + iters);
+	print('js interop test ' + test + ': ' + timeNs / iters + ' ns/iter, iters: ' + iters);
 
 	return null;
 }
 
-let args = process.argv;
-if (args.length !== 5) {
-	console.log('Expected <test name> <number of warmup iterations> <number of iterations>');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 8) {
+	throw Error('Expected <test name> <number of warmup iterations> <number of iterations>');
 }
-let test = args[2];
-let warmup = parseInt(args[3], 10);
-let iters = parseInt(args[4], 10);
+let test = args[5];
+let warmup = parseInt(args[6], 10);
+let iters = parseInt(args[7], 10);
 runTest(test, warmup, iters);

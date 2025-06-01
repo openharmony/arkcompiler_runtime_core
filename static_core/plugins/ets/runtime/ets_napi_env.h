@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
 
+#include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
@@ -25,10 +26,10 @@ class EtsCoroutine;
 class PandaEtsVM;
 using EtsThrowable = EtsObject;
 
-class PandaEtsNapiEnv : public EtsEnv {
+class PandaEtsNapiEnv : public ani_env, public EtsEnv {  // NOLINT(fuchsia-multiple-inheritance)
 public:
-    static Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> Create(EtsCoroutine *coroutine,
-                                                                           mem::InternalAllocatorPtr allocator);
+    static Expected<PandaEtsNapiEnv *, const char *> Create(EtsCoroutine *coroutine,
+                                                            mem::InternalAllocatorPtr allocator);
     PANDA_PUBLIC_API static PandaEtsNapiEnv *GetCurrent();
 
     PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
@@ -51,6 +52,16 @@ public:
         return static_cast<PandaEtsNapiEnv *>(env);
     }
 
+    static PandaEtsNapiEnv *FromEtsEnv(EtsEnv *env)
+    {
+        return static_cast<PandaEtsNapiEnv *>(env);
+    }
+
+    static PandaEtsNapiEnv *FromAniEnv(ani_env *env)
+    {
+        return static_cast<PandaEtsNapiEnv *>(env);
+    }
+
     void SetException(EtsThrowable *thr);
     EtsThrowable *GetThrowable() const;
     bool HasPendingException() const;
@@ -64,6 +75,8 @@ private:
     EtsCoroutine *coroutine_;
     PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
 };
+
+using PandaEnv = PandaEtsNapiEnv;
 
 }  // namespace ark::ets
 

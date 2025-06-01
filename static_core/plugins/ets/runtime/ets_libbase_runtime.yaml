@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,14 +18,29 @@ coretypes:
 - managed_class: std.core.Class
   mirror_class: ark::ets::EtsClass
 
+- managed_class: std.core.RuntimeLinker
+  mirror_class: ark::ets::EtsRuntimeLinker
+
+- managed_class: std.core.AbcFile
+  mirror_class: ark::ets::EtsAbcFile
+
+- managed_class: std.core.AbcRuntimeLinker
+  mirror_class: ark::ets::EtsAbcRuntimeLinker
+
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
 
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
 
+- managed_class: std.core.Job
+  mirror_class: ark::ets::EtsJob
+
 - managed_class: Array
   mirror_class: ark::ets::EtsCharArray
+
+- managed_class: std.core.Type
+  mirror_class: ark::ets::EtsTypeAPIType
 
 - managed_class: std.core.Field
   mirror_class: ark::ets::EtsTypeAPIField
@@ -56,6 +71,45 @@ coretypes:
 
 - managed_class: std.core.CondVar
   mirror_class: ark::ets::EtsCondVar
+
+- managed_class: std.core.OutOfMemoryError
+  mirror_class: ark::ets::EtsOutOfMemoryError
+
+- managed_class: escompat.ArrayBuffer
+  mirror_class: ark::ets::EtsEscompatArrayBuffer
+
+- managed_class: escompat.Int8Array
+  mirror_class: ark::ets::EtsEscompatInt8Array
+
+- managed_class: escompat.Int16Array
+  mirror_class: ark::ets::EtsEscompatInt16Array
+
+- managed_class: escompat.Int32Array
+  mirror_class: ark::ets::EtsEscompatInt32Array
+
+- managed_class: escompat.BigInt64Array
+  mirror_class: ark::ets::EtsEscompatBigInt64Array
+
+- managed_class: escompat.Float32Array
+  mirror_class: ark::ets::EtsEscompatFloat32Array
+
+- managed_class: escompat.Float64Array
+  mirror_class: ark::ets::EtsEscompatFloat64Array
+
+- managed_class: escompat.Uint8ClampedArray
+  mirror_class: ark::ets::EtsEscompatUInt8ClampedArray
+
+- managed_class: escompat.Uint8Array
+  mirror_class: ark::ets::EtsEscompatUInt8Array
+
+- managed_class: escompat.Uint16Array
+  mirror_class: ark::ets::EtsEscompatUInt16Array
+
+- managed_class: escompat.Uint32Array
+  mirror_class: ark::ets::EtsEscompatUInt32Array
+
+- managed_class: escompat.BigUint64Array
+  mirror_class: ark::ets::EtsEscompatBigUInt64Array
 
 intrinsics_namespace: ark::ets::intrinsics
 
@@ -565,8 +619,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ std.core.String ]
+      args:
+      - std.core.String
     impl: ark::ets::intrinsics::StdConsolePrintString
+
+  - name: StdConsolePrintStringError
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - std.core.String
+    impl: ark::ets::intrinsics::StdConsolePrintStringError
 
   - name: StdConsolePrintU1
     space: ets
@@ -575,8 +641,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ u1 ]
+      args:
+      - u1
     impl: ark::ets::intrinsics::StdConsolePrintBool
+
+  - name: StdConsolePrintU1Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - u1
+    impl: ark::ets::intrinsics::StdConsolePrintBoolError
 
   - name: StdConsolePrintI8
     space: ets
@@ -585,8 +663,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i8 ]
+      args:
+      - i8
     impl: ark::ets::intrinsics::StdConsolePrintI8
+
+  - name: StdConsolePrintI8Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - i8
+    impl: ark::ets::intrinsics::StdConsolePrintI8Error
 
   - name: StdConsolePrintI16
     space: ets
@@ -595,8 +685,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i16 ]
+      args:
+      - i16
     impl: ark::ets::intrinsics::StdConsolePrintI16
+
+  - name: StdConsolePrintI16Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - i16
+    impl: ark::ets::intrinsics::StdConsolePrintI16Error
 
   - name: StdConsolePrintU16
     space: ets
@@ -605,8 +707,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ u16 ]
+      args:
+      - u16
     impl: ark::ets::intrinsics::StdConsolePrintChar
+
+  - name: StdConsolePrintU16Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - u16
+    impl: ark::ets::intrinsics::StdConsolePrintCharError
 
   - name: StdConsolePrintI32
     space: ets
@@ -615,8 +729,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i32 ]
+      args:
+      - i32
     impl: ark::ets::intrinsics::StdConsolePrintI32
+
+  - name: StdConsolePrintI32Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - i32
+    impl: ark::ets::intrinsics::StdConsolePrintI32Error
 
   - name: StdConsolePrintI64
     space: ets
@@ -625,8 +751,20 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i64 ]
+      args:
+      - i64
     impl: ark::ets::intrinsics::StdConsolePrintI64
+
+  - name: StdConsolePrintI64Error
+    space: ets
+    class_name: std.core.Console
+    method_name: printError
+    static: false
+    signature:
+      ret: void
+      args:
+      - i64
+    impl: ark::ets::intrinsics::StdConsolePrintI64Error
 
   - name: StdConsolePrintln
     space: ets
@@ -637,6 +775,19 @@ intrinsics:
       ret: void
       args: []
     impl: ark::ets::intrinsics::StdConsolePrintln
+
+  - name: StdConsolePrintlnError
+    space: ets
+    class_name: std.core.Console
+    method_name: printlnError
+    static: false
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdConsolePrintlnError
+
+
+####################
 
   - name: StdCoreLoadLibrary
     space: ets
@@ -1081,6 +1232,15 @@ intrinsics:
     codegen_func: CreateStringRepeat
     llvm_codegen_func: EmitStringRepeat
 
+  - name: StdCoreStringGet
+    space: ets
+    class_name: std.core.String
+    method_name: $_get
+    static: false
+    signature:
+      ret: u16
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreStringGet
 ##########################
 # std.core.StringBuilder #
 ##########################
@@ -1390,25 +1550,609 @@ intrinsics:
       args: [ std.core.String, std.core.String, i64, u1 ]
     impl: ark::ets::intrinsics::EscompatDateGetLocaleString
 
+##################
+# escompat.Array #
+##################
+  - name: EscompatArrayGet
+    space: ets
+    class_name: escompat.Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGet
+
+  - name: EscompatArraySet
+    space: ets
+    class_name: escompat.Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [ i32, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArraySet
+
 ########################
 # escompat.ArrayBuffer #
 ########################
-  - name: EscompatArrayBufferFrom
+  - name: EscompatArrayBufferAt
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: atImpl
+    static: false
+    signature:
+      ret: i8
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferAt
+
+  - name: EscompatArrayBufferSet
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: setImpl
+    static: false
+    signature:
+      ret: void
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferSet
+
+  - name: EscompatArrayBufferSetValues
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: setValues
+    static: false
+    signature:
+      ret: void
+      args: [escompat.ArrayBuffer, i32]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferSetValues
+
+  - name: EscompatArrayBufferAllocateNonMovable
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: allocateNonMovable
+    static: true
+    signature:
+      ret: i8[]
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferAllocateNonMovable
+
+  - name: EscompatArrayBufferGetAddress
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: getAddress
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i8[]
+    impl: ark::ets::intrinsics::EtsEscompatArrayBufferGetAddress
+
+  - name: EscompatArrayBufferFromEncodedString
     space: ets
     class_name: escompat.ArrayBuffer
     method_name: from
     static: true
     signature:
       ret: escompat.ArrayBuffer
-      args: [std.core.Object]
-    impl: ark::ets::intrinsics::EtsArrayBufferFrom
+      args: [std.core.String, std.core.String, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferFromEncodedString
+
+  - name: EscompatArrayBufferFromBufferSlice
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: from
+    static: true
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [escompat.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferFromBufferSlice
+
+  - name: EtsStringBytesLength
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: bytesLength
+    static: true
+    signature:
+      ret: i32
+      args: [std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::EtsStringBytesLength
+
+  - name: EtsArrayBufferToString
+    space: ets
+    class_name: escompat.ArrayBuffer
+    method_name: stringify
+    static: true
+    signature:
+      ret: std.core.String
+      args: [escompat.ArrayBuffer, std.core.String, i32, i32]
+    impl: ark::ets::intrinsics::EtsArrayBufferToString
+
+  - name: Int8ArraySetInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetInt
+
+  - name: Int8ArraySetByte
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetByte
+
+  - name: Int8ArrayGet
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayGet
+
+  - name: Int8ArraySetValues
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int8Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValues
+
+  - name: Int8ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int8Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
+
+  - name: Int16ArraySetInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetInt
+
+  - name: Int16ArraySetShort
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i16]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetShort
+
+  - name: Int16ArrayGet
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGet
+
+  - name: Int16ArraySetValues
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int16Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValues
+
+  - name: Int16ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int16Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
+
+  - name: Int32ArraySetInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetInt
+
+  - name: Int32ArrayGet
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGet
+
+  - name: Int32ArraySetValues
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int32Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValues
+
+  - name: Int32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
+
+  - name: BigInt64ArraySetLong
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetLong
+
+  - name: BigInt64ArrayGet
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: getLong
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGet
+
+  - name: BigInt64ArraySetValues
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigInt64Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValues
+
+  - name: BigInt64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigInt64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
+
+  - name: Float32ArraySetFloat
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, f32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetFloat
+
+  - name: Float32ArrayGet
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGet
+
+  - name: Float32ArraySetValues
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float32Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValues
+
+  - name: Float32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
+
+  - name: Float64ArraySetDouble
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetDouble
+
+  - name: Float64ArrayGet
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGet
+
+  - name: Float64ArraySetValues
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float64Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValues
+
+  - name: Float64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
+
+  - name: UInt8ClampedArraySetInt
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetInt
+
+  - name: UInt8ClampedArrayGet
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGet
+
+  - name: UInt8ClampedArraySetValues
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8ClampedArray]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValues
+
+  - name: UInt8ClampedArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8ClampedArray, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValuesWithOffset
+
+  - name: UInt8ArraySetInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetInt
+
+  - name: UInt8ArrayGet
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGet
+
+  - name: UInt8ArraySetValues
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValues
+
+  - name: UInt8ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValuesWithOffset
+
+  - name: UInt16ArraySetInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetInt
+
+  - name: UInt16ArrayGet
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGet
+
+  - name: UInt16ArraySetValues
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint16Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValues
+
+  - name: UInt16ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint16Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValuesWithOffset
+
+  - name: UInt32ArraySetInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetInt
+
+  - name: UInt32ArraySetLong
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetLong
+
+  - name: UInt32ArrayGet
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGet
+
+  - name: UInt32ArraySetValues
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint32Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValues
+
+  - name: UInt32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValuesWithOffset
+
+  - name: BigUInt64ArraySetInt
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetInt
+
+  - name: BigUInt64ArraySetLong
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetLong
+
+  - name: BigUInt64ArrayGet
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: getLong
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGet
+
+  - name: BigUInt64ArraySetValues
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigUint64Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValues
+
+  - name: BigUInt64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigUint64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
 
 ########################
 # escompat.taskpool #
 ########################
   - name: TaskpoolGenerateId
     space: ets
-    class_name: escompat.taskpoolTask
+    class_name: escompat.taskpool.Task
     method_name: generateId
     static: true
     signature:
@@ -1418,7 +2162,7 @@ intrinsics:
 
   - name: TaskpoolGenerateGroupId
     space: ets
-    class_name: escompat.taskpoolTaskGroup
+    class_name: escompat.taskpool.TaskGroup
     method_name: generateGroupId
     static: true
     signature:
@@ -1428,7 +2172,7 @@ intrinsics:
 
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
-    class_name: escompat.taskpoolSequenceRunner
+    class_name: escompat.taskpool.SequenceRunner
     method_name: generateSeqRunnerId
     static: true
     signature:
@@ -1450,7 +2194,7 @@ intrinsics:
       args: []
     impl: ark::intrinsics::NanoTime
     clear_flags: [ require_state, runtime_call, can_throw ]
-  
+
   - name: StdTimeChronoGetCpuTime
     space: ets
     class_name: std.time.Chrono
@@ -1600,6 +2344,16 @@ intrinsics:
       ret: std.core.String
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleToExponential
+
+  - name: StdCoreDoubleToExponentialWithNoDigit
+    space: ets
+    class_name: std.core.Double
+    method_name: toExponentialWithNoDigit
+    static: false
+    signature:
+      ret: std.core.String
+      args: []
+    impl: ark::ets::intrinsics::StdCoreDoubleToExponentialWithNoDigit
 
   - name: StdCoreDoubleToPrecision
     space: ets
@@ -2168,9 +2922,32 @@ intrinsics:
     method_name: registerInstance
     static: true
     signature:
-      ret: void
+      ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
+
+  - name: StdFinalizationRegistryFinishCleanup
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: finishCleanup
+    static: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryFinishCleanup
+
+########################
+# std.core.Job #
+########################
+  - name: StdJobAwait
+    space: ets
+    class_name: std.core.Job
+    method_name: Await
+    static: false
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsAwaitJob
 
 ######################
 # std.core.Promise #
@@ -2182,7 +2959,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [std.core.Object]
+      args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::EtsPromiseResolve
 
   - name: StdPromiseReject
@@ -2192,7 +2969,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [std.core.Object]
+      args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::EtsPromiseReject
 
   - name: StdPromiseSubmitCallback
@@ -3131,6 +3908,26 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemGetCoroutineId
 
+  - name: StdCoroutineIsMainWorker
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: isMainWorker
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::StdSystemIsMainWorker
+
+  - name: StdCoroutineScaleWorkersPool
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: scaleWorkersPool
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemScaleWorkersPool
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
@@ -3196,21 +3993,32 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
-  - name: StdCoreRuntimeTypeof
+  - name: StdCoreRuntimeGetTypeInfo
     space: ets
     class_name: std.core.Runtime
-    method_name: typeOf
+    method_name: __getTypeInfo
     static: true
     signature:
-      ret: std.core.String
+      ret: std.core.Class
       args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
-    clear_flags: [ no_dce ]
-    set_flags: [ no_nullptr ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeGetTypeInfo
+    clear_flags: [ heap_inv, no_dce ]
+    peephole_func: PeepholeGetTypeInfo
 
-####################
+  - name: StdCoreRuntimeAllocSameTypeArray
+    space: ets
+    class_name: std.core.Runtime
+    method_name: allocSameTypeArray
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args: [ std.core.Class, i32 ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeAllocSameTypeArray
+    clear_flags: [ ]
+
+##################
 # std.core.Class #
-####################
+##################
   - name: StdCoreClassGetNameInternal
     space: ets
     class_name: std.core.Class
@@ -3221,6 +4029,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
 
+  - name: StdCoreClassGetLinker
+    space: ets
+    class_name: std.core.Class
+    method_name: getLinker
+    static: false
+    signature:
+      ret: std.core.RuntimeLinker
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetLinker
+
   - name: StdCoreClassOf
     space: ets
     class_name: std.core.Class
@@ -3230,6 +4048,16 @@ intrinsics:
       ret: std.core.Class
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreClassOf
+
+  - name: StdCoreClassCurrent
+    space: ets
+    class_name: std.core.Class
+    method_name: current
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassCurrent
 
   - name: StdCoreClassOfCaller
     space: ets
@@ -3271,18 +4099,120 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
 
-####################
+##########################
 # std.core.RuntimeLinker #
-####################
-  - name: StdCoreRuntimeLinkerLoadClassInternal
+##########################
+  - name: StdCoreRuntimeLinkerFindLoadedClass
     space: ets
     class_name: std.core.RuntimeLinker
-    method_name: loadClassInternal
-    static: true
+    method_name: findLoadedClass
+    static: false
     signature:
       ret: std.core.Class
-      args: [ std.core.Class, std.core.String, u1]
-    impl: ark::ets::intrinsics::StdCoreRuntimeLinkerLoadClassInternal
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EtsRuntimeLinkerFindLoadedClass
+
+  - name: StdCoreRuntimeLinkerInitializeContext
+    space: ets
+    class_name: std.core.RuntimeLinker
+    method_name: initializeContext
+    static: false
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsRuntimeLinkerInitializeContext
+
+##############################
+# std.core.BootRuntimeLinker #
+##############################
+  - name: StdCoreBootRuntimeLinkerFindAndLoadClass
+    space: ets
+    class_name: std.core.BootRuntimeLinker
+    method_name: findAndLoadClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsBootRuntimeLinkerFindAndLoadClass
+
+  - name: StdCoreGetNearestNonBootRuntimeLinker
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: getNearestNonBootRuntimeLinker
+    static: true
+    signature:
+      ret: std.core.RuntimeLinker
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsGetNearestNonBootRuntimeLinker
+
+####################
+# std.core.AbcFile #
+####################
+  - name: StdCoreAbcFileLoadAbcFile
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: loadAbcFile
+    static: true
+    signature:
+      ret: std.core.AbcFile
+      args: [ std.core.RuntimeLinker, std.core.String ]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadAbcFile
+
+  - name: StdCoreAbcFileLoadFromMemory
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: loadFromMemory
+    static: true
+    signature:
+      ret: std.core.AbcFile
+      args:
+        - std.core.RuntimeLinker
+        - i8[]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadFromMemory
+
+  - name: StdCoreAbcFileLoadClass
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: loadClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.RuntimeLinker, std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsAbcFileLoadClass
+
+  - name: StdCoreAbcFileGetFilename
+    space: ets
+    class_name: std.core.AbcFile
+    method_name: getFilename
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsAbcFileGetFilename
+
+#############################
+# std.core.AbcRuntimeLinker #
+#############################
+  - name: StdCoreAbcRuntimeLinkerLoadClassFromAbcFiles
+    space: ets
+    class_name: std.core.AbcRuntimeLinker
+    method_name: loadClassFromAbcFiles
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, u1 ]
+    impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerLoadClassFromAbcFiles
+
+  - name: StdCoreAbcRuntimeLinkerAddNewAbcFiles
+    space: ets
+    class_name: std.core.AbcRuntimeLinker
+    method_name: addAbcFiles
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.AbcFile[]
+    impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerAddNewAbcFiles
 
 ###################
 # std.core.RegExp #
@@ -3304,111 +4234,272 @@ intrinsics:
     static: false
     signature:
       ret: escompat.RegExpExecArray
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::EscompatRegExpExec
 
-###################
-# std.core.Type   #
-###################
-  - name: TypeAPIGetTypeDescriptor
+  - name: EscompatRegExpParse
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeDescriptor
+    class_name: escompat.RegExp
+    method_name: parse
     static: true
     signature:
       ret: std.core.String
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeDescriptor
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EscompatRegExpParse
 
+####################
+# std.core.TypeAPI #
+####################
   - name: TypeAPIGetTypeKind
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeKind
+    class_name: std.core.TypeAPI
+    method_name: getTypeKind
     static: true
     signature:
       ret: i8
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.RuntimeLinker ]
     impl: ark::ets::intrinsics::TypeAPIGetTypeKind
 
   - name: TypeAPIIsValueType
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIIsValueType
+    class_name: std.core.TypeAPI
+    method_name: isValueType
     static: true
     signature:
       ret: u1
-      args: [ std.core.String ]
+      args: [ std.core.String, std.core.RuntimeLinker ]
     impl: ark::ets::intrinsics::TypeAPIIsValueType
 
-  - name: TypeAPIGetTypeName
+  - name: TypeAPIGetNullTypeDescriptor
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeName
+    class_name: std.core.TypeAPI
+    method_name: getNullTypeDescriptor
     static: true
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeName
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetNullTypeDescriptor
+
+  - name: TypeAPIGetUndefinedTypeDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getUndefinedTypeDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetUndefinedTypeDescriptor
+
+  - name: TypeAPIGetClass
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getClass
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.String, std.core.RuntimeLinker ]
+    impl: ark::ets::intrinsics::TypeAPIGetClass
 
   - name: TypeAPIGetClassAttributes
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetClassAttributes
+    class_name: std.core.TypeAPI
+    method_name: getClassAttributes
     static: true
     signature:
       ret: i32
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetClassAttributes
 
   - name: TypeAPIGetFieldsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFieldsNum
+    class_name: std.core.TypeAPI
+    method_name: getFieldsNum
     static: true
     signature:
       ret: i64
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetFieldsNum
 
   - name: TypeAPIGetOwnFieldsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetOwnFieldsNum
+    class_name: std.core.TypeAPI
+    method_name: getOwnFieldsNum
     static: true
     signature:
       ret: i64
-      args: [ std.core.String ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::TypeAPIGetOwnFieldsNum
+
+  - name: TypeAPIGetFieldPtr
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldPtr
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldPtr
+
+  - name: TypeAPIGetOwnFieldPtr
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getOwnFieldPtr
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetOwnFieldPtr
+
+  - name: TypeAPIGetFieldPtrByName
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldPtrByName
+    static: true
+    signature:
+      ret: std.core.Long
+      args: [ std.core.Class, std.core.String ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldPtrByName
+
+  - name: TypeAPIGetFieldDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldDescriptor
+
+  - name: TypeAPIGetFieldOwner
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFieldOwner
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetFieldOwner
 
   - name: TypeAPIGetField
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetField
+    class_name: std.core.TypeAPI
+    method_name: getField
     static: true
     signature:
       ret: std.core.Field
-      args: [ std.core.String, i64 ]
+      args: [ std.core.Class, i64, std.core.Type, std.core.Type ]
     impl: ark::ets::intrinsics::TypeAPIGetField
 
-  - name: TypeAPIGetOwnField
+  - name: TypeAPIGetMethodsNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetOwnField
+    class_name: std.core.TypeAPI
+    method_name: getMethodsNum
     static: true
     signature:
-      ret: std.core.Field
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetOwnField
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
 
-  - name: TypeAPIGetFieldByName
+  - name: TypeAPIGetMethodDescriptor
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFieldByName
+    class_name: std.core.TypeAPI
+    method_name: getMethodDescriptor
     static: true
     signature:
-      ret: std.core.Field
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetFieldByName
+      ret: std.core.String
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethodDescriptor
+
+  - name: TypeAPIGetMethod
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getMethod
+    static: true
+    signature:
+      ret: std.core.Method
+      args: [ std.core.Class, std.core.MethodType ]
+    impl: ark::ets::intrinsics::TypeAPIGetMethod
+
+  - name: TypeAPIGetConstructorsNum
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getConstructorsNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
+
+  - name: TypeAPIGetConstructorDescriptor
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getConstructorDescriptor
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetConstructorDescriptor
+
+  - name: TypeAPIGetArrayElementType
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getArrayElementType
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
+
+  - name: TypeAPIMakeArrayInstance
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: makeArrayInstance
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.String, std.core.RuntimeLinker, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
+
+  - name: TypeAPIGetInterfacesNum
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getInterfacesNum
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
+
+  - name: TypeAPIGetInterface
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getInterface
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetInterface
+
+  - name: TypeAPIIsInheritedFrom
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: isInheritedFrom
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class, std.core.Class ]
+    impl: ark::ets::intrinsics::TypeAPIIsInheritedFrom
+    clear_flags: [ ]
+
+  - name: TypeAPIGetFunctionAttributes
+    space: ets
+    class_name: std.core.TypeAPI
+    method_name: getFunctionAttributes
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
 
   - name: TypeAPIGetStaticFieldValue
     space: ets
@@ -3417,128 +4508,8 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [ std.core.String, std.core.String ]
+      args: [ std.core.Type, std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetStaticFieldValue
-
-  - name: TypeAPIGetMethodsNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetMethodsNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
-
-  - name: TypeAPIGetMethod
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetMethod
-    static: true
-    signature:
-      ret: std.core.Method
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetMethod
-
-  - name: TypeAPIGetConstructorsNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetConstructorsNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
-
-  - name: TypeAPIGetConstructor
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetConstructor
-    static: true
-    signature:
-      ret: std.core.Method
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetConstructor
-
-  - name: TypeAPIGetParametersNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetParametersNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetParametersNum
-
-  - name: TypeAPIGetParameter
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetParameter
-    static: true
-    signature:
-      ret: std.core.Parameter
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetParameter
-
-  - name: TypeAPIGetTypeId
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetTypeId
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetTypeId
-
-  - name: TypeAPIGetArrayElementType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetArrayElementType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
-
-  - name: TypeAPIMakeArrayInstance
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIMakeArrayInstance
-    static: true
-    signature:
-      ret: std.core.Object
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
-
-  - name: TypeAPIGetBaseType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetBaseType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetBaseType
-
-  - name: TypeAPIGetInterfacesNum
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetInterfacesNum
-    static: true
-    signature:
-      ret: i64
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
-
-  - name: TypeAPIGetInterface
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetInterface
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String, i64 ]
-    impl: ark::ets::intrinsics::TypeAPIGetInterface
 
   - name: TypeAPISetStaticFieldValue
     space: ets
@@ -3547,39 +4518,8 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.String, std.core.String, std.core.Object ]
+      args: [ std.core.Type, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
-
-  - name: TypeAPIIsInheritedFrom
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIIsInheritedFrom
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIIsInheritedFrom
-    clear_flags: [ ]
-
-  - name: TypeAPIGetFunctionAttributes
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetFunctionAttributes
-    static: true
-    signature:
-      ret: i32
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
-
-  - name: TypeAPIGetResultType
-    space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetResultType
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetResultType
 
   - name: StdMethodInvoke
     space: ets
@@ -3589,7 +4529,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args:
-        - std.core.String
+        - std.core.MethodType
         - std.core.Object
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvoke
@@ -3602,19 +4542,78 @@ intrinsics:
     signature:
       ret: std.core.Object
       args:
-        - std.core.String
+        - std.core.MethodType
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvokeConstructor
 
-  - name: TypeAPIGetReceiverType
+#########################
+# std.core.FunctionType #
+#########################
+  - name: TypeAPIGetParametersNum
     space: ets
-    class_name: std.core.ETSGLOBAL
-    method_name: TypeAPIGetReceiverType
-    static: true
+    class_name: std.core.FunctionType
+    method_name: getParametersNum
+    static: false
+    signature:
+      ret: i64
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetParametersNum
+
+  - name: TypeAPIGetResultTypeDescriptor
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getResultTypeDescriptor
+    static: false
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::TypeAPIGetReceiverType
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetResultTypeDescriptor
+
+  - name: TypeAPIGetParameterDescriptor
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getParameterDescriptor
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::TypeAPIGetParameterDescriptor
+
+  - name: TypeAPIGetParameter
+    space: ets
+    class_name: std.core.FunctionType
+    method_name: getParameter
+    static: false
+    signature:
+      ret: std.core.Parameter
+      args: [ i64, std.core.Type ]
+    impl: ark::ets::intrinsics::TypeAPIGetParameter
+
+#######################
+# std.core.MethodType #
+#######################
+  - name: TypeAPIGetReceiverTypeDescriptor
+    space: ets
+    class_name: std.core.MethodType
+    method_name: getReceiverTypeDescriptor
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetReceiverTypeDescriptor
+
+#######################
+# std.core.LambdaType #
+#######################
+  - name: TypeAPIGetDeclaringClass
+    space: ets
+    class_name: std.core.LambdaType
+    method_name: getDeclaringClass
+    static: false
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::TypeAPIGetDeclaringClass
 
 #################
 # std.core.Char #
@@ -4265,6 +5264,7 @@ intrinsics:
       args:
         - i64
         - std.core.Object[]
+        - std.core.RuntimeLinker
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCommit
 
   - name: TypeAPITypeCreatorCtxGetError
@@ -4424,7 +5424,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-        - std.core.String
+        - std.core.MethodType
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromLambda
@@ -4437,7 +5437,7 @@ intrinsics:
       args:
         - i64
         - i32
-        - std.core.String
+        - std.core.LambdaType
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
@@ -4952,3 +5952,141 @@ intrinsics:
       ret: void
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
+
+######################################
+# std.concurrency.ConcurrencyHelpers #
+######################################
+
+  - name: stdConcurrencyConcurrencyHelpersMutexCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexCreate
+
+  - name: stdConcurrencyConcurrencyHelpersMutexLock
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexLock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: stdConcurrencyConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
+
+  - name: stdConcurrencyHelpersEventCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsEventCreate
+
+  - name: stdConcurrencyHelpersEventWait
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventWait
+
+  - name: stdConcurrencyHelpersEventFire
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: eventFire
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventFire
+
+  - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
+    space: ets
+    class_name: std.concurrency.NativeAsyncWorkHelper
+    method_name: asyncWorkNativeInvoke
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64, u1 ]
+    impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
+
+###############################
+# std.core.ExclusiveLauncher #
+###############################
+
+  - name: StdExclusiveLauncherLaunch
+    space: ets
+    class_name: std.core.ExclusiveLauncher
+    method_name: elaunch
+    static: true
+    signature:
+      ret: void
+      args: [std.core.Object, u1]
+    impl: ark::ets::intrinsics::ExclusiveLaunch
+
+###############################
+# std.core.TaskPoster #
+###############################
+
+  - name: StdTaskPosterCreate
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: create
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::TaskPosterCreate
+
+  - name: StdTaskPosterDestroy
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: destroy
+    static: true
+    signature:
+      ret: void
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskPosterDestroy
+
+  - name: StdTaskPosterPost
+    space: ets
+    class_name: std.core.TaskPoster
+    method_name: post
+    static: true
+    signature:
+      ret: void
+      args: [i64, std.core.Object]
+    impl: ark::ets::intrinsics::TaskPosterPost
+
+###################
+# std.concurrency #
+###################
+
+  - name: EtsMlaunchInternalNative
+    space: ets
+    class_name: std.concurrency.ETSGLOBAL
+    method_name: mlaunchInternalNative
+    static: true
+    signature:
+      ret: std.core.Job
+      args:
+        - std.core.Object
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsMlaunchInternalNative

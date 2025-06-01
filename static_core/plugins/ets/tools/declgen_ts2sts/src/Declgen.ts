@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,24 +38,32 @@ export class Declgen {
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
 
-  constructor(declgenOptions: DeclgenCLIOptions) {
+  constructor(
+    declgenOptions: DeclgenCLIOptions,
+    customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[],
+    compilerOptions?: ts.CompilerOptions
+  ) {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
-
-    this.compilerOptions = Object.assign(options, {
+    this.compilerOptions = Object.assign({}, options, {
       declaration: true,
       emitDeclarationOnly: true,
-      outDir: declgenOptions.outDir
+      outDir: declgenOptions.outDir,
+      ...(declgenOptions.rootDir ? { rootDir: declgenOptions.rootDir } : {}),
+      ...(compilerOptions ?? {})
     });
-
-    this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions);
+    // Prevent the noemit of the passed compilerOptions from being true
+    this.compilerOptions.noEmit = false;
+    this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions, declgenOptions);
+    if (customResolveModuleNames) {
+      this.hookedHost.resolveModuleNames = customResolveModuleNames;
+    }
   }
 
   run(): DeclgenResult {
-
     /**
      * First compilation with the hooked CompilerHost:
      * collect the SourceFiles after transformation to the hooked Map
@@ -76,18 +84,9 @@ export class Declgen {
       ]
     });
 
-    /**
-     * Second compilation with the hooked CompilerHost:
-     * use transformed source files and perform type check upon them
-     */
-    program = this.recompile();
-
-    const checkResult = this.checkProgram(program);
-
     return {
-      emitResult: emitResult,
-      checkResult: checkResult
-    };
+      emitResult: emitResult
+    } as DeclgenResult;
   }
 
   private recompile(): ts.Program {
@@ -105,7 +104,8 @@ export class Declgen {
 
   private static createHookedCompilerHost(
     sourceFileMap: Map<string, ts.SourceFile>,
-    compilerOptions: ts.CompilerOptions
+    compilerOptions: ts.CompilerOptions,
+    declgenOptions: DeclgenCLIOptions
   ): ts.CompilerHost {
     const host = ts.createCompilerHost(compilerOptions);
     const fallbackGetSourceFile = host.getSourceFile;
@@ -131,14 +131,16 @@ export class Declgen {
         sourceFiles?: readonly ts.SourceFile[],
         data?: ts.WriteFileCallbackData
       ) {
+        if (!Declgen.isFileInAllowedPath(declgenOptions, sourceFiles)) {
+          return;
+        }
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
-
           /*
            * Since `.d` part of `.d.ts` extension is a part of the parsedPath.name,
            * use `Extension.Ets` for output file name generation.
            */
-          path.join(parsedPath.dir, `${parsedPath.name}${Extension.STS}`),
+          path.join(parsedPath.dir, `${parsedPath.name}${Extension.ETS}`),
           text,
           writeByteOrderMark,
           onError,
@@ -146,6 +148,24 @@ export class Declgen {
           data
         );
       }
+    });
+  }
+
+  private static isFileInAllowedPath(
+    declgenOptions: DeclgenCLIOptions,
+    sourceFiles?: readonly ts.SourceFile[]
+  ): boolean {
+    // equal to includePaths = [*]
+    if (!declgenOptions.includePaths?.length) {
+      return true;
+    }
+    if (!sourceFiles?.length) {
+      return false;
+    }
+
+    const filePath = path.resolve(sourceFiles[0].fileName);
+    return declgenOptions.includePaths.some((allowedPath) => {
+      return filePath.startsWith(path.resolve(allowedPath));
     });
   }
 

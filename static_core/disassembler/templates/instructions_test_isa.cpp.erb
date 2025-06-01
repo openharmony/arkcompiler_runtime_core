@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,11 +53,15 @@
 %       elsif properties.include?("string_id")
 %           result += (escape_strings) ?  "\\\"string_literal\\\"": "\"string_literal\""
 %       elsif properties.include?("method_id")
+%           result += "A.init:(A)"
+%       elsif properties.include?("static_method_id")
 %           result += "A.init:()"
 %       elsif properties.include?("literalarray_id")
 %           result += "array_0"
 %       elsif properties.include?("field_id")
 %           result += "A.fld"
+%       elsif properties.include?("static_field_id")
+%           result += "A.static_fld"
 %       else
 %       end
 %   end
@@ -78,9 +82,16 @@ TEST(InstructionsTest, TestInsIsa)
     auto program = ark::pandasm::Parser().Parse(R"(
 .record A {
     u1 fld
+    u1 static_fld <static>
 }
 
 .function A A.init() {
+    newobj v0, A
+    lda.obj v0
+    return.obj
+}
+
+.function A A.init(A a0) {
     newobj v0, A
     lda.obj v0
     return.obj
@@ -121,6 +132,9 @@ TEST(InstructionsTest, TestInsIsa)
     ASSERT_EQ(line, "jump_label_0:");
 % gen_ins_examples(true, true).each do |ins|
     std::getline(g, line);
+%   if ins.include? 'A.init:()'
+%     ins.gsub! 'A.init:()', '<static> A.init:()'\
+%   end
     ASSERT_EQ(std::string("\t<%= ins%>").rfind(line, 0), 0);
 % end
     std::getline(g, line);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
         return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
     };
 
-    ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
+    [[maybe_unused]] ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
 
     using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
     auto const numArgs = protoReader_.GetMethod()->GetNumArgs() - !IS_STATIC;
@@ -105,7 +105,11 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 
     if (protoReader_.GetMethod()->HasVarArgs()) {
         const auto restIdx = numArgs - 1;
-        etsBoxedArgs[restIdx] = ConvertRestParams(jsargv_.SubSpan(restIdx));
+        auto restParams = ConvertRestParams(jsargv_.SubSpan(restIdx));
+        if (UNLIKELY(restParams == nullptr)) {
+            return false;
+        }
+        etsBoxedArgs[restIdx] = restParams;
     }
 
     // Unbox values
@@ -131,10 +135,7 @@ ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
     ASSERT(protoReader_.GetType().IsReference());
     ASSERT(protoReader_.GetClass()->IsArrayClass());
 
-    ObjectHeader **restParamsSlot = PackRestParameters(coro_, ctx_, protoReader_, restArgs);
-    ASSERT(restParamsSlot != nullptr);
-
-    return restParamsSlot;
+    return PackRestParameters(coro_, ctx_, protoReader_, restArgs);
 }
 
 bool CallETSHandler::CheckNumArgs(size_t numArgs) const
@@ -197,30 +198,29 @@ napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Sp
     return CallETSHandler::HandleImpl<true>(coro, ctx, method, jsargv, nullptr);
 }
 
-Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint)
+Expected<Method *, PandaString> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint)
 {
-    uint8_t const *classDescriptor;
-    uint8_t const *methodName;
-    PandaString complexClassName;
-
-    if (auto packageSep = entryPoint.rfind('.'); packageSep != PandaString::npos) {
-        complexClassName = 'L' + PandaString(entryPoint.substr(0, packageSep + 1)) + "ETSGLOBAL;";
-        std::replace(complexClassName.begin(), complexClassName.end(), '.', '/');
-        classDescriptor = utf::CStringAsMutf8(complexClassName.data());
-        methodName = utf::CStringAsMutf8(&entryPoint.at(packageSep + 1));
-    } else {
-        classDescriptor = utf::CStringAsMutf8("LETSGLOBAL;");
-        methodName = utf::CStringAsMutf8(entryPoint.data());
+    ASSERT_MANAGED_CODE();
+    auto const packageSep = entryPoint.rfind('.');
+    if (UNLIKELY(packageSep == PandaString::npos)) {
+        return Unexpected(PandaString("Bad entrypoint format: ") + PandaString(entryPoint));
     }
+
+    PandaString complexClassName =
+        'L' + (UNLIKELY(packageSep == 0) ? "" : PandaString(entryPoint.substr(0, packageSep + 1))) + "ETSGLOBAL;";
+    std::replace(complexClassName.begin(), complexClassName.end(), '.', '/');
+
+    uint8_t const *classDescriptor = utf::CStringAsMutf8(complexClassName.data());
+    uint8_t const *methodName = utf::CStringAsMutf8(&entryPoint.at(packageSep + 1));
 
     Class *cls = ctx->GetClassLinker()->GetClass(classDescriptor, true, ctx->LinkerCtx());
     if (UNLIKELY(cls == nullptr)) {
-        return Unexpected("Cannot find class");
+        return Unexpected(PandaString("Cannot find class ") + utf::Mutf8AsCString(classDescriptor));
     }
 
     Method *method = cls->GetDirectMethod(methodName);
     if (UNLIKELY(method == nullptr)) {
-        return Unexpected("Cannot find method");
+        return Unexpected(PandaString("Cannot find method ") + utf::Mutf8AsCString(methodName));
     }
     return method;
 }

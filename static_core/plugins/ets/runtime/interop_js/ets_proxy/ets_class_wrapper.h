@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +49,8 @@ public:
     static constexpr auto STATIC_METHOD_ATTR = napi_static;
     // clang-format on
 
-    using OverloadsMap = std::unordered_map<uint8_t const *, char const *, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using OverloadsMap =
+        std::unordered_multimap<uint8_t const *, std::pair<char const *, uint32_t>, utf::Mutf8Hash, utf::Mutf8Equal>;
 
     static std::unique_ptr<EtsClassWrapper> Create(InteropCtx *ctx, EtsClass *etsClass,
                                                    const char *jsBuiltinName = nullptr,
@@ -58,6 +60,7 @@ public:
 
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertJSProxy(InteropCtx *ctx, Class *klass);
+    static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsInterface(InteropCtx *ctx, Class *klass);
 
     bool IsEtsGlobalClass() const
     {
@@ -109,6 +112,7 @@ private:
 
     using PropsMap =
         std::unordered_map<uint8_t const *, std::variant<EtsMethodSet *, Field *>, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using GetterSetterPropsMap = std::unordered_map<std::string, napi_property_descriptor>;
     using FieldsVec = std::vector<Field *>;
     using MethodsVec = std::vector<EtsMethodSet *>;
 
@@ -116,9 +120,19 @@ private:
     void UpdatePropsWithBaseClasses(PropsMap *props);
     void CollectConstructors(PropsMap *props);
     void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
+    bool HasOverloadsMethod(const OverloadsMap *overloads, Method *m);
     std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
-    std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<EtsMethodSet *> methods);
+    std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
+                                                            Span<EtsMethodSet *> methods);
+
+    static napi_value GetGlobalSymbolIterator(napi_env &env);
+
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
+    void BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method);
+    void SetUpMimicHandler(napi_env env);
+    static napi_value CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper);
+    static napi_value MimicGetHandler(napi_env env, napi_callback_info info);
+    static napi_value MimicSetHandler(napi_env env, napi_callback_info info);
 
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
     bool CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs);
@@ -145,14 +159,21 @@ private:
     napi_ref jsBuiltinCtorRef_ {};
     std::function<EtsObject *(InteropCtx *, napi_value, bool)> jsBuiltinMatcher_;
 
-    std::unique_ptr<js_proxy::JSProxy> jsproxyWrapper_ {};
+    js_proxy::JSProxy *jsproxyWrapper_ {};
 
     // NOTE(vpukhov): allocate inplace to reduce memory consumption
     std::unique_ptr<LazyEtsMethodWrapperLink[]> etsMethodWrappers_;  // NOLINT(modernize-avoid-c-arrays)
     std::unique_ptr<EtsFieldWrapper[]> etsFieldWrappers_;            // NOLINT(modernize-avoid-c-arrays)
     std::vector<std::unique_ptr<EtsMethodSet>> etsMethods_;
+    std::vector<std::unique_ptr<EtsFieldWrapper>> getterSetterFieldWrappers_;
     uint32_t numMethods_ {};
     uint32_t numFields_ {};
+
+    bool needProxy_ = false;
+    napi_ref jsProxyCtorRef_ {};
+    napi_ref jsProxyHandlerRef_ {};
+
+    static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
 };
 
 }  // namespace ark::ets::interop::js::ets_proxy

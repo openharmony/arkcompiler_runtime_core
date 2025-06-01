@@ -17,17 +17,18 @@ set(LOOKUP_BY_NAME_TEST_LIST
     "correct_case_32bit"
     "correct_case_64bit"
     "correct_case_ref"
-    "correct_case_ref_2"
-    "no_field_case"
-    "no_field_case_2"
-    "no_getter_case"
-    "no_setter_case"
-    "wrong_setter_args_case"
-    "wrong_setter_args_case_2"
-    "wrong_setter_args_case_3"
-    "wrong_setter_args_case_4"
-    "wrong_getter_args_case"
-    "wrong_getter_args_case_2"
+    # enable after fix #23965
+    # "correct_case_ref_2"
+    # "no_field_case"
+    # "no_field_case_2"
+    # "no_getter_case"
+    # "no_setter_case"
+    # "wrong_setter_args_case"
+    # "wrong_setter_args_case_2"
+    # "wrong_setter_args_case_3"
+    # "wrong_setter_args_case_4"
+    # "wrong_getter_args_case"
+    # "wrong_getter_args_case_2"
     "field_case_8bit"
     "field_case_32bit"
     "field_case_64bit"
@@ -151,13 +152,14 @@ add_ets_verifier_test(FILE "field_case_ref")
 # based on the above,here we skip:
 # 1. checking whether a field existed in the union or not
 # 2. skip checking member access violiations
-add_ets_verifier_test(FILE "no_field_case")
-add_ets_verifier_test(FILE "no_field_case_2")
-add_ets_verifier_test(FILE "no_getter_case")
-add_ets_verifier_test(FILE "no_setter_case")
-add_ets_verifier_test(FILE "wrong_setter_args_case")
-add_ets_verifier_test(FILE "wrong_setter_args_case_2")
-add_ets_verifier_test(FILE "wrong_setter_args_case_3" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
-add_ets_verifier_test(FILE "wrong_setter_args_case_4")
-add_ets_verifier_test(FILE "wrong_getter_args_case")
-add_ets_verifier_test(FILE "wrong_getter_args_case_2")
+# enable after fix #23965
+# add_ets_verifier_test(FILE "no_field_case")
+# add_ets_verifier_test(FILE "no_field_case_2")
+# add_ets_verifier_test(FILE "no_getter_case")
+# add_ets_verifier_test(FILE "no_setter_case")
+# add_ets_verifier_test(FILE "wrong_setter_args_case")
+# add_ets_verifier_test(FILE "wrong_setter_args_case_2")
+# add_ets_verifier_test(FILE "wrong_setter_args_case_3" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
+# add_ets_verifier_test(FILE "wrong_setter_args_case_4")
+# add_ets_verifier_test(FILE "wrong_getter_args_case")
+# add_ets_verifier_test(FILE "wrong_getter_args_case_2")

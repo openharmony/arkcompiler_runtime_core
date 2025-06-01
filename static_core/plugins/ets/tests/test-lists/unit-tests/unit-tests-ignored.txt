@@ -1,0 +1,14 @@
+# 21888
+common/imported_modules_TL_exec_2/a.ets
+common/imported_modules_TL_exec_1/a.ets
+
+# URunner: support custom arktsconfig
+common/testing_varying_arktsconfigs/package_names/test_01/dir/foo.ets
+common/testing_arktsconfig/dirA/a.ets
+common/testing_arktsconfig_field_dependencies_and_entry/A/src/main/ets/a1.ets
+common/testing_arktsconfig_paths_single_file/dirA/a.ets
+
+# Failed tests
+common/bouncing_peas/bouncing_peas_unit_native.ets
+ets_test_suite/atomics/skipped_rendezvous_channel.ets
+ets_test_suite/atomics/skipped_cyclic_barrier.ets  # ark timeout

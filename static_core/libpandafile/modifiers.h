@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,8 +58,7 @@ constexpr uint32_t ACC_INTRINSIC = 0x00200000;                 // method (runtim
 constexpr uint32_t ACC_PROFILING = 0x20000000;                 // method (runtime)
 
 constexpr uint32_t INTRINSIC_SHIFT = MinimumBitsToStore(ACC_INTRINSIC);
-constexpr uint32_t INTRINSIC_MASK = static_cast<uint32_t>(0xffffffff) << INTRINSIC_SHIFT;
-constexpr uint32_t MAX_INTRINSIC_NUMBER = INTRINSIC_MASK >> INTRINSIC_SHIFT;
+constexpr uint32_t MAX_INTRINSIC_NUMBER = std::numeric_limits<uint32_t>::max();
 
 // Runtime internal language specific modifiers
 constexpr uint32_t ACC_PROXY = 0x00020000;            // class (java runtime)

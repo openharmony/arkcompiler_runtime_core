@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,27 +27,27 @@ class EtsInteropInstanceOf : public EtsInteropTest {};
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestObjectInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestEtstypeInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestJsvalueInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofObject"));
 }
 
 /*
@@ -57,27 +57,27 @@ TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofEtstype"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestObjectInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofEtstype"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestEtstypeInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofEtstype"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestJsvalueInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofEtstype"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofEtstype"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofEtstype"));
 }
 
 /*
@@ -87,27 +87,27 @@ TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_etstype)
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofDyndecl"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestObjectInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofDyndecl"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestEtstypeInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofDyndecl"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestJsvalueInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofDyndecl"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofDyndecl"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofDyndecl"));
 }
 
 }  // namespace ark::ets::interop::js::testing

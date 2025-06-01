@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,32 +22,32 @@ class EtsClassMethodChildClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkChildClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildClassMethod"));
 }
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkCreateChildClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateChildClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateChildClassFromTs"));
 }
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkInstanceChildClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceChildClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceChildClass"));
 }
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkChildClassMethodOwnMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildClassMethodOwnMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildClassMethodOwnMethod"));
 }
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkCreateChildClassFromTsOwnMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateChildClassFromTsOwnMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateChildClassFromTsOwnMethod"));
 }
 
 TEST_F(EtsClassMethodChildClassTsToEtsTest, checkInstanceChildClassOwnMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceChildClassOwnMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceChildClassOwnMethod"));
 }
 
 }  // namespace ark::ets::interop::js::testing

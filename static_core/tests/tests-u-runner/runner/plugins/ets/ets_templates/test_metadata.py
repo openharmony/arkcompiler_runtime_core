@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -74,6 +74,7 @@ class TestMetadata:
     params: Optional[Any] = None
     name: Optional[str] = None
     package: Optional[str] = None
+    module: Optional[str] = None
     ark_options: List[str] = field(default_factory=list)
     timeout: Optional[int] = None
     spec: Optional[str] = None
@@ -85,6 +86,9 @@ class TestMetadata:
         if not re.match(SPEC_CHAPTER_PATTERN, self.spec):
             error_message = f"Incorrect format of specification chapter number : {self.spec}"
             _LOGGER.error(error_message)
+
+    def get_package_name(self) -> str:
+        return self.package if self.package is not None else ""
 
 
 def get_metadata(path: Path) -> TestMetadata:
@@ -102,6 +106,9 @@ def get_metadata(path: Path) -> TestMetadata:
     metadata['package'] = metadata.get("package")
     if metadata['package'] is None:
         metadata['package'] = get_package_statement(path)
+    metadata['module'] = metadata['package']
+    if metadata['module'] is None:
+        metadata['module'] = path.stem
     return TestMetadata(**metadata)
 
 

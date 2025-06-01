@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <atomic>
 #include <optional>
 #include "runtime/coroutines/coroutine_events.h"
+#include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
 
@@ -40,23 +41,29 @@ public:
     /**
      * Status transitions:
      *
-     * +---------+                                  +----------+
-     * | CREATED | -------------------------------> |          | <-------------+
-     * +---------+                                  | RUNNABLE |               |
-     *                                         +--- |          | <--+          |
-     *                                         |    +----------+    |          |
-     *                                         |                    |          |
-     *                                         |    +----------+    |     +----------+
-     *                                         +--> |          | ---+     |          |
-     * +------------+      +-------------+          | RUNNING  |          | BLOCKED  |
-     * | AWAIT_LOOP | <--- | TERMINATING | <------- |          | -------> |          |
-     * +------------+      +-------------+          +----------+          +----------+
+     * +---------+                                    +----------+
+     * | CREATED | ---------------------------------> |          | <-------------+
+     * +---------+                                    | RUNNABLE |               |
+     *                                           +--- |          | <--+          |
+     *                                           |    +----------+    |          |
+     *                                           |                    |          |
+     *                                           |    +----------+    |     +----------+
+     *                                           +--> |          | ---+     |          |
+     * +------------+        +-------------+          | RUNNING  |          | BLOCKED  |
+     * | AWAIT_LOOP | [<---] | TERMINATING | <------- |          | -------> |          |
+     * +------------+        +-------------+          +----------+          +----------+
      *
+     * ACTIVE = (RUNNABLE | RUNNING) & WORKER_ASSIGNED
+     * NOT_ACTIVE = (CREATED | BLOCKED | TERMINATING | AWAIT_LOOP) | NO_WORKER_ASSIGNED
      *
-     * Main coroutine gets AWAIT_LOOP status once it starts the final waiting loop. After all
-     * other coroutines are completed, the main coroutine exits.
+     * Notes:
+     * Main coroutine may optionally (in the "threaded" backend) go from TERMINATING to AWAIT_LOOP
+     * in order to wait for other coroutines to complete. After all other coroutines are completed,
+     * the main coroutine exits.
      */
     enum class Status { CREATED, RUNNABLE, RUNNING, BLOCKED, TERMINATING, AWAIT_LOOP };
+    /// the type of work that a coroutine performs
+    enum class Type { MUTATOR, SCHEDULER, FINALIZER };
 
     /// Needed for object locking
     static constexpr ThreadId MAX_COROUTINE_ID = MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT;
@@ -114,7 +121,7 @@ public:
      * coroutine. For details see CoroutineManager::CoroutineFactory
      */
     static Coroutine *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&epInfo = std::nullopt);
+                             std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR);
     ~Coroutine() override;
 
     /// Should be called after creation in order to create native context and do other things
@@ -138,7 +145,7 @@ public:
     static bool ThreadIsCoroutine(Thread *thread)
     {
         ASSERT(thread != nullptr);
-        // NOTE(konstanting, #I67QXC): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
+        // NOTE(konstanting, #IAD5MH): THREAD_TYPE_TASK -> THREAD_TYPE_COROUTINE and
         // remove the runtime/scheduler directory contents
         return thread->GetThreadType() == Thread::ThreadType::THREAD_TYPE_TASK;
     }
@@ -241,16 +248,47 @@ public:
         return static_cast<T *>(context_);
     }
 
+    CoroutineManager *GetManager() const
+    {
+        return manager_;
+    }
+
+    /**
+     * Assign this coroutine to a worker. Please do not call this method directly unless it is absolutely
+     * necessary (e.g. in the threaded backend). Use worker's interfaces like AddRunnableCoroutine(),
+     * AddRunningCoroutine().
+     */
+    void SetWorker(CoroutineWorker *w);
+
+    /// get the currently assigned worker
+    CoroutineWorker *GetWorker() const
+    {
+        return worker_;
+    }
+
+    /// @return true if the coroutine is ACTIVE (see the status transition diagram and the notes below)
+    bool IsActive();
+
+    /// @return type of work that the coroutine performs
+    Type GetType() const
+    {
+        return type_;
+    }
+
     bool IsSuspendOnStartup() const
     {
         return startSuspended_;
     }
 
+    /* event handlers */
+    virtual void OnHostWorkerChanged() {};
+    virtual void OnStatusChanged(Status oldStatus, Status newStatus);
+
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                        ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                       std::optional<EntrypointInfo> &&epInfo);
+                       std::optional<EntrypointInfo> &&epInfo, Type type);
 
     void SetCoroutineStatus(Status newStatus);
 
@@ -299,8 +337,11 @@ private:
     std::variant<std::monostate, ManagedEntrypointData, NativeEntrypointData> entrypoint_;
 
     CoroutineContext *context_ = nullptr;
-    // NOTE(konstanting, #I67QXC): check if we still need this functionality
+    CoroutineWorker *worker_ = nullptr;
+    CoroutineManager *manager_ = nullptr;
+    // NOTE(konstanting, #IAD5MH): check if we still need this functionality
     bool startSuspended_ = false;
+    Type type_ = Type::MUTATOR;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsConversionExponentialTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToInt"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToNumber"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToFloat"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToByte"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToShort"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToLong"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToDouble"));
 }
 
 TEST_F(EtsConversionExponentialTsToEtsTest, checkConversionExponentialToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionExponentialToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionExponentialToChar"));
 }
 
 }  // namespace ark::ets::interop::js::testing

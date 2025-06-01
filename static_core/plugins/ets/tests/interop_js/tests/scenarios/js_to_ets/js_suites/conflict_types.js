@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 'use strict';
 
-function functionArgTypeConflictArray() {
+export function functionArgTypeConflictArray() {
 	const SAMPLE_INT = 123;
 	const SAMPLE_STRING = 'foo';
 
@@ -22,7 +22,7 @@ function functionArgTypeConflictArray() {
 	return array;
 }
 
-function functionArgTypeConflictArrayBuffer() {
+export function functionArgTypeConflictArrayBuffer() {
 	const BUFFER_SIZE = 8;
 	const VALUE_AS_INT32 = 123;
 
@@ -34,11 +34,11 @@ function functionArgTypeConflictArrayBuffer() {
 	return buffer;
 }
 
-function functionArgTypeConflictBoolean() {
+export function functionArgTypeConflictBoolean() {
 	return new Boolean(true);
 }
 
-function functionArgTypeConflictDataView() {
+export function functionArgTypeConflictDataView() {
 	const BUFFER_SIZE = 8;
 	const VALUE_AS_INT32 = 123;
 
@@ -49,17 +49,17 @@ function functionArgTypeConflictDataView() {
 	return view;
 }
 
-function functionArgTypeConflictDate() {
+export function functionArgTypeConflictDate() {
 	return new Date(1);
 }
 
-function functionArgTypeConflictError() {
+export function functionArgTypeConflictError() {
 	const SAMPLE_STRING = 'foo';
 
 	return new Error(SAMPLE_STRING);
 }
 
-function functionArgTypeConflictMap() {
+export function functionArgTypeConflictMap() {
 	const dataMap = new Map();
 	const KEY = 'foo';
 	const VALUE = 'bar';
@@ -69,21 +69,11 @@ function functionArgTypeConflictMap() {
 	return dataMap;
 }
 
-function functionArgTypeConflictObject() {
+export function functionArgTypeConflictObject() {
 	return new Object();
 }
 
-function functionArgTypeConflictString() {
+export function functionArgTypeConflictString() {
 	const SAMPLE_STRING = 'foo';
 	return SAMPLE_STRING;
 }
-
-exports.functionArgTypeConflictArray = functionArgTypeConflictArray;
-exports.functionArgTypeConflictArrayBuffer = functionArgTypeConflictArrayBuffer;
-exports.functionArgTypeConflictBoolean = functionArgTypeConflictBoolean;
-exports.functionArgTypeConflictDataView = functionArgTypeConflictDataView;
-exports.functionArgTypeConflictDate = functionArgTypeConflictDate;
-exports.functionArgTypeConflictError = functionArgTypeConflictError;
-exports.functionArgTypeConflictMap = functionArgTypeConflictMap;
-exports.functionArgTypeConflictObject = functionArgTypeConflictObject;
-exports.functionArgTypeConflictString = functionArgTypeConflictString;

@@ -1,0 +1,118 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[tool.poetry]
+name = "taihe"
+version = "0.1.0"
+description = ""
+authors = ["The Taihe Authors <asanrocks@outlook.com>"]
+include = [
+    "taihe/parse/antlr/*",
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+antlr4-python3-runtime = "^4.13.2"
+antlr4-tools = "^0.2.1"
+typing-extensions = "^4.12.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.5"
+black = "^24.8.0"
+exceptiongroup = "^1.2.2"
+coverage = "^7.6.1"
+pytest = "^8.3.3"
+pyre-check = "^0.9.23"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "ali"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "tencent"
+url = "https://mirrors.cloud.tencent.com/pypi/simple/"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+exclude = "taihe/parse/antlr"
+target-version = ['py310']
+
+[tool.ruff]
+target-version = 'py310'
+
+# Don't check generated code.
+exclude = ["taihe/parse/antlr/*.py"]
+
+# See all rules at https://beta.ruff.rs/docs/rules/
+lint.select = [
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "F", # Pyflakes
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "D", # pydocstyle
+    "I", # isort
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "Q", # flake8-quotes
+    "UP", # pyupgrade
+    "PT", # flake8-pytest-style
+    "RUF", # Ruff-specific rules
+]
+
+lint.ignore = [
+    "E501", # "Line too long"
+    # -> "line length already regulated by black"
+    "PT011", # "pytest.raises() should specify expected exception"
+    # -> "would imply to update tests every time you update exception message"
+    "SIM108",
+    "F541", # "f-string without any placeholders"
+    "E731",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107", # -> "Missing docstring in public function too restrictive"
+    "UP007", # Allow `Optional[T]`
+]
+
+[tool.ruff.lint.pydocstyle]
+# Automatically disable rules that are incompatible with Google docstring convention
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 100
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+# Pydantic needs to be able to evaluate types at runtime
+# see https://pypi.org/project/flake8-type-checking/ for flake8-type-checking documentation
+# see https://beta.ruff.rs/docs/settings/#flake8-type-checking-runtime-evaluated-base-classes for ruff documentation

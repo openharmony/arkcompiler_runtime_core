@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,12 +51,11 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
         return false;
     }
     auto intrinsicId = typeOf->CastToIntrinsic()->GetIntrinsicId();
-    if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_TYPEOF) {
+    if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_TYPEOF) {
         return false;
     }
     auto typeId = loadString->CastToLoadString()->GetTypeId();
-    auto bb = intrinsic->GetBasicBlock();
-    auto graph = bb->GetGraph();
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
     auto runtime = graph->GetRuntime();
     auto method = graph->GetMethod();
 
@@ -66,14 +65,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     if (stringValue == "string") {
         klass = runtime->GetStringClass(method, &ktypeId);
     } else {
-        const std::unordered_map<std::string_view, const char *const> n2n = {
-            {"number", "Lstd/core/Double;"}, {"double", "Lstd/core/Double;"}, {"int", "Lstd/core/Int;"},
-            {"short", "Lstd/core/Short;"},   {"byte", "Lstd/core/Byte;"},     {"float", "Lstd/core/Float;"}};
-        auto found = n2n.find(stringValue);
-        if (found == n2n.end()) {
-            return false;
-        }
-        klass = runtime->GetNumberClass(method, found->second, &ktypeId);
+        return false;
     }
 
     auto pc = intrinsic->GetPc();
@@ -82,6 +74,7 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     auto loadClass =
         graph->CreateInstLoadClass(DataType::REFERENCE, pc, saveState, TypeIdMixin {ktypeId, method}, nullptr);
     loadClass->SetClass(klass);
+    auto *bb = saveState->GetBasicBlock();
     bb->InsertAfter(loadClass, saveState);
     auto isInstance = graph->CreateInstIsInstance(DataType::BOOL, pc, typeOf->GetInput(0).GetInst(), loadClass,
                                                   saveState, TypeIdMixin {typeId, method}, ClassType::FINAL_CLASS);
@@ -235,7 +228,7 @@ bool Peepholes::PeepholeLdObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicI
     auto method = intrinsic->GetMethod();
     auto runtime = graph->GetRuntime();
     auto fieldId = intrinsic->GetImm(0);
-    auto rawField = runtime->ResolveField(method, fieldId, !graph->IsAotMode(), nullptr);
+    auto rawField = runtime->ResolveField(method, fieldId, false, !graph->IsAotMode(), nullptr);
     ASSERT(rawField != nullptr);
 
     if (TryInsertFieldInst<false>(intrinsic, klassPtr, rawField, fieldId)) {
@@ -257,7 +250,7 @@ bool Peepholes::PeepholeStObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicI
     auto method = intrinsic->GetMethod();
     auto runtime = graph->GetRuntime();
     auto fieldId = intrinsic->GetImm(0);
-    auto rawField = runtime->ResolveField(method, fieldId, !graph->IsAotMode(), nullptr);
+    auto rawField = runtime->ResolveField(method, fieldId, false, !graph->IsAotMode(), nullptr);
     ASSERT(rawField != nullptr);
 
     if (TryInsertFieldInst<true>(intrinsic, klassPtr, rawField, fieldId)) {
@@ -276,39 +269,26 @@ static void ReplaceWithCompareNullish(IntrinsicInst *intrinsic, Inst *input)
 
     auto compareNull = graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateNullPtr(),
                                                 DataType::REFERENCE, ConditionCode::CC_EQ);
-    auto compareUndef =
-        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateUndefinedInst(),
+    auto compareUniqueObj =
+        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateUniqueObjectInst(),
                                  DataType::REFERENCE, ConditionCode::CC_EQ);
 
-    auto orInst = graph->CreateInstOr(DataType::BOOL, intrinsic->GetPc(), compareNull, compareUndef);
+    auto orInst = graph->CreateInstOr(DataType::BOOL, intrinsic->GetPc(), compareNull, compareUniqueObj);
 
     bb->InsertAfter(compareNull, intrinsic);
-    bb->InsertAfter(compareUndef, compareNull);
-    bb->InsertAfter(orInst, compareUndef);
+    bb->InsertAfter(compareUniqueObj, compareNull);
+    bb->InsertAfter(orInst, compareUniqueObj);
 
     intrinsic->ReplaceUsers(orInst);
 }
 
-bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+static bool IsNullish(const Inst *input)
 {
-    auto input0 = intrinsic->GetInput(0).GetInst();
-    auto input1 = intrinsic->GetInput(1).GetInst();
+    return input->IsNullPtr() || input->IsLoadUniqueObject();
+}
 
-    const auto isNullish = [](Inst *inst) { return inst->IsNullPtr() || inst->IsLoadUndefined(); };
-    if (input0 == input1 || (isNullish(input0) && isNullish(input1))) {
-        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
-        return true;
-    }
-    auto graph = intrinsic->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer()) {
-        return false;
-    }
-    if (isNullish(input0) || isNullish(input1)) {
-        auto nonNullishInput = isNullish(input0) ? input1 : input0;
-        ReplaceWithCompareNullish(intrinsic, nonNullishInput);
-        return true;
-    }
-
+static bool ReplaceIfNonValueTyped(IntrinsicInst *intrinsic, compiler::Graph *graph)
+{
     auto klass1 = GetClassPtrForObject(intrinsic, 0);
     auto klass2 = GetClassPtrForObject(intrinsic, 1);
     if ((klass1 != nullptr && !graph->GetRuntime()->IsClassValueTyped(klass1)) ||
@@ -318,6 +298,54 @@ bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *
     }
     // NOTE(vpukhov): #16340 try ObjectTypePropagation
     return false;
+}
+
+bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+    if (input0 == input1 || (IsNullish(input0) && IsNullish(input1))) {
+        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
+        return true;
+    }
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+    if (IsNullish(input0) || IsNullish(input1)) {
+        auto nonNullishInput = IsNullish(input0) ? input1 : input0;
+        ReplaceWithCompareNullish(intrinsic, nonNullishInput);
+        return true;
+    }
+
+    return ReplaceIfNonValueTyped(intrinsic, graph);
+}
+
+bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+    if (input0 == input1) {
+        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
+        return true;
+    }
+
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+
+    if (IsNullish(input0) || IsNullish(input1)) {
+        ReplaceWithCompareEQ(intrinsic);
+        return true;
+    }
+
+    return ReplaceIfNonValueTyped(intrinsic, graph);
+}
+
+bool Peepholes::PeepholeTypeof([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    return ReplaceTypeofWithIsInstance(intrinsic);
 }
 
 bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
@@ -364,6 +392,30 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     // remove intrinsic to satisfy SaveState checker
     intrinsic->GetBasicBlock()->RemoveInst(intrinsic);
     intrinsic->SetNext(newInst->GetNext());
+    return true;
+}
+
+bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+#ifdef COMPILER_DEBUG_CHECKS
+    if (!graph->IsInliningComplete()) {
+        return false;
+    }
+#endif  // COMPILER_DEBUG_CHECKS
+    auto obj = intrinsic->GetInput(0).GetInst();
+    auto typeInfo = obj->GetObjectTypeInfo();
+    if (typeInfo) {
+        auto loadType = graph->CreateInstLoadType(DataType::REFERENCE, intrinsic->GetPc());
+        loadType->SetMethod(graph->GetMethod());
+        loadType->SetTypeId(graph->GetRuntime()->GetClassIdWithinFile(graph->GetMethod(), typeInfo.GetClass()));
+        loadType->SetSaveState(intrinsic->GetSaveState());
+        intrinsic->InsertAfter(loadType);
+        intrinsic->ReplaceUsers(loadType);
+    } else {
+        intrinsic->ReplaceUsers(graph->GetOrCreateNullPtr());
+    }
     return true;
 }
 

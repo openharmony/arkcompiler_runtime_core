@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,13 +71,18 @@ public:
     }
     // The following constructors are non-explicit to be aligned with std::expected
     // NOLINTNEXTLINE(google-explicit-constructor)
-    Expected(T v) noexcept(std::is_nothrow_move_constructible_v<T>) : v_(std::move(v)) {}
+    Expected(T v) noexcept(std::is_nothrow_move_constructible_v<T>) : v_(std::in_place_index<VALUE_INDEX>, std::move(v))
+    {
+    }
     // NOLINTNEXTLINE(google-explicit-constructor)
-    Expected(Unexpected<E> e) noexcept(std::is_nothrow_move_constructible_v<E>) : v_(std::move(e.Value())) {}
+    Expected(Unexpected<E> e) noexcept(std::is_nothrow_move_constructible_v<E>)
+        : v_(std::in_place_index<ERROR_INDEX>, std::move(e.Value()))
+    {
+    }
 
     bool HasValue() const noexcept
     {
-        return std::holds_alternative<T>(v_);
+        return v_.index() == VALUE_INDEX;
     }
     explicit operator bool() const noexcept
     {
@@ -87,36 +92,36 @@ public:
     const E &Error() const &noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(!HasValue());
-        return std::get<E>(v_);
+        return std::get<ERROR_INDEX>(v_);
     }
     // NOLINTNEXTLINE(bugprone-exception-escape)
     E &Error() &noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(!HasValue());
-        return std::get<E>(v_);
+        return std::get<ERROR_INDEX>(v_);
     }
     E &&Error() &&noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(!HasValue());
-        return std::move(std::get<E>(v_));
+        return std::move(std::get<ERROR_INDEX>(v_));
     }
 
     const T &Value() const &noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(HasValue());
-        return std::get<T>(v_);
+        return std::get<VALUE_INDEX>(v_);
     }
     // NOTE(aemelenko): Delete next line when the issue 388 is resolved
     // NOLINTNEXTLINE(bugprone-exception-escape)
     T &Value() &noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(HasValue());
-        return std::get<T>(v_);
+        return std::get<VALUE_INDEX>(v_);
     }
     T &&Value() &&noexcept(ExpectedConfig::RELEASE)
     {
         ASSERT(HasValue());
-        return std::move(std::get<T>(v_));
+        return std::move(std::get<VALUE_INDEX>(v_));
     }
     const T &operator*() const &noexcept(ExpectedConfig::RELEASE)
     {
@@ -134,13 +139,13 @@ public:
 
     const T *operator->() const noexcept(ExpectedConfig::RELEASE)
     {
-        auto ptr = std::get_if<T>(&v_);
+        auto ptr = std::get_if<VALUE_INDEX>(&v_);
         ASSERT(ptr != nullptr);
         return ptr;
     }
     T *operator->() noexcept(ExpectedConfig::RELEASE)
     {
-        auto ptr = std::get_if<T>(&v_);
+        auto ptr = std::get_if<VALUE_INDEX>(&v_);
         ASSERT(ptr != nullptr);
         return ptr;
     }
@@ -168,6 +173,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(Expected);
 
 private:
+    static constexpr size_t VALUE_INDEX = 0;
+    static constexpr size_t ERROR_INDEX = 1;
     std::variant<T, E> v_;
 };
 

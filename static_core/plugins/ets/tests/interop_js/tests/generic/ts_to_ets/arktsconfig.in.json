@@ -3,18 +3,10 @@
 		"baseUrl": "${PANDA_ROOT}",
 		"paths": {
 			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
-			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
-			"dynamic_import": ["${CMAKE_CURRENT_SOURCE_DIR}/generic"]
+			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
 		},
 		"dynamicPaths": {
-			"${CMAKE_CURRENT_SOURCE_DIR}/generic": {
-				"language": "js",
-				"hasDecl": true
-			},
-			"${CMAKE_CURRENT_SOURCE_DIR}/generic.js": {
-				"language": "js",
-				"hasDecl": false
-			}
+		    "dynamic_import": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/generic" }
 		}
 	}
 }

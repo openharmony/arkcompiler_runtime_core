@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 #include "libpandabase/utils/utf.h"
 #include "macros.h"
 #include "napi/ets_napi.h"
-#include "runtime/include/runtime.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -27,6 +28,8 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 #include "plugins/ets/runtime/types/ets_class.h"
+#include "runtime/include/runtime.h"
+#include "runtime/mem/local_object_handle.h"
 
 namespace ark::ets {
 
@@ -124,40 +127,6 @@ EtsMethod *EtsClass::GetMethodByIndex(uint32_t ind)
     ASSERT(ind < methods.size());
     res = methods[ind];
     return res;
-}
-
-EtsMethod *EtsClass::GetMethod(const char *name)
-{
-    auto coreName = reinterpret_cast<const uint8_t *>(name);
-
-    Method *coreMethod = nullptr;
-    auto *runtimeClass = GetRuntimeClass();
-    if (IsInterface()) {
-        coreMethod = runtimeClass->GetInterfaceMethod(coreName);
-    } else {
-        coreMethod = runtimeClass->GetClassMethod(coreName);
-    }
-    return reinterpret_cast<EtsMethod *>(coreMethod);
-}
-
-EtsMethod *EtsClass::GetMethod(const char *name, const char *signature)
-{
-    EtsMethodSignature methodSignature(signature);
-    if (!methodSignature.IsValid()) {
-        LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
-        return nullptr;
-    }
-
-    auto coreName = reinterpret_cast<const uint8_t *>(name);
-
-    Method *coreMethod = nullptr;
-    auto *runtimeClass = GetRuntimeClass();
-    if (IsInterface()) {
-        coreMethod = runtimeClass->GetInterfaceMethod(coreName, methodSignature.GetProto());
-    } else {
-        coreMethod = runtimeClass->GetClassMethod(coreName, methodSignature.GetProto());
-    }
-    return reinterpret_cast<EtsMethod *>(coreMethod);
 }
 
 // NOTE(kirill-mitkin): Cache in EtsClass field later
@@ -411,10 +380,10 @@ void EtsClass::SetValueTyped()
     flags_ = flags_ | IS_VALUE_TYPED;
     ASSERT(IsValueTyped());
 }
-void EtsClass::SetUndefined()
+void EtsClass::SetNullValue()
 {
-    flags_ = flags_ | IS_UNDEFINED;
-    ASSERT(IsUndefined());
+    flags_ = flags_ | IS_NULLVALUE;
+    ASSERT(IsNullValue());
 }
 void EtsClass::SetBoxed()
 {
@@ -425,6 +394,11 @@ void EtsClass::SetFunction()
 {
     flags_ = flags_ | IS_FUNCTION;
     ASSERT(IsFunction());
+}
+void EtsClass::SetEtsEnum()
+{
+    flags_ = flags_ | IS_ETS_ENUM;
+    ASSERT(IsEtsEnum());
 }
 void EtsClass::SetBigInt()
 {
@@ -462,11 +436,27 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (superClass != nullptr) {
         static constexpr uint32_t COPIED_MASK = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
         flags |= superClass->GetFlags() & COPIED_MASK;
-        ASSERT(!superClass->IsValueTyped());
+        ASSERT(!superClass->IsValueTyped() || superClass->IsEtsEnum());
     }
     if (UNLIKELY(HasFunctionTypeInSuperClasses(this))) {
         flags |= IS_FUNCTION;
     }
+    if (UNLIKELY(GetBase() != nullptr && GetBase()->IsEtsEnum())) {
+        flags |= (IS_ETS_ENUM | IS_VALUE_TYPED);
+    }
+
+    auto *runtimeClass = GetRuntimeClass();
+    auto *pfile = runtimeClass->GetPandaFile();
+    if (pfile != nullptr) {
+        panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
+
+        cda.EnumerateAnnotation(panda_file_items::class_descriptors::ANNOTATION_MODULE.data(),
+                                [&flags](panda_file::AnnotationDataAccessor &) {
+                                    flags |= IS_MODULE;
+                                    return true;
+                                });
+    }
+
     SetFlags(flags);
 }
 
@@ -608,6 +598,47 @@ void EtsClass::SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObj
         GetRuntimeClass()->SetFieldObject<true>(fieldOffset, reinterpret_cast<ObjectHeader *>(value));
     }
     GetRuntimeClass()->SetFieldObject<false>(fieldOffset, reinterpret_cast<ObjectHeader *>(value));
+}
+
+EtsObject *EtsClass::CreateInstance()
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    const auto throwCreateInstanceErr = [coro, this](std::string_view msg) {
+        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+                               PandaString(msg) + " " + GetDescriptor());
+    };
+
+    if (UNLIKELY(!GetRuntimeClass()->IsInstantiable() || IsArrayClass())) {
+        throwCreateInstanceErr("Cannot instantiate");
+        return nullptr;
+    }
+
+    if (IsStringClass()) {
+        return EtsString::CreateNewEmptyString()->AsObject();
+    }
+
+    EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");
+    if (UNLIKELY(ctor == nullptr)) {
+        throwCreateInstanceErr("No default constructor in");
+        return nullptr;
+    }
+
+    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
+    if (UNLIKELY(!IsInitialized() && !linker->InitializeClass(coro, this))) {
+        return nullptr;
+    }
+    EtsObject *obj = EtsObject::Create(this);
+    if (UNLIKELY(obj == nullptr)) {
+        return nullptr;
+    }
+
+    LocalObjectHandle objHandle(coro, obj);
+    std::array<Value, 1> args {Value(obj->GetCoreType())};
+    ctor->GetPandaMethod()->Invoke(coro, args.data());
+    if (UNLIKELY(coro->HasPendingException())) {
+        return nullptr;
+    }
+    return objHandle.GetPtr();
 }
 
 }  // namespace ark::ets

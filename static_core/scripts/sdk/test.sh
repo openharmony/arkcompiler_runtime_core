@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,58 +12,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eo pipefail
-set -x
+function print_test_help() {
+    HELP_MESSAGE="
+    This script builds Panda SDK.
 
-PANDA_SDK_BUILD_TYPE="${1:-"Release"}"
+    SYNOPSIS
+
+    $0 [OPTIONS]
+
+    OPTIONS
+
+    --help, -h              Show this message and exit.
+
+    --build_type=...        [Release/Debug/FastVerify] Set build type
+    "
+
+    echo "$HELP_MESSAGE"
+}
+
+set -eo pipefail
 
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+PANDA_SDK_BUILD_TYPE="Release"
 
-BUILD_DIR=${BUILD_DIR:-'.'}
-mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
-
-OHOS_SDK_NATIVE_URL=${OHOS_SDK_NATIVE_URL:-'https://contentcenter-drcn.dbankcdn.com/pub_1/DevEcoSpace_1_900_9/4a/v3/oidhh45PQ-qFyqu2pO5Kmw/nZgBfyRtTzuaBczj9WgsWQ.zip'}
-
-# Search for default OHOS SDK native or download it
-if [ -z "$OHOS_SDK_NATIVE" ]; then
-    OHOS_SDK_NATIVE_DEFAULT_1=/opt/ohos-sdk/native
-    OHOS_SDK_NATIVE_DEFAULT_2="$(realpath ./native)"
-    if [ -d "$OHOS_SDK_NATIVE_DEFAULT_1" ]; then
-        OHOS_SDK_NATIVE="$OHOS_SDK_NATIVE_DEFAULT_1"
-    elif [ -d "$OHOS_SDK_NATIVE_DEFAULT_2" ]; then
-        OHOS_SDK_NATIVE="$OHOS_SDK_NATIVE_DEFAULT_2"
-    else
-        if [ -z "$OHOS_SDK_NATIVE_URL" ]; then
-            echo "Error: OHOS SDK not found, please set OHOS_SDK_NATIVE or OHOS_SDK_NATIVE_URL environment variable"
-            exit 1
+for i in "$@"; do
+    ERROR_ARG=""
+    case $i in
+    -h|--help)
+        print_test_help
+        exit 0
+        ;;
+    --build_type=*)
+        TYPE_ARG=${i//[-a-zA-Z0-9]*=/}
+        if [[ "$TYPE_ARG" = "Release" ]]; then
+            PANDA_SDK_BUILD_TYPE="Release"
         fi
-        curl --retry 5 -Lo ohos-sdk-native.zip "${OHOS_SDK_NATIVE_URL}"
-        unzip -q ohos-sdk-native.zip
-        OHOS_SDK_NATIVE=native
+        if [[ "$TYPE_ARG" = "Debug" ]]; then
+            PANDA_SDK_BUILD_TYPE="Debug"
+        fi
+        if [[ "$TYPE_ARG" = "FastVerify" ]]; then
+            PANDA_SDK_BUILD_TYPE="FastVerify"
+        fi
+        shift
+        ;;
+    *)
+        ERROR_ARG="YES"
+    esac
+
+    if [[ -n "${ERROR_ARG}" ]]; then
+        echo "Error: Unsupported flag $i" >&2
+        exit 1
     fi
-fi
+done
 
-# Build panda SDK
-SDK_VERSION=$(grep '"version":' "$SCRIPT_DIR"/package.json | sed 's|.*"version":.*"\(.*\)".*|\1|')
-"$SCRIPT_DIR"/build_sdk.sh "$OHOS_SDK_NATIVE" build-sdk "$PANDA_SDK_BUILD_TYPE"
-
-ACTUAL="/tmp/panda_sdk_test_actual.txt"
-EXPECTED="/tmp/panda_sdk_test_expected.txt"
-
-# Test 1
-find build-sdk -maxdepth 1 | sort --version-sort >"$ACTUAL"
-echo "build-sdk
-build-sdk/linux_arm64_host_tools
-build-sdk/linux_host_tools
-build-sdk/ohos_arm64
-build-sdk/panda-sdk-$SDK_VERSION.tgz
-build-sdk/sdk
-build-sdk/windows_host_tools" >"$EXPECTED"
-diff "$ACTUAL" "$EXPECTED"
-
-# Test 2
-find build-sdk/sdk/ -maxdepth 3 | sort --version-sort >"$ACTUAL"
-EXPECTED_TEST2="$SCRIPT_DIR/test2_file_list_expected.txt"
-diff "$ACTUAL" "$EXPECTED_TEST2"
-
-rm "$ACTUAL" "$EXPECTED"
+bash "$SCRIPT_DIR"/test_sdk --build_type="$PANDA_SDK_BUILD_TYPE"

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -502,7 +502,11 @@ bool Method::Verify()
         LOG(DEBUG, VERIFIER) << "Skipping verification of system method " << GetFullName(true);
         return true;
     }
-    return verifier::Verify(service, this, mode) == verifier::Status::OK;
+    if (verifier::Verify(service, this, mode) != verifier::Status::OK) {
+        LOG(ERROR, VERIFIER) << "Method verification failed: " << GetFullName(true);
+        return false;
+    }
+    return true;
 }
 
 inline void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
@@ -551,34 +555,20 @@ void Method::StartProfiling()
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto vcallDataOffset = RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
-    auto branchesDataOffset =
-        RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * vcalls.size(), alignof(BranchData));
-    auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
-    auto data = allocator->Alloc(throwsDataOffset + sizeof(ThrowData) * throws.size());
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
-
     auto profilingData =
-        new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
-                                 ThrowData::From(throwsMem, throws));
-
-    ProfilingData *oldValue = nullptr;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    while (!pointer_.profilingData.compare_exchange_weak(oldValue, profilingData)) {
-        if (oldValue != nullptr) {
-            // We're late, some thread already started profiling.
-            allocator->Delete(data);
-            return;
-        }
+        ProfilingData::Make(allocator, vcalls.size(), branches.size(), throws.size(),
+                            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
+                                return new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls),
+                                                                BranchData::From(branchesMem, branches),
+                                                                ThrowData::From(throwsMem, throws));
+                            });
+    if (!InitProfilingData(profilingData)) {
+        allocator->Free(profilingData);
+        return;
     }
+
     EVENT_INTERP_PROFILING(events::InterpProfilingAction::START, GetFullName(), vcalls.size());
+    Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->TryAddMethodToProfile(this);
 }
 
 void Method::StopProfiling()

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,6 +109,53 @@
         test15: {v: 0x00000000000000FF as long },
         test16: {v: 0x000000000000000F as long },
         test17: {v: 0x0000000000000000 as long },
+        },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  4,
+        test3:  8,
+        test4:  12,
+        test5:  16,
+        test6:  20,
+        test7:  24,
+        test8:  28,
+        test9:  32,
+        test10: 36,
+        test11: 40,
+        test12: 44,
+        test13: 48,
+        test14: 52,
+        test15: 56,
+        test16: 60,
+        test17: 64,
+      },
+  }
+- {
+    method_name: clz64,
+    method_nature: function,
+    result_type: int,
+    method_signature:  {v: "long"},
+
+    method_test_index_data:
+      {
+        test1:  {v: -1 },
+        test2:  {v: 0x0FFFFFFFFFFFFFFF },
+        test3:  {v: 0x00FFFFFFFFFFFFFF },
+        test4:  {v: 0x000FFFFFFFFFFFFF },
+        test5:  {v: 0x0000FFFFFFFFFFFF },
+        test6:  {v: 0x00000FFFFFFFFFFF },
+        test7:  {v: 0x000000FFFFFFFFFF },
+        test8:  {v: 0x0000000FFFFFFFFF },
+        test9:  {v: 0x00000000FFFFFFFF },
+        test10: {v: 0x000000000FFFFFFF },
+        test11: {v: 0x0000000000FFFFFF },
+        test12: {v: 0x00000000000FFFFF },
+        test13: {v: 0x000000000000FFFF },
+        test14: {v: 0x0000000000000FFF },
+        test15: {v: 0x00000000000000FF },
+        test16: {v: 0x000000000000000F },
+        test17: {v: 0x0000000000000000 },
         },
     method_expected_data:
       {

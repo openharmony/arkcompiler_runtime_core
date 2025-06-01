@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -215,7 +215,6 @@ set(PANDA_DEFAULT_LIB_TYPE "SHARED")
 option(PANDA_WITH_TESTS "Enable test targets" true)
 option(PANDA_WITH_BYTECODE_OPTIMIZER "Enable bytecode optimizer" true)
 option(PANDA_COMPILER_DEBUG_INFO "Support DWARF debug information in Compiler (JIT/AOT/IRtoC)" OFF)
-option(PANDA_ENABLE_RELAYOUT_PROFILE "Enable relayout profile" OFF)
 option(PANDA_ENABLE_CCACHE "Enable ccache" true)
 if (NOT DEFINED ES2PANDA_PATH)
     set(ES2PANDA_PATH ${PANDA_ROOT}/tools/es2panda)
@@ -238,7 +237,7 @@ if(PANDA_TARGET_OHOS)
     set(PANDA_WITH_BENCHMARKS false)
     add_definitions(-D__MUSL__)
 
-    if(PANDA_TARGET_ARM64)
+    if(PANDA_TARGET_ARM64 OR PANDA_TARGET_ARM32)
         # WORKAROUND:
         #   Disable '-Wunused-command-line-argument' error to avoid compilation error:
         #   clang++: error: argument unused during compilation: '--gcc-toolchain=<path/to/toolchain>/llvm' [-Werror,-Wunused-command-line-argument]
@@ -530,7 +529,6 @@ message(STATUS "PANDA_WITH_BYTECODE_OPTIMIZER          = ${PANDA_WITH_BYTECODE_O
 message(STATUS "PANDA_PGO_INSTRUMENT                   = ${PANDA_PGO_INSTRUMENT}")
 message(STATUS "PANDA_PGO_OPTIMIZE                     = ${PANDA_PGO_OPTIMIZE}")
 message(STATUS "PANDA_PRODUCT_BUILD                    = ${PANDA_PRODUCT_BUILD}")
-message(STATUS "PANDA_ENABLE_RELAYOUT_PROFILE          = ${PANDA_ENABLE_RELAYOUT_PROFILE}")
 message(STATUS "PANDA_QEMU_BUILD                       = ${PANDA_QEMU_BUILD}")
 message(STATUS "PANDA_LLVM_BACKEND                     = ${PANDA_LLVM_BACKEND}")
 message(STATUS "PANDA_LLVM_INTERPRETER                 = ${PANDA_LLVM_INTERPRETER}")

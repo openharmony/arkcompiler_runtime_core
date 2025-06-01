@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,30 +23,38 @@ namespace ark::ets {
 template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
-    auto *ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-    Class *boxClass = nullptr;
-    if constexpr (std::is_same<T, EtsBoolean>::value) {
-        boxClass = ext->GetBoxBooleanClass();
-    } else if constexpr (std::is_same<T, EtsByte>::value) {
-        boxClass = ext->GetBoxByteClass();
-    } else if constexpr (std::is_same<T, EtsChar>::value) {
-        boxClass = ext->GetBoxCharClass();
-    } else if constexpr (std::is_same<T, EtsShort>::value) {
-        boxClass = ext->GetBoxShortClass();
-    } else if constexpr (std::is_same<T, EtsInt>::value) {
-        boxClass = ext->GetBoxIntClass();
-    } else if constexpr (std::is_same<T, EtsLong>::value) {
-        boxClass = ext->GetBoxLongClass();
-    } else if constexpr (std::is_same<T, EtsFloat>::value) {
-        boxClass = ext->GetBoxFloatClass();
-    } else if constexpr (std::is_same<T, EtsDouble>::value) {
-        boxClass = ext->GetBoxDoubleClass();
-    }
-    ASSERT(EtsClass::FromRuntimeClass(boxClass)->IsBoxed());
-    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, boxClass));
+    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, GetBoxClass(coro)));
     instance->SetValue(value);
     return instance;
 }
+
+template <typename T>
+Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+{
+    auto ptypes = PlatformTypes(coro);
+    EtsClass *boxClass = nullptr;
+
+    if constexpr (std::is_same<T, EtsBoolean>::value) {
+        boxClass = ptypes->coreBoolean;
+    } else if constexpr (std::is_same<T, EtsByte>::value) {
+        boxClass = ptypes->coreByte;
+    } else if constexpr (std::is_same<T, EtsChar>::value) {
+        boxClass = ptypes->coreChar;
+    } else if constexpr (std::is_same<T, EtsShort>::value) {
+        boxClass = ptypes->coreShort;
+    } else if constexpr (std::is_same<T, EtsInt>::value) {
+        boxClass = ptypes->coreInt;
+    } else if constexpr (std::is_same<T, EtsLong>::value) {
+        boxClass = ptypes->coreLong;
+    } else if constexpr (std::is_same<T, EtsFloat>::value) {
+        boxClass = ptypes->coreFloat;
+    } else if constexpr (std::is_same<T, EtsDouble>::value) {
+        boxClass = ptypes->coreDouble;
+    }
+    ASSERT(boxClass->IsBoxed());
+    return boxClass->GetRuntimeClass();
+}
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H

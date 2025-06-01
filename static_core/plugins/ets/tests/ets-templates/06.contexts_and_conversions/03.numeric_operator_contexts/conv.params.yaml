@@ -22,7 +22,8 @@ cases:
   - { op: '/', type1: double, v1: 100.0, type2: long, v2: 2, res: 50.0 }
 
   # widening reference conversion followed by an unboxing conversion
-  - defs: |-
+  - tags: "compile-only, negative"
+    defs: |-
       function foo<T extends Double>(p: T): double {
           return 1.0 + p;
       }
@@ -33,7 +34,8 @@ cases:
     v2: foo <Double> (new Double(3.14))
     res: 0.0
 
-  - defs: |-
+  - tags: "compile-only, negative"
+    defs: |-
       function foo<T extends Int>(p: T): int {
           return 100000 + p;
       }
@@ -45,7 +47,8 @@ cases:
     res: 200000
 
 # widening reference conversion followed by an unboxing conversion, then followed by a widening primitive conversion
-  - defs: |-
+  - tags: "compile-only, negative"
+    defs: |-
       function foo<T extends Float>(p: T): double {
           return 1.0 + p;
       }
@@ -56,7 +59,8 @@ cases:
     v2: foo <Float> (new Float(3.14 as float))
     res: 0.0
 
-  - defs: |-
+  - tags: "compile-only, negative"
+    defs: |-
       function foo<T extends Short>(p: T): int {
           return 100000 + p;
       }
