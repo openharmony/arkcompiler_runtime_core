@@ -17,7 +17,7 @@ import { xml } from "@ohos.xml"
 import { BusinessError } from "@ohos.base"
 
 const TypeErrorCodeId: number = 401;
-const myMAX = 2048;
+const MaxBufferLength = 2048;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlSerializer API tests");
@@ -30,101 +30,106 @@ function main(): int {
     suite.addTest("Testing illegal position for setting attributes", testIllegalPositionForAttributes);
     suite.addTest("Testing empty attribute name", testEmptyAttributeName);
     suite.addTest("Testing attribute setting with arrayBuffer overflow", testAttributeSettingWithOverflow);
+    suite.addTest("Test writing attributes containing '>'.", testWriteAttributesWithGreaterThan);
+    suite.addTest("Test writing attributes containing '<'.", testWriteAttributesWithLessThan);
+    suite.addTest("Test writing attributes containing '&'.", testWriteAttributesWithAmpersand);
+    suite.addTest("Test writing attributes containing single quote.", testWriteAttributesWithSingleQuote);
+    suite.addTest("Test writing attributes containing double quote.", testWriteAttributesWithDoubleQuote);
 
     return suite.run();
 }
 
+// Utility function to perform XML serialization tests
+function performXmlTest(
+    setupCallback: (serializer: xml.XmlSerializer) => void, 
+    expectedXml: string, 
+    bufferSize: number = MaxBufferLength
+): void {
+    const arrayBuffer = new ArrayBuffer(bufferSize);
+    const serializer = new xml.XmlSerializer(arrayBuffer);
+    
+    setupCallback(serializer);
+    
+    const view = new Uint8Array(arrayBuffer);
+    let actualXml = "";
+    for (let i = 0; i < expectedXml.length; ++i) {
+        actualXml += String.fromCodePoint(view[i]);
+    }
+    
+    arktest.assertEQ(actualXml, expectedXml);
+}
+
 // Test cases ported from ArkTS 1.0: XML_01100
 function testSingleAttributeInElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance1", "high1");
-    thatSer.endElement();
-    let result = '<note importance1="high1"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement("note");
+            serializer.setAttributes("importance1", "high1");
+            serializer.endElement();
+        },
+        '<note importance1="high1"/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_01200
 function testMultipleAttributesInElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance1", "high1");
-    thatSer.setAttributes("importance2", "high2");
-    thatSer.endElement();
-    let result = '<note importance1="high1" importance2="high2"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement("note");
+            serializer.setAttributes("importance1", "high1");
+            serializer.setAttributes("importance2", "high2");
+            serializer.endElement();
+        },
+        '<note importance1="high1" importance2="high2"/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_01300
 function testThreeAttributesInElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance1", "high1");
-    thatSer.setAttributes("importance2", "high2");
-    thatSer.setAttributes("importance3", "high3");
-    thatSer.endElement();
-    let result = '<note importance1="high1" importance2="high2" importance3="high3"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement("note");
+            serializer.setAttributes("importance1", "high1");
+            serializer.setAttributes("importance2", "high2");
+            serializer.setAttributes("importance3", "high3");
+            serializer.endElement();
+        },
+        '<note importance1="high1" importance2="high2" importance3="high3"/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_01400
 function testFourAttributesInElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance1", "high1");
-    thatSer.setAttributes("importance2", "high2");
-    thatSer.setAttributes("importance3", "high3");
-    thatSer.setAttributes("importance4", "high4");
-    thatSer.endElement();
-    let result = '<note importance1="high1" importance2="high2" importance3="high3" importance4="high4"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement("note");
+            serializer.setAttributes("importance1", "high1");
+            serializer.setAttributes("importance2", "high2");
+            serializer.setAttributes("importance3", "high3");
+            serializer.setAttributes("importance4", "high4");
+            serializer.endElement();
+        },
+        '<note importance1="high1" importance2="high2" importance3="high3" importance4="high4"/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_01500
 function testNonSequentialAttributesInElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance1", "high1");
-    thatSer.setAttributes("importance2", "high2");
-    thatSer.setAttributes("importance3", "high3");
-    thatSer.setAttributes("importance5", "high5");
-    thatSer.endElement();
-    let result = '<note importance1="high1" importance2="high2" importance3="high3" importance5="high5"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement("note");
+            serializer.setAttributes("importance1", "high1");
+            serializer.setAttributes("importance2", "high2");
+            serializer.setAttributes("importance3", "high3");
+            serializer.setAttributes("importance5", "high5");
+            serializer.endElement();
+        },
+        '<note importance1="high1" importance2="high2" importance3="high3" importance5="high5"/>'
+    );
 }
 
 function testIllegalPositionForAttributes() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
+    let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     thatSer.endElement();
@@ -136,7 +141,7 @@ function testIllegalPositionForAttributes() {
 }
 
 function testEmptyAttributeName() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
+    let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     let exceptionCheck = (e: Error | Exception): boolean | string => {
@@ -158,4 +163,69 @@ function testAttributeSettingWithOverflow() {
             ((e as BusinessError).message == 'XmlSerializer:: SetAttributes memcpy_s failed');
     }
     arktest.expectThrow(() => {thatSer.setAttributes("a", "b")}, exceptionCheck);
+}
+
+// Test cases ported from ArkTS 1.0: XML_11400
+function testWriteAttributesWithGreaterThan() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.setAttributes('importance', 'Hello>World');
+            serializer.setText('high');
+            serializer.endElement();
+        },
+        '<note importance="Hello&gt;World">high</note>'
+    );
+}
+
+// Test cases ported from ArkTS 1.0: XML_11500
+function testWriteAttributesWithLessThan() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.setAttributes('importance', 'Hello<World');
+            serializer.setText('high');
+            serializer.endElement();
+        },
+        '<note importance="Hello&lt;World">high</note>'
+    );
+}
+
+// Test cases ported from ArkTS 1.0: XML_11600
+function testWriteAttributesWithAmpersand() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.setAttributes('importance', 'Hello&World');
+            serializer.setText('high');
+            serializer.endElement();
+        },
+        '<note importance="Hello&amp;World">high</note>'
+    );
+}
+
+// Test cases ported from ArkTS 1.0: XML_11700
+function testWriteAttributesWithSingleQuote() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.setAttributes('importance', 'Hello\'World');
+            serializer.setText('high');
+            serializer.endElement();
+        },
+        '<note importance="Hello&apos;World">high</note>'
+    );
+}
+
+// Test cases ported from ArkTS 1.0: XML_11800
+function testWriteAttributesWithDoubleQuote() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.setAttributes('importance', 'Hello"World');
+            serializer.setText('high');
+            serializer.endElement();
+        },
+        '<note importance="Hello&quot;World">high</note>'
+    );
 }

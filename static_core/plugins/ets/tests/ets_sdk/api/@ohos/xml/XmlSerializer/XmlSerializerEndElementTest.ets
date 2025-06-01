@@ -17,7 +17,7 @@ import { xml } from "@ohos.xml"
 import { BusinessError } from "@ohos.base"
 
 const TypeErrorCodeId: number = 401;
-const myMAX = 2048;
+const MaxBufferLength = 2048;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlSerializer API tests");
@@ -32,84 +32,68 @@ function main(): int {
     return suite.run();
 }
 
-// Test cases ported from ArkTS 1.0: XML_01600
-function testEndElementWithoutAttributes() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
+/**
+ * Helper function to create XmlSerializer, perform operations and verify result
+ * @param bufferSize Size of the ArrayBuffer to use
+ * @param operations A callback function that performs XML operations on the serializer
+ * @param expectedResult The expected XML string output
+ */
+function performXmlTest(bufferSize: number, operations: (serializer: xml.XmlSerializer) => void, expectedResult: string) {
+    let arrayBuffer = new ArrayBuffer(bufferSize);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.endElement();
-    let result = '<note/>';
+    operations(thatSer);
+    
     let view = new Uint8Array(arrayBuffer);
     let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
+    for (let i = 0; i < expectedResult.length; ++i) {
         view1 = view1 + String.fromCodePoint(view[i]);
     }
-    arktest.assertEQ(view1, result);
+    arktest.assertEQ(view1, expectedResult);
+}
+
+// Test cases ported from ArkTS 1.0: XML_01600
+function testEndElementWithoutAttributes() {
+    performXmlTest(MaxBufferLength, (serializer) => {
+        serializer.startElement("note");
+        serializer.endElement();
+    }, '<note/>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_01700
 function testEndElementWithSingleAttribute() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("importance", "high");
-    thatSer.endElement();
-    let result = '<note importance="high"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(MaxBufferLength, (serializer) => {
+        serializer.startElement("note");
+        serializer.setAttributes("importance", "high");
+        serializer.endElement();
+    }, '<note importance="high"/>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_01800
 function testEndElementWithMultipleAttributes() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note");
-    thatSer.setAttributes("impo", "hi");
-    thatSer.endElement();
-    let result = '<note impo="hi"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(MaxBufferLength, (serializer) => {
+        serializer.startElement("note");
+        serializer.setAttributes("impo", "hi");
+        serializer.endElement();
+    }, '<note impo="hi"/>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_01900
 function testNestedEndElements() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.startElement("note2");
-    thatSer.endElement();
-    thatSer.endElement();
-    let result = '<note1>\r\n  <note2/>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(MaxBufferLength, (serializer) => {
+        serializer.startElement("note1");
+        serializer.startElement("note2");
+        serializer.endElement();
+        serializer.endElement();
+    }, '<note1>\r\n  <note2/>\r\n</note1>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_02000
 function testEndElementWithAttributesInNestedElements() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note2");
-    thatSer.setAttributes("importance", "high");
-    thatSer.endElement();
-    let result = '<note2 importance="high"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(MaxBufferLength, (serializer) => {
+        serializer.startElement("note2");
+        serializer.setAttributes("importance", "high");
+        serializer.endElement();
+    }, '<note2 importance="high"/>');
 }
 
 function testEndElementWithArrayBufferOverflow() {
