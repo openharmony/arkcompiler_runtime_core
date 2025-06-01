@@ -179,6 +179,13 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
                 << returnValue.GetAs<ObjectHeader *>() << ">";
         }
     }
+    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
+        // If the retObject is a rejected Promise, the reject reason will be set as an exception.
+        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
+        if (retObject == nullptr) {
+            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
+        }
+    }
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
@@ -187,12 +194,6 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
                               << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
         intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc), ToEtsBoolean(false));
         return;
-    }
-    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
-        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
-        if (retObject == nullptr) {
-            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
-        }
     }
     intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject, ToEtsBoolean(false));
 }
