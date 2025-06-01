@@ -179,7 +179,7 @@ static_core/plugins/ets/stdlib/std/debug/concurrency/                         @k
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^dreamdoomwalker
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof1983 ^kurnevichstanislav @dingding5
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof1983 @dingding5
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya @ivagin ^hufeng20 ^Prof1983
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya ^ivagin ^hufeng20 ^Prof1983 @zenghang11
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 
 /abc2program/ @oatuwwutao @hufeng20 @chenqy930
