@@ -178,6 +178,7 @@ ohos_source_set("libarkruntime_set_static") {
     "jit/libprofile/pgo_file_builder.cpp",
     "jit/profiling_loader.cpp",
     "jit/profiling_saver.cpp",
+    "jit/profile_saver_worker.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",

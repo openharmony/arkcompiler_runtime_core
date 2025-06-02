@@ -238,6 +238,10 @@ public:
     // Returns true if profile saving is enabled.
     bool SaveProfileInfo() const;
 
+    bool IncrementalSaveProfileInfo() const;
+
+    bool TryCreateSaverTask();
+
     const std::string &GetProcessPackageName() const
     {
         return processPackageName_;
@@ -539,7 +543,8 @@ private:
     bool isZygote_;
     bool isInitialized_ {false};
 
-    bool saveProfilingInfo_;
+    bool saveProfilingInfo_ {false};
+    bool incrementalSaveProfilingInfo_ {false};
 
     bool checksSuspend_ {false};
     bool checksStack_ {true};

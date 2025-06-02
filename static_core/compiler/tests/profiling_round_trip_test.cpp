@@ -172,6 +172,7 @@ class ProfilingRoundTripTest : public ::testing::Test {
 public:
     PandaRunner &CreateRunner()
     {
+        runner_.GetRuntimeOptions().SetIncrementalProfilesaverEnabled(false);
         runner_.GetRuntimeOptions().SetShouldLoadBootPandaFiles(false);
         runner_.GetRuntimeOptions().SetShouldInitializeIntrinsics(false);
         runner_.GetRuntimeOptions().SetCompilerProfilingThreshold(0U);
@@ -191,7 +192,8 @@ public:
             return;
         }
         ProfilingSaver profileSaver;
-        classCtxStr_ = runtime->GetClassLinker()->GetClassContextForAot(true);
+        classCtxStr_ = runtime->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                       runtime->GetClassLinker()->GetAotManager()->GetAppClassContext();
         auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
         auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();

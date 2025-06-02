@@ -429,8 +429,8 @@ bool Runtime::Destroy()
     trace::ScopedTrace scopedTrace("Runtime shutdown");
     if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
         ProfilingSaver profileSaver;
-        auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
-        auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
+        auto classCtxStr = instance_->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                           instance_->GetClassLinker()->GetAotManager()->GetAppClassContext();
         auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
         auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
@@ -574,6 +574,16 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         ark::os::mem_hooks::PandaHooks::Enable();
     }
 
+#ifdef PANDA_TARGET_OHOS
+    if (!options_.WasSetProfileOutput()) {
+        options_.SetProfileOutput("/data/storage/ark-profile/profile.ap");
+    }
+
+    if (!options_.WasSetIncrementalProfilesaverEnabled()) {
+        options_.SetIncrementalProfilesaverEnabled(true);
+    }
+#endif
+
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
     isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
@@ -582,6 +592,7 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 #endif
     isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
     saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
+    incrementalSaveProfilingInfo_ = Runtime::GetOptions().IsIncrementalProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
@@ -1541,6 +1552,25 @@ void Runtime::PostZygoteFork()
 bool Runtime::SaveProfileInfo() const
 {
     return IsProfilerEnabled() && saveProfilingInfo_;
+}
+
+bool Runtime::IncrementalSaveProfileInfo() const
+{
+    return IsProfilerEnabled() && incrementalSaveProfilingInfo_;
+}
+
+bool Runtime::TryCreateSaverTask()
+{
+    if (!IncrementalSaveProfileInfo()) {
+        LOG(INFO, RUNTIME) << "[profile_saver] Incremental profile save disabled.";
+        return false;
+    }
+    auto saverWorker = GetPandaVM()->GetProfileSaverWorker();
+    if (saverWorker == nullptr) {
+        LOG(INFO, RUNTIME) << "[profile_saver] Profile saver worker doesn't exists.";
+        return false;
+    }
+    return saverWorker->TryAddTask();
 }
 
 void Runtime::CheckOptionsFromOs() const
