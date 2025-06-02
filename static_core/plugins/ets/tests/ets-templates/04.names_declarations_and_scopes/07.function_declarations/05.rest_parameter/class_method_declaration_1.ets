@@ -41,7 +41,7 @@ function main() {
     let emp: number[] = []
     let tmp: number[] = [1, 2, 3];
     let arr: Array<number> = Array.create<number>(1, 1.0)
-    let roo: readonly number[] = [1, 2, 3]
+    let roo = [1, 2, 3] as readonly number[]
 
     let rc = new RestClass
 
