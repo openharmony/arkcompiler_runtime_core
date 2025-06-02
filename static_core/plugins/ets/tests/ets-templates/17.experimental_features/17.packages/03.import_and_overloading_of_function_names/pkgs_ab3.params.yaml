@@ -24,7 +24,7 @@ cases:
     - arg1: 'a2, a1, a2'
       arg2: 'a2, a1, a1'
       decl: |-
-          let a1: FixedArray<int> = [1, 2, 3]
+          let a1: FixedArray<Int> = [1, 2, 3]
           let a2: FixedArray<Int> = [new Int(), new Int(1)]
 
     # 3
