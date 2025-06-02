@@ -266,9 +266,9 @@ export class Math {
     /**
      * Rounding-up argument value to the closest integral power of 2
      * Thus, Math.ceilPow2(n) is the least power of 2 that is >= n
-     * 
+     *
      * @param n 32-bit integer
-     * 
+     *
      * @returns Argument value rounded-up to the closest integral power of 2
      * @example
      * ```
@@ -654,7 +654,7 @@ export class Math {
         if (isNaN(x)) {
             return x;
         }
-        return sign(x) as double as number;
+        return sign(x).toDouble();
     }
 
     /**

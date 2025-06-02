@@ -84,7 +84,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as int
      */
     public override toByte(): byte {
-        return Int.toByte(this.value);
+        return this.value.toByte();
     }
 
     /**
@@ -93,7 +93,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as short
      */
     public override toShort(): short {
-        return Int.toShort(this.value);
+        return this.value.toShort();
     }
 
     /**
@@ -111,7 +111,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as long
      */
     public override toLong(): long {
-        return Int.toLong(this.value);
+        return this.value.toLong();
     }
 
     /**
@@ -129,7 +129,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as double
      */
     public override toDouble(): double {
-        return Int.toDouble(this.value);
+        return this.value.toDouble();
     }
 
     /**
@@ -138,7 +138,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as char
      */
     public toChar(): char {
-        return Int.toChar(this.value);
+        return this.value.toChar();
     }
 
     /**
@@ -194,6 +194,17 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns casted value
      */
     public static native toChar(value: int): char;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toInt(value: int): int {
+        return value;
+    }
 
     /**
      * Compares this instance to other Int object
@@ -349,7 +360,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-                return Int.valueOf(num as int)
+                return Int.valueOf(Double.toInt(num))
             }
         }
         throw new JSONTypeError("Cannot create Int from JSON", new ErrorOptions(json as Object))

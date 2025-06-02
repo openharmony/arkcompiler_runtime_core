@@ -81,7 +81,7 @@ export class Object {
      * @returns an array of strings representing the given record's property names
      */
     public static keys(rec: Record<PropertyKey, NullishType>): string[] {
-        const keys: string[] = new string[rec.size as int]
+        const keys: string[] = new string[rec.size.toInt()]
 
         let i = 0
         for (const key of rec.keys()) {
@@ -154,7 +154,7 @@ export class Object {
             if (len == 0) {
                 return new string[0]
             }
-            let res: string[] = new string[len as int]
+            let res: string[] = new string[len.toInt()]
             for (let i = 0; i < len; i++) {
                 // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
                 res[i] = new Int(i).toString()
@@ -177,7 +177,7 @@ export class Object {
     }
 
     public static values(rec: Record<PropertyKey, NullishType>): NullishType[] {
-        const vals: NullishType[] = new NullishType[rec.size as int]
+        const vals: NullishType[] = new NullishType[rec.size.toInt()]
 
         let i = 0
         for (let val of rec.values()) {
@@ -238,7 +238,7 @@ export class Object {
             if (len == 0) {
                 return new NullishType[0]
             }
-            let res: NullishType[] = new NullishType[len as int]
+            let res: NullishType[] = new NullishType[len.toInt()]
             for (let i = 0; i < len; i++) {
                 res[i] = av.getElement(i).getData()
             }
@@ -267,7 +267,7 @@ export class Object {
     * @returns array representation of key/value
     */
     public static entries(rec: Record<PropertyKey, NullishType>): NullishEntryType[] {
-        const entries: NullishEntryType[] = new NullishEntryType[rec.size as int]
+        const entries: NullishEntryType[] = new NullishEntryType[rec.size.toInt()]
 
         let i = 0
         for (const entry of rec.entries()) {
@@ -327,7 +327,7 @@ export class Object {
             if (len == 0) {
                 return new NullishEntryType[0]
             }
-            let res: NullishEntryType[] = new NullishEntryType[len as int]
+            let res: NullishEntryType[] = new NullishEntryType[len.toInt()]
             for (let i = 0; i < len; i++) {
                 res[i] = [new Int(i).toString(), av.getElement(i).getData()] as EntryType
             }
@@ -428,14 +428,14 @@ export class Object {
         if ((this) instanceof String) {
             const sv = this as String
             const len = sv.getLength()
-            const idx = index as long
+            const idx = index.toLong()
             return (0 <= idx && idx < len)
         }
         const t = Type.of(this)
         if (t instanceof ArrayType) {
             const av = Value.of(this) as ArrayValue
             const len = av.getLength()
-            const idx = index as long
+            const idx = index.toLong()
             return (0 <= idx && idx < len)
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
@@ -492,7 +492,7 @@ export class Object {
         while (!entriesIterResult.done) {
             const entry: [PropertyKey, T] | undefined = entriesIterResult.value
             if (entry != undefined) {
-                result[entry[0]] = entry[1]
+                result[entry[0] as PropertyKey] = entry[1] as T
             }
 
             entriesIterResult = entriesIter.next()
@@ -514,7 +514,7 @@ export class Object {
         for (const s of source) {
             const entries = Object.entries(s)
             for (const e of entries) {
-                target.set(e![0], e![1])
+                target.set(e![0] as PropertyKey, e![1] as NullishType)
             }
         }
         return target

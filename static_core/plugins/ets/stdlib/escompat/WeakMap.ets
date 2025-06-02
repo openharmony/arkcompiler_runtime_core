@@ -63,7 +63,7 @@ export final class WeakMap<K extends Object, V> {
         this(null)
 
         iteratorForEach<[K, V]>(entries.$_iterator(), (entry: [K, V]) => {
-            this.set(entry[WeakMap.KEY], entry[WeakMap.VAL])
+            this.set(entry[0] as K, entry[1] as V)
         })
     }
 
