@@ -563,9 +563,6 @@
 #23764 Constructor body doesn't cause CTE
 09.classes/09.constructor_declaration/02.constructor_body/this_argument_neg.ets
 
-#24685
-10.interfaces/03.interface_body/issue24865.ets
-
 #16840
 10.interfaces/04.interface_members/methods_overriding.ets
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
