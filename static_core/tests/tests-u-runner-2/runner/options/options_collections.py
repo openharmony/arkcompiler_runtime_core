@@ -37,15 +37,16 @@ class CollectionsOptions(IOptions):
     __GENERATOR_OPTIONS = "generator-options"
     __EXCLUDE = "exclude"
 
-    def __init__(self, name: str, args: dict[str, Any], parent: IOptions):
+    def __init__(self, name: str, args: dict[str, Any], parent: IOptions): # type: ignore[explicit-any]
         super().__init__(None)
         self.__name = name
         self._parent: IOptions = parent
-        self.__args: dict[str, Any] = args
+        self.__args: dict[str, Any] = args  # type: ignore[explicit-any]
         self.__test_root = self.__get_arg(self.__TEST_ROOT)
         self.__list_root = self.__get_arg(self.__LIST_ROOT)
         self.__exclude: list[str] = args[self.__EXCLUDE] if args and self.__EXCLUDE in args else []
-        self.__parameters: dict[str, Any] = args[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
+        self.__parameters: dict[str, Any] = ( # type: ignore[explicit-any]
+            args)[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
         self.__expand_macros_in_parameters()
 
     def __str__(self) -> str:
@@ -81,13 +82,13 @@ class CollectionsOptions(IOptions):
         return self.__exclude
 
     @cached_property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, Any]: # type: ignore[explicit-any]
         return self.__parameters
 
-    def get_parameter(self, key: str, default: Any | None = None) -> Any | None:
+    def get_parameter(self, key: str, default: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
-    def __get_from_args(self, key: str, default_value: Any | None = None) -> Any | None:
+    def __get_from_args(self, key: str, default_value: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__args[key] if self.__args and key in self.__args else default_value
 
     def __get_arg(self, prop_name_minused: str) -> str:

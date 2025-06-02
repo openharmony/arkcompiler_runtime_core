@@ -112,7 +112,7 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     return failed_tests
 
 
-def load_config(args: dict[str, Any]) -> Log:
+def load_config(args: dict[str, Any]) -> Log: # type: ignore[explicit-any]
     runner_verbose = "runner.verbose"
     test_suite_const = "test-suite"
 

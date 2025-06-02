@@ -27,7 +27,7 @@ class TimeReportOptions(IOptions):
     __TIME_REPORT = "enable-time-report"
     __TIME_EDGES = "time-edges"
 
-    def __init__(self, args: dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(args)
         self.__parameters = args
 

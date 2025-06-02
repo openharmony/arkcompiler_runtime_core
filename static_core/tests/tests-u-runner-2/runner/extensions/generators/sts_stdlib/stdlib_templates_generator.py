@@ -17,7 +17,6 @@
 
 import os
 from pathlib import Path
-from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError, select_autoescape
 
@@ -85,7 +84,7 @@ class StdlibTemplatesGenerator(IGenerator):
                 generated_test_list.append(str(output_filepath))
         return generated_test_list
 
-    def __render_template(self, filepath: str, params: Any = None) -> str:
+    def __render_template(self, filepath: str, params: dict[str, list] | None = None) -> str:
         """
         Renders a single template and returns result as string
         """

@@ -28,7 +28,7 @@ class CoverageOptions(IOptions):
     __LLVM_PROFDATA_OUT_PATH = "profdata-files-dir"
     __LLVM_COV_HTML_OUT_PATH = "coverage-html-report-dir"
 
-    def __init__(self, args: dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(args)
         self.__parameters = args
 

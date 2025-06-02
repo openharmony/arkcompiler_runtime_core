@@ -17,7 +17,7 @@
 import re
 from functools import cached_property
 from os import path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.logger import Log
@@ -41,7 +41,7 @@ class WorkflowOptions(IOptions):
     __IMPORTS = "imports"
     __TYPE = "type"
 
-    def __init__(self, cfg_content: dict[str, Any], parent_test_suite: TestSuiteOptions,
+    def __init__(self, cfg_content: dict[str, Any], parent_test_suite: TestSuiteOptions,  # type: ignore[explicit-any]
                  *, parent_workflow: Optional['WorkflowOptions'] = None) -> None:
         super().__init__(None)
         self._parent = parent_test_suite if parent_workflow is None else parent_workflow
@@ -92,7 +92,7 @@ class WorkflowOptions(IOptions):
         return self.__steps
 
     @cached_property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, Any]:   # type: ignore[explicit-any]
         return self.__parameters
 
     def get_command_line(self) -> str:
@@ -102,7 +102,7 @@ class WorkflowOptions(IOptions):
 
         return options_str
 
-    def get_parameter(self, key: str, default: Any | None = None) -> Any | None:
+    def get_parameter(self, key: str, default: Any | None = None) -> Any | None: # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
     def check_binary_artifacts(self) -> None:
@@ -132,7 +132,7 @@ class WorkflowOptions(IOptions):
             return self.__expand_macro_for_list(value_in_workflow)
         return value_in_workflow
 
-    def __prepare_imported_configs(self, imported_configs: dict[str, Any]) -> None:
+    def __prepare_imported_configs(self, imported_configs: dict[str, dict[str, str]]) -> None:
         for config_name, config_content in imported_configs.items():
             config_name = str(path.join(get_config_workflow_folder(), f"{config_name}.yaml"))
             args = {}
@@ -140,7 +140,7 @@ class WorkflowOptions(IOptions):
                 args.update(self.__prepare_imported_config(param, param_value))
             self.__load_imported_config(config_name, args)
 
-    def __prepare_imported_config(self, param: str, param_value: Any) -> dict[str, Any]:
+    def __prepare_imported_config(self, param: str, param_value: Any) -> dict[str, Any]:  # type: ignore[explicit-any]
         args = {}
         if isinstance(param_value, str) and param_value.find(self.__PARAMETERS) >= 0:
             param_value = param_value.replace(f"${{{self.__PARAMETERS}.", "").replace("}", "")
@@ -160,9 +160,10 @@ class WorkflowOptions(IOptions):
                     result_list.append(sub_item)
         return result_list
 
-    def __load_imported_config(self, cfg_path: str, actual_params: dict[str, Any]) -> None:
+    def __load_imported_config(self, cfg_path: str,         # type: ignore[explicit-any]
+                               actual_params: dict[str, Any]) -> None:
         cfg_content = load_config(str(cfg_path))
-        params = cfg_content.get(self.__PARAMETERS, {})
+        params = cast(dict, cfg_content.get(self.__PARAMETERS, {}))
         for param, _ in params.items():
             if param in actual_params:
                 params[param] = actual_params[param]
@@ -175,14 +176,14 @@ class WorkflowOptions(IOptions):
             if param_name not in self.__parameters:
                 self.__parameters[param_name] = param_value
 
-    def __load_steps(self, steps: dict[str, Any]) -> None:
+    def __load_steps(self, steps: dict[str, dict]) -> None:
         for step_name, step_content in steps.items():
             if step_name == self.__IMPORTS:
                 self.__prepare_imported_configs(step_content)
             else:
                 self.__load_step(step_name, step_content)
 
-    def __load_step(self, step_name: str, step_content: dict[str, Any]) -> None:
+    def __load_step(self, step_name: str, step_content: dict[str, str | list]) -> None:
         _LOGGER.all(f"Going to load step '{step_name}'")
         for (step_item, step_value) in step_content.items():
             if isinstance(step_value, str):

@@ -17,7 +17,6 @@
 
 import json
 from json import JSONDecodeError, JSONDecoder
-from typing import Any
 
 from runner import common_exceptions, utils
 from runner.extensions.validators.astchecker.util_astchecker import UtilASTChecker
@@ -70,7 +69,7 @@ class AstCheckerValidator(BaseValidator):
     def es2panda_result_validator(test: object, step_name: str, actual_output: str, _2: str,
                                   return_code: int) -> bool:
         error = ""
-        dump: dict[str, Any] = {}
+        dump: dict[str, str | list | dict] = {}
         if not isinstance(test, TestStandardFlow):
             raise common_exceptions.UnknownException(
                 "AstCheckerValidator works only with tests of TestStandardFlow inherits. "

@@ -29,7 +29,7 @@ class ETSOptions(IOptions):
     __COMPARE_FILES_ITERATIONS = "compare-files-iterations"
     __DEFAULT_COMPARE_FILES_ITERATIONS = 2
 
-    def __init__(self, parameters: dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]): # type: ignore[explicit-any]
         super().__init__(parameters)
         self.__parameters = parameters
 

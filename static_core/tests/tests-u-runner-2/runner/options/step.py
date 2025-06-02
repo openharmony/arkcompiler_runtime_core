@@ -28,7 +28,7 @@ from runner.utils import to_bool
 
 _LOGGER = Log.get_logger(__file__)
 
-PropType = str | int | bool | list[str] | dict[str, Any] | BaseEnum
+PropType = str | int | bool | list[str] | dict[str, Any] | BaseEnum  # type: ignore[explicit-any]
 
 
 class StepKind(BaseEnum):
@@ -44,7 +44,7 @@ class Step(IOptions):
     name: str
     timeout: int
     args: list[str]
-    env: dict[str, Any]
+    env: dict[str, str]
     step_kind: StepKind
     enabled: bool = True
     executable_path: Path | None = None
@@ -57,7 +57,7 @@ class Step(IOptions):
     __INDENT_ARG = __INDENT_STEP * 2
     __INDENT_SUB_ARG = __INDENT_STEP * 3
 
-    def __init__(self, name: str, step_body: dict[str, Any]):
+    def __init__(self, name: str, step_body: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__()
         self.name = name
         self.executable_path = self.__get_path_property(step_body, 'executable-path')
@@ -86,7 +86,8 @@ class Step(IOptions):
         return "\n".join(result)
 
     @staticmethod
-    def __get_int_property(step_body: dict[str, Any], name: str, default: int | None = None) -> int:
+    def __get_int_property(step_body: dict[str, Any],   # type: ignore[explicit-any]
+                           name: str, default: int | None = None) -> int:
         value = Step.__get_property(step_body, name, default)
         try:
             return int(value)
@@ -94,7 +95,8 @@ class Step(IOptions):
             return False
 
     @staticmethod
-    def __get_bool_property(step_body: dict[str, Any], name: str, default: bool | None = None) -> bool:
+    def __get_bool_property(step_body: dict[str, Any],  # type: ignore[explicit-any]
+                            name: str, default: bool | None = None) -> bool:
         value = Step.__get_property(step_body, name, default)
         try:
             return to_bool(value)
@@ -102,7 +104,8 @@ class Step(IOptions):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'") from exc
 
     @staticmethod
-    def __get_list_property(step_body: dict[str, Any], name: str, default: list[str] | None = None) -> list[str]:
+    def __get_list_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: list[str] | None = None) -> list[str]:
         value = Step.__get_property(step_body, name, default)
         if not isinstance(value, list):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
@@ -110,16 +113,17 @@ class Step(IOptions):
         return cast(list[str], value)
 
     @staticmethod
-    def __get_dict_property(step_body: dict[str, Any], name: str, default: dict[str, Any] | None = None) \
-            -> dict[str, Any]:
+    def __get_dict_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: dict[str, Any] | None = None) -> dict[str, str]:
         value = Step.__get_property(step_body, name, default)
         if not isinstance(value, dict):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
                                                       "Expected dict.")
-        return cast(dict[str, Any], value)
+        return cast(dict[str, str], value)
 
     @staticmethod
-    def __get_str_property(step_body: dict[str, Any], name: str, default: str | None = None) -> str:
+    def __get_str_property(step_body: dict[str, Any], name: str,     # type: ignore[explicit-any]
+                           default: str | None = None) -> str:
         value = Step.__get_property(step_body, name, default)
         if isinstance(value, (dict | list)):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
@@ -127,7 +131,7 @@ class Step(IOptions):
         return str(value)
 
     @staticmethod
-    def __get_path_property(step_body: dict[str, Any], name: str) -> Path | None:
+    def __get_path_property(step_body: dict[str, Any], name: str) -> Path | None:  # type: ignore[explicit-any]
         value = Step.__get_str_property(step_body, name, "")
         if value == "":
             return None
@@ -137,8 +141,8 @@ class Step(IOptions):
         return value_path
 
     @staticmethod
-    def __get_kind_property(step_body: dict[str, Any], name: str, default: StepKind | None = None) \
-            -> StepKind:
+    def __get_kind_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: StepKind | None = None) -> StepKind:
         value = Step.__get_property(step_body, name, default)
         try:
             if isinstance(value, StepKind):
@@ -149,7 +153,7 @@ class Step(IOptions):
                                                       f"Expected one of {StepKind.values()}.") from exc
 
     @staticmethod
-    def __get_property(step_body: dict[str, Any],
+    def __get_property(step_body: dict[str, Any],  # type: ignore[explicit-any]
                        name: str,
                        default: PropType | None = None) -> \
             Any:

@@ -31,7 +31,7 @@ _LOGGER = Log.get_logger(__file__)
 class Config(IOptions):
     __CONFIG_TYPE = 'type'
 
-    def __init__(self, args: dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):       # type: ignore[explicit-any]
         super().__init__(None)
         CliArgsWrapper.setup(args)
         self.general = GeneralOptions(args, self)

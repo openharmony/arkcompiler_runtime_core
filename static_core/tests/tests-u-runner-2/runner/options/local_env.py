@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from typing import Any, Optional
+from typing import Optional
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
@@ -27,7 +27,7 @@ class LocalEnv:
     __instance: Optional['LocalEnv'] = None
 
     def __init__(self) -> None:
-        self.__env: dict[str, Any] = {}
+        self.__env: dict[str, str] = {}
 
     @staticmethod
     def get() -> 'LocalEnv':

@@ -75,12 +75,12 @@ class Tags:
 
 
 @dataclass
-class TestMetadata:
+class TestMetadata:     # type: ignore[explicit-any]
     tags: Tags = field(default_factory=Tags)
     desc: str | None = None
     files: list[str] | None = None
     assertion: str | None = None
-    params: Any | None = None
+    params: Any | None = None   # type: ignore[explicit-any]
     name: str | None = None
     package: str | None = None
     ark_options: list[str] = field(default_factory=list)
@@ -116,7 +116,7 @@ class TestMetadata:
             return cls.create_empty_metadata(path)
 
     @classmethod
-    def create_filled_metadata(cls, metadata: dict[str, Any], path: Path) -> 'TestMetadata':
+    def create_filled_metadata(cls, metadata: dict[str, Any], path: Path) -> 'TestMetadata':# type: ignore[explicit-any]
         metadata['tags'] = Tags(metadata.get('tags'))
         if 'assert' in metadata:
             metadata['assertion'] = metadata.get('assert')

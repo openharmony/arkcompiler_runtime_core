@@ -23,8 +23,8 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class CliArgsWrapper:
-    args: dict[str, Any] | None = None
+    args: dict[str, Any] | None = None  # type: ignore[explicit-any]
 
     @staticmethod
-    def setup(args: dict[str, Any]) -> None:
+    def setup(args: dict[str, Any]) -> None:  # type: ignore[explicit-any]
         CliArgsWrapper.args = args

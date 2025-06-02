@@ -47,7 +47,7 @@ if LLVM_COV_VERSION is not None:
 
 class LinuxCommands:
     @staticmethod
-    def _popen(**kwargs: Any) -> Any:
+    def _popen(**kwargs: Any) -> Any:   # type: ignore[explicit-any]
         if sys.version_info.major == 3 and sys.version_info.minor >= 6:
             return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
         return subprocess.Popen(**kwargs)

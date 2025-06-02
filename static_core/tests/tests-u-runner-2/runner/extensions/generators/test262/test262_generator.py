@@ -78,7 +78,7 @@ class Test262Generator(IGenerator):
             output.write(out_str)
 
     @staticmethod
-    def process_descriptor(descriptor: Descriptor) -> dict[str, Any]:
+    def process_descriptor(descriptor: Descriptor) -> dict[str, str | list]:
         desc = descriptor.parse_descriptor()
 
         includes = []
@@ -102,7 +102,8 @@ class Test262Generator(IGenerator):
         }
 
     @staticmethod
-    def validate_parse_result(return_code: int, _: str, desc: dict[str, Any], out: str) -> tuple[bool, bool]:
+    def validate_parse_result(return_code: int, _: str, desc: dict[str, Any],   # type: ignore[explicit-any]
+                              out: str) -> tuple[bool, bool]:
         is_negative = desc['negative_phase'] == 'parse'
 
         if return_code == 0:  # passed
@@ -149,7 +150,8 @@ class Test262Generator(IGenerator):
             makedirs(path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file, harness, test262_path)
 
-    def validate_runtime_result(self, return_code: int, std_err: str, desc: dict[str, Any], out: str) -> bool:
+    def validate_runtime_result(self, return_code: int, std_err: str,   # type: ignore[explicit-any]
+                                desc: dict[str, Any], out: str) -> bool:
         is_negative = (desc['negative_phase'] == 'runtime') or \
                       (desc['negative_phase'] == 'resolution')
 

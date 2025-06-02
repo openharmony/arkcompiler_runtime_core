@@ -17,7 +17,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from runner.code_coverage.coverage import LlvmCov
 from runner.options.config import Config
@@ -37,8 +36,6 @@ class TestEnv:
     work_dir: WorkDir
 
     coverage: LlvmCov | None = None
-
-    util: Any = None
 
 
 @dataclass(frozen=True)

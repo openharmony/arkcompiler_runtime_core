@@ -42,14 +42,14 @@ def load_params(dirpath: Path) -> Params:
         if not name_without_ext.startswith(LIST_PREFIX):
             raise InvalidFileFormatException(message="Lists of parameters must start with 'list.'", filepath=filepath)
         listname = name_without_ext[len(LIST_PREFIX):]
-        params: list[dict[str, Any]] = parse_yaml(filepath)
+        params: list[dict[str, Any]] = parse_yaml(filepath) # type: ignore[explicit-any]
         if not isinstance(params, list):
             raise InvalidFileFormatException(message="Parameters list must be YAML array", filepath=filepath)
         result[listname] = params
     return result
 
 
-def parse_yaml(path: str) -> Any:
+def parse_yaml(path: str) -> Any:       # type: ignore[explicit-any]
     """
     Parses a single YAML list of parameters
     """

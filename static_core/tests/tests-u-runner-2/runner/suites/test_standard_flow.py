@@ -294,7 +294,7 @@ class TestStandardFlow(Test):
         if step.env:
             cmd_env = deepcopy(self.test_env.cmd_env)
             for env_item in step.env:
-                env_value = step.env[env_item]
+                env_value: str | list[str] = step.env[env_item]
                 if isinstance(env_value, list):
                     cmd_env[env_item] = "".join(env_value)
                 else:

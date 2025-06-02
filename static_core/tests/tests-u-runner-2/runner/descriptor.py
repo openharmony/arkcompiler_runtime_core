@@ -45,9 +45,9 @@ class Descriptor:
         header_comment = self.header.search(self.content)
         return header_comment.group(0) if header_comment else ""
 
-    def parse_descriptor(self) -> dict[str, Any]:
+    def parse_descriptor(self) -> dict[str, Any]:   # type: ignore[explicit-any]
         header = self.get_header()
-        result: dict[str, Any] = {}
+        result: dict[str, Any] = {}     # type: ignore[explicit-any]
 
         if len(header) == 0:
             return result
@@ -80,5 +80,5 @@ class Descriptor:
 
         return result
 
-    def get_descriptor(self) -> dict[str, Any]:
+    def get_descriptor(self) -> dict[str, Any]:     # type: ignore[explicit-any]
         return self.parse_descriptor()

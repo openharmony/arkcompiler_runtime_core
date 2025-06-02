@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from os import path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.params import TestEnv, TestReport
@@ -26,6 +26,9 @@ from runner.enum_types.verbose_format import VerboseFilter
 from runner.logger import Log
 from runner.reports.report_format import ReportFormat
 from runner.utils import write_2_file
+
+if TYPE_CHECKING:
+    from runner.runner_base import Test
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -37,7 +40,7 @@ class ReportGenerator:
         self.__repeat = repeat
         self.__generate_for_passed = test_env.config.general.verbose_filter == VerboseFilter.ALL
 
-    def generate_reports(self, test_result: Any) -> dict[ReportFormat, str]:
+    def generate_reports(self, test_result: 'Test') -> dict[ReportFormat, str]:
         if test_result.passed and not self.__generate_for_passed:
             return {}
 
@@ -90,7 +93,7 @@ def convert_to_array(output: str) -> list[str]:
 
 
 class Report(ABC):
-    def __init__(self, test: Any) -> None:
+    def __init__(self, test: 'Test') -> None:
         self.test = test
 
     @abstractmethod
@@ -117,7 +120,7 @@ class HtmlReport(Report):
             report = file_pointer.read()
 
         report = report.replace(REPORT_TITLE, self.test.test_id)
-        report = report.replace(REPORT_PATH, self.test.path)
+        report = report.replace(REPORT_PATH, str(self.test.path))
         if self.test.passed:
             report = report.replace(REPORT_STATUS_CLASS, STATUS_PASSED_CLASS)
             report = report.replace(REPORT_STATUS, STATUS_PASSED)
@@ -191,7 +194,7 @@ class MdReport(Report):
             report = file_pointer.read()
 
         report = report.replace(REPORT_TITLE, self.test.test_id)
-        report = report.replace(REPORT_PATH, self.test.path)
+        report = report.replace(REPORT_PATH, str(self.test.path))
         if self.test.passed:
             report = report.replace(REPORT_STATUS_CLASS, STATUS_PASSED_CLASS)
             report = report.replace(REPORT_STATUS, STATUS_PASSED)
