@@ -16,6 +16,9 @@
 package std.core;
 // Note: This file initialize all the `const` property that non-immediately initialized(spec-issue 217).
 static {
+    // 5 lower bits stores kind's id
+    TypeKindMask = ((1 << 6) - 1).toByte();
+    
     ObjectType = Type.of(new Object()) as ClassType;
     console = new Console();
     coroutine = new Coroutine();

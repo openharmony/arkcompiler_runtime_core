@@ -72,11 +72,11 @@ export final class JSRuntime {
     }
 
     public static newJSValueInt(value: int): JSValue {
-        return JSRuntime.newJSValueDouble(value as double);
+        return JSRuntime.newJSValueDouble(value.toDouble());
     }
 
     public static newJSValueLong(value: long): JSValue {
-        return JSRuntime.newJSValueDouble(value as double);
+        return JSRuntime.newJSValueDouble(value.toDouble());
     }
 
     public static newJSValueFloat(value: float): JSValue {
@@ -131,27 +131,27 @@ export final class JSRuntime {
     }
 
     public static getPropertyByte(object: JSValue, name: String): byte {
-        return JSRuntime.getPropertyInt(object, name) as byte;
+        return (JSRuntime.getPropertyInt(object, name)).toByte();
     }
 
     public static getPropertyChar(object: JSValue, name: String): char {
-        return JSRuntime.getPropertyInt(object, name) as char;
+        return (JSRuntime.getPropertyInt(object, name)).toChar();
     }
 
     public static getPropertyShort(object: JSValue, name: String): short {
-        return JSRuntime.getPropertyInt(object, name) as short;
+        return (JSRuntime.getPropertyInt(object, name)).toShort();
     }
 
     public static getPropertyInt(object: JSValue, name: String): int {
-        return JSRuntime.getPropertyDouble(object, name) as int;
+        return (JSRuntime.getPropertyDouble(object, name)).toInt();
     }
 
     public static getPropertyLong(object: JSValue, name: String): long {
-        return JSRuntime.getPropertyDouble(object, name) as long;
+        return (JSRuntime.getPropertyDouble(object, name)).toLong();
     }
 
     public static getPropertyFloat(object: JSValue, name: String): float {
-        return JSRuntime.getPropertyDouble(object, name) as float;
+        return (JSRuntime.getPropertyDouble(object, name)).toFloat();
     }
 
     public static getPropertyDouble(object: JSValue, name: String): double {
@@ -190,11 +190,11 @@ export final class JSRuntime {
     }
 
     public static setPropertyInt(object: JSValue, name: String, value: int): void {
-        JSRuntime.setPropertyDouble(object, name, value as double);
+        JSRuntime.setPropertyDouble(object, name, value.toDouble());
     }
 
     public static setPropertyLong(object: JSValue, name: String, value: long): void {
-        JSRuntime.setPropertyDouble(object, name, value as double);
+        JSRuntime.setPropertyDouble(object, name, value.toDouble());
     }
 
     public static setPropertyFloat(object: JSValue, name: String, value: float): void {
@@ -290,27 +290,27 @@ export final class JSRuntime {
     }
 
     public static getElementByte(object: JSValue, index: int): byte {
-        return JSRuntime.getElementInt(object, index) as byte;
+        return (JSRuntime.getElementInt(object, index)).toByte();
     }
 
     public static getElementChar(object: JSValue, index: int): char {
-        return JSRuntime.getElementInt(object, index) as char;
+        return (JSRuntime.getElementInt(object, index)).toChar();
     }
 
     public static getElementShort(object: JSValue, index: int): short {
-        return JSRuntime.getElementInt(object, index) as short;
+        return (JSRuntime.getElementInt(object, index)).toShort();
     }
 
     public static getElementInt(object: JSValue, index: int): int {
-        return JSRuntime.getElementDouble(object, index) as int;
+        return (JSRuntime.getElementDouble(object, index)).toInt();
     }
 
     public static getElementLong(object: JSValue, index: int): long {
-        return JSRuntime.getElementDouble(object, index) as long;
+        return (JSRuntime.getElementDouble(object, index)).toLong();
     }
 
     public static getElementFloat(object: JSValue, index: int): float {
-        return JSRuntime.getElementDouble(object, index) as float;
+        return (JSRuntime.getElementDouble(object, index)).toFloat();
     }
 
     public static getElementDouble(object: JSValue, index: int): double {
@@ -345,11 +345,11 @@ export final class JSRuntime {
     }
 
     public static setElementInt(object: JSValue, index: int, value: int): void {
-        JSRuntime.setElementDouble(object, index, value as double);
+        JSRuntime.setElementDouble(object, index, value.toDouble());
     }
 
     public static setElementLong(object: JSValue, index: int, value: long): void {
-        JSRuntime.setElementDouble(object, index, value as double);
+        JSRuntime.setElementDouble(object, index, value.toDouble());
     }
 
     public static setElementFloat(object: JSValue, index: int, value: float): void {

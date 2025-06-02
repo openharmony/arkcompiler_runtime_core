@@ -75,7 +75,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      * @returns resulting string
      */
     public $_get(index: number): String {
-        return this.$_get(index as int);
+        return this.$_get(Double.toInt(index));
     }
 
     /**
@@ -97,7 +97,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      * @param val
      */
     public $_set(index: number, val: String) {
-        return this.$_set(index as int, val);
+        return this.$_set(Double.toInt(index), val);
     }
 
     get length(): int {
@@ -200,7 +200,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
     }
 
     constructor(index: number, input: String, result: FixedArray<String>, indices: FixedArray<FixedArray<number>>) {
-        this(index as int, input, result, indices)
+        this(index.toInt(), input, result, indices)
     }
 }
 
@@ -284,7 +284,7 @@ export class RegExp extends Object {
     private static $9_: String = ""
 
     private groupNames: String[] = []
-    private buffer: int[] = []
+    private buffer: int[] = new Array<int>()
 
     // NOTE(shumilov-petr): Removing the following setter leads to unspecified behaviour of es2panda
     // The negative test '02.lexical_elements/07.keywords/types_n_12.ets' gets failed if remove this setter
@@ -589,7 +589,7 @@ export class RegExp extends Object {
             let nCaptures = result.length;
             let matched = result.$_get(0);
             let matchLength = matched.getLength();
-            let position = max(min(result.index, lengthS), 0) as int;
+            let position = max(min(result.index, lengthS), 0).toInt();
             let captures = new UndefinableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
@@ -638,14 +638,14 @@ export class RegExp extends Object {
             let nCaptures = result.length;
             let matched = result.$_get(0);
             let matchLength = matched.getLength();
-            let position = max(min(result.index, lengthS), 0) as int;
+            let position = (max(min(result.index, lengthS), 0)).toInt();
             let args = new UndefinableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
                 args.pushBack(capN)
             }
             let namedCaptures: NullishType = /*result.groups*/ undefined;
-            args.pushBack(new Double(position as double));
+            args.pushBack(position.toDouble());
             args.pushBack(str)
             if (namedCaptures != undefined) {
                 args.pushBack(namedCaptures)
@@ -673,7 +673,7 @@ export class RegExp extends Object {
         } else if (limit == 0) {
             return new String[0]
         } else {
-            lim = limit.unboxed() as long
+            lim = limit.toLong()
         }
         let size = str.getLength()
         if (size == 0) {
@@ -691,7 +691,7 @@ export class RegExp extends Object {
             if (z == null) {
                 lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
             } else {
-                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex as int : size
+                let separatorRight = (splitter.lastIndex < size) ? splitter.lastIndex.toInt() : size
                 if (separatorRight == lastStart) {
                     lastEnd = RegExp.advanceStringIndex(str, lastEnd, unicodeMatching)
                 } else {
@@ -808,7 +808,7 @@ export class RegExp extends Object {
      * @returns new index
      */
     public static advanceStringIndex(s: String, index: number, unicode: boolean): number {
-        return RegExp.advanceStringIndex(s, index as int, unicode)
+        return RegExp.advanceStringIndex(s, index.toInt(), unicode)
     }
 
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {

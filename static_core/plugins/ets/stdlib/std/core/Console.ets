@@ -536,7 +536,7 @@ export final class Console {
             this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
             return
         }
-        const start = Date.now() as long
+        const start = Date.now().toLong()
         this.timers.set(key, start)
     }
 
@@ -554,7 +554,7 @@ export final class Console {
             this.warn(`Timer '${key}' does not exist`)
             return
         }
-        const end = Date.now() as long
+        const end = Date.now().toLong()
         const duration = end - startTime
         this.log("Start: ", startTime, " end:", end, " diff: ", duration)
         this.log(`${key}: ${duration}ms`)
@@ -625,7 +625,7 @@ class DataFrame {
     private static readonly headerIndexRow: string = '| (index) |'
 
     /** Width of the index column based on header */
-    private readonly _indexColumnWidth: int = DataFrame.headerIndexRow.length as int;
+    private readonly _indexColumnWidth: int = Double.toInt(DataFrame.headerIndexRow.length);
 
     /**
      * Creates a new DataFrame with specified columns
@@ -638,7 +638,7 @@ class DataFrame {
         this.columnWidths = new Map<ColumnName, ColumnWidth>();
         for (let column of columns) {
             this.tableModel.set(column, new Array<string>());
-            this.columnWidths.set(column, column.length as int);
+            this.columnWidths.set(column, column.length.toInt());
         }
         this.rowsCount = 0;
     }
@@ -654,7 +654,7 @@ class DataFrame {
             const value = row.get(key) ?? "-";
             this.tableModel.get(key)!.push(value);
             const currentWidth = this.columnWidths.get(key)!;
-            const valueLength = value.length as int;
+            const valueLength = value.length.toInt();
             this.columnWidths.set(key,
                                 currentWidth < valueLength
                                 ? valueLength
@@ -680,8 +680,8 @@ class DataFrame {
     ): string {
         const connLength: int =
             this._indexColumnWidth -
-            (connectorLeft.length as int) -
-            (connectorRight.length as int);
+            connectorLeft.length.toInt() -
+            connectorRight.length.toInt();
         const conn: string = ch.repeat(connLength);
         let border: string = `${connectorLeft}${conn}`;
         for (const col of this.tableModel.keys()) {

@@ -176,7 +176,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             this.buckets = new MapBucket<K, V>[bucketsCount]
 
             entriesBuf.forEach((e: [K, V]) => {
-                this.set(e[Map.ENTRY_KEY], e[Map.ENTRY_VAL])
+                this.set(e[0] as K, e[1] as V)
             })
         } else {
             const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
@@ -185,7 +185,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 if (entries[i] == null) {
                     continue
                 }
-                this.set(entries[i]![Map.ENTRY_KEY], entries[i]![Map.ENTRY_VAL])
+                this.set(entries[i]![0] as K, entries[i]![1] as V)
             }
         }
     }
@@ -212,7 +212,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.buckets = new MapBucket<K, V>[bucketsCount]
 
         entries.forEach((entry: [K, V]) => {
-            this.set(entry[Map.ENTRY_KEY], entry[Map.ENTRY_VAL])
+            this.set(entry[0] as K, entry[1] as V)
         })
     }
 
@@ -226,7 +226,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             if (values[i] == null) {
                 continue
             }
-            this.set(values[i][Map.ENTRY_KEY], values[i][Map.ENTRY_VAL])
+            this.set(values[i][0] as K, values[i][1] as V)
         }
     }
 
@@ -499,7 +499,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 }
 
-export class Record<K extends Numeric | string, V> extends Map<K, V> {
+export class Record<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string>, V> extends Map<K, V> {
     $_get(k : K) : V | undefined {
         return super.get(k)
     }

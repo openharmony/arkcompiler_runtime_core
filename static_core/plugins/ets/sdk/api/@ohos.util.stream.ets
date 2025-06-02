@@ -631,7 +631,7 @@ export namespace stream {
             let buffer: string | null = null;
             if (size > 0 && size <= this.readableLengthInner) {
                 this.readableLengthInner -= size;
-                buffer = this.stringDecoder.write(this.buf.slice(0, size));
+                buffer = this.stringDecoder.write(this.buf.slice(0 as int, size));
                 this.buf = this.buf.slice(size);
                 if (this.doReadFunc !== null && this.listener !== undefined) {
                     this.listener!.emit(ReadableEvent.DATA, buffer);
