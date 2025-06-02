@@ -218,7 +218,10 @@ ark_gen_file("ark_asm_ets_meta_gen_h") {
 }
 
 config("runtime") {
-  include_dirs = [ "$ark_root/plugins/ets/runtime" ]
+  include_dirs = [
+    "$ark_root/plugins/ets/runtime",
+    "$ark_root/../common_interfaces",
+  ]
   configs = [
     "$ark_es2panda_root:libes2panda_public_config",
     "$ark_root/assembler:arkassembler_public_config",

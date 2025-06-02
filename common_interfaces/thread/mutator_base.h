@@ -22,7 +22,7 @@
 
 namespace panda {
 class ThreadHolder;
-}
+}  // namespace panda
 
 namespace panda {
 class Mutator;
@@ -100,14 +100,26 @@ public:
         return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
     }
 
-    inline void IncObserver() { observerCnt_.fetch_add(1); }
+    inline void IncObserver()
+    {
+        observerCnt_.fetch_add(1);
+    }
 
-    inline void DecObserver() { observerCnt_.fetch_sub(1); }
+    inline void DecObserver()
+    {
+        observerCnt_.fetch_sub(1);
+    }
 
     // Return true indicate there are some observer is visitting this mutator
-    inline bool HasObserver() { return observerCnt_.load() != 0; }
+    inline bool HasObserver()
+    {
+        return observerCnt_.load() != 0;
+    }
 
-    inline size_t GetObserverCount() const { return observerCnt_.load(); }
+    inline size_t GetObserverCount() const
+    {
+        return observerCnt_.load();
+    }
 
     // Force current mutator enter saferegion, internal use only.
     __attribute__((always_inline)) inline void DoEnterSaferegion();
@@ -189,6 +201,7 @@ public:
 
     __attribute__((always_inline)) inline bool HasCallbackRequest() const
     {
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         return (callbackRequest_.load(std::memory_order_acquire) != 0);
     }
 
@@ -202,11 +215,14 @@ public:
         callbackRequest_.store(false, std::memory_order_relaxed);
     }
 
-    void SetSafepointStatePtr(uint64_t* slot) { safepointStatePtr_ = slot; }
+    void SetSafepointStatePtr(uint64_t* slot)
+    {
+        safepointStatePtr_ = slot;
+    }
 
     void SetSafepointActive(bool value)
     {
-        uint64_t* statePtr = safepointStatePtr_;
+        uint64_t *statePtr = safepointStatePtr_;
         if (statePtr == nullptr) {
             return;
         }
@@ -260,37 +276,43 @@ public:
         return mutatorPhase_.load(std::memory_order_acquire);
     }
 
-    const void* GetSafepointPage() const
+    const void *GetSafepointPage() const
     {
         return safepointStatePtr_;
     }
 
-    void MutatorBaseLock() { mutatorBaseLock_.lock(); }
+    void MutatorBaseLock()
+    {
+        mutatorBaseLock_.lock();
+    }
 
-    void MutatorBaseUnlock() { mutatorBaseLock_.unlock(); }
+    void MutatorBaseUnlock()
+    {
+        mutatorBaseLock_.unlock();
+    }
 
 private:
     // Indicate the current mutator phase and use which barrier in concurrent gc
     // ATTENTION: THE LAYOUT FOR GCPHASE MUST NOT BE CHANGED!
-    std::atomic<GCPhase> mutatorPhase_ = { GCPhase::GC_PHASE_UNDEF };
+    std::atomic<GCPhase> mutatorPhase_ = {GCPhase::GC_PHASE_UNDEF};
     // in saferegion, it will not access any managed objects and can be visitted by observer
-    std::atomic<uint32_t> inSaferegion_ = { SAFE_REGION_TRUE };
+    std::atomic<uint32_t> inSaferegion_ = {SAFE_REGION_TRUE};
     // Protect observerCnt
     std::mutex observeCntMutex_;
     // Increase when this mutator is observed by some observer
-    std::atomic<size_t> observerCnt_ = { 0 };
+    std::atomic<size_t> observerCnt_ = {0};
 
-    uint64_t* safepointStatePtr_ = nullptr; // state: active or not
+    uint64_t *safepointStatePtr_ = nullptr; // state: active or not
 
     // If set implies this mutator should process suspension requests
-    std::atomic<uint32_t> suspensionFlag_ = { 0 };
-    std::atomic<bool> callbackRequest_ = { false };
+    std::atomic<uint32_t> suspensionFlag_ = {0};
+    std::atomic<bool> callbackRequest_ = {false};
     // Indicate the state of mutator's phase transition
-    std::atomic<GCPhaseTransitionState> transitionState_ = { NO_TRANSITION };
+    std::atomic<GCPhaseTransitionState> transitionState_ = {NO_TRANSITION};
 
     std::mutex mutatorBaseLock_;
 
-    std::atomic<CpuProfileState> cpuProfileState_ = { NO_CPUPROFILE };
+    std::atomic<CpuProfileState> cpuProfileState_ = {NO_CPUPROFILE};
 
     // This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
     void *mutator_ {nullptr};

@@ -24,7 +24,7 @@
 
 namespace panda::ecmascript {
 class JSTaggedValue;
-}
+}  // namespace panda::ecmascript
 
 using JSTaggedValue = panda::ecmascript::JSTaggedValue;
 namespace panda {
@@ -34,7 +34,7 @@ struct BaseNull {};
 
 // The common consensus type between static and dynamic
 using PandaType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
-                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseObject*>;
+                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseObject *>;
 
 // base type for static vm
 using BoxedValue = BaseObject *;

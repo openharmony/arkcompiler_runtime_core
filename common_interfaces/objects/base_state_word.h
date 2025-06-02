@@ -16,7 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 #define COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <cstdint>
 
 namespace panda {
@@ -36,27 +36,27 @@ public:
     static constexpr size_t LANGUAGE_WIDTH = 2;
 
     BaseStateWord() = default;
+    // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init, google-explicit-constructor)
     BaseStateWord(MAddress header) : header_(header) {};
 
-    enum class ForwardState : uint64_t {
-        NORMAL,
-        FORWARDING,
-        FORWARDED,
-        TO_VERSION
-    };
+    enum class ForwardState : uint64_t { NORMAL, FORWARDING, FORWARDED, TO_VERSION };
 
     inline void SetForwarding()
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         state_.forwardState_ = ForwardState::FORWARDING;
     }
 
     inline bool IsForwarding() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.forwardState_ == ForwardState::FORWARDING;
     }
 
     inline bool IsToVersion() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.forwardState_ == ForwardState::TO_VERSION;
     }
 
@@ -65,6 +65,7 @@ public:
         if (current.IsForwarding()) {
             return false;
         }
+        // NOLINTNEXTLINE(modernize-use-auto)
         BaseStateWord newState = BaseStateWord(current.GetHeader());
         newState.SetForwardState(ForwardState::FORWARDING);
         return CompareExchangeHeader(current.GetHeader(), newState.GetHeader());
@@ -74,6 +75,7 @@ public:
     {
         do {
             BaseStateWord current = AtomicGetBaseStateWord();
+            // NOLINTNEXTLINE(modernize-use-auto)
             BaseStateWord newState = BaseStateWord(current.GetHeader());
             newState.SetForwardState(forwardState);
             if (CompareExchangeHeader(current.GetHeader(), newState.GetHeader())) {
@@ -84,19 +86,22 @@ public:
 
     void SetForwardState(ForwardState state)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         state_.forwardState_ = state;
     }
 
     ForwardState GetForwardState() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.forwardState_;
     }
 
 private:
     // Little endian
+    // NOLINTBEGIN(readability-identifier-naming)
     struct State {
-        StateWordType padding_     : PADDING_WIDTH;
-        Language language_         : LANGUAGE_WIDTH;
+        StateWordType padding_ : PADDING_WIDTH;
+        Language language_ : LANGUAGE_WIDTH;
         ForwardState forwardState_ : FORWARD_WIDTH;
     };
 
@@ -104,6 +109,7 @@ private:
         State state_;
         MAddress header_;
     };
+    // NOLINTEND(readability-identifier-naming)
 
     BaseStateWord AtomicGetBaseStateWord() const
     {
@@ -112,19 +118,26 @@ private:
 
     MAddress AtomicGetHeader() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return __atomic_load_n(&header_, __ATOMIC_ACQUIRE);
     }
 
-    MAddress GetHeader() const { return header_; }
+    MAddress GetHeader() const
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return header_;
+    }
 
     bool CompareExchangeHeader(MAddress expected, MAddress newState)
     {
 #if defined(__x86_64__)
         bool success =
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             __atomic_compare_exchange_n(&header_, &expected, newState, true, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
 #else
         // due to "Spurious Failure" of compare_exchange_weak, compare_exchange_strong is chosen.
         bool success =
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             __atomic_compare_exchange_n(&header_, &expected, newState, false, __ATOMIC_SEQ_CST, __ATOMIC_ACQUIRE);
 #endif
         return success;
@@ -132,26 +145,31 @@ private:
 
     inline void SetForwarded()
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         state_.forwardState_ = ForwardState::FORWARDED;
     }
 
     inline bool IsForwarded() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.forwardState_ == ForwardState::FORWARDED;
     }
 
     inline void SetLanguage(Language language)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         state_.language_ = language;
     }
 
     inline bool IsStatic() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.language_ == Language::STATIC;
     }
 
     inline bool IsDynamic() const
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return state_.language_ == Language::DYNAMIC;
     }
 

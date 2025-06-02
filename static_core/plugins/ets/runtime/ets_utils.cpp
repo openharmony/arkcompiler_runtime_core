@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -37,6 +38,61 @@ bool IsEtsGlobalClassName(const std::string &descriptor)
     const bool etsGlobalClassInPackage = endsWithETSGLOBAL && '/' == descriptor[etsGlobalSubstringPos - 1];
 
     return etsGlobalClass || etsGlobalClassInPackage;
+}
+
+EtsObject *GetBoxedValue(EtsCoroutine *coro, Value value, EtsType type)
+{
+    switch (type) {
+        case EtsType::BOOLEAN:
+            return EtsBoxPrimitive<EtsBoolean>::Create(coro, value.GetAs<EtsBoolean>());
+        case EtsType::BYTE:
+            return EtsBoxPrimitive<EtsByte>::Create(coro, value.GetAs<EtsByte>());
+        case EtsType::CHAR:
+            return EtsBoxPrimitive<EtsChar>::Create(coro, value.GetAs<EtsChar>());
+        case EtsType::SHORT:
+            return EtsBoxPrimitive<EtsShort>::Create(coro, value.GetAs<EtsShort>());
+        case EtsType::INT:
+            return EtsBoxPrimitive<EtsInt>::Create(coro, value.GetAs<EtsInt>());
+        case EtsType::LONG:
+            return EtsBoxPrimitive<EtsLong>::Create(coro, value.GetAs<EtsLong>());
+        case EtsType::FLOAT:
+            return EtsBoxPrimitive<EtsFloat>::Create(coro, value.GetAs<EtsFloat>());
+        case EtsType::DOUBLE:
+            return EtsBoxPrimitive<EtsDouble>::Create(coro, value.GetAs<EtsDouble>());
+        default:
+            UNREACHABLE();
+    }
+}
+
+Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj)
+{
+    auto *cls = obj->GetClass();
+    auto ptypes = PlatformTypes(coro);
+    if (cls == ptypes->coreBoolean) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsBoolean> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreDouble) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreInt) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreByte) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsByte> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreShort) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsShort> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreLong) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsLong> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreFloat) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsFloat> *>(obj))->GetValue());
+    }
+    if (cls == ptypes->coreChar) {
+        return Value((reinterpret_cast<EtsBoxPrimitive<EtsChar> *>(obj))->GetValue());
+    }
+    return Value(reinterpret_cast<ObjectHeader *>(obj));
 }
 
 void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)

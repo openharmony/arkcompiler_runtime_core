@@ -42,28 +42,5 @@ public:
     // SetElementByIdx is used to set the value of an element in a dynamic object with the given index.
     virtual bool SetElementByIdx(ThreadHolder *thread, BaseObject *obj, const uint32_t index, JSTaggedValue value) = 0;
 };
-
-// The interface will be implemented in the static runtime to provide the ability to access
-// properties of static objects.
-class StaticObjectAccessorInterface {
-public:
-    // HasProperty is used to check if the static object has a property with the given name.
-    virtual bool HasProperty(ThreadHolder *thread, const BaseObject *obj, const char *name) = 0;
-
-    // GetProperty is used to get the value of a property from a static object with the given name.
-    virtual BoxedValue GetProperty(ThreadHolder *thread, const BaseObject *obj, const char *name) = 0;
-
-    // SetProperty is used to set the value of a property in a static object with the given name.
-    virtual bool SetProperty(ThreadHolder *thread, BaseObject *obj, const char *name, BoxedValue value) = 0;
-
-    // HasElementByIdx is used to check if the static object has an element with the given index.
-    virtual bool HasElementByIdx(ThreadHolder *thread, const BaseObject *obj, const uint32_t index) = 0;
-
-    // GetElementByIdx is used to get the value of an element from a static object with the given index.
-    virtual BoxedValue GetElementByIdx(ThreadHolder *thread, const BaseObject *obj, const uint32_t index) = 0;
-
-    // SetElementByIdx is used to set the value of an element in a static object with the given index.
-    virtual bool SetElementByIdx(ThreadHolder *thread, BaseObject *obj, uint32_t index, const BoxedValue value) = 0;
-};
 }  // namespace panda
 #endif  // COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_H

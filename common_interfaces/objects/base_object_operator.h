@@ -27,6 +27,7 @@
 namespace panda {
 class BaseObject;
 
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class BaseObjectOperatorInterfaces {
 public:
     // Get Object size.
