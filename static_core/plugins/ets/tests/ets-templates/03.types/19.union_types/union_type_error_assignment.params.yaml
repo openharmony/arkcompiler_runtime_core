@@ -183,3 +183,55 @@ cases2:
       }
     check: |-
       let output = unitedSwitch(2);
+
+  - desc: Negative Test, Assigning object literal to union of two structurally identical classes.
+    dec1: |-
+      class UA {
+          name: string = "";
+          age: number = 0;
+      }
+      class UC {
+          name: string = "";
+          age: number = 0;
+      }
+      let val_cte: UA | UC;
+    check: |-
+      val_cte = {name:"aaa", age:10}; // CTE
+
+  - desc: Negative Test, Assigning object literal to union of two structurally identical interfaces.
+    dec1: |-
+      interface IA_neg {
+          id: number;
+          value: string;
+      }
+      interface IB_neg {
+          id: number;
+          value: string;
+      }
+      let val_cte_interface: IA_neg | IB_neg;
+    check: |-
+      val_cte_interface = {id:1, value:"test"}; // CTE
+
+  - desc: N2 - Assigning object literal missing a required property for all interface types.
+    dec1: |-
+      interface N_I1 { req_i1: string; opt_i1?: number; }
+      interface N_I2 { req_i2: boolean; opt_i2?: string; }
+      let val_n2: N_I1 | N_I2;
+    check: |-
+      val_n2 = { opt_i2: "optional" }; // CTE, missing req_i1 or req_i2
+
+  - desc: N3 - Assigning object literal with property type mismatch for a class.
+    dec1: |-
+      class N_C3 { prop_c3: number = 0; }
+      class N_C4 { prop_c4: string = ""; }
+      let val_n3: N_C3 | N_C4;
+    check: |-
+      val_n3 = { prop_c3: "this should be a number" }; // CTE
+
+  - desc: N4 - Assigning object literal with property type mismatch for an interface.
+    dec1: |-
+      interface N_I3 { prop_i3: number; }
+      interface N_I4 { prop_i4: string; }
+      let val_n4: N_I3 | N_I4;
+    check: |-
+      val_n4 = { prop_i4: false }; // CTE, should be string or N_I3 type
