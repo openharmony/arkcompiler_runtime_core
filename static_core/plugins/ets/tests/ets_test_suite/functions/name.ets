@@ -20,7 +20,7 @@ class A {
 
     public lambda = () => 1
 
-    public static staticBar () {}
+    public static staticBar() {}
 }
 
 interface B {
@@ -46,22 +46,22 @@ function main() {
     let b: B = new C()
     let def = true ? () => { } : null
 
-    assertEQ(foo.name, "foo")
-    assertEQ(x.name, "x")
-    assertEQ(a.bar.name, "bar")
-    assertEQ(a.lambda.name, "lambda")
-    assertEQ(A.staticBar.name, "staticBar")
-    assertEQ(b.buzz.name, "buzz")
-    assertEQ(def?.name, "")
+    assertEQ(foo.name, 'foo')
+    assertEQ(x.name, 'x')
+    assertEQ(a.bar.name, 'bar')
+    assertEQ(a.lambda.name, 'lambda')
+    assertEQ(A.staticBar.name, 'staticBar')
+    assertEQ(b.buzz.name, 'buzz')
+    assertEQ(def?.name, '')
 
-    assertEQ(returnFunctionName(foo), "foo")
-    assertEQ(returnFunctionName(x), "x")
-    assertEQ(returnFunctionName(a.bar), "bar")
-    assertEQ(returnFunctionName(a.lambda), "lambda")
-    assertEQ(returnFunctionName(A.staticBar), "staticBar")
-    assertEQ(returnFunctionName(b.buzz), "buzz")
-    assertEQ(returnFunctionName(() => 1), "")
+    assertEQ(returnFunctionName(foo), 'foo')
+    assertEQ(returnFunctionName(x), 'x')
+    assertEQ(returnFunctionName(a.bar), 'bar')
+    assertEQ(returnFunctionName(a.lambda), 'lambda')
+    assertEQ(returnFunctionName(A.staticBar), 'staticBar')
+    assertEQ(returnFunctionName(b.buzz), 'buzz')
+    assertEQ(returnFunctionName(() => 1), '')
     if (def) {
-        assertEQ(returnFunctionName(def), "")
+        assertEQ(returnFunctionName(def), '')
     }
 }
