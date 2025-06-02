@@ -15,6 +15,8 @@
 
 package escompat
 
+import { jsonx } from "std/core"
+
 // initialized in _initializerBlock_.ets
 const BigIntType: Type;
 
@@ -510,6 +512,26 @@ export class JSON {
         }
         s.append('}');
         return s.toString()
+    }
+
+    /**
+      * Converts a JsonElement to a JSON string.
+     * @param elem - The JsonElement to stringify
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElement): string {
+        return stringifyElementRecursively(elem, undefined, undefined, 0)
+    }
+
+    /**
+      * Converts a JsonElement to a JSON string with optional formatting.
+     * @param elem - The JsonElement to stringify
+     * @param replacer - Array of keys to include (currently not implemented)
+     * @param space - String or number of spaces for indentation
+     * @returns The JSON string representation
+     */
+    public static stringifyJsonElement(elem: jsonx.JsonElement, replacer?: (number | string)[], space?: string | number): string {
+        return stringifyElementRecursively(elem, replacer, space, 0)
     }
 
     private static IsBoxedType(typ : Type) : boolean {
@@ -1119,6 +1141,176 @@ class JSONWriter {
         }
     }
 }
+
+/**
+* Internal method to stringify a JsonElement recursively.
+* @param {JsonElement} elem - The JsonElement to stringify
+* @param {(number | string)[] | undefined} replacer - Array of keys to include (currently not implemented)
+* @param {string | number | undefined} space - String or number of spaces for indentation
+* @param {number} depth - Current nesting depth for indentation
+* @returns {string} The JSON string representation
+* @private
+*/
+function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (number | string)[], space?: string | number, depth: number = 0): string {
+    const indentStr = getIndentation(space, depth)
+    const nextIndentStr = getIndentation(space, depth + 1)
+    const hasIndentation = space != undefined && nextIndentStr.length > 0
+
+    switch (elem.jsonType) {
+        case jsonx.JsonType.JsonNull:
+            return "null"
+
+        case jsonx.JsonType.JsonUndefined:
+            return "undefined"
+
+        case jsonx.JsonType.JsonTrue:
+            return "true"
+
+        case jsonx.JsonType.JsonFalse:
+            return "false"
+
+        case jsonx.JsonType.JsonString:
+            return escapeString(elem.asString())
+
+        case jsonx.JsonType.JsonNumber:
+            const intValue = elem.tryAsInteger()
+            if (intValue != undefined) {
+                return intValue.toString()
+            }
+            const doubleValue = elem.tryAsDouble()
+            if (doubleValue != undefined) {
+                return doubleValue.toString()
+            }
+            return "null"
+
+        case jsonx.JsonType.JsonArray:
+            const array = elem.asArray()
+            if (array.length == 0) {
+                return "[]"
+            }
+            let arrayResult = "["
+            if (hasIndentation) {
+                arrayResult += "\n"
+            }
+            for (let i = 0; i < array.length; i++) {
+                if (hasIndentation) {
+                    arrayResult += nextIndentStr
+                }
+                arrayResult += stringifyElementRecursively(array[i], replacer, space, depth + 1)
+                if (i < array.length - 1) {
+                    arrayResult += ","
+                }
+                if (hasIndentation) {
+                    arrayResult += "\n"
+                }
+            }
+            if (hasIndentation) {
+                arrayResult += indentStr
+            }
+            arrayResult += "]"
+            return arrayResult
+
+        case jsonx.JsonType.JsonObject:
+            const it = elem.$_iterator()
+            const entries = Array.from(it)
+            if (entries.length == 0) {
+                return "{}"
+            }
+            let objectResult = "{"
+            if (hasIndentation) {
+                objectResult += "\n"
+            }
+            for (let i = 0; i < entries.length; i++) {
+                const key = entries[i][0]
+                const value = entries[i][1]
+                if (hasIndentation) {
+                    objectResult += nextIndentStr
+                }
+                objectResult += escapeString(key)
+                objectResult += ":"
+                if (hasIndentation) {
+                    objectResult += " "
+                }
+                objectResult += stringifyElementRecursively(value, replacer, space, depth + 1)
+                if (i < entries.length - 1) {
+                    objectResult += ","
+                }
+                if (hasIndentation) {
+                    objectResult += "\n"
+                }
+            }
+            if (hasIndentation) {
+                objectResult += indentStr
+            }
+            objectResult += "}"
+            return objectResult
+
+        default:
+            return "null"
+    }
+}
+
+function escapeString(str: string): string {
+    let result = "\""
+    for (let i = 0; i < str.length; i++) {
+        const ch = str.charAt(i)
+        switch (ch) {
+            case c'\"':
+                result += "\\\""
+                break
+            case c'\\':
+                result += "\\\\"
+                break
+            case c'\b':
+                result += "\\b"
+                break
+            case c'\f':
+                result += "\\f"
+                break
+            case c'\n':
+                result += "\\n"
+                break
+            case c'\r':
+                result += "\\r"
+                break
+            case c'\t':
+                result += "\\t"
+                break
+            default:
+                if (ch < 32) {
+                    let int_value = new Int(ch as int);
+                    result += "\\u" + int_value.toString(16).padStart(4, "0")
+                } else {
+                    result += ch
+                }
+                break
+        }
+    }
+    result += "\""
+    return result
+}
+
+
+function getIndentation(space: string | number | undefined, depth: number): string {
+    if (space == undefined) {
+        return ""
+    }
+    if (space instanceof string)
+    {
+        let unit = space.substring(0, 10)
+        return unit.repeat(depth)
+    }
+    let as_number = space as number
+    let as_int = as_number as int
+    let lower = as_int > 0
+        ? as_int
+        : 0
+    let aligned = lower > 10
+        ? 10
+        : lower
+    return " ".repeat(aligned).repeat(depth)
+}
+
 
 class TypeColor {
     readonly static VISITED : int = 1
