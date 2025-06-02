@@ -87,6 +87,18 @@ export class Decimal {
     public static modulo: number = DEFAULTS_MODULO;
     public static crypto: boolean = false;
 
+    // defined in d.ets, See "@arkts.math.Decimal.d.ets" for details.
+    public static readonly ROUND_UP: number = 0;
+    public static readonly ROUND_DOWN: number = 1;
+    public static readonly ROUND_CEILING: number = 2;
+    public static readonly ROUND_FLOOR: number = 3;
+    public static readonly ROUND_HALF_UP: number = 4;
+    public static readonly ROUND_HALF_DOWN: number = 5;
+    public static readonly ROUND_HALF_EVEN: number = 6;
+    public static readonly ROUND_HALF_CEILING: number = 7;
+    public static readonly ROUND_HALF_FLOOR: number = 8;
+    public static readonly EUCLIDEAN: number = 9;
+
     get d(): Array<number> | null {
         return this.digits;
     }
@@ -128,6 +140,58 @@ export class Decimal {
             x.sign = 1;
         }
         return Utils.finaliseExternal(x);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal rounded to a whole number in the
+     * direction of negative Infinity.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public floor(): Decimal {
+        return Utils.finalise(new Decimal(this), this.exponent + 1, Decimal.ROUND_FLOOR);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal rounded to a whole number in the
+     * direction of positive Infinity.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public ceil(): Decimal {
+        return Utils.finalise(new Decimal(this), this.exponent + 1, Decimal.ROUND_CEILING);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal truncated to a whole number.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public trunc(): Decimal {
+        return Utils.finalise(new Decimal(this), this.exponent + 1, Decimal.ROUND_DOWN);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal clamped to the range
+     * delineated by `min` and `max`.
+     *
+     * @param { DecimalValue } min {number | string | Decimal}
+     * @param { DecimalValue } max {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200001 - The value of `min` is out of range.
+     */
+    public clamp(min: DecimalValue, max: DecimalValue): Decimal {
+        let minDecimal = new Decimal(min);
+        let maxDecimal = new Decimal(max);
+        if (!minDecimal.s || !maxDecimal.s) {
+            return new Decimal(NaN);
+        }
+        if (minDecimal.greaterThan(maxDecimal)) {
+            throw Utils.createBusinessError(RANGE_ERROR_CODE,
+                `The value of min is out of range. It must be <= ${maxDecimal}. Received value is: ${minDecimal}`);
+        }
+        let k = this.comparedTo(minDecimal);
+        return k < 0 ? minDecimal : this.comparedTo(maxDecimal) > 0 ? maxDecimal : new Decimal(this);
     }
 
     /**
@@ -601,6 +665,106 @@ export class Decimal {
     }
 
     /**
+     * Return a new Decimal whose value is `n` round to an integer using `ROUND_FLOOR`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static floor(n: DecimalValue): Decimal {
+        return new Decimal(n).floor();
+    }
+
+    /**
+     * Return a new Decimal whose value is `n` rounded to an integer using `ROUND_CEIL`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static ceil(n: DecimalValue): Decimal {
+        return new Decimal(n).ceil();
+    }
+
+    /**
+     * Return a new Decimal whose value is `n` truncated to an integer.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static trunc(n: DecimalValue): Decimal {
+        return new Decimal(n).trunc();
+    }
+
+    /**
+     * Return a new Decimal whose value is `n` clamped to the range delineated by `min` and `max`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { DecimalValue } min {number | string | Decimal}
+     * @param { DecimalValue } max {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static clamp(n: DecimalValue, min: DecimalValue, max: DecimalValue): Decimal {
+        return new Decimal(n).clamp(min, max);
+    }
+
+    /**
+     * Return a new Decimal whose value is the sum of `x` and `y`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } x {number | string | Decimal}
+     * @param { DecimalValue } y {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static add(x: DecimalValue, y: DecimalValue): Decimal {
+        return new Decimal(x).add(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is the sum of the arguments, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * Only the result is rounded, not the intermediate calculations.
+     *
+     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static sum(...values: DecimalValue[]): Decimal {
+        let result = new Decimal(values[0]);
+        external = false;
+        for (let i = 1; i < values.length; i++) {
+            if (result.isNaN()) {
+                break;
+            }
+            result = result.add(values[i]);
+        }
+        external = true;
+        return Utils.finalise(result, Decimal.precision, Decimal.rounding);
+    }
+
+    /**
+     * Return a new Decimal whose value is `x` minus `y`, rounded to `precision` significant digits
+     * using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } x {number | string | Decimal}
+     * @param { DecimalValue } y {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static sub(x: DecimalValue, y: DecimalValue): Decimal {
+        return new Decimal(x).sub(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is `x` multiplied by `y`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } x {number | string | Decimal}
+     * @param { DecimalValue } y {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static mul(x: DecimalValue, y: DecimalValue): Decimal {
+        return new Decimal(x).mul(y);
+    }
+
+    /**
      * Return a new Decimal whose value is the square root of the sum of the squares of the arguments,
      * rounded to `precision` significant digits using rounding mode `rounding`.
      *
@@ -624,6 +788,95 @@ export class Decimal {
         }
         external = true;
         return t.sqrt();
+    }
+
+    /**
+     * Return a new Decimal whose value is the maximum of the arguments.
+     *
+     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static max(...values: DecimalValue[]): Decimal {
+        let result = new Decimal(values[0]);
+        for (let i = 1; i < values.length; i++) {
+            let other = new Decimal(values[i]);
+            if (other.isNaN()) {
+                result = other;
+                break;
+            } else if (result.lessThan(other)) {
+                result = other;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return a new Decimal whose value is the minimum of the arguments.
+     *
+     * @param { DecimalValue[] } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static min(...values: DecimalValue[]): Decimal {
+        let result = new Decimal(values[0]);
+        for (let i = 1; i < values.length; i++) {
+            let other = new Decimal(values[i]);
+            if (other.isNaN()) {
+                result = other;
+                break;
+            } else if (result.greaterThan(other)) {
+                result = other;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a new Decimal with a random value equal to or greater than 0 and less than 1.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200061 - Crypto unavailable
+     */
+    static random(): Decimal {
+        return Utils.random();
+    }
+
+    /**
+     * Returns a new Decimal with a random value equal to or greater than 0 and less than 1, and with
+     * `significantDigits` significant digits (or less if trailing zeros are produced).
+     *
+     * @param { number } significantDigits Significant digits. Integer, 0 to MAX_DIGITS inclusive.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200061 - Crypto unavailable
+     */
+    static random(significantDigits: number): Decimal {
+        return Utils.random(significantDigits);
+    }
+
+    /**
+     * Return the sign of the passed value to the method.
+     *   1    if x > 0,
+     *  -1    if x < 0,
+     *   0    if x is 0,
+     *  -0    if x is -0,
+     *   NaN  otherwise
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static sign(n: DecimalValue): number {
+        let x = new Decimal(n);
+        return x.d ? (x.d![0] ? x.s : 0 * x.s) : x.s || NaN;
+    }
+
+    /**
+     * Return a new Decimal whose value is `n` rounded to an integer using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static round(n: DecimalValue): Decimal {
+        let x = new Decimal(n)
+        return Utils.finalise(x, x.e + 1, Decimal.rounding);
     }
 
     /**
@@ -743,6 +996,48 @@ export class Decimal {
      */
     public equals(n: DecimalValue): boolean {
         return this.comparedTo(n) === 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is greater than the value of `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public greaterThan(n: DecimalValue): boolean {
+        return this.comparedTo(n) > 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is greater than or equal to the value of `n`,
+     * otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public greaterThanOrEqualTo(n: DecimalValue): boolean {
+        let k = this.comparedTo(n);
+        return k == 1 || k === 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is less than `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public lessThan(n: DecimalValue): boolean {
+        return this.comparedTo(n) < 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is less than or equal to `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public lessThanOrEqualTo(n: DecimalValue): boolean {
+        return this.comparedTo(n) <= 0;
     }
 
     /**
@@ -2304,6 +2599,76 @@ class Utils {
             Utils.finalise(q, sd, rm, more);
         }
         return q;
+    }
+
+    public static random(significantDigits?: number): Decimal {
+        let result = new Decimal(1);
+        if (significantDigits == undefined) {
+            significantDigits = Decimal.precision;
+        } else {
+            Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
+        }
+
+        // calculate the exponent based on 1e7.
+        let exp = Math.ceil(significantDigits / LOG_BASE);
+        let i: number = 0;
+        let resultDigits: Array<number> = new Array<number>();
+        if (!Decimal.crypto) {
+            for (; i < exp;) {
+                resultDigits.push(Math.random() * 1e7 | 0);
+                i++;
+            }
+        } else {
+            throw Utils.createBusinessError(CRYPTO_UNAVAILABLE_ERROR_CODE, `Crypto unavailable`);
+        }
+
+        let digitsValue = resultDigits[--i];
+        significantDigits = significantDigits! % LOG_BASE;
+
+        // Convert trailing digits to zeros according to significant digits.
+        if (digitsValue && significantDigits) {
+            let value = Math.pow(10, LOG_BASE - significantDigits);
+            if (i < resultDigits.length) {
+                resultDigits[i] = (digitsValue / value | 0) * value;
+            } else {
+                resultDigits.push((digitsValue / value | 0) * value);
+            } 
+        }
+
+        // Remove trailing words which are zero.
+        for (; i >= 0 && resultDigits[i] === 0; i--) {
+            resultDigits.pop();
+        }
+
+        // Zero?
+        let resultExponent: number = 0;
+        if (i < 0) {
+            resultExponent = 0;
+            resultDigits = new Array<number>();
+            resultDigits.push(0);
+        } else {
+            resultExponent = -1;
+            // Remove leading words which are zero and adjust exponent accordingly.
+            for (; resultDigits[0] === 0; resultExponent -= LOG_BASE) {
+                resultDigits.shift();
+            }
+
+            // Count the digits of the first word of result digits to determine leading zeros.
+            let exponent: number = 0;
+            let firstVal: number = 0;
+            for (exponent = 1, firstVal = resultDigits[0]; firstVal >= 10; firstVal /= 10) {
+                exponent++;
+            }
+
+            // Adjust the exponent for leading zeros of the first word of result digits.
+            if (exponent < LOG_BASE) {
+                resultExponent -= LOG_BASE - exponent;
+            }
+        }
+        result.exponent = resultExponent;
+        result.digits = resultDigits;
+
+        return result;
     }
 
     public static createBusinessError(code: number, message: string) {
