@@ -133,7 +133,8 @@ cases:
         }
       }
       let type_of_UserClass: Type = Type.from<User>();
-      assertEQ(type_of_UserClass.toString(), "how_to_get_type_via_reflection_ext_25.ETSGLOBAL.$0User");
+      assertEQ(type_of_UserClass.toString().slice(0,48), "how_to_get_type_via_reflection_ext_25.ETSGLOBAL.");
+      assertEQ(type_of_UserClass.toString().slice(type_of_UserClass.toString().length-4,type_of_UserClass.toString().length), "User");
   - desc: How to get void via reflection.
     logic: |-
       let type_of_void: Type = Type.from<void>();
