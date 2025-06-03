@@ -80,11 +80,13 @@ public:
     // If current in Native, do nothing and return false.
     inline bool TransferToNativeIfInRunning();
 
-    void CheckSafepointIfSuspended()
+    bool CheckSafepointIfSuspended()
     {
         if (UNLIKELY_CC(HasSuspendRequest())) {
             WaitSuspension();
+            return true;
         }
+        return false;
     }
 
     void WaitSuspension();

@@ -43,7 +43,7 @@ enum GCPhase : uint8_t {
     GC_PHASE_FIX = 16,
 };
 
-class MutatorBase {
+class PUBLIC_API MutatorBase {
 public:
     // flag which indicates the reason why mutator should suspend. flag is set by some external thread.
     enum SuspensionType : uint32_t {
