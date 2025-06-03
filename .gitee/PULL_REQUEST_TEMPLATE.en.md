@@ -44,8 +44,24 @@ ninja all tests
 - [ ] Involved, already synchronized
 - [ ] Not involved
 
-**Email:** chenqiuyao@huawei.com
+**Email:** wutao185@huawei.com
 
 ##### **7. Panda_Guard version number change self-check**
 - [ ] Involved, **Please contact email:** wutao185@huawei.com
 - [ ] Not involved
+
+##### **8. Compatibility Testing (for instruction generation or file format changes)**
+1. Minor Version Compatibility Test <!-- If the change causes new ABC files to fail on older images, a new version number must be added -->
+- [ ] Version number added
+- [ ] Passed
+- [ ] Not applicable, no need to verify
+
+2. Major Version Compatibility Test <!-- When `target-api-version` is configured, the generated ABC must run on the corresponding version -->
+- [ ] Passed
+- [ ] Not applicable, no need to verify
+
+3. es2abc Version Compatibility Test <!-- ABC files compiled by the new es2abc from an old API version should still be recognized and processed by the old es2abc -->
+**Note: If the PR involves changes to version control test cases, you must also check its impact on other branches and confirm whether updates are needed in those branches.**
+- [ ] Affected — Changes impact API/bytecode version and need to be synced to other branches
+- [ ] Affected — Changes impact API/bytecode version but do not need to be synced to other branches
+- [ ] Not affected — Changes do not involve API/bytecode version
