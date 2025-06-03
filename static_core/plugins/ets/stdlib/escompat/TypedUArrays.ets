@@ -1732,19 +1732,10 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
-        index = index * Uint8ClampedArray.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: int = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
-                val = val >> 8
-            }
-        } else {
-            for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + 0 - i, (val & 0xff).toByte())
-                val = val >> 8
-            }
-        }
+        const BPE = Uint8ClampedArray.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
+        buf.set(byteIndex, val.toByte())
     }
 }
 
@@ -3476,19 +3467,10 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
-        index = index * Uint8Array.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: int = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
-                val = val >> 8
-            }
-        } else {
-            for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + 0 - i, (val & 0xff).toByte())
-                val = val >> 8
-            }
-        }
+        const BPE = Uint8Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
+        buf.set(byteIndex, val.toByte())
     }
 }
 
@@ -5212,16 +5194,18 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
-        index = index * Uint16Array.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: int = 0
+        const BPE = Uint16Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
+            for (let i = 0; i < BPE; ++i) {
+                buf.set(byteIndex++, (val & 0xff).toByte())
                 val = val >> 8
             }
         } else {
-            for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + 1 - i, (val & 0xff).toByte())
+            byteIndex = byteIndex + BPE - 1
+            for (let i = 0; i < BPE; i++) {
+                buf.set(byteIndex--, (val & 0xff).toByte())
                 val = val >> 8
             }
         }
@@ -6983,16 +6967,18 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native getUnsafe(index: int): long
 
     internal setUnsafe(index: int, val: long): void {
-        index = index * Uint32Array.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: long = 0
+        const BPE = Uint32Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
+            for (let i = 0; i < BPE; ++i) {
+                buf.set(byteIndex++, (val & 0xff).toByte())
                 val = val >> 8
             }
         } else {
-            for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + 3 - i, (val & 0xff).toByte())
+            byteIndex = byteIndex + BPE - 1
+            for (let i = 0; i < BPE; i++) {
+                buf.set(byteIndex--, (val & 0xff).toByte())
                 val = val >> 8
             }
         }
@@ -8765,16 +8751,18 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native getUnsafe(index: int): long
 
     internal setUnsafe(index: int, val: long): void {
-        index = index * BigUint64Array.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: long = 0
+        const BPE = BigUint64Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
+            for (let i = 0; i < BPE; ++i) {
+                buf.set(byteIndex++, (val & 0xff).toByte())
                 val = val >> 8
             }
         } else {
-            for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + 7 - i, (val & 0xff).toByte())
+            byteIndex = byteIndex + BPE - 1
+            for (let i = 0; i < BPE; i++) {
+                buf.set(byteIndex--, (val & 0xff).toByte())
                 val = val >> 8
             }
         }

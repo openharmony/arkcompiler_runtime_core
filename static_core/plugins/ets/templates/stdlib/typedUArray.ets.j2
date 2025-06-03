@@ -1941,19 +1941,25 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     private final native getUnsafe(index: int): {{element['primitiveType']}}
 
     internal setUnsafe(index: int, val: {{element['primitiveType']}}): void {
-        index = index * {{element['name']}}Array.BYTES_PER_ELEMENT + this.byteOffsetInt
-        let res: {{element['primitiveType']}} = 0
+        const BPE = {{element['name']}}Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = index * BPE + this.byteOffsetInt
+        let buf = this.buffer
+        {%- if element['name'] != 'Uint8' and element['name'] != 'Uint8Clamped'%}
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + i, (val & 0xff).toByte())
+            for (let i = 0; i < BPE; ++i) {
+                buf.set(byteIndex++, (val & 0xff).toByte())
                 val = val >> 8
             }
         } else {
-            for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT.toInt(); i++) {
-                this.buffer.set(index + {{element['bytes'] - 1}} - i, (val & 0xff).toByte())
+            byteIndex = byteIndex + BPE - 1
+            for (let i = 0; i < BPE; i++) {
+                buf.set(byteIndex--, (val & 0xff).toByte())
                 val = val >> 8
             }
         }
+        {%- else %}
+        buf.set(byteIndex, val.toByte())
+        {%- endif %}
     }
 }
 {% endfor -%}
