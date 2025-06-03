@@ -16,7 +16,7 @@
 #include "helpers_static.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "assembler/annotation.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"

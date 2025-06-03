@@ -14,11 +14,11 @@
  */
 
 #include <cassert>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/helpers_common.h"

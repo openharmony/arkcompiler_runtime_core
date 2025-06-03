@@ -14,8 +14,8 @@
 
 #include <cassert>
 #include <cstdint>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 
 #include "libabckit/src/macros.h"
 

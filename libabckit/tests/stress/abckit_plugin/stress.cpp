@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "c/abckit.h"
-#include "c/extensions/arkts/metadata_arkts.h"
-#include "c/metadata_core.h"
-#include "c/ir_core.h"
-#include "c/statuses.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/statuses.h"
 
 #include <iostream>
 #include <functional>

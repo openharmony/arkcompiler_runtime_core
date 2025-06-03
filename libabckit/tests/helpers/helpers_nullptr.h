@@ -15,12 +15,12 @@
 #ifndef LIBABCKIT_TESTS_INVALID_HELPERS
 #define LIBABCKIT_TESTS_INVALID_HELPERS
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/isa/isa_static.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/ir_core.h"
 
 namespace libabckit::test::helpers_nullptr {
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 #include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
 #include "libabckit/src/adapter_dynamic/convert.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"

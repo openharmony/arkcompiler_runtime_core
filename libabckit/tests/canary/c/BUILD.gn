@@ -39,49 +39,49 @@ ohos_executable("abckit_canary_c") {
 
 abckit_standalone_canary("abckit_canary_c_metadata_core") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/metadata_core.h"
+  input_file = "$abckit_root/include/libabckit/c/metadata_core.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_ir_core") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/ir_core.h"
+  input_file = "$abckit_root/include/libabckit/c/ir_core.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_extensions_js_metadata_js") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/extensions/js/metadata_js.h"
+  input_file = "$abckit_root/include/libabckit/c/extensions/js/metadata_js.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_extensions_arkts_metadata_arkts") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/extensions/arkts/metadata_arkts.h"
+  input_file = "$abckit_root/include/libabckit/c/extensions/arkts/metadata_arkts.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_abckit") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/abckit.h"
+  input_file = "$abckit_root/include/libabckit/c/abckit.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_api_version") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/api_version.h"
+  input_file = "$abckit_root/include/libabckit/c/api_version.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_statuses") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/statuses.h"
+  input_file = "$abckit_root/include/libabckit/c/statuses.h"
   extension = "c"
 }
 
 abckit_standalone_canary("abckit_canary_c_isa_isa_dynamic") {
   configs = [ ":abckit_canary_c_config" ]
-  input_file = "$abckit_root/include/c/isa/isa_dynamic.h"
+  input_file = "$abckit_root/include/libabckit/c/isa/isa_dynamic.h"
   extension = "c"
 }
 

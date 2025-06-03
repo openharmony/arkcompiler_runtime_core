@@ -16,10 +16,10 @@
 #ifndef LIBABCKIT_SRC_ADAPTER_STATIC_HELPERS_STATIC_H
 #define LIBABCKIT_SRC_ADAPTER_STATIC_HELPERS_STATIC_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/isa/isa_static.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 

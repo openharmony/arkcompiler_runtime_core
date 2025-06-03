@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/metadata_core.h"
 #include "metadata_inspect_impl.h"  // NOTE(mshimenkov)
 
 namespace libabckit::test {

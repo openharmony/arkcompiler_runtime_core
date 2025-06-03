@@ -17,10 +17,10 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "helpers/visit_helper/visit_helper-inl.h"
 
 namespace libabckit::test {

@@ -17,8 +17,8 @@
 
 #include <gtest/gtest.h>
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/isa/isa_dynamic.h"
 #include "helpers/helpers_runtime.h"
 
 #include "helpers/helpers.h"

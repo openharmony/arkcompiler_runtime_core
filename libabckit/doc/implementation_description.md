@@ -33,10 +33,10 @@ And only one static runtime compiler is used for AbcKit graph representation: `a
 
 ## C API and C++ implementation
 
-All public API is stored in `./include/c` folder and has such structure:
+All public API is stored in `./include/libabckit/c` folder and has such structure:
 
 ```
-include/c/
+include/libabckit/c/
 ├── abckit.h                  // Entry point API
 ├── metadata_core.h           // API for language-independent metadata inspection/transformation
 ├── extensions
@@ -101,16 +101,16 @@ x.abc────>(ark/panda)::panda_file───>(ark/panda)::abc2program─�
                                                                     /\
                                                                     |
                                                                     \/
-  |──────────────────────────────────────|        |───────────────────────────────────────────|        |─────────────────────────────────────────────────────────────────|
-  |     1. API declarations (./include/c)|        |     2. API implementation (./src/)        |        |     3.1 Dynamic runtime implementation (./src/adapter_dynamic/) |
-  |  abckit.h                            |        |  abckit_impl.cpp                          |        |  abckit_dynamic.cpp                                             |
-  |  metadata_core.h                     |        |  metadata_(inspect|modify)_impl.cpp       |        |  metadata_(inspect|modify)_dynamic.cpp                          |
-  |  ir_core.h                           |        |  ir_impl.cpp                              |        |                                                                 |
-  |  extensions/arkts/metadata_arkts.h   |───────>|  metadata_arkts_(inspect|modify)_impl.cpp |───────>|                                                                 |
-  |  extensions/js/metadata_js.h         |        |  metadata_js_(inspect|modify)_impl.cpp    |        |                                                                 |
-  |  isa/isa_dynamic.h                   |        |  isa_dynamic_impl.cpp                     |        |                                                                 |
-  |  isa/isa_static.h                    |        |  isa_static_impl.cpp                      |        |                                                                 |
-  |──────────────────────────────────────|        |───────────────────────────────────────────|        |─────────────────────────────────────────────────────────────────|
+  |─────────────────────────────────────────────────|        |───────────────────────────────────────────|        |─────────────────────────────────────────────────────────────────|
+  |     1. API declarations(./include/libabckit/c)  |        |     2. API implementation (./src/)        |        |     3.1 Dynamic runtime implementation (./src/adapter_dynamic/) |
+  |  abckit.h                                       |        |  abckit_impl.cpp                          |        |  abckit_dynamic.cpp                                             |
+  |  metadata_core.h                                |        |  metadata_(inspect|modify)_impl.cpp       |        |  metadata_(inspect|modify)_dynamic.cpp                          |
+  |  ir_core.h                                      |        |  ir_impl.cpp                              |        |                                                                 |
+  |  extensions/arkts/metadata_arkts.h              |───────>|  metadata_arkts_(inspect|modify)_impl.cpp |───────>|                                                                 |
+  |  extensions/js/metadata_js.h                    |        |  metadata_js_(inspect|modify)_impl.cpp    |        |                                                                 |
+  |  isa/isa_dynamic.h                              |        |  isa_dynamic_impl.cpp                     |        |                                                                 |
+  |  isa/isa_static.h                               |        |  isa_static_impl.cpp                      |        |                                                                 |
+  |─────────────────────────────────────────────────|        |───────────────────────────────────────────|        |─────────────────────────────────────────────────────────────────|
                                                                     |
                                                                     \/
                                         |───────────────────────────────────────────────────────────────|
@@ -150,7 +150,7 @@ Abckit C API consumes and returns pointers to opaque `AbckitXXX` structures.
 User has forward declaration types for these structures (implementation is hidden from user and stored in `./src/metadata_inspect_impl.h`),
 so user can only receive pointer from API and pass it to another API and can't modify it manually.
 
-For example here is type forward declaration from `./include/c/metadata_core.h`:
+For example here is type forward declaration from `./include/libabckit/c/metadata_core.h`:
 
 ```
 typedef struct AbckitLiteral AbckitLiteral;
