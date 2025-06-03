@@ -163,32 +163,38 @@ export final class ESValue {
     }
 
     public toBoolean(): boolean {
-        return this.ev as boolean;
+        return JSRuntime.getValueBoolean(this.ev);
     }
 
     public toString(): string {
-        return this.ev as string;
+        return JSRuntime.getValueString(this.ev);
     }
 
     public toNumber(): number {
-        return this.ev as number;
+        return JSRuntime.getValueDouble(this.ev);
     }
 
     public toBigInt(): bigint {
-        return this.ev as bigint;
+        return JSRuntime.getValueObject(this.ev, Class.of(new bigint())) as bigint;
     }
 
     public toUndefined(): undefined {
-        return this.ev as undefined;
+        if (this.isUndefined()) {
+            return undefined;
+        }
+        throw Error("Can not cast to undefined")
     }
 
     public toNull(): null {
-        return this.ev as null;
+        if (this.isNull()) {
+            return null;
+        }
+        throw Error("Can not cast to null")
     }
 
     public toStaticObject(): object {
         if (this.isStatic) {
-            return this.ev as Object;
+            return JSRuntime.getValueObject(this.ev, Class.of(new Object()));
         }
         throw Error("Can not cast to a static object")
     }
@@ -299,10 +305,10 @@ export final class ESValue {
         let type = property.typeOf();
         switch (type) {
             case "string":
-                this.setProperty(property.ev as string, value);
+                this.setProperty(JSRuntime.getValueString(property.ev), value);
                 break;
             case "number":
-                this.setProperty(property.ev as number, value);
+                this.setProperty(JSRuntime.getValueDouble(property.ev), value);
                 break;
             default:
                 throw Error("type can't be set as key of property");
@@ -416,7 +422,7 @@ export final class ESValue {
     }
 
     public typeOf(): String {
-        if (this.ev == undefined) {
+        if (this.ev === undefined) {
             return "undefined";
         }
         return JSRuntime.typeOf(this.ev);
@@ -434,10 +440,13 @@ export final class ESValue {
         return JSRuntime.isPromise(this.ev);
     }
 
-    public toPromise(): Promise<ESValue> {
+    public toPromise(): Promise<Any> {
+        let linker = Class.ofCaller().getLinker();
+        let clsName = 'std.core.Promise';
         return new Promise<ESValue>((resolve, reject) => {
-            let jsPromise = this.ev as Promise<JSValue>;
-            jsPromise.then((value: JSValue) => {
+            let jsPromise = 
+                JSRuntime.getValueObject(this.ev, linker.loadClass(clsName, false)) as Promise<Any>;
+            jsPromise.then((value: Any) => {
                 resolve(ESValue.wrap(value));
             }).catch((error) => {
                 reject(error);

@@ -33,7 +33,8 @@ class MimicJSValueIteratableIterator implements IterableIterator<Object> {
 
     override next(): IteratorResult<Object> {
         const nextObj = JSRuntime.invoke(this.iterator, this.nextMethod);
-        if (JSRuntime.getPropertyJSValue(nextObj, 'done') as boolean) {
+        const done = JSRuntime.getPropertyJSValue(nextObj, 'done');
+        if (JSRuntime.getValueBoolean(done)) {
             return new IteratorResult<Object>();
         }
         const iterValue = JSRuntime.getPropertyJSValue(nextObj, 'value');
@@ -383,28 +384,31 @@ export final class JSRuntime {
             throw new Error('Can not retrieve [Symbol.iterator] from given object, object is not iterable.');
         }
 
-        const iterator = symbolIteratorMethod.call(object);
+        const iterator = JSRuntime.invoke(object, symbolIteratorMethod);
 
         let next: JSValue;
         let done: JSValue;
         let value: JSValue;
 
+        const symbolNext = JSRuntime.getPropertyJSValue(iterator, "next");
         while (true) {
-            next = iterator.next();
+            const symbolNextMethod = JSRuntime.getPropertyJSValue(iterator, symbolNext);
+
+            next = JSRuntime.invoke(iterator, symbolNextMethod);
             if (next === undefined) {
                 throw new Error('`next() return undefined, but IterationResult was expected.`')
             }
 
-            done = next.done;
+            done = JSRuntime.getPropertyJSValue(next, "done");
             if (done === undefined) {
                 throw new Error('`done` field is expected in IteratorResult.');
             }
 
-            if ((done as boolean) === true) {
+            if (JSRuntime.strictEqual(done, JSRuntime.newJSValueBoolean(true))) {
                 return;
             }
 
-            value = next.value;
+            value = JSRuntime.getPropertyJSValue(next, "value");
             if (value === undefined) {
                 throw new Error('`value` field is expected in IteratorResult when `done` = false.');
             }
