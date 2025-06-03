@@ -1428,6 +1428,16 @@ intrinsics:
       ret: void
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySet
+   
+  - name: EscompatArrayJoin
+    space: ets
+    class_name: escompat.Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayJoinInternal
 
   - name: EscompatArrayIndexOf
     space: ets
