@@ -505,11 +505,8 @@
 07.expressions/25.equality_expressions/eq_neg_92.ets
 07.expressions/25.equality_expressions/eq_neg_93.ets
 
-#18843 type compatability
+#26107 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_3.ets
 
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
