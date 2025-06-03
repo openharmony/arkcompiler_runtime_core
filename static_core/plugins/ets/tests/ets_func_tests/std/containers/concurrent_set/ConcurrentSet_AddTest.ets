@@ -19,14 +19,14 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAllOne: string = "ConcurrentSet[0,1,2,3,4,5,6,7,8,9]";
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetAddTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("AddTestOne001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
         let res = ConcurrentSetTest.size;
         arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
@@ -37,7 +37,7 @@ function main(): int {
     });
     ConcurrentSetTestsuite.addTest("AddTestTwo001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
         arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
@@ -48,7 +48,7 @@ function main(): int {
     });
     ConcurrentSetTestsuite.addTest("AddTestOne002", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
         let res = ConcurrentSetTest.size;
         arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
@@ -59,7 +59,7 @@ function main(): int {
     });
     ConcurrentSetTestsuite.addTest("AddTestTwo002", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
         arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {

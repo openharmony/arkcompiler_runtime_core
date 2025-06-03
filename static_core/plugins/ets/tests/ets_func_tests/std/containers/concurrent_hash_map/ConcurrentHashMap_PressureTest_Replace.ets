@@ -18,7 +18,7 @@ import { Job } from "std/core"
 
 let pressureFlag: number = 0;
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
 

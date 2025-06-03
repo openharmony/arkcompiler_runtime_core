@@ -22,7 +22,7 @@ function main(): int {
 
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
         for (let i = 0; i < 5; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -35,7 +35,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest006", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.remainingCapacity(), stressNum - i);
             queueInt.add(i);
@@ -47,7 +47,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityStressTest009", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         let j: int = stressNum;
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);

@@ -71,6 +71,6 @@ export class WorkerLocal<T> {
         this.storage.delete(workerId);
     }
 
-    private storage = new ConcurrentHashMap<WorkerId, T>();
+    private storage = new containers.ConcurrentHashMap<WorkerId, T>();
     private init?: () => T;
 }

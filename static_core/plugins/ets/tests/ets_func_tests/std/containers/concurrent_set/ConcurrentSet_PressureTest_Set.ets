@@ -16,7 +16,7 @@
 import { launch } from "std/concurrency"
 import { Job } from "std/core"
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetPressureTest");

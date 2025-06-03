@@ -22,10 +22,10 @@ let f1: int | null = 0;
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-let queueObj: ArrayBlockingQueue<Object> = new ArrayBlockingQueue<Object>(200);
-let queueStr: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
-let queueIntPopN: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+let queueObj: containers.ArrayBlockingQueue<Object> = new containers.ArrayBlockingQueue<Object>(200);
+let queueStr: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
+let queueIntPopN: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePopTest");
@@ -42,7 +42,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt001", () =>
     {
-        let queueIntPop1: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntPop1: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         arktest.assertEQ(queueIntPop1.size, 0);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPop1.push(i);
@@ -54,7 +54,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt002", () =>
     {
-        let queueIntPop2: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntPop2: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPop2.push(i);
         }
@@ -65,7 +65,7 @@ function main(): int {
             let el = queueIntPop2.getFirst();
             arktest.assertEQ(el, queueIntPop2.pop());
         }
-        let p1 = launch<void, (queueIntPop2: ArrayBlockingQueue<int>) => void>(ArrayBlockingQueuePop, queueIntPop2);
+        let p1 = launch<void, (queueIntPop2: containers.ArrayBlockingQueue<int>) => void>(ArrayBlockingQueuePop, queueIntPop2);
         let i = queueIntPop2.pop();
         p1.Await();
         arktest.assertEQ(i, 10);
@@ -81,7 +81,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("PopTestInt004", () =>
     {
-        let queueIntPop: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntPop: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         arktest.assertEQ(queueIntPop.size, 0);
         for (let i: int = 0; i < elementsNum; ++i) {
             let el = (random() * 10000).toInt();
@@ -196,7 +196,7 @@ function queueIntPopFdata() {
     queueInt.pop();
 }
 
-function ArrayBlockingQueuePop (queueIntPop2: ArrayBlockingQueue<int>) {
+function ArrayBlockingQueuePop (queueIntPop2: containers.ArrayBlockingQueue<int>) {
     queueIntPop2.push(10);
 }
 

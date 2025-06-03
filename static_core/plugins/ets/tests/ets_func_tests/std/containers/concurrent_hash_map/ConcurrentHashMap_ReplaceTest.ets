@@ -22,7 +22,7 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -34,14 +34,14 @@ function main(): int {
     // Single Thread Test
     concurrentHashMapTestsuite.addTest("replaceTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         arktest.assertFalse(concurrentHashMap.replace(0, "zero"));
         arktest.assertFalse(concurrentHashMap.replace(1, "one"));
         arktest.assertFalse(concurrentHashMap.replace(2, "two"));
     });
     concurrentHashMapTestsuite.addTest("replaceTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertEQ(concurrentHashMap.size, 10);
         arktest.assertTrue(concurrentHashMap.replace(0, "zero_Test"));
         arktest.assertTrue(concurrentHashMap.replace(1, "one_Test"));
@@ -50,13 +50,13 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("replaceTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertFalse(concurrentHashMap.replace(10, "ten"));
         arktest.assertFalse(concurrentHashMap.replace(11, "eleven"));
     });
     concurrentHashMapTestsuite.addTest("replaceTest_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         for (let i = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }

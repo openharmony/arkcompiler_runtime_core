@@ -22,14 +22,14 @@ let f1: int | null = 0;
 let f2: int | null = 0;
 let backNum: int | null = 0;
 
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetFirstTest");
 
     ArrayBlockingQueueTestsuite.addTest("GetFirstTest001", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -40,7 +40,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTest002", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -52,7 +52,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstAndSizeAndPopAndPollTest009", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -74,7 +74,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstAndIsEmptyAndPopAndPollTest010", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -95,7 +95,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstStressTest005", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(stressNum);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }

@@ -18,7 +18,7 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let strAllOne: string = "ConcurrentSet[0,1,2,3,4,5,6,7,8,9]";
 const arr: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetConstructorTest");
@@ -26,14 +26,14 @@ function main(): int {
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("ConstructorTest001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
         arktest.assertEQ(ConcurrentSetTest.size, 0);
     });
     ConcurrentSetTestsuite.addTest("ConstructorTest002", () =>
     {
         let array = Array.from<number>(arr);
         let arrayLike = array as ArrayLike<number>;
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(arrayLike);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(arrayLike);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
@@ -43,7 +43,7 @@ function main(): int {
     ConcurrentSetTestsuite.addTest("ConstructorTest003", () =>
     {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
@@ -53,14 +53,14 @@ function main(): int {
     ConcurrentSetTestsuite.addTest("ConstructorTest004", () =>
     {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
         let iter = ConcurrentSetTest.keys();
-        let ConcurrentSetTestIter: ConcurrentSet<number> = new ConcurrentSet<number>(iter);
+        let ConcurrentSetTestIter: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(iter);
         arktest.assertEQ(ConcurrentSetTestIter.size, 10);
         flag = 0;
         ConcurrentSetTestIter.forEach((val: number) => {
@@ -73,7 +73,7 @@ function main(): int {
         for (let i = 0; i < 10; i++) {
             setTest.add(i);
         }
-        let ConcurrentSetTestIter: ConcurrentSet<number> = new ConcurrentSet<number>(setTest);
+        let ConcurrentSetTestIter: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(setTest);
         flag = 0;
         ConcurrentSetTestIter.forEach((val: number) => {
             arktest.assertEQ(val, flag++);

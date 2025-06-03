@@ -590,7 +590,7 @@ export class RegExp extends Object {
             let matched = result.$_get(0);
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0).toInt();
-            let captures = new UndefinableStringArray(nCaptures);
+            let captures = new containers.UndefinableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
                 captures.pushBack(capN)
@@ -639,7 +639,7 @@ export class RegExp extends Object {
             let matched = result.$_get(0);
             let matchLength = matched.getLength();
             let position = (max(min(result.index, lengthS), 0)).toInt();
-            let args = new UndefinableObjectArray(nCaptures);
+            let args = new containers.UndefinableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
                 args.pushBack(capN)
@@ -683,7 +683,7 @@ export class RegExp extends Object {
             }
             return [str]
         }
-        let splittedStrings = new UndefinableStringArray()
+        let splittedStrings = new containers.UndefinableStringArray()
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < size;) {
             splitter.lastIndex = lastEnd
@@ -723,7 +723,7 @@ export class RegExp extends Object {
             return this.exec(str)
         }
         this.lastIndex = 0;
-        let matches = new UndefinableStringArray();
+        let matches = new containers.UndefinableStringArray();
         let n = 0
         while (true) {
             let result = this.exec(str)

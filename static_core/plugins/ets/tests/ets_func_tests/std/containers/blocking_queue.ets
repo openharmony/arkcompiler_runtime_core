@@ -19,9 +19,9 @@ const elementsNum: int = 100;
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: BlockingQueue<int> = new ArrayBlockingQueue<int>(100);
-let queueObj: BlockingQueue<Object> = new LinkedBlockingQueue<Object>(100);
-let queueStr: BlockingQueue<String> = new LinkedBlockingQueue<String>(100);
+let queueInt: containers.BlockingQueue<int> = new containers.ArrayBlockingQueue<int>(100);
+let queueObj: containers.BlockingQueue<Object> = new containers.LinkedBlockingQueue<Object>(100);
+let queueStr: containers.BlockingQueue<String> = new containers.LinkedBlockingQueue<String>(100);
 
 function wait(): int {
     let i = 1
@@ -139,7 +139,7 @@ function simpleQueuePushPopFrontBackSizeEmptyTest() {
         let el = (random() * 10000).toInt();
         arr[i] = el;
         queueInt.push(el);
-        arktest.assertEQ(el, (queueInt as ArrayBlockingQueue<int>).getEnd());
+        arktest.assertEQ(el, (queueInt as containers.ArrayBlockingQueue<int>).getEnd());
     }
     let ind: int = 0;
     while (!queueInt.isEmpty()) {

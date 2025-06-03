@@ -19,7 +19,7 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -31,21 +31,21 @@ function main(): int {
 
     concurrentHashMapClearTestsuite.addTest("clearTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         arktest.assertTrue(concurrentHashMap.isEmpty());
         concurrentHashMap.clear();
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapClearTestsuite.addTest("clearTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertFalse(concurrentHashMap.isEmpty());
         concurrentHashMap.clear();
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapClearTestsuite.addTest("clearTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         for (let i = 0; i < 10 ; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }

@@ -23,7 +23,7 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -35,7 +35,7 @@ function main(): int {
 
     concurrentHashMapOneTestsuite.addTest("deleteTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let value: string | undefined = concurrentHashMap.get(1);
         let del: boolean = concurrentHashMap.delete(1);
         let valueDel: string | undefined = concurrentHashMap.get(1);
@@ -45,7 +45,7 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let value: string | undefined = concurrentHashMap.get(10);
         let del: boolean = concurrentHashMap.delete(10);
         let valueDel: string | undefined = concurrentHashMap.get(10);
@@ -55,7 +55,7 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let value: string | undefined = concurrentHashMap.get(1);
         let del: boolean = concurrentHashMap.delete(1);
         let valueDel: string | undefined = concurrentHashMap.get(1);
@@ -65,7 +65,7 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         concurrentHashMap.set("zero", 0);
         let value: number | undefined = concurrentHashMap.get("zero");
         let del: boolean = concurrentHashMap.delete("zero");

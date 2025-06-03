@@ -15,154 +15,157 @@
 
 package std.containers
 
-type UndefinableString = String | undefined
+export namespace containers {
 
-export class UndefinableStringArray {
-    /* const */ static ArrayInitSize : int = 16
+    type UndefinableString = String | undefined
 
-    private init(capacity: int, val: UndefinableString): void {
-        this.data = new UndefinableString[capacity]
-        for (let i = 0; i < this.data.length; ++i) {
-            this.data[i] = val
-        }
-        this.curSize = capacity
-    }
+    export class UndefinableStringArray {
+        /* const */ static ArrayInitSize : int = 16
 
-    /**
-     * Constructs new UndefinableStringArray with respect to capacity and initial value
-     *
-     * @param capacity
-     *
-     * @param val
-     */
-    constructor(capacity: int, val: UndefinableString) {
-        this.init(capacity, val)
-    }
-
-    /**
-     * Constructs new UndefinableStringArray with required capacity
-     *
-     * @param capacity
-     */
-    constructor(capacity: int) {
-        this.data = new UndefinableString[capacity]
-        this.curSize = 0
-    }
-
-    /**
-     * Constructs new empty UndefinableStringArray
-     */
-    constructor() {
-        this(UndefinableStringArray.ArrayInitSize)
-    }
-
-    /**
-     * Increases capacity if passed argument is greater than current capacity
-     *
-     * @param capacity
-     */
-    public reserve(capacity: int): void {
-        if (this.data.length < capacity) {
-            let newData : FixedArray<UndefinableString> = new UndefinableString[capacity]
-            for (let i = 0; i < this.curSize; ++i) {
-               newData[i] = this.data[i]
+        private init(capacity: int, val: UndefinableString): void {
+            this.data = new UndefinableString[capacity]
+            for (let i = 0; i < this.data.length; ++i) {
+                this.data[i] = val
             }
-            this.data = newData
+            this.curSize = capacity
         }
-    }
 
-    /**
-     * Gets the underlying array
-     *
-     * @returns the underlying array
-     */
-    public toArray(): String[] {
-        let newData = new String[this.curSize]
-        for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]!
+        /**
+        * Constructs new UndefinableStringArray with respect to capacity and initial value
+        *
+        * @param capacity
+        *
+        * @param val
+        */
+        constructor(capacity: int, val: UndefinableString) {
+            this.init(capacity, val)
         }
-        return newData
-    }
 
-    public toFixedArray(): FixedArray<String> {
-        let newData: FixedArray<String> = new String[this.curSize]
-        for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]!
+        /**
+        * Constructs new UndefinableStringArray with required capacity
+        *
+        * @param capacity
+        */
+        constructor(capacity: int) {
+            this.data = new UndefinableString[capacity]
+            this.curSize = 0
         }
-        return newData
-    }
 
-
-    private static getNewCapacity(currentCapacity: int): int {
-        const fastGrowThreshold = 8192
-        const multiplier = 2
-        if (currentCapacity < fastGrowThreshold) {
-            // Adding 4 to jump over 0
-            return (currentCapacity + 4) * multiplier * 2
-        } else {
-            return currentCapacity * multiplier
+        /**
+        * Constructs new empty UndefinableStringArray
+        */
+        constructor() {
+            this(UndefinableStringArray.ArrayInitSize)
         }
-    }
 
-    /**
-     * Pushes a value to the end of the array
-     *
-     * @param e value to push
-     */
-    public pushBack(e: UndefinableString): void {
-        if (this.curSize == this.data.length) {
-            let newData : FixedArray<UndefinableString> = new UndefinableString[UndefinableStringArray.getNewCapacity(this.data.length)]
-            for (let i = 0; i < this.curSize; ++i) {
+        /**
+        * Increases capacity if passed argument is greater than current capacity
+        *
+        * @param capacity
+        */
+        public reserve(capacity: int): void {
+            if (this.data.length < capacity) {
+                let newData : FixedArray<UndefinableString> = new UndefinableString[capacity]
+                for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
+                }
+                this.data = newData
             }
-            this.data = newData
         }
-        this.data[this.curSize] = e
-        ++this.curSize
-    }
 
-    /**
-     * Pops a value from the end of the List
-     *
-     * @returns popped value
-     */
-    public popBack(): UndefinableString {
-        if (this.curSize === 0) {
-            throw new AssertionError("No data to popBack from UndefinableStringArray!")
+        /**
+        * Gets the underlying array
+        *
+        * @returns the underlying array
+        */
+        public toArray(): String[] {
+            let newData = new String[this.curSize]
+            for (let i = 0; i < this.curSize; ++i) {
+                newData[i] = this.data[i]!
+            }
+            return newData
         }
-        --this.curSize
-        return this.data[this.curSize]
-    }
 
-    /**
-     * Returns number of elements in the List
-     */
-    public size(): int {
-        return this.curSize
-    }
+        public toFixedArray(): FixedArray<String> {
+            let newData: FixedArray<String> = new String[this.curSize]
+            for (let i = 0; i < this.curSize; ++i) {
+                newData[i] = this.data[i]!
+            }
+            return newData
+        }
 
-    /**
-     * Returns an element at the specified index
-     *
-     * @param index element position
-     *
-     * @returns an element
-     */
-    public at(index: int): UndefinableString {
-        return this.data[index]
-    }
 
-    /**
-     * Sets an element at the specified index
-     *
-     * @param index element position
-     *
-     * @param e new value
-     */
-    public set(index: int, e: UndefinableString): void {
-        this.data[index] = e
-    }
+        private static getNewCapacity(currentCapacity: int): int {
+            const fastGrowThreshold = 8192
+            const multiplier = 2
+            if (currentCapacity < fastGrowThreshold) {
+                // Adding 4 to jump over 0
+                return (currentCapacity + 4) * multiplier * 2
+            } else {
+                return currentCapacity * multiplier
+            }
+        }
 
-    private data: FixedArray<UndefinableString> = []
-    private curSize: int
+        /**
+        * Pushes a value to the end of the array
+        *
+        * @param e value to push
+        */
+        public pushBack(e: UndefinableString): void {
+            if (this.curSize == this.data.length) {
+                let newData : FixedArray<UndefinableString> = new UndefinableString[UndefinableStringArray.getNewCapacity(this.data.length)]
+                for (let i = 0; i < this.curSize; ++i) {
+                    newData[i] = this.data[i]
+                }
+                this.data = newData
+            }
+            this.data[this.curSize] = e
+            ++this.curSize
+        }
+
+        /**
+        * Pops a value from the end of the List
+        *
+        * @returns popped value
+        */
+        public popBack(): UndefinableString {
+            if (this.curSize === 0) {
+                throw new AssertionError("No data to popBack from UndefinableStringArray!")
+            }
+            --this.curSize
+            return this.data[this.curSize]
+        }
+
+        /**
+        * Returns number of elements in the List
+        */
+        public size(): int {
+            return this.curSize
+        }
+
+        /**
+        * Returns an element at the specified index
+        *
+        * @param index element position
+        *
+        * @returns an element
+        */
+        public at(index: int): UndefinableString {
+            return this.data[index]
+        }
+
+        /**
+        * Sets an element at the specified index
+        *
+        * @param index element position
+        *
+        * @param e new value
+        */
+        public set(index: int, e: UndefinableString): void {
+            this.data[index] = e
+        }
+
+        private data: FixedArray<UndefinableString> = []
+        private curSize: int
+    }
 }

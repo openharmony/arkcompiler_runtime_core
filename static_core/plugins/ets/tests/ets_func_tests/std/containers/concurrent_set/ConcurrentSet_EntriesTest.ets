@@ -19,14 +19,14 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAll: string = "zero,zero,one,one,two,two,three,three,four,four,five,five,six,six,seven,seven,eight,eight,nine,nine";
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetEntriesTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
     {
-        let ConcurrentSetTestNull: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTestNull.size;
         arktest.assertEQ(res, 0);
         let iterValue: IterableIterator<[string, string]> = ConcurrentSetTestNull.entries();
@@ -74,7 +74,7 @@ function main(): int {
     /*
     ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
         arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {

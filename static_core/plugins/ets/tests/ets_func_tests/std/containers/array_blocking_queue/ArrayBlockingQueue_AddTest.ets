@@ -19,15 +19,15 @@ const elementsNum: int = 100;
 let b1: int | null = 0;
 let f1: int | null = 0;
 
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-let queueIntPopN: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+let queueIntPopN: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueAddTest");
 
     ArrayBlockingQueueTestsuite.addTest("AddTestInt001", () =>
     {
-        let queueIntAdd: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntAdd: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntAdd.add(i);
         }
@@ -35,7 +35,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestStr002", () =>
     {
-        let queueStrAdd: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
+        let queueStrAdd: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueStrAdd.add("test");
         }

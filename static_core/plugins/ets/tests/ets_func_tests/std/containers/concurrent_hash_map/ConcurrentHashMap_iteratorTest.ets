@@ -21,7 +21,7 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 let strAll: string = "0,zero,1,one,2,two,3,three,4,four,5,five,6,six,7,seven,8,eight,9,nine";
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -32,13 +32,13 @@ function main(): int {
 
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         arktest.assertEQ(iter_$.next().value, undefined);
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         let str = "";
         for (let i: int = 0; i < 10; i++) {
@@ -52,7 +52,7 @@ function main(): int {
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         arktest.assertEQ(iter_$.next().value, undefined);
         for (let i: int = 0; i < 10; i++) {
@@ -71,7 +71,7 @@ function main(): int {
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         for (let i = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }

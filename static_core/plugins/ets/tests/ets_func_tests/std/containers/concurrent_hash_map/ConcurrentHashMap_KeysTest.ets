@@ -20,7 +20,7 @@ let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-let concurrentHashMapKeys: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapKeys: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -32,14 +32,14 @@ function main(): int {
 
     concurrentHashMapKeysTestsuite.addTest("keysTest_001", () =>
     {
-        let concurrentHashMapNull: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMapNull: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iterKey: IterableIterator<number> = concurrentHashMapNull.keys();
         arktest.assertEQ(iterKey.next().value, undefined);
         arktest.assertEQ(iterKey.next().value, undefined);
     });
     concurrentHashMapKeysTestsuite.addTest("keysTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let iterKeys: IterableIterator<number> = concurrentHashMap.keys();
         flag = 0;
         for (let i: int = 0; i < 10; i++) {
@@ -52,7 +52,7 @@ function main(): int {
     });
     concurrentHashMapKeysTestsuite.addTest("keysTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iterKeys: IterableIterator<number> = concurrentHashMap.keys();
         arktest.assertEQ(iterKeys.next().value, undefined);
         for (let i: int = 0; i < 10; i++) {
@@ -70,7 +70,7 @@ function main(): int {
     });
     concurrentHashMapKeysTestsuite.addTest("keysTest_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<String, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<String, number>();
         let iterKeys: IterableIterator<string> = concurrentHashMap.keys();
         arktest.assertEQ(iterKeys.next().value, undefined);
         for (let i: int = 0; i < 10; i++) {

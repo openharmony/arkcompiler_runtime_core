@@ -25,7 +25,7 @@ function main(): int {
 }
 
 function getEndFillTest() {
-    let testBQ = new LinkedBlockingQueue<int>(10)
+    let testBQ = new containers.LinkedBlockingQueue<int>(10)
     for (let i = 0; i < testBQ.capacity; i++) {
         testBQ.add(i)
     }
@@ -34,7 +34,7 @@ function getEndFillTest() {
 }
 
 function getEndMoreTypeTest() {
-    let testBQ = new LinkedBlockingQueue<int | null | undefined | string>(10)
+    let testBQ = new containers.LinkedBlockingQueue<int | null | undefined | string>(10)
     testBQ.add(1)
     arktest.assertEQ(testBQ.getEnd(), 1)
     testBQ.add(null)
@@ -49,20 +49,20 @@ function getEndMoreTypeTest() {
 }
 
 function getEndEmptyTest() {
-    let testBQ = new LinkedBlockingQueue<int>(10)
+    let testBQ = new containers.LinkedBlockingQueue<int>(10)
     arktest.assertTrue(testBQ.isEmpty())
     arktest.assertEQ(testBQ.getEnd(), null)
 }
 
 function getEndOneTest() {
-    let testBQ = new LinkedBlockingQueue<int>(1)
+    let testBQ = new containers.LinkedBlockingQueue<int>(1)
     testBQ.add(1)
     arktest.assertEQ(testBQ.size, 1)
     arktest.assertEQ(testBQ.getEnd(), 1)
 }
 
 function getEndCapacityTest() {
-    let testBQ = new LinkedBlockingQueue<int>(10)
+    let testBQ = new containers.LinkedBlockingQueue<int>(10)
     testBQ.add(0)
     arktest.assertEQ(testBQ.getEnd(), 0)
     arktest.assertEQ(testBQ.size, 1)
@@ -81,12 +81,12 @@ function getEndCapacityTest() {
 const JOB_COUNT = 3
 const PUSH_COUNT_PER_JOB = 5
 function getEndConcurrentTest() {
-    let testBlockingQueue = new LinkedBlockingQueue<int>(JOB_COUNT * PUSH_COUNT_PER_JOB)
+    let testBlockingQueue = new containers.LinkedBlockingQueue<int>(JOB_COUNT * PUSH_COUNT_PER_JOB)
     let flag: AtomicFlag = new AtomicFlag(false)
     let lock = new AsyncLock()
     let jobs: Job<void>[] = []
     for (let i = 0; i < JOB_COUNT; i++) {
-        jobs.push(launch<void, (a0: LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => void>(getEndConcurrent, testBlockingQueue, lock, flag))
+        jobs.push(launch<void, (a0: containers.LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => void>(getEndConcurrent, testBlockingQueue, lock, flag))
     }
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs[i].Await()
@@ -96,7 +96,7 @@ function getEndConcurrentTest() {
     }
 }
 
-function getEndConcurrent(testBQ: LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
+function getEndConcurrent(testBQ: containers.LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
     let arrPromise = new Array<Promise<void>>(PUSH_COUNT_PER_JOB)
     for (let i: int = 0; i < PUSH_COUNT_PER_JOB; i++) {
         let val = i

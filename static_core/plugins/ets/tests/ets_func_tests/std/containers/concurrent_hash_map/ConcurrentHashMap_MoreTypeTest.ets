@@ -16,7 +16,7 @@
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -28,7 +28,7 @@ function main(): int {
     // K: number, V: boolean
     concurrentHashMapTestsuite.addTest("Number&Boolean_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
@@ -46,7 +46,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
@@ -73,7 +73,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
@@ -87,7 +87,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
@@ -102,7 +102,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_005", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
@@ -120,13 +120,13 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_006", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, boolean> = new containers.ConcurrentHashMap<number, boolean>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        concurrentHashMap.forEach((val: boolean, key: number, map: ConcurrentHashMap<number, boolean>) =>
+        concurrentHashMap.forEach((val: boolean, key: number, map: containers.ConcurrentHashMap<number, boolean>) =>
         {
             let str = map.toString();
             arktest.assertEQ(str, "0,true,1,false,2,true,3,false,4,true,5,false,6,true,7,false,8,true,9,false");
@@ -140,7 +140,7 @@ function main(): int {
     // K: number, V: Object
     concurrentHashMapTestsuite.addTest("Number&Object_001", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -153,7 +153,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Object_002", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -171,7 +171,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Object_003", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -186,7 +186,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Object_004", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -204,7 +204,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Object_005", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -227,7 +227,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("Number&Object_006", () =>
     {
-        let hasMapNO: ConcurrentHashMap<number, Array<string>> = new ConcurrentHashMap<number, Array<string>>();
+        let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
             let array: Array<string> = new Array<string>(5);
             for (let j = 0; j < i + 1; j++) {
@@ -235,7 +235,7 @@ function main(): int {
             }
             hasMapNO.set(i, array);
         }
-        hasMapNO.forEach((val: Array<string>, key: number, map: ConcurrentHashMap<number, Array<string>>) =>
+        hasMapNO.forEach((val: Array<string>, key: number, map: containers.ConcurrentHashMap<number, Array<string>>) =>
         {
             arktest.assertEQ(map.get(key), val);
         });
@@ -243,7 +243,7 @@ function main(): int {
 
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, number> = new ConcurrentHashMap<number, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, number> = new containers.ConcurrentHashMap<number, number>();
         for (let i: number = 0; i < 10 ; i++) {
             concurrentHashMap.set(i, i);
         }
@@ -259,7 +259,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, string> = new ConcurrentHashMap<string, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, string> = new containers.ConcurrentHashMap<string, string>();
         for (let i: int = 0; i < 10 ; i++) {
             concurrentHashMap.set(arrValues[i], arrValues[i]);
         }

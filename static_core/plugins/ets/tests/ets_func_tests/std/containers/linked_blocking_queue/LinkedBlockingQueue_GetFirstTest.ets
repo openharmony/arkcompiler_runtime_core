@@ -21,7 +21,7 @@ function main(): int {
 
     LinkedBlockingQueueTestsuite.addTest("GetFirstTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -32,7 +32,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("GetFirstTest002", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -44,7 +44,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("GetFirstAndSizeAndPopAndPollTest009", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -66,7 +66,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("GetFirstAndIsEmptyAndPopAndPollTest010", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -87,7 +87,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("GetFirstStressTest005", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }

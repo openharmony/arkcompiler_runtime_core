@@ -20,9 +20,9 @@ const elementsNum: int = 100;
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-let queueObj: ArrayBlockingQueue<Object> = new ArrayBlockingQueue<Object>(200);
-let queueStr: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+let queueObj: containers.ArrayBlockingQueue<Object> = new containers.ArrayBlockingQueue<Object>(200);
+let queueStr: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePushTest");

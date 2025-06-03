@@ -53,7 +53,7 @@ class Waiter {
     }
 
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
-    private promiseQueue: BlockingQueue<CompletableJob<string>> = new LinkedBlockingQueue<CompletableJob<string>>();
+    private promiseQueue: containers.BlockingQueue<CompletableJob<string>> = new containers.LinkedBlockingQueue<CompletableJob<string>>();
 }
 
 /**
@@ -709,7 +709,7 @@ export class Atomics {
         return notified;
     }
 
-    private static globalWaitingTable: ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>> = new ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>>();
+    private static globalWaitingTable: containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>> = new containers.ConcurrentHashMap<ArrayBuffer, containers.ConcurrentHashMap<int, Waiter>>();
     private static globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
 
     private static getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
@@ -718,7 +718,7 @@ export class Atomics {
             ConcurrencyHelpers.mutexLock(Atomics.globalWaitingTableMutex)
             waiterTable = Atomics.globalWaitingTable.get(buffer)
             if (waiterTable instanceof undefined) {
-                waiterTable = new ConcurrentHashMap<int, Waiter>()
+                waiterTable = new containers.ConcurrentHashMap<int, Waiter>()
                 Atomics.globalWaitingTable.set(buffer, waiterTable!)
             }
             ConcurrencyHelpers.mutexUnlock(Atomics.globalWaitingTableMutex)

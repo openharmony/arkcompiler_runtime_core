@@ -243,8 +243,8 @@ function throwExceptions(): boolean {
     return true;
 }
 
-let e2m: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
-let m2e: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
+let e2m: containers.LinkedBlockingQueue<boolean> = new containers.LinkedBlockingQueue<boolean>();
+let m2e: containers.LinkedBlockingQueue<boolean> = new containers.LinkedBlockingQueue<boolean>();
 
 function EACoroutineSendToMain(): boolean {
     launch<void, ()=>void>(():void => {

@@ -26,17 +26,17 @@ function main(): int {
 
     concurrentHashMapSizeTestsuite.addTest("sizeTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         arktest.assertEQ(concurrentHashMap.size, 0);
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertEQ(concurrentHashMap.size, 10);
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);
             arktest.assertEQ(concurrentHashMap.size, i + 1);
@@ -49,7 +49,7 @@ function main(): int {
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
             arktest.assertEQ(concurrentHashMap.size, i + 1);
