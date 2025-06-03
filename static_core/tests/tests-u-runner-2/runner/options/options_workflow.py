@@ -183,7 +183,7 @@ class WorkflowOptions(IOptions):
             else:
                 self.__load_step(step_name, step_content)
 
-    def __load_step(self, step_name: str, step_content: dict[str, str | list]) -> None:
+    def __load_step(self, step_name: str, step_content: dict[str, str | list | dict[str, list]]) -> None:
         _LOGGER.all(f"Going to load step '{step_name}'")
         for (step_item, step_value) in step_content.items():
             if isinstance(step_value, str):
@@ -197,6 +197,14 @@ class WorkflowOptions(IOptions):
             else:
                 new_args.append(arg)
         step_content['args'] = new_args
+        new_env: dict[str, list] = {}
+        if 'env' in step_content:
+            new_env_var = []
+            for env, val in cast(dict, step_content['env']).items():
+                for env_line in val:
+                    new_env_var.append(Macros.correct_macro(env_line, self))
+                new_env[env] = new_env_var
+            step_content['env'] = new_env
         step = Step(step_name, step_content)
         self.__steps.append(step)
 
