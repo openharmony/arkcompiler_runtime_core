@@ -14,6 +14,7 @@
  */
 
 import { BusinessError } from "@ohos.base";
+import { jsonx } from "std/core"
 
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
@@ -1676,6 +1677,24 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
                 return;
             }
             this.getDataView().setUint8(index, value);
+        }
+
+        /**
+         * Converts this Buffer instance into a JsonElement.
+         *
+         * @returns {JsonElement} A new JsonElement containing the Buffer
+         */
+        public toJSON(): jsonx.JsonElement {
+            const arr = new Array<jsonx.JsonElement>;
+            for (let i: int = 0; i < this.length; ++i) {
+                const intElement = new jsonx.JsonElement();
+                intElement.setInteger(this.at(i).toInt());
+                arr.push(intElement);
+            }
+            const objectElem = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>);
+            objectElem.setElement("type", jsonx.JsonElement.createString("Buffer"));
+            objectElem.setElement("data", jsonx.JsonElement.createArray(arr));
+            return objectElem;
         }
     }
 
