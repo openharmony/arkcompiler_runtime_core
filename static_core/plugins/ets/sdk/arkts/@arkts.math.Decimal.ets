@@ -39,6 +39,17 @@ const LN10 = ('2.302585092994045684017991454684364207601101488628772976033327900
     + '8243182375253577097505395651876975103749708886921802051893395072385392051446341972652872869651108625714921988499'
     + '78748873771345686209167058');
 
+const PI = ('3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214'
+    + '8086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933'
+    + '4461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209'
+    + '2096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179'
+    + '3105118548074462379962749567351885752724891227938183011949129833673362440656643086021394946395224737190702179860'
+    + '9437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249'
+    + '5343014654958537105079227968925892354201995611212902196086403441815981362977477130996051870721134999999837297804'
+    + '9951059731732816096318595024459455346908302642522308253344685035261931188171010003137838752886587533208381420617'
+    + '1776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989'
+    + '380952572010654858632789');
+
 const DEFAULTS_PRECISION = 20;
 const DEFAULTS_ROUNDING = 4;
 const DEFAULTS_MODULO = 1;
@@ -59,6 +70,7 @@ const LOG_BASE: number = 7;
 const MAX_SAFE_INTEGER: number = 9007199254740991;
 
 const LN10_PRECISION = LN10.length - 1;
+const PI_PRECISION = PI.length - 1;
 
 export interface DecimalConfig {
     precision?: number;
@@ -77,6 +89,7 @@ export class Decimal {
     internal exponent: number;
     internal sign: number;
     internal toStringTag: string = '[object Decimal]';
+    private static quadrant: number = 0;
 
     public static maxE: number = EXP_LIMIT;
     public static minE: number = -EXP_LIMIT;
@@ -249,6 +262,17 @@ export class Decimal {
     }
 
     /**
+     * Return a new Decimal whose value is the integer part of dividing the value of this Decimal
+     * by the value of `n`, rounded to `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    public dividedToIntegerBy(n: DecimalValue): Decimal {
+        return Utils.finalise(Utils.divide(this, new Decimal(n), 0, 1, true), Decimal.precision, Decimal.rounding);
+    }
+
+    /**
      * Return a new Decimal whose value is the value of this Decimal negated, i.e. as if multiplied by -1.
      *
      * @returns { Decimal } the Decimal type
@@ -357,6 +381,28 @@ export class Decimal {
      */
     public toHexadecimal(significantDigits: number, rounding: Rounding): string {
         return this.toStringBinary(16, significantDigits, rounding);
+    }
+
+    /**
+     * Return an array representing the value of this Decimal as a simple fraction with an integer
+     * numerator and an integer denominator.
+     *
+     * @returns { Decimal[] } the Decimal[] type
+     */
+    public toFraction(): Decimal[] {
+        return this.fraction();
+    }
+
+    /**
+     * Return an array representing the value of this Decimal as a simple fraction with an integer
+     * numerator and an integer denominator. The denominator will be a positive non-zero value
+     * less than or equal to `max_denominator`.
+     *
+     * @param { DecimalValue } maxDenominator {number | string | Decimal}
+     * @returns { Decimal[] } the Decimal[] type
+     */
+    public toFraction(maxDenominator: DecimalValue): Decimal[] {
+        return this.fraction(maxDenominator);
     }
 
     /**
@@ -655,6 +701,48 @@ export class Decimal {
     }
 
     /**
+     * Return the number of significant digits of the value of this Decimal.
+     *
+     * @returns { number } the number type
+     */
+    public precision(): number {
+        let result: number;
+        if (this.digits) {
+            result = Utils.getPrecision(this.digits!);
+        } else {
+            result = NaN;
+        }
+        return result;
+    }
+
+    /**
+     * Return the number of significant digits of the value of this Decimal, whether to count
+     * integer-part trailing zeros.
+     *
+     * @param { boolean | number } includeZeros Whether to count integer-part trailing zeros: true, false,
+     * 1 or 0.
+     * @returns { number } the number type
+     * @throws { BusinessError } 10200001 - The value of `includeZeros` is out of range.
+     */
+    public precision(includeZeros: boolean | number): number {
+        let result: number;
+        if (includeZeros != undefined && includeZeros !== !!includeZeros && includeZeros !== 1 && includeZeros !== 0) {
+            throw Utils.createBusinessError(RANGE_ERROR_CODE,
+                `The value of includeZeros is out of range. It must be 0 or 1. Received value is: ${includeZeros}`);
+        }
+
+        if (this.digits) {
+            result = Utils.getPrecision(this.digits!);
+            if (includeZeros && this.exponent + 1 > result) {
+                result = this.exponent + 1;
+            }
+        } else {
+            result = NaN;
+        }
+        return result;
+    }
+
+    /**
      * Return a new Decimal whose value is the absolute value of `n`.
      *
      * @param { DecimalValue } n {number | string | Decimal}
@@ -762,6 +850,284 @@ export class Decimal {
      */
     static mul(x: DecimalValue, y: DecimalValue): Decimal {
         return new Decimal(x).mul(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is `x` modulo `y`, rounded to `precision` significant digits
+     * using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } x {number | string | Decimal}
+     * @param { DecimalValue } y {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static mod(x: DecimalValue, y: DecimalValue): Decimal {
+        return new Decimal(x).mod(y);
+    }
+
+    /**
+     * Return a new Decimal whose value is the cube root of `n`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static cbrt(n: DecimalValue): Decimal {
+        return new Decimal(n).cbrt();
+    }
+
+    /**
+     * Return a new Decimal whose value is `base` raised to the power `exponent`, rounded to precision
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } base {number | string | Decimal} The base.
+     * @param { DecimalValue } exponent {number | string | Decimal} The exponent.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static pow(base: DecimalValue, exponent: DecimalValue): Decimal {
+        return new Decimal(base).pow(exponent);
+    }
+
+    /**
+     * Return a new Decimal whose value is the natural exponential of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static exp(n: DecimalValue): Decimal {
+        return new Decimal(n).exp();
+    }
+
+    /**
+     * Return a new Decimal whose value is the log of `n` to the base `base`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { DecimalValue } base {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static log(n: DecimalValue, base: DecimalValue): Decimal {
+        return new Decimal(n).log(base);
+    }
+
+    /**
+     * Return a new Decimal whose value is the natural logarithm of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { Value } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static ln(n: DecimalValue): Decimal {
+        return new Decimal(n).ln();
+    }
+
+    /**
+     * Return a new Decimal whose value is the base 2 logarithm of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { Value } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static log2(n: DecimalValue): Decimal {
+        return new Decimal(n).log(2);
+    }
+
+    /**
+     * Return a new Decimal whose value is the base 10 logarithm of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { Value } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static log10(n: DecimalValue): Decimal {
+        return new Decimal(n).log(10);
+    }
+
+    /**
+     * Return a new Decimal whose value is the cosine of `n`, rounded to `precision` significant
+     * digits using rounding mode `rounding`
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     */
+    static cos(n: DecimalValue): Decimal {
+        return new Decimal(n).cos();
+    }
+
+    /**
+     * Return a new Decimal whose value is the sine of `n`, rounded to `precision` significant digits
+     * using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     */
+    static sin(n: DecimalValue): Decimal {
+        return new Decimal(n).sin();
+    }
+
+    /**
+     * Return a new Decimal whose value is the tangent of `n`, rounded to `precision` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     */
+    static tan(n: DecimalValue): Decimal {
+        return new Decimal(n).tan();
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic cosine of `n`, rounded to precision
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     */
+    static cosh(n: DecimalValue): Decimal {
+        return new Decimal(n).cosh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic sine of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static sinh(n: DecimalValue): Decimal {
+        return new Decimal(n).sinh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic tangent of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     */
+    static tanh(n: DecimalValue): Decimal {
+        return new Decimal(n).tanh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the arccosine in radians of `n`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static acos(n: DecimalValue): Decimal {
+        return new Decimal(n).acos();
+    }
+
+    /**
+     * Return a new Decimal whose value is the arcsine in radians of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static asin(n: DecimalValue): Decimal {
+        return new Decimal(n).asin();
+    }
+
+    /**
+     * Return a new Decimal whose value is the arctangent in radians of `n`, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static atan(n: DecimalValue): Decimal {
+        return new Decimal(n).atan();
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic cosine of `n`, rounded to
+     * `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static acosh(n: DecimalValue): Decimal {
+        return new Decimal(n).acosh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic sine of `n`, rounded to
+     * `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+
+     */
+    static asinh(n: DecimalValue): Decimal {
+        return new Decimal(n).asinh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic tangent of `n`, rounded to
+     * `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal} A value in radians.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static atanh(n: DecimalValue): Decimal {
+        return new Decimal(n).atanh();
+    }
+
+    /**
+     * Return a new Decimal whose value is the arctangent in radians of `y/x` in the range -pi to pi
+     * (inclusive), rounded to `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } y {number | string | Decimal} The y-coordinate.
+     * @param { DecimalValue } x {number | string | Decimal} The x-coordinate.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    static atan2(y: DecimalValue, x: DecimalValue): Decimal {
+        y = new Decimal(y);
+        x = new Decimal(x);
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        let wpr = pr + 4;
+        let result: Decimal;
+        // Either NaN
+        if (!y.s || !x.s) {
+            result = new Decimal(NaN);
+        } else if (!y.d && !x.d) { // Both ±Infinity
+            result = Utils.getPi(wpr, 1).mul(x.s > 0 ? 0.25 : 0.75);
+            result.sign = y.s;
+        } else if (!x.d || y.isZero()) { // x is ±Infinity or y is ±0
+            result = x.s < 0 ? Utils.getPi(pr, rm) : new Decimal(0);
+            result.sign = y.s;
+        } else if (!y.d || x.isZero()) { // y is ±Infinity or x is ±0
+            result = Utils.getPi(wpr, 1).mul(0.5);
+            result.sign = y.s;
+        } else if (x.s < 0) { // Both non-zero and finite
+            Decimal.precision = wpr;
+            Decimal.rounding = 1;
+            result = Decimal.atan(Utils.divide(y, x, wpr, 1));
+            x = Utils.getPi(wpr, 1);
+            Decimal.precision = pr;
+            Decimal.rounding = rm;
+            result = y.s < 0 ? result.sub(x) : result.add(x);
+        } else {
+            result = Decimal.atan(Utils.divide(y, x, wpr, 1));
+        }
+
+        return result;
     }
 
     /**
@@ -944,7 +1310,7 @@ export class Decimal {
                 n += '0';
             }
             s = Math.sqrt(Utils.toNumber(n));
-            e = Math.floor((e + 1) / 2) - ((e < 0 || e % 2) as number);
+            e = Math.floor((e + 1) / 2) - ((e < 0 ? 1 : 0) || e % 2 );
             if (s == Infinity) {
                 n = '5e' + e;
             } else {
@@ -975,8 +1341,7 @@ export class Decimal {
                     sd += 4;
                     rep = 1;
                 } else {
-                    if (Utils.toNumber(n) > 0 || Utils.toNumber(n.slice(1)) > 0
-                        && (n.charAt(0) == c'5')) {
+                    if (!Utils.toNumber(n) || !Utils.toNumber(n.slice(1)) && (n.charAt(0) == c'5')) {
                         Utils.finalise(r, e + 1, 1);
                         m = !r.mul(r).equals(x);
                     }
@@ -989,6 +1354,97 @@ export class Decimal {
     }
 
     /**
+     * Return a new Decimal whose value is the cube root of the value of this Decimal, rounded to
+     * `precision` significant digits using rounding mode `rounding`.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public cbrt(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite() || x.isZero()) {
+            return new Decimal(x);
+        }
+        external = false;
+        
+        // Initial estimate.
+        let s: number = x.s * Math.pow(x.s * x.toNumber(), 1 / 3);
+        
+        // Math.cbrt underflow/overflow?
+        // Pass x to Math.pow as integer, then adjust the exponent of the result.
+        let n: string = '';
+        let e: number = 0;
+        let r: Decimal;
+        if (!s || Math.abs(s) == Infinity) {
+            n = Utils.digitsToString(x.d!);
+            e = x.e;
+        
+            // Adjust n exponent so it is a multiple of 3 away from x exponent.
+            if (s = (e - n.length + 1) % 3) {
+                n += (s == 1 || s == -2 ? '0' : '00');
+            }
+            s = Math.pow(Utils.toNumber(n), 1 / 3);
+        
+            // Rarely, e may be one less than the result exponent value.
+            e = Math.floor((e + 1) / 3) - ((e % 3 == (e < 0 ? -1 : 2)) ? 1 : 0);
+        
+            if (s == Infinity) {
+                n = '5e' + e;
+            } else {
+                n = Utils.toExponential(s);
+                n = n.slice(0, n.indexOf('e') + 1) + e;
+            }
+        
+            r = new Decimal(n);
+            r.sign = x.s;
+        } else {
+            r = new Decimal(s);
+        }
+        
+        let sd = (e = Decimal.precision) + 3;
+        
+        // Halley's method. Compare Newton's method.
+        let rep: number = 0;
+        let m: boolean = false;
+        while (true) {
+            let t = r;
+            let t3 = t.mul(t).mul(t);
+            let t3plusx = t3.add(x);
+            r = Utils.divide(t3plusx.add(x).mul(t), t3plusx.add(t3), sd + 2, 1);
+            // Replace with for-loop and checkRoundingDigits.
+            if (Utils.digitsToString(t.d!).slice(0, sd) === (n = Utils.digitsToString(r.d!)).slice(0, sd)) {
+                n = n.slice(sd - 3, sd + 1);
+                // The 4th rounding digit may be in error by -1 so if the 4 rounding digits are 9999 or 4999
+                // , i.e. approaching a rounding boundary, continue the iteration.
+                if (n == '9999' || !rep && n == '4999') {
+                    // On the first iteration only, check to see if rounding up gives the exact result as the
+                    // nines may infinitely repeat.
+                    if (!rep) {
+                        Utils.finalise(t, e + 1, 0);
+                        if (t.mul(t).mul(t).equals(x)) {
+                            r = t;
+                            break;
+                        }
+                    }
+                    sd += 4;
+                    rep = 1;
+                } else {
+                    // If the rounding digits are null, 0{0,4} or 50{0,3}, check for an exact result.
+                    // If not, then there are further digits and m will be truthy.
+                    if (!+Utils.toNumber(n) || !+Utils.toNumber(n.slice(1)) && (n.charAt(0) == c'5')) {
+                        // Truncate to the first rounding digit.
+                        Utils.finalise(r, e + 1, 1);
+                        m = !r.mul(r).mul(r).equals(x);
+                    }
+                    break;
+                }
+            }
+        }
+
+        external = true;
+        return Utils.finalise(r, e, Decimal.rounding, m);
+    }
+
+    /**
      * Return true if the value of this Decimal is equal to the value of `n`, otherwise return false.
      *
      * @param { DecimalValue } n {number | string | Decimal}
@@ -996,48 +1452,6 @@ export class Decimal {
      */
     public equals(n: DecimalValue): boolean {
         return this.comparedTo(n) === 0;
-    }
-
-    /**
-     * Return true if the value of this Decimal is greater than the value of `n`, otherwise return false.
-     *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @returns { boolean } the boolean type
-     */
-    public greaterThan(n: DecimalValue): boolean {
-        return this.comparedTo(n) > 0;
-    }
-
-    /**
-     * Return true if the value of this Decimal is greater than or equal to the value of `n`,
-     * otherwise return false.
-     *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @returns { boolean } the boolean type
-     */
-    public greaterThanOrEqualTo(n: DecimalValue): boolean {
-        let k = this.comparedTo(n);
-        return k == 1 || k === 0;
-    }
-
-    /**
-     * Return true if the value of this Decimal is less than `n`, otherwise return false.
-     *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @returns { boolean } the boolean type
-     */
-    public lessThan(n: DecimalValue): boolean {
-        return this.comparedTo(n) < 0;
-    }
-
-    /**
-     * Return true if the value of this Decimal is less than or equal to `n`, otherwise return false.
-     *
-     * @param { DecimalValue } n {number | string | Decimal}
-     * @returns { boolean } the boolean type
-     */
-    public lessThanOrEqualTo(n: DecimalValue): boolean {
-        return this.comparedTo(n) <= 0;
     }
 
     /**
@@ -1096,6 +1510,37 @@ export class Decimal {
     }
 
     /**
+     * Return a new Decimal whose value is the value of this Decimal modulo `n`, rounded to
+     * `precision` significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal }the Decimal type
+     */
+    public mod(n: DecimalValue): Decimal {
+        let y = new Decimal(n);
+        if (!this.d || !y.s || y.d && !y.d![0]) {
+            return new Decimal(NaN);
+        }
+
+        if (!y.d || this.d && !this.d![0]) {
+            return Utils.finalise(new Decimal(this), Decimal.precision, Decimal.rounding);
+        }
+
+        external = false;
+        let q: Decimal;
+        if (Decimal.modulo == 9) {
+            q = Utils.divide(this, y.abs(), 0, 3, true);
+            q.sign *= y.s;
+        } else {
+            q = Utils.divide(this, y, 0, Decimal.modulo, true);
+        }
+
+        q = q.mul(y);
+        external = true;
+        return this.sub(q);
+    }
+
+    /**
      * Return a new Decimal whose value is the value of this Decimal raised to the power `n`, rounded
      * to `precision` significant digits using rounding mode `rounding`.
      *
@@ -1131,7 +1576,7 @@ export class Decimal {
             if (e < y.d!.length - 1) {
                 return new Decimal(NaN);
             }
-            if ((y.d![e] & 1) == 0) {
+            if ((e < y.d!.length ? y.d![e] & 1 : 0) == 0) {
                 s = 1;
             }
             if (x.e == 0 && x.d![0] == 1 && x.d!.length == 1) {
@@ -1142,15 +1587,19 @@ export class Decimal {
 
         k = Math.pow(+x.toNumber(), yn);
         e = k == 0 || !isFinite(k)
-          ? Math.floor(yn * (Math.log(Utils.toNumber('0.' + Utils.digitsToString(x.d!))) / Math.LN10 + x.e + 1))
-          : new Decimal(k + '').e;
+            ? Math.floor(yn * (Math.log(Utils.toNumber('0.' + Utils.digitsToString(x.d!))) / Math.LN10 + x.e + 1))
+            : new Decimal(k + '').e;
 
         if (e > Decimal.maxE + 1 || e < Decimal.minE - 1) {
-            return new Decimal(e > 0 ? s / 0 : 0);
+            return new Decimal(e > 0 ? s * Infinity : 0);
         }
 
         external = false;
         Decimal.rounding = x.sign = 1;
+        // Estimate the extra guard digits needed to ensure five correct rounding digits from
+        // naturalLogarithm(x). Example of failure without these extra digits (precision: 10):
+        // new Decimal(2.32456).pow('2087987436534566.46411')
+        // should be 1.162377823e+764914905173815, but is 1.162355823e+764914905173815
         k = Math.min(12, (e + '').length);
         let r = this.naturalExponential(y.mul(this.naturalLogarithm(x, pr + k)), pr);
         if (r.d) {
@@ -1181,6 +1630,586 @@ export class Decimal {
     }
 
     /**
+     * Return the logarithm of the value of this Decimal to the specified base, rounded to `precision`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public log(n: DecimalValue): Decimal {
+        let base = new Decimal(n);
+        let d = base.d;
+
+        // Return NaN if base is negative, or non-finite, or is 0 or 1.
+        if (base.s < 0 || !d || !d[0] || base.equals(1)) {
+            return new Decimal(NaN);
+        }
+
+        let isBase10 = base.equals(10);
+        d = this.d;
+        // Is arg negative, non-finite, 0 or 1?
+        if (this.s < 0 || !d || !d[0] || this.equals(1)) {
+            return new Decimal(d && !d[0] ? -Infinity : this.s != 1 ? NaN : d ? 0 : Infinity);
+        }
+
+        // The result will have a non-terminating decimal expansion if base is 10 and arg is not an
+        // integer power of 10.
+        let inf: boolean = false;
+        let k: number;
+        if (isBase10) {
+            if (d.length > 1) {
+                inf = true;
+            } else {
+                for (k = d[0]; k % 10 === 0;) {
+                    k /= 10;
+                }
+                inf = k !== 1;
+            }
+        }
+
+        external = false;
+        let guard = 5;
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        let sd = pr + guard;
+        let num = this.naturalLogarithm(this, sd);
+        let denominator = isBase10 ? this.getLn10(sd + 10) : this.naturalLogarithm(base, sd);
+
+        // The result will have 5 rounding digits.
+        let r = Utils.divide(num, denominator, sd, 1);
+
+        // If at a rounding boundary, i.e. the result's rounding digits are [49]9999 or [50]0000,
+        // calculate 10 further digits.
+        //
+        // If the result is known to have an infinite decimal expansion, repeat this until it is clear
+        // that the result is above or below the boundary. Otherwise, if after calculating the 10
+        // further digits, the last 14 are nines, round up and assume the result is exact.
+        // Also assume the result is exact if the last 14 are zero.
+        //
+        // Example of a result that will be incorrectly rounded:
+        // log[1048576](4503599627370502) = 2.60000000000000009610279511444746...
+        // The above result correctly rounded using ROUND_CEILING to 1 decimal place should be 2.7, but it
+        // will be given as 2.6 as there are 15 zeros immediately after the requested decimal place, so
+        // the exact result would be assumed to be 2.6, which rounded using ROUND_CEILING to 1 decimal
+        // place is still 2.6.
+        if (Utils.checkRoundingDigits(r.d!, k = pr, rm)) {
+            do {
+                sd += 10;
+                num = this.naturalLogarithm(this, sd);
+                denominator = isBase10 ? this.getLn10(sd + 10) : this.naturalLogarithm(base, sd);
+                r = Utils.divide(num, denominator, sd, 1);
+
+                if (!inf) {
+                    // Check for 14 nines from the 2nd rounding digit, as the first may be 4.
+                    if (+Utils.toNumber(Utils.digitsToString(r.d!).slice(k + 1, k + 15)) + 1 == 1e14) {
+                        r = Utils.finalise(r, pr + 1, 0);
+                    }
+                    break;
+                }
+            } while (Utils.checkRoundingDigits(r.d!, k += 10, rm));
+        }
+        external = true;
+
+        return Utils.finalise(r, pr, rm);
+    }
+
+    /**
+     * Return a new Decimal whose value is the natural logarithm of the value of this Decimal,
+     * rounded to `precision` significant digits using rounding mode `rounding`.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public ln(): Decimal {
+        return this.naturalLogarithm(this);
+    }
+
+    /**
+     * Return a new Decimal whose value is the cosine of the value in radians of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public cos(): Decimal {
+        let x: Decimal = this;
+        if (!x.d) {
+            return new Decimal(NaN);
+        }
+    
+        if (!x.d![0]) {
+            return new Decimal(1);
+        }
+    
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + Math.max(this.e, x.precision()) + LOG_BASE;
+        Decimal.rounding = 1;
+        
+        x = this.cosine(this.toLessThanHalfPi(x));
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return Utils.finalise(Decimal.quadrant == 2 || Decimal.quadrant == 3 ? x.negate() : x, pr, rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the sine of the value in radians of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public sin(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite()) {
+            return new Decimal(NaN);
+        }
+        if (x.isZero()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + Math.max(x.e, x.precision()) + LOG_BASE;
+        Decimal.rounding = 1;
+        
+        x = this.sine(this.toLessThanHalfPi(x));
+        
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return Utils.finalise(Decimal.quadrant > 2 ? x.negate() : x, pr, rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the tangent of the value in radians of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public tan(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite()) {
+            return new Decimal(NaN);
+        }
+        if (x.isZero()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + 10;
+        Decimal.rounding = 1;
+        
+        x = x.sin();
+        x.sign = 1;
+        x = Utils.divide(x, new Decimal(1).sub(x.mul(x)).sqrt(), pr + 10, 0);
+        
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return Utils.finalise(Decimal.quadrant == 2 || Decimal.quadrant == 4 ? x.negate() : x, pr, rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic cosine of the value in radians of this
+     * Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public cosh(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite()) {
+            return new Decimal(x.s ? Infinity : NaN);
+        }
+        let one = new Decimal(1);
+        if (x.isZero()) {
+            return one;
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
+        Decimal.rounding = 1;
+        let len = x.d!.length;
+        
+        // Argument reduction: cos(4x) = 1 - 8cos^2(x) + 8cos^4(x) + 1
+        // i.e. cos(x) = 1 - cos^2(x/4)(8 - 8cos^2(x/4))
+        
+        // Estimate the optimum number of times to use the argument reduction.
+        let k: number = 0;
+        let n: string = '';
+        if (len < 32) {
+            k = Math.ceil(len / 3);
+            n = Utils.toString((1 / Utils.tinyPow(4, k)));
+        } else {
+            k = 16;
+            n = '2.3283064365386962890625e-10';
+        }
+        
+        x = this.taylorSeries(1, x.mul(n), new Decimal(1), true);
+        
+        // Reverse argument reduction
+        let i = k;
+        let d8 = new Decimal(8);
+        for (; i--;) {
+            let cosh2_x = x.mul(x);
+            x = one.sub(cosh2_x.mul(d8.sub(cosh2_x.mul(d8))));
+        }
+        
+        return Utils.finalise(x, Decimal.precision = pr, Decimal.rounding = rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic sine of the value in radians of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public sinh(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite() || x.isZero()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + Math.max(x.e, x.precision()) + 4;
+        Decimal.rounding = 1;
+        let len = x.d!.length;
+        
+        if (len < 3) {
+            x = this.taylorSeries(2, x, x, true);
+        } else {
+            // Alternative argument reduction: sinh(3x) = sinh(x)(3 + 4sinh^2(x))
+            // i.e. sinh(x) = sinh(x/3)(3 + 4sinh^2(x/3))
+            // 3 multiplications and 1 addition
+            // Argument reduction: sinh(5x) = sinh(x)(5 + sinh^2(x)(20 + 16sinh^2(x)))
+            // i.e. sinh(x) = sinh(x/5)(5 + sinh^2(x/5)(20 + 16sinh^2(x/5)))
+            // 4 multiplications and 2 additions
+            // Estimate the optimum number of times to use the argument reduction.
+            let k = 1.4 * Math.sqrt(len);
+            k = k > 16 ? 16 : k | 0;
+            x = x.mul(1 / Utils.tinyPow(5, k));
+            x = this.taylorSeries(2, x, x, true);
+
+            // Reverse argument reduction
+            let d5 = new Decimal(5);
+            let d16 = new Decimal(16);
+            let d20 = new Decimal(20);
+            for (; k--;) {
+                let sinh2_x = x.mul(x);
+                x = x.mul(d5.add(sinh2_x.mul(d16.mul(sinh2_x).add(d20))));
+            }
+        }
+
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+
+        return Utils.finalise(x, pr, rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the hyperbolic tangent of the value in radians of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public tanh(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite()) {
+            return new Decimal(x.s);
+        }
+        if (x.isZero()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + 7;
+        Decimal.rounding = 1;
+        
+        return Utils.divide(x.sinh(), x.cosh(), Decimal.precision = pr, Decimal.rounding = rm);
+    }
+
+    /**
+     * Return true if the value of this Decimal is greater than the value of `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public greaterThan(n: DecimalValue): boolean {
+        return this.comparedTo(n) > 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is greater than or equal to the value of `n`,
+     * otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public greaterThanOrEqualTo(n: DecimalValue): boolean {
+        let k = this.comparedTo(n);
+        return k == 1 || k === 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is less than `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public lessThan(n: DecimalValue): boolean {
+        return this.comparedTo(n) < 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is less than or equal to `n`, otherwise return false.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { boolean } the boolean type
+     */
+    public lessThanOrEqualTo(n: DecimalValue): boolean {
+        return this.comparedTo(n) <= 0;
+    }
+
+    /**
+     * Return a new Decimal whose value is the arccosine (inverse cosine) in radians of the value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public acos(): Decimal {
+        let x: Decimal = this;
+        let k = x.abs().comparedTo(1);
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+    
+        if (k != -1) {
+            return k == 0
+                // |x| is 1
+                ? x.isNegative() ? Utils.getPi(pr, rm) : new Decimal(0)
+                // |x| > 1 or x is NaN
+                : new Decimal(NaN);
+        }
+        
+        if (x.isZero()) {
+            return Utils.getPi(pr + 4, rm).mul(0.5);
+        }
+        
+        Decimal.precision = pr + 6;
+        Decimal.rounding = 1;
+
+        x = (new Decimal(1)).sub(x).div(x.add(1)).sqrt().atan();
+
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+
+        return x.mul(2);
+    }
+
+    /**
+     * Return a new Decimal whose value is the arcsine (inverse sine) in radians of the value of this
+     * Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public asin(): Decimal {
+        let x: Decimal = this;
+        if (x.isZero()) {
+            return new Decimal(x);
+        }
+
+        let k = x.abs().comparedTo(1);
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        if (k != -1) {
+            // |x| is 1
+            if (k == 0) {
+                let halfPi = Utils.getPi(pr + 4, rm).mul(0.5);
+                halfPi.sign = x.s;
+                return halfPi;
+            }
+            // |x| > 1 or x is NaN
+            return new Decimal(NaN);
+        }
+
+        Decimal.precision = pr + 6;
+        Decimal.rounding = 1;
+
+        x = x.div(new Decimal(1).sub(x.mul(x)).sqrt().add(1)).atan();
+
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+
+        return x.mul(2);
+    }
+
+    /**
+     * Return a new Decimal whose value is the arctangent (inverse tangent) in radians of the value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public atan(): Decimal {
+        let x: Decimal = this;
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        let r: Decimal;
+        if (!x.isFinite()) {
+            if (!x.s) {
+                return new Decimal(NaN);
+            }
+            if (pr + 4 <= PI_PRECISION) {
+                r = Utils.getPi(pr + 4, rm).mul(0.5);
+                r.sign = x.s;
+                return r;
+            }
+        } else if (x.isZero()) {
+            return new Decimal(x);
+        } else if (x.abs().equals(1) && pr + 4 <= PI_PRECISION) {
+            r = Utils.getPi(pr + 4, rm).mul(0.25);
+            r.sign = x.s;
+            return r;
+        }
+
+        let wpr: number = pr + 10;
+        Decimal.precision = wpr;
+        Decimal.rounding = 1;
+
+        // Argument reduction
+        // Ensure |x| < 0.42
+        // atan(x) = 2 * atan(x / (1 + sqrt(1 + x^2)))
+        let k = Math.min(28, wpr / LOG_BASE + 2 | 0);
+        let i: number = 0;
+        for (i = k; i; --i) {
+            x = x.div(x.mul(x).add(1).sqrt().add(1));
+        }
+        external = false;
+
+        let j = Math.ceil(wpr / LOG_BASE);
+        let n = 1;
+        let x2 = x.mul(x);
+        r = new Decimal(x);
+        let px = x;
+
+        // atan(x) = x - x^3/3 + x^5/5 - x^7/7 + ...
+        for (; i != -1;) {
+            px = px.mul(x2);
+            let t = r.sub(px.div(n += 2));
+            px = px.mul(x2);
+            r = t.add(px.div(n += 2));
+            if (j < r.d!.length && r.d![j] != undefined) {
+                for (i = j; r.d![i] == (i < t.d!.length ? t.d![i] : undefined) && i--;);
+            }
+        }
+
+        if (k) {
+            r = r.mul(2 << (k - 1));
+        }
+
+        external = true;
+
+        return Utils.finalise(r, Decimal.precision = pr, Decimal.rounding = rm, true);
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic cosine in radians of the
+     * value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public acosh(): Decimal {
+        let x: Decimal = this;
+        if (x.comparedTo(1) == -1) {
+            return new Decimal(x.equals(1) ? 0 : NaN);
+        }
+        if (!x.isFinite()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + Math.max(Math.abs(x.e), x.precision()) + 4;
+        Decimal.rounding = 1;
+        external = false;
+        
+        x = x.mul(x).sub(1).sqrt().add(x);
+        
+        external = true;
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return x.ln();
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic sine in radians of the value
+     * of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public asinh(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite() || x.isZero()) {
+            return new Decimal(x);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        Decimal.precision = pr + 2 * Math.max(Math.abs(x.e), x.precision()) + 6;
+        Decimal.rounding = 1;
+        external = false;
+        
+        x = x.mul(x).add(1).sqrt().add(x);
+        
+        external = true;
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return x.ln();
+    }
+
+    /**
+     * Return a new Decimal whose value is the inverse of the hyperbolic tangent in radians of the
+     * value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200060 - Precision limit exceeded.
+     */
+    public atanh(): Decimal {
+        let x: Decimal = this;
+        if (!x.isFinite()) {
+            return new Decimal(NaN);
+        }
+        if (x.e >= 0) {
+            return new Decimal(x.abs().equals(1) ? x.s * Infinity : x.isZero() ? x : NaN);
+        }
+        
+        let pr = Decimal.precision;
+        let rm = Decimal.rounding;
+        let xsd = x.precision();
+        
+        if (Math.max(xsd, pr) < 2 * -x.e - 1) {
+            return Utils.finalise(new Decimal(x), pr, rm, true);
+        }
+        
+        let wpr = xsd - x.e;
+        Decimal.precision = wpr;
+        
+        x = Utils.divide(x.add(1), new Decimal(1).sub(x), wpr + pr, 1);
+        
+        Decimal.precision = pr + 4;
+        Decimal.rounding = 1;
+        
+        x = x.ln();
+        
+        Decimal.precision = pr;
+        Decimal.rounding = rm;
+        
+        return x.mul(0.5);
+    }
+
+    /**
      * Return a new Decimal whose value is the value of this Decimal plus `n`, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
@@ -1202,13 +2231,13 @@ export class Decimal {
             y.sign = -y.s;
             return this.sub(y);
         }
-        let xd = this.d;
-        let yd = y.d;
+        let xd = this.d!;
+        let yd = y.d!;
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
 
-        if (!xd![0] || !yd![0]) {
-            if (!yd![0]) {
+        if (!xd[0] || !yd[0]) {
+            if (!yd[0]) {
                 y = new Decimal(this);
             }
             return external ? Utils.finalise(y, pr, rm) : y;
@@ -1223,9 +2252,9 @@ export class Decimal {
             if (i < 0) {
                 d = xd;
                 i = -i;
-                len = yd!.length;
+                len = yd.length;
             } else {
-                d = yd!;
+                d = yd;
                 e = k;
                 len = xd.length;
             }
@@ -1242,17 +2271,17 @@ export class Decimal {
             d.reverse();
         }
         len = xd.length;
-        i = yd!.length;
+        i = yd.length;
         if (len - i < 0) {
             i = len;
-            d = yd!;
+            d = yd;
             yd = xd;
             xd = d;
         }
         let carry: number = 0;
         for (carry = 0; i;) {
             --i;
-            xd[i] = xd[i] + yd![i] + carry;
+            xd[i] = xd[i] + yd[i] + carry;
             carry = (xd[i] / BASE) | 0;
             xd[i] = xd[i] % BASE;
         }
@@ -1296,14 +2325,14 @@ export class Decimal {
             return x.add(y);
         }
 
-        let xd = x.d;
-        let yd = y.d;
+        let xd = x.d!;
+        let yd = y.d!;
         let pr = Decimal.precision;
         let rm = Decimal.rounding;
-        if (!xd![0] || !yd![0]) {
-            if (yd![0]) {
+        if (!xd[0] || !yd[0]) {
+            if (yd[0]) {
                 y.sign = -y.s;
-            } else if (xd![0]) {
+            } else if (xd[0]) {
                 y = new Decimal(x);
             } else {
                 return new Decimal(rm === 3 ? -0 : 0);
@@ -1314,7 +2343,7 @@ export class Decimal {
         // Calculate base 1e7 exponents.
         let yExp = Math.floor(y.e / LOG_BASE);
         let xExp = Math.floor(x.e / LOG_BASE);
-        xd = xd!.slice();
+        xd = xd.slice();
         let expDiff = xExp - yExp;
         let len: number;
         let i: number;
@@ -1323,13 +2352,13 @@ export class Decimal {
             xLessThanY = expDiff < 0;
             let d: Array<number>;
             if (xLessThanY) {
-                d = xd!;
+                d = xd;
                 expDiff = -expDiff;
-                len = yd!.length;
+                len = yd.length;
             } else {
-                d = yd!;
+                d = yd;
                 yExp = xExp;
-                len = xd!.length;
+                len = xd.length;
             }
             let i = Math.max(Math.ceil(pr / LOG_BASE), len) + 2;
             if (expDiff > i) {
@@ -1342,15 +2371,15 @@ export class Decimal {
             }
             d.reverse();
         } else {
-            let i = xd!.length;
-            len = yd!.length;
+            let i = xd.length;
+            len = yd.length;
             xLessThanY = i < len;
             if (xLessThanY) {
                 len = i;
             }
             for (i = 0; i < len; i++) {
-                if (xd![i] != yd![i]) {
-                    xLessThanY = xd![i] < yd![i];
+                if (xd[i] != yd[i]) {
+                    xLessThanY = xd[i] < yd[i];
                     break;
                 }
             }
@@ -1363,36 +2392,36 @@ export class Decimal {
             yd = d;
             y.sign = -y.s;
         }
-        len = xd!.length;
-        for (i = yd!.length - len; i > 0; --i) {
-            xd!.push(0);
+        len = xd.length;
+        for (i = yd.length - len; i > 0; --i) {
+            xd.push(0);
             len++
         }
         let j: number;
-        for (i = yd!.length; i > expDiff;) {
-            if (xd![--i] < yd![i]) {
-                for (j = i; j && xd![--j] === 0;) {
-                    xd![j] = BASE - 1;
+        for (i = yd.length; i > expDiff && i > 0;) {
+            if (xd[--i] < yd[i]) {
+                for (j = i; j && xd[--j] === 0;) {
+                    xd[j] = BASE - 1;
                 }
-                --xd![j];
-                xd![i] = xd![i] + BASE;
+                --xd[j];
+                xd[i] = xd[i] + BASE;
             }
-            xd![i] -= yd![i];
+            xd[i] -= yd[i];
         }
 
-        for (; xd![--len] === 0;) {
-            xd!.pop();
+        for (; len > 0 && xd[--len] === 0;) {
+            xd.pop();
         }
 
-        for (; xd![0] === 0; xd!.shift()) {
+        for (; xd.length > 0 && xd[0] === 0; xd.shift()) {
             --yExp;
         }
 
-        if (!xd![0]) {
+        if (xd.length == 0 || (xd.length > 0 && !xd[0])) {
             return new Decimal(rm === 3 ? -0 : 0);
         }
         y.digits = xd;
-        y.exponent = this.getBase10Exponent(xd!, yExp);
+        y.exponent = this.getBase10Exponent(xd, yExp);
         return external ? Utils.finalise(y, pr, rm) : y;
     }
 
@@ -1780,7 +2809,7 @@ export class Decimal {
     }
 
     private nonFiniteToString(): String {
-        return String(this.sign * this.sign / 0);
+        return String(Number.isNaN(this.sign) ? NaN : this.sign * this.sign * Infinity);
     }
 
     private naturalExponential(x: Decimal, sd?: number): Decimal {
@@ -1815,6 +2844,7 @@ export class Decimal {
         let sum = new Decimal(1);
         Decimal.precision = wpr;
         let i = 0;
+        let rep: number = 0;
         while (true) {
             pow = Utils.finalise(pow.mul(x), wpr, 1);
             denominator = denominator.mul(++i);
@@ -1826,7 +2856,6 @@ export class Decimal {
                 }
 
                 if (sd == undefined) {
-                    let rep: number = 0;
                     if (rep < 3 && Utils.checkRoundingDigits(sum.d!, wpr - guard, rm, rep)) {
                         Decimal.precision = wpr += 10;
                         denominator = pow = t = new Decimal(1);
@@ -1848,13 +2877,12 @@ export class Decimal {
         let x = y;
         let xd = x.d;
         let rm = Decimal.rounding;
-        let n: number = 1;
         if (x.s < 0 || !xd || !xd![0] || !x.e && xd![0] == 1 && xd!.length == 1) {
             return new Decimal(xd && !xd![0] ? -Infinity : x.s != 1 ? NaN : xd ? 0 as number : x);
         }
         let wpr: number;
         let pr = Decimal.precision;
-        if (sd == null) {
+        if (sd == undefined) {
             external = false;
             wpr = pr;
         } else {
@@ -1865,10 +2893,11 @@ export class Decimal {
         let c = Utils.digitsToString(xd!);
         let ch = new Char(c.charAt(0));
         let c0 = Utils.toNumber(ch.toString());
-        let e: number;
+        let e: number = 0;
+        let n: number = 1;
         if (Math.abs(e = x.e) < 1.5e15) {
-            let n: number = 1;
-            while (c0 < 7 && c0 != 1 || c0 == 1 && (Utils.toNumber((new Char(c.charAt(1))).toString())) > 3) {
+            while (c0 < 7 && c0 != 1 ||
+                c0 == 1 && (c.length > 1 ? Utils.toNumber((new Char(c.charAt(1))).toString()) : NaN) > 3) {
                 x = x.mul(y);
                 c = Utils.digitsToString(x.d!);
                 c0 = Utils.toNumber((new Char(c.charAt(0))).toString());
@@ -1885,13 +2914,14 @@ export class Decimal {
             let t = this.getLn10(wpr + 2, pr).mul(e + '');
             x = this.naturalLogarithm(new Decimal(c0 + '.' + c.slice(1)), wpr - guard).add(t);
             Decimal.precision = pr;
-            return sd == null ? Utils.finalise(x, pr, rm, external = true) : x;
+            return sd == undefined ? Utils.finalise(x, pr, rm, external = true) : x;
         }
         let x1 = x;
         let numerator: Decimal;
         let sum = numerator = x = Utils.divide(x.sub(1), x.add(1), wpr, 1);
         let x2 = Utils.finalise(x.mul(x), wpr, 1);
         let denominator: number = 3;
+        let rep: number = 0;
         while (true) {
             numerator = Utils.finalise(numerator.mul(x2), wpr, 1);
             let t = sum.add(Utils.divide(numerator, new Decimal(denominator), wpr, 1));
@@ -1901,8 +2931,7 @@ export class Decimal {
                     sum = sum.add(this.getLn10(wpr + 2, pr).mul(e + ''));
                 }
                 sum = Utils.divide(sum, new Decimal(n), wpr, 1);
-                let rep: number = 0;
-                if (sd == null) {
+                if (sd == undefined) {
                     if (Utils.checkRoundingDigits(sum.d!, wpr - guard, rm, rep)) {
                         Decimal.precision = wpr += guard;
                         t = numerator = x = Utils.divide(x1.sub(1), x1.add(1), wpr, 1);
@@ -1931,6 +2960,188 @@ export class Decimal {
                 `Precision limit exceeded, "sd" must be <= LN10_PRECISION`);
         }
         return Utils.finalise(new Decimal(LN10), sd, 1, true);
+    }
+
+    private toLessThanHalfPi(x: Decimal): Decimal {
+        let isNeg = x.s < 0;
+        let pi = Utils.getPi(Decimal.precision, 1);
+        let halfPi = pi.mul(0.5);
+        x = x.abs();
+        if (x.comparedTo(halfPi) < 1) {
+            Decimal.quadrant = isNeg ? 4 : 1;
+            return x;
+        }
+        let t = x.dividedToIntegerBy(pi);
+        if (t.isZero()) {
+            Decimal.quadrant = isNeg ? 3 : 2;
+        } else {
+            x = x.sub(t.mul(pi));
+            // 0 <= x < pi
+            if (x.comparedTo(halfPi) < 1) {
+                Decimal.quadrant = Utils.isOdd(t) ? (isNeg ? 2 : 3) : (isNeg ? 4 : 1);
+                return x;
+            }
+            Decimal.quadrant = Utils.isOdd(t) ? (isNeg ? 1 : 4) : (isNeg ? 3 : 2);
+        }
+        return x.sub(pi).abs();
+    }
+
+    private cosine(x: Decimal): Decimal {
+        if (x.isZero()) {
+            return x;
+        }
+
+        // Argument reduction: cos(4x) = 8*(cos^4(x) - cos^2(x)) + 1
+        // i.e. cos(x) = 8*(cos^4(x/4) - cos^2(x/4)) + 1
+        // Estimate the optimum number of times to use the argument reduction.
+        let len = x.d!.length;
+        let k: number = 0;
+        let y: string = '';
+        if (len < 32) {
+            k = Math.ceil(len / 3);
+            y = Utils.toString((1 / Utils.tinyPow(4, k)));
+        } else {
+            k = 16;
+            y = '2.3283064365386962890625e-10';
+        }
+
+        Decimal.precision += k;
+
+        x = this.taylorSeries(1, x.mul(y), new Decimal(1));
+
+        // Reverse argument reduction
+        for (let i = k; i--;) {
+            let cos2x = x.mul(x);
+            x = cos2x.mul(cos2x).sub(cos2x).mul(8).add(1);
+        }
+        Decimal.precision -= k;
+        return x;
+    }
+
+    private sine(x: Decimal): Decimal {
+        let len = x.d!.length;
+        if (len < 3) {
+          return x.isZero() ? x : this.taylorSeries(2, x, x);
+        }
+
+        // Argument reduction: sin(5x) = 16*sin^5(x) - 20*sin^3(x) + 5*sin(x)
+        // i.e. sin(x) = 16*sin^5(x/5) - 20*sin^3(x/5) + 5*sin(x/5)
+        // and  sin(x) = sin(x/5)(5 + sin^2(x/5)(16sin^2(x/5) - 20))
+        // Estimate the optimum number of times to use the argument reduction.
+        let k = 1.4 * Math.sqrt(len);
+        k = k > 16 ? 16 : k | 0;
+
+        x = x.mul(1 / Utils.tinyPow(5, k));
+        x = this.taylorSeries(2, x, x);
+
+        // Reverse argument reduction
+        let d5 = new Decimal(5);
+        let d16 = new Decimal(16);
+        let d20 = new Decimal(20);
+        for (; k--;) {
+          let sin2_x = x.mul(x);
+          x = x.mul(d5.add(sin2_x.mul(d16.mul(sin2_x).sub(d20))));
+        }
+
+        return x;
+    }
+
+    private taylorSeries(n: number, x: Decimal, y: Decimal, isHyperbolic?: boolean): Decimal {
+        let pr = Decimal.precision;
+        let k = Math.ceil(pr / LOG_BASE);
+
+        external = false;
+        let x2 = x.mul(x);
+        let u = new Decimal(y);
+        let i: number = 1;
+        let t: Decimal;
+        let j: number = 0;
+        while(true) {
+            t = Utils.divide(u.mul(x2), new Decimal(n++ * n++), pr, 1);
+            u = isHyperbolic ? y.add(t) : y.sub(t);
+            y = Utils.divide(t.mul(x2), new Decimal(n++ * n++), pr, 1);
+            t = u.add(y);
+            if (k < t.d!.length && t.d![k] != undefined) {
+                for (j = k; (j >= 0 && t.d![j] == (j < u.d!.length ? u.d![j] : undefined)) && j--;);
+                if (j == -1) {
+                    break;
+                }
+            }
+            let t1 = u;
+            u = y;
+            y = t;
+            t = t1;
+            i++;
+        }
+        external = true;
+        t.d!.length = k + 1;
+        return t;
+    }
+
+    private fraction(maxD?: DecimalValue): Decimal[] {
+        let x: Decimal = this;
+        let xd = x.d;
+        if (!xd) {
+            return [new Decimal(x)];
+        }
+
+        let d0 = new Decimal(1);
+        let n0 = new Decimal(0);
+        let n1 = d0;
+        let d1 = n0;
+
+        let d = new Decimal(d1);
+        let e = d.exponent = Utils.getPrecision(xd!) - x.e - 1;
+        let k = e % LOG_BASE;
+        d.d![0] = Math.pow(10, k < 0 ? LOG_BASE + k : k);
+
+        let n: Decimal;
+        if (maxD == undefined) {
+            // d is 10**e, the minimum max-denominator needed.
+            maxD = e > 0 ? d : n1;
+        } else {
+            n = new Decimal(maxD);
+            if (!n.isInteger() || n.comparedTo(n1) == -1) {
+                throw Utils.createBusinessError(TYPE_ERROR_CODE,
+                    `The type of "Ctor(maxD)" must be Integer. Received value is: ${n}`);
+            }
+            maxD = n.comparedTo(d) == 1 ? (e > 0 ? d : n1) : n;
+        }
+
+        external = false;
+        n = new Decimal(Utils.digitsToString(xd!));
+        let pr = Decimal.precision;
+        Decimal.precision = e = xd.length * LOG_BASE * 2;
+        let d2: Decimal;
+        while(true)  {
+            let q = Utils.divide(n, d, 0, 1, true);
+            d2 = d0.add(q.mul(d1));
+            if (d2.comparedTo(maxD) == 1) {
+                break;
+            }
+            d0 = d1;
+            d1 = d2;
+            d2 = n1;
+            n1 = n0.add(q.mul(d2));
+            n0 = d2;
+            d2 = d;
+            d = n.sub(q.mul(d2));
+            n = d2;
+        }
+
+        d2 = Utils.divide(maxD.sub(d0), d1, 0, 1, true);
+        n0 = n0.add(d2.mul(n1));
+        d0 = d0.add(d2.mul(d1));
+        n0.sign = n1.sign = x.s;
+
+        // Determine which fraction is closer to x, n0/d0 or n1/d1?
+        let r = Utils.divide(n1, d1, e, 1).sub(x).abs().comparedTo(Utils.divide(n0, d0, e, 1).sub(x).abs()) < 1
+            ? [n1, d1] : [n0, d0];
+
+        Decimal.precision = pr;
+        external = true;
+
+        return r;
     }
 
     private getDigitsValidIndex(digits: Array<number>): number {
@@ -2213,7 +3424,7 @@ class Utils {
         // E.g. if within the word 3487563 the first rounding digit is 5,
         // then i = 4, k = 1000, rd = 3487563 % 1000 = 563
         k = Math.pow(10, LOG_BASE - i);
-        let rd = d[di] % k | 0;
+        let rd = di < d.length ? d[di] % k | 0 : 0;
         let r: boolean = false;
         if (repeating == undefined) {
             if (i < 3) {
@@ -2226,8 +3437,8 @@ class Utils {
                 r = rm < 4 && rd == 99999 || rm > 3 && rd == 49999 || rd == 50000 || rd == 0;
             } else {
                 r = (rm < 4 && rd + 1 == k || rm > 3 && rd + 1 == k / 2) &&
-                    (d[di + 1] / k / 100 | 0) == Math.pow(10, i - 2) - 1 ||
-                    (rd == k / 2 || rd == 0) && (d[di + 1] / k / 100 | 0) == 0;
+                    ((di + 1 < d.length) ? (d[di + 1] / k / 100 | 0) : 0) == Math.pow(10, i - 2) - 1 ||
+                    (rd == k / 2 || rd == 0) && ((di + 1 < d.length) ? (d[di + 1] / k / 100 | 0) : 0) == 0;
             }
         } else {
             if (i < 4) {
@@ -2282,6 +3493,43 @@ class Utils {
             }
         }
         return def;
+    }
+
+    public static getPrecision(digits: Array<number>) {
+        let w = digits.length - 1;
+        let len = w * LOG_BASE + 1;
+      
+        w = digits[w];
+        if (w) {
+            for (; w % 10 == 0; w /= 10) {
+                len--;
+            }
+      
+            for (w = digits[0]; w >= 10; w /= 10) {
+                len++;
+            }
+        }
+        return len;
+    }
+
+    public static isOdd(n: Decimal): boolean {
+        return (n.d![n.d!.length - 1] & 1) > 0;
+    }
+
+    public static tinyPow(b: number, e: number): number {
+        let n = b;
+        while (--e) {
+            n *= b;
+        }
+        return n;
+    }
+
+    public static getPi(sd: number, rm: number): Decimal {
+        if (sd > PI_PRECISION) {
+            throw Utils.createBusinessError(PRECISION_LIMIT_EXCEEDED_ERROR_CODE,
+                `Precision limit exceeded, "sd" must be <= PI_PRECISION`);
+        }
+        return Utils.finalise(new Decimal(PI), sd, rm, true);
     }
 
     /**
@@ -2449,8 +3697,10 @@ class Utils {
         if (!xd || !xd![0] || !yd || !yd![0]) {
             return new Decimal(
                 !x.s || !y.s || (xd ? yd && xd![0] == yd![0] : !yd) ? NaN :
-                xd && xd![0] == 0 || !yd ? sign * 0 : sign / 0);
+                xd && xd![0] == 0 || !yd ? sign * 0 : sign * Infinity);
         }
+        xd = x.d!;
+        yd = y.d!;
         let logBase: number;
         let e: number;
         if (base) {
@@ -2467,9 +3717,9 @@ class Utils {
         let qd = new Array<number>();
         q.digits = qd;
         let i: number;
-        for (i = 0; i < yL && yd![i] == (xd![i] || 0); i++);
+        for (i = 0; i < yL && yd[i] == (i < xL ? xd[i] || 0 : 0); i++);
 
-        if (yd![i] > (xd![i] || 0)) {
+        if (i < yL && yd[i] > (i < xL ? xd[i] || 0 : 0)) {
             e--;
         }
         let sd: number;
@@ -2491,25 +3741,25 @@ class Utils {
             i = 0;
             if (yL == 1) {
                 k = 0;
-                let ydv = yd![0];
+                let ydv = yd[0];
                 sd++;
                 let t: number;
                 for (; (i < xL || k) && sd--; i++) {
-                    t = k * base + (i < xd!.length ? (xd![i] || 0) : 0);
+                    t = k * base + (i < xd.length ? (xd[i] || 0) : 0);
                     qd.push(t / ydv | 0);
                     k = t % ydv | 0;
                 }
                 more = (k || i) < xL;
             } else {
-                k = base / (yd![0] + 1) | 0;
+                k = base / (yd[0] + 1) | 0;
                 if (k > 1) {
                     yd = Utils.multiplyInteger(yd, k, base);
                     xd = Utils.multiplyInteger(xd, k, base);
-                    yL = yd!.length;
-                    xL = xd!.length;
+                    yL = yd.length;
+                    xL = xd.length;
                 }
                 let xi = yL;
-                let rem: Array<number> | undefined = xd!.slice(0, yL);
+                let rem: Array<number> | undefined = xd.slice(0, yL);
                 let remL = rem.length;
                 for (; remL < yL;) {
                     if (remL == rem.length) {
@@ -2519,10 +3769,10 @@ class Utils {
                         rem[remL++] = 0;
                     }
                 }
-                let yz = yd!.slice();
+                let yz = yd.slice();
                 yz.unshift(0);
-                let yd0 = yd![0];
-                if (yd![1] >= base / 2) {
+                let yd0 = yd[0];
+                if (yd[1] >= base / 2) {
                     ++yd0;
                 }
                 do {
@@ -2551,7 +3801,7 @@ class Utils {
                             if (k == 0) {
                                 cmp = k = 1;
                             }
-                            prod = yd!.slice();
+                            prod = yd.slice();
                         }
                         let prodL = prod.length;
                         if (prodL < remL) {
@@ -2574,10 +3824,10 @@ class Utils {
                     qd.push(k);
                     i++;
                     if (cmp && rem![0]) {
-                        rem!.push(xi < xL ? (xd![xi] || 0) : 0);
+                        rem!.push(xi < xL ? (xd[xi] || 0) : 0);
                         remL++;
                     } else {
-                        rem = xi < xd!.length ? Utils.updateDigits(xd![xi]) : undefined;
+                        rem = xi < xd.length ? Utils.updateDigits(xd[xi]) : undefined;
                         remL = 1;
                     }
                 } while ((xi++ < xL || rem !== undefined) && sd--);
