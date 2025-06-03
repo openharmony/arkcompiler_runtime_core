@@ -16,7 +16,7 @@
 /*---
 desc: Access to field by nullable reference type
 assert: An expression must be a non-nullable reference type T to be used for Field Access. Otherwise, a compile-time error occurs.
-tags: [negative]
+tags: [negative, compile-only]
 ---*/
 
 class A {
@@ -24,7 +24,7 @@ class A {
 }
 
 function main(): void {
-    let instance: A? = new A();
+    let instance?: A = new A();
 
     assertTrue( instance.x == 1 )
 }

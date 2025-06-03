@@ -14,16 +14,17 @@
  */
 
 /*---
-desc: Variable declaration with readonly array type.
+desc: Variable declaration and undefined check.
 ---*/
+
+function isUndefined(value: number|undefined): boolean {
+    return value === undefined;
+}
 
 function main(): void {
   let tmp: number | undefined;
-  if (tmp === undefined) {
+  if (isUndefined(tmp)) {
     tmp = 10;
   }
   assertTrue(tmp == 10);
-  let tmp1?: string;
-  tmp1 = "hello";
-  assertTrue(tmp1 == "hello");
 }
