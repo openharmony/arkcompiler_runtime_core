@@ -142,12 +142,15 @@ public:
     ~CommonJSObjectCache();
 
     napi_value GetProxy() const;
+    napi_value GetRecordProto() const;
 
 private:
     void InitializeCache();
+    void InitializeRecordProto();
 
     InteropCtx *ctx_ = nullptr;
     napi_ref proxyRef_ {};
+    napi_ref recordProtoRef_ {nullptr};
 };
 
 class InteropCtx final {

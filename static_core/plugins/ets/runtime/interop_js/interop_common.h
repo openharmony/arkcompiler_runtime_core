@@ -25,6 +25,7 @@
 #include <node_api.h>
 
 #include <functional>
+#include <string_view>
 
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
 #include "interfaces/inner_api/napi/native_node_api.h"
@@ -46,6 +47,7 @@ namespace ark::ets::interop::js {
 
 constexpr size_t BIGINT_BITS_NUM = 32;
 constexpr size_t BIT_64 = 64;
+constexpr std::string_view IS_STATIC_PROXY = "_isStaticProxy";
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 

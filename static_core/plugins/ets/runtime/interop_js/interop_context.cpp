@@ -212,13 +212,17 @@ napi_value ConstStringStorage::InitBuffer(size_t length)
 CommonJSObjectCache::CommonJSObjectCache(InteropCtx *ctx) : ctx_(ctx)
 {
     InitializeCache();
+    InitializeRecordProto();
 }
 
 CommonJSObjectCache::~CommonJSObjectCache()
 {
+    napi_env env = ctx_->GetJSEnv();
     if (proxyRef_ != nullptr) {
-        napi_env env = ctx_->GetJSEnv();
         napi_delete_reference(env, proxyRef_);
+    }
+    if (recordProtoRef_ != nullptr) {
+        napi_delete_reference(env, recordProtoRef_);
     }
 }
 
@@ -228,6 +232,25 @@ napi_value CommonJSObjectCache::GetProxy() const
         const_cast<CommonJSObjectCache *>(this)->InitializeCache();
     }
     return GetReferenceValue(ctx_->GetJSEnv(), proxyRef_);
+}
+
+napi_value CommonJSObjectCache::GetRecordProto() const
+{
+    if (recordProtoRef_ == nullptr) {
+        const_cast<CommonJSObjectCache *>(this)->InitializeRecordProto();
+    }
+    return GetReferenceValue(ctx_->GetJSEnv(), recordProtoRef_);
+}
+
+void CommonJSObjectCache::InitializeRecordProto()
+{
+    napi_env env = ctx_->GetJSEnv();
+
+    napi_value protoObj;
+    NAPI_CHECK_FATAL(napi_create_object(env, &protoObj));
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, protoObj, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_create_reference(env, protoObj, 1, &recordProtoRef_));
 }
 
 void CommonJSObjectCache::InitializeCache()

@@ -177,6 +177,8 @@ private:
     static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
 };
 
+void DoSetPrototype(napi_env env, napi_value obj, napi_value proto);
+
 }  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
