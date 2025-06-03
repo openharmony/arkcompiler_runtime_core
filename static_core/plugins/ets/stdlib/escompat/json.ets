@@ -696,8 +696,10 @@ class JSONWriter {
             // nothing to do - write completed successfully
         } else {
             const objType = Type.of(obj)
-
-            if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
+            if (objType.getName() == "escompat.Date") {
+                this.buffer.append("\"").append((obj as Date).toISOString()).append("\"")
+            }
+            else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objType instanceof ArrayType) {
                 this.writeArrayValue(Value.of(obj) as ArrayValue, objType as ArrayType)
