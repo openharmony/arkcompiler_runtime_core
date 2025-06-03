@@ -57,6 +57,7 @@ function main(): int {
     suite.addTest("Test isEncoding", testIsEncoding)
     suite.addTest("Test transcode", testTranscode)
     suite.addTest("Test Buffer.compare", testBufferCompare)
+    suite.addTest("Test Buffer.compare with Buffer/Uint8Array", testBufferCompareUint8Array)
     suite.addTest("Test Buffer.copy", testBufferCopy)
     suite.addTest("Test Buffer.copy with params", testBufferCopyWithParams)
     suite.addTest("Test Buffer.copy with undefined", testBufferCopyWithUndefined)
@@ -222,6 +223,18 @@ function testFromBufferOrUint8Array() {
     const bufFromUint8 = buffer.from(uint8Arr)
     arktest.assertEQ(bufFromUint8.length, uint8Arr.length)
     arktest.assertEQ(bufFromUint8.toString('ascii'), "Hello")
+
+    let b: ArrayBuffer = new ArrayBuffer(7);
+    for (let i: int = 0; i < b.getByteLength(); ++i) {
+        b.set(i, i.toByte())
+    }
+    const bufOffset = buffer.from(b as Object, 3, 4); // Make Buffer with offset
+    arktest.assertEQ(bufOffset.at(0), 3)
+    arktest.assertEQ(bufOffset.at(1), 4)
+    arktest.assertEQ(bufOffset.at(2), 5)
+    arktest.assertEQ(bufOffset.at(3), 6)
+    arktest.assertEQ(bufOffset.length, 4)
+    arktest.assertEQ(bufOffset.byteOffset, 3)
 }
 
 function testFromString() {
@@ -240,13 +253,13 @@ function testFromString() {
 function testFromStringWithBase64Encoding() {
     let buf = buffer.from('abc', 'base64');
     arktest.assertEQ(buf.toString(), 'i·');
-    arktest.assertEQ(buf.length as int, 2);
+    arktest.assertEQ(buf.length, 2);
     arktest.assertEQ(buf.toString('base64'), 'abc=');
 }
 
 function testFromStringWithInvalidLength() {
     let buf = buffer.from(new String('this is a test'), 'utf8', -1);
-    arktest.assertEQ(buf.length as int, 14);
+    arktest.assertEQ(buf.length, 14);
     arktest.assertEQ(buf.toString(), 'this is a test');
 }
 
@@ -265,32 +278,32 @@ function testFromStringWithInvalidBase64UrlChars() {
 function testFromStringWithInvalidHexChars() {
     const buf = buffer.from("ffffhj", "hex")
     const buf2 = buffer.from("hjffff", "hex")
-    arktest.assertEQ(buf.length as int, 2)
+    arktest.assertEQ(buf.length, 2)
     arktest.assertEQ(buf.toString("hex"), "ffff")
-    arktest.assertEQ(buf2.length as int, 0)
+    arktest.assertEQ(buf2.length, 0)
     arktest.assertEQ(buf2.toString("hex"), "")
 }
 
 function testFromStringWithInvalidAsciiChars() {
     const buf = buffer.from("Héllo", "ascii")
-    arktest.assertEQ(buf.length as int, 5)
+    arktest.assertEQ(buf.length, 5)
     arktest.assertEQ(buf.toString("ascii"), "Hillo")
 }
 
 function testFromStringWithInvalidUtf8Chars() {
     const raw = '\uD800'
     const buf = buffer.from(raw, "utf8")
-    arktest.assertEQ(buf.length as int, 3)
+    arktest.assertEQ(buf.length, 3)
     arktest.assertEQ(buf.toString("utf8"), '\uFFFD')
 }
 
 function testFromStringWithInvalidLatin1Chars() {
     const raw = "F1FG刘"
     const buf = buffer.from(raw, "latin1");
-    const bufLength = buf.length;
+    const bufLength = buf.length.toInt();
     arktest.assertEQ(bufLength, 5);
     arktest.assertEQ(buf.at(0), 70);
-    arktest.assertEQ(buf.at((bufLength - 1) as int), 24);
+    arktest.assertEQ(buf.at(bufLength - 1), 24);
 }
 
 // Buffer.toString() tests
@@ -485,6 +498,47 @@ function testBufferCompare() {
     arktest.assertEQ(buf1.compare(buf2), -1);
     arktest.assertEQ(buf2.compare(buf1), 1);
     arktest.assertEQ(buf1.compare(buf1), 0);
+}
+
+function testBufferCompareUint8Array() {
+    // Call Buffer.compare Uint8Array (no byteOffset) vs Uint8Array (byteOffset)
+    let a = new ArrayBuffer(10)
+    let u1 = new Uint8Array(a, 0, 4)  // has no byteOffset
+    let u2 = new Uint8Array(a, 5, 3)  // has byteOffset
+    u1[0] = 1
+    u1[1] = 1
+    u1[2] = 1
+    u1[3] = 1
+    u2[0] = 22
+    u2[1] = 22
+    u2[2] = 22
+    arktest.assertEQ(buffer.compare(u1, u2), -1)
+    arktest.assertEQ(buffer.compare(u1, u1), 0)
+    arktest.assertEQ(buffer.compare(u2, u1), 1)
+
+    // Call Buffer.compare Uint8Arrays (no byteOffset) vs Buffer (no byteOffset)
+    let bufNoOffset = buffer.alloc(3, 22);
+    arktest.assertEQ(buffer.compare(u1, bufNoOffset), -1)
+    arktest.assertEQ(buffer.compare(bufNoOffset, u1), 1)
+
+    // Call Buffer.compare Uint8Arrays (byteOffset) vs Buffer (no byteOffset)
+    arktest.assertEQ(buffer.compare(u2, bufNoOffset), 0);
+    arktest.assertEQ(buffer.compare(bufNoOffset, u2), 0);
+
+    // Compare Uint8Arrays (byteOffset) vs Buffer (byteOffset)
+    let b = new ArrayBuffer(7);
+    for (let i: int = 0; i < b.getByteLength(); ++i) {
+        b.set(i, i.toByte())
+    }
+    let bufOffset = buffer.from(b as Object, 3, 4); // Make Buffer with offset
+    arktest.assertEQ(bufOffset.at(0), 3)
+    arktest.assertEQ(bufOffset.at(1), 4)
+    arktest.assertEQ(bufOffset.at(2), 5)
+    arktest.assertEQ(bufOffset.at(3), 6)
+    arktest.assertEQ(bufOffset.length, 4)
+    arktest.assertEQ(bufOffset.byteOffset, 3)
+    arktest.assertEQ(buffer.compare(u2, bufOffset), 1)
+    arktest.assertEQ(buffer.compare(bufOffset, u2), -1)
 }
 
 function testBufferCopy() {
@@ -854,7 +908,7 @@ function testBufferWriteStringSingleParam() {
 function testBufferWriteStringInfinity() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
-    expectError(() => {
+    arktest.expectError(() => {
         buf.write(str, 0, Infinity);
     }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: Infinity");
 }
@@ -862,64 +916,76 @@ function testBufferWriteStringInfinity() {
 function testBufferWriteStringWrongOffset() {
     const str = "abc"
     let buf = buffer.alloc(10)
-    expectError(() => {
+    arktest.expectError(() => {
 		buf.write(str, -12)
     }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -12");
 }
 
 function testBufferWriteStringOutRangeOffset() {
     let buf = buffer.alloc(10);
-    expectError(() => {
+    arktest.expectError(() => {
         buf.write("abc", -Infinity, -Infinity, 'utf8');
     }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -Infinity");
 }
 
 function testBufferWriteStringOutRangeLength() {
     let buf = buffer.alloc(10);
-    expectError(() => {
+    arktest.expectError(() => {
         buf.write("abcdefg", 3, -1);
     }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
 }
 
 function testBufferFrom40002() {
     let buf = buffer.from('abc', 'base64');
-    assertEQ(buf.toString(), 'i·')
-    assertEQ(buf.length, 2);
-    assertEQ(buf.toString('base64'), 'abc=');
+    arktest.assertEQ(buf.toString(), 'i·')
+    arktest.assertEQ(buf.length, 2);
+    arktest.assertEQ(buf.toString('base64'), 'abc=');
 }
 
 function testBufferFrom30006() {
     let buf = buffer.from(new String('this is a test'), 'utf8', -1);
-    assertEQ(buf.length, 14);
-    assertEQ(buf.toString(), 'this is a test');
+    arktest.assertEQ(buf.length, 14);
+    arktest.assertEQ(buf.toString(), 'this is a test');
 }
 
 function testBufferBase64Url() {
     const src = new Uint8Array([250, 251, 252, 253, 254, 255])
     const encodeStr = buffer.from(src).toString("base64url")
-    assertEQ(encodeStr, "-vv8_f7_")
-    const bytesLength = buffer.byteLength(encodeStr, "base64url") as int
-    assertEQ(bytesLength, 6)
+    arktest.assertEQ(encodeStr, "-vv8_f7_")
+    const bytesLength = buffer.byteLength(encodeStr, "base64url").toInt()
+    arktest.assertEQ(bytesLength, 6)
 }
 
 function testByteOffset() {
     let buf = buffer.from("1236");
     let offset = buf.byteOffset;
-    assertEQ(offset, 0)
+    arktest.assertEQ(offset, 0)
+
+    const a = new ArrayBuffer(5)
+    a.set(0, 0 as byte)
+    a.set(1, 11 as byte)
+    a.set(2, 22 as byte)
+    a.set(3, 33 as byte)
+    buf = new buffer.Buffer(a, 2)
+    arktest.assertEQ(buf.byteOffset, 2)
+    let byteOffset: number;
+    arktest.expectError((): void throws => { byteOffset = -1; let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void throws => { byteOffset = a.getByteLength().toDouble(); let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void throws => { byteOffset = a.getByteLength().toDouble() + 1; let f = new buffer.Buffer(a, byteOffset) });
 }
 
 function testFillHex() {
     const buf1 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'hex');
     let str1 = buf1.toString('hex');
-    assertEQ(str1, "f1f1f1f1f1f1f1f1f1f1");
+    arktest.assertEQ(str1, "f1f1f1f1f1f1f1f1f1f1");
 
     const buf2 = buffer.alloc(10).fill('1A3B5C7Z9D', 0, 10, 'hex');
     let str2 = buf2.toString('hex');
-    assertEQ(str2, "1a3b5c1a3b5c1a3b5c1a");
+    arktest.assertEQ(str2, "1a3b5c1a3b5c1a3b5c1a");
 
     const buf3 = buffer.alloc(10).fill('1A3BFF7', 0, 10, 'hex');
     let str3 = buf3.toString('hex');
-    assertEQ(str3, "1a3bff1a3bff1a3bff1a");
+    arktest.assertEQ(str3, "1a3bff1a3bff1a3bff1a");
 }
 
 function testIncludesHex() {
@@ -927,14 +993,14 @@ function testIncludesHex() {
     for (const encode of encodeArr) {
         let buf = buffer.from("13236");
         let flag = buf.includes("abc", 0, encode);
-        assertEQ(flag, false);
+        arktest.assertEQ(flag, false);
     }
 }
 
 function testFromHex() {
     const buf1 = buffer.from('F1刘FG', 'hex');
     let str = buf1.toString('hex');
-    assertEQ(str, "f1");
+    arktest.assertEQ(str, "f1");
 }
 
 function testFillAsciiWithUnicode() {

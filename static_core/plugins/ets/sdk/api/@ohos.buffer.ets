@@ -47,6 +47,13 @@ function sanitizeBase64(str: string, urlSafe: boolean = false): string {
     return str.replace(new RegExp(allowedPattern, "g"), "");
 }
 
+function getLength(value: buffer.Buffer | Uint8Array): number {
+    if (value instanceof Uint8Array) {
+        return value.length;
+    }
+    return value.buffer.byteLength;
+}
+
 function fillInPaddingBase64(str: string): string {
     const base64Divisible: int = 4;
     const normalized: String = normalizeBase64Url(str);
@@ -168,7 +175,7 @@ export default namespace buffer {
     export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
         const resolvedByteOffset: number = byteOffset ?? 0;
         const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
-        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
+        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength), resolvedByteOffset);
     }
 
     /**
@@ -180,8 +187,9 @@ export default namespace buffer {
     * @param { number } length - length length A length
     * @returns { Buffer } Return a new allocated Buffer
     */
-    function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
-        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length))
+    export function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
+        const resolvedByteOffset: number = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
+        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length), resolvedByteOffset);
     }
 
     /**
@@ -360,13 +368,17 @@ export default namespace buffer {
     export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): number {
         const resolvedBuf1 = getArrayBufferFrom(buf1);
         const resolvedBuf2 = getArrayBufferFrom(buf2);
-        const len1 = resolvedBuf1.byteLength;
-        const len2 = resolvedBuf2.byteLength;
+        const len1 = getLength(buf1);
+        const len2 = getLength(buf2);
         const minLength = Math.min(len1, len2);
+        let i1 = buf1.byteOffset.toInt();
+        let i2 = buf2.byteOffset.toInt();
         for (let i = 0; i < minLength; i++) {
-            if (resolvedBuf1.at(i) != resolvedBuf2.at(i)) {
-                return resolvedBuf1.at(i) < resolvedBuf2.at(i) ? -1 : 1;
+            if (resolvedBuf1.at(i1) != resolvedBuf2.at(i2)) {
+                return resolvedBuf1.at(i1) < resolvedBuf2.at(i2) ? -1 : 1;
             }
+            i1++;
+            i2++;
         }
         return len1 == len2 ? 0 : (len1 < len2 ? -1 : 1);
     }
@@ -534,6 +546,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         get length(): number { return this.buffer.getByteLength() }
 
         get byteOffset(): number { return this.byteOffsetNumber }
+
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
@@ -542,7 +555,13 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
         {
             this.buffer = buffer;
-            this.byteOffsetNumber = 0;
+            this.byteOffsetNumber = byteOffset;
+            if (byteOffset >= this.buffer.getByteLength() && this.buffer.getByteLength() > 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. Received value is: ${byteOffset}`)
+            }
+            if (byteOffset < 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. It must be >= 0. Received value is: ${byteOffset}`)
+            }
         }
 
         /**
