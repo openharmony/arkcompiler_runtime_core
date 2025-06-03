@@ -367,6 +367,62 @@ function testUptime(): int {
     return finish - start >= 1 ? 0 : 1;
 }
 
+function testProcessManagerIsAppUid(): int {
+    let result: int = 0;
+
+    try {
+        let mgr = new StdProcess.ProcessManager();
+        let isApp = mgr.isAppUid(StdProcess.uid());
+        if (!isApp) {
+            // Current process should be a application, if not, test failed
+            return 1;
+        }
+
+        if (mgr.isAppUid(9999) || mgr.isAppUid(20000)) {
+            // It should be in range of 10000-19999
+            return 1;
+        }
+    } catch (err: RuntimeException) {        
+        // It'll throw RuntimeException for Non-OHOS target
+        // If it's because of 'not implemented', regard it as passed, 
+        // as it only support aarch64-ohos currently.
+        if (err.message == 'not implemented for Non-OHOS target') {
+            // Regard as passed for Non-OHOS target here
+            result = 0;
+        } else {
+            // Otherwise, Regard it as failed.
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+function testIsIsolatedProcess(): int {
+    let result: int = 0;
+
+    try {
+        let isIsolated = StdProcess.isIsolatedProcess();
+        if (isIsolated) {
+            // Current process is not isolated by default, test failed
+            return 1;
+        }
+    } catch (err: RuntimeException) {
+        // It'll throw RuntimeException for Non-OHOS target
+        // If it's because of 'not implemented', regard it as passed, 
+        // as it only support aarch64-ohos currently.
+        if (err.message == 'not implemented for Non-OHOS target') {
+            // Regard as passed for Non-OHOS target here
+            result = 0;
+        } else {
+            // Otherwise, Regard it as failed.
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
 function main(): int {
     let failures: int = 0;
 
@@ -382,6 +438,7 @@ function main(): int {
     failures += test(testChildKill(), "ChildProcess.kill() / ChildProcess.killed");
     failures += test(testChildClose(), "ChildProcess.close()");
 
+    failures += test(testProcessManagerIsAppUid(), 'ProcessManager.isAppUid()');
     failures += test(testProcessManagerGetUidForName(), "ProcessManager.getUidForName()");
     failures += test(testProcessManagerGetThreadPriority(), "ProcessManager.getThreadPriority()");
     failures += test(testProcessManagerGetSystemConfig(), "ProcessManager.getSystemConfig()");
@@ -409,6 +466,7 @@ function main(): int {
     failures += test(testCwd(), "process.cwd() test");
     failures += test(testChangeDir(), "process.chdir() test");
     failures += test(testUptime(), "process.uptime() test");
+    failures += test(testIsIsolatedProcess(), 'process.isIsolatedProcess() test');
 
     if (failures != 0) {
         console.log("FAILED: All tests run");
