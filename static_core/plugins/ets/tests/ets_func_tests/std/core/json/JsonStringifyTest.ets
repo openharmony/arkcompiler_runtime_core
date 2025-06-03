@@ -47,6 +47,8 @@ function main(): int {
     suite.addTest("Stringify complex nested objects", testStringifyComplexObjects);
     suite.addTest("Stringify deeply nested structures", testStringifyDeeplyNested);
 
+    suite.addTest("Stringify Date with negative number in constructor", stringifyNegativeDate);
+
     return suite.run();
 }
 
@@ -473,4 +475,9 @@ function testStringifyDeeplyNested(): void {
     }
 
     arktest.assertTrue(maxIndentLevel >= 3, "Should have at least 3 levels of indentation for deep nesting");
+}
+
+function stringifyNegativeDate() {
+    let d = new Date(-271822)
+    arktest.assertEQ(JSON.stringify(d), "\"1969-12-31T23:55:28.178Z\"")
 }
