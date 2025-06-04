@@ -12,14 +12,15 @@
 # limitations under the License.
 
 set(IDL_FILES
-    "${CMAKE_CURRENT_LIST_DIR}/idl/primitives_test.taihe"
-    "${CMAKE_CURRENT_LIST_DIR}/idl/void_func.mytest.taihe"
+    "${CMAKE_CURRENT_LIST_DIR}/idl/scene.taihe"
+    "${CMAKE_CURRENT_LIST_DIR}/idl/sceneNodeParameters.taihe"
+
 )
 
 set(GEN_ETS_FILES
     "@ohos.base.ets"
-    "primitives_test.ets"
-    "void_func.ets"
+    "scene.ets"
+    "sceneNodeParameters.ets"
 )
 
 set(USER_ETS_FILES
@@ -28,4 +29,8 @@ set(USER_ETS_FILES
 
 file(GLOB AUTHOR_CPP_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/author/src/*.cpp")
 
-add_ani_demo(ani_primitives "${IDL_FILES}" "--sts-keep-name" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "" "${AUTHOR_CPP_FILES}" "test")
+set(AUTHOR_INCLUDE
+    "${CMAKE_CURRENT_LIST_DIR}/author/include"
+)
+
+add_ani_demo(ani_graphics3d "${IDL_FILES}" "" "${GEN_ETS_FILES}" "${USER_ETS_FILES}" "${AUTHOR_INCLUDE}" "${AUTHOR_CPP_FILES}" "test")
