@@ -146,35 +146,35 @@ class ANIBaseType(ANIType):
 
 
 ANI_REF = ANIBaseType(hint="ref")
-ANI_ARRAY_REF = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_REF = ANIArrayType(hint="array_ref", base=ANI_REF)
 ANI_REF.inner_array = ANI_ARRAY_REF
 
 ANI_BOOLEAN = ANIBaseType(hint="boolean")
-ANI_ARRAY_BOOLEAN = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_BOOLEAN = ANIArrayType(hint="array_boolean", base=ANI_REF)
 ANI_BOOLEAN.inner_array = ANI_ARRAY_BOOLEAN
 
 ANI_FLOAT = ANIBaseType(hint="float")
-ANI_ARRAY_FLOAT = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_FLOAT = ANIArrayType(hint="array_float", base=ANI_REF)
 ANI_FLOAT.inner_array = ANI_ARRAY_FLOAT
 
 ANI_DOUBLE = ANIBaseType(hint="double")
-ANI_ARRAY_DOUBLE = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_DOUBLE = ANIArrayType(hint="array_double", base=ANI_REF)
 ANI_DOUBLE.inner_array = ANI_ARRAY_DOUBLE
 
 ANI_BYTE = ANIBaseType(hint="byte")
-ANI_ARRAY_BYTE = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_BYTE = ANIArrayType(hint="array_byte", base=ANI_REF)
 ANI_BYTE.inner_array = ANI_ARRAY_BYTE
 
 ANI_SHORT = ANIBaseType(hint="short")
-ANI_ARRAY_SHORT = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_SHORT = ANIArrayType(hint="array_short", base=ANI_REF)
 ANI_SHORT.inner_array = ANI_ARRAY_SHORT
 
 ANI_INT = ANIBaseType(hint="int")
-ANI_ARRAY_INT = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_INT = ANIArrayType(hint="array_int", base=ANI_REF)
 ANI_INT.inner_array = ANI_ARRAY_INT
 
 ANI_LONG = ANIBaseType(hint="long")
-ANI_ARRAY_LONG = ANIArrayType(hint="array", base=ANI_REF)
+ANI_ARRAY_LONG = ANIArrayType(hint="array_long", base=ANI_REF)
 ANI_LONG.inner_array = ANI_ARRAY_LONG
 
 ANI_OBJECT = ANIType(hint="object", base=ANI_REF)
@@ -924,23 +924,25 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         ani_array_value: str,
         cpp_array_buffer: str,
     ):
-        ani_value = f"{cpp_array_buffer}_ani_item"
-        cpp_result = f"{cpp_array_buffer}_cpp_item"
-        cpp_i = f"{cpp_array_buffer}_i"
-        with target.indented(
-            f"for (size_t {cpp_i} = 0; {cpp_i} < {ani_size}; {cpp_i}++) {{",
-            f"}}",
-        ):
-            target.writelns(
-                f"ani_object {ani_value};",
-                f"{env}->Array_Get(reinterpret_cast<ani_array>({ani_array_value}), {cpp_i}, reinterpret_cast<ani_ref*>(&{ani_value}));",
-            )
-            if self.ani_type.base == ANI_REF:
+        if self.ani_type.base == ANI_REF:
+            ani_value = f"{cpp_array_buffer}_ani_item"
+            cpp_result = f"{cpp_array_buffer}_cpp_item"
+            cpp_i = f"{cpp_array_buffer}_i"
+            with target.indented(
+                f"for (size_t {cpp_i} = 0; {cpp_i} < {ani_size}; {cpp_i}++) {{",
+                f"}}",
+            ):
+                target.writelns(
+                    f"{self.ani_type} {ani_value};",
+                    f"{env}->Array_Get_Ref({ani_array_value}, {cpp_i}, reinterpret_cast<ani_ref*>(&{ani_value}));",
+                )
                 self.from_ani(target, env, ani_value, cpp_result)
-            else:
-                self.from_ani_boxed(target, env, ani_value, cpp_result)
+                target.writelns(
+                    f"new (&{cpp_array_buffer}[{cpp_i}]) {self.cpp_info.as_owner}(std::move({cpp_result}));",
+                )
+        else:
             target.writelns(
-                f"new (&{cpp_array_buffer}[{cpp_i}]) {self.cpp_info.as_owner}(std::move({cpp_result}));",
+                f"{env}->Array_GetRegion_{self.ani_type.suffix}({ani_array_value}, 0, {ani_size}, reinterpret_cast<{self.ani_type}*>({cpp_array_buffer}));",
             )
 
     def into_ani_array(
@@ -951,27 +953,32 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         cpp_array_value: str,
         ani_array_result: str,
     ):
-        ani_result = f"{ani_array_result}_item"
-        ani_undefined = f"{ani_array_result}_undef"
-        cpp_i = f"{ani_array_result}_i"
-        target.writelns(
-            f"ani_array {ani_array_result};",
-            f"ani_ref {ani_undefined};",
-            f"{env}->GetUndefined(&{ani_undefined});",
-            f"{env}->Array_New({cpp_size}, {ani_undefined}, &{ani_array_result});",
-        )
-        with target.indented(
-            f"for (size_t {cpp_i} = 0; {cpp_i} < {cpp_size}; {cpp_i}++) {{",
-            f"}}",
-        ):
-            if self.ani_type.base == ANI_REF:
-                self.into_ani(target, env, f"{cpp_array_value}[{cpp_i}]", ani_result)
-            else:
-                self.into_ani_boxed(
-                    target, env, f"{cpp_array_value}[{cpp_i}]", ani_result
-                )
+        if self.ani_type.base == ANI_REF:
+            ani_class = f"{ani_array_result}_cls"
+            ani_result = f"{ani_array_result}_item"
+            ani_undefined = f"{ani_array_result}_undef"
+            cpp_i = f"{ani_array_result}_i"
             target.writelns(
-                f"{env}->Array_Set({ani_array_result}, {cpp_i}, {ani_result});",
+                f"ani_array_ref {ani_array_result};",
+                f"ani_class {ani_class};",
+                f'{env}->FindClass("{self.type_desc}", &{ani_class});',
+                f"ani_ref {ani_undefined};",
+                f"{env}->GetUndefined(&{ani_undefined});",
+                f"{env}->Array_New_Ref({ani_class}, {cpp_size}, {ani_undefined}, &{ani_array_result});",
+            )
+            with target.indented(
+                f"for (size_t {cpp_i} = 0; {cpp_i} < {cpp_size}; {cpp_i}++) {{",
+                f"}}",
+            ):
+                self.into_ani(target, env, f"{cpp_array_value}[{cpp_i}]", ani_result)
+                target.writelns(
+                    f"{env}->Array_Set_Ref({ani_array_result}, {cpp_i}, {ani_result});",
+                )
+        else:
+            target.writelns(
+                f"{self.ani_type.array} {ani_array_result};",
+                f"{env}->Array_New_{self.ani_type.suffix}({cpp_size}, &{ani_array_result});",
+                f"{env}->Array_SetRegion_{self.ani_type.suffix}({ani_array_result}, 0, {cpp_size}, reinterpret_cast<{self.ani_type} const*>({cpp_array_value}));",
             )
 
     def into_ani_boxed(
@@ -1048,7 +1055,7 @@ class EnumTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[EnumType]):
         enum_cpp_info = EnumCppInfo.get(self.am, self.t.ty_decl)
         target.writelns(
             f"ani_size {ani_index};",
-            f"{env}->EnumItem_GetIndex(reinterpret_cast<ani_enum_item>({ani_value}), &{ani_index});",
+            f"{env}->EnumItem_GetIndex({ani_value}, &{ani_index});",
             f"{enum_cpp_info.full_name} {cpp_result}(({enum_cpp_info.full_name}::key_t){ani_index});",
         )
 
@@ -1317,10 +1324,10 @@ class StringTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StringType]):
         cpp_buffer = f"{cpp_result}_buf"
         target.writelns(
             f"ani_size {ani_length};",
-            f"{env}->String_GetUTF8Size(reinterpret_cast<ani_string>({ani_value}), &{ani_length});",
+            f"{env}->String_GetUTF8Size({ani_value}, &{ani_length});",
             f"TString {cpp_tstr};",
             f"char* {cpp_buffer} = tstr_initialize(&{cpp_tstr}, {ani_length} + 1);",
-            f"{env}->String_GetUTF8(reinterpret_cast<ani_string>({ani_value}), {cpp_buffer}, {ani_length} + 1, &{ani_length});",
+            f"{env}->String_GetUTF8({ani_value}, {cpp_buffer}, {ani_length} + 1, &{ani_length});",
             f"{cpp_buffer}[{ani_length}] = '\\0';",
             f"{cpp_tstr}.length = {ani_length};",
             f"::taihe::string {cpp_result} = ::taihe::string({cpp_tstr});",
@@ -1382,7 +1389,7 @@ class ArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         cpp_buffer = f"{cpp_result}_buffer"
         target.writelns(
             f"size_t {ani_size};",
-            f"{env}->Array_GetLength(reinterpret_cast<ani_array>({ani_value}), &{ani_size});",
+            f"{env}->Array_GetLength({ani_value}, &{ani_size});",
             f"{item_ty_cpp_info.as_owner}* {cpp_buffer} = reinterpret_cast<{item_ty_cpp_info.as_owner}*>(malloc({ani_size} * sizeof({item_ty_cpp_info.as_owner})));",
         )
         item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
@@ -1444,7 +1451,7 @@ class ArrayBufferTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         target.writelns(
             f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
-            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_value}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{env}->ArrayBuffer_GetInfo({ani_value}, reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
             f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data}), {ani_length});",
         )
 
@@ -1526,7 +1533,7 @@ class TypedArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
             f'{env}->Object_GetPropertyByName_Ref({ani_value}, "buffer", reinterpret_cast<ani_ref*>(&{ani_arrbuf}));',
             f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
-            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_arrbuf}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{env}->ArrayBuffer_GetInfo({ani_arrbuf}, reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
             f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data} + (size_t){ani_byte_offset}), (size_t){ani_byte_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
         )
 
@@ -1602,7 +1609,7 @@ class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
             f'{env}->Function_Call_Ref(TH_ANI_FIND_{pkg_ani_info.scope.upper}_FUNCTION({env}, "{pkg_ani_info.impl_desc}", "__fromBigIntToArrayBuffer", nullptr), reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, sizeof({item_ty_cpp_info.as_owner}) / sizeof(char));'
             f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
-            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_arrbuf}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{env}->ArrayBuffer_GetInfo({ani_arrbuf}, reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
             f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data}), {ani_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
         )
 
