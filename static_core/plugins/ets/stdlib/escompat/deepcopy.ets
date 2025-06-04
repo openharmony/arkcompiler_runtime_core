@@ -19,6 +19,13 @@ export interface Cloneable {
 	clone(): Cloneable;
 }
 
+// deepcopy can be used to copy a instance deeply, like builtins types, class with 
+// default constructor. If the instance is or contain a class without default 
+// constructor, `Cloneable` can be used to help to implement copying deeply. At the
+// same time, DeepCopy supports cloning of subclasses that inherit from the parent
+// class provided that the clone method needs to be overridden and if the clone method
+// is not overridden in the parent and child classes an error will be thrown at runtime
+
 export function deepcopy<T>(src: Nullish<T>, depth: int = -1): Nullish<T> {
 	const maxDepth = (depth == -1) ? Int.MAX_VALUE : depth
 	return new DeepCloner(maxDepth).clone<T>(src)
@@ -100,6 +107,18 @@ class DeepCloner {
 		return false
 	}
 
+	private hasOverrideClone(type: ClassType): boolean {
+		const methodNum = type.getMethodsNum()
+		for (let methodIdx = 0; methodIdx < methodNum; methodIdx++) {
+			const method = type.getMethod(methodIdx)
+			const methodName = method.getName()
+			if (methodName.equals("clone") && !method.isInherited()) {
+				return true
+			}
+		}
+		return false
+	}
+
 	private cloneObject(obj: Object, objType: ClassType): Object {
 		this.currentDepth++
 		if (this.currentDepth > this.maxDepth) {
@@ -107,8 +126,11 @@ class DeepCloner {
 		}
 
 		if (obj instanceof Cloneable) {
-			let objClone = obj as Cloneable
-			return objClone.clone()
+			if (this.hasOverrideClone(objType)) {
+				let objClone = obj as Cloneable
+				return objClone.clone()
+			}
+			throw new Error(`class ${objType.getName()} doesn't override clone`)
 		}
 
 		if (!this.hasEmptyConstructor(objType)) {
