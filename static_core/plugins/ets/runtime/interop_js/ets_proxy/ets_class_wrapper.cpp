@@ -700,7 +700,7 @@ EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
     return nullptr;
 }
 
-static void DoSetPrototype(napi_env env, napi_value obj, napi_value proto)
+void DoSetPrototype(napi_env env, napi_value obj, napi_value proto)
 {
     napi_value builtinObject;
     napi_value setprotoFn;
@@ -716,6 +716,10 @@ static void SetNullPrototype(napi_env env, napi_value jsCtor)
     napi_value prot;
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &prot));
 
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsCtor, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, prot, IS_STATIC_PROXY.data(), trueValue));
+
     auto nullProto = GetNull(env);
     DoSetPrototype(env, jsCtor, nullProto);
     DoSetPrototype(env, prot, nullProto);
@@ -730,6 +734,10 @@ static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value js
 
     DoSetPrototype(env, jsCtor, jsBaseCtor);
     DoSetPrototype(env, cprototype, baseCprototype);
+
+    napi_value trueValue = GetBooleanValue(env, true);
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsCtor, IS_STATIC_PROXY.data(), trueValue));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, cprototype, IS_STATIC_PROXY.data(), trueValue));
 }
 
 /*static*/

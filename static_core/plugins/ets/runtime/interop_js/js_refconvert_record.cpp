@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 #include "plugins/ets/runtime/types/ets_type.h"
@@ -33,6 +34,9 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 
     napi_value targetObj;
     NAPI_CHECK_FATAL(napi_create_object(env, &targetObj));
+
+    napi_value recordProto = ctx->GetCommonJSObjectCache()->GetRecordProto();
+    ets_proxy::DoSetPrototype(env, targetObj, recordProto);
 
     std::array<napi_value, 2U> args = {targetObj, handlerObj};
     napi_value proxy = ctx->GetCommonJSObjectCache()->GetProxy();
