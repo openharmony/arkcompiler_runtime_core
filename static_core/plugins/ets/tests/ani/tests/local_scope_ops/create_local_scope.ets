@@ -29,8 +29,8 @@ class Student {
         return this.name;
     }
 
-    age: int;
-    name: String;
+    public age: int;
+    public name: String;
 };
 
 function identity<T>(arg: T): T {
