@@ -526,15 +526,6 @@ public:
         return reinterpret_cast<EtsString *>(obj);
     }
 
-    EtsString() = delete;
-    ~EtsString() = delete;
-
-    NO_COPY_SEMANTIC(EtsString);
-    NO_MOVE_SEMANTIC(EtsString);
-
-private:
-    friend EtsString *StringBuilderToString(ObjectHeader *sb);
-
     static EtsString *AllocateNonInitializedString(uint32_t length, bool compressed)
     {
         ASSERT(length != 0);
@@ -543,6 +534,15 @@ private:
         return reinterpret_cast<EtsString *>(
             coretypes::String::AllocStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
+
+    EtsString() = delete;
+    ~EtsString() = delete;
+
+    NO_COPY_SEMANTIC(EtsString);
+    NO_MOVE_SEMANTIC(EtsString);
+
+private:
+    friend EtsString *StringBuilderToString(ObjectHeader *sb);
 
     static uint16_t CodeToChar(double code)
     {

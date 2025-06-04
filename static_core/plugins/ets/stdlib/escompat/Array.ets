@@ -1569,19 +1569,21 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public native lastIndexOf(searchElement: T): number;
 
-    /**
-     * Creates and returns a new string by concatenating all of the elements in an `Array`,
-     * separated by a specified separator string.
-     * If the array has only one item, then that item will be returned without using the separator.
-     *
-     * @param sep specifies a separator
-     *
-     * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
-     */
-    public override join(sep?: String): string {
-        if (this.actualLength == 0) {
-            return ""
-        }
+    private isPrimitive(element: T): boolean {
+        return (element instanceof String ||
+                element instanceof Int ||
+                element instanceof Number ||
+                element instanceof Float ||
+                element instanceof Long ||
+                element instanceof Short ||
+                element instanceof Boolean ||
+                element instanceof Char ||
+                element instanceof Byte ||
+                element == null);
+    }
+    private native joinInternal(sep: String): string;
+
+    private joinObject(sep?: String): string {
         const sepReal = sep === undefined ? "," : sep!
         // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
         const first_el = this.$_get_unsafe(0)
@@ -1600,8 +1602,37 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 sb.append("")
             }
         }
-
         return sb.toString();
+    }
+
+    /**
+     * Creates and returns a new string by concatenating all of the elements in an `Array`,
+     * separated by a specified separator string.
+     * If the array has only one item, then that item will be returned without using the separator.
+     *
+     * @param sep specifies a separator
+     *
+     * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     */
+    public override join(sep?: String): string {
+        if (this.actualLength == 0) {
+            return ""
+        }
+
+        let objArray: boolean = false;
+        for (let i: int = 0; i < this.actualLength; i++) {
+            const element = this.$_get_unsafe(i);
+            if (!this.isPrimitive(element)) {
+                objArray = true;
+                break;
+            }
+        }
+
+        if (objArray) {
+            return this.joinObject(sep);
+        }
+
+        return this.joinInternal(sep === undefined ? "," : sep!);
     }
 
     /**

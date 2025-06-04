@@ -551,6 +551,44 @@
 <%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): number;
 <% end %>
 
+<% if el_type == "T" %>
+private isPrimitive(element: T): boolean {
+    return (element instanceof String ||
+            element instanceof Int ||
+            element instanceof Number ||
+            element instanceof Float ||
+            element instanceof Long ||
+            element instanceof Short ||
+            element instanceof Boolean ||
+            element instanceof Char ||
+            element instanceof Byte ||
+            element == null);
+}
+private native joinInternal(sep: String): string;
+
+private joinObject(sep?: String): string {
+    const sepReal = sep === undefined ? "," : sep!
+    // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+    const first_el = this.$_get_unsafe(0)
+    let first_str = ""
+    if (first_el !== undefined && first_el !== null) {
+        first_str = new String(first_el)
+    }
+    let sb = new StringBuilder(first_str)
+    for (let i: int = 1; i < this.actualLength; i++) {
+        const tmp = this.$_get_unsafe(i)
+        sb.append(sepReal);
+        // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+        if (tmp !== undefined && tmp !== null) {
+            sb.append(new String(tmp))
+        } else {
+            sb.append("")
+        }
+    }
+    return sb.toString();
+}
+<% end %>
+
 /**
  * Creates and returns a new string by concatenating all of the elements in an `Array`,
  * separated by a specified separator string.
@@ -564,27 +602,33 @@
     if (<%= this_len_int %> == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
-    <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
-    const first_el = <%= get_unsafe.(this, '0') %>
-    let first_str = ""
-    if (first_el !== undefined && first_el !== null) {
-        first_str = new String(first_el)
-    }
-    let sb = new StringBuilder(first_str)<% else %>let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))<% end %>
+    <% if el_type != "T" %>const sepReal = sep === undefined ? "," : sep!
+    let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))
     for (let i: int = 1; i < <%= this_len_int %>; i++) {
         const tmp = <%= get_unsafe.(this, 'i') %>
         sb.append(sepReal);
-        <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
-        if (tmp !== undefined && tmp !== null) {
-            sb.append(new String(tmp))
-        } else {
-            sb.append("")
-        }<% else %>sb.append(tmp)<% end %>
+        sb.append(tmp)
     }
 
     return sb.toString();
 }
+    <% else %>
+    let objArray: boolean = false;
+    for (let i: int = 0; i < <%= this_len_int %>; i++) {
+        const element = <%= get_unsafe.(this, 'i') %>;
+        if (!this.isPrimitive(element)) {
+            objArray = true;
+            break;
+        }
+    }
+
+    if (objArray) {
+        return this.joinObject(sep);
+    }
+
+    return this.joinInternal(sep === undefined ? "," : sep!);
+}
+    <% end %>
 
 /**
  * Returns a string representing the specified array and its elements.
