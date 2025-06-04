@@ -1,0 +1,270 @@
+/*
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package escompat;
+
+export final class DataView implements ArrayBufferView {
+    /** Underlying buffer */
+    private readonly buffer_: ArrayBufferLike
+    /** Count of bytes in a view */
+    private readonly byteLength_: int
+    /** Offset from start of {@link buffer} */
+    private readonly byteOffset_: int
+
+    public get buffer(): ArrayBufferLike {
+        return this.buffer_
+    }
+
+    public get byteLength(): number {
+        return this.byteLength_
+    }
+
+    public get byteOffset(): number {
+        return this.byteOffset_
+    }
+
+    private readonly actualBuffer: Buffer
+
+    /**
+     * Constructs view
+     * @param buffer underlying buffer
+     * @param byteOffset offset to start from
+     * @throws RangeError if offset is out of array
+     */
+    public constructor(buffer: ArrayBufferLike, byteOffset: int) {
+        this(buffer, byteOffset, (buffer as Buffer).getByteLength() - byteOffset)
+    }
+
+    /**
+     * Constructs view
+     * @param buffer underlying buffer
+     * @param byteOffset offset to start from
+     * @param byteLength lenth of bytes to take
+     * @throws RangeError if provided indicies are invalid
+     */
+    public constructor(buffer: ArrayBufferLike, byteOffset: int, byteLength: int) {
+        this.buffer_ = buffer
+        this.actualBuffer = buffer
+        const bufLen = this.actualBuffer.getByteLength()
+        if (byteOffset < 0 || byteLength < 0 || byteOffset > bufLen || byteOffset + byteLength > bufLen) {
+            throw new RangeError("invalid arguments")
+        }
+        this.byteOffset_ = byteOffset
+        this.byteLength_ = byteLength
+    }
+
+    /**
+     * Constructs view
+     * @param buffer underlying buffer
+     * @param byteOffset offset to start from
+     * @param byteLength lenth of bytes to take
+     * @throws RangeError if provided indicies are invalid
+     */
+    public constructor(buffer: ArrayBufferLike, byteOffset?: Number, byteLength?: Number) {
+        this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
+    }
+
+{%- for bit in [8, 16, 32, 64] %}
+{%- for mode in ["Int", "Uint", "Float"] %}
+{%- if mode != "Float" or bit >= 32 %}
+    // === {{mode}}{{bit}} ===
+    {%- set impls = ['Little', 'Big'] if bit != 8 else ['Big'] %}
+
+    {%- set type2nameBits = {8: "byte", 16: "short", 32: "int", 64: "long"} %}
+    {%- set type2nameCompat = {8: "number", 16: "number", 32: "number", 64: "bigint"} %}
+    {%- if mode == "Float" %}
+    {%- set type2name = {32: "float", 64: "number"} %}
+    {%- set type2nameCompat = {32: "number", 64: "number"} %}
+    {%- elif mode == "Int" %}
+    {%- set type2name = {8: "int", 16: "int", 32: "int", 64: "long"} %}
+    {%- elif mode == "Uint" %}
+    {%- set type2name = {8: "int", 16: "int", 32: "long", 64: "long"} %}
+    {%- endif %}
+    {%- set methodName = ('Big' if bit == 64 and mode != 'Float' else '') + mode + '{}'.format(bit) %}
+
+    /**
+     * Read bytes as they represent given type
+     * @param byteOffset zero index to read
+     * @returns read value (big endian)
+     */
+    public get{{methodName}}(byteOffset: int): {{type2nameCompat[bit]}} {
+        return this.get{{methodName}}Big(byteOffset)
+    }
+
+    /**
+     * Sets bytes as they represent given type
+     * @param byteOffset zero index to write (big endian)
+     */
+    public set{{methodName}}(byteOffset: int, value: {{type2name[bit]}}): void {
+        this.set{{methodName}}Big(byteOffset, value)
+    }
+
+    {%- if bit == 8 %}
+
+    /**
+     * Read bytes as they represent given type
+     * @param byteOffset zero index to read
+     * @returns read value (big endian)
+     */
+    public get{{methodName}}(byteOffset: number): {{type2nameCompat[bit]}} {
+        return this.get{{methodName}}Big(byteOffset)
+    }
+
+    /**
+     * Sets bytes as they represent given type
+     * @param byteOffset zero index to write (big endian)
+     */
+    public set{{methodName}}(byteOffset: number, value: {{type2nameCompat[bit]}}): void {
+        this.set{{methodName}}Big(byteOffset, value)
+    }
+
+    {%- else %}
+    /**
+     * Sets bytes as they represent given type
+     * @param byteOffset zero index to write
+     * @param littleEndian read as little or big endian
+     */
+    public set{{methodName}}(byteOffset: number, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+            this.set{{methodName}}Little(byteOffset, value)
+        } else {
+            this.set{{methodName}}Big(byteOffset, value)
+        }
+    }
+
+    /**
+     * Sets bytes as they represent given type
+     * @param byteOffset zero index to write
+     * @param littleEndian read as little or big endian
+     */
+    public set{{methodName}}(byteOffset: int, value: {{type2name[bit]}}, littleEndian: boolean): void {
+        if (littleEndian) {
+            this.set{{methodName}}Little(byteOffset, value)
+        } else {
+            this.set{{methodName}}Big(byteOffset, value)
+        }
+    }
+
+    /**
+     * Read bytes as they represent given type
+     * @param byteOffset zero index to read
+     * @param littleEndian read as little or big endian
+     * @returns read value
+     */
+    public get{{methodName}}(byteOffset: number, littleEndian?: boolean): {{type2nameCompat[bit]}} {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+            return this.get{{methodName}}Little(byteOffset)
+        } else {
+            return this.get{{methodName}}Big(byteOffset)
+        }
+    }
+
+    /**
+     * Read bytes as they represent given type
+     * @param byteOffset zero index to read
+     * @param littleEndian read as little or big endian
+     * @returns read value
+     */
+    public get{{methodName}}(byteOffset: int, littleEndian: boolean): {{type2nameCompat[bit]}} {
+        if (littleEndian) {
+            return this.get{{methodName}}Little(byteOffset)
+        } else {
+            return this.get{{methodName}}Big(byteOffset)
+        }
+    }
+    {%- endif %}
+
+    {%- for suffix in impls: %}
+    {%- set getIdx = '+' if suffix == 'Little' else '+ {} -'.format(bit // 8 - 1) %}
+    private get{{methodName}}{{suffix}}(byteOffset: int): {{type2nameCompat[bit]}} {
+        if (byteOffset + {{bit // 8}} > this.byteLength_) {
+            throw new RangeError("wrong index")
+        }
+        {%- set resType = type2nameBits[bit] if mode == "Float" else type2name[bit] %}
+        let res: {{resType}} = 0;
+        const startByte = this.byteOffset_ + byteOffset
+        for (let i = 0; i < {{bit // 8}}; i++) {
+            let byteVal = this.actualBuffer.at(startByte {{getIdx}} i) as {{resType}};
+            byteVal &= 0xff
+            res = (res | byteVal << (8 * i)) as {{resType}};
+        }
+        {%- if bit == 32 and mode == "Float" %}
+        return Float.bitCastFromInt(res)
+        {%- elif bit == 64 and mode == "Float" %}
+        return Double.bitCastFromLong(res)
+        {%- elif bit == 64 and mode == "Int" %}
+        return new BigInt(res)
+        {%- elif bit == 64 and mode == "Uint" %}
+        return DataView.bigintFromULong(res)
+        {%- elif mode == 'Int' %}
+        return (res as {{type2nameBits[bit]}}) as {{resType}}
+        {%- else %}
+        return res
+        {%- endif %}
+    }
+    private get{{methodName}}{{suffix}}(byteOffset: number): {{type2nameCompat[bit]}} {
+        let res = this.get{{methodName}}{{suffix}}(byteOffset as int)
+        return res
+    }
+
+    private set{{methodName}}{{suffix}}(byteOffset: int, value: {{type2name[bit]}}): void {
+        if (byteOffset < 0 || byteOffset + {{bit / 8}} > this.byteLength_) {
+            throw new RangeError("wrong index")
+        }
+        {%- if bit == 32 and mode == "Float" %}
+        let bits = Float.bitCastToInt(value);
+        {%- elif bit == 64 and mode == "Float" %}
+        let bits = Double.bitCastToLong(value);
+        {%- elif bit == 32 and mode == "Uint" %}
+        let bits = value;
+        if (bits == Long.MAX_VALUE || bits == Long.MIN_VALUE) {
+            bits = 0;
+        }
+        {%- else %}
+        let bits = value;
+        {%- endif %}
+        const startByte = this.byteOffset_ + byteOffset
+        for (let i = 0; i < {{bit // 8}}; i++) {
+            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+            this.actualBuffer.set(startByte {{getIdx}} i,  byteVal)
+        }
+    }
+    private set{{methodName}}{{suffix}}(byteOffset: number, value: {{type2nameCompat[bit]}}): void {
+        {%- if bit == 64 and mode == "Int" %}
+        const val: {{type2name[bit]}} = value.getLong();
+        {%- elif bit == 64 and mode == "Uint" %}
+        const val: {{type2name[bit]}} = value.getLong();
+        {%- elif type2name[bit] == "int" %}
+        let temp: long = value as long;
+        if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
+            temp = 0;
+        }
+        const val: {{type2name[bit]}} = temp as {{type2name[bit]}};
+        {%- else %}
+        const val: {{type2name[bit]}} = value as {{type2name[bit]}};
+        {%- endif %}
+        this.set{{methodName}}{{suffix}}(byteOffset as int, val)
+    }
+    {%- endfor %}
+
+{%- endif%}
+{%- endfor %}
+{%- endfor %}
+
+    private static bigintFromULong(x: long): bigint {
+        const noSignMask: long = ((1 as long) << 63) - 1
+        return new BigInt(x & noSignMask) + (new BigInt((x >> 63) & 0x1) << new BigInt(63))
+    }
+}

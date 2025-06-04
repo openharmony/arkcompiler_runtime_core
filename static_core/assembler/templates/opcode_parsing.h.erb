@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,7 @@ bool Parser::ParseOperands()
 %        end
 %      elsif properties.include?("string_id")
                 ParseOperandString();
-%      elsif properties.include?("method_id")
+%      elsif properties.include?("method_id") or properties.include?("static_method_id")
 %        if insn.opcode[0..6] == "initobj"
                 ParseOperandInitobj();
 %        else
@@ -116,7 +116,7 @@ bool Parser::ParseOperands()
 %                                                   # properties.include?("method_id"), because we have opcodes
 %                                                   # with multiple id's, and their parsing is order-sensitive
                 ParseOperandLiteralArray();
-%      elsif properties.include?("field_id")
+%      elsif properties.include?("field_id") or properties.include?("static_field_id")
                 ParseOperandField();
 %      else
                 ParseOperandId();

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -535,8 +535,8 @@ def call_me_from_template
     plain('newobj', dst_r, type_id(0))
   end
 
-  visit('IsUndefinedIntrinsic') do
-    plain('ets.isundefined')
+  visit('IsNullValueIntrinsic') do
+    plain('ets.isnullvalue')
   end
 
   # Empty visitors for IR instructions we want to ignore

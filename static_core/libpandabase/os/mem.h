@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -432,6 +432,11 @@ PANDA_PUBLIC_API std::optional<Error> TagAnonymousMemory(const void *mem, size_t
 static constexpr size_t DEFAULT_NATIVE_BYTES_FROM_MALLINFO = 100000;
 
 PANDA_PUBLIC_API size_t GetNativeBytesFromMallinfo();
+
+#ifdef PANDA_TARGET_WINDOWS
+PANDA_PUBLIC_API void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, int fildes, off_t off);
+PANDA_PUBLIC_API int munmap(void *addr, [[maybe_unused]] size_t len);
+#endif
 
 }  // namespace ark::os::mem
 

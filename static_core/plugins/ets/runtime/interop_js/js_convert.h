@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
 #include "js_convert_base.h"
+#include "js_convert_stdlib.h"
 
 namespace ark::ets::interop::js {
 
@@ -42,22 +43,28 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_integral_v<P>, std::optional<Cpptype>> UnwrapImpl([[maybe_unused]] InteropCtx *ctx,
                                                                                       napi_env env, napi_value jsVal)
     {
-        if (UNLIKELY(GetValueType(env, jsVal) != napi_number)) {
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            JSConvertNumeric::TypeCheckFailed();
+            return {};
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
             JSConvertNumeric::TypeCheckFailed();
             return {};
         }
         Cpptype etsVal;
         if constexpr (sizeof(Cpptype) >= sizeof(int32_t)) {
             int64_t val;
-            NAPI_CHECK_FATAL(napi_get_value_int64(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         } else if constexpr (std::is_signed_v<Cpptype>) {
             int32_t val;
-            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         } else {
             uint32_t val;
-            NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsVal, &val));
+            NAPI_CHECK_FATAL(napi_get_value_uint32(env, result, &val));
             etsVal = static_cast<Cpptype>(val);
         }
         return etsVal;
@@ -75,12 +82,18 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_floating_point_v<P>, std::optional<Cpptype>> UnwrapImpl(
         [[maybe_unused]] InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
-        if (UNLIKELY(GetValueType(env, jsVal) != napi_number)) {
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        napi_value result = jsVal;
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
+            JSConvertNumeric::TypeCheckFailed();
+            return {};
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_number)) {
             JSConvertNumeric::TypeCheckFailed();
             return {};
         }
         double val;
-        NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
+        NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
         return val;
     }
 };
@@ -88,7 +101,6 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
 using JSConvertI8 = JSConvertNumeric<int8_t>;
 using JSConvertU8 = JSConvertNumeric<uint8_t>;
 using JSConvertI16 = JSConvertNumeric<int16_t>;
-using JSConvertU16 = JSConvertNumeric<uint16_t>;
 using JSConvertI32 = JSConvertNumeric<int32_t>;
 using JSConvertU32 = JSConvertNumeric<uint32_t>;
 using JSConvertI64 = JSConvertNumeric<int64_t>;
@@ -105,170 +117,41 @@ JSCONVERT_WRAP(U1)
 }
 JSCONVERT_UNWRAP(U1)
 {
-    if (UNLIKELY(GetValueType(env, jsVal) != napi_boolean)) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
-    bool val;
-    NAPI_CHECK_FATAL(napi_get_value_bool(env, jsVal, &val));
-    return val;
+    auto objVal = JSConvertStdlibBoolean::UnwrapWithNullCheck(ctx, env, jsVal);
+    if (!objVal || (objVal.has_value() && objVal.value() == nullptr)) {
+        return {};
+    }
+    if (objVal.has_value()) {
+        return EtsBoxPrimitive<EtsBoolean>::FromCoreType(objVal.value())->GetValue();
+    }
+    return {};
 }
 
-JSCONVERT_DEFINE_TYPE(StdlibBoolean, EtsObject *);
-JSCONVERT_WRAP(StdlibBoolean)
+JSCONVERT_DEFINE_TYPE(U16, char16_t);
+JSCONVERT_WRAP(U16)
 {
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsBoolean> *>(etsVal);
     napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_get_boolean(env, val->GetValue(), &jsVal));
+    NAPI_CHECK_FATAL(napi_create_string_utf16(env, &etsVal, 1, &jsVal));
     return jsVal;
 }
-JSCONVERT_UNWRAP(StdlibBoolean)
+JSCONVERT_UNWRAP(U16)
 {
-    bool val;
-    NAPI_CHECK_FATAL(napi_get_value_bool(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsBoolean>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsBoolean>(val));
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibByte, EtsObject *);
-JSCONVERT_WRAP(StdlibByte)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsByte> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibByte)
-{
-    int32_t val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    if (val < std::numeric_limits<EtsByte>::min() || val > std::numeric_limits<EtsByte>::max()) {
+    if (IsUndefined(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
-    return EtsBoxPrimitive<EtsByte>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibChar, EtsObject *);
-JSCONVERT_WRAP(StdlibChar)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsChar> *>(etsVal);
-    napi_value jsVal;
-    std::array<char16_t, 2U> str = {static_cast<char16_t>(val->GetValue()), 0};
-    NAPI_CHECK_FATAL(napi_create_string_utf16(env, str.data(), 1, &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibChar)
-{
-    napi_valuetype type;
-    napi_typeof(env, jsVal, &type);
-    EtsChar val;
-    if (type == napi_number) {
-        int32_t ival;
-        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &ival));
-        if (ival < 0 || ival > std::numeric_limits<EtsChar>::max()) {
-            TypeCheckFailed();
-            return {};
-        }
-        val = static_cast<uint16_t>(ival);
-    } else if (type == napi_string) {
-        size_t len = 0;
-        NAPI_CHECK_FATAL(napi_get_value_string_utf16(env, jsVal, nullptr, 0, &len));
-        if (len != 1) {
-            TypeCheckFailed();
-            return {};
-        }
-        char16_t cval;
-        NAPI_CHECK_FATAL(napi_get_value_string_utf16(env, jsVal, &cval, 1, &len));
-        val = static_cast<EtsChar>(cval);
-    } else {
-        TypeCheckFailed();
+    auto objVal = JSConvertStdlibChar::UnwrapWithNullCheck(ctx, env, jsVal);
+    if (!objVal || (objVal.has_value() && objVal.value() == nullptr)) {
         return {};
     }
-    return EtsBoxPrimitive<EtsChar>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibShort, EtsObject *);
-JSCONVERT_WRAP(StdlibShort)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsShort> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibShort)
-{
-    int32_t val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    if (val < std::numeric_limits<EtsShort>::min() || val > std::numeric_limits<EtsShort>::max()) {
-        TypeCheckFailed();
-        return {};
+    if (objVal.has_value()) {
+        return EtsBoxPrimitive<EtsChar>::FromCoreType(objVal.value())->GetValue();
     }
-    return EtsBoxPrimitive<EtsShort>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsShort>(val));
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibInt, EtsObject *);
-JSCONVERT_WRAP(StdlibInt)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int32(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibInt)
-{
-    EtsInt val;
-    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibLong, EtsObject *);
-JSCONVERT_WRAP(StdlibLong)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsLong> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_int64(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibLong)
-{
-    EtsLong val;
-    NAPI_CHECK_FATAL(napi_get_value_int64(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), val);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibFloat, EtsObject *);
-JSCONVERT_WRAP(StdlibFloat)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsFloat> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_double(env, static_cast<double>(val->GetValue()), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibFloat)
-{
-    double val;
-    NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
-    auto fval = static_cast<EtsFloat>(val);
-    if (fval != val) {
-        TypeCheckFailed();
-        return {};
-    }
-    return EtsBoxPrimitive<EtsFloat>::Create(EtsCoroutine::GetCurrent(), fval);
-}
-
-JSCONVERT_DEFINE_TYPE(StdlibDouble, EtsObject *);
-JSCONVERT_WRAP(StdlibDouble)
-{
-    auto *val = reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(etsVal);
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_create_double(env, val->GetValue(), &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(StdlibDouble)
-{
-    EtsDouble val;
-    NAPI_CHECK_FATAL(napi_get_value_double(env, jsVal, &val));
-    return EtsBoxPrimitive<EtsDouble>::Create(EtsCoroutine::GetCurrent(), val);
+    return {};
 }
 
 JSCONVERT_DEFINE_TYPE(String, EtsString *);
@@ -287,38 +170,41 @@ JSCONVERT_WRAP(String)
 }
 JSCONVERT_UNWRAP(String)
 {
-    if (UNLIKELY(GetValueType(env, jsVal) != napi_string)) {
+    napi_value result = jsVal;
+    napi_valuetype valueType = GetValueType(env, jsVal);
+    if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_STRING, &result)) {
         TypeCheckFailed();
         return {};
     }
-    std::string value = GetString(env, jsVal);
+    if (UNLIKELY(GetValueType(env, result) != napi_string)) {
+        TypeCheckFailed();
+        return {};
+    }
+    std::string value = GetString(env, result);
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
+
 JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);
 JSCONVERT_WRAP(BigInt)
 {
-    auto size = etsVal->GetBytes()->GetActualLength();  // size includes extra sign element
-    auto data = etsVal->GetBytes()->GetData();
+    auto size = etsVal->GetBytes()->GetLength();
+    auto data = etsVal->GetBytes();
 
     std::vector<uint32_t> etsArray;
     etsArray.reserve(size);
     for (size_t i = 0; i < size; ++i) {
-        etsArray.emplace_back(static_cast<uint32_t>(data->Get(i)->GetValue()));
+        etsArray.emplace_back(static_cast<uint32_t>(data->Get(i)));
     }
 
     SmallVector<uint64_t, 4U> jsArray;
-    int sign = 0;
-    if (size > 1) {
-        sign = GeBigIntSign(etsArray);
-        if (sign == 1) {
-            ConvertFromTwosComplement(etsArray);
-        }
-
+    if (size > 0) {
         jsArray = ConvertBigIntArrayFromEtsToJs(etsArray);
     } else {
         jsArray = {0};
     }
+
     napi_value jsVal;
+    int sign = etsVal->GetSign() < 0 ? 1 : 0;
     NAPI_CHECK_FATAL(napi_create_bigint_words(env, sign, jsArray.size(), jsArray.data(), &jsVal));
 
     return jsVal;
@@ -331,22 +217,17 @@ JSCONVERT_UNWRAP(BigInt)
     }
 
     auto [words, signBit] = GetBigInt(env, jsVal);
-    std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words, signBit);
+    std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words);
 
-    auto arrayKlass = EtsClass::FromRuntimeClass(ctx->GetArrayClass());
-    auto etsIntArray = EtsTypedObjectArray<EtsBoxPrimitive<EtsInt>>::Create(arrayKlass, array.size());
-
-    for (size_t i = 0; i < array.size(); ++i) {
-        etsIntArray->Set(i, EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), array[i]));
+    auto etsIntArray = EtsIntArray::Create(array.size());
+    for (uint32_t i = 0; i < array.size(); ++i) {
+        etsIntArray->Set(i, array[i]);
     }
-
-    auto bigIntArrayField = EtsBoxedIntArray::FromEtsObject(EtsObject::Create(arrayKlass));
-    bigIntArrayField->SetFieldPrimitive<EtsInt>(EtsBoxedIntArray::GetActualLengthOffset(), false, array.size());
-    bigIntArrayField->SetFieldObject(EtsBoxedIntArray::GetBufferOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
 
     auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
     auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
-    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), bigIntArrayField);
+    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
+    bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
 
     return bigInt;
 }
@@ -361,32 +242,36 @@ JSCONVERT_UNWRAP(JSValue)
     return JSValue::Create(EtsCoroutine::GetCurrent(), ctx, jsVal);
 }
 
-// JSError convertors are supposed to box JSValue objects, do not treat them in any other way
-JSCONVERT_DEFINE_TYPE(JSError, EtsObject *);
-JSCONVERT_WRAP(JSError)
+// ESError convertors are supposed to box JSValue objects, do not treat them in any other way
+JSCONVERT_DEFINE_TYPE(ESError, EtsObject *);
+JSCONVERT_WRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
 
     auto klass = etsVal->GetClass();
-    INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetJSErrorClass());
+    INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
-    // NOTE(vpukhov): remove call after adding a mirror-class for JSError
-    auto method = klass->GetMethod("getValue");
+    auto method = klass->GetInstanceMethod("getJsError", nullptr);
     ASSERT(method != nullptr);
     std::array args = {Value(etsVal->GetCoreType())};
     auto val = JSValue::FromCoreType(method->GetPandaMethod()->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
     INTEROP_FATAL_IF(val == nullptr);
     return val->GetNapiValue(env);
 }
-JSCONVERT_UNWRAP(JSError)
+JSCONVERT_UNWRAP(ESError)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    auto value = JSValue::Create(coro, ctx, jsVal);
+    JSValue *value = nullptr;
+    value = JSValue::Create(coro, ctx, jsVal);
     if (UNLIKELY(value == nullptr)) {
         return {};
     }
-    auto res = ctx->CreateETSCoreJSError(coro, value);
+    auto res = ctx->CreateETSCoreESError(coro, value);
     if (UNLIKELY(res == nullptr)) {
         return {};
     }
@@ -399,6 +284,10 @@ JSCONVERT_WRAP(Promise)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     // SharedReferenceStorage uses object's MarkWord to store interop hash.
     // Also runtime may lock a Promise object (this operation also requires MarkWord modification).
@@ -407,8 +296,8 @@ JSCONVERT_WRAP(Promise)
     // When a ets Promise object goes to JS we should get the corresponding EtsPromiseRef object.
     // So the ets Promise object should know about EtsPromiseRef which is stored in 'interopObject' field.
     EtsObject *interopObj = etsVal->GetInteropObject(coro);
-    if (interopObj != nullptr && storage->HasReference(interopObj)) {
-        return storage->GetReference(interopObj)->GetJsObject(env);
+    if (interopObj != nullptr && storage->HasReference(interopObj, env)) {
+        return storage->GetJsObject(interopObj, env);
     }
 
     [[maybe_unused]] EtsHandleScope s(coro);
@@ -416,13 +305,14 @@ JSCONVERT_WRAP(Promise)
     napi_deferred deferred;
     napi_value jsPromise;
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
-    EtsMutex::LockHolder holder(hpromise);
-    uint32_t state = hpromise->GetState();
-    if (state != EtsPromise::STATE_PENDING) {
+
+    hpromise->Lock();
+    // NOTE(alimovilya, #23064) This if should be removed. Only else branch should remain.
+    if (!hpromise->IsPending() && !hpromise->IsLinked()) {  // it will never get PENDING again
         EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
         napi_value completionValue;
         if (value.GetPtr() == nullptr) {
-            completionValue = GetNull(env);
+            completionValue = GetUndefined(env);
         } else {
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
             completionValue = refconv->Wrap(ctx, value.GetPtr());
@@ -433,16 +323,20 @@ JSCONVERT_WRAP(Promise)
             NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
         }
     } else {
+        // connect->Invoke calls EtsPromiseSubmitCallback that acquires the mutex and checks the state again
+        hpromise->Unlock();
         ASSERT_MANAGED_CODE();
-        RemotePromiseResolver *resolver =
-            Runtime::GetCurrent()->GetInternalAllocator()->New<JsRemotePromiseResolver>(deferred);
-        hpromise->SetEtsPromiseResolver(resolver);
+        Method *connect = ctx->GetPromiseInteropConnectMethod();
+        std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
+        connect->Invoke(coro, args.data());
+        hpromise->Lock();
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);
     ref->SetTarget(coro, hpromise->AsObject());
     hpromise->SetInteropObject(coro, ref);
     [[maybe_unused]] auto *sharedRef = storage->CreateETSObjectRef(ctx, ref, jsPromise);
     ASSERT(sharedRef != nullptr);
+    hpromise->Unlock();
     return jsPromise;
 }
 
@@ -457,7 +351,7 @@ JSCONVERT_UNWRAP(Promise)
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsVal);
     if (sharedRef != nullptr) {
-        auto *ref = reinterpret_cast<EtsPromiseRef *>(sharedRef->GetEtsObject(ctx));
+        auto *ref = reinterpret_cast<EtsPromiseRef *>(sharedRef->GetEtsObject());
         ASSERT(ref->GetTarget(coro) != nullptr);
         return EtsPromise::FromEtsObject(ref->GetTarget(coro));
     }
@@ -470,17 +364,19 @@ JSCONVERT_UNWRAP(Promise)
     hpromise->SetInteropObject(coro, href.GetPtr());
     storage->CreateJSObjectRef(ctx, href.GetPtr(), jsVal);
     hpromise->SetLinkedPromise(coro, href->AsObject());
+    EtsPromise::CreateLink(hpromise->GetLinkedPromise(coro), hpromise.GetPtr());
     return hpromise.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsArrayBuffer *);
+JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsEscompatArrayBuffer *);
 
 JSCONVERT_WRAP(ArrayBuffer)
 {
     napi_value buf;
     void *data;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
-    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()->GetData<const void *>()), etsVal->GetByteLength(),
+    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()), etsVal->GetByteLength(),
                 reinterpret_cast<uint8_t *>(data));
     return buf;
 }
@@ -495,32 +391,30 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     }
     void *data = nullptr;
     size_t byteLength = 0;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, jsVal, &data, &byteLength));
     auto *currentCoro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope s(currentCoro);
-    EtsClass *arraybufKlass = currentCoro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
-    EtsHandle<EtsArrayBuffer> buf(currentCoro,
-                                  reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(currentCoro, arraybufKlass)));
-    buf->SetByteLength(static_cast<EtsInt>(byteLength));
-    EtsHandle<EtsByteArray> byteArray(currentCoro, reinterpret_cast<EtsByteArray *>(EtsByteArray::Create(byteLength)));
-    buf->SetData(currentCoro, byteArray.GetPtr());
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
-    return buf.GetPtr();
+    void *etsData = nullptr;
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(currentCoro, byteLength, &etsData);
+    EtsHandle<EtsEscompatArrayBuffer> hbuffer(currentCoro, arrayBuffer);
+    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
+    return hbuffer.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(EtsUndefined, EtsObject *);
-JSCONVERT_WRAP(EtsUndefined)
+JSCONVERT_DEFINE_TYPE(EtsNull, EtsObject *);
+JSCONVERT_WRAP(EtsNull)
 {
-    return GetUndefined(env);
+    return GetNull(env);
 }
 
-JSCONVERT_UNWRAP(EtsUndefined)
+JSCONVERT_UNWRAP(EtsNull)
 {
-    if (UNLIKELY(!IsUndefined(env, jsVal))) {
+    if (UNLIKELY(!IsNull(env, jsVal))) {
         TypeCheckFailed();
         return {};
     }
-    return ctx->GetUndefinedObject();
+    return ctx->GetNullValue();
 }
 
 #undef JSCONVERT_DEFINE_TYPE
@@ -533,9 +427,13 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
-    napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
-    if (UNLIKELY(NapiThrownGeneric(rc))) {
-        return {};
+    {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        // No access to jsvalue after this line
+        napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
+        if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
+            return {};
+        }
     }
     return T::UnwrapWithNullCheck(ctx, env, jsVal);
 }
@@ -550,8 +448,10 @@ template <typename T>
     if (UNLIKELY(jsPropVal == nullptr)) {
         return false;
     }
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    // No access to jsvalue after this line
     napi_status rc = napi_set_named_property(env, jsVal, name, jsPropVal);
-    return !NapiThrownGeneric(rc);
+    return rc != napi_pending_exception && !NapiThrownGeneric(rc);
 }
 
 }  // namespace ark::ets::interop::js

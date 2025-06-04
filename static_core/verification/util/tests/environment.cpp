@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "util/parser/parser.h"
 
 #include <cstring>
+#include <charconv>
 
 namespace ark::verifier::test {
 
@@ -65,7 +66,10 @@ EnvOptions::EnvOptions(const char *envVarName)
     static const auto HEX = DEC.OfString("0x") >> DEC;     // NOLINT(readability-static-accessed-through-instance)
     static const auto NUM_HANDLER = [](auto a, Context &c, auto s, auto e, [[maybe_unused]] auto end) {
         if (a == Action::PARSED) {
-            c.value = std::stoi(std::string {s, e}, nullptr, 0);
+            int tempValue = 0;
+            std::string value = std::string {s, e};
+            std::from_chars(value.data(), &(*value.end()), tempValue, 0);
+            c.value = tempValue;
         }
         return true;
     };

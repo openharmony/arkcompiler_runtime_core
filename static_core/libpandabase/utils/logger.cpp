@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "generated/base_options.h"
 
 #include <cstdarg>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
@@ -33,8 +34,12 @@ thread_local int Logger::nesting_ = 0;
 
 #include <logger_impl_gen.inc>
 
-void Logger::Initialize(const base_options::Options &options)
+void Logger::Initialize(const base_options::Options &options, Formatter formatter)
 {
+    if (formatter == nullptr) {
+        formatter = DefaultFormatter;
+    }
+
     ark::Logger::ComponentMask componentMask;
     auto loadComponents = [&componentMask](auto components) {
         for (const auto &s : components) {
@@ -70,12 +75,12 @@ void Logger::Initialize(const base_options::Options &options)
     }
 
     if (options.GetLogStream() == "std") {
-        Logger::InitializeStdLogging(level, componentMask);
+        Logger::InitializeStdLogging(level, componentMask, formatter);
     } else if (options.GetLogStream() == "file" || options.GetLogStream() == "fast-file") {
         const std::string &fileName = options.GetLogFile();
-        Logger::InitializeFileLogging(fileName, level, componentMask, options.GetLogStream() == "fast-file");
+        Logger::InitializeFileLogging(fileName, level, componentMask, options.GetLogStream() == "fast-file", formatter);
     } else if (options.GetLogStream() == "dummy") {
-        Logger::InitializeDummyLogging(level, componentMask);
+        Logger::InitializeDummyLogging(level, componentMask, formatter);
     } else {
         UNREACHABLE();
     }
@@ -125,7 +130,6 @@ Logger::Message::~Message()
     if (printSystemError_) {
         stream_ << ": " << os::Error(errno).ToString();
     }
-
     Logger::Log(level_, component_, stream_.str());
 #ifndef NDEBUG
     ark::Logger::LogNestingDec();
@@ -170,18 +174,21 @@ void Logger::Log(Level level, Component component, const std::string &str)
     }
 }
 
-/* static */
-std::string GetPrefix(Logger::Level level, Logger::Component component)
+static std::string GetPrefix(Logger::Level level, const char *component)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     return helpers::string::Format("[TID %06x] %s/%s: ", os::thread::GetCurrentThreadId(), GetLevelTag(level),
-                                   GetComponentTag(component));
+                                   component);
 }
 
 /* static */
 void Logger::InitializeFileLogging(const std::string &logFile, Level level, ComponentMask componentMask,
-                                   bool isFastLogging)
+                                   bool isFastLogging, Formatter formatter)
 {
+    if (formatter == nullptr) {
+        formatter = DefaultFormatter;
+    }
+
     if (IsInitialized()) {
         return;
     }
@@ -192,15 +199,18 @@ void Logger::InitializeFileLogging(const std::string &logFile, Level level, Comp
         return;
     }
 
-    std::ofstream stream(logFile);
-    if (stream) {
+    FILE *file = nullptr;
+    if (!logFile.empty()) {
+        file = fopen(logFile.c_str(), "we");
+    }
+    if (file != nullptr) {
         if (isFastLogging) {
-            logger_ = new FastFileLogger(std::move(stream), level, componentMask);
+            logger_ = new FastFileLogger(file, level, componentMask, formatter);
         } else {
-            logger_ = new FileLogger(std::move(stream), level, componentMask);
+            logger_ = new FileLogger(file, level, componentMask, formatter);
         }
     } else {
-        logger_ = new StderrLogger(level, componentMask);
+        logger_ = new StderrLogger(level, componentMask, formatter);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         std::string msg = helpers::string::Format("Fallback to stderr logging: cannot open log file '%s': %s",
                                                   logFile.c_str(), os::Error(errno).ToString().c_str());
@@ -214,8 +224,11 @@ void Logger::InitializeFileLogging(const std::string &logFile, Level level, Comp
 }
 
 /* static */
-void Logger::InitializeStdLogging(Level level, ComponentMask componentMask)
+void Logger::InitializeStdLogging(Level level, ComponentMask componentMask, Formatter formatter)
 {
+    if (formatter == nullptr) {
+        formatter = DefaultFormatter;
+    }
     if (IsInitialized()) {
         return;
     }
@@ -226,8 +239,7 @@ void Logger::InitializeStdLogging(Level level, ComponentMask componentMask)
         if (IsInitialized()) {
             return;
         }
-
-        logger_ = new StderrLogger(level, componentMask);
+        logger_ = new StderrLogger(level, componentMask, formatter);
 #ifdef PANDA_TARGET_UNIX
         if (DfxController::IsInitialized() && DfxController::GetOptionValue(DfxOptionHandler::MOBILE_LOG) == 0) {
             Logger::SetMobileLogOpenFlag(false);
@@ -237,8 +249,12 @@ void Logger::InitializeStdLogging(Level level, ComponentMask componentMask)
 }
 
 /* static */
-void Logger::InitializeDummyLogging(Level level, ComponentMask componentMask)
+void Logger::InitializeDummyLogging(Level level, ComponentMask componentMask, Formatter formatter)
 {
+    if (formatter == nullptr) {
+        formatter = DefaultFormatter;
+    }
+
     if (IsInitialized()) {
         return;
     }
@@ -250,7 +266,7 @@ void Logger::InitializeDummyLogging(Level level, ComponentMask componentMask)
             return;
         }
 
-        logger_ = new DummyLogger(level, componentMask);
+        logger_ = new DummyLogger(level, componentMask, formatter);
     }
 }
 
@@ -305,27 +321,33 @@ void Logger::ProcessLogComponentsFromString(std::string_view s)
     }
 }
 
+void Logger::DefaultFormatter(FILE *stream, int level, const char *component, const char *message)
+{
+    std::string prefix = GetPrefix(static_cast<Level>(level), component);
+    std::stringstream streamBuf;
+    streamBuf << prefix << message << std::endl << std::flush;
+    std::fwrite(streamBuf.str().c_str(), streamBuf.str().size(), 1, stream);
+    std::fflush(stream);
+}
+
 void FileLogger::LogLineInternal(Level level, Component component, const std::string &str)
 {
-    std::string prefix = GetPrefix(level, component);
-    stream_ << prefix << str << std::endl << std::flush;
+    formatter_(stream_, static_cast<int>(level), GetComponentTag(component), str.c_str());
 }
 
 void FastFileLogger::LogLineInternal(Level level, Component component, const std::string &str)
 {
-    std::string prefix = GetPrefix(level, component);
-    stream_ << prefix << str << '\n';
+    formatter_(stream_, static_cast<int>(level), GetComponentTag(component), str.c_str());
 }
 
 void StderrLogger::LogLineInternal(Level level, Component component, const std::string &str)
 {
-    std::string prefix = GetPrefix(level, component);
-    std::cerr << prefix << str << std::endl << std::flush;
+    formatter_(stderr, static_cast<int>(level), GetComponentTag(component), str.c_str());
 }
 
 void FastFileLogger::SyncOutputResource()
 {
-    stream_ << std::flush;
+    std::fflush(stream_);
 }
 
 }  // namespace ark

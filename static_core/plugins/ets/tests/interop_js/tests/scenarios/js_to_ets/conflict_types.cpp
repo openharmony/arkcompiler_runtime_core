@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,60 +23,60 @@ class EtsInteropScenariosJsToEtsConflictTypes : public EtsInteropTest {};
 // NOTE(splatov) #17937 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_array)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictArray");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictArray");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_arraybuffer)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictArraybuffer");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictArraybuffer");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(splatov) #17379 enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_boolean)
+TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_boolean)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictBoolean");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictBoolean");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(splatov) #17939 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_dataview)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictDataview");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictDataview");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(splatov) #17939 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_date)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictDate");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictDate");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(splatov) #17940 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_error)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictError");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(splatov) #17939 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_map)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictMap");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictMap");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_object)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictObject");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictObject");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_string)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictString");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeConflictString");
     ASSERT_EQ(ret, true);
 }
 

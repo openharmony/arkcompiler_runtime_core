@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,8 @@ class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {
 public:
     void SetUp() override
     {
-        storage_ = SharedReferenceStorage::Create();
-        auto ctx = InteropCtx::Current();
-        ctx->SetJSEnv(GetJsEnv());
+        storage_ = SharedReferenceStorage::GetCurrent();
+        ASSERT_NE(storage_, nullptr);
 
         memset_s(&objectArray_, sizeof(objectArray_), 0, sizeof(objectArray_));
         nextFreeIdx_ = 0;
@@ -44,7 +43,7 @@ public:
     SharedReference *CreateReference(EtsObject *etsObject)
     {
         napi_value jsObj;
-        NAPI_CHECK_FATAL(napi_create_object(GetJsEnv(), &jsObj));
+        NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
         SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), etsObject, jsObj);
 
         // Emulate wrappper usage
@@ -64,13 +63,18 @@ public:
         return storage_->RemoveReference(ref);
     }
 
+    bool HasReference(EtsObject *object) const
+    {
+        return SharedReference::HasReference(object);
+    }
+
     bool CheckAlive(void *data)
     {
         return storage_->CheckAlive(data);
     }
 
 protected:
-    std::unique_ptr<SharedReferenceStorage> storage_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    SharedReferenceStorage *storage_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     static constexpr size_t MAX_OBJECTS = 128;
@@ -82,9 +86,9 @@ TEST_F(SharedReferenceStorage1GTest, test_0)
 {
     EtsObject *etsObject = NewEtsObject();
 
-    ASSERT_EQ(storage_->HasReference(etsObject), false);
+    ASSERT_EQ(HasReference(etsObject), false);
     SharedReference *ref = CreateReference(etsObject);
-    ASSERT_EQ(storage_->HasReference(etsObject), true);
+    ASSERT_EQ(HasReference(etsObject), true);
 
     SharedReference *refX = storage_->GetReference(etsObject);
     SharedReference *refY = GetReference((void *)ref);

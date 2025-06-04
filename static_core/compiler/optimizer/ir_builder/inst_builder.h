@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -207,6 +207,13 @@ private:
     size_t GetVRegsCount() const
     {
         return vregsAndArgsCount_ + 1 + GetGraph()->GetEnvCount();
+    }
+
+    void SetCallNativeFlags(CallInst *callInst, RuntimeInterface::MethodPtr method) const
+    {
+        bool isNativeApi = method != nullptr && GetRuntime()->IsMethodNativeApi(method);
+        callInst->SetIsNative(isNativeApi);
+        callInst->SetCanNativeException(isNativeApi && GetRuntime()->HasNativeException(method));
     }
 
     ConstantInst *FindOrCreate32BitConstant(uint32_t value);

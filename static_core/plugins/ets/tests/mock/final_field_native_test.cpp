@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ protected:
 
 TEST_F(FinalFieldNativeTest, FinalFieldTest)
 {
-    ets_class testClass = env->FindClass("FinalFieldNativeTest");
+    ets_class testClass = env->FindClass("FinalFieldNativeTest/FinalFieldNativeTest");
     ASSERT_NE(testClass, nullptr);
 
     ets_field field = env->GetStaticp_field(testClass, "boolean_value_final", "Z");

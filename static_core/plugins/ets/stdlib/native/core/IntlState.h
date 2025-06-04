@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "plugins/ets/stdlib/native/core/IntlFormattersCache.h"
 #include <memory>
 
-namespace ark::ets::stdlib {
+namespace ark::ets::stdlib::intl {
 
 struct IntlState {
     IntlFormattersCache fmtsCache;
@@ -29,6 +29,6 @@ extern std::unique_ptr<IntlState> g_intlState;
 
 void CreateIntlState();
 
-}  // namespace ark::ets::stdlib
+}  // namespace ark::ets::stdlib::intl
 
 #endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLSTATE_H

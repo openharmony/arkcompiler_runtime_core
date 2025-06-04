@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,9 +28,11 @@ META_COPYRIGHT = "Copyright (c)"
 
 # Extensions
 YAML_EXTENSIONS = [".yaml", ".yml"]
-TEMPLATE_EXTENSION = ".sts"
-OUT_EXTENSION = ".sts"
+TEMPLATE_EXTENSION = ".ets"
+OUT_EXTENSION = ".ets"
 JAR_EXTENSION = ".jar"
+TEMPLATE_EXTENSION_TS = ".ts"
+OUT_EXTENSION_TS = ".ts"
 
 # Prefixes
 LIST_PREFIX = "list."

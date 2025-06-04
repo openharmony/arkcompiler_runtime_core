@@ -265,7 +265,7 @@ options:
 
 - name: gc-trigger-type
   type: std::string
-  default: heap-trigger-test
+  default: heap-trigger
   possible_values:
     - heap-trigger-test
     - heap-trigger
@@ -350,11 +350,11 @@ options:
 - name: gc-workers-count
   type: uint32_t
   # default value depends on a specific device model
-  default:
-    "HL1CMSM": 2  # mate 60 pro
-    "ohos": 2 # devboard
-    "HN1NOAHM": 2 # mate 40 pro
-    "default": 2
+  default_target_specific:
+    HL1CMSM: 2  # mate 60 pro
+    ohos: 2 # devboard
+    HN1NOAHM: 2 # mate 40 pro
+    default: 2
   description: Set number of additional GC helper threads. GC uses these threads to speed up collection doing work in parallel.
 
 - name: manage-gc-threads-affinity
@@ -902,11 +902,11 @@ options:
 - name: taskmanager-workers-count
   type: uint32_t
   # default value depends on a specific device model
-  default:
-    "HL1CMSM": 3 # mate 60 pro
-    "ohos": 2 # devboard
-    "HN1NOAHM": 4 # mate 40 pro
-    "default": 4
+  default_target_specific:
+    HL1CMSM: 3 # mate 60 pro
+    ohos: 2 # devboard
+    HN1NOAHM: 4 # mate 40 pro
+    default: 4
   description: Number of worker threads for the taskmanager. Option is used only for --worker-type=taskmanager
 
 - name: task-stats-type

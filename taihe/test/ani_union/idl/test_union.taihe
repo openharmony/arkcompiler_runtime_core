@@ -1,0 +1,256 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+struct Pair {
+  a: String;
+  b: String;
+}
+
+enum Color: String {
+    RED = "Red",
+    GREEN = "Green",
+    BLUE = "Blue",
+}
+
+union union_primitive {
+  sValue: String;      
+  i8Value: i8;         
+  i16Value: i16;       
+  i32Value: i32;  
+
+  f32Value: f32;       
+  f64Value: f64;       
+  bValue: bool;        
+}
+
+union color_map_value1 {
+    colorValue: Color;
+    mapValue1: Map<String, i8>;
+}
+
+union color_map_value2 {
+    colorValue: Color;
+    mapValue2: Map<String, i16>;
+}
+
+union color_map_value3 {
+    colorValue: Color;
+    mapValue3: Map<String, i32>;
+}
+
+union color_map_value4 {
+    colorValue: Color;
+    mapValue4: Map<String, i64>;
+}
+
+union color_map_value5 {
+    colorValue: Color;
+    mapValue5: Map<String, f32>;
+}
+
+union color_map_value6 {
+    colorValue: Color;
+    mapValue6: Map<String, f64>;
+}
+
+union color_map_value7 {
+    colorValue: Color;
+    mapValue7: Map<String, bool>;
+}
+
+union color_map_value8 {
+    colorValue: Color;
+    mapValue8: Map<String, String>;
+}
+
+union color_map_value9 {
+    colorValue: Color;
+    mapValue9: Map<i32, i32>;
+}
+
+
+
+union UnionArrayMap1 {
+  arri8: Array<i8>;
+  mapValue1: Map<String, i8>;
+}
+
+
+union UnionArrayMap2 {
+  arri8: Array<i8>;
+  mapValue2: Map<String, i16>;
+}
+
+
+union UnionArrayMap3 {
+  arri8: Array<i8>;
+  mapValue3: Map<String, i32>;
+}
+
+
+union UnionArrayMap4 {
+  arri8: Array<i8>;
+  mapValue4: Map<String, i64>;
+}
+
+
+union UnionArrayMap5 {
+  arri8: Array<i8>;
+  mapValue5: Map<String, f32>;
+}
+
+
+union UnionArrayMap6 {
+  arri8: Array<i8>;
+  mapValue6: Map<String, f64>;
+}
+
+
+union UnionArrayMap7 {
+  arri8: Array<i8>;
+  mapValue7: Map<String, bool>;
+}
+
+
+union UnionArrayMap8 {
+  arri8: Array<i8>;
+  mapValue8: Map<String, String>;
+}
+
+
+union UnionArrayMap9 {
+  arri8: Array<i8>;
+  mapValue9: Map<i32, i32>;
+}
+
+union union_mix{
+  sValue: String;      
+  i8Value: i8;         
+  i16Value: i16;       
+  i32Value: i32;  
+  f32Value: f32;       
+  f64Value: f64;       
+  bValue: bool;     
+
+  enumValue: Color;
+  arri8: Array<i8>;
+}
+
+union union_primitive_2 {
+  sValue: String;      
+  i8Value: i8;               
+}
+
+union union_primitive_2_1 {   
+  i8Value: i8;    
+  i16Value: i16;           
+}
+
+union union_primitive_2_2 {   
+  i8Value: i8;    
+  i8Value2: i8;           
+}
+
+union union_primitive_2_3 {
+  i16Value: i16;     
+  i32Value: i32;               
+}
+
+union union_primitive_2_4 {
+  i32Value: i32;      
+  f32Value: f32;             
+}
+union union_primitive_2_5 {
+  f32Value: f32;      
+  f64Value: f64;               
+}
+union union_primitive_2_6 {
+  sValue: String;      
+  bValue: bool;               
+}
+union union_primitive_2_7 {
+  bValue: bool;       
+  i8Value: i8;               
+}
+union union_primitive_2_8 {
+  bValue: bool;       
+  b1Value: bool;               
+}
+union union_primitive_2_9 {
+  sValue: String;      
+  s1Value: String;               
+}
+
+union union_mix_5 {
+  sValue: String;      
+  i8Value: i8;
+  bValue: bool;
+  enumValue: Color;
+  arr32: Array<i32>;               
+}
+
+union union_map{
+  mapValue: Map<String, i8>;
+}
+
+
+interface MyInterface {
+  func_union_primitive(data1: union_primitive, data2: union_primitive): String;
+  func_union_primitive_5param(data1: union_primitive, data2: union_primitive, data3: union_primitive, data4: union_primitive, data5: union_primitive): String;
+  func_color_map_value1(data1: color_map_value1): String;
+  func_color_map_value2(data1: color_map_value2): String;
+  func_color_map_value3(data1: color_map_value3): String;
+  func_color_map_value4(data1: color_map_value4): String;
+  func_color_map_value5(data1: color_map_value5): String;
+  func_color_map_value6(data1: color_map_value6): String;
+  func_color_map_value7(data1: color_map_value7): String;
+  func_color_map_value8(data1: color_map_value8): String;
+  func_color_map_value9(data1: color_map_value9): String;
+  func_color_map_value10(data1: color_map_value9, data2: color_map_value9): String;
+
+  func_union_array_map1(data1: UnionArrayMap1, data2: UnionArrayMap1): String;
+  func_union_array_map2(data1: UnionArrayMap2, data2: UnionArrayMap2): String;
+  func_union_array_map3(data1: UnionArrayMap3, data2: UnionArrayMap3): String;
+  func_union_array_map4(data1: UnionArrayMap4, data2: UnionArrayMap4): String;
+  func_union_array_map5(data1: UnionArrayMap5, data2: UnionArrayMap5): String;
+  func_union_array_map6(data1: UnionArrayMap6, data2: UnionArrayMap6): String;
+  func_union_array_map7(data1: UnionArrayMap7, data2: UnionArrayMap7): String;
+  func_union_array_map8(data1: UnionArrayMap8, data2: UnionArrayMap8): String;
+  func_union_array_map9(data1: UnionArrayMap9, data2: UnionArrayMap9): String;
+  func_union_array_map10(data1: UnionArrayMap1, data2: UnionArrayMap2): String;
+
+  func_union_mix(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix): String;
+  func_union_mix_10param(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix,data6: union_mix,data7: union_mix,data8: union_mix,data9: union_mix,data10: union_mix): String;
+  func_union_primitive_return(kind: String): union_primitive_2;
+  func_union_primitive_return1(kind: String): union_primitive_2_1;
+  func_union_primitive_return2(kind: String): union_primitive_2_2;
+  func_union_primitive_return3(kind: String): union_primitive_2_3;
+  func_union_primitive_return4(kind: String): union_primitive_2_4;
+  func_union_primitive_return5(kind: String): union_primitive_2_5;
+  func_union_primitive_return6(kind: String): union_primitive_2_6;
+  func_union_primitive_return7(kind: String): union_primitive_2_7;
+  func_union_primitive_return8(kind: String): union_primitive_2_8;
+  func_union_primitive_return9(kind: String): union_primitive_2_9;
+
+  func_union_mix5_return(kind: String): union_mix_5;
+  func_union_mix10_return(kind: String): union_mix;
+
+
+  
+}
+
+function printUnion(data: union_primitive): String;
+function makeUnion(kind: String): union_primitive;
+
+function get_interface(): MyInterface;

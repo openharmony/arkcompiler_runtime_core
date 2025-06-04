@@ -24,3 +24,4 @@ PROXY_ENTRYPOINT JSRuntimeCallJSQNameBridge JSRuntimeCallJSQName
 PROXY_ENTRYPOINT JSRuntimeNewCallJSQNameBridge JSRuntimeNewCallJSQName
 
 PROXY_ENTRYPOINT CallJSProxyBridge CallJSProxy
+PROXY_ENTRYPOINT CallJSFunctionBridge CallJSFunction

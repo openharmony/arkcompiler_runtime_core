@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 cases:
   - { stype: 'Object[]', src: 'new Object[1]', dtype: Object }
   - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: Object }
-  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: 'Object[]' }
+  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: 'Object[]', tags: 'compile-only, negative' }
 
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
   - { stype: '(() => void)[]', src: '[]', dtype: Object }
@@ -36,13 +36,13 @@ cases:
   - { stype: 'Float[]', src: 'new Float[1]', dtype: Object }
   - { stype: 'Double[]', src: 'new Double[1]', dtype: Object }
 
-  - { stype: 'Byte[]', src: 'new Byte[1]', dtype: 'Object[]' }
-  - { stype: 'Short[]', src: 'new Short[1]', dtype: 'Object[]' }
-  - { stype: 'Char[]', src: 'new Char[1]', dtype: 'Object[]' }
-  - { stype: 'Int[]', src: 'new Int[1]', dtype: 'Object[]' }
-  - { stype: 'Long[]', src: 'new Long[1]', dtype: 'Object[]' }
-  - { stype: 'Float[]', src: 'new Float[1]', dtype: 'Object[]' }
-  - { stype: 'Double[]', src: 'new Double[1]', dtype: 'Object[]' }
+  - { stype: 'Byte[]', src: 'new Byte[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Short[]', src: 'new Short[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Char[]', src: 'new Char[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Int[]', src: 'new Int[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Long[]', src: 'new Long[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Float[]', src: 'new Float[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
+  - { stype: 'Double[]', src: 'new Double[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
 
   - { stype: 'Byte', src: 'new Byte()', dtype: Integral }
   - { stype: 'Short', src: 'new Short()', dtype: Integral }
@@ -76,6 +76,7 @@ cases:
     stype: 'Color[]'
     src: '[Color.Red, Color.Blue]'
     dtype: 'Object[]'
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsConversionIntTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToInt"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToNumber"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToFloat"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToByte"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToShort"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToLong"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToDouble"));
 }
 
 TEST_F(EtsConversionIntTsToEtsTest, checkConversionToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionToChar"));
 }
 
 }  // namespace ark::ets::interop::js::testing

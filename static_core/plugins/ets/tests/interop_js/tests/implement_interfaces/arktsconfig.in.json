@@ -7,23 +7,11 @@
             ],
             "std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
-            ],
-            "test_class": [
-                "${CMAKE_CURRENT_SOURCE_DIR}/test_class.js"
-            ],
-            "arkts_test_class": [
-                "${CMAKE_CURRENT_SOURCE_DIR}/arkts_class.js"
             ]
         },
         "dynamicPaths": {
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_class.js": {
-                "language": "js",
-                "hasDecl": false
-            },
-            "${CMAKE_CURRENT_SOURCE_DIR}/arkts_class": {
-                "language": "js",
-                "hasDecl": false
-            }
+			"test_class": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/test_class" },
+			"arkts_test_class": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/arkts_class" }
         }
     }
 }

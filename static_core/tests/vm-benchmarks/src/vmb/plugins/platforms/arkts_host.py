@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,9 +44,11 @@ class Platform(PlatformBase):
         else:
             an = ToolBase.libs.joinpath(
                 Path(self.ark.etsstdlib).with_suffix('.an').name)
-            log.info('AOT-Compiling %s. This may took a long time...',
+            aot_lib_opts = ' '.join(args.aot_lib_compiler_options)
+            log.info('AOT-Compiling %s. This may take a long time...',
                      self.ark.etsstdlib)
-            res = self.paoc.run_paoc(self.ark.etsstdlib, an, timeout=1800)
+            res = self.paoc.run_paoc(self.ark.etsstdlib, an,
+                                     opts=aot_lib_opts, timeout=1800)
             if not self.ext_info.get('etsstdlib', {}):
                 self.ext_info['etsstdlib'] = {}
             self.ext_info['etsstdlib']['etsstdlib.an'] = \
@@ -69,7 +71,7 @@ class Platform(PlatformBase):
 
     @property
     def langs(self) -> List[str]:
-        return ['sts']
+        return ['ets']
 
     @property
     def gc_parcer(self) -> Optional[Type]:

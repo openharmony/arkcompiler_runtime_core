@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@ Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStat
     auto method = graph->GetMethod();
 
     auto classId = GetStringBuilderClassId(graph);
+    ASSERT(classId != 0);
     auto loadClass =
         graph->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, CopySaveState(graph, saveState),
                                           TypeIdMixin {classId, method}, runtime->ResolveType(method, classId));

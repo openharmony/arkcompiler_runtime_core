@@ -318,6 +318,7 @@ class ShellAdb(ShellDevice):
 class ShellHdc(ShellDevice):
     def __init__(self,
                  dev_serial: str = '',
+                 dev_host: str = '',
                  timeout: Optional[float] = None,
                  tmp_dir: str = '/data/local/tmp/vmb') -> None:
         # -l0 because of HDC mutex file permission messages
@@ -327,6 +328,8 @@ class ShellHdc(ShellDevice):
                          tmp_dir=tmp_dir)
         if dev_serial:
             self._devsh = f'{self._devsh} -t {dev_serial}'
+        if dev_host:
+            self._devsh = f'{self._devsh} -s {dev_host}'
         self.mk_tmp_dir()
 
     def push(self,

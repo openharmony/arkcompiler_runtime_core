@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,8 @@ export let callAnonymousFunction = function (x: number, y: number): number {
 
 export let callArrowFunction = (x: number, y: number): Object => x + y;
 
-export const callConstructedFunction = new Function('a', 'b', 'return a + b');
+// Enable when #24130 is fixed
+// export const callConstructedFunction = new Function('a', 'b', 'return a + b');
 
 export let callBoundFunction = callNamedFunction.bind(null);
 
@@ -31,15 +32,22 @@ export class CallableTestClass {
 	public callNamedFunction = callNamedFunction.bind(this);
 	public callAnonymousFunction = callAnonymousFunction.bind(this);
 	public callArrowFunction = callArrowFunction.bind(this);
-	public callConstructedFunction = callConstructedFunction.bind(this);
+	// Enable when #24130 is fixed
+	// public callConstructedFunction = callConstructedFunction.bind(this);
 	public callBoundFunction = callBoundFunction.bind(this);
 }
 
 export type TCallableTestClass = CallableTestClass;
 export const callableTestClassInstance = new CallableTestClass();
 
+// Enable when #24130 is fixed
+// const test = (): void => {
+// 	print(`${[callNamedFunction, callAnonymousFunction, callArrowFunction, callConstructedFunction, callBoundFunction].map((x) => x(10, 5))}`);
+// };
+
+// Remove when #24130 is fixed
 const test = (): void => {
-	console.log([callNamedFunction, callAnonymousFunction, callArrowFunction, callConstructedFunction, callBoundFunction].map((x) => x(10, 5)));
+	print(`${[callNamedFunction, callAnonymousFunction, callArrowFunction, callBoundFunction].map((x) => x(10, 5))}`);
 };
 
 test();

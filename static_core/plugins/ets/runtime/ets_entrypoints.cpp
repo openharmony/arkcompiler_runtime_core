@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "runtime/interpreter/vregister_iterator.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "runtime/include/class_linker-inl.h"
 
 namespace ark::ets {
 
@@ -55,13 +56,13 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     // create the coro and put it to the ready queue
-    auto *coro = currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
-    if (UNLIKELY(coro == nullptr)) {
+    bool launchResult =
+        currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
+    if (UNLIKELY(!launchResult)) {
         // OOM
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
-        return false;
     }
-    return true;
+    return launchResult;
 }
 
 void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHeader *thisObj)
@@ -158,46 +159,42 @@ extern "C" ObjectHeader *LaunchFromInterpreterRange(Method *method, Frame *frame
 extern "C" Field *LookupFieldByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
                                               Method *caller, const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *field = klass->LookupFieldByName(rawField->GetName());
-    if (field != nullptr) {
-        *entry = {pc, caller, static_cast<void *>(field)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return field;
+    return GetFieldByName(entry, caller, metaField, pc, current);
 }
-
-constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
 
 template <panda_file::Type::TypeId FORMAT>
 Method *LookupGetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
                                      const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *method = klass->LookupGetterByName<FORMAT>(rawField->GetName());
-    auto mUint = reinterpret_cast<uint64_t>(method);
-    if (method != nullptr) {
-        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return method;
+    return GetAccessorByName<FORMAT, true>(entry, caller, metaField, pc, current);
 }
 
 template <panda_file::Type::TypeId FORMAT>
 Method *LookupSetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id, Method *caller,
                                      const uint8_t *pc)
 {
-    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto *method = klass->LookupSetterByName<FORMAT>(rawField->GetName());
-    auto mUint = reinterpret_cast<uint64_t>(method);
-    if (method != nullptr) {
-        *entry = {pc, caller, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK)};
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    if (UNLIKELY(metaField == nullptr)) {
+        HandlePendingException();
+        return nullptr;
     }
-    return method;
+    return GetAccessorByName<FORMAT, false>(entry, caller, metaField, pc, current);
 }
 
 extern "C" Method *LookupGetterByNameShortEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
@@ -240,28 +237,43 @@ extern "C" void ThrowEtsExceptionNoSuchGetterEntrypoint(ObjectHeader *obj, uint3
 {
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and getter with name " +
-                    utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(
-        EtsCoroutine::GetCurrent(),
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    LookUpException<true>(klass, rawField);
 }
 
 extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
 {
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
-    auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and setter with name " +
-                    utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(
-        EtsCoroutine::GetCurrent(),
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    LookUpException<false>(klass, rawField);
+}
+
+extern "C" Method *LookupMethodByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                Method *caller, const uint8_t *pc)
+{
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Method *metaMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id));
+    if (UNLIKELY(metaMethod == nullptr)) {
+        HandlePendingException();
+        return nullptr;
+    }
+    ETSStubCacheInfo cacheInfo {entry, caller, pc};
+    return GetMethodByName(currentCoro, cacheInfo, metaMethod, current);
+}
+
+extern "C" void ThrowEtsExceptionNoSuchMethodEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id));
+    if (UNLIKELY(rawMethod == nullptr)) {
+        HandlePendingException();
+    }
+    LookUpException(klass, rawMethod);
 }
 
 extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v)
@@ -329,6 +341,20 @@ extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHead
     return EtsValueTypedEquals(coro, eobj1, eobj2);
 }
 
+extern "C" EtsString *EtsGetTypeofEntrypoint(ManagedThread *thread, ObjectHeader *obj)
+{
+    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
+    EtsObject *eobj = EtsObject::FromCoreType(obj);
+    return EtsGetTypeof(coro, eobj);
+}
+
+extern "C" bool EtsIstrueEntrypoint(ManagedThread *thread, ObjectHeader *obj)
+{
+    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
+    EtsObject *eobj = EtsObject::FromCoreType(obj);
+    return EtsIstrue(coro, eobj);
+}
+
 extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);
@@ -353,6 +379,97 @@ extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem
 extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
 {
     return DoubleToStringCache::GetNoCache(bit_cast<double>(number))->GetCoreType();
+}
+
+extern "C" void BeginGeneralNativeMethod()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    constexpr uint32_t MAX_LOCAL_REF = 4096;
+    if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+        LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
+    }
+
+    coroutine->NativeCodeBegin();
+}
+
+extern "C" void EndGeneralNativeMethodPrim()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    coroutine->NativeCodeEnd();
+    storage->PopLocalEtsFrame(nullptr);
+}
+
+extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    coroutine->NativeCodeEnd();
+
+    ObjectHeader *ret = nullptr;
+    auto *etsRef = EtsReference::CastFromReference(ref);
+    if (etsRef != nullptr) {
+        ret = storage->GetEtsObject(etsRef)->GetCoreType();
+    }
+
+    storage->PopLocalEtsFrame(nullptr);
+    return ret;
+}
+
+extern "C" void BeginQuickNativeMethod()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    constexpr uint32_t MAX_LOCAL_REF = 4096;
+    if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
+        LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
+    }
+}
+
+extern "C" void EndQuickNativeMethodPrim()
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    storage->PopLocalEtsFrame(nullptr);
+}
+
+extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+
+    ObjectHeader *ret = nullptr;
+    auto *etsRef = EtsReference::CastFromReference(ref);
+    if (etsRef != nullptr) {
+        ret = storage->GetEtsObject(etsRef)->GetCoreType();
+    }
+
+    storage->PopLocalEtsFrame(nullptr);
+    return ret;
+}
+
+extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Method *caller, ObjectHeader *obj,
+                                                                     size_t calleeId)
+{
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto rawMethod = classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+    if (LIKELY(rawMethod != nullptr)) {
+        auto *resolved = ResolveCompatibleVMethod(currentCoro, klass, rawMethod);
+        ASSERT(resolved != nullptr);
+        return reinterpret_cast<uintptr_t>(resolved);
+    }
+
+    HandlePendingException();
+    UNREACHABLE();
 }
 
 }  // namespace ark::ets

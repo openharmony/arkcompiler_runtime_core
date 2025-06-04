@@ -12,25 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
-_$init$_();
-
-const CONSTANT: number = ETSGLOBAL.CONSTANT;
-export {CONSTANT};
-exports.CONSTANT = CONSTANT;
-
-class Bibka {
-    public static NOT_GLOBAL: number = {} as any;
-    constructor() {};
-};
-(Bibka as any) = (globalThis as any).Panda.getClass('LBibka;');
-export {Bibka};
-exports.Bibka = Bibka;
-
+export declare const CONSTANT: number;
+export declare class Bibka {
+    public static get NOT_GLOBAL(): number;
+    constructor();
+}
+export type UT = null | undefined | never;
+export type UTA = Array<UT>;
+export type a1 = "a" | "b" | "c";
+export type b1 = Record<string, number | string | boolean | [] | Record<string, number | string | boolean | []>>;
+export type c1 = Record<number, string> | Record<string, number>;
+export declare class B<T> {
+    constructor();
+}
+export type A<K, T> = string | B<A<K, T>>;
+export type Callback<T> = (data: T) => void;
+export type ErrorCallback<T extends Error = BusinessError> = (err: T) => void;
+export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data: T) => void;
+export declare class BusinessError<T = void> extends Error {
+    constructor();
+}

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -55,27 +55,30 @@
     title: Literals
     status: No testable assertions
 2.9.1:
+    title: Numeric Literals
+    status: No testable assertions
+2.9.2:
     title: Integer Literals
     status: Finished
-2.9.2:
+2.9.3:
     title: Floating-Point Literals
     status: Finished
-2.9.3:
-    title: BigInt Literals
-    status: Finished
 2.9.4:
-    title: Boolean Literals
+    title: Bigint Literals
     status: Finished
 2.9.5:
-    title: String Literals
+    title: Boolean Literals
     status: Finished
 2.9.6:
-    title: Multiline String Literal
+    title: String Literals
     status: Finished
 2.9.7:
-    title: Null Literal
+    title: Multiline String Literal
     status: Finished
 2.9.8:
+    title: Null Literal
+    status: Finished
+2.9.9:
     title: Undefined Literal
     status: Finished
 '2.10':
@@ -86,92 +89,101 @@
     status: Finished
 '3':
     title: Types
-    status: No testable assertions
+    status: Finished
 '3.1':
     title: Predefined Types
-    status: ''
+    status: No testable assertions
 3.1.1:
     title: Primitive Types
-    status: ''
+    status: No testable assertions
 3.1.2:
-    title: Boxed Types
-    status: ''
+    title: Numeric Types
+    status: Finished
 '3.2':
     title: User-Defined Types
     status: No testable assertions
 '3.3':
-    title: Types by Category
+    title: Using Types
     status: No testable assertions
 '3.4':
-    title: Using Types
-    status: ''
-'3.5':
     title: Named Types
-    status: ''
-'3.6':
+    status: No testable assertions
+'3.5':
     title: Type References
     status: ''
-'3.7':
+'3.6':
     title: Value Types
     status: No testable assertions
-3.7.1:
+3.6.1:
     title: Integer Types and Operations
     status: Finished
-3.7.2:
+3.6.2:
     title: Floating-Point Types and Operations
     status: Finished
-3.7.3:
-    title: Numeric Types Hierarchy
-    status: Finished
-3.7.4:
+3.6.3:
     title: Boolean Types and Operations
     status: Finished
-'3.8':
+'3.7':
     title: Reference Types
-    status: ''
-3.8.1:
-    title: Objects
-    status: Finished
-3.8.2:
-    title: Object Class Type
-    status: Finished
-3.8.3:
-    title: Type string
-    status: Finished
-3.8.4:
-    title: Literal Types
-    status: Finished
-3.8.5:
-    title: Type never
-    status: Finished
-3.8.6:
-    title: Type void
-    status: Finished
-3.8.7:
-    title: Array Types
-    status: Finished
-3.8.8:
-    title: Function Types
-    status: Finished
-3.8.9:
-    title: Type null
-    status: Finished
-3.8.10:
-    title: Type undefined
-    status: Finished
-3.8.11:
-    title: Tuple Types
-    status: Finished
-3.8.12:
-    title: Union Types
-    status: Finished
-3.8.13:
-    title: Nullish Types
-    status: Finished
-3.8.14:
-    title: Type BigInt
+    status: No testable assertions
+'3.8':
+    title: Type Object
     status: Finished
 '3.9':
+    title: Type never
+    status: Finished
+'3.10':
+    title: Type void
+    status: Finished
+'3.11':
+    title: Type undefined
+    status: Finished
+'3.12':
+    title: Type null
+    status: Finished
+'3.13':
+    title: Type string
+    status: Finished
+'3.14':
+    title: Type bigint
+    status: Finished
+'3.15':
+    title: Literal Types
+    status: Finished
+3.15.1:
+    title: Supertypes of Literal Types
+    status: ''
+3.15.2:
+    title: Operations on Literal Types
+    status: ''
+'3.16':
+    title: Array Types
+    status: Finished
+3.16.1:
+    title: Resizable Array Types
+    status: ''
+'3.17':
+    title: Tuple Types
+    status: Finished
+'3.18':
+    title: Function Types
+    status: Finished
+'3.19':
+    title: Union Types
+    status: Finished
+3.19.1:
+    title: Union Types Normalization
+    status: Finished
+3.19.2:
+    title: Access to Common Union Members
+    status: Finished
+3.19.3:
+    title: Keyof Types
+    status: ''
+'3.20':
+    title: Nullish Types
+    status: Finished
+'3.21':
     title: Default Values for Types
     status: Finished
 '4':
@@ -208,7 +220,7 @@
     title: Constant Declarations
     status: Finished
 4.7.3:
-    title: Type Compatibility with Initializer
+    title: Assignability with Initializer
     status: Finished
 4.7.4:
     title: Type Inference from Initializer
@@ -240,9 +252,6 @@
 4.8.8:
     title: Return Type Inference
     status: ''
-4.8.9:
-    title: Function Overload Signatures
-    status: Finished
 '5':
     title: Generics
     status: No testable assertions
@@ -272,7 +281,7 @@
     status: Finished
 '5.3':
     title: Utility Types
-    status: ''
+    status: No testable assertions
 5.3.1:
     title: Partial Utility Type
     status: ''
@@ -307,13 +316,22 @@
     title: Numeric Casting Conversions
     status: ''
 6.4.2:
-    title: Narrowing Class or Interface Casting Conversions
+    title: Class or Interface Casting Conversions
     status: ''
 6.4.3:
-    title: Casting Conversions from Type Parameter
+    title: Casting Conversions from Object
     status: ''
 6.4.4:
+    title: Casting Conversions from Type Parameter
+    status: ''
+6.4.5:
+    title: Casting Conversions to Type Parameter
+    status: ''
+6.4.6:
     title: Casting Conversions from Union
+    status: ''
+6.4.7:
+    title: Casting Conversions to Enumeration
     status: ''
 '6.5':
     title: Implicit Conversions
@@ -328,36 +346,30 @@
     title: Constant Narrowing Integer Conversions
     status: Finished
 6.5.4:
-    title: Boxing Conversions
-    status: Finished
-6.5.5:
-    title: Unboxing Conversions
-    status: Finished
-6.5.6:
     title: Widening Union Conversions
     status: Finished
-6.5.7:
+6.5.5:
     title: Widening Reference Conversions
     status: Finished
-6.5.8:
+6.5.6:
     title: Character to String Conversions
     status: Finished
-6.5.9:
+6.5.7:
     title: Constant String to Character Conversions
     status: Finished
-6.5.10:
+6.5.8:
     title: Function Types Conversions
     status: Finished
-6.5.11:
+6.5.9:
     title: Tuple Types Conversions
     status: Finished
-6.5.12:
+6.5.10:
     title: Enumeration to Constants Type Conversions
     status: Finished
-6.5.13:
+6.5.11:
     title: Constant to Enumeration Conversions
     status: ''
-6.5.14:
+6.5.12:
     title: Literal Type to its Supertype Conversions
     status: ''
 '7':
@@ -391,7 +403,7 @@
     title: Array Literal
     status: ''
 7.4.1:
-    title: Array Type Inference from Context
+    title: Array Literal Type Inference from Context
     status: ''
 7.4.2:
     title: Array Type Inference from Types of Elements
@@ -427,7 +439,7 @@
     title: Accessing Current Object Fields
     status: ''
 7.9.2:
-    title: Accessing Superclass Fields
+    title: Accessing SuperClass Properties
     status: ''
 '7.10':
     title: Method Call Expression
@@ -449,7 +461,7 @@
     status: ''
 '7.12':
     title: Indexing Expressions
-    status: ''
+    status: No testable assertions
 7.12.1:
     title: Array Indexing Expression
     status: ''
@@ -479,7 +491,7 @@
     status: ''
 '7.20':
     title: Unary Expressions
-    status: ''
+    status: No testable assertions
 7.20.1:
     title: Postfix Increment
     status: ''
@@ -506,7 +518,7 @@
     status: ''
 '7.21':
     title: Multiplicative Expressions
-    status: ''
+    status: No testable assertions
 7.21.1:
     title: Multiplication
     status: ''
@@ -518,7 +530,7 @@
     status: ''
 '7.22':
     title: Additive Expressions
-    status: ''
+    status: No testable assertions
 7.22.1:
     title: String Concatenation
     status: ''
@@ -530,7 +542,7 @@
     status: ''
 '7.24':
     title: Relational Expressions
-    status: ''
+    status: No testable assertions
 7.24.1:
     title: Numerical Relational Operators
     status: ''
@@ -575,7 +587,7 @@
     status: ''
 '7.26':
     title: Bitwise and Logical Expressions
-    status: Finished
+    status: No testable assertions
 7.26.1:
     title: Integer Bitwise Operators
     status: Finished
@@ -596,6 +608,9 @@
     status: ''
 7.29.2:
     title: Compound Assignment Operators
+    status: ''
+7.29.3:
+    title: Left-Hand-Side Expressions
     status: ''
 '7.30':
     title: Conditional Expressions
@@ -619,9 +634,6 @@
     title: Runtime Evaluation of Lambda Expressions
     status: ''
 '7.33':
-    title: Dynamic Import Expression
-    status: 'Finished'
-'7.34':
     title: Constant Expressions
     status: ''
 '8':
@@ -643,7 +655,7 @@
     title: if Statements
     status: ''
 '8.6':
-    title: loop Statements
+    title: Loop Statements
     status: ''
 '8.7':
     title: while Statements and do Statements
@@ -692,7 +704,7 @@
     status: ''
 9.1.2:
     title: Final Classes
-    status: ''
+    status: No testable assertions
 9.1.3:
     title: Class Extension Clause
     status: ''
@@ -704,7 +716,7 @@
     status: ''
 '9.2':
     title: Class Body
-    status: ''
+    status: No testable assertions
 '9.3':
     title: Class Members
     status: ''
@@ -716,13 +728,13 @@
     status: ''
 9.4.2:
     title: Internal Access Modifier
-    status: ''
+    status: No testable assertions
 9.4.3:
     title: Protected Access Modifier
     status: ''
 9.4.4:
     title: Public Access Modifier
-    status: ''
+    status: No testable assertions
 '9.5':
     title: Field Declarations
     status: ''
@@ -735,9 +747,12 @@
 9.5.3:
     title: Field Initialization
     status: ''
+9.5.4:
+    title: Overriding Fields
+    status: ''
 '9.6':
     title: Method Declarations
-    status: ''
+    status: No testable assertions
 9.6.1:
     title: Static Methods
     status: ''
@@ -752,7 +767,7 @@
     status: No testable assertions
 9.6.5:
     title: Async Methods
-    status: ''
+    status: No testable assertions
 9.6.6:
     title: Overriding Methods
     status: ''
@@ -760,11 +775,11 @@
     title: Native Methods
     status: No testable assertions
 9.6.8:
-    title: Method Overload Signatures
-    status: ''
-9.6.9:
     title: Method Body
     status: ''
+9.6.9:
+    title: Methods Returning this
+    status: Finished
 '9.7':
     title: Accessor Declarations
     status: ''
@@ -778,22 +793,16 @@
     title: Formal Parameters
     status: ''
 9.9.2:
-    title: Constructor Overload Signatures
-    status: ''
-9.9.3:
     title: Constructor Body
     status: ''
-9.9.4:
+9.9.3:
     title: Explicit Constructor Call
     status: ''
-9.9.5:
+9.9.4:
     title: Default Constructor
     status: ''
 '9.10':
     title: Inheritance
-    status: ''
-'9.11':
-    title: Local Classes and Interfaces
     status: ''
 '10':
     title: Interfaces
@@ -818,7 +827,7 @@
     status: ''
 10.6.1:
     title: Interface Method Overloading
-    status: ''
+    status: No testable assertions
 '10.7':
     title: Interface Inheritance
     status: ''
@@ -841,7 +850,7 @@
     title: Errors
     status: ''
 '13':
-    title: Compilation Units, Packages, and Modules
+    title: Compilation Units
     status: No testable assertions
 '13.1':
     title: Separate Modules
@@ -850,72 +859,66 @@
     title: Separate Module Initializer
     status: ''
 '13.3':
-    title: Compilation Units in Host System
-    status: ''
-'13.4':
     title: Import Directives
     status: ''
-13.4.1:
+13.3.1:
     title: Bind All with Qualified Access
     status: ''
-13.4.2:
+13.3.2:
     title: Simple Name Binding
     status: ''
-13.4.3:
+13.3.3:
     title: Several Bindings for One Import Path
     status: ''
-13.4.4:
+13.3.4:
     title: Default Import Binding
     status: ''
-13.4.5:
+13.3.5:
     title: Type Binding
     status: ''
-13.4.6:
-    title: Import with No Binding
-    status: ''
-13.4.7:
+13.3.6:
     title: Import Path
     status: ''
-'13.5':
+'13.4':
     title: Standard Library Usage
     status: Finished
-'13.6':
+'13.5':
     title: Declaration Modules
     status: ''
-'13.7':
+'13.6':
     title: Compilation Unit Initialization
     status: ''
-'13.8':
+'13.7':
     title: Top-Level Declarations
     status: ''
-13.8.1:
+13.7.1:
     title: Exported Declarations
-    status: ''
-'13.9':
+    status: Finished
+'13.8':
     title: Namespace Declarations
     status: ''
-'13.10':
+'13.9':
     title: Export Directives
-    status: ''
-13.10.1:
+    status: No testable assertions
+13.9.1:
     title: Selective Export Directive
     status: ''
-13.10.2:
+13.9.2:
     title: Single Export Directive
-    status: ''
-13.10.3:
+    status: Finished
+13.9.3:
     title: Export Type Directive
     status: ''
-13.10.4:
+13.9.4:
     title: Re-Export Directive
     status: ''
-'13.11':
+'13.10':
     title: Top-Level Statements
     status: ''
-'13.12':
+'13.11':
     title: Program Entry Point
     status: ''
-'13.13':
+'13.12':
     title: Program Exit
     status: ''
 '14':
@@ -954,27 +957,18 @@
 '15.1':
     title: Subtyping
     status: ''
-'15.2':
+15.1.1:
     title: Supertyping
     status: ''
+'15.2':
+    title: Type Identity
+    status: No testable assertions
 '15.3':
-    title: Variance
-    status: ''
-15.3.1:
-    title: Invariance
-    status: ''
-15.3.2:
-    title: Covariance
-    status: ''
-15.3.3:
-    title: Contravariance
-    status: ''
-15.3.4:
-    title: Examples
+    title: Assignability
     status: ''
 '15.4':
-    title: Type Compatibility
-    status: No testable assertions
+    title: Invariance, Covariance and Contravariance
+    status: ''
 '15.5':
     title: Compatibility of Call Arguments
     status: ''
@@ -986,7 +980,7 @@
     status: Finished
 '15.7':
     title: Overloading and Overriding
-    status: ''
+    status: No testable assertions
 15.7.1:
     title: Overload-Equivalent Signatures
     status: ''
@@ -1004,7 +998,7 @@
     status: ''
 '15.8':
     title: Overload Resolution
-    status: ''
+    status: No testable assertions
 15.8.1:
     title: Selection of Applicable Candidates
     status: ''
@@ -1012,10 +1006,7 @@
     title: Selection of Best Candidate
     status: ''
 '15.9':
-    title: Overload Signatures
-    status: ''
-15.9.1:
-    title: Overload Signature Correctness Check
+    title: Initializer Block
     status: ''
 '15.10':
     title: Compatibility Features
@@ -1026,21 +1017,6 @@
 '16':
     title: Support for GUI Programming
     status: No testable assertions
-'16.1':
-    title: GUI Structs
-    status: ''
-'16.2':
-    title: Builder Function Syntax Conventions
-    status: ''
-'16.3':
-    title: Builder Function Restrictions
-    status: ''
-'16.4':
-    title: Additional Features
-    status: ''
-16.4.1:
-    title: Methods Returning this
-    status: ''
 '17':
     title: Experimental Features
     status: No testable assertions
@@ -1054,180 +1030,135 @@
     title: Character Type and Operations
     status: Finished
 '17.2':
+    title: Fixed Array Types
+    status: ''
+'17.3':
     title: Array Creation Expressions
     status: Finished
-17.2.1:
+17.3.1:
     title: Runtime Evaluation of Array Creation Expressions
     status: Finished
-'17.3':
+'17.4':
     title: Indexable Types
     status: Finished
-'17.4':
+'17.5':
     title: Iterable Types
     status: Finished
-'17.5':
+'17.6':
     title: Callable Types
     status: Finished
-17.5.1:
-    title: Callable Types with Invoke Method
-    status: Finished
-17.5.2:
-    title: Callable Types with Instantiate Method
-    status: Finished
-'17.6':
-    title: Statements
-    status: No testable assertions
 17.6.1:
-    title: For-of Type Annotation
+    title: Callable Types with $_invoke Method
     status: Finished
 17.6.2:
-    title: Multiple Catch Clauses in Try Statements
+    title: Callable Types with $_instantiate Method
     status: Finished
 '17.7':
-    title: Function and Method Overloading
+    title: Statements
     status: No testable assertions
 17.7.1:
-    title: Function Overloading
-    status: ''
-17.7.2:
-    title: Class Method Overloading
-    status: ''
-17.7.3:
-    title: Constructor Overloading
-    status: ''
-17.7.4:
-    title: Declaration Distinguishable by Signatures
-    status: ''
+    title: For-of Type Annotation
+    status: Finished
 '17.8':
-    title: Native Functions and Methods
+    title: Function, Method and Constructor Overloading
     status: No testable assertions
 17.8.1:
-    title: Native Functions
-    status: Finished
+    title: Function Overloading
+    status: ''
 17.8.2:
-    title: Native Methods
+    title: Class Method Overloading
     status: ''
 17.8.3:
-    title: Native Constructors
+    title: Constructor Overloading
     status: ''
+17.8.4:
+    title: Declaration Distinguishable by Signatures
+    status: ''
+17.8.5:
+    title: TypeScript Overload Signatures
+    status: Finished
 '17.9':
-    title: Final Classes and Methods
+    title: Native Functions and Methods
     status: No testable assertions
 17.9.1:
-    title: Final Classes
+    title: Native Functions
     status: Finished
 17.9.2:
+    title: Native Methods
+    status: ''
+17.9.3:
+    title: Native Constructors
+    status: ''
+'17.10':
+    title: Final Classes and Methods
+    status: No testable assertions
+17.10.1:
+    title: Final Classes
+    status: Finished
+17.10.2:
     title: Final Methods
     status: Finished
-'17.10':
+'17.11':
     title: Default Interface Method Declarations
     status: No testable assertions
-'17.11':
+'17.12':
     title: Adding Functionality to Existing Types
     status: ''
-17.11.1:
+17.12.1:
     title: Functions with Receiver
     status: ''
-17.11.2:
+17.12.2:
     title: Receiver Type
     status: ''
-17.11.3:
+17.12.3:
     title: Accessors with Receiver
     status: ''
-17.11.4:
+17.12.4:
     title: Function Types with Receiver
     status: ''
-17.11.5:
+17.12.5:
     title: Lambda Expressions with Receiver
     status: ''
-'17.12':
+17.12.6:
+    title: Implicit this in Lambda with Receiver Body
+    status: ''
+'17.13':
     title: Trailing Lambdas
     status: Finished
-'17.13':
-    title: Enumeration Types Conversions
-    status: ''
 '17.14':
     title: Enumeration Methods
     status: ''
+17.14.1:
+    title: Errors and Initialization Expression
+    status: ''
 '17.15':
-    title: Exceptions
-    status: Finished
-17.15.1:
-    title: Throwing Functions
-    status: Finished
-17.15.2:
-    title: Non-Throwing Functions
-    status: Finished
-17.15.3:
-    title: Rethrowing Functions
-    status: Finished
-17.15.4:
-    title: Exceptions and Initialization Expression
-    status: Finished
-17.15.5:
-    title: Exceptions and Errors Inside Field Initializers
-    status: Finished
-'17.16':
     title: Coroutines
-    status: No testable assertions
-17.16.1:
-    title: Create and Launch a Coroutine
-    status: Finished
-17.16.2:
-    title: Awaiting a Coroutine
-    status: Finished
-17.16.3:
-    title: Promise<T> Class
-    status: Finished
-17.16.4:
-    title: Structured Coroutines
     status: ''
-17.16.5:
-    title: Channels Classes
-    status: ''
-'17.17':
+'17.16':
     title: Async Functions and Methods
     status: No testable assertions
-17.17.1:
+17.16.1:
     title: Async Functions
     status: Finished
-17.17.2:
+17.16.2:
     title: Experimental Async Methods
     status: Finished
-'17.18':
-    title: DynamicObject Type
-    status: ''
-17.18.1:
-    title: DynamicObject Field Access
-    status: ''
-17.18.2:
-    title: DynamicObject Method Call
-    status: ''
-17.18.3:
-    title: DynamicObject Indexing Access
-    status: ''
-17.18.4:
-    title: DynamicObject New Expression
-    status: ''
-17.18.5:
-    title: DynamicObject Cast Expression
-    status: ''
-'17.19':
+'17.17':
     title: Packages
     status: ''
-17.19.1:
+17.17.1:
     title: Internal Access Modifier
-    status: ''
-17.19.2:
-    title: Package Initializer
-    status: ''
-17.19.3:
-    title: Import and Overloading of Function Names
     status: Finished
-'17.20':
+17.17.2:
+    title: Package Initializer
+    status: Finished
+17.17.3:
+    title: Import and Overloading of Function Names
+    status: ''
+'17.18':
     title: Generics Experimental
-    status: No testable assertions
-17.20.1:
+    status: ''
+17.18.1:
     title: NonNullish Type Parameter
     status: ''
 '18':
@@ -1253,6 +1184,9 @@
     status: ''
 '18.5':
     title: Standard Annotations
+    status: No testable assertions
+18.5.1:
+    title: Retention Annotation
     status: ''
 '19':
     title: Standard Library
@@ -1264,65 +1198,29 @@
     title: Import Path Lookup
     status: ''
 '20.2':
-    title: Type Function
+    title: Compilation Units in Host System
     status: ''
 '20.3':
     title: How to Get Type Via Reflection
     status: ''
 '20.4':
-    title: Methods for T[] Types
-    status: ''
-'20.5':
     title: Generic and Function Types Peculiarities
+    status: No testable assertions
+'20.5':
+    title: Keyword struct and ArkUI
+    status: ''
+'20.6':
+    title: OutOfMemoryError for Primitive Type Operations
+    status: ''
+'20.7':
+    title: Uniqueness of Functional Objects
     status: ''
 '21':
-    title: ArkTS-TypeScript compatibility
-    status: No testable assertions
-'21.1':
-    title: Reserved Names of TypeScript Types
-    status: ''
-'21.2':
-    title: Undefined is Not a Universal Value
-    status: ''
-'21.3':
-    title: Numeric Semantics
-    status: ''
-'21.4':
-    title: Covariant Overriding
-    status: ''
-'21.5':
-    title: Function types compatibility
-    status: ''
-'21.6':
-    title: Compatibility for Utility Types
-    status: ''
-'21.7':
-    title: Difference in Overload Signatures
-    status: ''
-'21.8':
-    title: Class Fields While Inheriting
-    status: ''
-'21.9':
-    title: Overriding for Primitive Types
-    status: ''
-'21.10':
-    title: Excessive Arguments
-    status: ''
-'21.11':
-    title: Built-in Arrays Compatibility
-    status: ''
-'21.12':
-    title: Extending Class Object
-    status: ''
-'21.13':
-    title: Differences in Math.pow
-    status: ''
-'22':
     title: Grammar Summary
     status: No testable assertions
-'23':
+'22':
     title: Contributors
     status: No testable assertions
-'24':
+'23':
     title: Index
-    status: ''
+    status: No testable assertions

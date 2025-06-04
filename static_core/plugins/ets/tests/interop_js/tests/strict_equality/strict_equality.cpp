@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,50 +22,50 @@ class EtsInteropStrictEqualityTest : public EtsInteropTest {};
 
 TEST_F(EtsInteropStrictEqualityTest, TestEqualTrue)
 {
-    auto ret = CallEtsMethod<bool>("TestEqualTrue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestEqualTrue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestEqualFalse)
 {
-    auto ret = CallEtsMethod<bool>("TestEqualFalse");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestEqualFalse");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestNotEqualTrue)
 {
-    auto ret = CallEtsMethod<bool>("TestNotEqualTrue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotEqualTrue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestNotEqualFalse)
 {
-    auto ret = CallEtsMethod<bool>("TestNotEqualFalse");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotEqualFalse");
     ASSERT_EQ(ret, true);
 }
 
 // Behaviour for equal is the same as strict equal
 TEST_F(EtsInteropStrictEqualityTest, TestNotStrictEqualTrue)
 {
-    auto ret = CallEtsMethod<bool>("TestNotStrictEqualTrue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotStrictEqualTrue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestNotStrictEqualFalse)
 {
-    auto ret = CallEtsMethod<bool>("TestNotStrictEqualFalse");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotStrictEqualFalse");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestNotStrictNotEqualTrue)
 {
-    auto ret = CallEtsMethod<bool>("TestNotStrictNotEqualTrue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotStrictNotEqualTrue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropStrictEqualityTest, TestNotStrictNotEqualFalse)
 {
-    auto ret = CallEtsMethod<bool>("TestNotStrictNotEqualFalse");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestNotStrictNotEqualFalse");
     ASSERT_EQ(ret, true);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include <iomanip>
+#include <charconv>
 
 #include "get_language_specific_metadata.inc"
 
@@ -55,7 +56,8 @@ void Disassembler::DisassembleImpl(const bool quiet, const bool skipStrings)
     prog_ = pandasm::Program {};
 
     recordNameToId_.clear();
-    methodNameToId_.clear();
+    methodStaticNameToId_.clear();
+    methodInstanceNameToId_.clear();
 
     skipStrings_ = skipStrings;
     quiet_ = quiet;
@@ -169,8 +171,11 @@ void Disassembler::CollectInfo()
         GetRecordInfo(pair.second, &progInfo_.recordsInfo[pair.first]);
     }
 
-    for (const auto &pair : methodNameToId_) {
-        GetMethodInfo(pair.second, &progInfo_.methodsInfo[pair.first]);
+    for (const auto &pair : methodStaticNameToId_) {
+        GetMethodInfo(pair.second, &progInfo_.methodsStaticInfo[pair.first]);
+    }
+    for (const auto &pair : methodInstanceNameToId_) {
+        GetMethodInfo(pair.second, &progInfo_.methodsInstanceInfo[pair.first]);
     }
 
     AddExternalFieldsInfoToRecords();
@@ -247,6 +252,7 @@ size_t Disassembler::SerializeIfPrintMethodInfo(
     return width;
 }
 
+// CC-OFFNXT(huge_method) solid logic
 void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool printInformation,
                              panda_file::LineNumberTable *lineTable) const
 {
@@ -269,8 +275,9 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     headerSs << " {";
 
     const MethodInfo *methodInfo = nullptr;
-    auto methodInfoIt = progInfo_.methodsInfo.find(signature);
-    bool printMethodInfo = printInformation && methodInfoIt != progInfo_.methodsInfo.end();
+    auto &methodsInfo = method.IsStatic() ? progInfo_.methodsStaticInfo : progInfo_.methodsInstanceInfo;
+    auto methodInfoIt = methodsInfo.find(signature);
+    bool printMethodInfo = printInformation && methodInfoIt != methodsInfo.end();
     size_t width = SerializeIfPrintMethodInfo(method, printMethodInfo, headerSs, methodInfo, methodInfoIt);
 
     auto headerSsStr = headerSs.str();
@@ -338,17 +345,25 @@ void Disassembler::GetRecord(pandasm::Record &record, const panda_file::File::En
 
 void Disassembler::AddMethodToTables(const panda_file::File::EntityId &methodId)
 {
+    panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
     pandasm::Function newMethod("", fileLanguage_);
     GetMethod(&newMethod, methodId);
 
     const auto signature = pandasm::GetFunctionSignatureFromName(newMethod.name, newMethod.params);
-    if (prog_.functionTable.find(signature) != prog_.functionTable.end()) {
+    auto isStatic = methodAccessor.IsStatic();
+    auto &functionTable = isStatic ? prog_.functionStaticTable : prog_.functionInstanceTable;
+    if (functionTable.find(signature) != functionTable.end()) {
         return;
     }
 
-    methodNameToId_.emplace(signature, methodId);
+    if (isStatic) {
+        methodStaticNameToId_.emplace(signature, methodId);
+    } else {
+        methodInstanceNameToId_.emplace(signature, methodId);
+    }
+
     prog_.functionSynonyms[newMethod.name].push_back(signature);
-    prog_.functionTable.emplace(signature, std::move(newMethod));
+    functionTable.emplace(signature, std::move(newMethod));
 }
 
 void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::EntityId &methodId)
@@ -1230,7 +1245,8 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
     GetParams(&method, methodAccessor.GetProtoId());
     GetMetaData(&method, methodId);
 
-    return pandasm::GetFunctionSignatureFromName(method.name, method.params);
+    auto res = pandasm::GetFunctionSignatureFromName(method.name, method.params);
+    return method.IsStatic() ? "<static> " + res : res;
 }
 
 std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &classId) const
@@ -1542,17 +1558,6 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
     os << "}\n\n";
 }
 
-void Disassembler::SerializeUnionFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const
-{
-    if (printInformation && progInfo_.recordsInfo.find(record.name) != progInfo_.recordsInfo.end()) {
-        os << " # " << progInfo_.recordsInfo.at(record.name).recordInfo << "\n";
-        SerializeFields(record, os, true, true);
-    } else {
-        SerializeFields(record, os, false, true);
-    }
-    os << "\n";
-}
-
 void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, std::stringstream &ss) const
 {
     ss << "[";
@@ -1584,7 +1589,10 @@ void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, s
             case panda_file::LiteralTag::LITERALARRAY: {
                 std::string offsetStr = std::get<std::string>(item.value);
                 const int hexBase = 16;
-                uint32_t litArrayOffset = std::stoi(offsetStr, nullptr, hexBase);
+                const char *begin = offsetStr.data();
+                const char *end = &(*offsetStr.end());
+                uint32_t litArrayOffset = 0;
+                std::from_chars(begin, end, litArrayOffset, hexBase);
                 pandasm::LiteralArray litArray;
                 GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
                 DumpLiteralArray(litArray, ss);
@@ -1605,17 +1613,20 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
         ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
     } else if (f.type.GetId() == panda_file::Type::TypeId::U8) {
         ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::I8) {
+        ss << " = 0x" << std::hex << static_cast<int32_t>(f.metadata->GetValue().value().GetValue<int8_t>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::F64) {
         ss << " = " << static_cast<double>(f.metadata->GetValue().value().GetValue<double>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::U1) {
         ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<bool>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::I32) {
-        ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<int>());
+        ss << " = " << f.metadata->GetValue().value().GetValue<int>();
     } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "std/core/String") {
         ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
     } else if (f.type.GetRank() > 0) {
-        uint32_t litArrayOffset =
-            std::stoi(static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()));
+        uint32_t litArrayOffset = 0;
+        auto value = f.metadata->GetValue().value().GetValue<std::string>();
+        std::from_chars(value.data(), &(*value.end()), litArrayOffset);
         pandasm::LiteralArray litArray;
         GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
         ss << " = ";
@@ -1623,8 +1634,7 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     }
 }
 
-void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation,
-                                   bool isUnion) const
+void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation) const
 {
     constexpr size_t INFO_OFFSET = 80;
 
@@ -1637,23 +1647,18 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
 
     std::stringstream ss;
     for (const auto &f : record.fieldList) {
-        if (isUnion) {
-            ss << ".union_field ";
-        } else {
-            ss << "\t";
-        }
-        ss << f.type.GetPandasmName() << " " << f.name;
+        ss << "\t" << f.type.GetPandasmName() << " " << f.name;
         if (f.metadata->GetValue().has_value()) {
             SerializeFieldValue(f, ss);
         }
-        if (!isUnion && recordInTable) {
+        if (recordInTable) {
             const auto fieldIter = recordIter->second.fieldAnnotations.find(f.name);
             if (fieldIter != recordIter->second.fieldAnnotations.end()) {
                 Serialize(*f.metadata, fieldIter->second, ss);
             } else {
                 Serialize(*f.metadata, {}, ss);
             }
-        } else if (!isUnion && !recordInTable) {
+        } else {
             Serialize(*f.metadata, {}, ss);
         }
 
@@ -1839,11 +1844,7 @@ void Disassembler::SerializeRecords(std::ostream &os, bool addSeparators, bool p
     }
 
     for (const auto &r : prog_.recordTable) {
-        if (!panda_file::IsDummyClassName(r.first)) {
-            Serialize(r.second, os, printInformation);
-        } else {
-            SerializeUnionFields(r.second, os, printInformation);
-        }
+        Serialize(r.second, os, printInformation);
     }
 }
 
@@ -1851,7 +1852,7 @@ void Disassembler::SerializeMethods(std::ostream &os, bool addSeparators, bool p
 {
     LOG(DEBUG, DISASSEMBLER) << "[serializing methods]";
 
-    if (prog_.functionTable.empty()) {
+    if (prog_.functionInstanceTable.empty() && prog_.functionStaticTable.empty()) {
         return;
     }
 
@@ -1860,7 +1861,10 @@ void Disassembler::SerializeMethods(std::ostream &os, bool addSeparators, bool p
               "# METHODS\n\n";
     }
 
-    for (const auto &m : prog_.functionTable) {
+    for (const auto &m : prog_.functionStaticTable) {
+        Serialize(m.second, os, printInformation);
+    }
+    for (const auto &m : prog_.functionInstanceTable) {
         Serialize(m.second, os, printInformation);
     }
 }
@@ -1881,7 +1885,8 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
 
         name.str("");
         name << type.GetPandasmName();
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
         auto idx = bcIns.GetId().AsIndex();
         auto id = file_->ResolveMethodIndex(methodId, idx);
 
@@ -1896,16 +1901,14 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
         }
 
         name << '\"';
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
         auto idx = bcIns.GetId().AsIndex();
         auto id = file_->ResolveFieldIndex(methodId, idx);
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
 
         auto recordName = GetFullRecordName(fieldAccessor.GetClassId());
-        if (!panda_file::IsDummyClassName(recordName)) {
-            name << recordName;
-            name << '.';
-        }
+        name << recordName << '.';
         name << StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
     } else if (bcIns.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
         auto index = bcIns.GetId().AsIndex();
@@ -1967,8 +1970,9 @@ void Disassembler::CollectExternalFields(const panda_file::FieldDataAccessor &fi
     }
 
     auto &fieldList = externalFieldTable_[recordName];
-    auto retField = std::find_if(fieldList.begin(), fieldList.end(),
-                                 [&field](pandasm::Field &fieldFromList) { return field.name == fieldFromList.name; });
+    auto retField = std::find_if(fieldList.begin(), fieldList.end(), [&field](pandasm::Field &fieldFromList) {
+        return field.name == fieldFromList.name && field.IsStatic() == fieldFromList.IsStatic();
+    });
     if (retField == fieldList.end()) {
         fieldList.emplace_back(std::move(field));
 
@@ -1976,19 +1980,19 @@ void Disassembler::CollectExternalFields(const panda_file::FieldDataAccessor &fi
     }
 }
 
+// CC-OFFNXT(huge_method) solid logic
 IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File::EntityId methodId,
                                      panda_file::File::EntityId codeId)
 {
     panda_file::CodeDataAccessor codeAccessor(*file_, codeId);
 
-    const auto insSz = codeAccessor.GetCodeSize();
     const auto insArr = codeAccessor.GetInstructions();
 
     method->regsNum = codeAccessor.GetNumVregs();
 
     auto bcIns = BytecodeInstruction(insArr);
     auto from = bcIns.GetAddress();
-    const auto bcInsLast = bcIns.JumpTo(insSz);
+    const auto bcInsLast = bcIns.JumpTo(codeAccessor.GetCodeSize());
 
     LabelTable labelTable = GetExceptions(method, methodId, codeId);
 
@@ -2003,7 +2007,8 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
             break;
         }
 
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
             auto idx = bcIns.GetId().AsIndex();
             auto id = file_->ResolveFieldIndex(methodId, idx);
             panda_file::FieldDataAccessor fieldAccessor(*file_, id);
@@ -2021,13 +2026,16 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         }
 
         // check if method id is unknown external method. if so, emplace it in table
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
             const auto argMethodIdx = bcIns.GetId().AsIndex();
             const auto argMethodId = file_->ResolveMethodIndex(methodId, argMethodIdx);
 
             const auto argMethodSignature = GetMethodSignature(argMethodId);
-
-            const bool isPresent = prog_.functionTable.find(argMethodSignature) != prog_.functionTable.cend();
+            panda_file::MethodDataAccessor methodAccessor(*file_, argMethodId);
+            const auto &functionTable =
+                methodAccessor.IsStatic() ? prog_.functionStaticTable : prog_.functionInstanceTable;
+            const bool isPresent = functionTable.find(argMethodSignature) != functionTable.cend();
             const bool isExternal = file_->IsExternal(argMethodId);
             if (isExternal && !isPresent) {
                 unknownExternalMethods.push_back(argMethodId);

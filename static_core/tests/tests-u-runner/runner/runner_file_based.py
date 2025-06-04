@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -64,7 +64,19 @@ _LOGGER = logging.getLogger("runner.runner_file_based")
 
 
 class PandaBinaries:
-    DISABLE_CHECK_RUNTIME = ['parser']
+    DISABLE_CHECK_RUNTIME = [
+        'parser',
+        'declgen-ets2ts-cts',
+        'declgen-ets2ts-func-tests',
+        'declgen-ets2ts-runtime',
+        'declgents2ets-ts-cts'
+    ]
+    DISABLE_CHECK_ES2PANDA = [
+        'declgen-ets2ts-cts',
+        'declgen-ets2ts-func-tests',
+        'declgen-ets2ts-runtime',
+        'declgents2ets-ts-cts'
+    ]
 
     def __init__(self, runner_name: str, build_dir: str, config: Config, conf_kind: ConfigurationKind) -> None:
         self.build_dir = build_dir
@@ -74,6 +86,8 @@ class PandaBinaries:
 
     @property
     def es2panda(self) -> str:
+        if self.runner_name in self.DISABLE_CHECK_ES2PANDA:
+            return ""
         if self.config.es2panda.custom_path is not None:
             es2panda = self.__get_binary_path(self.config.es2panda.custom_path)
         else:
@@ -116,7 +130,7 @@ class RunnerFileBased(Runner):
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
-        self.coverage = LlvmCov(self.build_dir, self.work_dir)
+        self.coverage = LlvmCov(Path(self.build_dir), self.work_dir.coverage_dir)
 
         self.__set_test_list_options()
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
@@ -208,9 +222,14 @@ class RunnerFileBased(Runner):
 
     def create_coverage_html(self) -> None:
         Log.all(_LOGGER, "Create html report for coverage")
-        self.coverage.make_profdata_list_file()
-        self.coverage.merge_all_profdata_files()
-        self.coverage.llvm_cov_export_to_info_file()
+        if self.test_env.config.general.coverage.llvm_cov_report_by_components:
+            self.coverage.make_profdata_list_files_by_components()
+            self.coverage.merge_all_profdata_files_by_components()
+            self.coverage.llvm_cov_export_to_info_file_by_components()
+        else:
+            self.coverage.make_profdata_list_file()
+            self.coverage.merge_all_profdata_files()
+            self.coverage.llvm_cov_export_to_info_file()
         self.coverage.genhtml()
 
     def summarize(self) -> int:
@@ -333,6 +352,17 @@ class RunnerFileBased(Runner):
                 fail_lists[test_result.fail_kind].append(test_result)
             else:
                 TestCase().assertTrue(test_result.fail_kind)
+
+    def _get_frontend_test_lists(self) -> Path:
+        symlink_frontend_test = Path(self.config.general.static_core_root) / "tools" / "es2panda" / "test"
+        if symlink_frontend_test.exists():
+            frontend_test = symlink_frontend_test
+        else:
+            frontend_test = Path(
+                self.config.general.static_core_root).parent.parent / "ets_frontend" / "ets2panda" / "test"
+        if not frontend_test.exists():
+            raise Exception(f"There is no path {frontend_test}")
+        return frontend_test / "test-lists"
 
     def __generate_detailed_report(self, results: List[Test]) -> None:
         if self.config.report.detailed_report:

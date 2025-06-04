@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,8 @@ void EtsReferenceProcessor::Initialize()
 {
     auto *vm = ark::ets::PandaEtsVM::GetCurrent();
     ASSERT(vm != nullptr);
-    auto *undefinedObjHeader = vm->GetUndefinedObject();
-    undefinedObject_ = ark::ets::EtsObject::FromCoreType(undefinedObjHeader);
-    ASSERT(gc_->GetObjectAllocator()->IsObjectInNonMovableSpace(undefinedObject_->GetCoreType()));
+    nullValue_ = ark::ets::EtsObject::FromCoreType(vm->GetNullValue());
+    ASSERT(gc_->GetObjectAllocator()->IsObjectInNonMovableSpace(nullValue_->GetCoreType()));
 }
 
 bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
@@ -53,7 +52,7 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
     const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
     auto *referent = etsRef->GetReferent();
-    if (referent == nullptr || referent == undefinedObject_) {
+    if (referent == nullptr || referent == nullValue_) {
         LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
                              << " as normal object, because referent is nullish";
         return false;

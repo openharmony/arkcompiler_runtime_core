@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/coroutines/coroutine_events.h"
-#include "plugins/ets/runtime/ets_remote_promise_resolver.h"
 
 namespace ark::ets {
 
@@ -37,8 +36,9 @@ class EtsPromise : public ObjectHeader {
 public:
     // temp
     static constexpr EtsInt STATE_PENDING = 0;
-    static constexpr EtsInt STATE_RESOLVED = 1;
-    static constexpr EtsInt STATE_REJECTED = 2;
+    static constexpr EtsInt STATE_LINKED = 1;
+    static constexpr EtsInt STATE_RESOLVED = 2;
+    static constexpr EtsInt STATE_REJECTED = 3;
 
     EtsPromise() = delete;
     ~EtsPromise() = delete;
@@ -116,6 +116,11 @@ public:
         return (state_ == STATE_PENDING);
     }
 
+    bool IsLinked() const
+    {
+        return (state_ == STATE_LINKED);
+    }
+
     bool IsProxy()
     {
         return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
@@ -143,6 +148,15 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
     }
 
+    static void CreateLink(EtsObject *source, EtsPromise *target)
+    {
+        EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
+        auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
+        if (jobQueue != nullptr) {
+            jobQueue->CreateLink(source, target->AsObject());
+        }
+    }
+
     EtsMutex *GetMutex(EtsCoroutine *coro)
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));
@@ -167,7 +181,7 @@ public:
 
     void Resolve(EtsCoroutine *coro, EtsObject *value)
     {
-        ASSERT(state_ == STATE_PENDING);
+        ASSERT(IsPending() || IsLinked());
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
@@ -176,7 +190,7 @@ public:
 
     void Reject(EtsCoroutine *coro, EtsObject *error)
     {
-        ASSERT(state_ == STATE_PENDING);
+        ASSERT(IsPending() || IsLinked());
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
         OnPromiseCompletion(coro);
@@ -239,13 +253,14 @@ public:
         event->Wait();
     }
 
+    void ChangeStateToPendingFromLinked()
+    {
+        ASSERT(IsLinked());
+        state_ = STATE_PENDING;
+    }
+
     // launch promise then/catch callback: void()
     static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode);
-
-    void SetEtsPromiseResolver(RemotePromiseResolver *resolver)
-    {
-        remotePromiseResolver_ = reinterpret_cast<EtsLong>(resolver);
-    }
 
 private:
     void OnPromiseCompletion(EtsCoroutine *coro);
@@ -257,16 +272,6 @@ private:
         queueSize_ = 0;
     }
 
-    RemotePromiseResolver *GetPromiseResolver() const
-    {
-        return reinterpret_cast<RemotePromiseResolver *>(remotePromiseResolver_);
-    }
-
-    void InvalidatePromiseResolver()
-    {
-        SetEtsPromiseResolver(nullptr);
-    }
-
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsMutex> mutex_;
     ObjectPointer<EtsEvent> event_;
@@ -276,8 +281,7 @@ private:
     ObjectPointer<EtsObject> interopObject_;      // internal object used in js interop
     ObjectPointer<EtsObject> linkedPromise_;      // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
-    EtsLong remotePromiseResolver_;  // resolver for mirror promise
-    uint32_t state_;                 // the Promise's state
+    uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;
 };

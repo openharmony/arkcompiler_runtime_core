@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,96 +27,115 @@
 
 namespace ark::ets {
 
-static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDescriptor, bool *isError)
+static EtsClass *GetExceptionClass(EtsCoroutine *coro, const char *classDescriptor)
 {
-    ASSERT(coroutine != nullptr);
-    ASSERT(classDescriptor != nullptr);
-    ASSERT(isError != nullptr);
-
-    EtsClassLinker *classLinker = coroutine->GetPandaVM()->GetClassLinker();
+    EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
     EtsClass *cls = classLinker->GetClass(classDescriptor, true);
     if (cls == nullptr) {
         LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " not found";
         return nullptr;
     }
 
-    if (!classLinker->InitializeClass(coroutine, cls)) {
+    if (!classLinker->InitializeClass(coro, cls)) {
         LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " cannot be initialized";
         return nullptr;
     }
-
-    EtsClass *errorBaseCls = classLinker->GetClass(panda_file_items::class_descriptors::ERROR.data(), true);
-    EtsClass *exceptionBaseCls = classLinker->GetClass(panda_file_items::class_descriptors::EXCEPTION.data(), true);
-
-    if (errorBaseCls->IsAssignableFrom(cls)) {
-        *isError = true;
-        return cls;
-    }
-    if (exceptionBaseCls->IsAssignableFrom(cls)) {
-        *isError = false;
-        return cls;
-    }
-
-    UNREACHABLE();
-    return nullptr;
+    return cls;
 }
 
-EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
+static EtsObject *CreateExceptionInstance(EtsCoroutine *coro, EtsClass *cls, EtsHandle<EtsString> msg,
+                                          EtsHandle<EtsObject> pending)
 {
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> cause(coroutine, EtsObject::FromCoreType(coroutine->GetException()));
-    coroutine->ClearException();
-    EtsHandle<EtsErrorOptions> errOptionHandle(coroutine, EtsErrorOptions::Create(coroutine));
-    errOptionHandle->SetCause(cause.GetPtr());
-
-    bool isError = false;
-    EtsClass *cls = GetExceptionClass(coroutine, classDescriptor, &isError);
-    if (cls == nullptr) {
-        return nullptr;
-    }
-
-    EtsString *etsMsg = nullptr;
-    if (msg != nullptr) {
-        etsMsg = EtsString::CreateFromMUtf8(msg);
-    } else {
-        etsMsg = EtsString::CreateNewEmptyString();
-    }
-    if (UNLIKELY(etsMsg == nullptr)) {
-        // OOM happened during msg allocation
-        ASSERT(coroutine->HasPendingException());
+    EtsHandle<EtsObject> error(coro, EtsObject::Create(cls));
+    if (UNLIKELY(error.GetPtr() == nullptr)) {
         return nullptr;
     }
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {isError ? panda_file_items::class_descriptors::OBJECT
-                                                              : panda_file_items::class_descriptors::STRING,
+                        Method::Proto::RefTypeVector {panda_file_items::class_descriptors::STRING,
                                                       panda_file_items::class_descriptors::OBJECT});
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
-        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << classDescriptor;
+        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << cls->GetDescriptor();
         return nullptr;
     }
 
-    EtsHandle<EtsString> msgHandle(coroutine, etsMsg);
-    EtsHandle<EtsObject> excHandle(coroutine, EtsObject::Create(cls));
-    // clang-format off
-    std::array args {
-        Value(excHandle.GetPtr()->GetCoreType()),
-        Value(isError ? msgHandle.GetPtr()->AsObject()->GetCoreType() : msgHandle.GetPtr()->GetCoreType()),
-        Value(isError ? errOptionHandle.GetPtr()->AsObject()->GetCoreType() : cause.GetPtr()->GetCoreType())
-    };
-    // clang-format on
+    std::array args {Value(error.GetPtr()->GetCoreType()), Value(msg.GetPtr()->GetCoreType()),
+                     Value(pending.GetPtr()->GetCoreType())};
 
-    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coroutine, args.data());
-    if (LIKELY(!coroutine->HasPendingException())) {
-        return excHandle.GetPtr();
+    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coro, args.data());
+    if (UNLIKELY(coro->HasPendingException())) {
+        return nullptr;
     }
+    return error.GetPtr();
+}
+
+static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHandle<EtsString> msg,
+                                      EtsHandle<EtsObject> pending)
+{
+    EtsHandle<EtsErrorOptions> errOptions(coro, EtsErrorOptions::Create(coro));
+    if (UNLIKELY(errOptions.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+    errOptions->SetCause(pending.GetPtr());
+
+    EtsHandle<EtsObject> error(coro, EtsObject::Create(cls));
+    if (UNLIKELY(error.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+
+    Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
+                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE),
+                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
+                        Method::Proto::RefTypeVector {panda_file_items::class_descriptors::STRING,
+                                                      panda_file_items::class_descriptors::ERROR_OPTIONS});
+    EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
+    if (ctor == nullptr) {
+        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << cls->GetDescriptor();
+        return nullptr;
+    }
+
+    std::array args {Value(error.GetPtr()->GetCoreType()), Value(msg.GetPtr()->GetCoreType()),
+                     Value(errOptions.GetPtr()->AsObject()->GetCoreType())};
+
+    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coro, args.data());
+    if (UNLIKELY(coro->HasPendingException())) {
+        return nullptr;
+    }
+    return error.GetPtr();
+}
+
+EtsObject *SetupEtsException(EtsCoroutine *coro, const char *classDescriptor, const char *msg)
+{
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> pending(coro, EtsObject::FromCoreType(coro->GetException()));
+    coro->ClearException();
+
+    EtsHandle<EtsString> etsMsg(coro,
+                                msg == nullptr ? EtsString::CreateNewEmptyString() : EtsString::CreateFromMUtf8(msg));
+    if (UNLIKELY(etsMsg.GetPtr() == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+
+    EtsClass *cls = GetExceptionClass(coro, classDescriptor);
+    if (UNLIKELY(cls == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+
+    if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
+        return CreateErrorInstance(coro, cls, etsMsg, pending);
+    }
+    if (PlatformTypes(coro)->coreException->IsAssignableFrom(cls)) {
+        return CreateExceptionInstance(coro, cls, etsMsg, pending);
+    }
+    LOG(FATAL, RUNTIME) << "Class " << cls->GetDescriptor() << " is not compatible with (Error | Exception)";
     return nullptr;
 }
 
-// NOTE: Is used to throw all language exceptional objects (currently Errors and Exceptions)
 void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
 {
     ASSERT(coroutine != nullptr);

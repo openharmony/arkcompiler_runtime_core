@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,8 +124,9 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(
     function->GetArkTSImpl()->impl = &functionImpl;
     function->GetArkTSImpl()->core = function.get();
     auto name = GetMangleFuncName(function.get());
-    ASSERT(file->nameToFunction.count(name) == 0);
-    file->nameToFunction.insert({name, function.get()});
+    auto &nameToFunction = functionImpl.IsStatic() ? file->nameToFunctionStatic : file->nameToFunctionInstance;
+    ASSERT(nameToFunction.count(name) == 0);
+    nameToFunction.insert({name, function.get()});
 
     for (auto &annoImpl : functionImpl.metadata->GetAnnotations()) {
         auto anno = std::make_unique<AbckitCoreAnnotation>();
@@ -274,13 +275,18 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
 
     // Functions
     std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
-    std::unordered_map<std::string, AbckitCoreFunction *> nameToFunction;
-    for (auto &[functionName, functionImpl] : prog->functionTable) {
+    for (auto &[functionName, functionImpl] : prog->functionStaticTable) {
         auto [moduleName, className] = FuncGetNames(functionName);
 
         if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
             functions.emplace_back(CollectFunction(file, nameToModule, functionName, functionImpl));
-            nameToFunction[functionName] = functions.back().get();
+        }
+    }
+    for (auto &[functionName, functionImpl] : prog->functionInstanceTable) {
+        auto [moduleName, className] = FuncGetNames(functionName);
+
+        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
+            functions.emplace_back(CollectFunction(file, nameToModule, functionName, functionImpl));
         }
     }
 

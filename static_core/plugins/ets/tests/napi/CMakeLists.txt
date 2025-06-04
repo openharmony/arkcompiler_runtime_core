@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,6 @@
 
 add_subdirectory(bridges)
 add_subdirectory(etsnative)
-add_subdirectory(sampler)
-add_subdirectory(sampler_sig_stack)
 
 if (PANDA_TARGET_ARM32)
     return()
@@ -60,10 +58,12 @@ panda_target_include_directories(etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/
 
 add_custom_target(etsnapi_test_suite COMMENT "Running etsnapi tests")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
+
+set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 
 set(RUNTIME_ARGUMENTS
-    --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+    --boot-panda-files=${BOOT_PANDA_FILES}
     --load-runtimes=ets
     --compiler-enable-jit=false
 )
@@ -74,7 +74,7 @@ foreach(t ${ets_tests_list})
 
     # Compile Ets tests
     add_custom_target(es2panda_${t}
-        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.sts
+        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.ets
         WORKING_DIRECTORY "${testing_dir}"
         DEPENDS ${es2panda_target}
     )
@@ -86,9 +86,9 @@ foreach(t ${ets_tests_list})
 
     # Run tests
     add_custom_target(etsnapi_run_${t}
-        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} ${testing_dir}/${t}.abc ETSGLOBAL::main
-        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc ${testing_dir}/${t}.abc ETSGLOBAL::main
-        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw ${testing_dir}/${t}.abc ETSGLOBAL::main
+        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
+        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
+        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
         WORKING_DIRECTORY "${GEN_ETSNAPI_LIB_DIR}"
         DEPENDS ark etsstdlib es2panda_${t}
     )

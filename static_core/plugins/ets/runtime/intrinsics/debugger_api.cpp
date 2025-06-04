@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,8 @@ static void SetNotFoundException(EtsLong regNumber, EtsCoroutine *coroutine, std
 {
     auto errorMsg =
         "No local variable found at vreg #" + std::to_string(regNumber) + " and type " + std::string(typeName);
-    ark::ets::ThrowEtsException(
-        coroutine,
-        utf::Mutf8AsCString(
-            Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-        errorMsg);
+    ark::ets::ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data(),
+                                errorMsg);
 }
 
 static void SetRuntimeException(EtsLong regNumber, EtsCoroutine *coroutine, std::string_view typeName)
@@ -118,7 +115,7 @@ EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     auto *obj = DebuggerAPIGetLocal<ObjectHeader *>(coroutine, regNumber);
-    obj = (obj == nullptr) ? coroutine->GetUndefinedObject() : obj;
+    obj = (obj == nullptr) ? coroutine->GetNullValue() : obj;
     VMHandle<ObjectHeader> objHandle(coroutine, obj);
     return EtsObject::FromCoreType(objHandle.GetPtr());
 }

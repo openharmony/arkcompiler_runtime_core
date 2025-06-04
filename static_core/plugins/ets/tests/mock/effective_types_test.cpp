@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,7 +91,7 @@ static ets_double effective_types_fooUnity(EtsEnv *, ets_class, ets_double v)
 
 TEST_F(EffectiveTypeTest, TestGetStaticMethod)
 {
-    ets_class testClass = env->FindClass("EffectiveTypes");
+    ets_class testClass = env->FindClass("EffectiveTypesTest/EffectiveTypes");
     ASSERT_NE(testClass, nullptr);
     std::array<EtsNativeMethod, 4U> native_methods {
         EtsNativeMethod {"foo", "I:I", reinterpret_cast<void *>(effective_types_foo_I)},

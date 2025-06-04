@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.returnThisTestClassInstance = 
-    exports.ReturnThisTestClass = 
-    exports.testFuncReturnStr = 
-    exports.getThisAsAsyncFunction = 
-    exports.getThisAsFunction = 
-    exports.getThis = 
-    exports.TestClass = 
-        void 0;
 const TEST_ARRAY = [1, 2, 3, 4, 5];
 const TEST_STRING = 'Test';
 const TEST_NUMBER = 100;
@@ -29,7 +20,7 @@ const TEST_NULL = null;
 const TEST_MAP = new Map([['TEST', 'test']]);
 const TEST_TUPLE = ['Test', 1];
 const TEST_OBJ = true;
-class TestClass {
+export class TestClass {
     constructor() {
         this.testString = TEST_STRING;
         this.testNumber = TEST_NUMBER;
@@ -38,38 +29,32 @@ class TestClass {
         return this;
     }
 }
-exports.TestClass = TestClass;
-function getThis() {
+export function getThis() {
     return this;
 }
-exports.getThis = getThis;
-function getThisAsFunction() {
+export function getThisAsFunction() {
     return this;
 }
-exports.getThisAsFunction = getThisAsFunction;
-async function getThisAsAsyncFunction() {
+export async function getThisAsAsyncFunction() {
     return this;
 }
-exports.getThisAsAsyncFunction = getThisAsAsyncFunction;
-function testFuncReturnStr() {
+export function testFuncReturnStr() {
     return TEST_STRING;
 }
-exports.testFuncReturnStr = testFuncReturnStr;
-class ReturnThisTestClass {
+export class ReturnThisTestClass {
     constructor() {
         this.getThis = getThis.bind(this);
         this.getThisAsFunction = getThisAsFunction.bind(this);
         this.getThisAsAsyncFunction = getThisAsAsyncFunction.bind(this);
     }
 }
-exports.ReturnThisTestClass = ReturnThisTestClass;
-exports.returnThisTestClassInstance = new ReturnThisTestClass();
+export let returnThisTestClassInstance = new ReturnThisTestClass();
 const testClass = () => {
     let testClass = new TestClass();
     let testVal = testClass.getThis();
 };
 const test = () => {
-    console.log(getThis.call(TEST_NUMBER), 
+    print(getThis.call(TEST_NUMBER), 
     getThis.call(TEST_STRING), 
     getThis.call(TEST_NULL), 
     getThis.call(TEST_MAP), 
@@ -80,7 +65,7 @@ const test = () => {
     getThisAsFunction.call(testFuncReturnStr()));
 };
 const testAsync = async () => {
-    console.log(await getThisAsAsyncFunction.call(testFuncReturnStr()));
+    print(await getThisAsAsyncFunction.call(testFuncReturnStr()));
 };
 testClass();
 test();

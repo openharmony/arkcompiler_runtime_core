@@ -96,6 +96,11 @@ public:
         verificationMode_ = in;
     }
 
+    void SetVerificationMode(const std::string &mode)
+    {
+        verificationMode_ = VerificationModeFromString(mode);
+    }
+
     bool IsVerifyRuntimeLibraries() const
     {
         return verifyRuntimeLibraries_;

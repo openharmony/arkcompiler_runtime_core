@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -47,7 +47,7 @@ cases:
 
   - { type: char, val: "c'2'", rt: byte, rv: 1 as byte, op: '+', res: 3 }
   - { type: char, val: "c'2'", rt: short, rv: 1 as short, op: '-', res: 3 }
-  - { type: char, val: "c'2'", rt: char, rv: "c'0'", op: '*', res: 5 }
+  - { type: char, val: "c'2'", rt: char, rv: "c'0'", op: '*', res: 3 }
   - { type: char, val: "c'2'", rt: int, rv: 1, op: '/', res: 3 }
   - { type: char, val: "c'2'", rt: long, rv: 1 as long, op: '%', res: 4 }
   - { type: char, val: "c'2'", rt: float, rv: 1.0 as float, op: '+', res: 7 }
@@ -55,7 +55,7 @@ cases:
 
   - { type: char, val: "c'2'", rt: Byte, rv: new Byte(1 as byte), op: '*', res: 3 }
   - { type: char, val: "c'2'", rt: Short, rv: new Short(1 as short), op: '/', res: 3 }
-  - { type: char, val: "c'2'", rt: Char, rv: new Char(c'0'), op: '%', res: 5 }
+  - { type: char, val: "c'2'", rt: Char, rv: new Char(c'0'), op: '%', res: 3 }
   - { type: char, val: "c'2'", rt: Int, rv: new Int(1), op: '+', res: 3 }
   - { type: char, val: "c'2'", rt: Long, rv: new Long(1 as long), op: '-', res: 4 }
   - { type: char, val: "c'2'", rt: Float, rv: new Float(1.0 as float), op: '*', res: 7 }

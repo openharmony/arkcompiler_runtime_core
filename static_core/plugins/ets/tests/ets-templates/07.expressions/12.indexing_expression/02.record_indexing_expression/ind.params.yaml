@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,12 +22,12 @@ cases:
               "2": idx++,
               "3": ++idx,
           }
-          assert(idx == 3)
-          assert(r["1"] == 1 && r["2"] == 1 && r["3"] == 3)
-          r["1"] = 10
-          r["2"] = 20
-          r["3"] = 30
-          assert(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
+          assertTrue(idx == 3)
+          assertTrue(r["1"] == 1 && r["2"] == 1 && r["3"] == 3)
+          r["1"] = 10 as short
+          r["2"] = 20 as short
+          r["3"] = 30 as short
+          assertTrue(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
 
     - tags: 'compile-only, negative'
       use: |-
@@ -39,7 +39,7 @@ cases:
               "13": idx,
           }
           let i = "11"
-          assert(r[i] == 0)  // CTE expected, expression is not permitted in index
+          assertTrue(r[i] == 0)  // CTE expected, expression is not permitted in index
 
     - tags: 'compile-only, negative'
       decl: |-
@@ -55,7 +55,7 @@ cases:
               "13": idx,
           }
           r[foo("1")] = 99   // CTE expected, expression is not permitted in index
-          assert(r["12"] == 99)
+          assertTrue(r["12"] == 99)
 
     - tags: 'compile-only, negative'
       use: |-
@@ -66,7 +66,7 @@ cases:
               "  "  : idx,
               "   " : idx,
           }
-          assert(r["?"] == undefined)  // CTE expected, unknown key
+          assertTrue(r["?"] == undefined)  // CTE expected, unknown key
 
     - tags: 'compile-only, negative'
       use: |-
@@ -78,7 +78,7 @@ cases:
               "   " : idx,
           }
           r[""] = ++idx;  // CTE expected, unknown key
-          assert(r[" "] == idx)
+          assertTrue(r[" "] == idx)
 
     # Record key is a union of string literal types and string
     - use: |-
@@ -88,10 +88,10 @@ cases:
               "1": idx + 1,
               "2": idx + 2,
           }
-          assert(r["1"] == 1 && r["2"] == 2 && r["3"] == undefined)
+          assertTrue(r["1"] == 1 && r["2"] == 2 && r["3"] == undefined)
           r["1"] = 90
           r["3"] = 92
-          assert(r["1"] == 90 && r["2"] == 2 && r["3"] == 92)
+          assertTrue(r["1"] == 90 && r["2"] == 2 && r["3"] == 92)
 
     - use: |-
           // key is a union of literal types and string, expression in index
@@ -102,7 +102,7 @@ cases:
           }
           let i1 = "1"
           let i2 = "2"
-          assert(r[i1] == 1 && r[i2] == 2 && r[i1 + i2] == undefined)
+          assertTrue(r[i1] == 1 && r[i2] == 2 && r[i1 + i2] == undefined)
 
     - decl: |-
           function foo(p: int): string {
@@ -115,9 +115,9 @@ cases:
               "1": idx + 1,
               "2": idx + 2,
           }
-          assert(r[foo(1)] == 1 && r[foo(2)] == 2 && r[foo(3)] == undefined)
+          assertTrue(r[foo(1)] == 1 && r[foo(2)] == 2 && r[foo(3)] == undefined)
           r[foo(1)] = 99
-          assert(r["1"] == 99 && r["2"] == 2 && r["3"] == undefined)
+          assertTrue(r["1"] == 99 && r["2"] == 2 && r["3"] == undefined)
 
     - tags: 'compile-only, negative'
       use: |-
@@ -127,7 +127,7 @@ cases:
               "1": idx + 1,
               "2": idx + 2,
           }
-          assert(r[1] == undefined)  // CTE: wrong key type
+          assertTrue(r[1] == undefined)  // CTE: wrong key type
 
     - tags: 'compile-only, negative'
       use: |-
@@ -138,7 +138,7 @@ cases:
               "2": idx + 2,
           }
           r[2] = 99 // CTE: wrong key type
-          assert(r["2"] == 2)
+          assertTrue(r["2"] == 2)
 
     # Record key is of numeric type
     - use: |-
@@ -148,8 +148,8 @@ cases:
           r[b0] = null
           r[b_max] = b_max
           r[b_min] = b_min
-          assert(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
-          assert(r[99 as byte] === undefined)
+          assertTrue(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
+          assertTrue(r[99 as byte] === undefined)
 
     - use: |-
           // key is of numeric type, constants
@@ -158,8 +158,8 @@ cases:
           r[s0] = undefined
           r[s_min] = s_min
           r[s_max] = s_max
-          assert(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
-          assert(r[99 as short] === undefined)
+          assertTrue(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
+          assertTrue(r[99 as short] === undefined)
 
     - decl: |-
           let v0 = 0, v1 = 1, v_max = Int.MAX_VALUE, v_min = Int.MIN_VALUE
@@ -170,8 +170,8 @@ cases:
           r[v1] = undefined
           r[v_min] = v_min
           r[v_max] = v_max
-          assert(r[v0] === null && r[v1] === undefined && r[v_min] == v_min && r[v_max] == v_max)
-          assert(r[99] === undefined)
+          assertTrue(r[v0] === null && r[v1] === undefined && r[v_min] == v_min && r[v_max] == v_max)
+          assertTrue(r[99] === undefined)
 
     - decl: |-
           function foo(p: int): long {
@@ -184,8 +184,8 @@ cases:
           r[foo(0)] = new Long()
           r[foo(1)] = Long.MIN_VALUE
           r[foo(2)] = Long.MAX_VALUE
-          assert(r[foo(0)] == 0 && r[foo(1)] == Long.MIN_VALUE && r[foo(2)] == Long.MAX_VALUE)
-          assert(r[foo(3)] === undefined)
+          assertTrue(r[foo(0)] == 0 && r[foo(1)] == Long.MIN_VALUE && r[foo(2)] == Long.MAX_VALUE)
+          assertTrue(r[foo(3)] === undefined)
 
     - decl: |-
           let arr: float[] = [0f, Float.MIN_VALUE, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN]
@@ -198,15 +198,15 @@ cases:
           r[arr[3]] = Float.NEGATIVE_INFINITY
           r[arr[4]] = Float.POSITIVE_INFINITY
           r[arr[5]] = Float.NaN
-          assert(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
-          assert(r[arr[3]] == Float.NEGATIVE_INFINITY && r[arr[4]] == Float.POSITIVE_INFINITY)
-          assert(Float.isNaN(r[arr[5]] as Float) && r[99f] === undefined)
+          assertTrue(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          assertTrue(r[arr[3]] == Float.NEGATIVE_INFINITY && r[arr[4]] == Float.POSITIVE_INFINITY)
+          assertTrue(Float.isNaN(r[arr[5]] as Float) && r[99f] === undefined)
           r[arr[3]] = "3"
           r[arr[4]] = "4"
           r[arr[5]] = "5"
-          assert(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
-          assert(r[arr[3]] == "3" && r[arr[4]] == "4")
-          assert(r[arr[5]] == "5" && r[99f] === undefined)
+          assertTrue(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          assertTrue(r[arr[3]] == "3" && r[arr[4]] == "4")
+          assertTrue(r[arr[5]] == "5" && r[99f] === undefined)
 
     # Record key is a union of numeric and string
     - use: |-
@@ -219,10 +219,10 @@ cases:
           r["" + b0] = null
           r["" + b_max] = b_max
           r["" + b_min] = b_min
-          assert(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
-          assert(r["" + b0] === null && r["" + b_max] == b_max && r["" + b_min] == b_min)
-          assert(r[99 as byte] === undefined)
-          assert(r["99"] === undefined)
+          assertTrue(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
+          assertTrue(r["" + b0] === null && r["" + b_max] == b_max && r["" + b_min] == b_min)
+          assertTrue(r[99 as byte] === undefined)
+          assertTrue(r["99"] === undefined)
 
     - use: |-
           // key is of numeric type, constants
@@ -234,10 +234,10 @@ cases:
           r["" + s0] = undefined
           r["" + s_min] = s_min
           r["" + s_max] = s_max
-          assert(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
-          assert(r["" + s0] === undefined && r["" + s_min] == s_min && r["" + s_max] == s_max)
-          assert(r[99 as short] === undefined)
-          assert(r["99"] === undefined)
+          assertTrue(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
+          assertTrue(r["" + s0] === undefined && r["" + s_min] == s_min && r["" + s_max] == s_max)
+          assertTrue(r[99 as short] === undefined)
+          assertTrue(r["99"] === undefined)
 
     - decl: |-
           let arr: Double[] = [0.0, Double.MIN_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN]
@@ -251,16 +251,16 @@ cases:
           r[arr[3]] = Double.NEGATIVE_INFINITY
           r[arr[4]] = Double.POSITIVE_INFINITY
           r[arr[5]] = Double.NaN
-          assert(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
-          assert(r[arr[3]] == Double.NEGATIVE_INFINITY && r[arr[4]] == Double.POSITIVE_INFINITY)
-          assert(Double.isNaN(r[arr[5]] as Double) && r[99.0] === undefined)
+          assertTrue(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
+          assertTrue(r[arr[3]] == Double.NEGATIVE_INFINITY && r[arr[4]] == Double.POSITIVE_INFINITY)
+          assertTrue(Double.isNaN(r[arr[5]] as Double) && r[99.0] === undefined)
           // double -> string
           r[arr[3]] = "3"
           r[arr[4]] = "4"
           r[arr[5]] = "5"
-          assert(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
-          assert(r[arr[3]] == "3" && r[arr[4]] == "4")
-          assert(r[arr[5]] == "5" && r[99.0] === undefined)
+          assertTrue(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
+          assertTrue(r[arr[3]] == "3" && r[arr[4]] == "4")
+          assertTrue(r[arr[5]] == "5" && r[99.0] === undefined)
           // string -> double
           r["" + arr[0]] = 0.0
           r["" + arr[1]] = Double.MIN_VALUE
@@ -268,16 +268,16 @@ cases:
           r["" + arr[3]] = Double.NEGATIVE_INFINITY
           r["" + arr[4]] = Double.POSITIVE_INFINITY
           r["" + arr[5]] = Double.NaN
-          assert(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
-          assert(r["" + arr[3]] == Double.NEGATIVE_INFINITY && r["" + arr[4]] == Double.POSITIVE_INFINITY)
-          assert(Double.isNaN(r["" + arr[5]] as Double) && r["99"] === undefined)
+          assertTrue(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
+          assertTrue(r["" + arr[3]] == Double.NEGATIVE_INFINITY && r["" + arr[4]] == Double.POSITIVE_INFINITY)
+          assertTrue(Double.isNaN(r["" + arr[5]] as Double) && r["99"] === undefined)
           // string -> string
           r["" + arr[3]] = "3"
           r["" + arr[4]] = "4"
           r["" + arr[5]] = "5"
-          assert(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
-          assert(r["" + arr[3]] == "3" && r["" + arr[4]] == "4")
-          assert(r["" + arr[5]] == "5" && r["99"] === undefined)
+          assertTrue(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
+          assertTrue(r["" + arr[3]] == "3" && r["" + arr[4]] == "4")
+          assertTrue(r["" + arr[5]] == "5" && r["99"] === undefined)
 
     - use: |-
           // key is a union of number and string
@@ -289,14 +289,14 @@ cases:
               "1": 11,
               "2": 12,
           }
-          assert(r[0] == 0 && r[1] == 1 && r[2] == 2 && r["0"] == 10 && r["1"] == 11 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          assertTrue(r[0] == 0 && r[1] == 1 && r[2] == 2 && r["0"] == 10 && r["1"] == 11 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
           r[1] = 100
           r["1"] = r[1]! + 1
-          assert(r[0] == 0 && r[1] == 100 && r[2] == 2 && r["0"] == 10 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          assertTrue(r[0] == 0 && r[1] == 100 && r[2] == 2 && r["0"] == 10 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
           r["0"] = 300
           r[0] = r["0"]! + 1
-          assert(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          assertTrue(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
           r["2"] = undefined
-          assert(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)
+          assertTrue(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)
           r[2] = undefined
-          assert(r[0] == 301 && r[1] == 100 && r[2] == undefined && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)
+          assertTrue(r[0] == 301 && r[1] == 100 && r[2] == undefined && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)

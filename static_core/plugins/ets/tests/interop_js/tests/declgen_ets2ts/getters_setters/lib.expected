@@ -12,21 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-class C {
-    public get x(): number { return {} as any; };
-    public set x(a: number) {};
-    public val: number = {} as any;
-    constructor() {};
-};
-(C as any) = (globalThis as any).Panda.getClass('LC;');
-export {C};
-exports.C = C;
-
+export declare class C {
+    public get x(): number;
+    public set x(value: number);
+    public get val(): number;
+    public set val(value: number);
+    constructor();
+}

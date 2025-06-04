@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ cases:
           }
       use: |-
           let f: F = (p: string): number => { return p.length }
-          assert f("abcdef") == foo("ABCDEF")
+          assertEQ( f("abcdef"), foo("ABCDEF") )
 
     - decl: |-
           class A {
@@ -37,7 +37,7 @@ cases:
           type F<T extends A> = (p: T) => number
       use: |-
           let f: F<B> = (v: B): number => { return v.getFld() }
-          assert f(new B()) == foo<B>(new B())
+          assertEQ( f(new B()), foo<B>(new B()) )
 
     - decl: |-
           let globl: number = 3.5
@@ -50,7 +50,7 @@ cases:
       use: |-
           globl = 3.5
           let res = foo(2.0, ():void => { globl *= 2.0 })
-          assert res == 16.0
+          assertEQ( res, 16.0 )
 
     - decl: |-
           let globl: number = 3.5
@@ -65,7 +65,7 @@ cases:
           let res = foo(2.0) {
               globl *= 2.0
           }
-          assert res == 16.0
+          assertEQ( res, 16.0 )
 
     - decl: |-
           let globl: number = 0.0
@@ -85,7 +85,7 @@ cases:
                   foo(4.0, lambda);
               }
           }
-          assert foo(2.0, lambda) == 13.5
+          assertEQ( foo(2.0, lambda), 13.5 )
 
     - decl: |-
           let globl: number = 0.0
@@ -110,7 +110,7 @@ cases:
           let res: number = foo(2.0) {
               lambda()
           }
-          assert res == 13.5
+          assertEQ( res, 13.5 )
 
     - decl: |-
           type ss = (p: string) => string
@@ -119,11 +119,11 @@ cases:
               globl += p
               return globl
           }
-          let nbar: ss|null
+          let nbar: ss|undefined
       use: |-
           globl = "G"
-          assert nbar?.("abc") === undefined
-          assert globl == "G"
+          assertTrue( nbar?.("abc") === undefined )
+          assertEQ( globl, "G" )
 
     - decl: |-
           type ss = (p: string) => string
@@ -136,8 +136,8 @@ cases:
       use: |-
           globl = "G"
           nbar = bar
-          assert nbar?.("abc") == "Gabc"
-          assert globl == "Gabc"
+          assertEQ( nbar?.("abc"), "Gabc" )
+          assertEQ( globl, "Gabc" )
 
     - decl: |-
           let globl: number = 0.0
@@ -148,10 +148,10 @@ cases:
           }
       use: |-
           let v: UT = 3.14
-          assert v as number == 3.14
+          assertEQ( v as number, 3.14 )
           v = foo
           globl = 9.81
-          assert (v as NumberFunc)() == 9.81
+          assertEQ( (v as NumberFunc)(), 9.81 )
 
     - decl: |-
           let globl: number = 0.0
@@ -159,7 +159,21 @@ cases:
           type UT = NumberFunc | number
       use: |-
           let v: UT = 3.14
-          assert v as number == 3.14
+          assertEQ( v as number, 3.14 )
           v = (): number => { return globl }
           globl = 9.81
-          assert (v as NumberFunc)() == 9.81
+          assertEQ( (v as NumberFunc)(), 9.81 )
+
+    - decl: |-
+          function foo(): int { return 1 }
+          function call(callee: () => int): int {
+            return callee()
+          }
+          class A {
+            static method(): int { return 2 }
+            method(): int { return 3 }
+          }
+      use: |-
+          assertEQ(call(foo), 1)
+          assertEQ(call(A.method), 2)
+          assertEQ(call((new A).method), 3)

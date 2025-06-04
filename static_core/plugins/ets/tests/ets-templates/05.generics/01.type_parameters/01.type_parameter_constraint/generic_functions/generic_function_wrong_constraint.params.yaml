@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,21 +11,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Wrong type constraints for generic parameters
-wrong_constraints:
-  - boolean
-  - byte
-  - char
-  - double
-  - float
-  - int
-  - int & Object
-  - int & Object & String
-  - long
-  - Object & int
-  - Object & int & String
-  - Object & String & int
-  - short
-  - void
-  - "enum Color { Red, Green, Blue }"
-  - "int[]"
+--- # Type constraints for generic parameters
+constraints:
+  - type: number
+    use: byte
+    p: 1 as byte
+  - type: short
+    use: long
+    p: 1 as long
+  - type: int
+    use: long
+    p: 1 as long
+  - type: byte
+    use: char
+    p: c'A'
+  - type: char
+    use: byte
+    p: 1 as byte
+  - type: string
+    use: char
+    p: c'A'
+  - type: char
+    use: string
+    p: '"str"'

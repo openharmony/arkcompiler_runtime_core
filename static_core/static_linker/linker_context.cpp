@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -532,7 +532,7 @@ void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, pand
     auto [iter, was_inserted] = foreignFields_.emplace(std::piecewise_construct, std::forward_as_tuple(fc, name, typ),
                                                        std::forward_as_tuple(nullptr));
     if (was_inserted) {
-        iter->second = cont_.CreateItem<panda_file::ForeignFieldItem>(fc, name, typ);
+        iter->second = cont_.CreateItem<panda_file::ForeignFieldItem>(fc, name, typ, ff->GetAccessFlags());
     } else {
         result_.stats.deduplicatedForeigners++;
     }
@@ -636,7 +636,7 @@ void Context::AddAnnotationImpl(AddAnnotationImplData<T> ad, Getter getter, Adde
         auto mbNewAnnot = AnnotFromOld(oldAnnot);
         if (std::holds_alternative<panda_file::AnnotationItem *>(mbNewAnnot)) {
             adder(ad.ni, std::get<panda_file::AnnotationItem *>(mbNewAnnot));
-            return;
+            continue;
         }
         const auto &ed = std::get<ErrorDetail>(mbNewAnnot);
         if (ad.retriesLeft-- == 0) {

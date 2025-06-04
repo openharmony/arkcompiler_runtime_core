@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "runtime/include/runtime.h"
 #include "ets_type.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 namespace ark::ets {
 
@@ -65,8 +66,8 @@ public:
     template <typename T>
     explicit EtsValue(T value)
     {
-        static_assert(std::is_arithmetic<T>::value || std::is_same<T, ets_object>::value ||
-                      std::is_same<T, std::nullptr_t>::value);
+        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, ets_object> || std::is_same_v<T, ani_ref> ||
+                      std::is_same_v<T, std::nullptr_t>);
         static_assert(sizeof(T) <= sizeof(holder_));
 
         memcpy_s(&holder_, sizeof(holder_), &value, sizeof(value));
@@ -75,7 +76,7 @@ public:
     template <typename T>
     T GetAs()
     {
-        static_assert(std::is_arithmetic<T>::value || std::is_same<T, ets_object>::value);
+        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, ets_object> || std::is_same_v<T, ani_ref>);
         static_assert(sizeof(T) <= sizeof(holder_));
 
         T tmp;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -626,22 +626,21 @@ public:
     void SetIntrinsic(intrinsics::Intrinsic intrinsic)
     {
         ASSERT(!IsIntrinsic());
-        // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
-        // should become visible
-        ASSERT((accessFlags_.load(std::memory_order_acquire) & INTRINSIC_MASK) == 0);
-        auto result = ACC_INTRINSIC | static_cast<uint32_t>(intrinsic) << INTRINSIC_SHIFT;
+
+        // Atomic with relaxed order reason: there is a release store below, which will make this store visible
+        // for other threads
+        intrinsicId_.store(static_cast<uint32_t>(intrinsic), std::memory_order_relaxed);
         // Atomic with acq_rel order reason: data race with access_flags_ with dependecies on reads after the load and
         // on writes before the store
-        accessFlags_.fetch_or(result, std::memory_order_acq_rel);
+        accessFlags_.fetch_or(ACC_INTRINSIC, std::memory_order_acq_rel);
     }
 
     intrinsics::Intrinsic GetIntrinsic() const
     {
         ASSERT(IsIntrinsic());
-        // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
+        // Atomic with acquire order reason: data race with intrinsicId_ with dependecies on reads after the load which
         // should become visible
-        return static_cast<intrinsics::Intrinsic>((accessFlags_.load(std::memory_order_acquire) & INTRINSIC_MASK) >>
-                                                  INTRINSIC_SHIFT);
+        return static_cast<intrinsics::Intrinsic>(intrinsicId_.load(std::memory_order_acquire));
     }
 
     void SetVTableIndex(uint16_t vtableIndex)
@@ -797,10 +796,12 @@ public:
 
     panda_file::File::StringData GetClassSourceFile() const;
 
+    inline bool InitProfilingData(ProfilingData *profilingData);
+
     PANDA_PUBLIC_API void StartProfiling();
     PANDA_PUBLIC_API void StopProfiling();
 
-    bool IsProxy() const;
+    PANDA_PUBLIC_API bool IsProxy() const;
 
     ProfilingData *GetProfilingData()
     {
@@ -934,6 +935,9 @@ private:
                                                          coretypes::TaggedValue func);
 
 private:
+    using IntrinsicIdType = uint32_t;
+    static_assert(std::numeric_limits<IntrinsicIdType>::max() == MAX_INTRINSIC_NUMBER);
+
     union PointerInMethod {
         // It's native pointer when the method is native or proxy method.
         std::atomic<void *> nativePointer;
@@ -959,6 +963,8 @@ private:
     panda_file::File::EntityId fileId_;
     panda_file::File::EntityId codeId_;
     const uint16_t *shorty_;
+
+    std::atomic<IntrinsicIdType> intrinsicId_ {0U};
 };
 
 static_assert(!std::is_polymorphic_v<Method>);

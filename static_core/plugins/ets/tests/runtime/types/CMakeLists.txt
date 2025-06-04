@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,6 +35,7 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:mock_stdlib,FILE>
     DEPS_TARGETS
         mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
 )
 
 panda_ets_add_gtest(
@@ -42,6 +43,7 @@ panda_ets_add_gtest(
     NAME ets_internal_objects_tests
     SOURCES
         ets_promise_test.cpp
+        ets_job_test.cpp
         ets_class_test.cpp
         ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
@@ -49,6 +51,12 @@ panda_ets_add_gtest(
         ets_string_builder_members_test.cpp
         ets_to_string_cache_test.cpp
         ets_finalizable_weak_ref_test.cpp
+        ets_runtime_linker_test.cpp
+        ets_abc_runtime_linker_test.cpp
+        ets_typeapi_test.cpp
+        typed_arrays_test.cpp
+        ets_base_enum_test.cpp
+        ets_error_test.cpp
     LIBRARIES
         arkassembler
         arkruntime
@@ -60,4 +68,5 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:etsstdlib,FILE>
     DEPS_TARGETS
         etsstdlib
+    TEST_GROUP ets_tests_runtime_gtests
 )

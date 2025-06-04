@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,6 +198,8 @@ public:
           parentGraph_(parent)
     {
         SetNeedCleanup(true);
+        SetCanOptimizeNativeMethods(g_options.IsCompilerOptimizeNativeCalls() && (GetArch() != Arch::AARCH32) &&
+                                    GetRuntime()->IsNativeMethodOptimizationEnabled());
     }
 
     ~Graph() override;
@@ -426,6 +428,11 @@ public:
     void SetDynUnitTestFlag()
     {
         FlagDynUnitTest::Set(true, &bitFields_);
+    }
+    bool IsUnitTest() const
+    {
+        static constexpr uintptr_t FAKE_FILE = 0xdeadf;
+        return method_ == nullptr || ToUintPtr(runtime_->GetBinaryFileForMethod(method_)) == FAKE_FILE;
     }
 #else
     bool IsRegAllocApplied() const
@@ -664,20 +671,20 @@ public:
     }
     Inst *GetOrCreateNullPtr();
 
-    Inst *GetUndefinedInst() const
+    Inst *GetUniqueObjectInst() const
     {
-        return undefinedInst_;
+        return uniqueObjectInst_;
     }
-    bool HasUndefinedInst() const
+    bool HasUniqueObjectInst() const
     {
-        return undefinedInst_ != nullptr;
+        return uniqueObjectInst_ != nullptr;
     }
-    void UnsetUndefinedInst()
+    void UnsetUniqueObjectInst()
     {
-        ASSERT(HasUndefinedInst());
-        undefinedInst_ = nullptr;
+        ASSERT(HasUniqueObjectInst());
+        uniqueObjectInst_ = nullptr;
     }
-    Inst *GetOrCreateUndefinedInst();
+    Inst *GetOrCreateUniqueObjectInst();
 
     /// Find constant in the list, return nullptr if not found
     ConstantInst *FindConstant(DataType::Type type, uint64_t value);
@@ -1126,6 +1133,16 @@ public:
         FlagNeedCleanup::Set(v, &bitFields_);
     }
 
+    bool CanOptimizeNativeMethods() const
+    {
+        return FlagCanOptimizeNativeMethods::Get(bitFields_);
+    }
+
+    void SetCanOptimizeNativeMethods(bool v)
+    {
+        FlagCanOptimizeNativeMethods::Set(v, &bitFields_);
+    }
+
     bool IsJitOrOsrMode() const
     {
         return !IsAotMode() && !IsBytecodeOptimizer() && SupportManagedCode();
@@ -1359,7 +1376,8 @@ private:
     using FlagDefaultLocationsInit = FlagFloatRegs::NextFlag;
     using FlagIrtocPrologEpilogOptimized = FlagDefaultLocationsInit::NextFlag;
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
-    using FlagUnrollComplete = FlagThrowApplied::NextFlag;
+    using FlagCanOptimizeNativeMethods = FlagThrowApplied::NextFlag;
+    using FlagUnrollComplete = FlagCanOptimizeNativeMethods::NextFlag;
 #if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
     using LastField = FlagUnrollComplete;
 #else
@@ -1390,7 +1408,7 @@ private:
     // first constant instruction in graph !NOTE rewrite it to hash-map
     ConstantInst *firstConstInst_ {nullptr};
     Inst *nullptrInst_ {nullptr};
-    Inst *undefinedInst_ {nullptr};
+    Inst *uniqueObjectInst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_VTABLE_BUILDER_VARIANCE_H
 #define PANDA_RUNTIME_VTABLE_BUILDER_VARIANCE_H
 
+#include "runtime/class_linker_context.h"
 #include "runtime/include/vtable_builder_base.h"
 
 namespace ark {
@@ -30,9 +31,10 @@ private:
 
     std::optional<MethodInfo const *> ScanConflictingDefaultMethods(const MethodInfo *info);
 
-    static bool IsOverriddenBy(Method::ProtoId const &base, Method::ProtoId const &derv);
+    static bool IsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
 
-    static bool IsOverriddenOrOverrides(Method::ProtoId const &p1, Method::ProtoId const &p2);
+    static bool IsOverriddenOrOverrides(const ClassLinkerContext *ctx, Method::ProtoId const &p1,
+                                        Method::ProtoId const &p2);
 };
 
 }  // namespace ark

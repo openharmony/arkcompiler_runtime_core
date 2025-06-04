@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -597,6 +597,7 @@ ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t classId, size_t p
                                                              UnresolvedTypesInterface::SlotKind::CLASS);
         }
     } else {
+        ASSERT(classId != 0);
         inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr,
                                                   TypeIdMixin {classId, GetGraph()->GetMethod()}, classPtr);
     }

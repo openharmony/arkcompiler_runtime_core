@@ -11,38 +11,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/ark_config.gni")
 import("//arkcompiler/runtime_core/arkplatform/arkplatform_config.gni")
-import("//arkcompiler/runtime_core/arkplatform/tests/test_helper.gni")
+import("//arkcompiler/runtime_core/tests/test_helper.gni")
 
 host_unittest_action("ArkplatformTest") {
-  module_out_path = module_output_path
+  module_out_path = "$arkplatform_root"
 
-  sources = [ "jsnapi_test.cpp" ]
+  sources = [ "xgc_test.cpp" ]
 
-  include_dirs = [ "$ark_root/arkplatform/include" ]
+  include_dirs = [ "$arkplatform_root" ]
 
   configs = [ "$ark_root/arkplatform:arkplatform_public_config" ]
 
   deps = [ "$ark_root/arkplatform:libarkplatform" ]
-
-  external_deps = [
-    "ets_runtime:libark_jsruntime",
-    "icu:shared_icui18n",
-    sdk_libc_secshared_dep,
-  ]
 }
 
 group("unittest") {
   testonly = true
-  if (enable_arkplatform) {
-    deps = [ ":ArkplatformTest" ]
-  }
+  deps = [ ":ArkplatformTest" ]
 }
 
 group("host_unittest") {
   testonly = true
-  if (enable_arkplatform) {
-    deps = [ ":ArkplatformTestAction" ]
-  }
+  deps = [ ":ArkplatformTestAction" ]
 }

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -32,14 +32,14 @@ Import Path Lookup
 If an import path ``<some path>/name`` is resolved to a path in the folder
 '*name*', then  the compiler executes the following lookup sequence:
 
--   If the folder contains the file ``index.sts``, then this file is imported
+-   If the folder contains the file ``index.ets``, then this file is imported
     as a separate module written in |LANG|;
 
 -   If the folder contains the file ``index.ts``, then this file is imported
     as a separated module written in |TS|;
 
 -   Otherwise, the compiler imports the package constituted by files
-    ``name/*.sts``.
+    ``name/*.ets``.
 
 .. index::
    implementation
@@ -51,35 +51,44 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 
 |
 
-.. _Type Function:
+.. _Compilation Units in Host System:
 
-Type Function
-*************
+Compilation Units in Host System
+**********************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-The |LANG| supports the type called ``Function`` which is a supertype for all
-function types (see :ref:`Function Types`), and thus allows third party code
-interaction.
+Modules and packages are created and stored in a manner determined by the
+host system. The exact manner modules and packages are stored in a file
+system is determined by a particular implementation of the compiler and other
+tools.
 
-.. code-block:: typescript
-   :linenos:
+As an example, a simple implementation is characterised by the following:
 
-    declare function processAnyFunction (a_function: Function)
-      // This is an external function which may handle any ArkTS function
+-  Module (package module) is stored in a single file.
 
-    function foo() {}
-    function bar(p1: number, p2: string, p3: boolean): Object {}
+-  All package modules are stored in files of the same folder.
 
-    processAnyFunction (foo)         // pass 'foo' as an argument
-    processAnyFunction (bar)         // pass 'bar' as an argument
-    processAnyFunction (()=>void {}) // pass lambda expression as an argument
+-  Folder that can store several separate modules (one source file to contain a
+   separate module or a package module).
+
+-  Folder that stores a single package must not contain separate module
+   files or package modules from other packages.
 
 .. index::
-   type function
-   supertype
-   function type
+   compilation unit
+   host system
+   module
+   package
+   file system
+   implementation
+   package module
+   file
+   folder
+   source file
+   separate module
+
 
 |
 
@@ -121,34 +130,6 @@ be any valid type.
 
 |
 
-.. _Methods for T[] Types:
-
-Methods for ``T[]`` Types
-*************************
-
-Some methods defined for ``Array<T>`` can be used for ``T[]`` (e.g., ``at``).
-It does not mean that ``T[]`` is a class type, but rather that the compiler
-supports the syntactical form of the method call for the ``T[]`` variables.
-The list of supported methods is defined by the compiler implementation.
-
-.. code-block:: typescript
-   :linenos:
-
-    let built_in_array: number[] = [1,2,3]
-    built_in_array.at (0) // That will be a valid call
-
-.. index::
-   method
-   type
-   array
-   class type
-   compiler
-   method call
-   variable
-   implementation
-
-|
-
 .. _Generic and Function Types Peculiarities:
 
 Generic and Function Types Peculiarities
@@ -156,9 +137,7 @@ Generic and Function Types Peculiarities
 
 Current compiler and runtime implementations use type erasure, and thus affect
 the manner of behavior of generics and function types. It is expected to change
-in the future. The compiler applies boxing (see :ref:`Boxing Conversions`) to
-any parameter and return type of primitive types when dealing with variables
-of function types. A particular example can be found under the last bullet of
+in the future. A particular example can be found under the last bullet of
 the compile-time errors list in :ref:`InstanceOf Expression`.
 
 .. index::
@@ -166,10 +145,72 @@ the compile-time errors list in :ref:`InstanceOf Expression`.
    function type
    compiler
    runtime implementation
-   boxing
    conversion
-   variable
-   primitive type
+
+|
+
+.. _Keyword struct and ArkUI:
+
+Keyword ``struct`` and ArkUI
+****************************
+
+.. meta:
+    frontend_status: Done
+
+The current compiler reserves the keyword ``struct``
+because it is used in legacy ArkUI code.
+This keyword can be used as a replacement for the keyword ``class``
+in :ref:`Class declarations`.
+Class declarations marked with the keyword ``struct``
+are processed by the ArkUI plugin
+and replaced with class declarations that use specific ArkUI types.
+
+.. index::
+   compiler
+   struct
+   ArkUI
+   compiler plugin
+
+|
+
+.. OutOfMemoryError for Primitive Type Operations:
+
+``OutOfMemoryError`` for Primitive Type Operations
+**************************************************
+
+Execution of some primitive type operations (like
+increment, decrement and assignment)
+can throw ``OutOfMemoryError`` (see :ref:`Error Handling`)
+if allocation of new object is required
+but the available memory is not sufficient to perform it.
+
+.. _Uniqueness of Functional Objects:
+
+Uniqueness of Functional Objects
+********************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| and |LANG| handle function objects differently, and the equality test can
+perform differently. The difference can be eliminated in the future versions of
+|LANG|.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {}
+    foo == foo  // true in Typescript while may be false in ArkTS
+    const f1 = foo
+    const f2 = foo
+    f1 == f2 // true in Typescript while may be false in ArkTS
+
+
+.. index::
+   function object
+   equality test
+
+|
 
 .. raw:: pdf
 

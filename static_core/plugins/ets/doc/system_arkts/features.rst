@@ -59,10 +59,10 @@ type. The performance gain can as much as double in some applications.
     }
 
     function main() {
-        let num1: Int = 15; // ETS Warning: Implicit Boxing to Char in Variable Declaration.
-        let num2: Float = 5.0; // ETS Warning: Implicit Boxing to Float in Variable Declaration.
-        let num3: Long = 5; // ETS Warning: Implicit Boxing to Long in Variable Declaration.
-        let result: double = complexArithmeticExpression(num1, num2, num3); // ETS Warning: Implicit Unboxing to float in Call Method/Function.
+        let num1: Int = 15; // Warning: Implicit Boxing to Char in Variable Declaration.
+        let num2: Float = 5.0; // Warning: Implicit Boxing to Float in Variable Declaration.
+        let num3: Long = 5; // Warning: Implicit Boxing to Long in Variable Declaration.
+        let result: double = complexArithmeticExpression(num1, num2, num3); // Warning: Implicit Unboxing to float in Call Method/Function.
         console.log(result);
     }
 
@@ -116,11 +116,11 @@ approximately 10 % performance improvement.
 
     let x: Int = new Int(5);
 
-    if (x == null) { // ETS Warning: Boost Equality Expression. Change sides of binary expression.
+    if (x == null) { // Warning: Boost Equality Expression. Change sides of binary expression.
         console.println("Hello!");
     }
 
-    let k: boolean = x == null; // ETS Warning: Boost Equality Expression. Change sides of binary expression.
+    let k: boolean = x == null; // Warning: Boost Equality Expression. Change sides of binary expression.
 
 |LANG| Improvement Implemented
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -159,7 +159,7 @@ using Coroutines instead.
     }
 
     function main(): void {
-        let promise = foo(); // ETS Warning: Replace asynchronous function with coroutine.
+        let promise = foo(); // Warning: Replace asynchronous function with coroutine.
     }
 
 |LANG| Coroutines Way
@@ -202,9 +202,9 @@ allows making calls more efficient, and improves the performance significantly.
         };
     }
 
-    class K extends A { // ETS Warning: Suggest 'final' modifier for class 'K'
-        foo_to_suggest(): void {}; // ETS Warning: Suggest 'final' modifier for method 'foo_to_suggest'.
-        override foo(): String { // ETS Warning: Suggest 'final' modifier for method 'foo'.
+    class K extends A { // Warning: Suggest 'final' modifier for class 'K'
+        foo_to_suggest(): void {}; // Warning: Suggest 'final' modifier for method 'foo_to_suggest'.
+        override foo(): String { // Warning: Suggest 'final' modifier for method 'foo'.
             return "overridden_foo";
         }
     }
@@ -246,7 +246,7 @@ function calls.
 .. code-block:: typescript
 
     let foo: (i: int) => int
-    foo = (i: int): int => {return i + 1} // ETS Warning: Replace the lambda function with a regular function.
+    foo = (i: int): int => {return i + 1} // Warning: Replace the lambda function with a regular function.
 
 |LANG| Improvement Implemented
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

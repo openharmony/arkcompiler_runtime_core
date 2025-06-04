@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,7 @@ from cdp import debugger, runtime
 
 from arkdb.compiler import StringCodeCompiler
 from arkdb.debug_connection import ArkConnection, Proxy, ScriptsCache, SourcesCache, connect_cdp
+from arkdb.extensions import debugger as ext_debugger
 
 T: TypeAlias = trio_cdp.T
 
@@ -159,6 +160,16 @@ class DebuggerClient:
             ),
         )
 
+    async def remove_breakpoint(self, breakpoint_id: debugger.BreakpointId) -> None:
+        return await self.connection.send(
+            debugger.remove_breakpoint(
+                breakpoint_id=breakpoint_id,
+            ),
+        )
+
+    async def remove_breakpoints_by_url(self, url: str) -> None:
+        await self.connection.send(ext_debugger.remove_breakpoints_by_url(url))
+
     async def set_breakpoint_by_url(self, *args, **kwargs) -> Tuple[debugger.BreakpointId, List[debugger.Location]]:
         return await self.connection.send(debugger.set_breakpoint_by_url(*args, **kwargs))
 
@@ -176,8 +187,37 @@ class DebuggerClient:
             )
         )
 
+    async def get_possible_and_set_breakpoint_by_url(
+        self,
+        locations: List[ext_debugger.UrlBreakpointRequest],
+    ) -> List[ext_debugger.CustomUrlBreakpointResponse]:
+        return await self.connection.send(ext_debugger.get_possible_and_set_breakpoint_by_url(locations))
+
     async def set_breakpoints_active(self, active: bool) -> None:
         await self.connection.send(debugger.set_breakpoints_active(active=active))
+
+    async def set_skip_all_pauses(self, skip: bool) -> None:
+        await self.connection.send(debugger.set_skip_all_pauses(skip=skip))
+
+    async def evaluate_on_call_frame(
+        self,
+        call_frame_id: debugger.CallFrameId,
+        expression: str,
+        object_group: Optional[str] = None,
+        include_command_line_api: Optional[bool] = None,
+        silent: Optional[bool] = None,
+        return_by_value: Optional[bool] = None,
+    ) -> Tuple[runtime.RemoteObject, Optional[runtime.ExceptionDetails]]:
+        return await self.connection.send(
+            debugger.evaluate_on_call_frame(
+                call_frame_id=call_frame_id,
+                expression=expression,
+                object_group=object_group,
+                include_command_line_api=include_command_line_api,
+                silent=silent,
+                return_by_value=return_by_value,
+            )
+        )
 
     async def evaluate(self, expression: str) -> tuple[runtime.RemoteObject, runtime.ExceptionDetails | None]:
         return await self.connection.send(runtime.evaluate(expression))

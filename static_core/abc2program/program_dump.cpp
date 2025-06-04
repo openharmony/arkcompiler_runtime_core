@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,7 +188,10 @@ void PandasmProgramDumper::DumpFunctionTable(std::ostream &os, const pandasm::Pr
     os << DUMP_TITLE_SEPARATOR;
     os << DUMP_TITLE_METHODS;
     os << DUMP_CONTENT_DOUBLE_ENDL;
-    for (const auto &it : program.functionTable) {
+    for (const auto &it : program.functionStaticTable) {
+        DumpFunction(os, it.second);
+    }
+    for (const auto &it : program.functionInstanceTable) {
         DumpFunction(os, it.second);
     }
 }

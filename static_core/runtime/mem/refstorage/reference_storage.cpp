@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,7 +229,8 @@ ObjectHeader *ReferenceStorage::GetObject(const Reference *ref)
 bool ReferenceStorage::PushLocalFrame(uint32_t capacity)
 {
     ASSERT_THREAD_STATE();
-    size_t needBlocks = (capacity + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
+    size_t needBlocks = (static_cast<uint64_t>(capacity) + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
+
     size_t blocksFree = MAX_STORAGE_BLOCK_COUNT - blocksCount_;
     if (needBlocks > blocksFree) {
         LOG(ERROR, GC) << "Free size of local reference storage is less than capacity: " << capacity
@@ -293,9 +294,9 @@ Reference *ReferenceStorage::PopLocalFrame(const Reference *result)
     return NewRef(obj, type);
 }
 
-bool ReferenceStorage::EnsureLocalCapacity(size_t capacity)
+bool ReferenceStorage::EnsureLocalCapacity(uint32_t capacity)
 {
-    size_t needBlocks = (capacity + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
+    size_t needBlocks = (static_cast<uint64_t>(capacity) + RefBlock::REFS_IN_BLOCK - 1) / RefBlock::REFS_IN_BLOCK;
     size_t blocksFreed = MAX_STORAGE_BLOCK_COUNT - blocksCount_;
     if (needBlocks > blocksFreed) {
         LOG(ERROR, GC) << "Can't store size: " << capacity << " in local references";

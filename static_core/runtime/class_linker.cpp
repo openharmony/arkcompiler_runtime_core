@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -308,6 +308,24 @@ private:
     panda_file::ClassDataAccessor *dataAccessor_;
 };
 
+void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces)
+{
+    auto table = itable.Get();
+    if (!table.Empty()) {
+        for (size_t i = 0; i < table.Size(); i++) {
+            Span<Method *> imethods = table[i].GetMethods();
+            if (!imethods.Empty()) {
+                allocator_->Free(imethods.begin());
+            }
+            table[i].SetInterface(nullptr);
+        }
+        allocator_->Free(table.begin());
+    }
+    if (!interfaces.Empty()) {
+        allocator_->Free(interfaces.begin());
+    }
+}
+
 bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                  Span<Class *> interfaces, ClassLinkerContext *context,
                                  ClassLinkerErrorHandler *errorHandler)
@@ -322,6 +340,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::Class
         return false;
     }
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
@@ -370,6 +389,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> meth
         return false;
     }
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
@@ -1470,9 +1490,8 @@ Method *ClassLinker::GetMethod(const Class *klass, const panda_file::MethodDataA
 }
 
 Field *ClassLinker::GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
-                                 ClassLinkerErrorHandler *errorHandler)
+                                 ClassLinkerErrorHandler *errorHandler, bool isStatic)
 {
-    bool isStatic = fieldDataAccessor.IsStatic();
     auto &pf = fieldDataAccessor.GetPandaFile();
     auto id = fieldDataAccessor.GetFieldId();
 
@@ -1491,13 +1510,13 @@ Field *ClassLinker::GetFieldById(Class *klass, const panda_file::FieldDataAccess
 }
 
 Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
-                                        ClassLinkerErrorHandler *errorHandler)
+                                        ClassLinkerErrorHandler *errorHandler, bool isStatic)
 {
     auto &pf = fieldDataAccessor.GetPandaFile();
     auto id = fieldDataAccessor.GetFieldId();
     auto fieldName = pf.GetStringData(fieldDataAccessor.GetNameId());
     auto fieldType = panda_file::Type::GetTypeFromFieldEncoding(fieldDataAccessor.GetType());
-    Field *field = klass->FindField([&fieldDataAccessor, &fieldType, &fieldName, &id, &pf](const Field &fld) {
+    auto filter = [&fieldDataAccessor, &fieldType, &fieldName, &id, &pf](const Field &fld) {
         if (fieldType == fld.GetType() && fieldName == fld.GetName()) {
             if (!fieldType.IsReference()) {
                 return true;
@@ -1514,7 +1533,8 @@ Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDat
             }
         }
         return false;
-    });
+    };
+    Field *field = isStatic ? klass->FindStaticField(filter) : klass->FindInstanceField(filter);
 
     if (field == nullptr) {
         PandaStringStream ss;
@@ -1527,7 +1547,7 @@ Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDat
     return field;
 }
 
-Field *ClassLinker::GetField(const panda_file::File &pf, panda_file::File::EntityId id,
+Field *ClassLinker::GetField(const panda_file::File &pf, panda_file::File::EntityId id, bool isStatic,
                              ClassLinkerContext *context /* = nullptr */,
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
@@ -1546,9 +1566,9 @@ Field *ClassLinker::GetField(const panda_file::File &pf, panda_file::File::Entit
     }
 
     if (!fieldDataAccessor.IsExternal() && klass->GetPandaFile() == &pf) {
-        field = GetFieldById(klass, fieldDataAccessor, errorHandler);
+        field = GetFieldById(klass, fieldDataAccessor, errorHandler, isStatic);
     } else {
-        field = GetFieldBySignature(klass, fieldDataAccessor, errorHandler);
+        field = GetFieldBySignature(klass, fieldDataAccessor, errorHandler, isStatic);
     }
     return field;
 }
@@ -1589,7 +1609,7 @@ void ClassLinker::VisitLoadedClasses(size_t flag)
     }
 }
 
-Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id,
+Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id, bool isStatic,
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     Field *field = caller.GetPandaFile()->GetPandaCache()->GetFieldFromCache(id);
@@ -1597,7 +1617,7 @@ Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id
         return field;
     }
     auto *ext = GetExtension(caller.GetClass()->GetSourceLang());
-    field = GetField(*caller.GetPandaFile(), id, caller.GetClass()->GetLoadContext(),
+    field = GetField(*caller.GetPandaFile(), id, isStatic, caller.GetClass()->GetLoadContext(),
                      (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(field != nullptr)) {
         caller.GetPandaFile()->GetPandaCache()->SetFieldCache(id, field);

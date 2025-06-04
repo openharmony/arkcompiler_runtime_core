@@ -112,6 +112,22 @@
     verify_test_result_function: compareWrapperObjectValue
   }
 
+- {
+    method_name: parseInt,
+    object_type: Double,
+
+    param_init_data_types: {"param1":"String[]", "param2": "double[]"},
+    param_types: {"param1":String, "param2":"double"},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["11", "11", " 11 ", " 11 ", "0x11", "0x11", " 0x11 ", " 0x11 ", " 0x11 ",  " 0x11 "]', "param2": "[Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity, NaN, -NaN]"},
+
+    method_return_type: Double,
+    
+    expected_data_item_type: Double,
+    expected_data_type: "double[]",
+    expected_test_data: "[11, 11, 11, 11, 17, 17, 17, 17, 17, 17]",
+    verify_test_result_function: compareWrapperObjectValue
+  }
 
 - {
     method_name: isFinite,

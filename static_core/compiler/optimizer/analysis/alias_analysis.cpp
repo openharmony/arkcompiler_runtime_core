@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,11 +75,37 @@
 
 namespace ark::compiler {
 
-AliasAnalysis::AliasAnalysis(Graph *graph) : Analysis(graph), pointsTo_(graph->GetAllocator()->Adapter()) {}
+bool PointerWithInfo::IsLocalCreated() const
+{
+    for (const auto &pointer : PointsTo()) {
+        if (!(pointer.IsObject() && pointer.IsLocalCreatedAlias())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+AliasAnalysis::AliasAnalysis(Graph *graph) : Analysis(graph), pointerInfo_(graph->GetAllocator()->Adapter()) {}
 
 const ArenaVector<BasicBlock *> &AliasAnalysis::GetBlocksToVisit() const
 {
     return GetGraph()->GetBlocksRPO();
+}
+
+[[maybe_unused]] static std::string TypeToStr(AliasType t)
+{
+    switch (t) {
+        case MAY_ALIAS:
+            return "MAY_ALIAS";
+        case NO_ALIAS:
+            return "NO_ALIAS";
+        case MUST_ALIAS:
+            return "MUST_ALIAS";
+        case ALIAS_IF_BASE_EQUALS:
+            return "ALIAS_IF_BASE_EQUALS";
+        default:
+            UNREACHABLE();
+    }
 }
 
 bool AliasAnalysis::RunImpl()
@@ -88,15 +114,22 @@ bool AliasAnalysis::RunImpl()
 
     VisitGraph();
 
-    // Initialize solution sets
-    for (auto pair : *direct_) {
-        auto it = pointsTo_.try_emplace(pair.first, GetGraph()->GetAllocator()->Adapter());
-        ASSERT(pair.first.GetBase() == nullptr || pair.first.GetBase()->GetOpcode() != Opcode::NullCheck);
-        ASSERT(pair.second.GetBase() == nullptr || pair.second.GetBase()->GetOpcode() != Opcode::NullCheck);
-        it.first->second.insert(pair.second);
+    for (const auto &[from, _] : *direct_) {
+        CreatePointerInfo(from);
+    }
+    for (const auto &[from, to] : *copy_) {
+        CreatePointerInfo(from);
+        CreatePointerInfo(to);
     }
 
-    // Build graph
+    // Initialize solution sets
+    for (auto pair : *direct_) {
+        ASSERT(pair.first.GetBase() == nullptr || pair.first.GetBase()->GetOpcode() != Opcode::NullCheck);
+        ASSERT(pair.second.GetBase() == nullptr || pair.second.GetBase()->GetOpcode() != Opcode::NullCheck);
+        GetPointerInfo(pair.first).Insert(pair.second);
+    }
+
+    // Build graphs
     for (auto pair : *copy_) {
         auto it = chains_->try_emplace(pair.first, GetGraph()->GetLocalAllocator()->Adapter());
         ASSERT(pair.first.GetBase() == nullptr || pair.first.GetBase()->GetOpcode() != Opcode::NullCheck);
@@ -104,11 +137,14 @@ bool AliasAnalysis::RunImpl()
         it.first->second.push_back(pair.second);
     }
 
+    FindEscapingPointers();
     SolveConstraints();
 
 #ifndef NDEBUG
     if (CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::ALIAS_ANALYSIS)) {
         std::ostringstream out;
+        DumpCopy(&out);
+        DumpDirect(&out);
         DumpChains(&out);
         Dump(&out);
         COMPILER_LOG(DEBUG, ALIAS_ANALYSIS) << out.str();
@@ -120,63 +156,16 @@ bool AliasAnalysis::RunImpl()
 void AliasAnalysis::Init()
 {
     auto allocator = GetGraph()->GetLocalAllocator();
-    chains_ = allocator->New<PointerMap<ArenaVector<Pointer>>>(allocator->Adapter());
+    chains_ = allocator->New<Pointer::Map<ArenaVector<Pointer>>>(allocator->Adapter());
+    reverseChains_ = allocator->New<Pointer::Map<ArenaVector<Pointer>>>(allocator->Adapter());
     direct_ = allocator->New<PointerPairVector>(allocator->Adapter());
     copy_ = allocator->New<PointerPairVector>(allocator->Adapter());
-    inputsSet_ = allocator->New<ArenaSet<Inst *>>(allocator->Adapter());
     ASSERT(chains_ != nullptr);
+    ASSERT(reverseChains_ != nullptr);
     ASSERT(direct_ != nullptr);
     ASSERT(copy_ != nullptr);
-    ASSERT(inputsSet_ != nullptr);
-    pointsTo_.clear();
-}
-
-void Pointer::Dump(std::ostream *out) const
-{
-    switch (type_) {
-        case OBJECT:
-            (*out) << "v" << base_->GetId();
-            break;
-        case STATIC_FIELD:
-            (*out) << "SF #" << imm_;
-            break;
-        case POOL_CONSTANT:
-            (*out) << "PC #" << imm_;
-            break;
-        case OBJECT_FIELD:
-            (*out) << "v" << base_->GetId() << " #" << imm_;
-            break;
-        case ARRAY_ELEMENT:
-            (*out) << "v" << base_->GetId() << "[";
-            if (idx_ != nullptr) {
-                (*out) << "v" << idx_->GetId();
-                if (imm_ != 0) {
-                    (*out) << "+" << imm_;
-                }
-            } else {
-                (*out) << imm_;
-            }
-            (*out) << "]";
-            break;
-        case DICTIONARY_ELEMENT:
-            (*out) << "v" << base_->GetId() << "[";
-            (*out) << "v" << idx_->GetId();
-            if (imm_ != 0) {
-                (*out) << "#NAME";
-            } else {
-                (*out) << "#INDEX";
-            }
-            (*out) << "]";
-            break;
-        default:
-            UNREACHABLE();
-    }
-    if (local_) {
-        (*out) << "(local)";
-    }
-    if (volatile_) {
-        (*out) << "(v)";
-    }
+    AliasVisitor::Init(allocator);
+    pointerInfo_.clear();
 }
 
 static bool PointerLess(const Pointer &lhs, const Pointer &rhs)
@@ -191,30 +180,6 @@ static bool PointerLess(const Pointer &lhs, const Pointer &rhs)
         return false;
     }
     return lhs.GetBase()->GetId() < rhs.GetBase()->GetId();
-}
-
-static Pointer GetDynamicAccessPointer(Inst *inst, Inst *base, DynObjectAccessType type, DynObjectAccessMode mode)
-{
-    if (type == DynObjectAccessType::UNKNOWN || mode == DynObjectAccessMode::UNKNOWN) {
-        return Pointer::CreateObject(base);
-    }
-
-    Inst *idx = inst->GetDataFlowInput(1);
-    uint64_t imm = 0;
-    if (type == DynObjectAccessType::BY_NAME) {
-        ASSERT_DO(mode != DynObjectAccessMode::ARRAY,
-                  (std::cerr << "Unexpected access type BY_NAME for access mode ARRAY: ", inst->Dump(&std::cerr)));
-        imm = UINT64_MAX;
-    } else {
-        ASSERT_DO(type == DynObjectAccessType::BY_INDEX,
-                  (std::cerr << "Unsupported dynamic access type in alias analysis: ", inst->Dump(&std::cerr)));
-    }
-    if (mode == DynObjectAccessMode::ARRAY) {
-        return Pointer::CreateArrayElement(base, idx, imm);
-    }
-    ASSERT_DO(mode == DynObjectAccessMode::DICTIONARY,
-              (std::cerr << "Unsupported dynamic access mode in alias analysis: ", inst->Dump(&std::cerr)));
-    return Pointer::CreateDictionaryElement(base, idx, imm);
 }
 
 void AliasAnalysis::DumpChains(std::ostream *out) const
@@ -278,7 +243,7 @@ void AliasAnalysis::DumpCopy(std::ostream *out) const
 void AliasAnalysis::Dump(std::ostream *out) const
 {
     ArenaVector<Pointer> sortedKeys(GetGraph()->GetLocalAllocator()->Adapter());
-    for (auto &pair : pointsTo_) {
+    for (const auto &pair : pointerInfo_) {
         sortedKeys.push_back(pair.first);
     }
     if (sortedKeys.empty()) {
@@ -291,10 +256,17 @@ void AliasAnalysis::Dump(std::ostream *out) const
     for (auto &p : sortedKeys) {
         (*out) << "\t";
         p.Dump(out);
+        const auto &info = GetPointerInfo(p);
+        if (info.IsLocal()) {
+            (*out) << "(local)";
+        }
+        if (info.IsVolatile()) {
+            (*out) << "(v)";
+        }
         (*out) << ": {";
 
         // Sort by instruction ID to add more readability to logs
-        auto values = pointsTo_.at(p);
+        auto values = info.PointsTo();
         ArenaVector<Pointer> sorted(values.begin(), values.end(), GetGraph()->GetLocalAllocator()->Adapter());
         std::sort(sorted.begin(), sorted.end(), PointerLess);
         auto iter = sorted.begin();
@@ -309,6 +281,7 @@ void AliasAnalysis::Dump(std::ostream *out) const
     }
 }
 
+template <bool REFINED>
 AliasType AliasAnalysis::CheckInstAlias(Inst *mem1, Inst *mem2) const
 {
     ASSERT(mem1->IsMemory() && mem2->IsMemory());
@@ -331,23 +304,29 @@ AliasType AliasAnalysis::CheckInstAlias(Inst *mem1, Inst *mem2) const
         return NO_ALIAS;
     }
 
-    return CheckMemAddress(p1, p2);
+    return CheckMemAddress<REFINED>(p1, p2, IsVolatileMemInst(mem1) || IsVolatileMemInst(mem2));
 }
+
+template AliasType AliasAnalysis::CheckInstAlias<false>(Inst *, Inst *) const;
+template AliasType AliasAnalysis::CheckInstAlias<true>(Inst *, Inst *) const;
 
 AliasType AliasAnalysis::CheckRefAlias(Inst *ref1, Inst *ref2) const
 {
     ASSERT(ref1->IsReferenceOrAny());
     ASSERT(ref2->IsReferenceOrAny());
-    return CheckMemAddress(Pointer::CreateObject(ref1), Pointer::CreateObject(ref2));
+    return CheckMemAddress<false>(Pointer::CreateObject(ref1), Pointer::CreateObject(ref2), false);
 }
 
-AliasType AliasAnalysis::CheckMemAddressEmptyIntersectionCase(const PointerSet &aliases1, const PointerSet &aliases2,
-                                                              const Pointer &p1, const Pointer &p2) const
+AliasType AliasAnalysis::CheckMemAddressEmptyIntersectionCase(const PointerWithInfo &base1,
+                                                              const PointerWithInfo &base2, const Pointer &p1,
+                                                              const Pointer &p2) const
 {
     // If at least one set of aliases consists of only local aliases then there is NO_ALIAS
-    auto isOuter = [](Pointer const &p) { return !p.IsLocal(); };
-    if (std::find_if(aliases1.begin(), aliases1.end(), isOuter) == aliases1.end() ||
-        std::find_if(aliases2.begin(), aliases2.end(), isOuter) == aliases2.end()) {
+    if (base1.IsLocal() || base2.IsLocal()) {
+        return NO_ALIAS;
+    }
+    // If BOTH sets of aliases consists of only local created aliases then there is NO_ALIAS
+    if (base1.IsLocalCreated() && base2.IsLocalCreated()) {
         return NO_ALIAS;
     }
     // Different fields cannot alias each other even if they are not created locally
@@ -391,8 +370,10 @@ AliasType AliasAnalysis::CheckMemAddressEmptyIntersectionCase(const PointerSet &
  * All function's arguments MAY_ALIAS each other.  Created objects in the
  * function may not alias arguments.
  */
-AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2) const
+template <bool REFINED>
+AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2, bool isVolatile) const
 {
+    ASSERT(p1.GetType() != UNKNOWN_OFFSET && p2.GetType() != UNKNOWN_OFFSET);
     if (p1.GetType() != p2.GetType()) {
         return NO_ALIAS;
     }
@@ -404,15 +385,22 @@ AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2) c
         }
         return NO_ALIAS;
     }
+    ASSERT(p1.GetBase() != nullptr && p2.GetBase() != nullptr);
+
+    if (auto base = p1.GetBase(); base == p2.GetBase()) {
+        return SingleIntersectionAliasing(p1, p2, nullptr, isVolatile);
+    }
 
     auto baseObj1 = Pointer::CreateObject(p1.GetBase());
     auto baseObj2 = Pointer::CreateObject(p2.GetBase());
-    ASSERT_DO(pointsTo_.find(baseObj1) != pointsTo_.end(),
+    ASSERT_DO(pointerInfo_.find(baseObj1) != pointerInfo_.end(),
               (std::cerr << "Undefined inst in AliasAnalysis: ", p1.GetBase()->Dump(&std::cerr)));
-    ASSERT_DO(pointsTo_.find(baseObj2) != pointsTo_.end(),
+    ASSERT_DO(pointerInfo_.find(baseObj2) != pointerInfo_.end(),
               (std::cerr << "Undefined inst in AliasAnalysis: ", p2.GetBase()->Dump(&std::cerr)));
-    auto &aliases1 = pointsTo_.at(baseObj1);
-    auto &aliases2 = pointsTo_.at(baseObj2);
+    const auto &base1 = GetPointerInfo(baseObj1);
+    const auto &base2 = GetPointerInfo(baseObj2);
+    const auto &aliases1 = base1.PointsTo();
+    const auto &aliases2 = base2.PointsTo();
     // Find the intersection
     const Pointer *intersection = nullptr;
     for (auto &alias : aliases1) {
@@ -424,11 +412,11 @@ AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2) c
 
     // The only common intersection
     if (intersection != nullptr && aliases1.size() == 1 && aliases2.size() == 1) {
-        return SingleIntersectionAliasing(p1, p2, intersection);
+        return SingleIntersectionAliasing<REFINED>(p1, p2, &base1, isVolatile);
     }
     // Empty intersection: check that both addresses are not parameters
     if (intersection == nullptr) {
-        return CheckMemAddressEmptyIntersectionCase(aliases1, aliases2, p1, p2);
+        return CheckMemAddressEmptyIntersectionCase(base1, base2, p1, p2);
     }
     return MAY_ALIAS;
 }
@@ -449,13 +437,13 @@ static uint64_t CombineIdxAndImm(const Pointer *p)
 AliasType AliasAnalysis::AliasingTwoArrayPointers(const Pointer *p1, const Pointer *p2)
 {
     // Structure of Pointer: base, idx, imm
-    // Base is same. We should compare fields in order: idx, combine {idx + imm}.
+    // Base may be same or not. We should compare fields in order: idx, combine {idx + imm}.
     // Is necessary compare sum, because LoadArrayI (..., nullptr, 2) and StoreArray(..., Const{2}, 0) will alias,
     // but in separate idx and imm are different.
 
-    // 1) Compare idx. If they same, compare Imm part -> MUST_ALIAS, NO_ALIAS
+    // 1) Compare idx. If they same, compare Imm part -> ALIAS_IF_BASE_EQUALS, NO_ALIAS
     if (AliasAnalysis::IsSameOffsets(p1->GetIdx(), p2->GetIdx()) == Trilean::TRUE) {
-        return p1->GetImm() == p2->GetImm() ? MUST_ALIAS : NO_ALIAS;
+        return p1->GetImm() == p2->GetImm() ? ALIAS_IF_BASE_EQUALS : NO_ALIAS;
     }
     // 2) If still one of indexes is not constant or nullptr -> MAY_ALIAS
     for (auto *pointer : {p1, p2}) {
@@ -465,19 +453,26 @@ AliasType AliasAnalysis::AliasingTwoArrayPointers(const Pointer *p1, const Point
     }
     // 3) Combine idx(is constant) and imm for compare
     if (CombineIdxAndImm(p1) == CombineIdxAndImm(p2)) {
-        return MUST_ALIAS;
+        return ALIAS_IF_BASE_EQUALS;
     }
     return NO_ALIAS;
 }
 
 /// Checks aliasing if P1 and P2 point to the one single object.
 /* static */
-AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Pointer &p2, const Pointer *intersection)
+template <bool REFINED>
+AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Pointer &p2,
+                                                    const PointerWithInfo *commonBase, bool isVolatile) const
 {
+    // check that PointerInfo for intersection exists
+    ASSERT(commonBase == nullptr || commonBase->PointsTo().size() == 1U);
     ASSERT(p1.GetType() == p2.GetType());
     switch (p1.GetType()) {
         case ARRAY_ELEMENT: {
-            return AliasingTwoArrayPointers(&p1, &p2);
+            if (auto type = AliasingTwoArrayPointers(&p1, &p2); type != ALIAS_IF_BASE_EQUALS) {
+                return type;
+            }
+            break;
         }
         case DICTIONARY_ELEMENT:
             // It is dinamic case, there are less guarantees
@@ -498,65 +493,167 @@ AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Poi
         default:
             UNREACHABLE();
     }
-    if (intersection->IsVolatile()) {
+    if (commonBase != nullptr && commonBase->IsLocal()) {
+        // if base is local, volatility does not matter
+        return MUST_ALIAS;
+    }
+    if (isVolatile) {
         return MAY_ALIAS;
     }
-    return MUST_ALIAS;
+    if (commonBase == nullptr) {
+        // p1 and p2 have the same base instruction
+        return MUST_ALIAS;
+    }
+    ASSERT(commonBase->GetType() == OBJECT);
+    if (commonBase->IsVolatile()) {
+        // base of p1 and base of p2 can be different if they are loaded from some object
+        // at different moments
+        return MAY_ALIAS;
+    }
+
+    auto basePointsTo = *commonBase->PointsTo().begin();
+    if (basePointsTo.GetType() == OBJECT || basePointsTo.GetType() == POOL_CONSTANT) {
+        // p1 and p2 have the same base instruction
+        return MUST_ALIAS;
+    }
+    if (REFINED) {
+        return ALIAS_IF_BASE_EQUALS;
+    }
+    return MAY_ALIAS;
 }
 
-void AliasAnalysis::SolveConstraintsMainLoop(Pointer &ref, Pointer &edge, bool &added, PointerSet &sols)
+void AliasAnalysis::SolveConstraintsMainLoop(const PointerWithInfo *ref, PointerWithInfo *edge, bool &added)
 {
-    for (auto &alias : pointsTo_.at(ref)) {
+    added |= edge->UpdateLocal(ref->IsLocal());
+    if (ref->IsVolatile() && !edge->IsVolatile()) {
+        added = true;
+        edge->SetVolatile(true);
+    }
+    if (ref->GetBase() != edge->GetBase() || edge->GetType() == STATIC_FIELD || edge->GetType() == OBJECT) {
+        for (const auto &alias : ref->PointsTo()) {
+            ASSERT(alias.GetBase() == nullptr || alias.GetBase()->GetOpcode() != Opcode::NullCheck);
+            added |= edge->Insert(alias);
+        }
+        return;
+    }
+
+    ASSERT(ref->GetBase() == edge->GetBase());
+    ASSERT(edge->GetType() == OBJECT_FIELD || edge->GetType() == ARRAY_ELEMENT ||
+           edge->GetType() == DICTIONARY_ELEMENT || edge->GetType() == RAW_OFFSET || edge->GetType() == UNKNOWN_OFFSET);
+
+    bool onlyObjects = true;
+    for (auto alias : ref->PointsTo()) {
         ASSERT(alias.GetBase() == nullptr || alias.GetBase()->GetOpcode() != Opcode::NullCheck);
-        if (edge.GetType() == OBJECT_FIELD && ref.GetBase() == edge.GetBase()) {
+        if (alias.GetType() != OBJECT) {
+            onlyObjects = false;
+            continue;
+        }
+
+        // NOTE: do we need it if onlyObjects is false?
+        Pointer p {};
+        if (edge->GetType() == OBJECT_FIELD) {
             // Propagating from object to fields: A{a} -> A.F{a.f}
-            if (alias.GetType() == OBJECT) {
-                Pointer p = Pointer::CreateObjectField(alias.GetBase(), edge.GetImm(), edge.GetTypePtr());
-                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                added |= sols.insert(p).second;
-                continue;
-            }
-            // In case A{a.g} -> A.F we propagate symbolic name: A{a.g} -> A.F{A.F}
-            Pointer p = Pointer::CreateObjectField(ref.GetBase(), edge.GetImm(), edge.GetTypePtr());
-            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-            added |= sols.insert(p).second;
-            continue;
-        }
-        if (edge.GetType() == ARRAY_ELEMENT && ref.GetBase() == edge.GetBase()) {
+            p = Pointer::CreateObjectField(alias.GetBase(), edge->GetImm(), edge->GetTypePtr());
+        } else if (edge->GetType() == ARRAY_ELEMENT) {
             // Propagating from object to elements: A{a} -> A[i]{a[i]}
-            if (alias.GetType() == OBJECT) {
-                Pointer p = Pointer::CreateArrayElement(alias.GetBase(), edge.GetIdx(), edge.GetImm());
-                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-                added |= sols.insert(p).second;
-                continue;
-            }
-            // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
-            Pointer p = Pointer::CreateArrayElement(ref.GetBase(), edge.GetIdx(), edge.GetImm());
-            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
-
-            added |= sols.insert(p).second;
-            continue;
-        }
-        if (edge.GetType() == DICTIONARY_ELEMENT && ref.GetBase() == edge.GetBase()) {
+            p = Pointer::CreateArrayElement(alias.GetBase(), edge->GetIdx(), edge->GetImm());
+        } else if (edge->GetType() == RAW_OFFSET) {
             // Propagating from object to elements: A{a} -> A[i]{a[i]}
-            if (alias.GetType() == OBJECT) {
-                Pointer p = Pointer::CreateDictionaryElement(alias.GetBase(), edge.GetIdx());
-                p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+            p = Pointer::CreateRawOffset(alias.GetBase(), edge->GetIdx(), edge->GetImm());
+        } else if (edge->GetType() == DICTIONARY_ELEMENT) {
+            // Propagating from object to elements: A{a} -> A[i]{a[i]}
+            p = Pointer::CreateDictionaryElement(alias.GetBase(), edge->GetIdx());
+        } else if (edge->GetType() == UNKNOWN_OFFSET) {
+            p = Pointer::CreateUnknownOffset(alias.GetBase());
+        } else {
+            UNREACHABLE();
+        }
+        added |= edge->Insert(p);
+    }
 
-                added |= sols.insert(p).second;
-                continue;
-            }
-            // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
-            Pointer p = Pointer::CreateDictionaryElement(ref.GetBase(), edge.GetIdx());
-            p.SetLocalVolatile(alias.IsLocal(), edge.IsVolatile());
+    if (!onlyObjects) {
+        // In case A{a[j]} -> A[i] we propagate symbolic name: A{a[j]} -> A[i]{A[i]}
+        added |= edge->Insert(edge->GetPointer());
+    }
+}
 
-            added |= sols.insert(p).second;
+void AliasAnalysis::CreatePointerInfo(const Pointer &pointer, bool isVolatile)
+{
+    auto it = pointerInfo_.find(pointer);
+    if (it == pointerInfo_.end()) {
+        pointerInfo_.emplace(pointer, PointerInfo {Pointer::Set {GetGraph()->GetAllocator()->Adapter()},
+                                                   pointer.IsNotEscapingAlias(), isVolatile});
+    } else if (isVolatile) {
+        it->second.isVolatile = true;
+    }
+}
+
+const PointerWithInfo &AliasAnalysis::GetPointerInfo(const Pointer &pointer) const
+{
+    auto it = pointerInfo_.find(pointer);
+    ASSERT_DO(it != pointerInfo_.end(),
+              (std::cerr << "No info for pointer: ", pointer.Dump(&std::cerr), GetGraph()->Dump(&std::cerr)));
+    return PointerWithInfo::FromPair(*it);
+}
+
+PointerWithInfo &AliasAnalysis::GetPointerInfo(const Pointer &pointer)
+{
+    return const_cast<PointerWithInfo &>(static_cast<const AliasAnalysis *>(this)->GetPointerInfo(pointer));
+}
+
+void AliasAnalysis::SetVolatile(const Pointer &pointer, Inst *memInst)
+{
+    ASSERT(memInst->IsMemory());
+    if (IsVolatileMemInst(memInst)) {
+        CreatePointerInfo(pointer, true);
+        ASSERT(GetPointerInfo(pointer).IsVolatile());
+    }
+}
+
+void AliasAnalysis::AddConstantDirectEdge(Inst *inst, uint32_t id)
+{
+    direct_->push_back({Pointer::CreateObject(inst), Pointer::CreatePoolConstant(id)});
+}
+
+void AliasAnalysis::FindEscapingPointers()
+{
+    ArenaVector<const PointerWithInfo *> worklist(GetGraph()->GetLocalAllocator()->Adapter());
+    // propagate "escaping" property backward by copy-edges
+    for (const auto &pair : pointerInfo_) {
+        const auto *info = &PointerWithInfo::FromPair(pair);
+        if (info->IsLocal()) {
             continue;
         }
-        added |= sols.insert(alias).second;
+        worklist.push_back(info);
+        while (!worklist.empty()) {
+            auto to = worklist.back();
+            worklist.pop_back();
+            if (auto it = reverseChains_->find(to->GetPointer()); it != reverseChains_->end()) {
+                PropagateEscaped(it->second, worklist);
+            }
+        }
+    }
+    // pointer is local alias if it is created locally and does not escape
+    for (auto &pair : pointerInfo_) {
+        auto &info = PointerWithInfo::FromPair(pair);
+        info.UpdateLocal(info.GetPointer().IsLocalCreatedAlias());
+    }
+}
+
+void AliasAnalysis::AddEscapeEdge(const Pointer &from, const Pointer &to)
+{
+    auto it = reverseChains_->try_emplace(from, GetGraph()->GetLocalAllocator()->Adapter());
+    it.first->second.push_back(to);
+}
+
+void AliasAnalysis::PropagateEscaped(const ArenaVector<Pointer> &escaping,
+                                     ArenaVector<const PointerWithInfo *> &worklist)
+{
+    for (const auto &from : escaping) {
+        auto &fromInfo = GetPointerInfo(from);
+        if (fromInfo.UpdateLocal(false)) {
+            worklist.push_back(&fromInfo);
+        }
     }
 }
 
@@ -594,203 +691,31 @@ void AliasAnalysis::SolveConstraintsMainLoop(Pointer &ref, Pointer &edge, bool &
  */
 void AliasAnalysis::SolveConstraints()
 {
-    ArenaQueue<Pointer> worklist(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaQueue<PointerWithInfo *> worklist(GetGraph()->GetLocalAllocator()->Adapter());
     for (auto &pair : *direct_) {
         if (chains_->find(pair.first) != chains_->end()) {
-            worklist.push(pair.first);
+            worklist.push(&GetPointerInfo(pair.first));
         }
     }
 
     while (!worklist.empty()) {
-        Pointer &ref = worklist.front();
-        ASSERT(ref.GetBase() == nullptr || ref.GetBase()->GetOpcode() != Opcode::NullCheck);
-        for (auto &edge : chains_->at(ref)) {
+        const PointerWithInfo *ref = worklist.front();
+        ASSERT(ref->GetBase() == nullptr || ref->GetBase()->GetOpcode() != Opcode::NullCheck);
+        for (const auto &edgePointer : chains_->at(ref->GetPointer())) {
+            auto *edge = &GetPointerInfo(edgePointer);
             // POOL_CONSTANT cannot be assignee
-            ASSERT(edge.GetType() != POOL_CONSTANT);
-            auto &sols = pointsTo_.try_emplace(edge, GetGraph()->GetAllocator()->Adapter()).first->second;
+            ASSERT(edge->GetType() != POOL_CONSTANT);
             bool added = false;
 
-            SolveConstraintsMainLoop(ref, edge, added, sols);
+            SolveConstraintsMainLoop(ref, edge, added);
 
-            if (added && chains_->find(edge) != chains_->end()) {
+            if (added && chains_->find(edgePointer) != chains_->end()) {
                 worklist.push(edge);
             }
-            ASSERT(!sols.empty());
+            ASSERT(!edge->PointsTo().empty());
         }
         worklist.pop();
     }
-}
-
-/// Selects the address from instruction that should be checked on alias
-bool AliasAnalysis::ParseInstruction(Inst *inst, Pointer *pointer)
-{
-    Pointer p {};
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadArray:
-        case Opcode::LoadArrayI:
-        case Opcode::StoreArray:
-        case Opcode::StoreArrayI:
-            p = ParseArrayElement(inst);
-            break;
-        case Opcode::LoadString:
-        case Opcode::LoadType:
-        case Opcode::UnresolvedLoadType:
-            p = ParsePoolConstant(inst);
-            break;
-        case Opcode::LoadStatic:
-        case Opcode::StoreStatic:
-        case Opcode::UnresolvedStoreStatic:
-        case Opcode::LoadResolvedObjectFieldStatic:
-        case Opcode::StoreResolvedObjectFieldStatic:
-            p = ParseStaticField(inst);
-            break;
-        case Opcode::LoadObject:
-        case Opcode::StoreObject:
-        case Opcode::LoadResolvedObjectField:
-        case Opcode::StoreResolvedObjectField:
-            p = ParseObjectField(inst);
-            break;
-        case Opcode::LoadObjectDynamic:
-        case Opcode::StoreObjectDynamic:
-            p = ParseDynamicField(inst);
-            break;
-        default:
-            return false;
-    }
-
-    auto base = p.GetBase();
-    if (base != nullptr) {
-        // Currently unhandled and return always MAY_ALIAS
-        if (base->GetOpcode() == Opcode::LoadArrayPair || base->GetOpcode() == Opcode::LoadArrayPairI ||
-            base->GetOpcode() == Opcode::LoadPairPart || base->GetOpcode() == Opcode::CatchPhi ||
-            base->GetOpcode() == Opcode::Load || base->GetOpcode() == Opcode::LoadI ||
-            base->GetOpcode() == Opcode::Store || base->GetOpcode() == Opcode::StoreI) {
-            return false;
-        }
-    }
-
-    *pointer = p;
-    return true;
-}
-
-Pointer AliasAnalysis::ParseArrayElement(Inst *inst)
-{
-    uint32_t imm = 0;
-    Inst *offset = nullptr;
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadArray:
-        case Opcode::StoreArray:
-            offset = inst->GetDataFlowInput(1);
-            break;
-        case Opcode::LoadArrayI:
-            imm = inst->CastToLoadArrayI()->GetImm();
-            break;
-        case Opcode::StoreArrayI:
-            imm = inst->CastToStoreArrayI()->GetImm();
-            break;
-        default:
-            UNREACHABLE();
-    }
-    auto base = inst->GetDataFlowInput(0);
-    return Pointer::CreateArrayElement(base, offset, imm);
-}
-
-Pointer AliasAnalysis::ParsePoolConstant(Inst *inst)
-{
-    uint32_t typeId = 0;
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadString:
-            typeId = inst->CastToLoadString()->GetTypeId();
-            break;
-        case Opcode::LoadType:
-            typeId = inst->CastToLoadType()->GetTypeId();
-            break;
-        case Opcode::UnresolvedLoadType:
-            typeId = inst->CastToUnresolvedLoadType()->GetTypeId();
-            break;
-        default:
-            UNREACHABLE();
-    }
-    return Pointer::CreatePoolConstant(typeId);
-}
-
-Pointer AliasAnalysis::ParseStaticField(Inst *inst)
-{
-    uint32_t typeId = 0;
-    void *typePtr = nullptr;
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadStatic:
-            typeId = inst->CastToLoadStatic()->GetTypeId();
-            typePtr = inst->CastToLoadStatic()->GetObjField();
-            break;
-        case Opcode::LoadResolvedObjectFieldStatic:
-            typeId = inst->CastToLoadResolvedObjectFieldStatic()->GetTypeId();
-            break;
-        case Opcode::StoreStatic:
-            typeId = inst->CastToStoreStatic()->GetTypeId();
-            typePtr = inst->CastToStoreStatic()->GetObjField();
-            break;
-        case Opcode::UnresolvedStoreStatic:
-            typeId = inst->CastToUnresolvedStoreStatic()->GetTypeId();
-            break;
-        case Opcode::StoreResolvedObjectFieldStatic:
-            typeId = inst->CastToStoreResolvedObjectFieldStatic()->GetTypeId();
-            break;
-        default:
-            UNREACHABLE();
-    }
-    return Pointer::CreateStaticField(typeId, typePtr);
-}
-
-Pointer AliasAnalysis::ParseObjectField(Inst *inst)
-{
-    uint32_t typeId = 0;
-    void *typePtr = nullptr;
-    bool isStatic = false;
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadObject:
-            isStatic = inst->CastToLoadObject()->GetObjectType() == ObjectType::MEM_STATIC;
-            typeId = inst->CastToLoadObject()->GetTypeId();
-            typePtr = inst->CastToLoadObject()->GetObjField();
-            break;
-        case Opcode::LoadResolvedObjectField:
-            typeId = inst->CastToLoadResolvedObjectField()->GetTypeId();
-            break;
-        case Opcode::StoreObject:
-            isStatic = inst->CastToStoreObject()->GetObjectType() == ObjectType::MEM_STATIC;
-            typeId = inst->CastToStoreObject()->GetTypeId();
-            typePtr = inst->CastToStoreObject()->GetObjField();
-            break;
-        case Opcode::StoreResolvedObjectField:
-            typeId = inst->CastToStoreResolvedObjectField()->GetTypeId();
-            break;
-        default:
-            UNREACHABLE();
-    }
-    auto base = inst->GetDataFlowInput(0);
-    return isStatic ? Pointer::CreateStaticField(typeId, typePtr) : Pointer::CreateObjectField(base, typeId, typePtr);
-}
-
-Pointer AliasAnalysis::ParseDynamicField(Inst *inst)
-{
-    auto base = inst->GetDataFlowInput(0);
-
-    DynObjectAccessType type;
-    DynObjectAccessMode mode;
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadObjectDynamic:
-            type = inst->CastToLoadObjectDynamic()->GetAccessType();
-            mode = inst->CastToLoadObjectDynamic()->GetAccessMode();
-            break;
-        case Opcode::StoreObjectDynamic:
-            type = inst->CastToStoreObjectDynamic()->GetAccessType();
-            mode = inst->CastToStoreObjectDynamic()->GetAccessMode();
-            break;
-        default:
-            UNREACHABLE();
-    }
-
-    return GetDynamicAccessPointer(inst, base, type, mode);
 }
 
 /**
@@ -820,752 +745,4 @@ AliasAnalysis::Trilean AliasAnalysis::IsSameOffsets(const Inst *off1, const Inst
     return Trilean::UNKNOWN;
 }
 
-/// Instructions that definitely are not an alias of anything.
-void AliasAnalysis::VisitNullPtr(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitLoadUndefined(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitInitObject(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitNewObject(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitNewArray(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitMultiArray(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitInitEmptyString(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-void AliasAnalysis::VisitInitString(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-
-/**
- * Instructions that can introduce references that are an alias of
- * something already existed.
- */
-void AliasAnalysis::VisitConstant(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitParameter(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitLoadImmediate(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitIntrinsic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitBuiltin(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitCallStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitCallResolvedStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitCallVirtual(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitCallDynamic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitGetManagedClassObject(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-void AliasAnalysis::VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-
-void AliasAnalysis::VisitBitcast(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-
-/// Instructions that introduce static fields (global variables).
-void AliasAnalysis::VisitLoadStatic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToLoadStatic();
-    uint32_t typeId = typedInst->GetTypeId();
-    Pointer sfield = Pointer::CreateStaticField(typeId, typedInst->GetObjField());
-
-    sfield.SetVolatile(typedInst->GetVolatile());
-
-    visitor->AddDirectEdge(sfield);
-    visitor->AddCopyEdge(sfield, Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitLoadResolvedObjectFieldStatic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToLoadResolvedObjectFieldStatic();
-    uint32_t typeId = typedInst->GetTypeId();
-    Pointer sfield = Pointer::CreateStaticField(typeId);
-
-    sfield.SetVolatile(IsVolatileMemInst(typedInst));
-
-    visitor->AddDirectEdge(sfield);
-    visitor->AddCopyEdge(sfield, Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitStoreStatic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToStoreStatic();
-    uint32_t typeId = typedInst->GetTypeId();
-    Pointer sfield = Pointer::CreateStaticField(typeId, typedInst->GetObjField());
-
-    sfield.SetVolatile(typedInst->GetVolatile());
-
-    visitor->AddDirectEdge(sfield);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), sfield);
-}
-
-void AliasAnalysis::VisitStoreResolvedObjectFieldStatic(GraphVisitor *v, Inst *inst)
-{
-    if (inst->GetType() != DataType::REFERENCE) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToStoreResolvedObjectFieldStatic();
-    uint32_t typeId = typedInst->GetTypeId();
-    Pointer sfield = Pointer::CreateStaticField(typeId);
-
-    sfield.SetVolatile(IsVolatileMemInst(typedInst));
-
-    visitor->AddDirectEdge(sfield);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), sfield);
-}
-
-void AliasAnalysis::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToUnresolvedStoreStatic();
-    uint32_t typeId = typedInst->GetTypeId();
-    Pointer sfield = Pointer::CreateStaticField(typeId);
-
-    sfield.SetVolatile(IsVolatileMemInst(typedInst));
-
-    visitor->AddDirectEdge(sfield);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), sfield);
-}
-
-/// Instructions that introduce unique constant references (global constants).
-void AliasAnalysis::VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadRuntimeClass()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-
-void AliasAnalysis::VisitLoadClass(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadClass()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitLoadAndInitClass(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadAndInitClass()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitUnresolvedLoadAndInitClass(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToUnresolvedLoadAndInitClass()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitGetGlobalVarAddress(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToGetGlobalVarAddress()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitLoadString(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadString()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitLoadConstArray(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadConstArray()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitLoadType(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToLoadType()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-void AliasAnalysis::VisitUnresolvedLoadType(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        uint32_t typeId = inst->CastToUnresolvedLoadType()->GetTypeId();
-        static_cast<AliasAnalysis *>(v)->AddConstantDirectEdge(inst, typeId);
-    }
-}
-
-void AliasAnalysis::VisitLoadObjFromConst(GraphVisitor *v, Inst *inst)
-{
-    if (inst->IsReferenceOrAny()) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-
-/// Instructions that introduce aliases.
-void AliasAnalysis::VisitLoadArray(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    Inst *arr = inst->GetDataFlowInput(0);
-    Inst *idx = inst->GetDataFlowInput(1);
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elem = Pointer::CreateArrayElement(arr, idx);
-    Pointer val = Pointer::CreateObject(inst);
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(elem, val);
-}
-
-void AliasAnalysis::VisitStoreArray(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    Inst *arr = inst->GetDataFlowInput(0);
-    Inst *idx = inst->GetDataFlowInput(1);
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elem = Pointer::CreateArrayElement(arr, idx);
-    Pointer val = Pointer::CreateObject(inst->GetDataFlowInput(2U));
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(val, elem);
-}
-
-void AliasAnalysis::VisitLoadArrayI(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    Inst *arr = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elem = Pointer::CreateArrayElement(arr, nullptr, inst->CastToLoadArrayI()->GetImm());
-    Pointer val = Pointer::CreateObject(inst);
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(elem, val);
-}
-
-void AliasAnalysis::VisitStoreArrayI(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    Inst *arr = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elem = Pointer::CreateArrayElement(arr, nullptr, inst->CastToStoreArrayI()->GetImm());
-    Pointer val = Pointer::CreateObject(inst->GetDataFlowInput(1));
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(val, elem);
-}
-
-void AliasAnalysis::VisitLoadArrayPair(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto *load = inst->CastToLoadArrayPair();
-    Inst *arr = load->GetDataFlowInput(load->GetArray());
-    Pointer obj = Pointer::CreateObject(arr);
-    for (auto &user : load->GetUsers()) {
-        ASSERT(user.GetInst()->GetOpcode() == Opcode::LoadPairPart);
-        auto uinst = user.GetInst()->CastToLoadPairPart();
-
-        Pointer elem = Pointer::CreateArrayElement(arr, load->GetIndex(), uinst->GetImm());
-        Pointer val = Pointer::CreateObject(uinst);
-        visitor->AddCopyEdge(obj, elem);
-        visitor->AddCopyEdge(elem, val);
-        visitor->AddCopyEdge(elem, Pointer::CreateObject(load));
-    }
-}
-
-void AliasAnalysis::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto *store = inst->CastToStoreArrayPair();
-    Inst *arr = store->GetDataFlowInput(store->GetArray());
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elFst = Pointer::CreateArrayElement(arr, store->GetIndex());
-    Pointer elSnd = Pointer::CreateArrayElement(arr, store->GetIndex(), 1);
-    Pointer valFst = Pointer::CreateObject(store->GetDataFlowInput(store->GetStoredValue(0)));
-    Pointer valSnd = Pointer::CreateObject(store->GetDataFlowInput(store->GetStoredValue(1)));
-
-    visitor->AddCopyEdge(obj, elFst);
-    visitor->AddCopyEdge(obj, elSnd);
-    visitor->AddCopyEdge(valFst, elFst);
-    visitor->AddCopyEdge(valSnd, elSnd);
-}
-
-void AliasAnalysis::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToLoadObjectPair();
-    uint32_t typeId0 = typedInst->GetTypeId0();
-    uint32_t typeId1 = typedInst->GetTypeId1();
-    ASSERT(typedInst->GetObjectType() != ObjectType::MEM_STATIC);
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer field0 = Pointer::CreateObjectField(dfobj, typeId0, typedInst->GetObjField0());
-    Pointer field1 = Pointer::CreateObjectField(dfobj, typeId1, typedInst->GetObjField1());
-
-    Pointer to = Pointer::CreateObject(inst);
-
-    field0.SetVolatile(typedInst->GetVolatile());
-    field1.SetVolatile(typedInst->GetVolatile());
-
-    visitor->AddCopyEdge(obj, field0);
-    visitor->AddCopyEdge(field0, to);
-    visitor->AddCopyEdge(obj, field1);
-    visitor->AddCopyEdge(field1, to);
-
-    for (auto &user : inst->GetUsers()) {
-        visitor->AddCopyEdge(obj, Pointer::CreateObject(user.GetInst()));
-    }
-}
-
-void AliasAnalysis::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToStoreObjectPair();
-    uint32_t typeId0 = typedInst->GetTypeId0();
-    uint32_t typeId1 = typedInst->GetTypeId1();
-    ASSERT(typedInst->GetObjectType() != ObjectType::MEM_STATIC);
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer field0 = Pointer::CreateObjectField(dfobj, typeId0, typedInst->GetObjField0());
-    Pointer val0 = Pointer::CreateObject(inst->GetDataFlowInput(1));
-    Pointer field1 = Pointer::CreateObjectField(dfobj, typeId1, typedInst->GetObjField1());
-    Pointer val1 = Pointer::CreateObject(inst->GetDataFlowInput(2));
-
-    field0.SetVolatile(typedInst->GetVolatile());
-    field1.SetVolatile(typedInst->GetVolatile());
-
-    visitor->AddCopyEdge(obj, field0);
-    visitor->AddCopyEdge(val0, field0);
-    visitor->AddCopyEdge(obj, field1);
-    visitor->AddCopyEdge(val1, field1);
-}
-
-void AliasAnalysis::VisitLoadArrayPairI(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto *load = inst->CastToLoadArrayPairI();
-    Inst *arr = load->GetDataFlowInput(load->GetArray());
-    Pointer obj = Pointer::CreateObject(arr);
-    for (auto &user : load->GetUsers()) {
-        ASSERT(user.GetInst()->GetOpcode() == Opcode::LoadPairPart);
-        auto uinst = user.GetInst()->CastToLoadPairPart();
-
-        Pointer elem = Pointer::CreateArrayElement(arr, nullptr, load->GetImm() + uinst->GetImm());
-        Pointer val = Pointer::CreateObject(uinst);
-        visitor->AddCopyEdge(obj, elem);
-        visitor->AddCopyEdge(elem, val);
-        visitor->AddCopyEdge(elem, Pointer::CreateObject(load));
-    }
-}
-
-void AliasAnalysis::VisitStoreArrayPairI(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto *store = inst->CastToStoreArrayPairI();
-    Inst *arr = store->GetDataFlowInput(store->GetArray());
-    Pointer obj = Pointer::CreateObject(arr);
-    Pointer elFst = Pointer::CreateArrayElement(arr, nullptr, store->GetImm());
-    Pointer elSnd = Pointer::CreateArrayElement(arr, nullptr, store->GetImm() + 1);
-    Pointer valFst = Pointer::CreateObject(store->GetDataFlowInput(store->GetFirstValue()));
-    Pointer valSnd = Pointer::CreateObject(store->GetDataFlowInput(store->GetSecondValue()));
-
-    visitor->AddCopyEdge(obj, elFst);
-    visitor->AddCopyEdge(obj, elSnd);
-    visitor->AddCopyEdge(valFst, elFst);
-    visitor->AddCopyEdge(valSnd, elSnd);
-}
-
-void AliasAnalysis::VisitLoadObject(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToLoadObject();
-    uint32_t typeId = typedInst->GetTypeId();
-    if (inst->CastToLoadObject()->GetObjectType() == ObjectType::MEM_STATIC) {
-        Pointer sfield = Pointer::CreateStaticField(typeId, typedInst->GetObjField());
-
-        sfield.SetVolatile(typedInst->GetVolatile());
-
-        visitor->AddDirectEdge(sfield);
-        visitor->AddCopyEdge(sfield, Pointer::CreateObject(inst));
-    } else {
-        Inst *dfobj = inst->GetDataFlowInput(0);
-        Pointer obj = Pointer::CreateObject(dfobj);
-        Pointer ifield = Pointer::CreateObjectField(dfobj, typeId, typedInst->GetObjField());
-        Pointer to = Pointer::CreateObject(inst);
-
-        ifield.SetVolatile(typedInst->GetVolatile());
-
-        visitor->AddCopyEdge(obj, ifield);
-        visitor->AddCopyEdge(ifield, to);
-    }
-}
-
-void AliasAnalysis::VisitLoadResolvedObjectField(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToLoadResolvedObjectField();
-    uint32_t typeId = typedInst->GetTypeId();
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer ifield = Pointer::CreateObjectField(dfobj, typeId);
-    Pointer to = Pointer::CreateObject(inst);
-
-    ifield.SetVolatile(IsVolatileMemInst(typedInst));
-
-    visitor->AddCopyEdge(obj, ifield);
-    visitor->AddCopyEdge(ifield, to);
-}
-
-void AliasAnalysis::VisitStoreObject(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToStoreObject();
-    uint32_t typeId = typedInst->GetTypeId();
-    if (inst->CastToStoreObject()->GetObjectType() == ObjectType::MEM_STATIC) {
-        Pointer sfield = Pointer::CreateStaticField(typeId, typedInst->GetObjField());
-
-        sfield.SetVolatile(typedInst->GetVolatile());
-
-        visitor->AddDirectEdge(sfield);
-        visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), sfield);
-    } else {
-        Inst *dfobj = inst->GetDataFlowInput(0);
-        Pointer obj = Pointer::CreateObject(dfobj);
-        Pointer ifield = Pointer::CreateObjectField(dfobj, typeId, typedInst->GetObjField());
-        Pointer val = Pointer::CreateObject(inst->GetDataFlowInput(1));
-
-        ifield.SetVolatile(typedInst->GetVolatile());
-
-        visitor->AddCopyEdge(obj, ifield);
-        visitor->AddCopyEdge(val, ifield);
-    }
-}
-
-void AliasAnalysis::VisitStoreResolvedObjectField(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto typedInst = inst->CastToStoreResolvedObjectField();
-    uint32_t typeId = typedInst->GetTypeId();
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer ifield = Pointer::CreateObjectField(dfobj, typeId);
-    Pointer val = Pointer::CreateObject(inst->GetDataFlowInput(1));
-
-    ifield.SetVolatile(IsVolatileMemInst(inst));
-
-    visitor->AddCopyEdge(obj, ifield);
-    visitor->AddCopyEdge(val, ifield);
-}
-
-void AliasAnalysis::VisitCatchPhi(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto inputsSet = visitor->GetClearInputsSet();
-    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        inputsSet->insert(inst->GetDataFlowInput(i));
-    }
-
-    for (auto inputInst : *inputsSet) {
-        visitor->AddCopyEdge(Pointer::CreateObject(inputInst), Pointer::CreateObject(inst));
-    }
-}
-
-void AliasAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(i)), Pointer::CreateObject(inst));
-    }
-}
-
-void AliasAnalysis::VisitSelect(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    ASSERT(inst->GetInputsCount() == 4U);
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), Pointer::CreateObject(inst));
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(1)), Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitSelectImm(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    ASSERT(inst->GetInputsCount() == 3U);
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), Pointer::CreateObject(inst));
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(1)), Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitMov(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    visitor->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)), Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst)
-{
-    if (inst->GetType() == DataType::REFERENCE) {
-        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-    }
-}
-
-void AliasAnalysis::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
-{
-    if (inst->CastToCastValueToAnyType()->GetInputType(0) == DataType::REFERENCE) {
-        static_cast<AliasAnalysis *>(v)->AddCopyEdge(Pointer::CreateObject(inst->GetDataFlowInput(0)),
-                                                     Pointer::CreateObject(inst));
-    }
-}
-
-void AliasAnalysis::VisitGetAnyTypeName(GraphVisitor *v, Inst *inst)
-{
-    static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
-}
-
-void AliasAnalysis::VisitLoadConstantPool(GraphVisitor *v, Inst *inst)
-{
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer to = Pointer::CreateObject(inst);
-    static_cast<AliasAnalysis *>(v)->AddCopyEdge(obj, to);
-}
-
-void AliasAnalysis::VisitLoadLexicalEnv(GraphVisitor *v, Inst *inst)
-{
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer to = Pointer::CreateObject(inst);
-    static_cast<AliasAnalysis *>(v)->AddCopyEdge(obj, to);
-}
-
-void AliasAnalysis::VisitLoadObjectDynamic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto type = inst->CastToLoadObjectDynamic()->GetAccessType();
-    auto mode = inst->CastToLoadObjectDynamic()->GetAccessMode();
-
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer val = Pointer::CreateObject(inst);
-    Pointer elem = GetDynamicAccessPointer(inst, dfobj, type, mode);
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(elem, val);
-}
-
-void AliasAnalysis::VisitStoreObjectDynamic(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    auto type = inst->CastToStoreObjectDynamic()->GetAccessType();
-    auto mode = inst->CastToStoreObjectDynamic()->GetAccessMode();
-
-    Inst *dfobj = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(dfobj);
-    Pointer val = Pointer::CreateObject(inst);
-    Pointer elem = GetDynamicAccessPointer(inst, dfobj, type, mode);
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(val, elem);
-}
-
-void AliasAnalysis::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
-{
-    if (!inst->IsReferenceOrAny()) {
-        return;
-    }
-    uint32_t typeId = inst->CastToLoadFromConstantPool()->GetTypeId();
-    auto visitor = static_cast<AliasAnalysis *>(v);
-    Inst *constpool = inst->GetDataFlowInput(0);
-    Pointer obj = Pointer::CreateObject(constpool);
-    Pointer elem = Pointer::CreateArrayElement(constpool, nullptr, typeId);
-    Pointer val = Pointer::CreateObject(inst);
-
-    visitor->AddCopyEdge(obj, elem);
-    visitor->AddCopyEdge(elem, val);
-}
-
-void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
-{
-    /* Ignore the following instructions with REFERENCE type intentionally */
-    switch (inst->GetOpcode()) {
-        // Handled on its input
-        case Opcode::LoadPairPart:
-        // No passes that check class references aliasing
-        case Opcode::GetInstanceClass:
-        case Opcode::LoadImmediate:
-        // NOTE(ekudriashov): Probably should be added
-        case Opcode::Monitor:
-        // Mitigated by using GetDataFlowInput
-        case Opcode::NullCheck:
-        case Opcode::RefTypeCheck:
-        case Opcode::AnyTypeCheck:
-        case Opcode::ObjByIndexCheck:
-        case Opcode::HclassCheck:
-        // Irrelevant for analysis
-        case Opcode::Return:
-        case Opcode::ReturnI:
-        // NOTE(compiler team): support Load, Store
-        case Opcode::Load:
-        case Opcode::LoadI:
-        case Opcode::Store:
-        case Opcode::StoreI:
-        // No need to analyze
-        case Opcode::LiveOut:
-        case Opcode::FunctionImmediate:
-            return;
-        default:
-            ASSERT_DO(!inst->IsReferenceOrAny(),
-                      (std::cerr << "Unsupported instruction in alias analysis: ", inst->Dump(&std::cerr)));
-            return;
-    }
-}
 }  // namespace ark::compiler

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 let iteration = 0;
+let expectedValue = '';
 
 function equal(actual, expected) {
 	// try to convert expected to actual's type
@@ -27,52 +28,54 @@ function equal(actual, expected) {
 	return String(actual) === String(expected);
 }
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function runTest(test, iter) {
-	console.log("Running test '" + test + "'");
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	print("Running test '" + test + "'");
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
 	}
-	let res = etsVm.call(test);
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
+
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
+	}
+	const runTestImpl = etsVm.getFunction(globalName, test);
+	let res = runTestImpl();
 	if (typeof res !== 'object') {
-		console.log('Result is not an object');
-		process.exit(1);
+		throw Error('Result is not an object');
 	}
 	if (res.constructor.name !== 'Promise') {
-		console.log("Expect result type 'Promise' but get '" + res.constructor.name + "'");
-		process.exit(1);
+		throw Error("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 	}
 	let testSuccess = false;
 	res.then((value) => {
 		if (equal(value, expectedValue)) {
 			testSuccess = true;
 		} else {
-			console.log('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
+			print('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
 		}
 	});
+	let tId = 0;
 	let callback = () => {
-		--iteration;
-		console.log('Checking #' + iteration);
 		if (!testSuccess) {
-			if (iteration > 0) {
-				queueMicrotask(callback);
-			} else {
-				console.log('Promise is not resolved or value is wrong');
-				process.exit(1);
-			}
-		} else {
-			console.log('Test passed');
+			return;
 		}
+		print('Test passed');
+		helper.clearInterval(tId);
 	};
-	queueMicrotask(callback);
+	tId = helper.setInterval(callback, 0);
 }
 
-let args = process.argv;
-if (args.length !== 5) {
-	console.log('Expected <test name> <expected value> <number of iterations>');
-	process.exit(1);
-}
-iteration = args[4];
-expectedValue = args[3];
-runTest(args[2]);
+let args = helper.getArgv();
+expectedValue = args[6];
+runTest(args[5]);

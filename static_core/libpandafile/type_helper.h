@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,15 +32,6 @@ inline bool IsArrayDescriptor(const uint8_t *descriptor)
     return sp[0] == '[';
 }
 
-inline std::string GetDummyClassName()
-{
-    return "$UNION_FIELD_DUMMY_CLASS";
-}
-
-inline bool IsDummyClassName(const std::string &name)
-{
-    return name == GetDummyClassName();
-}
 }  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_TYPE_HELPER_H_

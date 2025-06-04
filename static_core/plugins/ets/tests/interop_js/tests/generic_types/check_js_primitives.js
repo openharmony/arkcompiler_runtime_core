@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-const { checkGenericValue } = require('generic_types.test.js');
+const { checkGenericValue } = require('generic_types.test.abc');
 
-// NOTE (v.cherkashin): Enable when bigInt is implemented
-const FIX_BIGINT = false;
+const FIX_BIGINT = true;
 
 // Null
 checkGenericValue(null);
@@ -27,19 +26,19 @@ checkGenericValue(undefined);
 // Boolean
 checkGenericValue(false);
 checkGenericValue(true);
-checkGenericValue(new Boolean(false));
-checkGenericValue(new Boolean(true));
+checkGenericValue(Boolean(false));
+checkGenericValue(Boolean(true));
 
 // Number
 checkGenericValue(234);
 checkGenericValue(4.234);
-checkGenericValue(new Number(34));
-checkGenericValue(new Number(-643.23566));
+checkGenericValue(Number(34));
+checkGenericValue(Number(-643.23566));
 
 // BigInt
 FIX_BIGINT && checkGenericValue(9007199254740991n);
-FIX_BIGINT && checkGenericValue(new BigInt('0b11010101'));
+FIX_BIGINT && checkGenericValue(BigInt('0b11010101'));
 
 // String
 checkGenericValue('abcdefg');
-checkGenericValue(new String('ABCDEFG'));
+checkGenericValue(String('ABCDEFG'));

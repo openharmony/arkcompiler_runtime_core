@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,9 @@ public:
      */
     bool AddTask(PandaUniquePtr<GCTask> task);
 
+    /// @brief Add all postponed tasks to gc queue
+    void OnPostponeGCEnd();
+
 private:
     static constexpr taskmanager::TaskProperties GC_WORKER_TASK_PROPERTIES = {
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
@@ -87,6 +90,8 @@ private:
     taskmanager::Task::RunnerCallback gcRunner_ {nullptr};
     std::atomic_bool needToFinish_ {false};
     os::memory::Mutex gcTaskRunMutex_;
+    os::memory::Mutex postponedTasksMutex_;
+    PandaQueue<PandaUniquePtr<GCTask>> postponedTasks_ GUARDED_BY(postponedTasksMutex_);
 };
 
 }  // namespace ark::mem

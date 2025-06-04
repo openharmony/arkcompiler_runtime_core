@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -265,11 +265,11 @@ instructions:
     verification:
       - start_block_instruction
 
-  - opcode: LoadUndefined
+  - opcode: LoadUniqueObject
     base: FixedInputsInst<0>
     signature: [d-ref]
     flags: [load]
-    description: Load Undefined object from TLS
+    description: Load UniqueObject from TLS
     verification:
       - start_block_instruction
 
@@ -352,6 +352,12 @@ instructions:
     modes: [jit_aot, irtoc]
     description: Load value from memory by offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
+  - opcode: LoadNative
+    base: LoadMemInst
+    signature: [d-real-any, ptr-ref, int]
+    flags: [native, load, no_hoist, no_cse]
+    description: the same as Load but to use in managed code
+
   - opcode: LoadI
     base: LoadMemInstI
     signature: [d-real-any, ptr-ref]
@@ -365,6 +371,12 @@ instructions:
     flags: [native, low_level, store, no_dce, no_hoist, no_cse]
     modes: [jit_aot, irtoc]
     description: Store value in memory by offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
+
+  - opcode: StoreNative
+    base: StoreMemInst
+    signature: [ptr-ref-any, int, real-any]
+    flags: [native, store, no_dce, no_hoist, no_cse]
+    description: the same as Store but to use in managed code
 
   - opcode: StoreI
     base: StoreMemInstI
@@ -697,7 +709,7 @@ instructions:
 
   - opcode: DeoptimizeCompareImm
     base: DeoptimizeCompareImmInst
-    signature: [any-int-bool-ref, save_state]
+    signature: [any-int-bool-ref-ptr, save_state]
     flags: [can_throw, no_dce, no_cse, no_hoist, require_state, acc_read, barrier, can_deoptimize, low_level]
     modes: [jit_aot]
     description: Compare and jump to interpreter if the result is true.
@@ -855,11 +867,35 @@ instructions:
     abckit_flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
     description: Call runtime intrinsics directly.
 
+  - opcode: CallNative
+    base: CallInst
+    signature: [d-real-void, ptr, real-dyn, save_state]
+    flags: [heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call]
+    modes: [jit_aot]
+    description: Call Native API method directly, without bridge. First input is a resolved and checked native pointer.
+
+  - opcode: WrapObjectNative
+    base: WrapObjectNativeInst
+    signature: [d-ptr, ref]
+    flags: [no_cse]
+    modes: [jit_aot]
+    description: >-
+      Calculate stack address of managed reference, spilled on stack, for passing as a parameter to Native API method.
+      Reference parameter is a pseudo-input, there is no need to allocate a register for it
+      (since we use a location of input, recorded in SaveState, not a value of the input).
+
   - opcode: Builtin
     base: IntrinsicInst
     signature: [d-real-void, real-dyn]
     flags: []
     description: Expand known intrinsics using Encoder
+
+  - opcode: ResolveByName
+    base: ResolveVirtualInst
+    signature: [d-ptr, ref-nc, save_state]
+    flags: [can_throw, barrier, require_state, runtime_call]
+    abckit_flags: [can_throw, barrier, runtime_call]
+    description: Prepare a method address for CallResolvedVirtual by method name. First input is an object reference.
 
     ##############################################################################
     # Low-level instructions

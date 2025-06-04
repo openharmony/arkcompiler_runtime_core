@@ -1,4 +1,4 @@
-%# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+%# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 %# Licensed under the Apache License, Version 2.0 (the "License");
 %# you may not use this file except in compliance with the License.
 %# You may obtain a copy of the License at
@@ -302,19 +302,6 @@
     return false
 }
 
-%   if lambda_params_num != 1
-/**
- * Returns the elements of an array that meet the condition specified in a callback function.
- *
- * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
- *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
- */
-<%= access_public %> <%= override %> filter<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): <%= this_type %> {
-    return <%= this_call.('filter') %>(value: <%= el_type %>, index: number): boolean => predicate(value<%= lambda_args2 %>));
-}
-%   end
-
 /**
  * Iterates the array in reverse order and returns the index of
  * the first element that satisfies the provided testing function.
@@ -363,24 +350,6 @@
 <%= access_public %> <%= override %> reduce<<%= this_generic_one %>U = <%= el_type %>>(<%= this_arg %>callbackfn: (previousValue: U, currentValue: <%= el_type %><%= lambda_params %>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < <%= this_len_int %>; i++) {
-        acc = callbackfn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<%= this_generic %>(<%= this_arg %>callbackfn: (previousValue: <%= el_type %>, currentValue: <%= el_type %><%= lambda_params %>) => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
-    for (let i = <%= this_len_int %> - 2; i >= 0; i--) {
         acc = callbackfn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
     return acc
@@ -471,7 +440,7 @@
     return <%= this_call.('slice') %>start, Int.MAX_VALUE as int);
 }
 
-<% if access_public == "export function" %><% #generate code for BuiltinArray.sts %>
+<% if access_public == "export function" %><% #generate code for BuiltinArray.ets %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
@@ -520,7 +489,7 @@
 <%= access_public %> <%= override %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: Number): number {
     return <%= this_call.('lastIndexOf') %>element, asIntOrDefault(fromIndex, <%= this_len_int %> - 1));
 }
-<% else %><% #generate code for Array.sts %>
+<% else %><% #generate code for Array.ets %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
@@ -558,7 +527,7 @@
         return this.lastIndexOfLong(searchElement, k)
     } else if (searchElement instanceof Int) {
         return this.lastIndexOfInt(searchElement, k)
-    } else if (__runtimeIsSameReference(searchElement, undefined)) {
+    } else if (searchElement === undefined) {
         return this.lastIndexOfUndefined(k)
     } else if (searchElement == null) {
             return this.lastIndexOfNull(k)
@@ -619,11 +588,11 @@
     if (<%= this_len_int %> == 0) {
         return ""
     }
-    const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
+    const sepReal = sep === undefined ? "," : sep!
     <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
     const first_el = <%= get_unsafe.(this, '0') %>
-    let first_str = "undefined"
-    if (!__runtimeIsSameReference(first_el, undefined)) {
+    let first_str = ""
+    if (first_el !== undefined && first_el !== null) {
         first_str = new String(first_el)
     } 
     let sb = new StringBuilder(first_str)<% else %>let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))<% end %>
@@ -631,10 +600,10 @@
         const tmp = <%= get_unsafe.(this, 'i') %>
         sb.append(sepReal);
         <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583  
-        if (!__runtimeIsSameReference(tmp, undefined)) {
+        if (tmp !== undefined && tmp !== null) {
             sb.append(new String(tmp))
         } else {
-            sb.append("undefined")
+            sb.append("")
         }<% else %>sb.append(tmp)<% end %>
     }
 
@@ -646,7 +615,7 @@
  *
  * @returns string representation
  */
-<%= access_public %> <%= override %> toString<%= this_generic %>(<%= this_arg %>): string {
+<%= access_public %> <%= override %> toString<%= this_generic %>(<%= this_arg.chomp(', ') %>): string {
     return <%= this_call.('join') %>",");
 }
 
@@ -679,7 +648,7 @@
  *
  * @returns string representation
  */
-<%= access_public %> <%= override %> toLocaleString<%= this_generic %>(<%= this_arg %>): string {
+<%= access_public %> <%= override %> toLocaleString<%= this_generic %>(<%= this_arg.chomp(', ') %>): string {
     const sb = new StringBuilder()
     const len = <%= this_len_int %>;
     for (let i = 0; i < len; i++) {
@@ -687,7 +656,7 @@
             sb.append(",")
         }
         let x = <%= get_unsafe.(this, 'i') %> as NullishType;
-        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+        if ((null !== x) && (undefined !== x)) {
             sb.append(x!.toLocaleString())
         }
     }
@@ -807,7 +776,7 @@
         return this.searchLong(val, fi, len)
     } else if (val instanceof Int) {
         return this.searchInt(val, fi, len)
-    } else if (__runtimeIsSameReference(val, undefined)) {
+    } else if (val === undefined) {
         return this.searchUndefined(fi, len)
     } else if (val == null) {
         return this.searchNull(fi, len)
@@ -855,9 +824,9 @@
         return this.indexOfLong(val, fromIndex, len)
     } else if (val instanceof Int) {
         return this.indexOfInt(val, fromIndex, len)
-    } else if (__runtimeIsSameReference(val, undefined)) {
+    } else if (val === undefined) {
         return this.indexOfUndefined(fromIndex, len)
-    } else if (val == null) {
+    } else if (val === null) {
         return this.indexOfNull(fromIndex, len)
     } else {
         return this.indexOfCommon(val, fromIndex, len) 
@@ -885,9 +854,9 @@
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-<%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>): <%= this_type %> {
+<%= access_public %> toSorted<%= this_generic %>(<%= this_arg.chomp(', ') %>): <%= this_type %> {
     let arr = <%= clone_this %>;
-    <%= arr_method_call.('arr', 'sort') %>)
+    <%= arr_method_call.('arr', 'sort') %>
     return arr
 }
 
@@ -901,7 +870,7 @@
  */
 <%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>comparator: (a: <%= el_type %>, b: <%= el_type %>) => number): <%= this_type %> {
     let arr = <%= clone_this %>;
-    <%= arr_method_call.('arr', 'sort') %>comparator)
+    <%= arr_method_call.('arr', 'sort', 'comparator') %>
     return arr
 }
 
@@ -911,7 +880,7 @@
  *
  * @note Mutating method
  */
-<%= access_public %> reverse<%= this_generic %>(<%= this_arg %>): <%= this_return_type %> {
+<%= access_public %> reverse<%= this_generic %>(<%= this_arg.chomp(', ') %>): <%= this_return_type %> {
     for (let i = 0; i < <%= this_len_int %> / 2; i++) {
         const tmp = <%= get_unsafe.(this, 'i') %>;
         const idx_r = <%= this_len_int %> - 1 - i;
@@ -928,7 +897,7 @@
  *
  * @returns reversed copy of the current Array
  */
-<%= access_public %> toReversed<%= this_generic %>(<%= this_arg %>): <%= this_type %> {
+<%= access_public %> toReversed<%= this_generic %>(<%= this_arg.chomp(', ') %>): <%= this_type %> {
     let arr = <%= make_buffer.(this_len_int) %>
     for (let i = 0; i < <%= this_len_int %>; i++) {
         arr[<%= this_len_int %> - 1 - i] = <%= get_unsafe.(this, 'i') %>
@@ -975,285 +944,13 @@
 /**
  * Returns an iterator over all values
  */
-<%= access_public %> <%= override %> values<%= this_generic %>(<%= this_arg %>): IterableIterator<<%= el_type %>> {
+<%= access_public %> <%= override %> values<%= this_generic %>(<%= this_arg.chomp(', ') %>): IterableIterator<<%= el_type %>> {
     return new ArrayValuesIterator_<%= el_type %><%= this_iterator_generic || this_generic %>(<%= this %>);
 }
 
 /**
  * Returns an iterable of key, value pairs for every entry in the array
  */
-<%= access_public %> <%= override %> entries<%= this_generic %>(<%= this_arg %>): IterableIterator<[number, <%= el_type %>]> {
+<%= access_public %> <%= override %> entries<%= this_generic %>(<%= this_arg.chomp(', ') %>): IterableIterator<[number, <%= el_type %>]> {
     return new ArrayEntriesIterator_<%= el_type %><%= this_iterator_generic || this_generic %>(<%= this %>);
-}
-
-/**
- * Determines whether all the members of an array satisfy the specified test.
- *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
- */
-<%= access_public %> <%= override %> every<%= this_generic %>(<%= this_arg %>predicate: () => boolean): boolean {
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        if (!predicate()) {
-            return false
-        }
-    }
-    return true
-}
-
-/**
- * Returns the elements of an array that meet the condition specified in a callback function.
- *
- * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
- *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
- */
-<%= access_public %> <%= override %> filter<%= this_generic %>(<%= this_arg %>predicate: () => boolean): <%= this_type %> {
-    return <%= this_call.('filter') %>(value: <%= el_type %>, index: number): boolean => predicate());
-}
-
-/**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
- *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
- */
-<%= access_public %> <%= override %> find<%= this_generic %>(<%= this_arg %>predicate: () => boolean): <%= el_type_boxed %> | undefined {
-    const res = <%= this_call.('findIndex') %>predicate)
-    if (res == -1) {
-        return undefined
-    }
-    return <%= get_unsafe.(this, 'res as int') %>;
-}
-
-/**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
- *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
- */
-<%= access_public %> <%= override %> findIndex<%= this_generic %>(<%= this_arg %>predicate: () => boolean): number {
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        if (predicate()) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-/**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-<%= access_public %> <%= override %> forEach<%= this_generic %>(<%= this_arg %>callbackfn: () => void): void {
-    const len0 = <%= this_len_int %>;
-    for (let i = 0; i < len0; i++) {
-        callbackfn()
-    }
-}
-
-/**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduce<%= this_generic %>(<%= this_arg %>callbackfn: (previousValue: <%= el_type %>) => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, '0') %>;
-    for (let i = 1; i < <%= this_len_int %>; i++) {
-        acc = callbackfn(acc)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduce<%= this_generic %>(<%= this_arg %>callbackfn: () => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, '0') %>;
-    for (let i = 1; i < <%= this_len_int %>; i++) {
-        acc = callbackfn()
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduce<<%= this_generic_one %>U = <%= el_type %>>(<%= this_arg %>callbackfn: (previousValue: U) => U, initialValue: U): U {
-    let acc = initialValue
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        acc = callbackfn(acc)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduce<<%= this_generic_one %>U = <%= el_type %>>(<%= this_arg %>callbackfn: () => U, initialValue: U): U {
-    let acc = initialValue
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        acc = callbackfn()
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<%= this_generic %>(<%= this_arg %>callbackfn: (previousValue: <%= el_type %>) => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
-    for (let i = <%= this_len_int %> - 2; i >= 0; i--) {
-        acc = callbackfn(acc)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<%= this_generic %>(<%= this_arg %>callbackfn: () => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
-    for (let i = <%= this_len_int %> - 2; i >= 0; i--) {
-        acc = callbackfn()
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<<%= this_generic_one %>U>(<%= this_arg %>callbackfn: (previousValue: U) => U, initialValue: U): U {
-    let acc = initialValue
-    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
-        acc = callbackfn(acc)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<<%= this_generic_one %>U>(<%= this_arg %>callbackfn: () => U, initialValue: U): U {
-    let acc = initialValue
-    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
-        acc = callbackfn()
-    }
-    return acc
-}
-
-/**
- * Determines whether the specified callback function returns true for any element of an array.
- *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
- */
-<%= access_public %> <%= override %> some<%= this_generic %>(<%= this_arg %>predicate: () => boolean): boolean {
-    for (let i = 0; i < <%= this_len_int %>; i++) {
-        if (predicate()) {
-            return true
-        }
-    }
-    return false
-}
-
-/**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
- *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
- */
-<%= access_public %> <%= override %> findLast<%= this_generic %>(<%= this_arg %>predicate: () => boolean): <%= el_type_boxed %> | undefined {
-    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
-        const val = <%= get_unsafe.(this, 'i') %>;
-        if (predicate()) {
-            return val;
-        }
-    }
-    return undefined;
-}
-
-/**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
- *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
- */
-<%= access_public %> <%= override %> findLastIndex<%= this_generic %>(<%= this_arg %>predicate: () => boolean): number {
-    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
-        if (predicate()) {
-            return i
-        }
-    }
-    return -1
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,9 +40,9 @@ void ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
-    objHandle.GetPtr()->SetFieldObject(fieldObject, valHandle.GetPtr());
+    objHandle->SetFieldObject(fieldObject, valHandle.GetPtr());
 }
 
 template <typename T>
@@ -52,13 +52,14 @@ void SetFieldValue(EtsObject *obj, EtsLong i, T val)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     if (fieldObject->GetType()->IsBoxed()) {
-        objHandle.GetPtr()->SetFieldObject(fieldObject, EtsBoxPrimitive<T>::Create(coroutine, val));
+        auto *boxedVal = EtsBoxPrimitive<T>::Create(coroutine, val);
+        objHandle->SetFieldObject(fieldObject, boxedVal);
         return;
     }
-    objHandle.GetPtr()->SetFieldPrimitive<T>(fieldObject, val);
+    objHandle->SetFieldPrimitive<T>(fieldObject, val);
 }
 
 void ValueAPISetFieldBoolean(EtsObject *obj, EtsLong i, EtsBoolean val)
@@ -109,9 +110,9 @@ void ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject *va
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(nameHandle.GetPtr()->GetMutf8().c_str());
-    objHandle.GetPtr()->SetFieldObject(fieldObject, valHandle.GetPtr());
+    auto typeClass = objHandle->GetClass();
+    auto fieldObject = typeClass->GetFieldIDByName(nameHandle->GetMutf8().c_str());
+    objHandle->SetFieldObject(fieldObject, valHandle.GetPtr());
 }
 
 template <typename T>
@@ -122,13 +123,14 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(nameHandle.GetPtr()->GetMutf8().c_str());
+    auto typeClass = objHandle->GetClass();
+    auto fieldObject = typeClass->GetFieldIDByName(nameHandle->GetMutf8().c_str());
     if (fieldObject->GetType()->IsBoxed()) {
-        objHandle.GetPtr()->SetFieldObject(fieldObject, EtsBoxPrimitive<T>::Create(coroutine, val));
+        auto *boxedVal = EtsBoxPrimitive<T>::Create(coroutine, val);
+        objHandle->SetFieldObject(fieldObject, boxedVal);
         return;
     }
-    objHandle.GetPtr()->SetFieldPrimitive<T>(fieldObject, val);
+    objHandle->SetFieldPrimitive<T>(fieldObject, val);
 }
 
 void ValueAPISetFieldByNameBoolean(EtsObject *obj, EtsString *name, EtsBoolean val)
@@ -177,9 +179,9 @@ EtsObject *ValueAPIGetFieldObject(EtsObject *obj, EtsLong i)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
-    return objHandle.GetPtr()->GetFieldObject(fieldObject);
+    return objHandle->GetFieldObject(fieldObject);
 }
 
 template <typename T>
@@ -189,12 +191,12 @@ T GetFieldValue(EtsObject *obj, EtsLong i)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     if (fieldObject->GetType()->IsBoxed()) {
-        return EtsBoxPrimitive<T>::FromCoreType(objHandle.GetPtr()->GetFieldObject(fieldObject))->GetValue();
+        return EtsBoxPrimitive<T>::FromCoreType(objHandle->GetFieldObject(fieldObject))->GetValue();
     }
-    return objHandle.GetPtr()->GetFieldPrimitive<T>(fieldObject);
+    return objHandle->GetFieldPrimitive<T>(fieldObject);
 }
 
 EtsBoolean ValueAPIGetFieldBoolean(EtsObject *obj, EtsLong i)
@@ -243,9 +245,9 @@ EtsObject *ValueAPIGetFieldByNameObject(EtsObject *obj, EtsString *name)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldIDByName(name->GetMutf8().c_str());
-    return objHandle.GetPtr()->GetFieldObject(fieldObject);
+    return objHandle->GetFieldObject(fieldObject);
 }
 
 template <typename T>
@@ -255,12 +257,12 @@ T GetFieldByNameValue(EtsObject *obj, EtsString *name)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
-    auto typeClass = objHandle.GetPtr()->GetClass();
+    auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldIDByName(name->GetMutf8().c_str());
     if (fieldObject->GetType()->IsBoxed()) {
-        return EtsBoxPrimitive<T>::FromCoreType(objHandle.GetPtr()->GetFieldObject(fieldObject))->GetValue();
+        return EtsBoxPrimitive<T>::FromCoreType(objHandle->GetFieldObject(fieldObject))->GetValue();
     }
-    return objHandle.GetPtr()->GetFieldPrimitive<T>(fieldObject);
+    return objHandle->GetFieldPrimitive<T>(fieldObject);
 }
 
 EtsBoolean ValueAPIGetFieldByNameBoolean(EtsObject *obj, EtsString *name)
@@ -318,7 +320,7 @@ void ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
 
-    arrHandle.GetPtr()->Set(i, valHandle.GetPtr());
+    arrHandle->Set(i, valHandle.GetPtr());
 }
 
 template <typename P, typename T>
@@ -329,10 +331,14 @@ void SetElement(EtsObject *obj, EtsLong i, T val)
     auto typeClass = obj->GetClass();
     if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
-        arrHandle.GetPtr()->Set(i, val);
+        arrHandle->Set(i, val);
     } else {
         VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
-        arrHandle.GetPtr()->Set(i, EtsBoxPrimitive<T>::Create(coroutine, val));
+        // Don't inline boxedVal.
+        // In case it is inlined, the handle may be dereferenced before
+        // call Create which leads to invalid raw pointer to the managed object.
+        auto *boxedVal = EtsBoxPrimitive<T>::Create(coroutine, val);
+        arrHandle->Set(i, boxedVal);
     }
 }
 
@@ -382,7 +388,7 @@ EtsObject *ValueAPIGetElementObject(EtsObject *obj, EtsLong i)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
 
-    return arrHandle.GetPtr()->Get(i);
+    return arrHandle->Get(i);
 }
 
 template <typename P>
@@ -393,10 +399,10 @@ typename P::ValueType GetElement(EtsObject *obj, EtsLong i)
     auto typeClass = obj->GetClass();
     if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
-        return arrHandle.GetPtr()->Get(i);
+        return arrHandle->Get(i);
     }
     VMHandle<EtsObjectArray> arrHandle(coroutine, obj->GetCoreType());
-    auto value = EtsBoxPrimitive<typename P::ValueType>::FromCoreType(arrHandle.GetPtr()->Get(i));
+    auto value = EtsBoxPrimitive<typename P::ValueType>::FromCoreType(arrHandle->Get(i));
     return value->GetValue();
 }
 

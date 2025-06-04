@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,10 +24,12 @@
     std.core.String baz
 }
 
-.union_field std.core.String bar
-.union_field std.core.String baz
+.record $NamedAccessMeta-std-core-String {
+    std.core.String bar
+    std.core.String baz
+}
 
-.function std.core.String A.bar(A a0) <access.function=public> {
+.function std.core.String A.<get>bar(A a0) <access.function=public> {
     lda.str "64"
     return.obj
 }
@@ -39,7 +41,7 @@
     lda.str "42"
     stobj.obj v1, B.baz
 
-    ets.ldobj.name.obj v1, baz
+    ets.ldobj.name.obj v1, $NamedAccessMeta-std-core-String.baz
     sta.obj v2
     lda.str "42"
     sta.obj v3
@@ -47,7 +49,7 @@
     movi v4, 1
     jne v4, error1
 
-    ets.ldobj.name.obj v0, bar
+    ets.ldobj.name.obj v0, $NamedAccessMeta-std-core-String.bar
     sta.obj v2
     lda.str "64"
     sta.obj v3

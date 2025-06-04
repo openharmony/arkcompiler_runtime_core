@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,23 +61,11 @@ std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsV
     return {words, signBit};
 }
 
-static inline size_t GetBigIntJSArraySize(size_t etsArraySize, uint64_t lastElem)
-{
-    size_t bitsNum = (etsArraySize - 1) * BIGINT_BITS_NUM;
-    size_t tailBits = 0;
-
-    while (lastElem > 0) {
-        lastElem >>= 1U;
-        ++tailBits;
-    }
-    bitsNum += tailBits;
-    return (bitsNum + BIT_64 - 1) / BIT_64;
-}
-
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray)
 {
-    // BigInt in ArkTS is stored in EtsInt array but only 30 bits have meaning. Put these bits into int64_t array
-    size_t jsArraySize = GetBigIntJSArraySize(etsArray.size(), etsArray.back());
+    ASSERT(BIT_64 % BIGINT_BITS_NUM == 0);
+    // BigInt in ArkTS is stored in EtsInt array. Put these bits into int64_t array
+    size_t jsArraySize = etsArray.size() / 2 + etsArray.size() % 2;
     SmallVector<uint64_t, 4U> jsArray;
     jsArray.resize(jsArraySize, 0);
 
@@ -85,14 +73,10 @@ SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32
     size_t curBitPos = 0;
     for (auto etsElem : etsArray) {
         jsArray[curJSArrayElemPos] |= static_cast<uint64_t>(etsElem) << curBitPos;
-        if (curBitPos + BIGINT_BITS_NUM <= BIT_64) {
-            curBitPos = curBitPos + BIGINT_BITS_NUM;
-        } else {
-            if (++curJSArrayElemPos != jsArray.size()) {
-                size_t leftoverBitNums = BIT_64 - curBitPos;
-                jsArray[curJSArrayElemPos] |= static_cast<uint32_t>(etsElem) >> leftoverBitNums;
-                curBitPos = BIGINT_BITS_NUM - leftoverBitNums;
-            }
+        curBitPos = curBitPos + BIGINT_BITS_NUM;
+        if (curBitPos == BIT_64) {
+            curBitPos = 0;
+            ++curJSArrayElemPos;
         }
     }
 
@@ -101,66 +85,80 @@ SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32
 
 static inline size_t GetBigIntEtsArraySize(size_t jsArraySize, uint64_t lastElem)
 {
-    size_t bitsNum = (jsArraySize - 1) * BIT_64;
-    size_t tailBits = 0;
-
-    while (lastElem > 0) {
-        lastElem >>= 1U;
-        ++tailBits;
+    if (jsArraySize == 1 && lastElem == 0) {
+        return 0;
     }
-    bitsNum += tailBits;
-    return (bitsNum + BIGINT_BITS_NUM - 1) / BIGINT_BITS_NUM;
+
+    size_t etsSize = jsArraySize * 2 - 1;
+
+    if ((lastElem >> BIGINT_BITS_NUM) > 0) {
+        ++etsSize;
+    }
+
+    return etsSize;
 }
 
-static inline void ConvertToTwosComplement(std::vector<EtsInt> &array)
-{
-    uint8_t extraBit = 1;
-    for (auto &elem : array) {
-        elem = (~static_cast<uint32_t>(elem) + extraBit) & BIGINT_BITMASK_30;
-        if (elem != 0) {
-            extraBit = 0;
-        }
-    }
-}
-
-std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray, int signBit)
+std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray)
 {
     size_t etsArraySize = GetBigIntEtsArraySize(jsArray.size(), jsArray.back());
-    std::vector<EtsInt> etsArray(etsArraySize + 1, 0);
+    std::vector<EtsInt> etsArray(etsArraySize, 0);
 
     size_t curJSArrayElemPos = 0;
     size_t curBitPos = 0;
     for (size_t i = 0; i < etsArraySize; ++i) {
-        auto etsElem = static_cast<uint32_t>(jsArray[curJSArrayElemPos] >> curBitPos);
+        etsArray[i] = static_cast<uint32_t>(jsArray[curJSArrayElemPos] >> curBitPos);
 
-        if (curBitPos + BIGINT_BITS_NUM <= BIT_64) {
-            curBitPos = curBitPos + BIGINT_BITS_NUM;
-        } else {
-            if (++curJSArrayElemPos != jsArray.size()) {
-                size_t leftoverBitNums = BIT_64 - curBitPos;
-                etsElem |= static_cast<uint32_t>(jsArray[curJSArrayElemPos]) << leftoverBitNums;
-                curBitPos = BIGINT_BITS_NUM - leftoverBitNums;
-            }
+        curBitPos = curBitPos + BIGINT_BITS_NUM;
+        if (curBitPos == BIT_64) {
+            curBitPos = 0;
+            ++curJSArrayElemPos;
         }
-
-        etsArray[i] = etsElem & BIGINT_BITMASK_30;
     }
-
-    if (signBit == 1) {
-        ConvertToTwosComplement(etsArray);
-    }
-    etsArray.back() = (signBit == 1) ? BIGINT_BITMASK_30 : 0;
 
     return etsArray;
 }
 
-}  // namespace ark::ets::interop::js
-
-namespace ark::ets::ts2ets::GlobalCtx {  // NOLINT(readability-identifier-naming)
-
-void Init()
+void ThrowNoInteropContextException()
 {
-    interop::js::InteropCtx::Init(EtsCoroutine::GetCurrent(), nullptr);
+    auto *thread = ManagedThread::GetCurrent();
+    auto ctx = thread->GetVM()->GetLanguageContext();
+    auto descriptor = utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_INTEROP_CONTEXT_ERROR.data());
+    PandaString msg = "Interop call may be done only from _main_ or exclusive worker";
+    ThrowException(ctx, thread, descriptor, utf::CStringAsMutf8(msg.c_str()));
 }
 
-}  // namespace ark::ets::ts2ets::GlobalCtx
+static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status rc)
+{
+#if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)
+    if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+        ASSERT(NapiIsExceptionPending(env));
+        return false;
+    }
+#else
+    if (UNLIKELY(rc == napi_object_expected && !NapiIsExceptionPending(env))) {
+        InteropCtx::ThrowJSTypeError(env, "Cannot convert undefined or null to object");
+        return false;
+    }
+
+    if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
+        ASSERT(NapiIsExceptionPending(env));
+        return false;
+    }
+#endif
+    INTEROP_FATAL_IF(rc != napi_ok);
+    return true;
+}
+
+bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result)
+{
+    napi_status rc = napi_get_property(env, object, key, result);
+    return GetPropertyStatusHandling(env, rc);
+}
+
+bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name, napi_value *result)
+{
+    napi_status rc = napi_get_named_property(env, object, utf8name, result);
+    return GetPropertyStatusHandling(env, rc);
+}
+
+}  // namespace ark::ets::interop::js

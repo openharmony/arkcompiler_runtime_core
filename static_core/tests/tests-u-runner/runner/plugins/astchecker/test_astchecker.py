@@ -15,13 +15,11 @@
 # limitations under the License.
 #
 
-import json
 import logging
 from json import JSONDecoder
 from typing import List, Any, Tuple, Dict
 
 from runner.descriptor import Descriptor
-from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.plugins.astchecker.util_astchecker import UtilASTChecker
@@ -39,32 +37,23 @@ class TestASTChecker(TestFileBased):
 
     @staticmethod
     def handle_error_dump(input_string: str) -> Tuple[str, dict]:
-        actual_output = str()
         errors_list = []
-        not_handled_errors = []
         lines = input_string.splitlines()
         for line in lines:
-            if line.startswith("Warning") or line.startswith("SyntaxError") or line.startswith("TypeError"):
+            if line.split()[0] in ("Warning:", "SyntaxError:", "TypeError:", "Error:"):
                 errors_list.append(line)  # Add the line to the errors list
-            if line.startswith("Error:"):
-                not_handled_errors.append(line)
 
         errors = "\n".join(errors_list)
-        errors_list.extend(not_handled_errors)
 
         filtered_lines = [line for line in lines if line not in errors_list]
         dump = "\n".join(filtered_lines)
 
         if any(char != '\b' for char in dump):
             decoder = JSONDecoder()
-            pos = 0
-            result = []
-            obj, pos = decoder.raw_decode(dump, pos)
-            result.append(obj)
-            pos += 1
-            actual_output = " ".join(map(str, result[:pos]))
+            obj, _ = decoder.raw_decode(dump, 0)
+            return errors, obj
 
-        return errors, json.loads(json.dumps(actual_output))
+        return errors, {}
 
     def do_run(self) -> TestFileBased:
         es2panda_flags = self.flags
@@ -79,14 +68,11 @@ class TestASTChecker(TestFileBased):
         if 'flags' in desc and 'module' in desc['flags']:
             es2panda_flags.append("--module")
 
-        passed, self.report, self.fail_kind = self.run_es2panda(
+        self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=es2panda_flags,
             test_abc='',
             result_validator=self.es2panda_result_validator
         )
-
-        self.passed = ((self.test_cases.has_error_tests or self.test_cases.has_warning_tests)
-                       and self.fail_kind == FailKind.ES2PANDA_OTHER) ^ passed
         return self
 
     def es2panda_result_validator(self, actual_output: str, _: Any, return_code: int) -> bool:

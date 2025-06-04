@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,32 +23,32 @@ class EtsIndexedSignatureTsToEtsTest : public EtsInteropTest {};
 // NOTE: (alexanderpolenov)issue(18238) access by string index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkValueDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkValueDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkValueDynamicObject"));
 }
 // NOTE: (alexanderpolenov)issue(18238) access by string index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkAddNewPropertyDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAddNewPropertyDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAddNewPropertyDynamicObject"));
 }
 // // NOTE: (alexanderpolenov)issue(18238) access by string index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkAddArrayDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAddArrayDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAddArrayDynamicObject"));
 }
 // // NOTE: (alexanderpolenov)issue(18238) access by string index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkPushToArrayDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkPushToArrayDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkPushToArrayDynamicObject"));
 }
 // // NOTE: (alexanderpolenov)issue(18239) access by number index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkAddToArrayByIndexDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAddToArrayByIndexDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAddToArrayByIndexDynamicObject"));
 }
 // // NOTE: (alexanderpolenov)issue(18238) access by string index
 TEST_F(EtsIndexedSignatureTsToEtsTest, DISABLED_checkCallFunctionDynamicObject)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallFunctionDynamicObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallFunctionDynamicObject"));
 }
 
 }  // namespace ark::ets::interop::js::testing

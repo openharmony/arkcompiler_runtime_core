@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,54 @@ static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **pEnv, [[maybe_unused]
     return ETS_OK;
 }
 
-static const struct ETS_InvokeInterface S_INVOKE_INTERFACE = {DestroyEtsVM, GetEnv};
+static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv, void **resultJsEnv)
+{
+    if (vm == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, vm is null";
+        return ETS_ERR;
+    }
+    if (Thread::GetCurrent() != nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, thread has already been attached";
+        return ETS_ERR;
+    }
+    auto *runtime = Runtime::GetCurrent();
+    auto *etsVM = PandaEtsVM::FromEtsVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+
+    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+    if (exclusiveCoro == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, reached the limit of EAWorkers";
+        return ETS_ERR;
+    }
+    ASSERT(exclusiveCoro == Coroutine::GetCurrent());
+    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    auto *jsEnv = ifaceTable->CreateJSRuntime();
+    if (jsEnv != nullptr) {
+        ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+    }
+    *resultEnv = PandaEtsNapiEnv::GetCurrent();
+    *resultJsEnv = jsEnv;
+    return ETS_OK;
+}
+
+static ets_int DetachThread(EtsVM *vm)
+{
+    if (vm == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot DetachThread, vm is null";
+        return ETS_ERR;
+    }
+    auto *etsVM = PandaEtsVM::FromEtsVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto result = coroMan->DestroyExclusiveWorker();
+    if (!result) {
+        LOG(ERROR, RUNTIME) << "Cannot DetachThread, thread was not attached";
+        return ETS_ERR;
+    }
+    ASSERT(Thread::GetCurrent() == nullptr);
+    return ETS_OK;
+}
+
+static const struct ETS_InvokeInterface S_INVOKE_INTERFACE = {DestroyEtsVM, GetEnv, AttachThread, DetachThread};
 
 const ETS_InvokeInterface *GetInvokeInterface()
 {
@@ -98,7 +145,12 @@ extern "C" ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *n
         return ETS_ERR;
     }
 
-    if (auto coroutine = EtsCoroutine::GetCurrent()) {
+    if (Thread::GetCurrent() == nullptr) {
+        *nVms = 0;
+        return ETS_OK;
+    }
+
+    if (auto *coroutine = EtsCoroutine::GetCurrent()) {
         *nVms = 1;
 
         if (vmBuf == nullptr || bufLen < 1) {
@@ -177,6 +229,7 @@ static arg_list_t SplitString(const std::string &from, char delim)
     return pathes;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) big switch-case
 static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &parsedOptions,
                                Span<const EtsVMOption> &options)
 {
@@ -226,6 +279,9 @@ static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &pa
                 break;
             case EtsOptionType::ETS_NATIVE_LIBRARY_PATH:
                 runtimeOptions.SetNativeLibraryPath(SplitString(extraStr, ':'));
+                break;
+            case EtsOptionType::ETS_VERIFICATION_MODE:
+                runtimeOptions.SetVerificationMode(extraStr);
                 break;
             default:
                 LOG(ERROR, RUNTIME) << "No such option";

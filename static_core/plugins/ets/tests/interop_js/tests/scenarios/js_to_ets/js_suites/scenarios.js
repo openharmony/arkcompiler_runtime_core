@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,23 +21,23 @@ const INT_VALUE3 = 3;
 const FLOAT_VALUE = 1.0;
 
 
-function standaloneFunctionJs() {
+export function standaloneFunctionJs() {
 	return 1;
 }
 
-class ClassWithMethodJs {
+export class ClassWithMethodJs {
 	methodInClassJs() {
 		return 1;
 	}
 }
 
-class InterfaceWithMethodImpl {
+export class InterfaceWithMethodImpl {
 	methodInInterface() {
 		return 1;
 	}
 }
 
-function newInterfaceWithMethod() {
+export function newInterfaceWithMethod() {
 	let implInterfaceWithMethod = new InterfaceWithMethodImpl();
 	return implInterfaceWithMethod;
 	/* above is transpiled from the following TS code:
@@ -45,20 +45,20 @@ function newInterfaceWithMethod() {
       methodInInterface(): int;
     }
 
-    class InterfaceWithMethodImpl implements InterfaceWithMethod {
+    export class InterfaceWithMethodImpl implements InterfaceWithMethod {
       methodInInterface(): int {
         return 1;
       }
     }
 
-    function newInterfaceWithMethod(): InterfaceWithMethod {
+    export function newInterfaceWithMethod(): InterfaceWithMethod {
       let implInterfaceWithMethod: InterfaceWithMethod = new InterfaceWithMethodImpl();
       return implInterfaceWithMethod;
     }
   */
 }
 
-class ClassWithGetterSetter {
+export class ClassWithGetterSetter {
 	_value = 1;
 
 	get value() {
@@ -70,23 +70,23 @@ class ClassWithGetterSetter {
 	}
 }
 
-let lambdaFunction = () => {
+export let lambdaFunction = () => {
 	return 1;
 };
 
-function genericFunction(arg) {
+export function genericFunction(arg) {
 	return arg;
 }
 
-function genericTypeParameter(arg) {
+export function genericTypeParameter(arg) {
 	return arg.toString();
 }
 
-function genericTypeReturnValue(arg) {
+export function genericTypeReturnValue(arg) {
 	return arg;
 }
 
-class ClassToExtend {
+export class ClassToExtend {
 	value() {
 		return 1;
 	}
@@ -94,43 +94,43 @@ class ClassToExtend {
 
 // NOTE(oignatenko) return and arg types any, unknown, undefined need real TS because transpiling cuts off
 //   important details. Have a look at declgen_ets2ts
-function functionArgTypeAny(arg) {
+export function functionArgTypeAny(arg) {
 	return arg; // transpiled from Typescript code: functionArgTypeAny(arg: any)
 }
 
-function functionArgTypeUnknown(arg) {
+export function functionArgTypeUnknown(arg) {
 	return arg; // transpiled from Typescript code: functionArgTypeUnknown(arg: unknown)
 }
 
-function functionArgTypeUndefined(arg) {
+export function functionArgTypeUndefined(arg) {
 	return arg; // transpiled from Typescript code: functionArgTypeUndefined(arg: undefined)
 }
 
-function functionArgTypeTuple(arg) {
+export function functionArgTypeTuple(arg) {
 	return arg[0]; // transpiled from Typescript code: functionArgTypeTuple(arg: [number, string]): number
 }
 
-function functionReturnTypeAny() {
+export function functionReturnTypeAny() {
 	let value = 1;
 	return value; // transpiled from Typescript code:functionReturnTypeAny(): any
 }
 
-function functionReturnTypeUnknown() {
+export function functionReturnTypeUnknown() {
 	let value = 1;
 	return value; // transpiled from Typescript code: functionReturnTypeUnknown(): unknown
 }
 
-function functionReturnTypeUndefined() {
+export function functionReturnTypeUndefined() {
 	let value = 1;
 	return value; // transpiled from Typescript code: functionReturnTypeUndefined(): undefined
 }
 
-function functionArgTypeCallable(functionToCall) {
+export function functionArgTypeCallable(functionToCall) {
 	return functionToCall();
 	// transpiled from Typescript code: unctionArgTypeCallable(functionToCall: () => number): number
 }
 
-function functionDefaultParameterFunction(arg1 = INT_VALUE, arg2 = INT_VALUE2, arg3 = INT_VALUE3) {
+export function functionDefaultParameterFunction(arg1 = INT_VALUE, arg2 = INT_VALUE2, arg3 = INT_VALUE3) {
 	let value = 1;
 	return value;
 	// transpiled from Typescript code:
@@ -140,79 +140,79 @@ function functionDefaultParameterFunction(arg1 = INT_VALUE, arg2 = INT_VALUE2, a
 	//	arg3: JSValue = INT_VALUE3): int
 }
 
-function functionDefaultIntParameterFunction(arg = INT_VALUE) {
+export function functionDefaultIntParameterFunction(arg = INT_VALUE) {
 	return arg;
-	// transpiled from Typescript code: function defaultFloatParameterFunction(arg: JSValue = INT_VALUE): JSValue
+	// transpiled from Typescript code: export function defaultFloatParameterFunction(arg: JSValue = INT_VALUE): JSValue
 }
 
-function functionDefaultStringParameterFunction(arg = STRING_VALUE) {
+export function functionDefaultStringParameterFunction(arg = STRING_VALUE) {
 	return arg;
 	// transpiled from Typescript code: functionDefaultStringParameterFunction(arg: JSValue = STRING_VALUE): JSValue{
 }
 
-function functionDefaultFloatParameterFunction(arg = FLOAT_VALUE) {
+export function functionDefaultFloatParameterFunction(arg = FLOAT_VALUE) {
 	return arg;
-	// transpiled from Typescript code: function defaultFloatParameterFunction(arg: JSValue = FLOAT_VALUE): JSValue{
+	// transpiled from Typescript code: export function defaultFloatParameterFunction(arg: JSValue = FLOAT_VALUE): JSValue{
 }
 
-function functionArgTypeOptionalPrimitive(arg) {
+export function functionArgTypeOptionalPrimitive(arg) {
 	if (typeof arg !== 'undefined') {
 		return arg;
 	}
 	return INT_VALUE;
 }
 
-function functionArgTypePrimitive(arg) {
+export function functionArgTypePrimitive(arg) {
 	return arg;
 }
 
-function functionReturnTypePrimitive() {
+export function functionReturnTypePrimitive() {
 	return true;
 }
 
-function optionalCall(x = 123, y = 130, z = 1) {
+export function optionalCall(x = 123, y = 130, z = 1) {
 	return x + y + z;
 }
 
-function singleRequired(z, x = 123, y = 123) {
+export function singleRequired(z, x = 123, y = 123) {
 	return x + y + z;
 }
 
-function jsSumRestParams(...args) {
+export function jsSumRestParams(...args) {
 	let sum = 0;
 	args.forEach((n) => (sum += n));
 	return sum;
 }
 
-function jsMultiplyArgBySumRestParams(arg0, ...args) {
+export function jsMultiplyArgBySumRestParams(arg0, ...args) {
 	let sum = 0;
 	args.forEach((n) => (sum += n));
 	return sum * arg0;
 }
 
-function jsMultiplySumArgsBySumRestParams(arg0, arg1, ...args) {
+export function jsMultiplySumArgsBySumRestParams(arg0, arg1, ...args) {
 	let sum = 0;
 	args.forEach((n) => (sum += n));
 	return sum * (arg0 + arg1);
 }
 
-function jsConcatStringsRestParams(...args) {
+export function jsConcatStringsRestParams(...args) {
 	let str = '';
 	args.forEach((s) => (str += s));
 	return str;
 }
 
-class InterfaceWithUnionImpl {
+export class InterfaceWithUnionImpl {
 	methodInInterface(arg) {
 		return functionReturnTypeUnion(arg);
 	}
 }
 
-function newInterfaceWithUnion() {
+export function newInterfaceWithUnion() {
 	return new InterfaceWithUnionImpl();
 }
 
-function functionArgTypeUnion(arg) {
+export function functionArgTypeUnion(arg) {
 	switch (typeof arg) {
 		case 'number':
 			return 0;
@@ -223,14 +223,14 @@ function functionArgTypeUnion(arg) {
 	}
 }
 
-function functionReturnTypeUnion(arg) {
+export function functionReturnTypeUnion(arg) {
 	if (arg === 0) {
 		return INT_VALUE;
 	}
 	return STRING_VALUE;
 }
 
-class UnionTestClassJs {
+export class UnionTestClassJs {
 	methodArgTypeUnion(arg) {
 		return functionArgTypeUnion(arg);
 	}
@@ -239,7 +239,7 @@ class UnionTestClassJs {
 	}
 }
 
-class ClassWithStaticMethod {
+export class ClassWithStaticMethod {
 	static staticMethod(arg) {
 		return arg;
 	}
@@ -248,112 +248,60 @@ class ClassWithStaticMethod {
 	}
 }
 
-class ClassReturnThis {
+export class ClassReturnThis {
   returnThis() {
     return this;
   }
 }
 
-function functionReturnOmittedValue() {}
+export function functionReturnOmittedValue() {}
 
-function functionRestParameter(...arg) {
-	return arg[0]; // transpiled from Typescript code: function functionRestParameter(...arg: number[])
+export function functionRestParameter(...arg) {
+	return arg[0]; // transpiled from Typescript code: export function functionRestParameter(...arg: number[])
 }
 
-function functionSpreadParameter(arg1, arg2) {
-	return arg1 + arg2; // transpiled from Typescript code: function functionSpreadParameter(arg1: number, arg2: number)
+export function functionSpreadParameter(arg1, arg2) {
+	return arg1 + arg2; // transpiled from Typescript code: export function functionSpreadParameter(arg1: number, arg2: number)
 }
 
-function functionOverloaded() {}
+// export function functionOverloaded() {}
 
-function functionOverloaded(arg) {}
+// export function functionOverloaded(arg) {}
 
-function functionOverload() {
-	let value = 1;
-	functionOverloaded();
-	functionOverloaded(value);
-	return value;
-}
+// export function functionOverload() {
+// 	let value = 1;
+// 	functionOverloaded();
+// 	functionOverloaded(value);
+// 	return value;
+// }
 
-function functionCallableReturnValue() {
-	const value = () => (x) => Number(x) + 1;
-	console.log(value()(4));
-	return Function('', 'return 2');
-}
 
-function functionArgStringLiteralType(arg) {
+export function functionArgStringLiteralType(arg) {
 	return arg;
 	// transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString
 }
 
-function functionIntersectionTypePrimitive(arg) {
+export function functionIntersectionTypePrimitive(arg) {
 	const ret = arg;
 	return ret;
 	// transpiled from Typescript code: functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB
 }
 
-class ClassWithInFieldDeclaration {
+export class ClassWithInFieldDeclaration {
     constructor(value) {
         this.value = value;
     }
 }
 
-function functionReturnsCompositeType(arg) {
-    switch (arg){
+export function functionReturnsCompositeType(arg) {
+    switch (arg) {
       case 0:
-        return STRING_VALUE
+        return STRING_VALUE;
       case 1:
-        return FLOAT_VALUE
+        return FLOAT_VALUE;
       case 2:
-        return INT_VALUE
+        return INT_VALUE;
       default:
-        return [ 'arrayvalue1', 'arrayvalue2' ]
-    } 
+        return ['arrayvalue1', 'arrayvalue2'];
+    }
 }
-
-exports.standaloneFunctionJs = standaloneFunctionJs;
-exports.ClassWithMethodJs = ClassWithMethodJs;
-exports.newInterfaceWithMethod = newInterfaceWithMethod;
-exports.ClassWithGetterSetter = ClassWithGetterSetter;
-exports.lambdaFunction = lambdaFunction;
-exports.genericFunction = genericFunction;
-exports.genericTypeParameter = genericTypeParameter;
-exports.genericTypeReturnValue = genericTypeReturnValue;
-exports.ClassToExtend = ClassToExtend;
-exports.functionArgTypeAny = functionArgTypeAny;
-exports.functionArgTypeUnknown = functionArgTypeUnknown;
-exports.functionArgTypeUndefined = functionArgTypeUndefined;
-exports.functionArgTypeTuple = functionArgTypeTuple;
-exports.functionReturnTypeAny = functionReturnTypeAny;
-exports.functionReturnTypeUnknown = functionReturnTypeUnknown;
-exports.functionReturnTypeUndefined = functionReturnTypeUndefined;
-exports.functionArgTypeCallable = functionArgTypeCallable;
-exports.functionDefaultParameterFunction = functionDefaultParameterFunction;
-exports.functionDefaultIntParameterFunction = functionDefaultIntParameterFunction;
-exports.functionDefaultStringParameterFunction = functionDefaultStringParameterFunction;
-exports.functionDefaultFloatParameterFunction = functionDefaultFloatParameterFunction;
-exports.functionArgTypeOptionalPrimitive = functionArgTypeOptionalPrimitive;
-exports.functionArgTypePrimitive = functionArgTypePrimitive;
-exports.functionReturnTypePrimitive = functionReturnTypePrimitive;
-exports.optionalCall = optionalCall;
-exports.singleRequired = singleRequired;
-exports.jsSumRestParams = jsSumRestParams;
-exports.jsMultiplyArgBySumRestParams = jsMultiplyArgBySumRestParams;
-exports.jsMultiplySumArgsBySumRestParams = jsMultiplySumArgsBySumRestParams;
-exports.jsConcatStringsRestParams = jsConcatStringsRestParams;
-exports.InterfaceWithUnionImpl = InterfaceWithUnionImpl;
-exports.newInterfaceWithUnion = newInterfaceWithUnion;
-exports.functionArgTypeUnion = functionArgTypeUnion;
-exports.functionReturnTypeUnion = functionReturnTypeUnion;
-exports.UnionTestClassJs = UnionTestClassJs;
-exports.ClassWithStaticMethod = ClassWithStaticMethod;
-exports.ClassReturnThis = ClassReturnThis;
-exports.functionReturnOmittedValue = functionReturnOmittedValue;
-exports.functionRestParameter = functionRestParameter;
-exports.functionSpreadParameter = functionSpreadParameter;
-exports.functionOverload = functionOverload;
-exports.functionCallableReturnValue = functionCallableReturnValue;
-exports.functionArgStringLiteralType = functionArgStringLiteralType;
-exports.functionIntersectionTypePrimitive = functionIntersectionTypePrimitive;
-exports.ClassWithInFieldDeclaration = ClassWithInFieldDeclaration;
-exports.functionReturnsCompositeType = functionReturnsCompositeType;

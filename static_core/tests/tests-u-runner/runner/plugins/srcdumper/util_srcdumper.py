@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,7 +31,7 @@ class PathConverter:
         os.makedirs(os.path.join(self.artefacts, os.path.dirname(self.test_id)), exist_ok=True)
 
     def dumped_src_path(self) -> str:
-        return f"{os.path.splitext(os.path.join(self.artefacts, self.test_id))[0]}_dumped.sts"
+        return f"{os.path.splitext(os.path.join(self.artefacts, self.test_id))[0]}_dumped.ets"
 
 
 class AstComparator:
@@ -46,7 +46,8 @@ class AstComparator:
         AstComparator.remove_loc_nodes(ast)
         AstComparator.remove_empty_statements(ast)
         AstComparator.replace_null_literals(ast)
-        AstComparator.flatten_block_statements(ast)
+        AstComparator.flatten_similar_nested_nodes(ast, "BlockStatement", "statements")
+        AstComparator.flatten_similar_nested_nodes(ast, "ETSUnionType", "types")
         AstComparator.remove_duplicate_undefined_types(ast)
 
         return ast
@@ -84,27 +85,34 @@ class AstComparator:
 
 
     @staticmethod
-    def flatten_block_statements(ast: Any) -> None:
-        """Flattens BlockStatement nodes where possible."""
+    def list_extend_in_pos(nodes: list, extend_nodes: list, pos: int) -> None:
+        """Removes the element in 'pos' position and inserts extend_nodes instead."""
+        nodes.pop(pos)
+        for i, extend_node in enumerate(extend_nodes):
+            nodes.insert(pos + i, extend_node)
+
+
+    @staticmethod
+    def flatten_similar_nested_nodes(ast: Any, node_type: str, nested_key: str) -> None:
+        """Flattens nested nodes with similar type e.g. BlockStatement in BlockStatement."""
 
         if isinstance(ast, list):
             for i in range(len(ast) - 1, -1, -1):
-                if isinstance(ast[i], dict) and ast[i].get("type") == "BlockStatement":
-                    AstComparator.flatten_block_statements(ast[i].get("statements"))
-                    ast.extend(ast[i].get("statements", []))
-                    ast.pop(i)
+                if isinstance(ast[i], dict) and ast[i].get("type") == node_type:
+                    AstComparator.flatten_similar_nested_nodes(ast[i].get(nested_key), node_type, nested_key)
+                    AstComparator.list_extend_in_pos(ast, ast[i].get(nested_key, []), i)
                 else:
-                    AstComparator.flatten_block_statements(ast[i])
+                    AstComparator.flatten_similar_nested_nodes(ast[i], node_type, nested_key)
 
         elif isinstance(ast, dict):
             for key, value in ast.items():
-                if not isinstance(value, dict) or value.get("type") != "BlockStatement":
-                    AstComparator.flatten_block_statements(value)
-                elif (statements := value.get("statements", [])) and len(statements) == 1:
-                    AstComparator.flatten_block_statements(statements[0])
-                    ast[key] = statements[0]
+                if not isinstance(value, dict) or value.get("type") != node_type:
+                    AstComparator.flatten_similar_nested_nodes(value, node_type, nested_key)
+                elif (nested_nodes := value.get(nested_key, [])) and len(nested_nodes) == 1:
+                    AstComparator.flatten_similar_nested_nodes(nested_nodes[0], node_type, nested_key)
+                    ast[key] = nested_nodes[0]
                 else:
-                    AstComparator.flatten_block_statements(value)
+                    AstComparator.flatten_similar_nested_nodes(value, node_type, nested_key)
 
 
     @staticmethod
@@ -142,6 +150,14 @@ class AstComparator:
             for value in ast.values():
                 AstComparator.replace_null_literals(value)
 
+    # NOTE(zhelyapovaleksey): need to remove this patch-method (Issue: #22553)
+    @staticmethod
+    def remove_default_constructor_properties(ast: dict) -> None:
+        if 'accessibility' in ast:
+            del ast['accessibility']
+        if 'declare' in ast:
+            del ast['declare']
+
 
     def run(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         passed = self.compare_asts(self.original_ast, self.dumped_ast)
@@ -156,6 +172,9 @@ class AstComparator:
             return False
 
         if isinstance(dumped_ast, dict):
+            AstComparator.remove_default_constructor_properties(original_ast)
+            AstComparator.remove_default_constructor_properties(dumped_ast)
+
             if original_ast.keys() != dumped_ast.keys():
                 self.output += (
                     f"AST comparison failed!\n"

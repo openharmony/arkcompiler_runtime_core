@@ -1,0 +1,175 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |
+      class A {}
+      function f(this: A) {}
+    use: |
+      f(new A())
+  - decl: |
+      class A {}
+      function f(this: A) {}
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      class A {}
+      function f(this: A) {}
+    use: |
+      new A().f()
+  - decl: |
+      class A {}
+      function f(this: A) {}
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      class A {}
+      function f(this: A, n: number) {}
+    use: |
+      let a: A = new A()
+      a.f(1)
+  - decl: |
+      class A {}
+      function f(this: A, n: number) {}
+    use: |
+      let a: A = new A()
+      f(a, 1)
+  - decl: |
+      class A {}
+      function f(this: A, n: number) {}
+    use: |
+      let a: A = new A()
+      a.f(1)
+  - decl: |
+      class A {
+        foo() {}  
+      }
+      function f(this: A) {
+        this.foo()
+      }
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      class A {
+        n: number = 1
+      }
+      function f(this: A) {
+        return this.n
+      }
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      class A {
+        foo() {}  
+      }
+      function f(this: A) {
+        this.foo()
+      }
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      class A {
+        n: number = 1
+      }
+      function f(this: A):number {
+        return this.n
+      }
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      class A<T> {}
+      function f<T>(this: A<T>) {}
+    use: |
+      let a: A<number> = new A<number>()
+      a.f()
+  - decl: |
+      class A<T> {}
+      function f<T>(this: A<T>) {}
+    use: |
+      let a: A<number> = new A<number>()
+      f(a)
+  - decl: |
+      class A {}
+      class B extends A {}
+      function f(this: A): number { return 1 }
+      function f(this: B): number { return 2 }
+    use: |
+      let a: A = new A()
+      let b: B = new B()
+      assertEQ(a.f(), 1)
+      assertEQ(b.f(), 2)
+      a = new B()
+      assertEQ(a.f(), 2)
+  - decl: |
+      class A {}
+      class B extends A {}
+      function f(this: A): number { return 1 }
+      function f(this: B): number { return 2 }
+    use: |
+      let a: A = new A()
+      let b: B = new B()
+      assertEQ(f(a), 1)
+      assertEQ(f(b), 2)
+      a = new B()
+      assertEQ(f(b), 2)
+  - decl: |
+      import {A} from "./a.ets"
+      function f(this: A) {}
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      import {A} from "./a.ets"
+      function f(this: A) {}
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      import {I} from "./i.ets"
+      function f(this: I) {}
+    use: |
+      let i: I = {}
+      i.f()
+  - decl: |
+      import {I} from "./i.ets"
+      function f(this: I) {}
+    use: |
+      let i: I = {}
+      f(i)
+  - decl: |
+      import {A, f} from "./a1.ets"
+    use: |
+      let a: A = new A()
+      a.f()
+  - decl: |
+      import {A, f} from "./a1.ets"
+    use: |
+      let a: A = new A()
+      f(a)
+  - decl: |
+      import {I, f} from "./i1.ets"
+    use: |
+      let i: I = {}
+      i.f()
+  - decl: |
+      import {I, f} from "./i1.ets"
+    use: |
+      let i: I = {}
+      f(i)

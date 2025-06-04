@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 
@@ -52,6 +53,10 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
 
     if (IsFunctionClass(ctx, klass)) {
         return std::make_unique<JSRefConvertFunction>(klass);
+    }
+
+    if (klass->IsInterface()) {
+        return ets_proxy::EtsClassWrapper::CreateJSRefConvertEtsInterface(ctx, klass);
     }
 
     return ets_proxy::EtsClassWrapper::CreateJSRefConvertEtsProxy(ctx, klass);

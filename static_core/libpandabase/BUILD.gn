@@ -23,29 +23,15 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbase_package") {
   deps = []
   if (enable_static_vm) {
-    deps += [ ":libarktsbase" ]
+    if (is_mac) {
+      deps += [ ":libarktsbase_frontend_static" ]
+    } else {
+      deps += [ ":libarktsbase" ]
+    }
   }
 
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
-}
-
-config("arkbase_public_config") {
-  include_dirs = [
-    "$ark_root_gen_dir/libpandabase",
-    "$ark_root/libpandabase",
-    "$target_gen_dir/generated",
-    "$target_gen_dir/include",
-    "$target_gen_dir",
-  ]
-
-  include_dirs += platform_include_dirs
-
-  if (ark_static_standalone_build) {
-    ldflags = [ "-ldl" ]
-  }
-
-  configs = [ sdk_libc_secshared_config ]
 }
 
 ark_gen_file("events_gen") {
@@ -83,7 +69,6 @@ libarkbase_sources = [
   "$ark_root/libpandabase/os/dfx_option.cpp",
   "$ark_root/libpandabase/os/filesystem.cpp",
   "$ark_root/libpandabase/os/native_stack.cpp",
-  "$ark_root/libpandabase/os/stacktrace_stub.cpp",
   "$ark_root/libpandabase/os/time.cpp",
   "$ark_root/libpandabase/taskmanager/task.cpp",
   "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
@@ -161,12 +146,24 @@ if (is_mingw) {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
   }
 }
-
+libarkbase_libs = []
+if (is_linux && ark_static_standalone_build) {
+  libarkbase_sources += [
+    "os/debug_info.cpp",
+    "os/stacktrace.cpp",
+  ]
+  libarkbase_libs += [
+    "dwarf",
+    "z",
+  ]
+} else {
+  libarkbase_sources += [ "os/stacktrace_stub.cpp" ]
+}
 if (is_debug) {
   libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
 }
 
-if (current_cpu == "arm64") {
+if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
   libarkbase_sources +=
       [ "$ark_root/libpandabase/arch/aarch64/cpu_features.cpp" ]
 } else {
@@ -186,6 +183,25 @@ if (is_mob) {
         [ "$ark_root/platforms/common/libpandabase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
   }
+}
+
+config("arkbase_public_config") {
+  include_dirs = [
+    "$ark_root_gen_dir/libpandabase",
+    "$ark_root/libpandabase",
+    "$target_gen_dir/generated",
+    "$target_gen_dir/include",
+    "$target_gen_dir",
+  ]
+
+  include_dirs += platform_include_dirs
+
+  libs = libarkbase_libs
+  if (ark_static_standalone_build) {
+    ldflags = [ "-ldl" ]
+  }
+
+  configs = [ sdk_libc_secshared_config ]
 }
 
 libarkbase_configs = [

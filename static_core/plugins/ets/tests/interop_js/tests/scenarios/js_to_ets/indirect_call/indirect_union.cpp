@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,49 +22,49 @@ class EtsInteropScenariosJsToEtsIndirectCallUnion : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_call_arg_numeric)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_call_arg_numeric");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_call_arg_numeric");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_call_arg_string)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_call_arg_string");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_call_arg_string");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_apply_arg_numeric)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_apply_arg_numeric");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_apply_arg_numeric");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_apply_arg_string)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_apply_arg_string");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_apply_arg_string");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_bind_with_arg_numeric)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_bind_with_arg_numeric");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_bind_with_arg_numeric");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_bind_with_arg_string)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_bind_with_arg_string");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_bind_with_arg_string");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_bind_without_arg_numeric)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_bind_without_arg_numeric");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_bind_without_arg_numeric");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallUnion, Test_indirect_call_type_union_bind_without_arg_string)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_union_bind_without_arg_string");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_union_bind_without_arg_string");
     ASSERT_EQ(ret, true);
 }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,29 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Wrong type constraints for generic parameters
-wrong_constaints:
-  - byte
-  - short
-  - int
-  - long
-  - float
-  - double
-  - boolean
-  - void
-  - char
-  - "int[]"
-  - "enum Color { Red, Green, Blue}"
-  - Object & int
-  - int & Object
-  - Object & String & int
-  - Object & int & String
-  - int & Object & String
-  - "Object, extends int"
-  - "int, extends Object"
-
+---
 # Top level class modifiers
 top_level_class_modifiers:
   - ""
-  - abstract
   - final
+
+# Type constraints for generic parameters
+constraints:
+  - type: number
+    use: byte
+  - type: short
+    use: long
+  - type: int
+    use: long
+  - type: byte
+    use: char
+  - type: char
+    use: byte
+  - type: string
+    use: char
+  - type: char
+    use: string

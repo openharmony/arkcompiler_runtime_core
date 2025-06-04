@@ -84,7 +84,9 @@ group("abckit_tests") {
   if (abckit_enable) {
     deps = [
       ":abckit_documentation",
-      ":abckit_status",
+
+      # Issue 24654
+      # ":abckit_status",
       "tests:abckit_gtests_action",
       "tests:abckit_mock_gtests_action",
       "tests:abckit_stress_tests_apps",

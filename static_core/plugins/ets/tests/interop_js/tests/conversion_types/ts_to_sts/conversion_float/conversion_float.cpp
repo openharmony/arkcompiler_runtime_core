@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsConversionFloatTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToInt"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToNumber"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToFloat"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToByte"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToShort"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToLong"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToDouble"));
 }
 
 TEST_F(EtsConversionFloatTsToEtsTest, checkConversionFloatToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionFloatToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionFloatToChar"));
 }
 
 }  // namespace ark::ets::interop::js::testing

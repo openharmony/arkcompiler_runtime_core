@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,9 +19,10 @@ message(STATUS "eTS plugin is found")
 include(cmake/import.cmake)
 
 add_custom_target(ets_tests COMMENT "Running ets test suites")
+set(DEFAULT_TEST_GROUP ets_tests)
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
     set(multiValueArgs COMPILER_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -32,10 +33,18 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     set(ES2PANDA_ARGUMENTS
         --opt-level=${ARG_OPT_LEVEL}
         --thread=0
-        --extension=sts
+        --extension=ets
         --output=${OUTPUT_ABC}
         ${ARG_COMPILER_EXTRA_OPTIONS}
     )
+    if (DEFINED ARG_ARKTS_CONFIG)
+        list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${ARG_ARKTS_CONFIG}")
+        list(APPEND ES2PANDA_ARGUMENTS "--stdlib=${PANDA_ROOT}/plugins/ets/stdlib")
+    endif()
+    if (DEFINED ARG_ETSPATH)
+        list(APPEND ES2PANDA_ARGUMENTS "--ets-path=${ARG_ETSPATH}")
+    endif()
+
     set(COMPILE_DEPENDENCIES
         ${es2panda_target}
     )
@@ -61,7 +70,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     add_custom_command(
         OUTPUT ${OUTPUT_ABC}
-        COMMENT "Running es2panda for sts file: ${ETS_SRC}"
+        COMMENT "Running es2panda for ets file: ${ETS_SRC}"
         COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS}
         DEPENDS ${COMPILE_DEPENDENCIES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -71,7 +80,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     if(TARGET etsstdlib)
         if (NOT TARGET regenerate_and_check_stdlib AND ${CMAKE_GENERATOR} MATCHES "Ninja")
-            # Note(ivan-tyulyanin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
+            # Note(ivan-tyulyandin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
             add_custom_target(regenerate_and_check_stdlib
                 COMMAND ${CMAKE_COMMAND} -DETS_PLUGIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/GenerateStdLib.cmake)
             add_dependencies(etsstdlib regenerate_and_check_stdlib)
@@ -80,19 +89,58 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
 endfunction()
 
+function(compile_ets_sources WORK_DIR ABC_TARGET ABC_FILES ETS_SOURCES)
+    set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL)
+    set(multiValueArgs ARKTS_CONFIGS)
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    add_custom_target(${ABC_TARGET})
+
+    # Required for clearing `RESULT` when calling the function multiple times from a single scope
+    set(RESULT "")
+
+    list(LENGTH ETS_SOURCES SOURCES_LIST_LENGTH)
+
+    if(DEFINED ARG_ARKTS_CONFIGS)
+        list(LENGTH ARG_ARKTS_CONFIGS CONFIG_LIST_LENGTH)
+        if(NOT SOURCES_LIST_LENGTH EQUAL CONFIG_LIST_LENGTH)
+            error("If set, the number of elements in ARKTS_CONFIGS should be equal to the number of ETS_SOURCES")
+        endif()
+    endif()
+
+    math(EXPR LAST_INDEX "${SOURCES_LIST_LENGTH} - 1")
+
+    foreach(i RANGE ${LAST_INDEX})
+        list(GET ETS_SOURCES ${i} SOURCE_ETS)
+        if(DEFINED ARG_ARKTS_CONFIGS)
+            list(GET ARG_ARKTS_CONFIGS ${i} ARKTS_CONFIG)
+        else()
+            set(ARKTS_CONFIG "${ARG_ARKTS_CONFIG}")
+        endif()
+        get_filename_component(SOURCE_FNAME ${SOURCE_ETS} NAME_WE)
+        set(SOURCE_ABC ${WORK_DIR}/${ABC_TARGET}-${SOURCE_FNAME}.abc)
+        set(SOURCE_ABC_TARGET ${ABC_TARGET}-${SOURCE_FNAME}-ets-es2panda)
+        compile_ets_code(${SOURCE_ETS} ${SOURCE_ABC} ${SOURCE_ABC_TARGET}
+                         ARKTS_CONFIG ${ARKTS_CONFIG}
+                         ETSPATH ${ARG_ETSPATH}
+                         OPT_LEVEL ${ARG_OPT_LEVEL})
+        add_dependencies(${ABC_TARGET} ${SOURCE_ABC_TARGET})
+        set(RESULT ${RESULT} ${SOURCE_ABC})
+    endforeach()
+
+    set(${ABC_FILES} ${RESULT} PARENT_SCOPE)
+endfunction()
 
 # NB! ADDING THIS PROPERTY IS ALLOWED ONLY IN SPECIAL CASES. DO NOT COPY-PASTE IT.
 set_target_properties(ets_tests PROPERTIES first-level-tests-dependency TRUE)
 add_dependencies(tests ets_tests)
 
-# List for accumulation of all ets gtests binary paths.
-# It's used by CI to archive these binaries into a single artifact
-# and send it to second stage where unit tests will use them.
-set_property(GLOBAL PROPERTY ets_stash_list "")
-
-if(TARGET es2panda_tests)
-    if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+    if(TARGET es2panda_tests)
         add_dependencies(ets_tests es2panda_tests)
+    endif()
+    if(TARGET es2panda_gtests)
+        add_dependencies(ets_tests es2panda_gtests)
     endif()
 endif()
 
@@ -111,7 +159,6 @@ add_subdirectory(bytecode_optimizer)
 add_subdirectory(irtoc_scripts)
 add_subdirectory(verification)
 add_subdirectory(tools)
-
 add_subdirectory(arkts_header)
 
 # NOTE(nsizov): change this logic when ets compiler moved into ets plugin
@@ -120,8 +167,30 @@ if(TARGET es2panda)
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
     add_dependencies(ark etsstdlib)
+    add_subdirectory(sdk)
+
+    if(NOT CMAKE_CROSSCOMPILING)
+        set(verifier_target verifier)
+        set(verifier_bin    $<TARGET_FILE:${verifier_target}>)
+
+        add_dependencies(etsstdlib ${verifier_target})
+
+        set (ETS_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+
+        set (RUN_VERIFIER_DST_DIR "${PANDA_BINARY_ROOT}/verification/verifier/")
+        set (RUN_VERIFIER_SRC_DIR "${CMAKE_SOURCE_DIR}/verification/verifier/")
+
+        configure_file(
+            ${RUN_VERIFIER_SRC_DIR}/run_verifier.sh
+            ${RUN_VERIFIER_DST_DIR}/run_verifier.sh
+            COPYONLY
+        )
+        add_custom_command(TARGET etsstdlib 
+            COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
+        )
+    endif()
 else()
-    message(WARNING "es2panda was not found for etsstdlib build")
+    message(WARNING "es2panda was not found for etsstdlib and etssdk build")
 endif()
 
 if(PANDA_WITH_COMPILER)

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,33 +44,27 @@ cases:
   - decl: |-
       interface I {
         foo(j: String) {}
-      }
-      interface J implements I {
         foo(i: string) {}
       }
-      class A implements J {}
+      class A implements I {}
     call: |-
       new A();
 
   - decl: |-
       interface I {
         foo(j: number) {}
-      }
-      interface J implements I {
         foo(i: double) {}
       }
-      class A implements J {}
+      class A implements I {}
     call: |-
       new A();
 
   - decl: |-
       interface I {
         foo(j: Number) {}
-      }
-      interface J implements I {
         foo(i: Double) {}
       }
-      class A implements J {}
+      class A implements I {}
     call: |-
       new A();
 

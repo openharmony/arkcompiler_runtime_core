@@ -65,30 +65,32 @@
     i8 foo
 }
 
-.union_field i8 bar
-.union_field i8 baz
-.union_field i8 foo
+.record $NamedAccessMeta-i8 {
+    i8 bar
+    i8 baz
+    i8 foo
+}
 
 .function i32 load_bar__noinline__(A a0) {
-    ets.ldobj.name a0, bar
+    ets.ldobj.name a0, $NamedAccessMeta-i8.bar
     return
 }
 
 .function i32 load_baz__noinline__(A a0) {
-    ets.ldobj.name a0, baz
+    ets.ldobj.name a0, $NamedAccessMeta-i8.baz
     return
 }
 
 .function i32 load_foo__noinline__(A a0) {
-    ets.ldobj.name a0, foo
+    ets.ldobj.name a0, $NamedAccessMeta-i8.foo
     return
 }
 
 .function i32 test_store() {
     newobj v0, A
     ldai -1
-    ets.stobj.name v0, bar
-    ets.stobj.name v0, foo
+    ets.stobj.name v0, $NamedAccessMeta-i8.bar
+    ets.stobj.name v0, $NamedAccessMeta-i8.foo
 
     call.short load_baz__noinline__, v0
     jnez error1
@@ -115,8 +117,8 @@ error3:
 
 .function i32 fill__noinline__(A a0) {
     ldai -1
-    ets.stobj.name a0, bar
-    ets.stobj.name a0, foo
+    ets.stobj.name a0, $NamedAccessMeta-i8.bar
+    ets.stobj.name a0, $NamedAccessMeta-i8.foo
     return
 }
 
@@ -124,14 +126,14 @@ error3:
     newobj v0, A
     call.short fill__noinline__, v0
 
-    ets.ldobj.name v0, baz
+    ets.ldobj.name v0, $NamedAccessMeta-i8.baz
     jnez error1
 
     movi v1, -1
-    ets.ldobj.name v0, bar
+    ets.ldobj.name v0, $NamedAccessMeta-i8.bar
     jne v1, error2
 
-    ets.ldobj.name v0, foo
+    ets.ldobj.name v0, $NamedAccessMeta-i8.foo
     jne v1, error3
 
     ldai 0
