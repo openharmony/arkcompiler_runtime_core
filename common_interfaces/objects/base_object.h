@@ -33,7 +33,7 @@ public:
     }
 
     static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
-    static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
+    static PUBLIC_API void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
 
     inline size_t GetSize() const
     {

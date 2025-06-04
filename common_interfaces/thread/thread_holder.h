@@ -47,7 +47,7 @@ class ThreadHolderManager;
  * ThreadHolder is a package of execution BaseThreads which must run in the same OS Thread and so could
  * share ThreadState.
  */
-class ThreadHolder {
+class PUBLIC_API ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
