@@ -17,7 +17,7 @@ import { xml } from "@ohos.xml"
 import { BusinessError } from "@ohos.base"
 
 const TypeErrorCodeId: number = 401;
-const myMAX = 2048;
+const MaxBufferLength = 2048;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlSerializer API tests");
@@ -34,8 +34,27 @@ function main(): int {
     return suite.run();
 }
 
+/**
+ * Common function to perform XML serialization tests
+ * @param serializerOperation Function to perform operations on the serializer
+ * @param expectedResult Expected XML string result
+ */
+function performXmlTest(serializerOperation: (serializer: xml.XmlSerializer) => void, expectedResult: string): void {
+    let arrayBuffer = new ArrayBuffer(MaxBufferLength);
+    let serializer = new xml.XmlSerializer(arrayBuffer);
+    
+    serializerOperation(serializer);
+    
+    let view = new Uint8Array(arrayBuffer);
+    let result = '';
+    for (let i = 0; i < expectedResult.length; ++i) {
+        result += String.fromCodePoint(view[i]);
+    }
+    arktest.assertEQ(result, expectedResult);
+}
+
 function testInvalidEncodingForXmlSerializer() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
+    let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
             ((e as BusinessError).message == 'Parameter error.Just support utf-8');
@@ -45,93 +64,58 @@ function testInvalidEncodingForXmlSerializer() {
 
 // Test cases ported from ArkTS 1.0: XML_00600
 function testSingleElementStartElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.endElement();
-    let result = '<note1/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest((serializer) => {
+        serializer.startElement("note1");
+        serializer.endElement();
+    }, '<note1/>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_00700
 function testMultipleElementStartAndEndElements() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.endElement();
-    thatSer.startElement("note2");
-    thatSer.endElement();
-    let result = '<note1/>\r\n<note2/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest((serializer) => {
+        serializer.startElement("note1");
+        serializer.endElement();
+        serializer.startElement("note2");
+        serializer.endElement();
+    }, '<note1/>\r\n<note2/>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_00800
 function testNestedElementStartAndEndElements() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.startElement("note2");
-    thatSer.endElement();
-    thatSer.endElement();
-    let result = '<note1>\r\n  <note2/>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest((serializer) => {
+        serializer.startElement("note1");
+        serializer.startElement("note2");
+        serializer.endElement();
+        serializer.endElement();
+    }, '<note1>\r\n  <note2/>\r\n</note1>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_00900
 function testDeeplyNestedElementStartAndEndElements() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.startElement("note2");
-    thatSer.startElement("note3");
-    thatSer.endElement();
-    thatSer.endElement();
-    thatSer.endElement();
-    let result = '<note1>\r\n  <note2>\r\n    <note3/>\r\n  </note2>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest((serializer) => {
+        serializer.startElement("note1");
+        serializer.startElement("note2");
+        serializer.startElement("note3");
+        serializer.endElement();
+        serializer.endElement();
+        serializer.endElement();
+    }, '<note1>\r\n  <note2>\r\n    <note3/>\r\n  </note2>\r\n</note1>');
 }
 
 // Test cases ported from ArkTS 1.0: XML_01000
 function testSiblingElementsWithinParent() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
-    let thatSer = new xml.XmlSerializer(arrayBuffer);
-    thatSer.startElement("note1");
-    thatSer.startElement("note2");
-    thatSer.endElement();
-    thatSer.startElement("note3");
-    thatSer.endElement();
-    thatSer.endElement();
-    let result = '<note1>\r\n  <note2/>\r\n  <note3/>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = "";
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest((serializer) => {
+        serializer.startElement("note1");
+        serializer.startElement("note2");
+        serializer.endElement();
+        serializer.startElement("note3");
+        serializer.endElement();
+        serializer.endElement();
+    }, '<note1>\r\n  <note2/>\r\n  <note3/>\r\n</note1>');
 }
 
 function testEmptyNameForStartElement() {
-    let arrayBuffer = new ArrayBuffer(myMAX);
+    let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).code == TypeErrorCodeId) &&
