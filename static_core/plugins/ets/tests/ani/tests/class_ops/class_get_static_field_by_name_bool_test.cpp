@@ -143,6 +143,22 @@ TEST_F(ClassGetStaticFieldByNameBoolTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_by_name_bool_test/BoolStaticFinal;", "bool_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameBoolTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_bool_test.BoolStaticA", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_bool_test.BoolStaticA"));
+    ani_boolean boolValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "bool_valuex", &boolValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_bool_test.BoolStaticA"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Boolean(cls, "bool_value", &boolValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_bool_test.BoolStaticA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

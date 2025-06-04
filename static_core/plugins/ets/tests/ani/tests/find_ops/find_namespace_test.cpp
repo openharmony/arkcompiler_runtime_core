@@ -88,6 +88,15 @@ TEST_F(FindNamespaceTest, find_namespace_combine_scenes_003)
     ASSERT_EQ(env_->Function_Call_Int_A(fn, &value, args), ANI_OK);
     ASSERT_EQ(value, VAL1 * VAL2);
 }
+
+TEST_F(FindNamespaceTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_namespace_test.geometry"));
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.geometry", &ns), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_namespace_test.geometry"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(modernize-avoid-c-arrays)

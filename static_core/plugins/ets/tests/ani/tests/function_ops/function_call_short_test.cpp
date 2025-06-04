@@ -398,6 +398,34 @@ TEST_F(FunctionCallTest, function_call_short_010)
     ASSERT_EQ(env_->Function_Call_Short(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Short_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallTest, check_initialization_short)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_short_test.ops"));
+    ani_short result {};
+    ASSERT_EQ(env_->Function_Call_Short(fn, &result, SHORT_VAL1, SHORT_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_short_test.ops"));
+}
+
+TEST_F(FunctionCallTest, check_initialization_short_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_short_test.ops"));
+    ani_short result {};
+    ani_value args[2U];
+    args[0U].s = SHORT_VAL1;
+    args[1U].s = SHORT_VAL2;
+    ASSERT_EQ(env_->Function_Call_Short_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_short_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

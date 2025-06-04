@@ -185,10 +185,9 @@ static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
     return nullptr;
 }
 
-static ani_status DoGetInternalClass(ScopedManagedCodeFix &s, EtsClass *klass, EtsClass **result)
+static ani_status InitializeClass(ScopedManagedCodeFix &s, EtsClass *klass)
 {
     if (klass->IsInitialized()) {
-        *result = klass;
         return ANI_OK;
     }
 
@@ -203,32 +202,7 @@ static ani_status DoGetInternalClass(ScopedManagedCodeFix &s, EtsClass *klass, E
         }
         return ANI_ERROR;
     }
-    *result = klass;
     return ANI_OK;
-}
-
-static ani_status GetInternalClass(ScopedManagedCodeFix &s, ani_class cls, EtsClass **result)
-{
-    EtsClass *klass = s.ToInternalType(cls);
-    return DoGetInternalClass(s, klass, result);
-}
-
-static ani_status GetInternalNamespace(ScopedManagedCodeFix &s, ani_namespace ns, EtsNamespace **result)
-{
-    EtsNamespace *nsp = s.ToInternalType(ns);
-    EtsClass *klass {};
-    ani_status status = DoGetInternalClass(s, nsp->AsClass(), &klass);
-    *result = EtsNamespace::FromClass(klass);
-    return status;
-}
-
-static ani_status GetInternalModule(ScopedManagedCodeFix &s, ani_module module, EtsModule **result)
-{
-    EtsModule *etsModule = s.ToInternalType(module);
-    EtsClass *klass {};
-    ani_status status = DoGetInternalClass(s, etsModule->AsClass(), &klass);
-    *result = EtsModule::FromClass(klass);
-    return status;
 }
 
 static Value ConstructValueFromFloatingPoint(float val)
@@ -365,8 +339,14 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
         m = ResolveVirtualMethod(&s, obj, method);
     } else if constexpr (std::is_same_v<MethodType, ani_static_method>) {
         m = ToInternalMethod(method);
+
+        ani_status status = InitializeClass(s, m->GetClass());
+        ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     } else if constexpr (std::is_same_v<MethodType, ani_function>) {
         m = ToInternalFunction(method);
+
+        ani_status status = InitializeClass(s, m->GetClass());
+        ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     } else {
         static_assert(!(std::is_same_v<MethodType, ani_method> || std::is_same_v<MethodType, ani_static_method> ||
                         std::is_same_v<MethodType, ani_function>),
@@ -439,10 +419,15 @@ static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_fi
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(field);
     CHECK_PTR_ARG(result);
+
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
     return ANI_OK;
 }
@@ -453,10 +438,15 @@ static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_fi
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(field);
+
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     etsClass->SetStaticFieldPrimitive(etsField, value);
     return ANI_OK;
 }
@@ -468,13 +458,17 @@ static ani_status ClassGetStaticFieldByName(ani_env *env, ani_class cls, const c
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(name);
     CHECK_PTR_ARG(result);
+
     ScopedManagedCodeFix s(env);
-    EtsClass *etsClass;
-    ani_status status = GetInternalClass(s, cls, &etsClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *etsClass = s.ToInternalType(cls);
+
     EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
     return ANI_OK;
 }
@@ -485,13 +479,17 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(name);
+
     ScopedManagedCodeFix s(env);
-    EtsClass *etsClass;
-    ani_status status = GetInternalClass(s, cls, &etsClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *etsClass = s.ToInternalType(cls);
+
     EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     etsClass->SetStaticFieldPrimitive(etsField, value);
     return ANI_OK;
 }
@@ -656,9 +654,7 @@ static ani_status GetClassMethod(ani_env *env, ani_class cls, const char *name, 
                                  EtsMethod **result)
 {
     ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *klass = s.ToInternalType(cls);
     return DoGetClassMethod<IS_STATIC_METHOD>(klass, name, signature, result);
 }
 
@@ -689,9 +685,7 @@ static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const cha
                                        EtsMethod **result)
 {
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs;
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
     return DoGetClassMethod<true>(etsNs->AsClass(), name, signature, result);
 }
 
@@ -699,9 +693,7 @@ static ani_status GetModuleFunction(ani_env *env, ani_module ns, const char *nam
                                     EtsMethod **result)
 {
     ScopedManagedCodeFix s(env);
-    EtsModule *etsModule;
-    ani_status status = GetInternalModule(s, ns, &etsModule);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(ns)->AsClass());
     return DoGetClassMethod<true>(etsModule->AsClass(), name, signature, result);
 }
 
@@ -734,9 +726,7 @@ static ani_status FindInModule(ani_env *env, ani_module module, const char *targ
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-    EtsModule *etsModule {};
-    ani_status status = GetInternalModule(s, module, &etsModule);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(module)->AsClass());
 
     PandaString descriptor;
     ANI_CHECK_RETURN_IF_NE(etsModule->GetModulePrefix(descriptor), ANI_OK, ANI_INVALID_DESCRIPTOR);
@@ -772,9 +762,7 @@ ani_status GetVM(ani_env *env, ani_vm **result)
 
 static ani_status AllocObject(ScopedManagedCodeFix &s, ani_class cls, ani_object *result)
 {
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *klass = s.ToInternalType(cls);
     ANI_CHECK_RETURN_IF_EQ(klass->IsAbstract(), true, ANI_INVALID_TYPE);
     ANI_CHECK_RETURN_IF_EQ(klass->IsInterface(), true, ANI_INVALID_TYPE);
 
@@ -793,6 +781,10 @@ static ani_status DoNewObject(ani_env *env, ani_class cls, ani_method method, an
     ani_object object;
     ScopedManagedCodeFix s(env);
     ani_status status = AllocObject(s, cls, &object);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
+    EtsClass *klass = s.ToInternalType(cls);
+    status = InitializeClass(s, klass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     // Use any primitive type as template parameter and just ignore the result
@@ -868,8 +860,6 @@ ani_status Type_GetSuperClass(ani_env *env, ani_type type, ani_class *result)
 
     ScopedManagedCodeFix s(env);
     EtsClass *cls = s.ToInternalType(type);
-    ani_status status = DoGetInternalClass(s, cls, &cls);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     EtsClass *superCls = cls->GetSuperClass();
     if (superCls != nullptr) {
@@ -891,12 +881,7 @@ ani_status Type_IsAssignableFrom(ani_env *env, ani_type fromType, ani_type toTyp
 
     ScopedManagedCodeFix s(env);
     EtsClass *toClass = s.ToInternalType(toType);
-    ani_status status = DoGetInternalClass(s, toClass, &toClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
     EtsClass *fromClass = s.ToInternalType(fromType);
-    status = DoGetInternalClass(s, fromClass, &fromClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     *result = toClass->IsAssignableFrom(fromClass) ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
@@ -972,9 +957,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindNamespace(ani_env *env, ani_names
 
     auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-    EtsNamespace *etsNs {};
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
     std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
     ASSERT(nsDescriptor.size() > 2U);
 
@@ -1004,9 +987,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindClass(ani_env *env, ani_namespace
 
     auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-    EtsNamespace *etsNs {};
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
     std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
     ASSERT(nsDescriptor.size() > 2U);
 
@@ -1035,9 +1016,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(ani_env *env, ani_namesp
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs {};
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
     EtsVariable *variable = etsNs->GetVariabe(variableDescriptor);
     ANI_CHECK_RETURN_IF_EQ(variable, nullptr, ANI_NOT_FOUND);
 
@@ -1073,9 +1052,7 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(ani_env *env, ani_module mo
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsModule *etsModule {};
-    ani_status status = GetInternalModule(s, module, &etsModule);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(module)->AsClass());
     EtsVariable *variable = etsModule->GetVariabe(variableDescriptor);
     ANI_CHECK_RETURN_IF_EQ(variable, nullptr, ANI_NOT_FOUND);
 
@@ -1710,13 +1687,16 @@ static ani_status SetVariableValue(ani_env *env, ani_variable variable, T value)
     CHECK_ENV(env);
     CHECK_PTR_ARG(variable);
 
+    ScopedManagedCodeFix s(env);
     EtsVariable *etsVariable = ToInternalVariable(variable);
     EtsField *etsField = etsVariable->AsField();
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
     EtsClass *cls = etsField->GetDeclaringClass();
+    ani_status status = InitializeClass(s, cls);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     static constexpr auto IS_REF = std::is_same_v<T, ani_ref>;
-    ScopedManagedCodeFix s(env);
     if constexpr (IS_REF) {
         EtsObject *object = s.ToInternalType(value);
         cls->SetStaticFieldObject(etsField, object);
@@ -1838,9 +1818,7 @@ NO_UB_SANITIZE static ani_status Variable_SetValue_Ref(ani_env *env, ani_variabl
 template <bool IS_STATIC_FIELD>
 static ani_status DoGetField(ScopedManagedCodeFix &s, ani_class cls, const char *name, EtsField **result)
 {
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *klass = s.ToInternalType(cls);
 
     EtsField *field = [&]() {
         if constexpr (IS_STATIC_FIELD) {
@@ -2041,6 +2019,9 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Ref(ani_env *env, ani_clas
 
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     auto *etsRes = etsClass->GetStaticFieldObject(etsField);
     return s.AddLocalRef(etsRes, result);
 }
@@ -2132,6 +2113,9 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(ani_env *env, ani_clas
 
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
+    ani_status status = InitializeClass(s, etsClass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     EtsObject *etsValue = s.ToInternalType(value);
     etsClass->SetStaticFieldObject(etsField, etsValue);
     return ANI_OK;
@@ -2220,13 +2204,15 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(ani_env *env, an
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *klass = s.ToInternalType(cls);
 
     EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ani_status status = InitializeClass(s, klass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     EtsObject *etsRes = klass->GetStaticFieldObject(etsField);
     return s.AddLocalRef(etsRes, result);
 }
@@ -2312,13 +2298,14 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, an
     CHECK_PTR_ARG(value);
 
     ScopedManagedCodeFix s(env);
-    EtsClass *klass;
-    ani_status status = GetInternalClass(s, cls, &klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsClass *klass = s.ToInternalType(cls);
 
     EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
+    ani_status status = InitializeClass(s, klass);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     EtsObject *etsValue = s.ToInternalType(value);
     klass->SetStaticFieldObject(etsField, etsValue);
@@ -4764,7 +4751,11 @@ static ani_status DoVariableGetValue(ani_env *env, ani_variable variable, R *res
     EtsVariable *internalVariable = ToInternalVariable(variable);
     EtsField *field = internalVariable->AsField();
     ANI_CHECK_RETURN_IF_NE(field->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
+
     EtsClass *cls = field->GetDeclaringClass();
+    ani_status status = InitializeClass(s, cls);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     Res etsRes {};
     if constexpr (IS_REF) {
         etsRes = cls->GetStaticFieldObject(field);
@@ -6007,9 +5998,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindEnum(ani_env *env, ani_namespace 
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs;
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
 
     PandaString enumDescriptorPandStr = Mangle::ConvertDescriptor(enumDescriptor);
     if (!enumDescriptorPandStr.empty() && enumDescriptorPandStr[0] == 'L') {
@@ -6047,6 +6036,9 @@ static ani_status GetArrayFromEnum(ScopedManagedCodeFix &s, ani_enum enm, const 
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     EtsClass *cls = field->GetDeclaringClass();
+    status = InitializeClass(s, cls);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     EtsObject *etsObject = cls->GetStaticFieldObject(field);
     *result = EtsObjectArray::FromCoreType(etsObject->GetCoreType());
     return ANI_OK;

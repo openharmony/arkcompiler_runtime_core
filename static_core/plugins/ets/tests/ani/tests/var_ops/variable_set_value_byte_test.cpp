@@ -174,6 +174,18 @@ TEST_F(VariableSetValueByteTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Byte(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueByteTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aByte", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_byte_test.anyns"));
+    const ani_byte x = 24U;
+    ASSERT_EQ(env_->Variable_SetValue_Byte(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_byte_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

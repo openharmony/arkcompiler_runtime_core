@@ -241,6 +241,19 @@ TEST_F(VariableSetValueRefTest, composite_case_4)
     ASSERT_EQ(strSize, 3U);
     ASSERT_STREQ(buffer.data(), "UVW");
 }
+
+TEST_F(VariableSetValueRefTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "stringValue", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_ref_test.anyns"));
+    ani_string string = {};
+    ASSERT_EQ(env_->String_NewUTF8("VLG", 3U, &string), ANI_OK);
+    ASSERT_EQ(env_->Variable_SetValue_Ref(variable, string), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_ref_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers,

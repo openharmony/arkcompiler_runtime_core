@@ -178,6 +178,21 @@ TEST_F(ClassGetStaticFieldCharTest, combination_test3)
 {
     CheckFieldValue("Lclass_get_static_field_char_test/TestCharFinal;", "char_value");
 }
+
+TEST_F(ClassGetStaticFieldCharTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_char_test.TestChar", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "char_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_char_test.TestChar"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Char(cls, field, &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_char_test.TestChar"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

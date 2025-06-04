@@ -467,6 +467,34 @@ TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_8)
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method2, &valueA, args), ANI_OK);
     CheckRefUp(valueA);
 }
+
+TEST_F(CallStaticMethodTest, check_initialization_ref)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodDataButton(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+    ani_ref value {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization_ref_a)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodDataButton(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+    ani_ref value {};
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method, &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

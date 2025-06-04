@@ -224,4 +224,16 @@ TEST_F(ModuleFindFunctionTest, find_func_B_in_namespace_A)
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getIntValueOps", ":I", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
+
+TEST_F(ModuleFindFunctionTest, check_initialization)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_function_test", false));
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "I:I", &fn), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_function_test", false));
+}
+
 }  // namespace ark::ets::ani::testing

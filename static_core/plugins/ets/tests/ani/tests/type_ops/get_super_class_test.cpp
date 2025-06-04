@@ -137,6 +137,17 @@ TEST_F(GetSuperClassTest, get_super_class_combine_scenes_003)
     TestGetSuperClass("Lget_super_class_test/test002/test003;");
 }
 
+TEST_F(GetSuperClassTest, check_initialization)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("get_super_class_test.A", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("get_super_class_test.A"));
+    ani_type typeRef = cls;
+    ASSERT_EQ(env_->Type_GetSuperClass(typeRef, &cls), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("get_super_class_test.A"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -385,6 +385,34 @@ TEST_F(FunctionCallByteTest, function_call_byte_010)
     ASSERT_EQ(env_->Function_Call_Byte(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Byte_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallByteTest, check_initialization_byte)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_byte_test.ops"));
+    ani_byte result {};
+    ASSERT_EQ(env_->Function_Call_Byte(fn, &result, BYTE_VAL1, BYTE_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_byte_test.ops"));
+}
+
+TEST_F(FunctionCallByteTest, check_initialization_byte_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_byte_test.ops"));
+    ani_byte result {};
+    ani_value args[2U];
+    args[0U].b = BYTE_VAL1;
+    args[1U].b = BYTE_VAL2;
+    ASSERT_EQ(env_->Function_Call_Byte_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_byte_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -173,6 +173,18 @@ TEST_F(VariableSetValueDoubleTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Double(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueDoubleTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_double_test.anyns"));
+    const ani_double x = 12.07F;
+    ASSERT_EQ(env_->Variable_SetValue_Double(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_double_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)
