@@ -789,4 +789,5 @@ export namespace jsonx {
          */
         toJson(): JsonElement
     }
+
 }
