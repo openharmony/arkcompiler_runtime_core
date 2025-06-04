@@ -131,6 +131,7 @@ ohos_static_library("arktsdisassembler_frontend_static") {
 }
 
 ohos_executable("arkts_disasm") {
+  output_name = "ark_disasm_static"
   sources = [ "disasm.cpp" ]
 
   include_dirs = [
