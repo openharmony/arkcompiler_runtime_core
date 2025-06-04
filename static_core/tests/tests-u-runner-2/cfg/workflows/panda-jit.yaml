@@ -38,6 +38,10 @@ parameters:
         - "--compiler-check-final=true"
         - "--compiler-ignore-failures=false"
         - "--no-async-jit=true"
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    # adds --boot-panda-files option to ark with all dependent and the current abc files
+    # adds --panda-files option to ark with all dependent and the current abc files
+    is-panda: True
 steps:
     imports:
         only-es2panda:
