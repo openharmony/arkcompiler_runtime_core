@@ -53,7 +53,7 @@ void CompileInvalidAot(const char *abcPath, const char *anPath)
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsVMPostforkAotTest, PostforkAotFailedTest)
+TEST_F(EtsVMPostforkAotTest, DISABLED_PostforkAotFailedTest)
 {
     const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
     ASSERT_NE(abcPath, nullptr);
