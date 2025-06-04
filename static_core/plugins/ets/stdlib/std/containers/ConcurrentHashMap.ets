@@ -271,7 +271,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
 
     /**
      * Constructs a ConcurrentHashMap from ArrayLike
-     * @param entries initial ArrayLike
+     * @param { ArrayLike<[K, V]> } entries initial ArrayLike
      */
     constructor(entries: ArrayLike<[K, V]>) {
         const bucketsCount = this.getInitialBucketsCount(entries.length as Int);
@@ -283,8 +283,8 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     }
 
     /**
-     * Constructs a ConcurrentHashMap from iterator
-     * @param iterable The iterator
+     * Constructs a ConcurrentHashMap from any iterable
+     * @param { Iterable<[K, V]> } iterable The iterable object
      */
     constructor(iterable: Iterable<[K, V]>) {
         const entriesIter = (iterable as Iterable<[K, V]>).$_iterator();
@@ -306,7 +306,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
 
     /**
      * Constructs a ConcurrentHashMap from another Map
-     * @param map another map
+     * @param { Map<K, V> } map another map
      */
     constructor(map: Map<K, V>) {
         const bucketsCount = this.getInitialBucketsCount(map.size as int);
@@ -318,6 +318,11 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
         });
     }
 
+    /**
+     * Transform container to a string
+     *
+     * @returns { String } string created from the container
+     */
     public override toString(): String {
         const strBuf = new StringBuilder();
 
@@ -341,10 +346,10 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Puts a pair of key and value into the Map
      *
-     * @param key the key to put into the Map
-     * @param val the value to put into the Map
+     * @param { K } key the key to put into the Map
+     * @param { V } val the value to put into the Map
      *
-     * @returns return this.
+     * @returns { this } return this.
      */
     public set(key: K, val: V): this {
         // insert into buckets
@@ -393,10 +398,10 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Puts a pair of key and value into the Map
      *
-     * @param key the key to find in the Map
-     * @param newValue the value to replace into the Map
+     * @param { K } key the key to find in the Map
+     * @param { V } newValue the value to replace into the Map
      *
-     * @returns true if the delete Operation is success, otherwise false.
+     * @returns { boolean } true if the delete Operation is success, otherwise false.
      */
     public replace(key: K, newValue: V): boolean {
         const buck = this.getBucket(key);
@@ -426,9 +431,9 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Checks if a key is in the ConcurrentHashMap
      *
-     * @param key the key to find in the ConcurrentHashMap
+     * @param { K } key the key to find in the ConcurrentHashMap
      *
-     * @returns true if the value is in the ConcurrentHashMap
+     * @returns { boolean } true if the value is in the ConcurrentHashMap
      */
     public override has(key: K): boolean {
         const buck = this.getBucket(key);
@@ -454,7 +459,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Returns number of Entries with unique keys in the ConcurrentHashMap
      *
-     * @returns number of Entries with unique keys in the ConcurrentHashMap
+     * @returns { number } number of Entries with unique keys in the ConcurrentHashMap
      */
     public override get size(): number {
         return this.sizeVal.get();
@@ -463,8 +468,8 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Removes an MapNode with specified key from the ConcurrentHashMap, and return the deleted value.
      *
-     * @param key the key to remove
-     * @returns the deleted value or undefined.
+     * @param { K } key the key to remove
+     * @returns { V | undefined } the deleted value or undefined.
      */
     public remove(key: K): V | undefined {
         return this.deleteImpl(key);
@@ -473,8 +478,8 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Removes an Entry with specified key from the ConcurrentHashMap
      *
-     * @param key the key to remove
-     * @returns true if the delete Operation is success, otherwise false.
+     * @param { K } key the key to remove
+     * @returns { boolean } true if the delete Operation is success, otherwise false.
      */
     public delete(key: K): boolean {
         if (this.deleteImpl(key) === undefined) {
@@ -569,9 +574,9 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Returns a value assosiated with key if present
      *
-     * @param key the key to find in the ConcurrentHashMap
+     * @param { K } key the key to find in the ConcurrentHashMap
      *
-     * @returns value if assosiated with key presents.
+     * @returns { V | undefined } value if assosiated with key presents.
      */
     public override get(key: K): V | undefined {
         const buck = this.getBucket(key);
@@ -597,7 +602,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Checks if ConcurrentHashMap is empty
      *
-     * @returns true if ConcurrentHashMap is empty, false otherwise.
+     * @returns { boolean } true if ConcurrentHashMap is empty, false otherwise.
      */
     public isEmpty(): boolean {
         if (this.sizeVal.get() == 0) {
@@ -623,7 +628,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Returns elements from the ConcurrentHashMap as an keys Iterator
      *
-     * @returns iterator with ConcurrentHashMap keys
+     * @returns { IterableIterator<K> } iterator with ConcurrentHashMap keys
      */
     public override keys(): IterableIterator<K> {
         return this.mappedIterator<K>((e: MapNode<K, V>): K => e.key);
@@ -632,12 +637,17 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Returns elements from the ConcurrentHashMap as an values Iterator
      *
-     * @returns iterator with ConcurrentHashMap values
+     * @returns { IterableIterator<K> } iterator with ConcurrentHashMap values
      */
     public override values(): IterableIterator<V> {
         return this.mappedIterator<V>((e: MapNode<K, V>): V => e.val );
     }
 
+    /**
+     * Iterable interface implementation
+     *
+     * @returns { IterableIterator<[K, V]> } iterator over all elements
+     */
     public override $_iterator(): IterableIterator<[K, V]> {
         return this.entries();
     }
@@ -645,7 +655,7 @@ export class ConcurrentHashMap<K, V> implements ReadonlyMap<K, V> {
     /**
      * Returns elements from the ConcurrentHashMap as an array of Entries
      *
-     * @returns an array of Entries
+     * @returns { IterableIterator<[K, V]> } an array of Entries
      */
     public override entries(): IterableIterator<[K, V]> {
         return this.mappedIterator<[K, V]>((e: MapNode<K, V>): [K, V] => [e.key, e.val]);

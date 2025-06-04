@@ -152,8 +152,9 @@ export namespace taskpool {
         /**
          * Create a Task instance
          *
-         * @param name The name of task
-         * @param func Concurrent function to execute in the taskpool
+         * @param { string } name The name of task
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for function to execute with
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
@@ -174,7 +175,8 @@ export namespace taskpool {
         /**
          * Create a Task instance
          *
-         * @param func Concurrent function to execute in the taskpool
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for function to execute with
          */
         constructor(func: Function, ...args: FixedArray<NullishType>) {
             this("", func, ...args);
@@ -183,7 +185,7 @@ export namespace taskpool {
         /**
          * Check current running task is canceled or not
          *
-         * @returns true if current running task is canceled, false - otherwise
+         * @returns { boolean } true if current running task is canceled, false - otherwise
          */
         static isCanceled(): boolean {
             return isCancel();
@@ -191,8 +193,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task is enqueued
-         * 
-         * @param callback Callback to be registered and executed when the task is enqueued
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed when the task is enqueued
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onEnqueued(callback: CallbackFunction): void {
@@ -202,8 +204,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it before the task execution
-         * 
-         * @param callback Callback to be registered and executed before the task execution
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed before the task execution
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onStartExecution(callback: CallbackFunction): void {
@@ -213,8 +215,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task fails to execute
-         * 
-         * @param callback Callback to be registered and executed when the task fails to execute
+         *
+         * @param { CallbackFunctionWithError } callback Callback to be registered and executed when the task fails to execute
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onExecutionFailed(callback: CallbackFunctionWithError): void {
@@ -224,8 +226,8 @@ export namespace taskpool {
 
         /**
          * Register a callback and call it when the task successfully executed
-         * 
-         * @param callback Callback to be registered and executed when the task successfully executed
+         *
+         * @param { CallbackFunction } callback Callback to be registered and executed when the task successfully executed
          * @throws Error if task is executed. It does not support the registration of listeners
          */
         onExecutionSucceeded(callback: CallbackFunction): void {
@@ -235,7 +237,7 @@ export namespace taskpool {
 
         /**
          * Add dependencies on the task array for this task
-         * @param tasks An array of dependent tasks
+         * @param { Task[] } tasks An array of dependent tasks
          * @throws Error if
          *     - no parameters
          *     - this task or argument tasks executed (as common or via SequenceRunner)
@@ -280,7 +282,7 @@ export namespace taskpool {
          *     - no parameters
          *     - this task or argument tasks executed
          *     - this task or argument tasks have not dependencies
-         *     - this task does not depend on an argument task 
+         *     - this task does not depend on an argument task
          */
         removeDependency(...tasks: Task[]): void {
             if (tasks.length == 0) {
@@ -288,7 +290,7 @@ export namespace taskpool {
             }
             if (!this.isDependent) {
                 throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
-            } 
+            }
             if (this.isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
@@ -319,7 +321,7 @@ export namespace taskpool {
 
         /**
          * Send data to host side and trigger the registered callback
-         * @param args arguments for the registered callback
+         * @param { ...NullishType } args arguments for the registered callback
          * @throws Error if the function is not called from a taskpool task
          * @throws Error if the callback is not registered
          */
@@ -338,7 +340,7 @@ export namespace taskpool {
         }
 
         /**
-         * Register a callback for this task to receive and handle data from the taskpool task 
+         * Register a callback for this task to receive and handle data from the taskpool task
          */
         onReceiveData(callback?: Function): void {
             this.onReceiveCallback = callback;
@@ -366,7 +368,7 @@ export namespace taskpool {
 
         /**
          * Check that the task can be executed as common task
-         * @throws Error if the task can not be executed as common task 
+         * @throws Error if the task can not be executed as common task
          * @see taskpool.execute
          */
         internal checkExecution(): void {
@@ -640,8 +642,8 @@ export namespace taskpool {
     export class LongTask extends Task {
         /**
          * Create a LongTask instance
-         * @param name The name of long task
-         * @param func Concurrent function to execute in the taskpool
+         * @param { string } name The name of long task
+         * @param { Function } func Concurrent function to execute in the taskpool
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             super(name, func, ...args);
@@ -649,7 +651,8 @@ export namespace taskpool {
 
         /**
          * Create a LongTask instance
-         * @param func Concurrent function to execute in the taskpool
+         * @param { Function } func Concurrent function to execute in the taskpool
+         * @param { ...NullishType } args arguments for func to execute with
          */
         constructor(func: Function, ...args: FixedArray<NullishType>) {
             super("", func, ...args);
@@ -683,7 +686,7 @@ export namespace taskpool {
 
         /**
          * Create a TaskGroup instance
-         * @param name The name of TaskGroup
+         * @param { string } name The name of TaskGroup
          */
         constructor(name: string) {
             this.name = name;
@@ -695,7 +698,8 @@ export namespace taskpool {
         /**
          * Add a concurrent function into task group
          *
-         * @param func the concurrent function to add to the task group
+         * @param { Function } func the concurrent function to add to the task group
+         * @param { ...NullishType } args arguments for func to execute with
          */
         addTask(func: Function, ...args: FixedArray<NullishType>): void {
             this.addTask(new Task(func, ...args));
@@ -704,7 +708,7 @@ export namespace taskpool {
         /**
          * Add a task into task group
          *
-         * @param task the task to add to the task group
+         * @param { Task } task the task to add to the task group
          * @throws Error if
          *     - task was already added to any group
          *     - task is LongTask
@@ -736,7 +740,7 @@ export namespace taskpool {
         /**
          * Generate unique identifier for the group
          * @see TaskGroup.constructor
-         * @return unique group identifier for a new Taskgroup instance 
+         * @return unique group identifier for a new Taskgroup instance
          */
         private static native generateGroupId(): long;
 
@@ -895,6 +899,13 @@ export namespace taskpool {
 
     // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
+    /**
+     * Create task and execute
+     *
+     * @param { Function } func a concurrent function to create task from
+     * @param { ...NullishType } args arguments for func to execute with
+     * @returns { Promise<NullishType> } Promise for result of executed task
+     */
     export function execute(func: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
         initWorkerPool();
         if (isTaskPoolUseLaunch) {
@@ -906,9 +917,10 @@ export namespace taskpool {
 
     /**
      * Execute a concurrent task
-     * 
-     * @param task The task for executing
-     * @returns Promise for result of executed task
+     *
+     * @param task The task to execute
+     * @param { Priority } [priority] priority for the task
+     * @returns { Promise<NullishType> } Promise for result of executed task
      */
     export function execute(task: Task, priority?: Priority): Promise<NullishType> {
         task.checkExecution();
@@ -931,8 +943,9 @@ export namespace taskpool {
     /**
      * Execute a concurrent task group
      *
-     * @param group The task group for execution
-     * @returns Promise for array of results of executed tasks from the group
+     * @param { TaskGroup } group The task group for execution
+     * @param { Priority } [priority] priority for tasks in the group
+     * @returns { Promise<Array<NullishType>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
         if (group.isTaskAlreadySubmitted) {
@@ -963,6 +976,14 @@ export namespace taskpool {
         return Promise.all<NullishType>(promises);
     }
 
+    /**
+     * Delayed execution of a concurrent task
+     *
+     * @param { number } delayTime timeout in ms to execute task after
+     * @param { Task } task The task to execute
+     * @param { Priority } [priority] priority for task
+     * @returns { Promise<NullishType> } Promise for result of executed task
+     */
     export function executeDelayed(delayTime: number, task: Task, priority?: Priority): Promise<NullishType> {
         task.checkExecutionForDelayedTask(delayTime);
         task.isSubmitted = true;
@@ -995,6 +1016,13 @@ export namespace taskpool {
         });
     }
 
+    /**
+     * Delayed execution of a concurrent task
+     *
+     * @param { number } period period in ms to execute task
+     * @param { Task } task The task to execute
+     * @param { Priority } [priority] priority for task
+     */
     export function executePeriodically(period: number, task: Task, priority?: Priority): void {
         task.checkExecutionForPeriodTask(period);
         task.isSubmitted = true;
@@ -1069,12 +1097,12 @@ export namespace taskpool {
      * Terminate a long task.
      *
      * @param longTask The long task for terminating
-     * @note This method is needed for compatibilty with OHOS API. For coroutines in static ArkTS it is not required 
+     * @note This method is needed for compatibilty with OHOS API. For coroutines in static ArkTS it is not required
      */
     export function terminateTask(longTask: LongTask): void {}
 
     /**
-     * @returns taskpool internal information about tasks and threads
+     * @returns { TaskPoolInfo } taskpool internal information about tasks and threads
      */
     export function getTaskPoolInfo(): TaskPoolInfo {
         initWorkerPool();
@@ -1180,7 +1208,7 @@ export namespace taskpool {
      * @brief Submit group of tasks to the taskpool on the execute method
      * @see taskpool.execute
      * @param groupId identifier of the submitted group
-     * @param tasksCount count of tasks in the passed group 
+     * @param tasksCount count of tasks in the passed group
      */
     function taskGroupSubmitted(groupId: long, tasksCount: int): void {
         ConcurrencyHelpers.mutexLock(mutex);

@@ -76,7 +76,7 @@ export namespace StdProcess {
         /**
          * Wait for child process to terminate
          *
-         * @returns Promise containing child process's exit code value
+         * @returns { Promise<number> } Promise containing child process's exit code value
          */
         wait(): Promise<number> {
             this.waitImpl();
@@ -86,7 +86,7 @@ export namespace StdProcess {
         /**
          * Get child process's output to stdout
          *
-         * @returns Promise containing bytes read from child process's stdout in Uint8Array
+         * @returns { Promise<Uint8Array> } Promise containing bytes read from child process's stdout in Uint8Array
          */
         getOutput(): Promise<Uint8Array> {
             this.readOutput();
@@ -96,7 +96,7 @@ export namespace StdProcess {
         /**
          * Get child process's output to stderr
          *
-         * @returns Promise containing bytes read from child process's stderr in Uint8Array
+         * @returns { Promise<Uint8Array> } Promise containing bytes read from child process's stderr in Uint8Array
          */
         getErrorOutput(): Promise<Uint8Array> {
             this.readErrorOutput();
@@ -111,7 +111,7 @@ export namespace StdProcess {
         /**
          * Send a signal to the child process
          *
-         * @param signal number or string indicating a kill signal
+         * @param { number | string } signal number or string indicating a kill signal
          *
          */
         kill(signal: number | string): void {
@@ -205,9 +205,9 @@ export namespace StdProcess {
         /**
          * Determine if a given uid belongs to an app
          *
-         * @param uid
+         * @param { number } uid
          *
-         * @returns resulting boolean
+         * @returns { boolean } resulting boolean
          */
         static isAppUid(uid: number): boolean {
             throw new Error("not implemented");
@@ -216,43 +216,43 @@ export namespace StdProcess {
         /**
          * Determine the uid corresponding to a user name string
          *
-         * @param v user name string
+         * @param { string } v user name string
          *
-         * @returns user id as number
+         * @returns { number } user id as number
          */
         static native getUidForName(v: string): number;
 
         /**
          * Determine the priority for a given pid or tid
          *
-         * @param v
+         * @param { number } v pid or tid
          *
-         * @returns priority value as number
+         * @returns { number } priority value as number
          */
         static native getThreadPriority(v: number): number;
 
         /**
         * Get configuration information
         *
-        * @param name constant corresponding to a configuration parameter
+        * @param { number } name constant corresponding to a configuration parameter
         *
-        * @returns value of the configuration parameter
+        * @returns { number } value of the configuration parameter
         */
         static native getSystemConfig(name: number): number;
 
         /**
          * Get value of an environment variable
          *
-         * @param name environment variable
+         * @param { string } name environment variable
          *
-         * @returns value of the environment variable
+         * @returns { string } value of the environment variable
          */
         static native getEnvironmentVar(name: string): string;
 
         /**
          * Exit the program
          *
-         * @param code exit code
+         * @param { number } code exit code
          *
          */
         static native exit(code: number): void;
@@ -260,11 +260,11 @@ export namespace StdProcess {
         /**
          * Send a kill singnal to a process with a given pid
          *
-         * @param signal signal to send
+         * @param { number } signal signal to send
          *
-         * @param pid pid of receiving process
+         * @param { number } pid pid of receiving process
          *
-         * @returns bloolen value indicating if the signal was sent succesfully
+         * @returns { boolean } value indicating if the signal was sent succesfully
          *
          */
         static native kill(signal: number, pid: number): boolean;
@@ -279,7 +279,7 @@ export namespace StdProcess {
         /**
          * Get effective group id of the current process
          *
-         * @returns egid as number
+         * @returns { number } egid as number
          */
         static get egid(): number {
             return process.getEgidImpl();
@@ -288,7 +288,7 @@ export namespace StdProcess {
         /**
          * Get effective user id of the current process
          *
-         * @returns euid as number
+         * @returns { number } euid as number
          */
         static get euid(): number {
             return process.getEuidImpl();
@@ -297,7 +297,7 @@ export namespace StdProcess {
         /**
          * Get group id of the current process
          *
-         * @returns gid as number
+         * @returns { number } gid as number
          */
         static get gid(): number {
             return process.getGidImpl();
@@ -306,7 +306,7 @@ export namespace StdProcess {
         /**
          * Get user id of the current process
          *
-         * @returns uid as number
+         * @returns { number } uid as number
          */
         static get uid(): number {
             return process.getUidImpl();
@@ -315,7 +315,7 @@ export namespace StdProcess {
         /**
          * Get groups to which the current process belongs
          *
-         * @returns groups as number array
+         * @returns { number[] } groups as number array
          */
         static get groups(): number[] {
             return process.getGroupsImpl();
@@ -324,7 +324,7 @@ export namespace StdProcess {
         /**
          * Get process id of the current process
          *
-         * @returns pid as number
+         * @returns { number } pid as number
          */
         static get pid(): number {
             return process.getPidImpl();
@@ -333,7 +333,7 @@ export namespace StdProcess {
         /**
          * Get parent process id of the current process
          *
-         * @returns ppid as number
+         * @returns { number } ppid as number
          */
         static get ppid(): number {
             return process.getPpidImpl();
@@ -342,7 +342,7 @@ export namespace StdProcess {
         /**
          * Get thread id of the current process
          *
-         * @returns tid as number
+         * @returns { number } tid as number
          */
         static get tid(): number {
             return process.getTidImpl();
@@ -351,7 +351,7 @@ export namespace StdProcess {
         /**
          * Determine if the current process is isolated
          *
-         * @returns boolean value indicating if the current process is isolated
+         * @returns { boolean } value indicating if the current process is isolated
          */
         static isIsolatedProcess(): boolean {
             throw new Error("not implemented");
@@ -360,21 +360,21 @@ export namespace StdProcess {
         /**
          * Determine if the current process is a 64-bit process
          *
-         * @returns boolean value indicating if the current process is a 64-bit process
+         * @returns { boolean } value indicating if the current process is a 64-bit process
          */
         static native is64Bit(): boolean;
 
         /**
          * Get start time of the current process
          *
-         * @returns current process's start time milliseconds as number
+         * @returns { number } current process's start time milliseconds as number
          */
         static native getStartRealtime(): number;
 
         /**
          * Get past cpu time of the current process
          *
-         * @returns current process's past cpu time in milliseconds as number
+         * @returns { number } current process's past cpu time in milliseconds as number
          */
         static native getPastCpuTime(): number;
 
@@ -382,11 +382,11 @@ export namespace StdProcess {
         /**
          * Create a child process to execute a given command
          *
-         * @param command command to execute
+         * @param { string } command command to execute
          *
-         * @param options specifies timeout, kill signal and maximum buffer size for child process created
+         * @param { ConditionType } [options] specifies timeout, kill signal and maximum buffer size for child process created
          *
-         * @returns instance of ChildProcess
+         * @returns { ChildProcess } instance of ChildProcess
          *
          */
         public static runCmd(command: string, options?: ConditionType): ChildProcess {
@@ -405,9 +405,9 @@ export namespace StdProcess {
         /**
          * Store user-triggered event
          *
-         * @param type type of storage event
+         * @param { string } type type of storage event
          *
-         * @param listener callback for event handling
+         * @param { EventListener } listener callback for event handling
          *
          */
         static on(type: string, listener: EventListener): void {
@@ -425,9 +425,9 @@ export namespace StdProcess {
         /**
          * Remove user-triggered event
          *
-         * @param type type of storage event
+         * @param { string } type type of storage event
          *
-         * @returns boolean indicating if the event has been removed successfully
+         * @returns { boolean } indicating if the event has been removed successfully
          *
          */
         static off(type: string): boolean {
@@ -445,7 +445,7 @@ export namespace StdProcess {
         /**
          * Get the current working directory of the program
          *
-         * @returns current working directory as string
+         * @returns { string } current working directory as string
          *
          */
         static native cwd(): string;
@@ -453,7 +453,7 @@ export namespace StdProcess {
         /**
          * Change the current working directory of the program
          *
-         * @param path working directory
+         * @param { string } path working directory
          *
          */
         static native chdir(path: string): void;
@@ -461,7 +461,7 @@ export namespace StdProcess {
         /**
         * Get the system uptime
         *
-        * @returns uptime in milliseconds as number
+        * @returns { number } uptime in milliseconds as number
         *
         */
         static native uptime(): number;
@@ -507,7 +507,7 @@ export namespace StdProcess {
          * This method updates handler that is applied to
          * unhandled failed jobs at the program exit
          *
-         * @param listener user-provided handler
+         * @param { EventListener } listener user-provided handler
          *
          */
         private static setFailedJobHandler(listener: EventListener): void {
@@ -518,7 +518,7 @@ export namespace StdProcess {
          * This method updates handler that is applied to
          * unhandled rejected promises at the program exit
          *
-         * @param listener user-provided handler
+         * @param { EventListener } listener user-provided handler
          *
          */
         private static setRejectedPromiseHandler(listener: EventListener): void {
@@ -530,7 +530,7 @@ export namespace StdProcess {
          * This method applies default or user-provided handler to
          * all unhandled failed job results
          *
-         * @param errors results of failed jobs
+         * @param { Object[] } errors results of failed jobs
          *
          */
         private static listUnhandledJobs(errors: Object[]): void {
@@ -543,7 +543,7 @@ export namespace StdProcess {
          * This method applies default or user-provided handler to
          * all unhandled rejected promise results
          *
-         * @param errors results of rejected promises
+         * @param { Object[] } errors results of rejected promises
          *
          */
         public static listUnhandledPromises(errors: NullishType[]): void {

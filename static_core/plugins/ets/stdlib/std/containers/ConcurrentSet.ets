@@ -30,7 +30,7 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
 
     /**
      * Constructs a ConcurrentSet from ArrayLike
-     * @param values initial ArrayLike
+     * @param { ArrayLike<T> } values initial ArrayLike
      */
     constructor(values: ArrayLike<T> ) {
         this.elements = new ConcurrentHashMap<T, T>();
@@ -41,7 +41,7 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
 
     /**
      * Constructs a ConcurrentSet from iterator
-     * @param iterable initial iterable
+     * @param { Iterable<T> } iterable initial iterable
      */
     constructor(iterable: Iterable<T>) {
         const it = (iterable as Iterable<T>).$_iterator();
@@ -51,7 +51,7 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
 
     /**
      * Constructs a ConcurrentSet from a Set
-     * @param set another Set
+     * @param { Set<T> } set another Set
      */
     constructor(set: Set<T>) {
         this.elements = new ConcurrentHashMap<T, T>();
@@ -77,6 +77,11 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
         return strBuf.toString();
     }
 
+    /**
+     * Creates a string representation of the CoucurrentSet
+     *
+     * @returns { String } string representation
+     */
     public override toString(): String {
         return "ConcurrentSet[" + this.toStringVals() + "]";
     }
@@ -84,8 +89,8 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Puts a value into the ConcurrentSet
      *
-     * @param val the value to put into the ConcurrentSet
-     * @returns this
+     * @param { T } val the value to put into the ConcurrentSet
+     * @returns { this } this
      */
     public add(val: T): this {
         this.elements.set(val, val);
@@ -95,9 +100,9 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Checks if a value is in the ConcurrentSet.
      *
-     * @param val the value to find in the ConcurrentSet.
+     * @param { T } val the value to find in the ConcurrentSet.
      *
-     * @returns true if the value is in the ConcurrentSet.
+     * @returns { boolean } true if the value is in the ConcurrentSet.
      */
     public override has(val: T): boolean {
         return this.elements.has(val);
@@ -106,7 +111,7 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Returns number of unique elements in the ConcurrentSet.
      *
-     * @returns number of unique elements in the ConcurrentSet.
+     * @returns { number } number of unique elements in the ConcurrentSet.
      */
     public override get size(): number {
         return this.elements.size;
@@ -115,9 +120,9 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Removes a value from the ConcurrentSet.
      *
-     * @param val the value to remove
+     * @param { T } val the value to remove
      *
-     * @returns true if the delete operation is success, otherwise false.
+     * @returns { boolean } true if the delete operation is success, otherwise false.
      */
     public delete(val: T): boolean {
         return this.elements.delete(val);
@@ -133,7 +138,7 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Despite name, returns elements from the ConcurrentSet
      *
-     * @returns an iterable of the values in the ConcurrentSet
+     * @returns { IterableIterator<T> } an iterable of the values in the ConcurrentSet
      */
     public override keys(): IterableIterator<T> {
         return this.elements.keys();
@@ -142,18 +147,23 @@ export final class ConcurrentSet<T> implements ReadonlySet<T> {
     /**
      * Returns elements from the ConcurrentSet
      *
-     * @returns an iterable of the values in the ConcurrentSet
+     * @returns { IterableIterator<T> } an iterable of the values in the ConcurrentSet
      */
     public override values(): IterableIterator<T> {
         return this.elements.keys();
     }
 
+    /**
+     * Iterable interface implementation
+     *
+     * @returns { IterableIterator<T> } iterator over all elements
+     */
     public override $_iterator(): IterableIterator<T> {
         return this.values();
     }
 
     /**
-     * @returns an iterable of [v,v] pairs for every value `v` in the ConcurrentSet.
+     * @returns { IterableIterator<[T, T]> } an iterable of [v,v] pairs for every value `v` in the ConcurrentSet.
      */
     public override entries(): IterableIterator<[T, T]> {
         return this.elements.entries();

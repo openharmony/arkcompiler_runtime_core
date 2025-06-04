@@ -19,7 +19,11 @@ package std.containers;
  * ArrayBlockingQueue implementation
  */
 export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
-
+    /**
+     * Constructs a LinkedBlockingQueue with provided capaity.
+     *
+     * @param { int } capacity capacity of the container
+     */
     constructor(capacity: int) {
         if (capacity <= 0) {
             throw new RangeError("Invalid capacity for ArrayBlockingQueue's constructor.");
@@ -30,6 +34,12 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         this.condVar = ConcurrencyHelpers.condVarCreate();
     }
 
+    /**
+     * Constructs a LinkedBlockingQueue with provided capaity from iterable.
+     *
+     * @param { int } capacity capacity of the container
+     * @param { Iterable<T> } iterable some iterable
+     */
     constructor(capacity: int, iterable: Iterable<T>) {
         if (capacity <= 0) {
             throw new RangeError("Invalid capacity for ArrayBlockingQueue's constructor.");
@@ -49,7 +59,11 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         }
     }
 
-    // Inserts element at the end.
+    /**
+     * Inserts element at the end.
+     *
+     * @param { T } el element to insert
+     */
     override push(el: T): void {
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.waitUntilQueueIsNotFull();
@@ -59,8 +73,12 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
-    // Removes and returns the first element in a ArrayBlockingQueue.
-    // If the ArrayBlockingQueue is empty then wait method is called.
+    /**
+     * Removes and returns the first element in a ArrayBlockingQueue.
+     * If the ArrayBlockingQueue is empty then wait method is called.
+     *
+     * @returns { T } the removed element
+     */
     override pop(): T {
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.waitUntilQueueIsNotEmpty();
@@ -77,9 +95,9 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * The insert operation. Return true upon success and false if no space is currently available, no blocking.
      *
-     * @param element the element inserted to the BlockingQueue
+     * @param { T } element the element inserted to the BlockingQueue
      *
-     * @returns T True upon success and false if no space is currently available.
+     * @returns { boolean } True upon success and false if no space is currently available.
      */
     override add(element: T): boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -100,7 +118,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
      * The poll operation. Pop one element and return it if the queue is not empty.
      * Return null when the queue is empty. No blocking.
      *
-     * @returns Return the deleted element or null.
+     * @returns { T | null } Return the deleted element or null.
      */
     override poll(): T | null {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -120,7 +138,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the first element in a BlockingQueue.
      *
-     * @returns T | null The first element or null.
+     * @returns { T | null } The first element or null.
      */
     override getFirst(): T | null {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -138,7 +156,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the end element in a ArrayBlockingQueue.
      *
-     * @returns return the end element or null.
+     * @returns { T | null } return the end element or null.
      */
     public getEnd(): T | null {
         ConcurrencyHelpers.mutexLock(this.mutex);
@@ -157,7 +175,11 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         }
     }
 
-    // Returns size of a ArrayBlockingQueue.
+    /**
+     * Returns size of a ArrayBlockingQueue.
+     *
+     * @returns { int } size
+     */
     override get size(): int {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
@@ -176,7 +198,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Checks if the BlockingQueue is empty.
      *
-     * @returns boolean True if a BlockingQueue has no elements, otherwise false.
+     * @returns { boolean } True if a BlockingQueue has no elements, otherwise false.
      */
     override isEmpty(): boolean {
         return this.size == 0;
@@ -185,7 +207,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the capacity of a BlockingQueue.
      *
-     * @returns int The capacity of the BlockingQueue.
+     * @returns { int } The capacity of the BlockingQueue.
      */
     override get capacity(): int {
         return this.capacitySize;
@@ -194,7 +216,7 @@ export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the number of additional elements that this queue can ideally accept without blocking.
      *
-     * @returns int The capacity of the BlockingQueue.
+     * @returns { int } The capacity of the BlockingQueue.
      */
     override remainingCapacity(): int {
         return this.capacitySize - this.size;

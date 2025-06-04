@@ -48,7 +48,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Constructs a LinkedBlockingQueue with the capacity.
      *
-     * @param capacity the capacity of LinkedBlockingQueue
+     * @param { int } capacity the capacity of LinkedBlockingQueue
      */
     constructor(capacity: int) {
         if (capacity <= 0) {
@@ -66,7 +66,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Constructs a LinkedBlockingQueue with the Iterable.
      *
-     * @param iterable the Iterable of LinkedBlockingQueue
+     * @param { Iterable<T> } iterable the Iterable of LinkedBlockingQueue
      */
     constructor(iterable: Iterable<T>) {
         this.actualCapacity = Int.MAX_VALUE;
@@ -90,8 +90,8 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Constructs a LinkedBlockingQueue with the Iterable.
      *
-     * @param capacity the capacity of LinkedBlockingQueue
-     * @param iterable the Iterable of LinkedBlockingQueue
+     * @param { int } capacity the capacity of LinkedBlockingQueue
+     * @param { Iterable<T> } iterable the Iterable of LinkedBlockingQueue
      */
     constructor(capacity: int , iterable: Iterable<T>) {
         if (capacity <= 0) {
@@ -116,9 +116,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Inserts element at the end. If the queue is full, blocking.
      *
-     * @param element the element pushed to the BlockingQueue
-     *
-     * @returns void
+     * @param { T } element the element pushed to the BlockingQueue
      */
     override push(element: T): void {
         ConcurrencyHelpers.mutexLock(this.pushMutex);
@@ -135,7 +133,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
      * pop() is remove operation and returns T
      * If the BlockingQueue is empty, blocking.
      *
-     * @returns T The first element.
+     * @returns { T } The first element.
      */
     override pop(): T {
         ConcurrencyHelpers.mutexLock(this.popMutex);
@@ -157,9 +155,9 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * The insert operation. Return true upon success and false if no space is currently available, no blocking.
      *
-     * @param element the element inserted to the BlockingQueue
+     * @param { T } element the element inserted to the BlockingQueue
      *
-     * @returns T True upon success and false if no space is currently available.
+     * @returns { boolean } True upon success and false if no space is currently available.
      */
     override add(element: T): boolean {
         if (this.atomicsGetSize() == this.actualCapacity) {
@@ -186,7 +184,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
      * The poll operation. Pop one element and return it if the queue is not empty.
      * Return null when the queue is empty. No blocking.
      *
-     * @returns Return the deleted element or null.
+     * @returns { T | null } Return the deleted element or null.
      */
     override poll(): T | null {
         if (this.atomicsGetSize() == 0) {
@@ -214,7 +212,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the first element in a BlockingQueue.
      *
-     * @returns return the first element or null.
+     * @returns { T | null } return the first element or null.
      */
     override getFirst(): T | null {
         ConcurrencyHelpers.mutexLock(this.popMutex);
@@ -232,7 +230,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the end element in a LinkedBlockingQueue.
      *
-     * @returns return the end element or null.
+     * @returns { T | null } return the end element or null.
      */
     public getEnd(): T | null {
         ConcurrencyHelpers.mutexLock(this.pushMutex);
@@ -250,7 +248,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Checks if the BlockingQueue is empty.
      *
-     * @returns boolean True if a BlockingQueue has no elements, otherwise false.
+     * @returns { boolean } True if a BlockingQueue has no elements, otherwise false.
      */
     override isEmpty(): boolean {
         return this.atomicsGetSize() == 0;
@@ -259,7 +257,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the size of a BlockingQueue.
      *
-     * @returns int The size of the BlockingQueue.
+     * @returns { int } The size of the BlockingQueue.
      */
     override get size(): int {
         return this.atomicsGetSize();
@@ -268,7 +266,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the capacity of a BlockingQueue.
      *
-     * @returns int The capacity of the BlockingQueue.
+     * @returns { int } The capacity of the BlockingQueue.
      */
     override get capacity(): int {
         return this.actualCapacity;
@@ -277,7 +275,7 @@ export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Returns the number of additional elements that this queue can ideally accept without blocking.
      *
-     * @returns int The capacity of the BlockingQueue.
+     * @returns { int } The capacity of the BlockingQueue.
      */
     override remainingCapacity(): int {
         return (this.actualCapacity - this.atomicsGetSize()) as int;
