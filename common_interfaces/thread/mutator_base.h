@@ -269,6 +269,17 @@ public:
 
     void MutatorBaseUnlock() { mutatorBaseLock_.unlock(); }
 
+    void RegisterJSThread(void *jsThread)
+    {
+        CHECK_CC(jsThread_ == nullptr);
+        jsThread_ = jsThread;
+    }
+
+    void UnregisterJSThread()
+    {
+        jsThread_ = nullptr;
+    }
+
 private:
     // Indicate the current mutator phase and use which barrier in concurrent gc
     // ATTENTION: THE LAYOUT FOR GCPHASE MUST NOT BE CHANGED!
@@ -294,6 +305,9 @@ private:
 
     // This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
     void *mutator_ {nullptr};
+
+    // used to synchronize cmc-gc phase to JSThread
+    void *jsThread_ {nullptr};
 
     friend Mutator;
     friend panda::ThreadHolder;
