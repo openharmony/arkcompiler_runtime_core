@@ -26,6 +26,8 @@ function main() {
     suite.addTest("Stack forEach with function with value and index", testForEachWithValueAndIndex);
     suite.addTest("Stack forEach with function with value, index and stack", testForEachWithValueIndexAndStack);
     suite.addTest("Stack forEach with changing the elements", testForEachWithChangingElements);
+    suite.addTest("Stack isEmpty with empty container", testIsEmptyWithEmpty);
+    suite.addTest("Stack isEmpty with non-empty container", testIsEmptyWithNonEmpty);
     suite.addTest("Stack iterate with empty stack", testIteratorWithEmptyStack);
     suite.addTest("Stack iterate", testIterator);
     suite.addTest("Stack interface composition testing", testInterfaceComposition);
@@ -140,6 +142,17 @@ function testForEachWithChangingElements() {
         assertEQ(value, TestData.forNumber[forEachCount], "ForEach should iterate elements in correct order");
         forEachCount++;
     });
+}
+
+function testIsEmptyWithEmpty() {
+    let stack = new Stack<number>();
+    arktest.assertTrue(stack.isEmpty(), "The container should be empty");
+}
+
+function testIsEmptyWithNonEmpty() {
+    let stack = new Stack<number>();
+    initializeStack(stack, TestData.forNumber);
+    arktest.assertFalse(stack.isEmpty(), "The container should not be empty");
 }
 
 function testIteratorWithEmptyStack() {
