@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -328,7 +328,7 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const 
     // We call this method and return pools to the system.
     // Therefore, delete all objects to clear all external dependences
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Clear all objects inside the allocator";
-    memoryPool_.VisitAllPools(memVisitor);
+    memoryPool_.VisitAndRemoveAllPools(memVisitor);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -674,7 +674,7 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::IterateOverOb
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAllPools(const MemVisitor &memVisitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
     os::memory::WriteLockHolder wlock(lock_);
     PoolListElement *currentPool = occupiedTail_;
@@ -684,6 +684,15 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAllPools
         memVisitor(currentPool->GetPoolMemory(), currentPool->GetSize());
         currentPool = tmp;
     }
+    occupiedTail_ = nullptr;
+    currentPool = freeTail_;
+    while (currentPool != nullptr) {
+        // Use tmp in case if visitor with side effects
+        PoolListElement *tmp = currentPool->GetPrev();
+        memVisitor(currentPool->GetPoolMemory(), currentPool->GetSize());
+        currentPool = tmp;
+    }
+    freeTail_ = nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
