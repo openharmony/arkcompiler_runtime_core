@@ -41,6 +41,9 @@ function main(): int {
     suite.addTest("Test get Blob constructor Int16Array", testBlobToArrayInt16Array)
     suite.addTest("Test get Blob constructor Uint16Array", testBlobToArrayUint16Array)
     suite.addTest("Test get Blob constructor Uint8Array with options", testBlobToArrayUint8ArrayOptions)
+    suite.addTest("Test get Blob constructor for string[]", testBlobToBuiltInStringArray)
+    suite.addTest("Test get Blob constructor from empty", testBlobFromEmpty)
+    suite.addTest("Test get Blob constructor from arrays with negative values", testBlobNegative)
 
     return suite.run()
 }
@@ -202,6 +205,7 @@ function testBlobToArrayBuffer() {
     assertEQ(ArrayBuffer.stringify(arrayBufferFromBlob, 'utf8', 0, arrayBufferFromBlob.getByteLength()), text)
 }
 
+//testBlobSize0003
 function testBlobToArrayString() {
     let sources = ["测试", "$#", "c"];
     let blob = new buffer.Blob(sources)
@@ -288,3 +292,136 @@ function testBlobToArrayUint8ArrayOptions() {
     let text = await blob.text()
     assertEQ(text, "abc")
 }
+
+function testBlobToBuiltInStringArray() {
+    let src: string[] = ["1", "2", "3", "4", "5"]
+    let blob = new buffer.Blob(src)
+    let text = await blob.text()
+    assertEQ(text, "12345")
+}
+
+function testBlobFromEmpty() {
+    {
+        let src: string[] = []
+        let blob = new buffer.Blob(src)
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new Uint8Array(0);
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new Uint16Array(0)
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new Int16Array(0)
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new Int8Array(0)
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new Uint8ClampedArray(0)
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+    {
+        let src = new ArrayBuffer(0)
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+
+    {
+        let src = new DataView(new ArrayBuffer(0));
+        let blob = new buffer.Blob([src])
+        let text = await blob.text()
+        assertEQ(text, "")
+        assertEQ(blob.size, 0)
+        assertEQ(blob.type, "")
+    }
+}
+
+function testBlobNegative() {
+    {
+        let int16 = new Int16Array(2);
+        int16 [0] = -100;
+        int16 [1] = -101;
+        let blob = new buffer.Blob([int16]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 4)
+    }
+    {
+        let src = new Int8Array(2);
+        src[0] = -100;
+        src[1] = -101;
+        let blob = new buffer.Blob([src]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 2)
+    }
+    {
+        let src = new Int32Array(2);
+        src[0] = -100;
+        src[1] = -101;
+        let blob = new buffer.Blob([src]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 8)
+    }
+    {
+        let src = new Float32Array(2);
+        src[0] = -100;
+        src[1] = -101;
+        let blob = new buffer.Blob([src]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 8)
+    }
+    {
+        let src = new Float64Array(2);
+        src[0] = -100;
+        src[1] = -101;
+        let blob = new buffer.Blob([src]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 16)
+    }
+    {
+        let src = new BigInt64Array(2);
+        src[0] = -100;
+        src[1] = -101;
+        let blob = new buffer.Blob([src]);
+        let size = blob.size;
+        assertEQ(blob.type, "")
+        assertEQ(size, 16)
+    }
+}
+

@@ -82,6 +82,9 @@ function main(): int {
     suite.addTest("Test string write wrong offset", testBufferWriteStringWrongOffset)
     suite.addTest("Test string write out range offset", testBufferWriteStringOutRangeOffset)
     suite.addTest("Test string write out range length", testBufferWriteStringOutRangeLength)
+    suite.addTest("Test buffer from string in base64", testBufferFrom40002)
+    suite.addTest("Test buffer from string in utf8", testBufferFrom30006)
+    suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
 
     return suite.run()
 }
@@ -819,4 +822,25 @@ function testBufferWriteStringOutRangeLength() {
     expectError(() => {
         buf.write("abcdefg", 3, -1);
     }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
+}
+
+function testBufferFrom40002() {
+    let buf = buffer.from('abc', 'base64');
+    assertEQ(buf.toString(), 'i·')
+    assertEQ(buf.length, 2);
+    assertEQ(buf.toString('base64'), 'abc=');
+}
+
+function testBufferFrom30006() {
+    let buf = buffer.from(new String('this is a test'), 'utf8', -1);
+    assertEQ(buf.length, 14);
+    assertEQ(buf.toString(), 'this is a test');
+}
+
+function testBufferBase64Url() {
+    const src = new Uint8Array([250, 251, 252, 253, 254, 255])
+    const encodeStr = buffer.from(src).toString("base64url")
+    assertEQ(encodeStr, "-vv8_f7_")
+    const bytesLength = buffer.byteLength(encodeStr, "base64url") as int
+    assertEQ(bytesLength, 6)
 }
