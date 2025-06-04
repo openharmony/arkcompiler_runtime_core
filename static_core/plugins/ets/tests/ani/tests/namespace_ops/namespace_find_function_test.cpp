@@ -132,4 +132,16 @@ TEST_F(NamespaceFindFunctionTest, duplicate_no_signature)
     ani_function fn {};
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "overloaded", nullptr, &fn), ANI_AMBIGUOUS);
 }
+
+TEST_F(NamespaceFindFunctionTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.fnns", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test.fnns"));
+    ani_function fn {};
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getInitialIntValue", ":i", &fn), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_function_test.fnns"));
+}
+
 }  // namespace ark::ets::ani::testing

@@ -176,6 +176,18 @@ TEST_F(VariableSetValueLongTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Long(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueLongTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "longValue", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_long_test.anyns"));
+    const ani_long x = 88L;
+    ASSERT_EQ(env_->Variable_SetValue_Long(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_long_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

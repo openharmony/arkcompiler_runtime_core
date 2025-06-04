@@ -399,6 +399,34 @@ TEST_F(FunctionCallDoubleTest, function_call_double_010)
     ASSERT_EQ(env_->Function_Call_Double(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Double_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallDoubleTest, check_initialization_double)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_double_test.ops"));
+    ani_double result {};
+    ASSERT_EQ(env_->Function_Call_Double(fn, &result, VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_double_test.ops"));
+}
+
+TEST_F(FunctionCallDoubleTest, check_initialization_double_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_double_test.ops"));
+    ani_double result {};
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+    ASSERT_EQ(env_->Function_Call_Double_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_double_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -116,4 +116,15 @@ TEST_F(NamespaceFindVariableTest, invalid_args_result)
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "s", nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(NamespaceFindVariableTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_variable_test.anyns"));
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "x", &variable), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_variable_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing

@@ -147,5 +147,21 @@ TEST_F(ClassSetStaticFieldByNameIntTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Int(nullptr, cls, "int_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameIntTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_int_test.PackstaticFinal", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_int_test.PackstaticFinal"));
+    const ani_int intValue = 24;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_valuex", intValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_int_test.PackstaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Int(cls, "int_value", intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_int_test.PackstaticFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

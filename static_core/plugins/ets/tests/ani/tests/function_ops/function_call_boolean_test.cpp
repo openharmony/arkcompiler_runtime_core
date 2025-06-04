@@ -385,6 +385,34 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_010)
     ASSERT_EQ(env_->Function_Call_Boolean(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Boolean_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallBooleanTest, check_initialization_bool)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, &result, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+}
+
+TEST_F(FunctionCallBooleanTest, check_initialization_bool_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+    ani_boolean result = ANI_FALSE;
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -143,6 +143,22 @@ TEST_F(ClassGetStaticFieldByNameLongTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_by_name_long_test/PackageStaticFinal;", "long_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameLongTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_long_test.GetLongStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+    ani_long longValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "agex", &longValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Long(cls, "age", &longValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_long_test.GetLongStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

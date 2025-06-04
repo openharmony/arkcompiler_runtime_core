@@ -586,6 +586,38 @@ TEST_F(ObjectNewTest, object_new_v_normal_method_loop)
         TestObjectNewV(env_, cls, newTestMethod, tag, animalRef);
     }
 }
+
+TEST_F(ObjectNewTest, check_initialization)
+{
+    ani_class cls {};
+    ani_method ctor {};
+    ani_string model {};
+    ani_int weight = 0;
+    GetTestData(&cls, &ctor, &model, &weight);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+    ani_object phone {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &phone, model, weight), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+}
+
+TEST_F(ObjectNewTest, check_initialization_a)
+{
+    ani_class cls {};
+    ani_method ctor {};
+    ani_string model {};
+    ani_int weight = 0;
+    GetTestData(&cls, &ctor, &model, &weight);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+    ani_value args[2U];
+    args[0U].r = model;
+    args[1U].i = weight;
+    ani_object phone {};
+    ASSERT_EQ(env_->Object_New_A(cls, ctor, &phone, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("object_new_test.MobilePhone"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, readability-magic-numbers, modernize-avoid-c-arrays)

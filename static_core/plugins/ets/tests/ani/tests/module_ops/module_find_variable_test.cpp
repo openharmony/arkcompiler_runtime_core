@@ -316,5 +316,16 @@ TEST_F(ModuleFindVariableTest, combine_test_ref)
     ASSERT_STREQ(str.c_str(), "hello");
 }
 
+TEST_F(ModuleFindVariableTest, check_initialization)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_variable_test", &module), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_variable_test", false));
+    ani_variable variable {};
+    ASSERT_EQ(env_->Module_FindVariable(module, "moduleXS", &variable), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_variable_test", false));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

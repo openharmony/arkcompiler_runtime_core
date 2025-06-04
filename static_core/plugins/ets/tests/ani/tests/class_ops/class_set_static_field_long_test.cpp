@@ -159,6 +159,21 @@ TEST_F(ClassSetStaticFieldLongTest, combination_test3)
 {
     CheckFieldValue("Lclass_set_static_field_long_test/TestSetLongFinal;", "long_value");
 }
+
+TEST_F(ClassSetStaticFieldLongTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_long_test.TestSetLongFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "long_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_long_test.TestSetLongFinal"));
+    const ani_long longValue = 20L;
+    ASSERT_EQ(env_->Class_SetStaticField_Long(cls, field, longValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_long_test.TestSetLongFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

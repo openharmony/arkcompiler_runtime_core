@@ -444,5 +444,41 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "callPrivateMethod", "ZZ:Z", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, ANI_FALSE);
 }
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization_boolean)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+    ani_boolean value {};
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "publicMethodx", "zz:z", &value, ANI_TRUE, ANI_FALSE),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "publicMethod", "zz:z", &value, ANI_TRUE, ANI_FALSE),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization_boolean_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+    ani_boolean value {};
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethodx", "zz:z", &value, args), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethod", "zz:z", &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

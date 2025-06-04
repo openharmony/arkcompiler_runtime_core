@@ -394,5 +394,41 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_co
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "callPrivateMethod", "FF:F", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, FLOAT_VAL2 - FLOAT_VAL1);
 }
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization_float)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+    ani_float value {};
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "publicMethodx", "ff:f", &value, FLOAT_VAL1, FLOAT_VAL2),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "publicMethod", "ff:f", &value, FLOAT_VAL1, FLOAT_VAL2),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization_float_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+    ani_float value {};
+    ani_value args[2U];
+    args[0U].d = FLOAT_VAL1;
+    args[1U].d = FLOAT_VAL1;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethodx", "ff:f", &value, args), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethod", "ff:f", &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

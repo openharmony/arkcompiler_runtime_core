@@ -172,6 +172,21 @@ TEST_F(ClassSetStaticFieldFloatTest, combination_test3)
 {
     CheckFieldValue("Lclass_set_static_field_float_test/TestSetFloatFinal;", "float_value");
 }
+
+TEST_F(ClassSetStaticFieldFloatTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_float_test.TestSetFloatFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "float_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_float_test.TestSetFloatFinal"));
+    const ani_float floatValue = 20.03F;
+    ASSERT_EQ(env_->Class_SetStaticField_Float(cls, field, floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_float_test.TestSetFloatFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

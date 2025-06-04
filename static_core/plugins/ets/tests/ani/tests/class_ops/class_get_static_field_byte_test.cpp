@@ -185,6 +185,21 @@ TEST_F(ClassGetStaticFieldByteTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_byte_test/TestByteFinal;", "byte_value");
 }
+
+TEST_F(ClassGetStaticFieldByteTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_byte_test.TestByteFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "byte_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_byte_test.TestByteFinal"));
+    ani_byte byteValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Byte(cls, field, &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_byte_test.TestByteFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

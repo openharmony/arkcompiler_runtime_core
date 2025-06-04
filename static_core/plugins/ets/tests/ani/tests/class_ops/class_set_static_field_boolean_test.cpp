@@ -171,5 +171,19 @@ TEST_F(ClassSetStaticFieldBooleanTest, combination_test4)
 {
     CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBooleanFinal;", "bool_value");
 }
+
+TEST_F(ClassSetStaticFieldBooleanTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_boolean_test.TestSetBoolean", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_boolean_test.TestSetBoolean"));
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_FALSE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_boolean_test.TestSetBoolean"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

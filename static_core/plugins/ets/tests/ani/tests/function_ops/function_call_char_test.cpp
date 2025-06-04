@@ -399,6 +399,34 @@ TEST_F(FunctionCallCharTest, function_call_char_010)
     ASSERT_EQ(env_->Function_Call_Char(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Char_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallCharTest, check_initialization_char)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_char_test.ops"));
+    ani_char result {};
+    ASSERT_EQ(env_->Function_Call_Char(fn, &result, CHAR_VAL1, CHAR_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_char_test.ops"));
+}
+
+TEST_F(FunctionCallCharTest, check_initialization_char_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_char_test.ops"));
+    ani_char result {};
+    ani_value args[2U];
+    args[0U].c = CHAR_VAL1;
+    args[1U].c = CHAR_VAL2;
+    ASSERT_EQ(env_->Function_Call_Char_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_char_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

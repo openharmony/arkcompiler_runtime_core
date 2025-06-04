@@ -267,5 +267,19 @@ TEST_F(ModuleFindClassTest, find_generic_class)
     ASSERT_EQ(env_->Object_CallMethod_Void(object, method, testIntObject), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
+
+TEST_F(ModuleFindClassTest, check_initialization)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_class_test", false));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_class_test.ATest"));
+    ani_class cls {};
+    ASSERT_EQ(env_->Module_FindClass(module, "ATest", &cls), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_class_test.ATest"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_class_test", false));
+}
+
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 }  // namespace ark::ets::ani::testing

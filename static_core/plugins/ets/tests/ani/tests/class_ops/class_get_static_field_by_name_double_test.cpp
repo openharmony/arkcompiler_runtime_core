@@ -148,6 +148,22 @@ TEST_F(ClassGetStaticFieldByNameDoubleTest, combination_test4)
 {
     CheckFieldValue("Lclass_get_static_field_by_name_double_test/DoubleStaticFinal;", "double_value");
 }
+
+TEST_F(ClassGetStaticFieldByNameDoubleTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_double_test.Woman", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_double_test.Woman"));
+    ani_double doubleValue {};
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Double(cls, "agex", &doubleValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_double_test.Woman"));
+
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Double(cls, "age", &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_double_test.Woman"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -140,4 +140,18 @@ TEST_F(NamespaceFindEnumTest, find_enum_same_name)
     ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColor;", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 }
+
+TEST_F(NamespaceFindEnumTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_enum_test.enumns"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_enum_test.enumns.Color"));
+    ani_enum en {};
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "Color", &en), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_enum_test.enumns.Color"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_enum_test.enumns"));
+}
+
 }  // namespace ark::ets::ani::testing

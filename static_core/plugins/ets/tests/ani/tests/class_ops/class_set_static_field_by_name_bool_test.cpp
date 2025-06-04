@@ -142,5 +142,20 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "\n", ANI_TRUE), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Boolean(nullptr, cls, "bool_value", ANI_TRUE), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.BoolStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_valuex", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_value", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
