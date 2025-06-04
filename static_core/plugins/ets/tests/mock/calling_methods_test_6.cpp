@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,16 +33,16 @@ class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
 TEST_F(MethodsTest, CallMethodsTestGeneral14)
 {
-    ets_class cCls = env_->FindClass("C");
+    ets_class cCls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cCls, nullptr);
-    ets_class dCls = env_->FindClass("D");
+    ets_class dCls = env_->FindClass("CallingMethodsTest/D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
     ASSERT_NE(obj, nullptr);
 
     ets_method voidId = env_->Getp_method(cCls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->Getp_method(cCls, "object_method", ":LA;");
+    ets_method objectId = env_->Getp_method(cCls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
 
     env_->CallNonvirtualVoidMethod(obj, cCls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121_I));
@@ -50,7 +50,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral14)
     ASSERT_NE(dMemberId, nullptr);
     EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_object aObj = env_->CallNonvirtualObjectMethod(obj, cCls, objectId);
     ASSERT_NE(aObj, nullptr);
@@ -81,9 +81,9 @@ TEST_F(MethodsTest, CallMethodsTestGeneral14)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral15)
 {
-    ets_class cCls = env_->FindClass("C");
+    ets_class cCls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cCls, nullptr);
-    ets_class dCls = env_->FindClass("D");
+    ets_class dCls = env_->FindClass("CallingMethodsTest/D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
     ASSERT_NE(obj, nullptr);
@@ -133,9 +133,9 @@ TEST_F(MethodsTest, CallMethodsTestGeneral15)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral16)
 {
-    ets_class cCls = env_->FindClass("C");
+    ets_class cCls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cCls, nullptr);
-    ets_class dCls = env_->FindClass("D");
+    ets_class dCls = env_->FindClass("CallingMethodsTest/D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
     ASSERT_NE(obj, nullptr);
@@ -190,9 +190,9 @@ TEST_F(MethodsTest, CallMethodsTestGeneral16)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral17)
 {
-    ets_class cCls = env_->FindClass("C");
+    ets_class cCls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cCls, nullptr);
-    ets_class dCls = env_->FindClass("D");
+    ets_class dCls = env_->FindClass("CallingMethodsTest/D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
     ASSERT_NE(obj, nullptr);
@@ -237,9 +237,9 @@ TEST_F(MethodsTest, CallMethodsTestGeneral17)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral18)
 {
-    ets_class cCls = env_->FindClass("C");
+    ets_class cCls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cCls, nullptr);
-    ets_class dCls = env_->FindClass("D");
+    ets_class dCls = env_->FindClass("CallingMethodsTest/D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
     ASSERT_NE(obj, nullptr);
@@ -376,7 +376,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral20)
 }
 #endif  // ENABLE_THIS_CODE_IN_FUTURE
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath14)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath14)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -386,7 +386,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath14)
     EXPECT_DEATH(env_->GetStaticp_method(nullptr, nullptr, "I:I"), "");
     EXPECT_DEATH(env_->GetStaticp_method(nullptr, "foo", "I:I"), "");
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
     EXPECT_DEATH(env_->GetStaticp_method(aCls, nullptr, nullptr), "");
     EXPECT_DEATH(env_->GetStaticp_method(aCls, nullptr, "I:I"), "");

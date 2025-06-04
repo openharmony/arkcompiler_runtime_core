@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ enum class GCWorkersTaskTypes : uint32_t {
     TASK_EMPTY,
     TASK_MARKING,
     TASK_REMARK,
+    TASK_HUGE_ARRAY_MARKING_REMARK,
+    TASK_XREMARK,
     TASK_FULL_MARK,
     TASK_REGION_COMPACTING,
     TASK_RETURN_FREE_PAGES_TO_OS,
@@ -44,6 +46,10 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
             return "Marking task";
         case GCWorkersTaskTypes::TASK_REMARK:
             return "Remark task";
+        case GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK:
+            return "Huge array marking task during remark";
+        case GCWorkersTaskTypes::TASK_XREMARK:
+            return "XRemark task";
         case GCWorkersTaskTypes::TASK_FULL_MARK:
             return "Marking task for full collection";
         case GCWorkersTaskTypes::TASK_REGION_COMPACTING:
@@ -111,6 +117,7 @@ public:
     GCMarkWorkersTask(GCWorkersTaskTypes type, StackType *markingStack) : GCWorkersTask(type, markingStack)
     {
         ASSERT(type == GCWorkersTaskTypes::TASK_MARKING || type == GCWorkersTaskTypes::TASK_REMARK ||
+               type == GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK || type == GCWorkersTaskTypes::TASK_XREMARK ||
                type == GCWorkersTaskTypes::TASK_FULL_MARK);
     }
     DEFAULT_COPY_SEMANTIC(GCMarkWorkersTask);

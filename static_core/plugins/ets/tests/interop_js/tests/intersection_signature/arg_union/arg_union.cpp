@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,57 +22,57 @@ class EtsIntersectionArgUnionTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkArgFuFromSts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkArgFuFromSts"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkArgFuFromSts"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkIntersectionTypeClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIntersectionTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntersectionTypeClass"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkIntersectionClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIntersectionClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIntersectionClassMethod"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkCreateIntersectionClassTypeFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateIntersectionClassTypeFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateIntersectionClassTypeFromTs"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkCallMethodIntersectionClassTypeFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodIntersectionClassTypeFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodIntersectionClassTypeFromTs"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkInstanceIntersectionTypeClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceIntersectionTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceIntersectionTypeClass"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkChildIntersectionTypeClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildIntersectionTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildIntersectionTypeClass"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkChildIntersectionTypeClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildIntersectionTypeClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildIntersectionTypeClassMethod"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkCreateChildIntersectionClassTypeFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateChildIntersectionClassTypeFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateChildIntersectionClassTypeFromTs"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkCallMethodChildIntersectionClassTypeFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodChildIntersectionClassTypeFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodChildIntersectionClassTypeFromTs"));
 }
 
 TEST_F(EtsIntersectionArgUnionTsToEtsTest, checkInstanceChildIntersectionTypeClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceChildIntersectionTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceChildIntersectionTypeClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

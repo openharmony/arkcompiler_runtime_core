@@ -1,5 +1,5 @@
 # plugin interpreter_main_loop
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,12 +25,12 @@
   when "ETS_LAUNCH_VIRT_RANGE_PREF_V8_ID16"
     handle_ets_launch_virt_range(op[1], as_id(op[0]))
 
-  when "ETS_LDUNDEFINED_PREF_NONE"
-    handle_ets_ldundefined()
-  when "ETS_MOVUNDEFINED_PREF_V8"
-    handle_ets_movundefined(vreg_ptr(op[0]))
-  when "ETS_ISUNDEFINED_PREF_NONE"
-    handle_ets_isundefined()
+  when "ETS_LDNULLVALUE_PREF_NONE"
+    handle_ets_ldnullvalue()
+  when "ETS_MOVNULLVALUE_PREF_V8"
+    handle_ets_movnullvalue(vreg_ptr(op[0]))
+  when "ETS_ISNULLVALUE_PREF_NONE"
+    handle_ets_isnullvalue()
 
   when "ETS_LDOBJ_NAME_PREF_V8_ID32"
     handle_ets_ldobj_name_short(op[0], as_id(op[1]), i.format.size)
@@ -47,3 +47,16 @@
 
   when "ETS_EQUALS_PREF_V4_V4"
     handle_ets_equals(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+  when "ETS_STRICTEQUALS_PREF_V4_V4"
+    handle_ets_equals_strict(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+  when "ETS_TYPEOF_PREF_V8"
+    handle_ets_typeof(vreg_value(op[0]).ref)
+  when "ETS_ISTRUE_PREF_V8"
+    handle_ets_istrue(vreg_value(op[0]).ref)
+
+  when "ETS_CALL_NAME_SHORT_PREF_V4_V4_ID16"
+    handle_ets_call_name_short(op[1], op[2], as_id(op[0]), i.format.size)
+  when "ETS_CALL_NAME_PREF_V4_V4_V4_V4_ID16"
+    handle_ets_call_name_long(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
+  when "ETS_CALL_NAME_RANGE_PREF_V8_ID16"
+    handle_ets_call_name_range(op[1], as_id(op[0]), i.format.size)

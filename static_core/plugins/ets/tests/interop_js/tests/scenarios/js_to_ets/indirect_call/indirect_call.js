@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,23 @@
  */
 'use strict';
 
-function indirectCallTypeAny(arg) {
+export function indirectCallTypeAny(arg) {
 	return arg;
 }
 
-function indirectCallTypeLiteral(arg) {
+export function indirectCallTypeLiteral(arg) {
 	const SUFFIX = 'bar';
 	return arg + SUFFIX;
 }
 
-function indirectCallTypeExtraSet(tuple) {
+export function indirectCallTypeExtraSet(tuple) {
 	let [str, num] = tuple;
 	const SUFFIX = 'bar';
 
 	return [str + SUFFIX, num + 1];
 }
 
-class UserClass {
+export class UserClass {
 	method(arg) {
 		return arg;
 	}
@@ -47,35 +47,35 @@ class UserInterfaceImpl implements UserInterface {
 	}
 }
 
-function interfaceFunc(): UserInterface {
+export function interfaceFunc(): UserInterface {
 	let impl: UserInterface = new UserInterfaceImpl();
 	return impl;
 }
 */
-class UserInterfaceImpl {
+export class UserInterfaceImpl {
 	interfaceMethod(arg) {
 		return arg;
 	}
 }
 
-function interfaceFunc() {
+export function interfaceFunc() {
 	let impl = new UserInterfaceImpl();
 	return impl;
 }
 
-function indirectCallUnion(arg) {
+export function indirectCallUnion(arg) {
 	return arg;
 }
 
-function indirectCallTypeByRefArray(arg) {
+export function indirectCallTypeByRefArray(arg) {
 	return [...arg];
 }
 
-function indirectCallTypeByRefTuple(arg) {
+export function indirectCallTypeByRefTuple(arg) {
 	return [...arg];
 }
 
-function indirectCallTypeByRefMap(arg) {
+export function indirectCallTypeByRefMap(arg) {
 	const KEY = 'key2';
 	const VALUE = 2;
 
@@ -85,27 +85,14 @@ function indirectCallTypeByRefMap(arg) {
 	return result;
 }
 
-function indirectCallTypeByValueNumber(arg) {
+export function indirectCallTypeByValueNumber(arg) {
 	return +arg + +arg;
 }
 
-function indirectCallTypeByValueString(arg) {
+export function indirectCallTypeByValueString(arg) {
 	return ''.concat(arg, arg);
 }
 
-function indirectCallTypeByValueBoolean(arg) {
+export function indirectCallTypeByValueBoolean(arg) {
 	return !Boolean(arg);
 }
-
-exports.indirectCallTypeAny = indirectCallTypeAny;
-exports.indirectCallTypeLiteral = indirectCallTypeLiteral;
-exports.indirectCallTypeExtraSet = indirectCallTypeExtraSet;
-exports.UserClass = UserClass;
-exports.interfaceFunc = interfaceFunc;
-exports.indirectCallUnion = indirectCallUnion;
-exports.indirectCallTypeByRefArray = indirectCallTypeByRefArray;
-exports.indirectCallTypeByRefTuple = indirectCallTypeByRefTuple;
-exports.indirectCallTypeByRefMap = indirectCallTypeByRefMap;
-exports.indirectCallTypeByValueNumber = indirectCallTypeByValueNumber;
-exports.indirectCallTypeByValueString = indirectCallTypeByValueString;
-exports.indirectCallTypeByValueBoolean = indirectCallTypeByValueBoolean;

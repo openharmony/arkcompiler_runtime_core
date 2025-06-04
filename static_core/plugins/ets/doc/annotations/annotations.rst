@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -60,7 +60,7 @@ Multiple annotations can be applied to one declaration:
     class MyClass {/*body*/}
 
 
-As annotations is not |TS| feature in can be used only in ``.sts/.d.sts`` files.
+As annotations is not |TS| feature in can be used only in ``.ets/.d.ets`` files.
 
 |
 
@@ -272,7 +272,7 @@ To export an annotation its declaration must be marked with ``export`` keyword:
 .. code-block:: typescript
    :linenos:
 
-    // a.sts
+    // a.ets
     export @interface MyAnno {}
 
 An annotation can be imported as part of the imported module. In this case
@@ -281,7 +281,7 @@ it is accessed by qualified name:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import * as ns from "./a"
 
     @ns.MyAnno
@@ -292,7 +292,7 @@ Unqualified import is also allowed:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
@@ -323,12 +323,12 @@ The following cases are forbidden for annotations:
     import {MyAnno as Anno} from "./a" // compile-time error
 
 
-.. _Annotations in .d.sts Files:
+.. _Annotations in .d.ets Files:
 
-Annotations in .d.sts Files
+Annotations in .d.ets Files
 ===========================
 
-Ambient annotations can be declared in .d.sts file.
+Ambient annotations can be declared in .d.ets file.
 
 .. code-block:: abnf
 
@@ -347,10 +347,10 @@ including fields initialization:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface NameAnno{name: string = ""}
 
-    // a.sts
+    // a.ets
     export @interface NameAnno{name: string = ""} // ok
 
 The following example shows incorrect code,
@@ -359,10 +359,10 @@ as ambient declaration is not the same as annotation declaration:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface VersionAnno{version: number} // initialization is missing
 
-    // a.sts
+    // a.ets
     export @interface VersionAnno{version: number = 1}
 
 
@@ -371,16 +371,16 @@ An ambient declaration can be imported and used exactly the same way as a regula
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
     class C {/*body*/}
 
-If an annotation is applied to an ambient declaration in .d.sts file
+If an annotation is applied to an ambient declaration in .d.ets file
 (see the example below),
 it is not automatically applied to the declaration that implements
 this ambient declaration.
@@ -389,7 +389,7 @@ It is up to the developer to apply it to the implementation declaration.
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
 
     @MyAnno

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,8 @@ private:
     template <bool IS_NEWCALL>
     ALWAYS_INLINE std::optional<Value> ConvertRetval(napi_value jsRet);
 
+    napi_value HandleSpecialMethod(Span<napi_value> jsargs);
+
     NO_COPY_SEMANTIC(CallJSHandler);
     NO_MOVE_SEMANTIC(CallJSHandler);
 
@@ -135,10 +137,6 @@ ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
     if (UNLIKELY(!ArgSetup()(ctx_, this))) {
         return ForwardException(ctx_, coro_);
     }
-    if (UNLIKELY(GetValueType(env, jsFn_) != napi_function)) {
-        ctx_->ThrowJSTypeError(env, "call target is not a function");
-        return ForwardException(ctx_, coro_);
-    }
 
     std::optional<napi_value> jsRes = ConvertArgsAndCall<IS_NEWCALL>();
     if (UNLIKELY(!jsRes.has_value())) {
@@ -160,7 +158,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
     ASSERT(klass->IsArrayClass());
     LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
     auto compTy = klass->GetComponentType();
-    auto refConv = JSRefConvertResolve(ctx_, compTy);
+    // compTy comes from parameter type, thus maybe uninitialized
+    auto refConv = JSRefConvertResolve<true>(ctx_, compTy);
 
     auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetLength() + jsargs.size());
     for (uint32_t el = 0; el < jsargs.size(); ++el) {
@@ -187,11 +186,64 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
         }
     }
 
+    napi_value handlerResult = HandleSpecialMethod(*jsargs);
+    if (handlerResult) {
+        return handlerResult;
+    }
+
+    napi_env env = ctx_->GetJSEnv();
+    if (UNLIKELY(GetValueType(env, jsFn_) != napi_function)) {
+        ctx_->ThrowJSTypeError(env, "call target is not a function");
+        return std::nullopt;
+    }
+
     if (isVarArgs) {
         return ConvertVarargsAndCall<IS_NEWCALL>(readVal, *jsargs);
     }
 
     return CallConverted<IS_NEWCALL>(*jsargs);
+}
+
+napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
+{
+    napi_value handlerResult {};
+    napi_env env = ctx_->GetJSEnv();
+    const char *methodName = EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName();
+    if (methodName != nullptr && std::strlen(methodName) >= SETTER_GETTER_PREFIX_LENGTH) {
+        std::string content = std::string(methodName).substr(SETTER_GETTER_PREFIX_LENGTH);
+        if (std::strncmp(methodName, GETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            NAPI_CHECK_FATAL(napi_get_named_property(env, jsThis_, content.c_str(), &handlerResult));
+        } else if (std::strncmp(methodName, SETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            NAPI_CHECK_FATAL(napi_create_string_utf8(env, content.c_str(), NAPI_AUTO_LENGTH, &handlerResult));
+            NAPI_CHECK_FATAL(napi_set_property(env, jsThis_, handlerResult, jsargs[0]));
+            napi_get_undefined(env, &handlerResult);
+        } else if (std::strncmp(methodName, GET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            int32_t idx;
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+            NAPI_CHECK_FATAL(napi_get_element(env, jsThis_, idx, &handlerResult));
+        } else if (std::strncmp(methodName, SET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            int32_t idx;
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+            NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
+            napi_get_undefined(env, &handlerResult);
+        } else if (std::strncmp(methodName, ITERATOR_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            napi_value global;
+            NAPI_CHECK_FATAL(napi_get_global(env, &global));
+            napi_value symbol;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+            napi_value symbolIterator;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
+            napi_value iteratorMethod;
+            NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
+            if (GetValueType(env, iteratorMethod) == napi_undefined) {
+                NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
+                return handlerResult;
+            }
+            size_t jsArgc = 0;
+            NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
+        }
+    }
+    return handlerResult;
 }
 
 template <bool IS_NEWCALL>
@@ -218,7 +270,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_value jsRet)
 {
-    napi_env env = ctx_->GetJSEnv();
+    [[maybe_unused]] napi_env env = ctx_->GetJSEnv();
     Value etsRet;
     protoReader_.Reset();
 
@@ -247,9 +299,8 @@ static std::optional<std::pair<napi_value, napi_value>> ResolveQualifiedReceiver
 
     auto resolveName = [&jsThis, &jsVal, &env](const std::string &name) -> bool {
         jsThis = jsVal;
-        INTEROP_LOG(DEBUG) << "JSRuntimeCallJS: resolve name: " << name;
-        napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);
-        if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+
+        if (!NapiGetNamedProperty(env, jsVal, name.c_str(), &jsVal)) {
             ASSERT(NapiIsExceptionPending(env));
             return false;
         }
@@ -327,8 +378,8 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSBase(Method *method, uint8_t
             auto success = ctx->GetConstStringStorage()->EnumerateStrings(
                 qnameStart, qnameLen, [&jsThis, &jsVal, env](napi_value jsStr) {
                     jsThis = jsVal;
-                    napi_status rc = napi_get_property(env, jsVal, jsStr, &jsVal);
-                    if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+
+                    if (!NapiGetProperty(env, jsVal, jsStr, &jsVal)) {
                         ASSERT(NapiIsExceptionPending(env));
                         return false;
                     }
@@ -390,8 +441,7 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             ASSERT(GetValueType(env, jsThis) == napi_object);
             const char *methodName = utf::Mutf8AsCString(st->GetMethod()->GetName().data);
             napi_value jsFn;
-            napi_status rc = napi_get_named_property(env, jsThis, methodName, &jsFn);
-            if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+            if (!NapiGetNamedProperty(env, jsThis, methodName, &jsFn)) {
                 ASSERT(NapiIsExceptionPending(env));
                 return false;
             }
@@ -402,6 +452,24 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
     };
     return CallJSHandler::HandleImpl<false, ArgSetup>(method, args, inStackArgs);
 }
+
+extern "C" uint64_t CallJSFunction(Method *method, uint8_t *args, uint8_t *inStackArgs)
+{
+    struct ArgSetup {
+        ALWAYS_INLINE bool operator()([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] CallJSHandler *st)
+        {
+            ObjectHeader *etsThis = st->SetupArgreader(true);
+
+            auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
+            napi_value jsCallBackFn = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
+
+            st->SetupJSCallee(jsCallBackFn, jsCallBackFn);
+            return true;
+        }
+    };
+    return CallJSHandler::HandleImpl<false, ArgSetup>(method, args, inStackArgs);
+}
+
 extern "C" void CallJSProxyBridge(Method *method, ...);
 
 static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
@@ -513,7 +581,8 @@ static uint8_t InitCallJSClass(bool isNewCall)
         auto fields = klass->GetStaticFields();
         INTEROP_FATAL_IF(fields.Size() != 1);
         INTEROP_FATAL_IF(klass->GetFieldPrimitive<uint32_t>(fields[0]) != 0);
-        klass->SetFieldPrimitive<uint32_t>(fields[0], ctx->AllocateSlotsInStringBuffer(*qnameCount));
+        auto *stringStorage = ctx->GetConstStringStorage();
+        klass->SetFieldPrimitive<uint32_t>(fields[0], stringStorage->AllocateSlotsInStringBuffer(*qnameCount));
     }
     return 1;
 }

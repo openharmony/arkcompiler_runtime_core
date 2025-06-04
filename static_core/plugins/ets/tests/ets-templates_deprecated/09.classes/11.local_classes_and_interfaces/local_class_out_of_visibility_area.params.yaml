@@ -1,0 +1,165 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      // Access to local class field from outside
+      class A {
+        class B {
+          i: int = 1;
+        }
+        getInner(): B {
+          return new B();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.getInner().i == 2);
+      }
+
+  - decl: |-
+      // Access to local interface field from outside
+      class A {
+        interface I {
+          static i: int;
+        }
+      }
+    check: |-
+      function main() {
+        I.i = 1;
+      }
+
+  - decl: |-
+      // Access to local class method from outside
+      class A {
+        class B {
+          foo(): int {
+            return 1;
+          }
+        }
+        getInner(): B {
+          return new B();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.getInner().foo() == 1);
+      }
+
+  - decl: |-
+      // Access to local interface method from outside
+      class A {
+        interface I {
+          static foo(): int {
+            return 1;
+          }
+        }
+      }
+    check: |-
+      function main() {
+        I.foo();
+      }
+
+  - decl: |-
+      // Using local class outside of visibility area
+      class A {
+        foo() {
+          class B {}
+        }
+        i: B = new B();
+      }
+
+  - decl: |-
+      // Using local interface outside of visibility area
+      class A {
+        foo() {
+          interface I {}
+        }
+        class B implements I {}
+      }
+
+  - decl: |-
+      // Access to function variable by local class from if clause
+      function foo(): void {
+        let i: int = 1;
+        if(1) {
+          class B {
+          constructor() {
+            let a = i;
+          };
+        }
+      }
+
+  - decl: |-
+      // Access to function variable by local interface from if clause
+      function foo(): void {
+        let i: int = 1;
+        if(1) {
+          interface I {
+            foo(): int {
+              return i;
+            }
+          }
+        }
+      }
+
+  - decl: |-
+      // Access to function argument by local class outside of visibility area
+      function foo(i: int): void {
+        {
+          class B {
+            a: int = i;
+        }
+      }
+
+  - decl: |-
+      // Access to function argument by local interface outside of visibility area
+      function foo(i: int): void {
+        {
+          interface I {
+            foo() { 
+              a: int = i;
+            }
+        }
+      }
+
+  - decl: |-
+      // Access to superclass field from local class, declared in a method
+      class A {
+        field: int = 1;
+        foo(): void {
+          class B {
+            constructor() {
+              let i = field;
+            }
+          }
+        }
+      }
+
+  - decl: |-
+      // Access to superclass method from local class, declared in different method
+      class A {
+        bar(): int {
+          return 1;
+        }
+        foo(): void {
+          class B {
+            constructor() {
+              let i = bar();
+            }
+          }
+        }
+      }

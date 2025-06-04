@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,15 +23,19 @@ from .common import ResponseLog, DisasmResponse
 class CompileRequestModel(BaseModel):
     code: str
     options: Dict[str, Any] = Field(default_factory=dict)
-    disassemble: bool
+    disassemble: bool = False
+    verifier: bool = False
+    runtime_verify: bool = False
 
 
 class RunResponse(BaseModel):
     run: Optional[ResponseLog] = None
     compile: ResponseLog
     disassembly: Optional[DisasmResponse] = None
+    verifier: Optional[ResponseLog] = None
 
 
 class CompileResponse(BaseModel):
     compile: ResponseLog
     disassembly: Optional[DisasmResponse] = None
+    verifier: Optional[ResponseLog] = None

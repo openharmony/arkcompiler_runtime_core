@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,8 @@ cases:
     use: ' arr[0] = new Object();'
     assert: arr[0] instanceof Object
 
-  - decl: 'let arr = new (Error|null)[1];  // inferred array of Error|null'
-    assert: arr[0] == null
+  - decl: 'let arr = new (Error|undefined)[1];  // inferred array of Error|undefined'
+    assert: arr[0] == undefined
 
   - decl: 'const obj = new Object[1];  // inferred array of Objects'
     use: 'obj[0] = new Long(Long.MAX_VALUE);'
@@ -49,3 +49,24 @@ cases:
       const b = new B();  // inferred type B
     use: a = b;
     assert: a instanceof A && b instanceof B && a === b
+
+  - decl: let myV = undefined
+    assert: typeof myV == "undefined"
+
+  - decl: let myV = true
+    assert: typeof myV == "boolean"
+
+  - decl: let myV = "true"
+    assert: typeof myV == "string"
+
+  - decl: declare const myC = 1
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = 2.0
+    assert: typeof myC == "number"
+
+  - decl: declare const myC = "1"
+    assert: typeof myC == "string"
+
+  - decl: declare const myC = "string"
+    assert: typeof myC == "string"

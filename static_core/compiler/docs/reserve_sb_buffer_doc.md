@@ -115,4 +115,4 @@ Notice, NewArray instruction second argument is now Constant 0x40
     * [simplify_string_builder.h](../optimizer/optimizations/simplify_string_builder.h)
     * [simplify_string_builder.cpp](../optimizer/optimizations/simplify_string_builder.cpp)
 * Tests
-    * [ets_string_builder_reserve.sts](../../plugins/ets/tests/checked/ets_string_builder_reserve.sts)
+    * [ets_string_builder_reserve.ets](../../plugins/ets/tests/checked/ets_string_builder_reserve.ets)

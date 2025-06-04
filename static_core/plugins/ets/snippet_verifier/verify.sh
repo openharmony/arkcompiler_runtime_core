@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -111,7 +111,7 @@ function write_md_results() {
     check_results_md_file "$theme"
 
     echo "<td> <details><summary>$2</summary><pre><code class=typescript>">> results/"$1".md
-    cat snippets/"$2".sts >> results/"$1".md
+    cat snippets/"$2".ets >> results/"$1".md
     echo "</td></code></pre></details>" >> results/"$1".md
     echo "<td> $3 </td><td> $4 </td><td> $5 </td><td> $6 </td><td> $7 </th></tr>" >> results/"$1".md
 }
@@ -148,17 +148,17 @@ function write_results() {
 }
 
 function check() {
-    ets_count=$(ls "$snippets"/*.sts 2> /dev/null | wc -l)
+    ets_count=$(ls "$snippets"/*.ets 2> /dev/null | wc -l)
     if [ "$ets_count" = 0 ]; then
         echo_color_text $OK_COLOR "There is no snippets in $RST_FILE $SPEC :)"
         exit
     fi
     chmod a+x "$snippets"
-    for snippet in $snippets/*.sts; do
-        snippet_name=$(echo "${snippet##*/}" | cut -d "." -f 1) # "/../../../test.sts" -> "test"
+    for snippet in $snippets/*.ets; do
+        snippet_name=$(echo "${snippet##*/}" | cut -d "." -f 1) # "/../../../test.ets" -> "test"
 
         # echo "$snippet_name"
-        snippet_ets=$snippets/$snippet_name.sts
+        snippet_ets=$snippets/$snippet_name.ets
         snippet_ts=$snippets/$snippet_name.ts
 
         expect_cte=$(sed -n '1p' "$snippet_ets")

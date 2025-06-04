@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 {
     mem::MemStatsType *memStats = Thread::GetCurrent()->GetVM()->GetMemStats();
 
-    ets_class testClass = env_->FindClass("NativeAllocationTest");
+    ets_class testClass = env_->FindClass("RegisterNativeAllocationTest/NativeAllocationTest");
     ASSERT_NE(testClass, nullptr);
 
     ets_method allocMethod = env_->GetStaticp_method(testClass, "allocate_object", ":I");

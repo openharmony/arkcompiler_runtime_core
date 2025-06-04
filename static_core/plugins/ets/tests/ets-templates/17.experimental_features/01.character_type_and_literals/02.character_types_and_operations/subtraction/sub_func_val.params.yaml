@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,36 +12,43 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       v2: c'\u0041'
       exp: 'sub(v2, v1)'
       r: c'!'
 
+    # 1.
     - v1: c'\u0041'
       v2: c'\u0001'
-      exp: "sub(v1, v2) - c' '"
+      exp: "(sub(v1, v2) - c' ') as char"
       r: c' '
 
+    # 2.
     - v1: c'\uFFFF'
       v2: c'\uFFFF'
       exp: 'sub(v1, v2)'
       r: c'\u0000'
 
+    # 3.
     - v1: c'\uFFFF'
       v2: c'\u0000'
       exp: 'sub(v2, v1)'
       r: c'\u0001'
 
+    # 4.
     - v1: c'\uFFFF'
       v2: c'\u000F'
       exp: "sub(c'\\u000F', v1)"
       r: c'\u0010'
 
+    # 5. Widening to int happens
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "sub(v1 - c'\\u0101', v2 - c'\\u1010')"
+      exp: "sub((v1 - c'\\u0101') as char, (v2 - c'\\u1010') as char)"
       r: c'\u1E1E'
 
+    # 6.
     - v1: c'∬'
       v2: c'\x01'
       exp: 'sub(v1, v2)'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,21 +41,21 @@ describe('ControlPanel component', () => {
 
     it('renders the ControlPanel component with all buttons and elements', () => {
         renderWithProviders(<ControlPanel />);
-        expect(screen.getByText('Compile')).toBeInTheDocument();
-        expect(screen.getByText('Run')).toBeInTheDocument();
-        expect(screen.getByText('Compile options')).toBeInTheDocument();
+        expect(screen.getByTestId('compile-btn')).toBeInTheDocument();
+        expect(screen.getByTestId('run-btn')).toBeInTheDocument();
+        expect(screen.getByTestId('options')).toBeInTheDocument();
     });
 
     it('dispatches compile action on Compile button click', () => {
         renderWithProviders(<ControlPanel />);
-        const compileButton = screen.getByText('Compile');
+        const compileButton = screen.getByTestId('run-btn');
         fireEvent.click(compileButton);
         expect(store.dispatch).toHaveBeenCalled();
     });
 
     it('dispatches run action on Run button click', () => {
-            renderWithProviders(<ControlPanel />);
-        const runButton = screen.getByText('Run');
+        renderWithProviders(<ControlPanel />);
+        const runButton = screen.getByTestId('compile-btn');
         fireEvent.click(runButton);
         expect(store.dispatch).toHaveBeenCalled();
     });
@@ -69,7 +69,7 @@ describe('ControlPanel component', () => {
 
     it('opens and closes the Compile Options popover on click', () => {
         renderWithProviders(<ControlPanel />);
-        const compileOptionsButton = screen.getByText('Compile options');
+        const compileOptionsButton = screen.getByTestId('options');
         fireEvent.click(compileOptionsButton);
         expect(screen.getByTestId('compile-options-content')).toBeInTheDocument();
     });
@@ -82,7 +82,7 @@ describe('ControlPanel component', () => {
             code: { isCompileLoading: true, isRunLoading: false },
         });
         renderWithProviders(<ControlPanel />);
-        const compileButton = screen.getByText('Compile');
+        const compileButton = screen.getByTestId('compile-btn');
         expect(compileButton).toBeDisabled();
     });
 
@@ -94,7 +94,7 @@ describe('ControlPanel component', () => {
             code: { isCompileLoading: false, isRunLoading: true },
         });
         renderWithProviders(<ControlPanel />);
-        const runButton = screen.getByText('Run');
+        const runButton = screen.getByTestId('run-btn');
         expect(runButton).toBeDisabled();
     });
 });

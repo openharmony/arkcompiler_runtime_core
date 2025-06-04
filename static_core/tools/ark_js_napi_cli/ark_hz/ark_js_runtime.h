@@ -35,10 +35,7 @@ public:
 
     void Loop() override;
 
-    uv_loop_t *GetUVLoop() override
-    {
-        return &loop_;
-    }
+    uv_loop_t *GetUVLoop() override;
 
     NativeEngine *GetNativeEngine() override
     {
@@ -49,7 +46,6 @@ private:
     ecmascript::JSRuntimeOptions options_;
     ecmascript::EcmaVM *vm_ {nullptr};
     std::unique_ptr<ArkNativeEngine> engine_;
-    uv_loop_t loop_;
 };
 
 }  // namespace panda

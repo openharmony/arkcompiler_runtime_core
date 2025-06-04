@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,5 +19,18 @@
 bool LaunchCallCodegen(CallInst *inst);
 // CC-OFFNXT(G.NAM.01) false positive
 void PrepareForCallLaunchVirtual(CallInst *callInst, RuntimeInterface::MethodPtr method, Reg &thisReg, Reg &param0);
+
+bool ResolveCallByNameCodegen(ResolveVirtualInst *resolver);
+
+void EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsGetNativeMethodManagedClass(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsGetMethodNativePointer(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsGetNativeApiEnv(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsBeginNativeMethod(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsEndNativeMethod(IntrinsicInst *inst, Reg dst, SRCREGS &src, bool isObject);
+void EtsEndNativeMethodPrim(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsEndNativeMethodObj(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsCheckNativeException(IntrinsicInst *inst, Reg dst, SRCREGS &src);
+void EtsWrapObjectNative(WrapObjectNativeInst *wrapObject);
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H

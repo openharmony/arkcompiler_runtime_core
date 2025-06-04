@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,82 +22,82 @@ class EtsInteropScenariosJsToEts : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_double)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeDouble");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeDouble");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_byte)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeByte");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeByte");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE #18602 (nikitayegorov) enable when numeric type casting is fixed for JS-calls-Ark interoperability
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_return_type_short)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeShort");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeShort");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_int)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeInt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeInt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_long)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeLong");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeLong");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_float)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeFloat");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeFloat");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE #19091 (nikitayegorov) enable when casting to Ark char type is fixed
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_return_type_char)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeChar");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeChar");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_boolean)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeBoolean");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeBoolean");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_string)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeString");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeString");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_object)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeObject");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeObject");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_class)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeClass");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_array)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeArray");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeArray");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE #19087 (nikitayegorov) enable when passing callables is fixed
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_return_type_callable)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeCallable");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeCallable");
     ASSERT_EQ(ret, true);
 }
 

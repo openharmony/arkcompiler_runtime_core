@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,9 +33,9 @@ void AbcKitInstBuilder::AbcKitBuildStoreObject(const BytecodeInstruction *bcInst
     BuildAbcKitStoreObjectIntrinsic<IS_ACC_READ>(bcInst, type);
 }
 
-void AbcKitInstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
+void AbcKitInstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_UNDEFINED);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_NULL_VALUE);
 }
 
 void AbcKitInstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type)

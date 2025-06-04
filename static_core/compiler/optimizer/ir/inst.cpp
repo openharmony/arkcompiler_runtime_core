@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -581,6 +581,7 @@ Inst *CallInst::Clone(const Graph *targetGraph) const
     auto callClone = static_cast<CallInst *>(instClone);
     callClone->SetCallMethodId(GetCallMethodId());
     callClone->SetCallMethod(GetCallMethod());
+    callClone->SetIsNative(GetIsNative());
     callClone->SetCanNativeException(GetCanNativeException());
     CloneTypes(targetGraph->GetAllocator(), callClone);
     return instClone;
@@ -786,7 +787,8 @@ bool Inst::IsZeroRegInst() const
 {
     ASSERT(GetBasicBlock() != nullptr);
     ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    return GetBasicBlock()->GetGraph()->GetZeroReg() != GetInvalidReg() && IsZeroConstantOrNullPtr(this);
+    return GetBasicBlock()->GetGraph()->GetZeroReg() != GetInvalidReg() && IsZeroConstantOrNullPtr(this) &&
+           !IsReferenceForNativeApiCall();
 }
 
 bool Inst::IsAccRead() const
@@ -862,7 +864,7 @@ bool Inst::IsMovableObject()
         case Opcode::Constant:
         case Opcode::LoadConstantPool:
         case Opcode::LoadRuntimeClass:
-        case Opcode::LoadUndefined:
+        case Opcode::LoadUniqueObject:
             // The result of these instructions can't be moved by GC.
             return false;
         case Opcode::LoadObject:
@@ -873,6 +875,9 @@ bool Inst::IsMovableObject()
             MarkerHolder marker {GetBasicBlock()->GetGraph()};
             return IsMovableObjectRec(this, marker.GetMarker());
         }
+        case Opcode::Intrinsic:
+            return CastToIntrinsic()->GetIntrinsicId() !=
+                   RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_GET_NATIVE_METHOD_MANAGED_CLASS;
         default:
             return true;
     }

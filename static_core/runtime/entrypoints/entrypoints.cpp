@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -609,7 +609,7 @@ extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fi
 {
     BEGIN_ENTRYPOINT();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -628,7 +628,7 @@ extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_
     [[maybe_unused]] HandleScope<ObjectHeader *> objHandleScope(thread);
     VMHandle<ObjectHeader> objHandle(thread, obj);
 
-    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(fieldId));
+    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -669,7 +669,7 @@ extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method
 {
     BEGIN_ENTRYPOINT();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), true);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -689,7 +689,7 @@ extern "C" size_t GetFieldOffsetEntrypoint(Method *method, uint32_t fieldId)
 {
     BEGIN_ENTRYPOINT();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId), false);
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -1283,7 +1283,7 @@ extern "C" Field *GetFieldByIdEntrypoint([[maybe_unused]] ManagedThread *thread,
     CHECK_STACK_WALKER;
     auto resolvedId = caller->GetClass()->ResolveFieldIndex(BytecodeId(fieldId).AsIndex());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto *field = classLinker->GetField(*caller, panda_file::File::EntityId(resolvedId));
+    auto *field = classLinker->GetField(*caller, panda_file::File::EntityId(resolvedId), false);
     if (field != nullptr) {
         *entry = {pc, caller, static_cast<void *>(field)};
     }
@@ -1294,7 +1294,7 @@ extern "C" Field *GetStaticFieldByIdEntrypoint(ManagedThread *thread, Method *ca
                                                InterpreterCache::Entry *entry, const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
-    auto *field = interpreter::RuntimeInterface::ResolveField(thread, *caller, BytecodeId(fieldId));
+    auto *field = interpreter::RuntimeInterface::ResolveField(thread, *caller, BytecodeId(fieldId), true);
     if (field == nullptr) {
         return field;
     }

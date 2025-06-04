@@ -78,6 +78,8 @@ set(SOURCES
         utils.cpp
 )
 
+include(cmake/CommonDefines.cmake)
+
 if (PANDA_LLVM_AOT)
     list(APPEND SOURCES
         llvm_aot_compiler.cpp
@@ -228,7 +230,7 @@ endif()
 
 panda_target_compile_options(llvmbackend PUBLIC "-Wno-unused-parameter")
 
-panda_target_compile_definitions(llvmbackend PUBLIC REQUIRED_LLVM_VERSION=15.0.4-ark18)
+panda_target_compile_definitions(llvmbackend PUBLIC REQUIRED_LLVM_VERSION=${REQUIRED_LLVM_VERSION})
 
 if (PANDA_LLVM_AOT AND PANDA_TARGET_AMD64 AND PANDA_COMPILER_TARGET_AARCH64 AND PANDA_WITH_TESTS)
     set(PANDA_LLVM_AOT_TESTS_SOURCES

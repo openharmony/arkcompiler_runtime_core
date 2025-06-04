@@ -56,10 +56,17 @@ ohos_shared_library("arklinker") {
     "$ark_root/libpandafile:libarktsfile",
   ]
 
+  if (is_mingw || is_win) {
+    deps += [
+      "$ark_root/libpandabase:libarktsbase_frontend_static",
+      "$ark_root/libpandafile:libarktsfile_frontend_static",
+    ]
+  }
+
   external_deps = [ sdk_libc_secshared_dep ]
 
   output_extension = "so"
-  if (is_mingw) {
+  if (is_mingw || is_win) {
     output_extension = "dll"
   }
   part_name = ark_part_name
@@ -71,6 +78,26 @@ ark_gen_file("link_options_h") {
   data = [ "options.yaml" ]
   api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/panda_gen_options/generated/link_options.h"
+}
+
+ohos_static_library("arklinker_static") {
+  sources = arklinker_sources
+
+  include_dirs = [
+    "$ark_root/libpandabase",
+    "$ark_root/libpandafile",
+    "$target_gen_dir",
+  ]
+
+  configs = arklinker_configs
+
+  deps = [
+    "$ark_root/libpandabase:libarktsbase_frontend_static",
+    "$ark_root/libpandafile:libarktsfile_frontend_static",
+  ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_executable("ark_link") {
@@ -90,10 +117,17 @@ ohos_executable("ark_link") {
   ]
 
   deps = [
-    ":arklinker",
+    ":arklinker_static",
     ":link_options_h",
-    "$ark_root/libpandabase:libarktsbase",
   ]
+
+  if (target_os != "win" && target_os != "mingw" && target_os != "winuwp") {
+    if (is_linux) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_copy_linux" ]
+    } else if (is_mingw || is_win) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_copy_windows" ]
+    }
+  }
 
   libs = platform_libs
   ldflags = platform_ldflags
@@ -101,4 +135,11 @@ ohos_executable("ark_link") {
   install_enable = true
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
+}
+
+group("static_linker") {
+  deps = [
+    ":ark_link",
+    ":arklinker",
+  ]
 }

@@ -17,6 +17,7 @@ server:
     port: 8000
 binary:
   build: "/playground/build"
+  icu_data: "/playground/icudt72l.dat"
 options:
   - flag: "--opt-level"
     values: [ 0,1,2 ]
@@ -47,6 +48,14 @@ syntax:
       [
         "/[;,.]/",
         "delimiter",
+      ],
+      [
+        "/\/\/.*$/",
+        "comment"
+      ],
+      [
+        "/\\/\\*[\\s\\S]*?\\*\\//",
+        "comment"
       ]
     ]
   }

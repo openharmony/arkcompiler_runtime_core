@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,13 +19,14 @@ import os
 import subprocess
 import sys
 import uuid
+import threading
 from multiprocessing import current_process
 from os import getenv, path, remove
 from pathlib import Path
-from typing import Optional, List, Any, TextIO, Union
+from typing import Optional, List, Any, TextIO, Union, Dict
+from runner.code_coverage.coverage_dir import CoverageDir
 
 from runner.logger import Log
-from runner.plugins.work_dir import WorkDir
 
 _LOGGER = logging.getLogger("runner.code_coverage.coverage")
 
@@ -72,35 +73,56 @@ class LinuxCommands:
 
 class LlvmCovCommands:
     @staticmethod
-    def llvm_prof_merge_command(args: List[str]) -> List[str]:
+    def get_llvm_prof_merge_command(args: List[str]) -> List[str]:
         return [LLVM_PROFDATA_BINARY, 'merge'] + args
 
     @staticmethod
-    def llvm_cov_export_command(args: List[str]) -> List[str]:
+    def get_llvm_cov_export_command(args: List[str]) -> List[str]:
         return [LLVM_COV_PATH_BINARY, 'export'] + args
 
 
 class LlvmCov:
-    def __init__(self, build_dir: str, work_dir: WorkDir) -> None:
-        self.build_dir = build_dir
-        self.coverage_dir = work_dir.coverage_dir
-        self.llvm_cov_commands = LlvmCovCommands()
-        self.linux_commands = LinuxCommands()
+    _instance: Optional['LlvmCov'] = None
+    _lock: threading.Lock = threading.Lock()
+    _initialized: bool = False
 
-    @staticmethod
-    def do_find(search_directory: Path, extension: str) -> List[Path]:
-        return list(Path(search_directory).rglob(extension))
+    def __new__(cls, build_dir_path: Optional[Path] = None, coverage_dir: Optional[CoverageDir] = None) -> 'LlvmCov':
+        if cls._instance is None:
+            with cls._lock:
+                if build_dir_path is None:
+                    raise ValueError("build_dir_path is not initialized")
+                if not build_dir_path.parts or str(build_dir_path) == ".":
+                    raise ValueError("build_dir_path must not be '.' or empty")
+                if not build_dir_path.exists():
+                    raise FileNotFoundError(f"Dirrectory build_dir_path={build_dir_path} not found")
 
-    def get_uniq_profraw_profdata_file_paths(self) -> List[str]:
+                if coverage_dir is None:
+                    raise ValueError("coverage_dir is not initialized")
+                if not coverage_dir.root.exists():
+                    raise FileNotFoundError(f"Dirrectory coverage_dir.root={coverage_dir.root} not found")
+
+                if cls._instance is None:
+                    instance = super().__new__(cls)
+                    instance._initialize(build_dir_path, coverage_dir)
+                    cls._instance = instance
+        return cls._instance
+
+    def get_uniq_profraw_profdata_file_paths(self, component_name: Optional[str] = None) -> List[str]:
         pid = current_process().pid
         hash_code = uuid.uuid4()
-        file_path = f"{self.coverage_dir.profdata_dir}/{pid}-{hash_code}"
+        file_name = f"{pid}-{hash_code}"
+        file_path = f"{self.coverage_dir.profdata_dir}/{file_name}"
+        if component_name is not None:
+            self.components[component_name] = Path()
+            component_profdata_dir = Path(f"{self.coverage_dir.profdata_dir}/{component_name}")
+            component_profdata_dir.mkdir(parents=True, exist_ok=True)
+            file_path = f"{component_profdata_dir}/{component_name}-{file_name}"
         profraw_file = os.extsep.join([file_path, 'profraw'])
         profdata_file = os.extsep.join([file_path, 'profdata'])
         return [profraw_file, profdata_file]
 
     def llvm_profdata_merge(self, args: List[str]) -> None:
-        prof_merge_command = self.llvm_cov_commands.llvm_prof_merge_command(args)
+        prof_merge_command = self.llvm_cov_commands.get_llvm_prof_merge_command(args)
         self.linux_commands.run_command(prof_merge_command)
 
     def merge_and_delete_prowraw_files(self, profraw_file: str, profdata_file: str) -> None:
@@ -111,47 +133,111 @@ class LlvmCov:
         else:
             Log.all(_LOGGER, f"File with name {profraw_file} not exist")
 
-    def make_profdata_list_file(self) -> None:
-        results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
-        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_WRONLY | os.O_CREAT, 0o755),
-                       "a", encoding="utf-8") as the_file:
-            for i in results:
-                the_file.write(str(i) + '\n')
+    def make_profdata_list_file(
+            self,
+            profdata_root_dir_path: Optional[Path] = None,
+            profdata_files_list_file_path: Optional[Path] = None
+        ) -> None:
+        _profdata_root_dir_path = profdata_root_dir_path or self.coverage_dir.profdata_dir
+        _profdata_files_list_file_path = profdata_files_list_file_path or self.coverage_dir.profdata_files_list_file
 
-    def merge_all_profdata_files(self) -> None:
-        input_files = f"--input-files={self.coverage_dir.profdata_files_list_file}"
-        self.llvm_profdata_merge(['--sparse', input_files, '-o', str(self.coverage_dir.profdata_merged_file)])
+        profdata_files = list(_profdata_root_dir_path.rglob('*.profdata'))
 
-    def llvm_cov_export_to_info_file(self) -> None:
-        instr_profile = f"-instr-profile={self.coverage_dir.profdata_merged_file}"
+        with os.fdopen(os.open(_profdata_files_list_file_path, os.O_RDWR | os.O_CREAT, 0o755),
+                       'w', encoding="utf-8") as file:
+            for entity in profdata_files:
+                file.write(f"{entity}\n")
 
-        bin_dir = f"{self.build_dir}/bin"
+    def make_profdata_list_files_by_components(self) -> None:
+        for key in self.components:
+            profdata_files_list_file_path = self.get_path_from_coverage_work_dir(f"{key}_profdatalist.txt")
+            component_profdata_dir = self.coverage_dir.profdata_dir / key
 
-        bins = [
-            'ark', 'ark_aot', 'ark_asm', 'ark_disasm', 'c2abc',
-            'c2p', 'es2panda', 'irtoc_ecmascript_fastpath_exec',
-            'irtoc_fastpath_exec', 'irtoc_interpreter_exec',
-            'panda', 'pandasm', 'paoc', 'verifier'
-        ]
+            self.components[key] = profdata_files_list_file_path
 
-        args = ['-format=lcov', '-Xdemangler', 'c++filt', instr_profile]
+            self.make_profdata_list_file(component_profdata_dir, profdata_files_list_file_path)
 
-        for bin_n in bins:
-            args.append(f"--object={bin_dir}/{bin_n}")
+    def merge_all_profdata_files(
+            self,
+            profdata_files_list_file_path: Optional[Path] = None,
+            merged_profdata_file_path: Optional[Path] = None
+        ) -> None:
+        _merged_profdata_file_path = merged_profdata_file_path or self.coverage_dir.profdata_merged_file
+        _profdata_files_list_file_path = profdata_files_list_file_path or self.coverage_dir.profdata_files_list_file
 
-        for so_path in Path(self.build_dir).rglob('*.so'):
-            args.append(f"--object={so_path}")
+        input_files_option = f"--input-files={_profdata_files_list_file_path}"
+
+        self.llvm_profdata_merge(['--sparse', input_files_option, '-o', str(_merged_profdata_file_path)])
+
+    def merge_all_profdata_files_by_components(self) -> None:
+        for component_name, profdata_files_list_file_path in self.components.items():
+            merged_profdata_file_path = self.get_path_from_coverage_work_dir(f"{component_name}_merged.profdata")
+
+            self.components[component_name] = merged_profdata_file_path
+
+            self.merge_all_profdata_files(profdata_files_list_file_path, merged_profdata_file_path)
+
+    def llvm_cov_export_to_info_file(
+            self,
+            merged_profdata_file_path: Optional[Path] = None,
+            dot_info_file_path: Optional[Path] = None,
+            component_name: Optional[str] = None
+        ) -> None:
+        _merged_profdata_file_path = merged_profdata_file_path or self.coverage_dir.profdata_merged_file
+        _dot_info_file_path = dot_info_file_path or self.coverage_dir.info_file
+
+        instr_profile_option = f"-instr-profile={_merged_profdata_file_path}"
+        llvm_cov_export_command_args = ['-format=lcov', '-Xdemangler', 'c++filt']
+
+        llvm_cov_export_command_args.append(instr_profile_option)
+
+        if component_name is None:
+            for bin_path in self.bin_dir.rglob('*'):
+                if os.path.splitext(bin_path)[1] == '':
+                    llvm_cov_export_command_args.append(f"--object={bin_path}")
+        else:
+            llvm_cov_export_command_args.append(f"--object={self.bin_dir}/{component_name}")
+
+        for so_path in self.build_dir.rglob('*.so'):
+            llvm_cov_export_command_args.append(f"--object={so_path}")
 
         if IGNORE_REGEX is not None:
             ignore_filename_regex = f"--ignore-filename-regex=\"{IGNORE_REGEX}\""
-            args.append(ignore_filename_regex)
+            llvm_cov_export_command_args.append(ignore_filename_regex)
 
-        command = self.llvm_cov_commands.llvm_cov_export_command(args)
+        command = self.llvm_cov_commands.get_llvm_cov_export_command(llvm_cov_export_command_args)
 
-        with os.fdopen(os.open(self.coverage_dir.info_file, os.O_WRONLY | os.O_CREAT, 0o755),
-                       "w", encoding="utf-8") as file_dot_info:
-            self.linux_commands.run_command(command, stdout=file_dot_info)
+        with open(_dot_info_file_path, 'w', encoding='utf-8') as file:
+            self.linux_commands.run_command(command, stdout=file)
+
+    def llvm_cov_export_to_info_file_by_components(self) -> None:
+        for component_name, merged_profdata_file_path in self.components.items():
+            dot_info_file_path = self.get_path_from_coverage_work_dir(f"{component_name}_lcov_format.info")
+            self.components[component_name] = dot_info_file_path
+            self.llvm_cov_export_to_info_file(merged_profdata_file_path, dot_info_file_path, component_name)
 
     def genhtml(self) -> None:
-        output_directory = f"--output-directory={self.coverage_dir.html_report_dir}"
-        self.linux_commands.do_genhtml([output_directory, str(self.coverage_dir.info_file)])
+        if len(self.components):
+            for component_name, dot_info_file in self.components.items():
+                output_directory_option = f"--output-directory={self.coverage_dir.html_report_dir}/{component_name}"
+                self.linux_commands.do_genhtml([output_directory_option, str(dot_info_file)])
+        else:
+            output_directory_option = f"--output-directory={self.coverage_dir.html_report_dir}"
+            self.linux_commands.do_genhtml([output_directory_option, str(self.coverage_dir.info_file)])
+
+    def get_path_from_coverage_work_dir(self, path_name: str) -> Path:
+        return Path(f"{self.coverage_dir.coverage_work_dir}/{path_name}")
+
+    def _initialize(self, build_dir_path: Path, coverage_dir: CoverageDir) -> None:
+        if self._initialized:
+            return
+
+        self._initialized = True
+        self.components: Dict[str, Path] = {}
+
+        self.build_dir = build_dir_path
+        self.bin_dir = self.build_dir / 'bin'
+        self.coverage_dir = coverage_dir
+
+        self.llvm_cov_commands = LlvmCovCommands()
+        self.linux_commands = LinuxCommands()

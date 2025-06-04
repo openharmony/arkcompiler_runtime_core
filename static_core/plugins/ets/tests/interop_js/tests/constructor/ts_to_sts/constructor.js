@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,53 +28,39 @@ let __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (FuC.prototype = b.prototype, new FuC());
     };
 })();
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.childClassInstance = exports.ChildClass = exports.abstractClassInstance = exports.AbstractClass = 
-exports.simpleArrowFunction = exports.SimpleObject = exports.methodCreateClassInstance = 
-exports.methodCreateAnonymousClass = exports.methodConstructorInstance = exports.MethodCreateConstructor = 
-exports.IIFEConstructorInstance = exports.IIFEConstructor = exports.IIFEClassInstance = exports.IIFEClass = 
-exports.functionConstructorInstance = exports.anonymousClassInstance = exports.AnonymousClass = exports.namedClassInstance = 
-exports.NamedClass = exports.tsInt = void 0;
-exports.createNamedClassFromTs = createNamedClassFromTs;
-exports.createAnonymousClassFromTs = createAnonymousClassFromTs;
-exports.FunctionConstructor = FunctionConstructor;
-exports.createFunctionConstructorFromTs = createFunctionConstructorFromTs;
-exports.createIIFEClassFromTs = createIIFEClassFromTs;
-exports.createIIFEConstructorFromTs = createIIFEConstructorFromTs;
-exports.createMethodConstructorClass = createMethodConstructorClass;
-exports.createAbstractClassFromTs = createAbstractClassFromTs;
-exports.createChildClassFromTs = createChildClassFromTs;
-exports.tsInt = 1;
-let NamedClass = /** @class */ (function () {
+export let tsInt = 1;
+export let NamedClass = /** @class */ (function () {
     function NamedClass(value) {
         this._value = value;
     }
     return NamedClass;
 }());
-exports.NamedClass = NamedClass;
-function createNamedClassFromTs() {
-    return new NamedClass(exports.tsInt);
+export function createNamedClassFromTs() {
+    return new NamedClass(tsInt);
 }
-exports.namedClassInstance = new NamedClass(exports.tsInt);
-exports.AnonymousClass = /** @class */ (function () {
+export let namedClassInstance = new NamedClass(tsInt);
+
+export let AnonymousClass = /** @class */ (function () {
     function class1(value) {
         this.value = value;
         this._value = value;
     }
     return class1;
 }());
-function createAnonymousClassFromTs() {
-    return new exports.AnonymousClass(exports.tsInt);
+export function createAnonymousClassFromTs() {
+    return new AnonymousClass(tsInt);
 }
-exports.anonymousClassInstance = new exports.AnonymousClass(exports.tsInt);
-function FunctionConstructor(value) {
+export let anonymousClassInstance = new AnonymousClass(tsInt);
+
+export function FunctionConstructor(value) {
     this._value = value;
 }
-function createFunctionConstructorFromTs() {
-    return new FunctionConstructor(exports.tsInt);
+export function createFunctionConstructorFromTs() {
+    return new FunctionConstructor(tsInt);
 }
-exports.functionConstructorInstance = new FunctionConstructor(exports.tsInt);
-exports.IIFEClass = (function () {
+export let functionConstructorInstance = new FunctionConstructor(tsInt);
+
+export let IIFEClass = (function () {
     return /** @class */ (function () {
         function class2(value) {
             this._value = value;
@@ -82,21 +68,23 @@ exports.IIFEClass = (function () {
         return class2;
     }());
 })();
-function createIIFEClassFromTs() {
-    return new exports.IIFEClass(exports.tsInt);
+export function createIIFEClassFromTs() {
+    return new IIFEClass(tsInt);
 }
-exports.IIFEClassInstance = new exports.IIFEClass(exports.tsInt);
-exports.IIFEConstructor = (function () {
+export let IIFEClassInstance = new IIFEClass(tsInt);
+
+export let IIFEConstructor = (function () {
     function constructorFoo(value) {
         this._value = value;
     }
     return constructorFoo;
 })();
-function createIIFEConstructorFromTs() {
-    return new exports.IIFEConstructor(exports.tsInt);
+export function createIIFEConstructorFromTs() {
+    return new IIFEConstructor(tsInt);
 }
-exports.IIFEConstructorInstance = new exports.IIFEConstructor(exports.tsInt);
-let MethodCreateConstructor = /** @class */ (function () {
+export let IIFEConstructorInstance = new IIFEConstructor(tsInt);
+
+export let MethodCreateConstructor = /** @class */ (function () {
     function MethodCreateConstructor() {
     }
     MethodCreateConstructor.prototype.Constructor = function () {
@@ -109,49 +97,48 @@ let MethodCreateConstructor = /** @class */ (function () {
     };
     return MethodCreateConstructor;
 }());
-exports.MethodCreateConstructor = MethodCreateConstructor;
-function createMethodConstructorClass() {
+export function createMethodConstructorClass() {
     return new MethodCreateConstructor();
 }
-exports.methodConstructorInstance = new MethodCreateConstructor();
-exports.methodCreateAnonymousClass = exports.methodConstructorInstance.Constructor();
-exports.methodCreateClassInstance = new exports.methodCreateAnonymousClass(exports.tsInt);
-exports.SimpleObject = {
-    _value: exports.tsInt,
+export let methodConstructorInstance = new MethodCreateConstructor();
+export let methodCreateAnonymousClass = methodConstructorInstance.Constructor();
+export let methodCreateClassInstance = new methodCreateAnonymousClass(tsInt);
+
+export let SimpleObject = {
+    _value: tsInt,
 };
-let simpleArrowFunction = function (int) {
+export let simpleArrowFunction = function (int) {
     return {
         int: int,
     };
 };
-exports.simpleArrowFunction = simpleArrowFunction;
 let Abstract = /** @class */ (function () {
     function abstract(value) {
         this._value = value;
     }
     return abstract;
 }());
-let AbstractClass = /** @class */ (function (_super) {
+
+export let AbstractClass = /** @class */ (function (_super) {
     __extends(AbstractClass, _super);
     function AbstractClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return AbstractClass;
 }(Abstract));
-exports.AbstractClass = AbstractClass;
-function createAbstractClassFromTs() {
-    return new AbstractClass(exports.tsInt);
+export function createAbstractClassFromTs() {
+    return new AbstractClass(tsInt);
 }
-exports.abstractClassInstance = new AbstractClass(exports.tsInt);
-let ChildClass = /** @class */ (function (_super) {
+export let abstractClassInstance = new AbstractClass(tsInt);
+
+export let ChildClass = /** @class */ (function (_super) {
     __extends(ChildClass, _super);
     function ChildClass(value) {
         return _super.call(this, value) || this;
     }
     return ChildClass;
 }(NamedClass));
-exports.ChildClass = ChildClass;
-function createChildClassFromTs() {
-    return new ChildClass(exports.tsInt);
+export function createChildClassFromTs() {
+    return new ChildClass(tsInt);
 }
-exports.childClassInstance = new ChildClass(exports.tsInt);
+export let childClassInstance = new ChildClass(tsInt);

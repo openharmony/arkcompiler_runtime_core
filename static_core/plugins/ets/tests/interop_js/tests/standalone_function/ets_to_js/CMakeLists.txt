@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,22 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_gtest(ets_interop_js_test__opt_default_arg_type
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__opt_default_arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_default_arg_type.ets
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_test__opt_arg_type
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__opt_arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.ets
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_test__arg_type
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__arg_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.ets
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_test__ret_type
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_test__ret_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.ets
 )

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,30 @@ void TransformEqualsIr(AbckitGraph *graph)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+void TransformEqualsIr2(AbckitGraph *graph)
+{
+    auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN);
+    ASSERT_NE(ret, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto *initObj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT);
+    ASSERT_NE(initObj, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto *initObj2 = g_implG->iGetNext(initObj);
+    ASSERT_NE(initObj2, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto *equals = g_statG->iCreateStrictEquals(graph, initObj, initObj2);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertBefore(equals, ret);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iSetInput(ret, equals, 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 }  // namespace
 
 class LibAbcKitEqualsStaticTest : public ::testing::Test {};
@@ -71,6 +95,36 @@ TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestEquals)
         ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static_modified.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) { TransformEqualsIr(graph); },
+        [](AbckitGraph *graph) {
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb1({{}, {1}, {}});
+            std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts({
+                {0, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}},
+                {1, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}},
+                {3, ABCKIT_ISA_API_STATIC_OPCODE_EQUALS, {0, 1}},
+                {2, ABCKIT_ISA_API_STATIC_OPCODE_RETURN, {3}},
+            });
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb2({{0}, {2}, insts});
+            helpers::BBSchema<AbckitIsaApiStaticOpcode> bb3({{1}, {}, {}});
+            std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> bbSchemas({bb1, bb2, bb3});
+            helpers::VerifyGraph(graph, bbSchemas);
+        });
+
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static_modified.abc",
+                                       "equals_static/ETSGLOBAL", "main");
+    EXPECT_TRUE(helpers::Match(output, "false\n"));
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStrictEquals, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitEqualsStaticTest, LibAbcKitTestStrictEquals)
+{
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",
+                                            "equals_static/ETSGLOBAL", "main");
+    EXPECT_TRUE(helpers::Match(output, "true\n"));
+
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_static/equals/equals_static_modified.abc", "foo",
+        [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) { TransformEqualsIr2(graph); },
         [](AbckitGraph *graph) {
             helpers::BBSchema<AbckitIsaApiStaticOpcode> bb1({{}, {1}, {}});
             std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts({

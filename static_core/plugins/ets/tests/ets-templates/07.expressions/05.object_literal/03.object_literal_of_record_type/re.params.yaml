@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,9 +17,9 @@ cases:
           // empty records
           let a: Record<number, string> = {}
           let b: Record<number, string> = {}
-          assert(a instanceof Record)
-          assert(b instanceof Record)
-          assert(a != b)
+          assertTrue(a instanceof Record)
+          assertTrue(b instanceof Record)
+          assertTrue(a != b)
 
     - use: |-
           // number to string
@@ -28,14 +28,14 @@ cases:
               1: "One",
               3.14159: "PI",
           }
-          assert(a[0] == "Zero")
-          assert(a[1] == "One")
-          assert(a[3.14159] == "PI")
-          assert(a[42] == undefined)
+          assertTrue(a[0] == "Zero")
+          assertTrue(a[1] == "One")
+          assertTrue(a[3.14159] == "PI")
+          assertTrue(a[42] == undefined)
           a = {}
-          assert(a[0] == undefined)
-          assert(a[1] == undefined)
-          assert(a[3.14159] == undefined)
+          assertTrue(a[0] == undefined)
+          assertTrue(a[1] == undefined)
+          assertTrue(a[3.14159] == undefined)
 
     - decl: |-
           function foo(p: string): string {
@@ -48,14 +48,14 @@ cases:
               1: foo("One"),
               3.14159: "P" + foo("I"),
           }
-          assert(a[0] == "ZeroZero")
-          assert(a[1] == "OneOne")
-          assert(a[3.14159] == "PII")
-          assert(a[42] == undefined)
+          assertTrue(a[0] == "ZeroZero")
+          assertTrue(a[1] == "OneOne")
+          assertTrue(a[3.14159] == "PII")
+          assertTrue(a[42] == undefined)
           a = {}
-          assert(a[0] == undefined)
-          assert(a[1] == undefined)
-          assert(a[3.14159] == undefined)
+          assertTrue(a[0] == undefined)
+          assertTrue(a[1] == undefined)
+          assertTrue(a[3.14159] == undefined)
 
     - use: |-
           // string to number
@@ -65,16 +65,16 @@ cases:
               "Two": 2e00,
               "Minus PI": -3.14159,
           }
-          assert(a["Zero"] == 0)
-          assert(a["One"] == 1)
-          assert(a["Two"] == 2)
-          assert(a["Minus PI"] == -3.14159)
-          assert(a["PI"] == undefined)
+          assertTrue(a["Zero"] == 0)
+          assertTrue(a["One"] == 1)
+          assertTrue(a["Two"] == 2)
+          assertTrue(a["Minus PI"] == -3.14159)
+          assertTrue(a["PI"] == undefined)
           a = {}
-          assert(a["Zero"] == undefined)
-          assert(a["One"] == undefined)
-          assert(a["Two"] == undefined)
-          assert(a["Minus PI"] == undefined)
+          assertTrue(a["Zero"] == undefined)
+          assertTrue(a["One"] == undefined)
+          assertTrue(a["Two"] == undefined)
+          assertTrue(a["Minus PI"] == undefined)
 
     - use: |-
           // string literals to number
@@ -83,9 +83,9 @@ cases:
               "One": 1.0,
               "Two": 2e00,
           }
-          assert(a["Zero"] == 0)
-          assert(a["One"] == 1)
-          assert(a["Two"] == 2)
+          assertTrue(a["Zero"] == 0)
+          assertTrue(a["One"] == 1)
+          assertTrue(a["Two"] == 2)
 
     - use: |-
           // string literals and string to number
@@ -96,12 +96,12 @@ cases:
               "Two": 2e00,
               "PI constant value": 3.14159,
           }
-          assert(a["Zero"] == undefined)
-          assert(a["One"] == 1)
-          assert(a["Two"] == 2)
-          assert(a[""] == 0)
-          assert(a[" "] == 1)
-          assert(a["PI constant value"] == 3.14159)
+          assertTrue(a["Zero"] == undefined)
+          assertTrue(a["One"] == 1)
+          assertTrue(a["Two"] == 2)
+          assertTrue(a[""] == 0)
+          assertTrue(a[" "] == 1)
+          assertTrue(a["PI constant value"] == 3.14159)
 
     - use: |-
           // string literals to Record
@@ -114,11 +114,11 @@ cases:
                      42: false,
               },
           }
-          assert(a["a"][1]!)
-          assert(!(a["a"][42]!))
-          assert(a["b"][123] == undefined)
-          assert(!(a["c"][1]!))
-          assert(a["c"][42]!)
+          assertTrue(a["a"][1]!)
+          assertTrue(!(a["a"][42]!))
+          assertTrue(a["b"][123] == undefined)
+          assertTrue(!(a["c"][1]!))
+          assertTrue(a["c"][42]!)
 
     - use: |-
           // string to Record
@@ -128,11 +128,9 @@ cases:
               },
               "b": {},
           }
-          assert(a["a"]![1]!)
-          assert(!(a["a"]![42]!))
-          assert(a["b"]![123] == undefined)
-          assert(!(a["c"]![1]!))
-          assert(a["c"]![42]!)
+          assertEQ(a["b"]![123], undefined)
+          assertTrue(!(a["c"]![1]!))
+          assertTrue(a["c"]![42]!)
 
     - use: |-
           // short to Error
@@ -141,9 +139,9 @@ cases:
               22: new Error,
               333: new Error,
           }
-          assert(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error)
-          assert(a[1] != a[22] && a[1] != a[333])
-          assert(a[2] == undefined)
+          assertTrue(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error)
+          assertTrue(a[1] != a[22] && a[1] != a[333])
+          assertTrue(a[2] == undefined)
 
     - use: |-
           // byte to union
@@ -153,11 +151,11 @@ cases:
               100: null,
               127: 127.0,
           }
-          assert(a[0] == 3.14159)
-          assert(a[50] == false)
-          assert(a[100] == null)
-          assert(a[127] == 127.0)
-          assert(a[1] == undefined)
+          assertTrue(a[0] == 3.14159)
+          assertTrue(a[50] == false)
+          assertTrue(a[100] == null)
+          assertTrue(a[127] == 127.0)
+          assertTrue(a[1] == undefined)
 
     - decl: |-
           // union to union
@@ -169,10 +167,10 @@ cases:
               "A" : Color.Blue,
               "B": "green"
             }
-          assert(a["A"] == Color.Blue)
-          assert(a["B"] == "green")
+          assertTrue(a["A"] == Color.Blue)
+          assertTrue(a["B"] == "green")
           a["A"] = Color.Red
-          assert(a["A"] == Color.Red)
+          assertTrue(a["A"] == Color.Red)
 
     - decl: |-
           // infer Record type from function signature
@@ -185,8 +183,8 @@ cases:
               }
           }
       use: |-
-          assert(foo({ "A": "B" })["exitCode"] == "0")
-          assert(foo({ "A": "C" })["exitCode"] == "1")
+          assertTrue(foo({ "A": "B" })["exitCode"] == "0")
+          assertTrue(foo({ "A": "C" })["exitCode"] == "1")
 
     - use: |-
           // string to array
@@ -196,14 +194,14 @@ cases:
               "\u0002": ["", "1", "2"],
               "wrong key": [] as string[]
           }
-          assert(r["\u0000"]![0] == "")
-          assert(r["\u0001"]![0] == "")
-          assert(r["\u0001"]![1] == "1")
-          assert(r["\u0002"]![0] == "")
-          assert(r["\u0002"]![1] == "1")
-          assert(r["\u0002"]![2] == "2")
-          assert(r["wrong key"]!.length == 0)
-          assert(r["bad key"] == undefined)
+          assertTrue(r["\u0000"]![0] == "")
+          assertTrue(r["\u0001"]![0] == "")
+          assertTrue(r["\u0001"]![1] == "1")
+          assertTrue(r["\u0002"]![0] == "")
+          assertTrue(r["\u0002"]![1] == "1")
+          assertTrue(r["\u0002"]![2] == "2")
+          assertTrue(r["wrong key"]!.length == 0)
+          assertTrue(r["bad key"] == undefined)
 
     - use: |-
           // string literals to tuple
@@ -212,12 +210,12 @@ cases:
               "W": [1e10, 111111111n],
               "E": [1e20, 111111111111111111n]
           }
-          assert(r["Q"][0] == 1)
-          assert(r["Q"][1] == 1n)
-          assert(r["W"][0] == 1e10)
-          assert(r["W"][1] == 111111111n)
-          assert(r["E"][0] == 1e20)
-          assert(r["E"][1] == 111111111111111111n)
+          assertEQ(r["Q"][0], 1)
+          assertEQ(r["Q"][1], 1n)
+          assertEQ(r["W"][0], 1e10)
+          assertEQ(r["W"][1], 111111111n)
+          assertEQ(r["E"][0], 1e20)
+          assertEQ(r["E"][1], 111111111111111111n)
 
     - use: |-
           // string literals to function
@@ -225,10 +223,10 @@ cases:
               "add": (p: number): number => p + p,
               "mul": (p: number): number => p * p
           }
-          assert(r["add"](42) == 84)
-          assert(r["mul"](12) == 144)
+          assertEQ(r["add"](42), 84)
+          assertEQ(r["mul"](12), 144)
           r["add"] = (p: number): number => p + p + p
-          assert(r["add"](3) == 9)
+          assertEQ(r["add"](3), 9)
 
     - use: |-
           // string to function
@@ -236,9 +234,9 @@ cases:
               "add": (p: number): number => p + p,
               "mul": (p: number): number => p * p
           }
-          assert(r["add"]!(42) == 84)
-          assert(r["mul"]!(12) == 144)
-          assert(r["div"] == undefined)
+          assertTrue(r["add"]!(42) == 84)
+          assertTrue(r["mul"]!(12) == 144)
+          assertTrue(r["div"] == undefined)
 
     - use: |-
           // number to union
@@ -248,11 +246,11 @@ cases:
               3: null,
               4: undefined,
           }
-          assert(r[1] == "1")
-          assert(r[2] == 2.5)
-          assert(r[3] == null)
-          assert(r[4] == undefined)
-          assert(r[5] == undefined)
+          assertTrue(r[1] == "1")
+          assertTrue(r[2] == 2.5)
+          assertTrue(r[3] == null)
+          assertTrue(r[4] == undefined)
+          assertTrue(r[5] == undefined)
 
     - use: |-
           // string literals to union
@@ -262,7 +260,7 @@ cases:
               "3": Long.MAX_VALUE,
               "4": new Error()
           }
-          assert(r["1"] == c'1')
-          assert(r["2"] == false)
-          assert(r["3"] == Long.MAX_VALUE)
-          assert(r["4"] instanceof Error)
+          assertTrue(r["1"] == c'1')
+          assertTrue(r["2"] == false)
+          assertTrue(r["3"] == Long.MAX_VALUE)
+          assertTrue(r["4"] instanceof Error)

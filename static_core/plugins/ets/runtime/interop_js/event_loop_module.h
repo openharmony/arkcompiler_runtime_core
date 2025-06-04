@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,10 @@
 #include "runtime/include/external_callback_poster.h"
 #include "libpandabase/os/mutex.h"
 
+namespace ark {
+class Coroutine;
+}  // namespace ark
+
 namespace ark::ets::interop::js {
 
 class EventLoopCallbackPoster : public CallbackPoster {
@@ -37,20 +41,19 @@ class EventLoopCallbackPoster : public CallbackPoster {
 
         void PushCallback(WrappedCallback &&callback, uv_async_t *async);
         void ExecuteAllCallbacks();
+        bool IsEmpty();
 
     private:
-        os::memory::RecursiveMutex lock_;
+        os::memory::Mutex lock_;
         CallbackQueue callbackQueue_ GUARDED_BY(lock_);
     };
 
 public:
     static_assert(PANDA_ETS_INTEROP_JS);
-    EventLoopCallbackPoster();
+    explicit EventLoopCallbackPoster();
     ~EventLoopCallbackPoster() override;
     NO_COPY_SEMANTIC(EventLoopCallbackPoster);
     NO_MOVE_SEMANTIC(EventLoopCallbackPoster);
-
-    static uv_loop_t *GetEventLoop();
 
 private:
     void PostImpl(WrappedCallback &&callback) override;
@@ -70,8 +73,20 @@ public:
     NO_COPY_SEMANTIC(EventLoopCallbackPosterFactoryImpl);
     NO_MOVE_SEMANTIC(EventLoopCallbackPosterFactoryImpl);
 
-    /// @brief Method should create a unique instance of CallbackPoster with inputted strategy of posting
+    /**
+     * @brief Creates callback poster to perform async work in EventLoop.
+     * NOTE: This method can only be called from threads that have napi_env (e.g. Main, Exclusive Workers).
+     */
     PandaUniquePtr<CallbackPoster> CreatePoster() override;
+};
+
+class EventLoop {
+public:
+    enum RunMode { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
+
+    static uv_loop_t *GetEventLoop();
+
+    static void RunEventLoop(RunMode mode = RunMode::RUN_DEFAULT);
 };
 
 }  // namespace ark::ets::interop::js

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,12 @@ LOCATIONS_BUILDER(void)::ProcessManagedCall(Inst *inst, ParameterInfo *pinfo)
     size_t stackArgs = 0;
     for (size_t i = 0; i < inputsCount; i++) {
         ASSERT(inst->GetInputType(i) != DataType::NO_TYPE);
+        if (i == 0U && inst->GetOpcode() == Opcode::CallNative) {
+            // NOTE: this is a hack for workarounding regalloc bug (i.e. this input can get some parameter register
+            // location by mistake)!
+            locations->SetLocation(0U, Location::MakeRegister(GetFirstCalleeReg(GetGraph()->GetArch(), false)));
+            continue;
+        }
         auto param = pinfo->GetNextLocation(inst->GetInputType(i));
         if (i == 0 && inst->IsIntrinsic() && inst->CastToIntrinsic()->HasIdInput()) {
             param = Location::MakeRegister(GetTarget().GetParamRegId(0));  // place id input before imms
@@ -98,6 +104,7 @@ LOCATIONS_BUILDER(void)::ProcessManagedCall(Inst *inst, ParameterInfo *pinfo)
     if (!inst->NoDest()) {
         locations->SetDstLocation(GetLocationForReturn(inst));
     }
+
     GetGraph()->UpdateStackSlotsCount(stackArgs);
 }
 
@@ -268,6 +275,12 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     }
 }
 
+LOCATIONS_BUILDER(void)::VisitCallNative(GraphVisitor *visitor, Inst *inst)
+{
+    auto *pinfo = static_cast<LocationsBuilder *>(visitor)->GetResetParameterInfo();
+    static_cast<LocationsBuilder *>(visitor)->ProcessManagedCall(inst, pinfo);
+}
+
 LOCATIONS_BUILDER(void)::VisitNewArray([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
 {
     inst->CastToNewArray()->SetLocation(0, Location::MakeRegister(GetTarget().GetParamRegId(0)));
@@ -399,6 +412,11 @@ LOCATIONS_BUILDER(void)::VisitStoreStatic([[maybe_unused]] GraphVisitor *visitor
     if (inst->CastToStoreStatic()->GetNeedBarrier()) {
         inst->SetFlag(inst_flags::REQUIRE_TMP);
     }
+}
+
+LOCATIONS_BUILDER(void)::VisitResolveByName([[maybe_unused]] GraphVisitor *visitor, Inst *inst)
+{
+    inst->CastToResolveByName()->SetDstLocation(GetLocationForReturn(inst));
 }
 
 template <Arch ARCH>

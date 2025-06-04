@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,17 @@ class EtsClassMethodAbstractClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassMethodAbstractClassTsToEtsTest, checkAbstractClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAbstractClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAbstractClassMethod"));
 }
 
 TEST_F(EtsClassMethodAbstractClassTsToEtsTest, checkCreateAbstractClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAbstractClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAbstractClassFromTs"));
 }
 
 TEST_F(EtsClassMethodAbstractClassTsToEtsTest, checkInstanceAbstractClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAbstractClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAbstractClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

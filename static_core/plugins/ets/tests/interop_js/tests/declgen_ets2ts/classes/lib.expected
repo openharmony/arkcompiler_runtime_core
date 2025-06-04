@@ -12,41 +12,111 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-interface I0 {
+export declare let cb: (this: X1) => void;
+export declare interface I0 {
     I0Method(a: string): string;
 }
-export {I0};
-
-
-interface I1 {
+export declare interface I1 {
     I1Method(a: number): number;
 }
-export {I1};
-
-
-class Base {
-    public a: number = {} as any;
-    public constructor(a: number) {};
-};
-(Base as any) = (globalThis as any).Panda.getClass('LBase;');
-export {Base};
-exports.Base = Base;
-
-class Derived extends Base implements I0, I1 {
-    public I0Method(a: string): string { return {} as any; };
-    public I1Method(a: number): number { return {} as any; };
-    public b: number = {} as any;
-    public constructor(a: number, b: number){ super(...{} as (ConstructorParameters<typeof Base>)); };
-};
-(Derived as any) = (globalThis as any).Panda.getClass('LDerived;');
-export {Derived};
-exports.Derived = Derived;
-
+export declare class Base {
+    public get a(): number;
+    public set a(value: number);
+    public constructor(a: number);
+}
+export declare class Derived extends Base implements I0, I1 {
+    public I0Method(a: string): string;
+    public I1Method(a: number): number;
+    public get b(): number;
+    public set b(value: number);
+    public constructor(a: number, b: number);
+}
+export declare class X {
+    public get a(): number;
+    public set a(value: number);
+    protected get b(): number;
+    protected set b(value: number);
+    constructor();
+}
+export declare class X1 {
+    public foo(): void;
+    constructor();
+}
+export declare class X2 {
+    public foo2(): this;
+    constructor();
+}
+export declare class C {
+    public foo(): void;
+    constructor();
+}
+export declare class C1 {
+    public foo1(n?: number): void;
+    constructor();
+}
+export declare class C2 {
+    public foo2(...nums: number[]): void;
+    constructor();
+}
+export declare class C3 {
+    public foo3(): void;
+    constructor();
+}
+export declare class C4 {
+    public foo4(): Promise<void>;
+    constructor();
+}
+export declare class C5 {
+    public static foo5(): void;
+    constructor();
+}
+export declare class C6 {
+    public static foo6(n?: number): void;
+    constructor();
+}
+export declare class C7 {
+    public static foo7(...nums: number[]): void;
+    constructor();
+}
+export declare class C8 {
+    public foo8(): void;
+    constructor();
+}
+export declare class C9 {
+    public static foo9(): Promise<void>;
+    constructor();
+}
+export declare class C10 {
+    public get s(): string;
+    public set s(value: string);
+    constructor();
+}
+export declare class C11 {
+    public static get foo11(): number;
+    public static set foo11(value: number);
+    constructor();
+}
+export declare class Person {
+    public constructor(name: string);
+    public get name(): string;
+    public set name(value: string);
+}
+export declare class A {
+    constructor();
+}
+export declare abstract class Animal {
+    public abstract move(): void;
+    constructor();
+}
+declare class B {
+    public foo(): void;
+    constructor();
+}
+export declare class D extends B {
+    public foo(): void;
+    constructor();
+}
+export declare class C12 {
+    public foo(i: "some str"): number;
+    constructor();
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ namespace ark::ets::test {
 
 class RegisterNativeMethodTest : public EtsNapiTestBaseClass {};
 
-static constexpr const char *CLASS_NAME = "NativeRegistrationTest";
+static constexpr const char *CLASS_NAME = "register_native_methods_test/NativeRegistrationTest";
 
 static constexpr const char *GENERIC_NATIVE_METHOD_NAME = "Func0";
 static constexpr const char *FAST_NATIVE_METHOD_NAME = "Func0";
@@ -49,7 +49,7 @@ ets_boolean Func0(EtsEnv *env, [[maybe_unused]] ets_int param)
     EtsClass *klass = s.ToInternalType(cls);
     ASSERT(klass);
 
-    EtsMethod *method = klass->GetMethod(FAST_NATIVE_METHOD_NAME);
+    EtsMethod *method = klass->GetStaticMethod(FAST_NATIVE_METHOD_NAME, nullptr);
     ASSERT(method);
 
     return static_cast<ets_boolean>(method->IsFastNative());

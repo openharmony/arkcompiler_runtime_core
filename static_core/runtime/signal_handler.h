@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,13 +38,25 @@ bool InAllocatedCodeRange(uintptr_t pc);
 #define CONTEXT_FP uc_->uc_mcontext.arm_fp  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_LR uc_->uc_mcontext.arm_lr  // NOLINT(cppcoreguidelines-macro-usage)
 #elif defined(PANDA_TARGET_ARM64)
+#ifdef __APPLE__
+#define CONTEXT_PC uc_->uc_mcontext->__ss.__pc  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext->__ss.__fp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext->__ss.__lr  // NOLINT(cppcoreguidelines-macro-usage)
+#else
 #define CONTEXT_PC uc_->uc_mcontext.pc        // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.regs[29]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_LR uc_->uc_mcontext.regs[30]  // NOLINT(cppcoreguidelines-macro-usage)
+#endif
 #elif defined(PANDA_TARGET_AMD64)
+#ifdef __APPLE__
+#define CONTEXT_PC uc_->uc_mcontext->__ss.__rip  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_SP uc_->uc_mcontext->__ss.__rsp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext->__ss.__rbp  // NOLINT(cppcoreguidelines-macro-usage)
+#else
 #define CONTEXT_PC uc_->uc_mcontext.gregs[REG_RIP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_SP uc_->uc_mcontext.gregs[REG_RSP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.gregs[REG_RBP]  // NOLINT(cppcoreguidelines-macro-usage)
+#endif
 #elif defined(PANDA_TARGET_X86)
 #define CONTEXT_PC uc_->uc_mcontext.gregs[REG_EIP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_SP uc_->uc_mcontext.gregs[REG_ESP]  // NOLINT(cppcoreguidelines-macro-usage)
@@ -68,8 +80,12 @@ public:
     uintptr_t GetSP()
     {
 #if defined(PANDA_TARGET_ARM64)
+#ifdef __APPLE__
+        return uc_->uc_mcontext->__ss.__sp;
+#else
         auto sc = reinterpret_cast<struct sigcontext *>(&uc_->uc_mcontext);
         return sc->sp;
+#endif
 #else
         return CONTEXT_SP;
 #endif
@@ -109,9 +125,7 @@ public:
     }
 
     bool SignalActionHandler(int sig, siginfo_t *info, void *context);
-    bool InOatCode(const siginfo_t *siginfo, const void *context, bool checkBytecodePc) const;
-    bool InOtherCode(int sig, const siginfo_t *info, const void *context) const;
-
+    bool InCompiledCode(const siginfo_t *siginfo, const void *context, bool checkBytecodePc) const;
     void AddHandler(SignalHandler *handler, bool oatCode);
 
     void RemoveHandler(SignalHandler *handler);
@@ -133,7 +147,7 @@ public:
 private:
     bool isInit_ {false};
     mem::InternalAllocatorPtr allocator_;
-    PandaVector<SignalHandler *> oatCodeHandler_;
+    PandaVector<SignalHandler *> compiledCodeHandler_;
     PandaVector<SignalHandler *> otherHandlers_;
     NO_COPY_SEMANTIC(SignalManager);
 };
@@ -173,6 +187,28 @@ public:
 
     NO_COPY_SEMANTIC(StackOverflowHandler);
     NO_MOVE_SEMANTIC(StackOverflowHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
+class SamplingProfilerHandler final : public SignalHandler {
+public:
+    SamplingProfilerHandler() = default;
+    ~SamplingProfilerHandler() override = default;
+
+    NO_COPY_SEMANTIC(SamplingProfilerHandler);
+    NO_MOVE_SEMANTIC(SamplingProfilerHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
+class CrashFallbackDumpHandler final : public SignalHandler {
+public:
+    CrashFallbackDumpHandler() = default;
+    ~CrashFallbackDumpHandler() override = default;
+
+    NO_COPY_SEMANTIC(CrashFallbackDumpHandler);
+    NO_MOVE_SEMANTIC(CrashFallbackDumpHandler);
 
     bool Action(int sig, siginfo_t *siginfo, void *context) override;
 };

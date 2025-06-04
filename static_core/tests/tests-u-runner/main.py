@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -52,7 +52,12 @@ def main() -> None:
                             "or use special value `all` to use all available cores.")
     start = datetime.now(pytz.UTC)
     for test_suite in config.test_suites:
-        plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("sts") else test_suite
+        if test_suite.startswith("declgen_ets2ts"):
+            plugin = "declgenets2ts"
+        elif test_suite.startswith("declgen_ts2ets"):
+            plugin = "declgents2ets"
+        else:
+            plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("ets") else test_suite
         runner_class = registry.get_runner(plugin)
         if runner_class is not None:
             runners.append(runner_class(config))

@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,57 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-exports.__esModule = true;
-exports.fnWithAnyParamObject =
-	exports.fnWithUserInterface =
-	exports.fnWithUserClass =
-	exports.TestUserClass =
-	exports.fnWithUnionParam =
-	exports.fnWithSubsetPartial =
-	exports.fnWithSubsetOmit =
-	exports.fnWithSubsetPick =
-	exports.fnWithExtraSetParam =
-	exports.fnWithLiteralParam =
-	exports.fnWithAnyParams =
-		void 0;
-
-function fnWithAnyParams(arr) {
+export function fnWithAnyParams(arr) {
 	return arr ? arr[0] : 'Argument not found';
 }
 
-exports.fnWithAnyParams = fnWithAnyParams;
-
-function fnWithLiteralParam(arr) {
+export function fnWithLiteralParam(arr) {
 	return arr ? arr[0] : 'Argument not found';
 }
 
-exports.fnWithLiteralParam = fnWithLiteralParam;
-
-function fnWithExtraSetParam(arr) {
+export function fnWithExtraSetParam(arr) {
 	return arr ? arr[0] : 'Argument not found';
 }
 
-exports.fnWithExtraSetParam = fnWithExtraSetParam;
-
-function fnWithSubsetPick(obj) {
+export function fnWithSubsetPick(obj) {
 	return obj.address ? obj.address.city : 'Address not found';
 }
 
-exports.fnWithSubsetPick = fnWithSubsetPick;
-
-function fnWithSubsetOmit(obj) {
+export function fnWithSubsetOmit(obj) {
 	return obj.address ? obj.address.city : 'Address not found';
 }
 
-exports.fnWithSubsetOmit = fnWithSubsetOmit;
-
-function fnWithSubsetPartial(obj) {
+export function fnWithSubsetPartial(obj) {
 	return obj.address ? obj.address.city : 'Address not found';
 }
 
-exports.fnWithSubsetPartial = fnWithSubsetPartial;
-
-function fnWithUnionParam(obj) {
+export function fnWithUnionParam(obj) {
 	if (obj) {
 		if (Array.isArray(obj)) {
 			return 'This is an array';
@@ -73,9 +47,7 @@ function fnWithUnionParam(obj) {
 	return 'Argument not found';
 }
 
-exports.fnWithUnionParam = fnWithUnionParam;
-
-let TestUserClass = /** @class */ (function () {
+export let TestUserClass = /** @class */ (function () {
 	function testUserClass(id, name) {
 		this.id = id;
 		this.name = name;
@@ -83,22 +55,14 @@ let TestUserClass = /** @class */ (function () {
 	return testUserClass;
 })();
 
-exports.TestUserClass = TestUserClass;
-
-function fnWithUserClass(obj) {
+export function fnWithUserClass(obj) {
 	return obj ? obj.name : 'Class was not passed';
 }
 
-exports.fnWithUserClass = fnWithUserClass;
-
-function fnWithUserInterface(obj) {
+export function fnWithUserInterface(obj) {
 	return obj ? obj.name : 'Object was not passed';
 }
 
-exports.fnWithUserInterface = fnWithUserInterface;
-
-function fnWithAnyParamObject(obj) {
+export function fnWithAnyParamObject(obj) {
 	return obj.arr ? obj.arr[0] : obj.id;
 }
-
-exports.fnWithAnyParamObject = fnWithAnyParamObject;

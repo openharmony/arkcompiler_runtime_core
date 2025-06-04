@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const etsVm = require('lib/module/ets_interop_js_napi');
+const etsVm = globalThis.gtest.etsVm;
 
 const num = 1;
 const string = 'string';
@@ -46,7 +46,7 @@ const callSubsetByRefInterfaceFromEts = etsVm.getFunction(MODULE_PATH, 'call_sub
 const SubsetByValueClass = etsVm.getClass('Linterface_method/test/SubsetByValueClass;');
 const createSubsetByValueClassFromEts = etsVm.getFunction(MODULE_PATH, 'create_subset_by_value_class_from_ets');
 
-getExtras = () => ({
+const getExtras = () => ({
 	WithOptionalMethodClass: etsVm.getClass('Linterface_method/test/WithOptionalMethodClass;'),
 	createClassWithOptionalMethod: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'create_class_with_optional_method'),
 	WithoutOptionalMethodClass: etsVm.getClass('Linterface_method/test/TupleClass;'),

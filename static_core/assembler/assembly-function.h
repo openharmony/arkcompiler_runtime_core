@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,7 +134,9 @@ struct Function {
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
+              const std::unordered_map<std::string, panda_file::BaseMethodItem *> &staticMethods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
+              const std::unordered_map<std::string, panda_file::BaseFieldItem *> &staticFields,
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
               const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const;

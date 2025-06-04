@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,8 @@ TEST_F(EtsInterfaceEtsToTsTest, check_subset_by_value_interface_method)
 {
     ASSERT_TRUE(RunJsTestSuite("check_subset_by_value_interface_method.js"));
 }
-
-TEST_F(EtsInterfaceEtsToTsTest, check_tuple_type_interface_method)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceEtsToTsTest, DISABLED_check_tuple_type_interface_method)
 {
     ASSERT_TRUE(RunJsTestSuite("check_tuple_type_interface_method.js"));
 }

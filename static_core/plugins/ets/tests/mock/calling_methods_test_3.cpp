@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath5)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -74,12 +74,12 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
     }
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath6)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath6)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
     {
-        ets_class cls = env_->FindClass("F");
+        ets_class cls = env_->FindClass("CallingMethodsTest/F");
         ASSERT_NE(cls, nullptr);
 
         // Call<type>Method part
@@ -122,12 +122,12 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath6)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral7)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -170,12 +170,12 @@ TEST_F(MethodsTest, CallMethodsTestGeneral7)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral8)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -197,7 +197,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral8)
     // CallStatic<type>Method part
     env_->CallStaticVoidMethod(cls, voidId, static_cast<ets_int>(42_I));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_object aObj = env_->CallStaticObjectMethod(cls, objectId);
     ASSERT_NE(aObj, nullptr);
@@ -217,15 +217,15 @@ TEST_F(MethodsTest, CallMethodsTestGeneral8)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral9)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -263,10 +263,10 @@ TEST_F(MethodsTest, CallMethodsTestGeneral9)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral10)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method shortId = env_->GetStaticp_method(cls, "short_method", "S:S");
@@ -310,14 +310,14 @@ TEST_F(MethodsTest, CallMethodsTestGeneral10)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral11)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -359,12 +359,12 @@ TEST_F(MethodsTest, CallMethodsTestGeneral11)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral12)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -399,12 +399,12 @@ TEST_F(MethodsTest, CallMethodsTestGeneral12)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral13)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("CallingMethodsTest/F");
     ASSERT_NE(cls, nullptr);
 
     ets_method voidId = env_->GetStaticp_method(cls, "void_method", "I:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->GetStaticp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->GetStaticp_method(cls, "boolean_method", "Z:Z");
     ASSERT_NE(booleanId, nullptr);

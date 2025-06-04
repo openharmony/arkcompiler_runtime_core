@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,17 @@
 
 #include "assembler/assembly-program.h"
 #include "assembler/assembly-function.h"
-#include "assembler/assembly-ins.h"
 #include "assembly-type.h"
 #include "ins_create_api.h"
 
-#include "runtime/include/runtime.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/include/runtime.h"
 
 #include "ets_typeapi_create.h"
 #include "ets_object.h"
 #include "ets_array.h"
+#include "utils/utf.h"
 
 namespace ark::ets {
 
@@ -65,16 +66,18 @@ void TypeCreatorCtx::FlushTypeAPICtxDataRecordsToProgram()
 
     ctxDataRecordCctor_.AddInstruction(pandasm::Create_RETURN_VOID());
 
-    auto name = ctxDataRecord_.name;
-    prog_.recordTable.emplace(std::move(name), std::move(ctxDataRecord_));
-    name = ctxDataRecordCctor_.name;
-    prog_.functionTable.emplace(std::move(name), std::move(ctxDataRecordCctor_));
+    [[maybe_unused]] auto res = AddPandasmRecord(std::move(ctxDataRecord_));
+    // Record must be unique
+    ASSERT(res.second);
+    auto name = ctxDataRecordCctor_.name;
+    prog_.functionStaticTable.emplace(std::move(name), std::move(ctxDataRecordCctor_));
 }
 
-void TypeCreatorCtx::SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects)
+void TypeCreatorCtx::SaveObjects(EtsCoroutine *coro, VMHandle<EtsArray> &objects, ClassLinkerContext *ctx)
 {
     auto arrayKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(
-        pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1, true}.GetDescriptor(true).c_str());
+        pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1, true}.GetDescriptor(true).c_str(), true, ctx);
+    ASSERT(arrayKlass != nullptr);
     auto arr = coretypes::Array::Create(arrayKlass->GetRuntimeClass(), 1, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     arr->Set<ObjectHeader *>(0, objects.GetPtr()->GetCoreType());
     initArrObject_ = arr;
@@ -88,18 +91,50 @@ EtsArray *TypeCreatorCtx::GetObjects([[maybe_unused]] EtsCoroutine *coro)
     return reinterpret_cast<EtsArray *>(initArrObject_->Get<ObjectHeader *>(0));
 }
 
-void TypeCreatorCtx::InitializeCtxDataRecord(EtsCoroutine *coro)
+bool TypeCreatorCtx::InitializeCtxDataRecord(EtsCoroutine *coro, ClassLinkerContext *ctx, const panda_file::File *pf)
 {
+    ASSERT(coro != nullptr);
+    ASSERT(ctx != nullptr);
+    ASSERT(pf != nullptr);
+
+    LoadCreatedClasses(ctx, pf);
+
     if (ctxDataRecordName_.empty()) {
-        return;
+        return true;
     }
-    auto name = pandasm::Type(ctxDataRecordName_, 0).GetDescriptor();
-    auto klass = coro->GetPandaVM()->GetClassLinker()->GetClass(name.c_str());
+
+    auto *etsLinker = coro->GetPandaVM()->GetClassLinker();
+    auto *errorHandler = etsLinker->GetEtsClassLinkerExtension()->GetErrorHandler();
+    auto clsDescriptor = pandasm::Type(ctxDataRecordName_, 0).GetDescriptor();
+    // At this point, the class must be already loaded in `LoadCreatedClasses`
+    auto *klass = etsLinker->GetClass(clsDescriptor.c_str(), true, ctx, errorHandler);
+    ASSERT(klass != nullptr);
     ASSERT(!klass->IsInitialized());
-    auto linker = Runtime::GetCurrent()->GetClassLinker();
-    [[maybe_unused]] auto result = linker->InitializeClass(coro, klass->GetRuntimeClass());
-    ASSERT(result);
-    ASSERT(klass->IsInitialized());
+    auto result = etsLinker->InitializeClass(coro, klass);
+    if (LIKELY(result)) {
+        ASSERT(klass->IsInitialized());
+    } else {
+        ASSERT(coro->HasPendingException());
+    }
+    return result;
+}
+
+void TypeCreatorCtx::LoadCreatedClasses(ClassLinkerContext *ctx, const panda_file::File *pf)
+{
+    auto *coreLinker = Runtime::GetCurrent()->GetClassLinker();
+    for (const auto &clsName : createdRecords_) {
+        // Ignore primitive, so that generated class could have the same name as primitive type encoding
+        auto clsDescriptor = pandasm::Type(clsName, 0, true).GetDescriptor(true);
+        auto classId = pf->GetClassId(utf::CStringAsMutf8(clsDescriptor.c_str()));
+        ASSERT(classId.IsValid());
+        ASSERT(!pf->IsExternal(classId));
+        // Note that the classes will be within loaded classes of the context,
+        // while their corresponding abc file will not be visible in managed `AbcFile` list
+        auto *klass = coreLinker->LoadClass(*pf, classId, ctx, nullptr, true);
+        // Check that the class was generated and loaded correctly
+        LOG_IF(klass == nullptr, FATAL, RUNTIME) << "Type API failed to load a created class '" << clsDescriptor << "'";
+    }
+    createdRecords_.clear();
 }
 
 pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
@@ -133,8 +168,7 @@ pandasm::Record &TypeCreatorCtx::GetTypeAPICtxDataRecord()
     getObjectsArray.returnType = pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1};
     getObjectsArray.params.emplace_back(
         pandasm::Type::FromPrimitiveId(ConvertEtsTypeToPandaType(EtsType::LONG).GetId()), SourceLanguage::ETS);
-    auto getObjectsArrayName = getObjectsArray.name;
-    prog_.functionTable.emplace(std::move(getObjectsArrayName), std::move(getObjectsArray));
+    prog_.AddToFunctionTable(std::move(getObjectsArray));
 
     return ctxDataRecord_;
 }
@@ -143,7 +177,16 @@ pandasm::Record &TypeCreatorCtx::AddRefTypeAsExternal(const std::string &name)
 {
     pandasm::Record objectRec {name, SourceLanguage::ETS};
     objectRec.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
-    return prog_.recordTable.emplace(objectRec.name, std::move(objectRec)).first->second;
+    return AddPandasmRecord(std::move(objectRec)).first;
+}
+
+std::pair<pandasm::Record &, bool> TypeCreatorCtx::AddPandasmRecord(pandasm::Record &&record)
+{
+    if (!record.metadata->GetAttribute(std::string(typeapi_create_consts::ATTR_EXTERNAL))) {
+        createdRecords_.emplace_back(record.name);
+    }
+    auto [iter, inserted] = prog_.recordTable.emplace(record.name, std::move(record));
+    return {iter->second, inserted};
 }
 
 const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(const std::string &primTypeName)
@@ -222,17 +265,24 @@ void LambdaTypeCreator::Create()
         GetCtx()->AddError("Function types with more than 16 parameters are not supported");
         return;
     }
-    name_ += std::to_string(fn_.params.size());
+    auto aritySuffix = std::to_string(fn_.params.size());
+    name_ += aritySuffix;
 
     rec_.name = name_;
-    fnName_ = fn_.name = name_ + ".invoke0";
+    fnName_ = fn_.name = name_ + "." + STD_CORE_FUNCTION_INVOKE_PREFIX + aritySuffix;
     fn_.params.insert(fn_.params.begin(), pandasm::Function::Parameter(pandasm::Type(name_, 0), SourceLanguage::ETS));
     for (const auto &attr : typeapi_create_consts::ATTR_ABSTRACT_METHOD) {
         fn_.metadata->SetAttribute(attr);
     }
     fn_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
-    GetCtx()->Program().recordTable.emplace(name_, std::move(rec_));
-    GetCtx()->Program().functionTable.emplace(fnName_, std::move(fn_));
+
+    // Register `std.core.Function` type and its `FN_INVOKE_METHOD_PREFIX+N` method as external,
+    // as they are already defined in standard library
+    GetCtx()->AddRefTypeAsExternal(name_);
+    fn_.metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
+    fn_.metadata->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS_FUNCTION,
+                                    typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
+    GetCtx()->Program().AddToFunctionTable(std::move(fn_));
 }
 
 void PandasmMethodCreator::AddParameter(pandasm::Type param)
@@ -256,7 +306,9 @@ void PandasmMethodCreator::Create()
     ASSERT(!finished_);
     finished_ = true;
     fn_.name = name_;
-    auto ok = ctx_->Program().functionTable.emplace(name_, std::move(fn_)).second;
+
+    auto &functionTable = fn_.IsStatic() ? ctx_->Program().functionStaticTable : ctx_->Program().functionInstanceTable;
+    auto ok = functionTable.emplace(name_, std::move(fn_)).second;
     if (!ok) {
         ctx_->AddError("duplicate function " + name_);
     }

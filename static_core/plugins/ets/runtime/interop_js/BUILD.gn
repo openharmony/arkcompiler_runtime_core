@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,13 +46,10 @@ ohos_source_set("ets_interop_js_napi_static") {
   configs = [
     "$ark_root:ark_config",
     "$ark_root/runtime:arkruntime_public_config",
+    ":interop_js_public_config",
   ]
 
-  sources = [
-    "ets_vm_plugin.cpp",
-    "event_loop_module.cpp",
-    "timer_module.cpp",
-  ]
+  sources = [ "ets_vm_plugin.cpp" ]
 
   deps = [
     ":interop_intrinsic_kinds_h",
@@ -61,17 +58,23 @@ ohos_source_set("ets_interop_js_napi_static") {
     "$ark_root/runtime:libarkruntime",
   ]
 
-  if (ark_standalone_build || ark_static_standalone_build) {
+  if ((ark_standalone_build || ark_static_standalone_build) &&
+      !ark_ets_hybrid) {
     deps += [ ":install_nodejs" ]
   }
 
   if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_USE_OHOS_LOG" ]
+    defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
     deps += [ ":etsstdlib_install" ]
     external_deps = [
       "hilog:libhilog",
       "libuv:uv",
       "napi:ace_napi",
+    ]
+  } else if (ark_standalone_build && ark_ets_hybrid) {
+    deps += [
+      "$ark_third_party_root/libuv:uv",
+      "$arkui_root/napi:ace_napi",
     ]
   }
   part_name = ark_part_name
@@ -94,10 +97,14 @@ action("install_nodejs") {
 }
 
 config("interop_js_public_config") {
-  if (ark_standalone_build || ark_static_standalone_build) {
+  include_dirs = [ "$arkplatform_include" ]
+  defines = []
+  if (ark_ets_hybrid) {
+    defines += [ "PANDA_JS_ETS_HYBRID_MODE" ]
+  } else if (ark_standalone_build || ark_static_standalone_build) {
     node_version = "v18.13.0"
     distro = "linux-x64"
 
-    include_dirs = [ "$ark_root/third_party/nodejs/node-${node_version}-${distro}/include/node" ]
+    include_dirs += [ "$ark_root/third_party/nodejs/node-${node_version}-${distro}/include/node" ]
   }
 }

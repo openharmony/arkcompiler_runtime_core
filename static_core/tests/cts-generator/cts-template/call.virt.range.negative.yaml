@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -923,10 +923,9 @@ tests:
             - method_id_non_static
         header-template: [r_A]
         description: >
-          Verifier should report that method is not accessible if method_id is not resolved to existing method.
+          Compiler should report that method is not accessible if method_id is not resolved to existing method.
         check-type: exit-positive
-        tags: [verifier]
-        runner-options: ['verifier-failure', 'verifier-config']
+        runner-options: ['compile-failure']
         code-template: |
             .function %s A.func(A a0, *s a1) <static> {
                 %s

@@ -68,12 +68,12 @@ cases:
     - { stype: Byte, sval: 'new Byte()', dtype: long }
     - { stype: Byte, sval: 'new Byte()', dtype: float }
     - { stype: Byte, sval: 'new Byte()', dtype: double }
-    - { stype: Byte, sval: 'new Byte()', dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Byte, sval: 'new Byte()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Byte, sval: 'new Byte()', dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Byte, sval: 'new Byte()', dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Byte, sval: 'new Byte()', dtype: Float, tags: 'compile-only, negative' }
-    - { stype: Byte, sval: 'new Byte()', dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Byte, sval: 'new Byte()', dtype: Short }
+    - { stype: Byte, sval: 'new Byte()', dtype: Char }
+    - { stype: Byte, sval: 'new Byte()', dtype: Int }
+    - { stype: Byte, sval: 'new Byte()', dtype: Long }
+    - { stype: Byte, sval: 'new Byte()', dtype: Float }
+    - { stype: Byte, sval: 'new Byte()', dtype: Double }
 
     - { stype: Char, sval: "new Char(c'X')", dtype: byte }
     - { stype: Char, sval: "new Char(c'X')", dtype: short }
@@ -81,12 +81,12 @@ cases:
     - { stype: Char, sval: "new Char(c'X')", dtype: long }
     - { stype: Char, sval: "new Char(c'X')", dtype: float }
     - { stype: Char, sval: "new Char(c'X')", dtype: double }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Float, tags: 'compile-only, negative' }
-    - { stype: Char, sval: "new Char(c'X')", dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Byte }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Short }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Int }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Long }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Float }
+    - { stype: Char, sval: "new Char(c'X')", dtype: Double }
 
     - { stype: Short, sval: 'new Short()', dtype: byte }
     - { stype: Short, sval: 'new Short()', dtype: char }
@@ -94,12 +94,12 @@ cases:
     - { stype: Short, sval: 'new Short()', dtype: long }
     - { stype: Short, sval: 'new Short()', dtype: float }
     - { stype: Short, sval: 'new Short()', dtype: double }
-    - { stype: Short, sval: 'new Short()', dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Short, sval: 'new Short()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Short, sval: 'new Short()', dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Short, sval: 'new Short()', dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Short, sval: 'new Short()', dtype: Float, tags: 'compile-only, negative' }
-    - { stype: Short, sval: 'new Short()', dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Short, sval: 'new Short()', dtype: Byte }
+    - { stype: Short, sval: 'new Short()', dtype: Char }
+    - { stype: Short, sval: 'new Short()', dtype: Int }
+    - { stype: Short, sval: 'new Short()', dtype: Long }
+    - { stype: Short, sval: 'new Short()', dtype: Float }
+    - { stype: Short, sval: 'new Short()', dtype: Double }
 
     - { stype: Int, sval: 'new Int()', dtype: byte }
     - { stype: Int, sval: 'new Int()', dtype: short }
@@ -107,12 +107,12 @@ cases:
     - { stype: Int, sval: 'new Int()', dtype: long }
     - { stype: Int, sval: 'new Int()', dtype: float }
     - { stype: Int, sval: 'new Int()', dtype: double }
-    - { stype: Int, sval: 'new Int()', dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Int, sval: 'new Int()', dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Int, sval: 'new Int()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Int, sval: 'new Int()', dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Int, sval: 'new Int()', dtype: Float, tags: 'compile-only, negative' }
-    - { stype: Int, sval: 'new Int()', dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Int, sval: 'new Int()', dtype: Byte }
+    - { stype: Int, sval: 'new Int()', dtype: Short }
+    - { stype: Int, sval: 'new Int()', dtype: Char }
+    - { stype: Int, sval: 'new Int()', dtype: Long }
+    - { stype: Int, sval: 'new Int()', dtype: Float }
+    - { stype: Int, sval: 'new Int()', dtype: Double }
 
     - { stype: Long, sval: 'new Long()', dtype: byte }
     - { stype: Long, sval: 'new Long()', dtype: short }
@@ -120,12 +120,12 @@ cases:
     - { stype: Long, sval: 'new Long()', dtype: int }
     - { stype: Long, sval: 'new Long()', dtype: float }
     - { stype: Long, sval: 'new Long()', dtype: double }
-    - { stype: Long, sval: 'new Long()', dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Long, sval: 'new Long()', dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Long, sval: 'new Long()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Long, sval: 'new Long()', dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Long, sval: 'new Long()', dtype: Float, tags: 'compile-only, negative' }
-    - { stype: Long, sval: 'new Long()', dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Long, sval: 'new Long()', dtype: Byte }
+    - { stype: Long, sval: 'new Long()', dtype: Short }
+    - { stype: Long, sval: 'new Long()', dtype: Char }
+    - { stype: Long, sval: 'new Long()', dtype: Int }
+    - { stype: Long, sval: 'new Long()', dtype: Float }
+    - { stype: Long, sval: 'new Long()', dtype: Double }
 
     - { stype: Float, sval: 'new Float()', dtype: byte }
     - { stype: Float, sval: 'new Float()', dtype: short }
@@ -133,12 +133,12 @@ cases:
     - { stype: Float, sval: 'new Float()', dtype: int }
     - { stype: Float, sval: 'new Float()', dtype: long }
     - { stype: Float, sval: 'new Float()', dtype: double }
-    - { stype: Float, sval: 'new Float()', dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Float, sval: 'new Float()', dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Float, sval: 'new Float()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Float, sval: 'new Float()', dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Float, sval: 'new Float()', dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Float, sval: 'new Float()', dtype: Double, tags: 'compile-only, negative' }
+    - { stype: Float, sval: 'new Float()', dtype: Byte }
+    - { stype: Float, sval: 'new Float()', dtype: Short }
+    - { stype: Float, sval: 'new Float()', dtype: Char }
+    - { stype: Float, sval: 'new Float()', dtype: Int }
+    - { stype: Float, sval: 'new Float()', dtype: Long }
+    - { stype: Float, sval: 'new Float()', dtype: Double }
 
     - { stype: Double, sval: 'new Double()', dtype: byte }
     - { stype: Double, sval: 'new Double()', dtype: short }
@@ -146,9 +146,9 @@ cases:
     - { stype: Double, sval: 'new Double()', dtype: int }
     - { stype: Double, sval: 'new Double()', dtype: long }
     - { stype: Double, sval: 'new Double()', dtype: float }
-    - { stype: Double, sval: 'new Double()', dtype: Byte, tags: 'compile-only, negative' }
-    - { stype: Double, sval: 'new Double()', dtype: Short, tags: 'compile-only, negative' }
-    - { stype: Double, sval: 'new Double()', dtype: Char, tags: 'compile-only, negative' }
-    - { stype: Double, sval: 'new Double()', dtype: Int, tags: 'compile-only, negative' }
-    - { stype: Double, sval: 'new Double()', dtype: Long, tags: 'compile-only, negative' }
-    - { stype: Double, sval: 'new Double()', dtype: Float, tags: 'compile-only, negative' }
+    - { stype: Double, sval: 'new Double()', dtype: Byte }
+    - { stype: Double, sval: 'new Double()', dtype: Short }
+    - { stype: Double, sval: 'new Double()', dtype: Char }
+    - { stype: Double, sval: 'new Double()', dtype: Int }
+    - { stype: Double, sval: 'new Double()', dtype: Long }
+    - { stype: Double, sval: 'new Double()', dtype: Float }

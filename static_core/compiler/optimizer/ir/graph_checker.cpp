@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -498,8 +498,8 @@ void GraphChecker::CheckStartBlock()
         [[maybe_unused]] Opcode opc = inst->GetOpcode();
         CHECKER_DO_IF_NOT_AND_PRINT(
             opc == Opcode::Constant || opc == Opcode::Parameter || opc == Opcode::SafePoint ||
-                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::NOP || opc == Opcode::LiveIn ||
-                opc == Opcode::LoadUndefined,
+                opc == Opcode::SpillFill || opc == Opcode::NullPtr || opc == Opcode::LoadUniqueObject ||
+                opc == Opcode::NOP || opc == Opcode::LiveIn,
             std::cerr
                 << "Entry block can contain Constant, Parameter, NullPtr, SafePoint, NOP or SpillFill instructions"
                 << *inst << std::endl);
@@ -1210,6 +1210,7 @@ void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, Basi
 void GraphChecker::VisitMov(GraphVisitor *v, Inst *inst)
 {
     CheckUnaryOperationTypes(v, inst);
+    UNREACHABLE();
 }
 void GraphChecker::VisitNeg(GraphVisitor *v, Inst *inst)
 {
@@ -1930,15 +1931,15 @@ void GraphChecker::VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
 
-void GraphChecker::VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitLoadUniqueObject([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, inst->GetType() == DataType::REFERENCE,
-        (std::cerr << "LoadUndefined instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
+        (std::cerr << "LoadUniqueObject instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        v, static_cast<GraphChecker *>(v)->IncrementLoadUndefinedInstCounterAndGet() == 1,
-        (std::cerr << "There should be not more than one LoadUndefined instruction in graph\n",
+        v, static_cast<GraphChecker *>(v)->IncrementLoadUniqueObjectInstCounterAndGet() == 1,
+        (std::cerr << "There should be not more than one LoadUniqueObject instruction in graph\n",
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
 
@@ -2226,6 +2227,42 @@ void GraphChecker::VisitCallVirtual([[maybe_unused]] GraphVisitor *v, Inst *inst
                                          inst->Dump(&std::cerr), op->Dump(&std::cerr)));
 }
 
+void GraphChecker::VisitCallNative([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    [[maybe_unused]] auto *graph = inst->GetBasicBlock()->GetGraph();
+    [[maybe_unused]] auto *callNative = inst->CastToCallNative();
+
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, graph->GetMode().SupportManagedCode(),
+        (std::cerr << "CallNative must be only in managed code:\n", callNative->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, callNative->IsRuntimeCall() == (callNative->GetSaveState() != nullptr),
+        (std::cerr << "CallNative with runtime_call flag must have SaveState (and vice versa):\n",
+         callNative->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, callNative->GetInputsCount() > 0U && callNative->GetInput(0U).GetInst()->GetType() == DataType::POINTER,
+        (std::cerr << "CallNative must have native pointer as 0 input:\n", callNative->Dump(&std::cerr)));
+
+    if (!callNative->IsRuntimeCall()) {
+        [[maybe_unused]] bool hasRefInputs = false;
+        for (size_t i = 1U; i < callNative->GetInputsCount(); ++i) {
+            auto input = callNative->GetInput(i);
+            if (DataType::IsReference(input.GetInst()->GetType())) {
+                hasRefInputs = true;
+                break;
+            }
+        }
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, !hasRefInputs,
+            (std::cerr << "CallNative without runtime_call flag cannot have ref inputs:\n",
+             callNative->Dump(&std::cerr)));
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, !DataType::IsReference(callNative->GetType()),
+            (std::cerr << "CallNative without runtime_call flag cannot have ref type:\n",
+             callNative->Dump(&std::cerr)));
+    }
+}
+
 void GraphChecker::VisitCallDynamic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
@@ -2328,6 +2365,10 @@ void GraphChecker::VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, saveState != nullptr,
                                         std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst
                                                   << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(),
+                                        std::cerr << "CheckCast must not have users: " << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::NO_TYPE,
+                                        std::cerr << "CheckCast must not have type: " << *inst << std::endl);
     if (inst->CanDeoptimize()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v, (saveState->GetOpcode() == Opcode::SaveState || saveState->GetOpcode() == Opcode::SaveStateDeoptimize),

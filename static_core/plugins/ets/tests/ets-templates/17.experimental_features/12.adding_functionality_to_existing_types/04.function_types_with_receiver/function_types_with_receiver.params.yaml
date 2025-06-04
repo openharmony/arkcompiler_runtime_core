@@ -1,0 +1,77 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |
+      class A {}
+      type T = (this: A) => int;
+    use: |
+      let a: A = new A()
+      let t: T = (this: A): int => { return 1 }
+      assertEQ(t(a), 1)
+  - decl: |
+      class A {}
+      type T = (this: A) => int;
+    use: |
+      let a: A = new A()
+      let t: T = (this: A): int => { return 1 }
+      assertEQ(a.t(), 1)
+  - decl: |
+      interface I {}
+      type T = (this: I) => int;
+    use: |
+      let i: I = {}
+      let t: T = (this: I): int => { return 1 }
+      assertEQ(t(i), 1)
+  - decl: |
+      interface I {}
+      type T = (this: I) => int;
+    use: |
+      let i: I = {}
+      let t: T = (this: I): int => { return 1 }
+      assertEQ(i.t(), 1)
+  - decl: |
+      type T = (this: boolean[]) => boolean
+    use: |
+      let b: boolean[] = [true, false]
+      let t: T = (this: boolean[]): boolean => { return true }
+      assertEQ(t(b), true)
+  - decl: |
+      type T = (this: boolean[]) => boolean
+    use: |
+      let b: boolean[] = [true, false]
+      let t: T = (this: boolean[]): boolean => { return true }
+      assertEQ(b.t(), true)
+  - decl: |
+      type T = (this: boolean[]) => boolean
+    use: |
+      let b: boolean[] = [true, false]
+      let t: T = (this: boolean[]): boolean => { return true }
+      assertEQ(b.t(), true)
+  - decl: |
+      class A {}
+      type t1 = (this: A) => boolean
+      type t2 = (a: A) => boolean
+      function foo(this: A): boolean { return true }
+      function bar(a: A): boolean { return false }
+    use: |
+      let f: t1 = foo
+      let b: t2 = bar
+      let a: A = new A()
+      assertEQ(b(a), false)
+      b = foo
+      f = b
+      assertEQ(b(a), true)
+      assertEQ(f(a), true)
+      assertEQ(a.f(), true)

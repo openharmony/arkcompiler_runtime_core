@@ -686,8 +686,8 @@ prop: end
     * [simplify_string_builder.h](../optimizer/optimizations/simplify_string_builder.h)
     * [simplify_string_builder.cpp](../optimizer/optimizations/simplify_string_builder.cpp)
 * Tests
-    * [ets_stringbuilder.sts](../../plugins/ets/tests/checked/ets_stringbuilder.sts)
-    * [ets_string_builder_append_merge.sts](../../plugins/ets/tests/checked/ets_string_builder_append_merge.sts)
-    * [ets_string_builder_merge.sts](../../plugins/ets/tests/checked/ets_string_builder_merge.sts)
-    * [ets_string_concat.sts](../../plugins/ets/tests/checked/ets_string_concat.sts)
-    * [ets_string_concat_loop.sts](../../plugins/ets/tests/checked/ets_string_concat_loop.sts)
+    * [ets_stringbuilder.ets](../../plugins/ets/tests/checked/ets_stringbuilder.ets)
+    * [ets_string_builder_append_merge.ets](../../plugins/ets/tests/checked/ets_string_builder_append_merge.ets)
+    * [ets_string_builder_merge.ets](../../plugins/ets/tests/checked/ets_string_builder_merge.ets)
+    * [ets_string_concat.ets](../../plugins/ets/tests/checked/ets_string_concat.ets)
+    * [ets_string_concat_loop.ets](../../plugins/ets/tests/checked/ets_string_concat_loop.ets)

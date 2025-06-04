@@ -30,6 +30,15 @@ function main(): int {
     failures += check(testTypedArrayReduce(), "Test reduce method")
     failures += check(testTypedArrayReduceRight(), "Test reduceRight method")
 
+    failures += check(testTypedArrayFill1Arg(), "Test fill(value) method")
+    failures += check(testTypedArrayFill2Args(), "Test fill(value, start) method")
+    failures += check(testTypedArrayFill3Args(), "Test fill(value, start, end) method")
+
+    failures += check(testTypedArrayFind(), "Test .find method")
+    failures += check(testTypedArrayFindIndex(), "Test .findIndex method")
+    failures += check(testTypedArrayIndexOf2(), "Test .indexOf method v2")
+    failures += check(testTypedArrayLastIndexOf(), "Test .lastIndexOf method")
+
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -55,7 +64,8 @@ function check(result: number, message: String): number {
     return fail;
 }
 
-const source: {{.item.sourceElementsType}}[] = {{.item.data}};
+const source: {{.item.primitiveType}}[] = {{.item.data}};
+const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
 
 type ObjectTypeAndExpectations<T> = [{{.item.objectType}}, T]
 
@@ -64,39 +74,82 @@ const testTypedArrayEvery = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     [
         [
             {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
-            [true, false, true, false, true, false, false]
+            [true, false, true, false, true, false, false, true, false, true]
         ] as ObjectTypeAndExpectations<boolean[]>,
     ],
     (args: ObjectTypeAndExpectations<boolean[]>): number => {
-        const array = args[0]
+        const array = new {{.item.objectType}}(args[0])
         const expected = args[1]
-
-        const isTrueEverywhere = array.every(() => true)
-        const isFalseEverywhere = array.every(() => false)
-
-        const isPositive = array.every((x: {{.item.type}}) => x > {{.item.create}}(0))
-        const isNegative = array.every((x: {{.item.type}}) => x < {{.item.create}}(0))
-
-        const isValueEqualToIndexPlus1 = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index + 1))
-        const isValueEqualToIndex = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
-
-        const rhs = array.reduce((acc: {{.item.type}}, x: {{.item.type}}) => acc + x)
-
-        const isArraySumEqualToIndexPlusValue =
-            array.every(
-                (x: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
-                    return x + {{.item.create}}(index) == rhs
-                })
 
         let failures = 0
 
-        failures += check(boolToResult(isTrueEverywhere == expected[0]), ".every(() => true)")
-        failures += check(boolToResult(isFalseEverywhere == expected[1]), ".every(() => false)")
-        failures += check(boolToResult(isPositive == expected[2]), ".every(x > 0)")
-        failures += check(boolToResult(isNegative == expected[3]), ".every(x < 0)")
-        failures += check(boolToResult(isValueEqualToIndexPlus1 == expected[4]), ".every((x, index) => x == index + 1)")
-        failures += check(boolToResult(isValueEqualToIndex == expected[5]), ".every((x, index) => x == index)")
-        failures += check(boolToResult(isArraySumEqualToIndexPlusValue == expected[6]), ".every((x, index, arr) => x + index == sum(arr))")
+        const isTrueEverywhere = array.every(() => true)
+        failures += check(boolToResult(isTrueEverywhere == expected[0]), `[${array}].every(() => true)`)
+
+        const isFalseEverywhere = array.every(() => false)
+        failures += check(boolToResult(isFalseEverywhere == expected[1]), `[${array}].every(() => false)`)
+
+        const isPositive = array.every((x: {{.item.type}}) => x > {{.item.create}}(0))
+        failures += check(boolToResult(isPositive == expected[2]), `[${array}].every(x > 0)`)
+
+        const isNegative = array.every((x: {{.item.type}}) => x < {{.item.create}}(0))
+        failures += check(boolToResult(isNegative == expected[3]), `[${array}].every(x < 0)`)
+
+        const isValueEqualToIndexPlus1 = array.every(
+            (x: {{.item.type}}, index: number) => x == {{.item.create}}(index + 1)
+        )
+        failures += check(
+            boolToResult(isValueEqualToIndexPlus1 == expected[4]),
+            `[${array}].every((x, index) => x == index + 1)`
+        )
+
+        const isValueEqualToIndex = array.every(
+            (x: {{.item.type}}, index: number) => x == {{.item.create}}(index)
+        )
+        failures += check(
+            boolToResult(isValueEqualToIndex == expected[5]),
+            `[${array}].every((x, index) => x == index)`
+        )
+
+        const rhs = array.reduce((acc: {{.item.type}}, x: {{.item.type}}) => acc + x)
+        const isArraySumEqualToIndexPlusValue = array.every(
+            (x: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
+                return x + {{.item.create}}(index) == rhs
+            }
+        )
+        failures += check(
+            boolToResult(isArraySumEqualToIndexPlusValue == expected[6]),
+            `[${array}].every((x, index, arr) => x + index == sum(arr))`
+        )
+
+        const eqByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x == arr[index]
+        const isValueEqualToArrayByIndex = array.every(eqByInd)
+        failures += check(
+            boolToResult(isValueEqualToArrayByIndex == expected[7]),
+            `[${array}].every((x, index, arr) => x == arr[index])`
+        )
+        
+        const isNoEvenNumbers = array.every(
+            (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => {
+                if (x{{.item.cast2primitive}} % 2 == 0) {
+                    arr[index] = {{.item.create}}(0)
+                    return false
+                }
+                return true
+            }
+        )
+        failures += check(
+            boolToResult(isNoEvenNumbers == expected[8]),
+            `[${array}].every((x, index, arr) => *check and remove even numbers*)`
+        )
+
+        const isNoMoreEvenNumbers = array.every(
+            (x: {{.item.type}}) => x{{.item.cast2primitive}} == 0 || x{{.item.cast2primitive}} % 2 != 0
+        )
+        failures += check(
+            boolToResult(isNoMoreEvenNumbers == expected[9]),
+            `[${array}].every((x) => x != 0 && x % 2 != 0)`
+        )
 
         return failures == 0 ? success: fail
     }
@@ -108,11 +161,11 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     [
         [
             {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
-            [true, true, false]
+            [true, true, false, false]
         ] as ObjectTypeAndExpectations<boolean[]>,
         [
             {{.item.objectType}}.of({{.item.create}}(0), {{.item.create}}(1)),
-            [true, true, true]
+            [true, true, true, false]
         ] as ObjectTypeAndExpectations<boolean[]>,
     ],
     (args: ObjectTypeAndExpectations<boolean[]>): number => {
@@ -123,11 +176,15 @@ const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
         const hasPositivesSome = array.some((x: {{.item.type}}) => x > {{.item.create}}(0))
         const hasElementsWithValueEqIndex = array.some((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
 
+        const neByInd = (x: {{.item.type}}, index: number, arr: {{.item.objectType}}) => x != arr[index]
+        const isValueNotEqualToArrayByIndex = array.some(neByInd)
+
         let failures = 0
 
         failures += check(boolToResult(constTrue == expected[0]), "const true")
         failures += check(boolToResult(hasPositivesSome == expected[1]), "has positives")
         failures += check(boolToResult(hasElementsWithValueEqIndex == expected[2]), "has elements where value == index")
+        failures += check(boolToResult(isValueNotEqualToArrayByIndex == expected[3]), ".some(x, index, arr) => x != arr[index]")
 
         return failures == 0 ? success: fail
     }
@@ -169,7 +226,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         // descending
         array.sort(
             (x: {{.item.type}}, y: {{.item.type}}) => {
-                return y - x
+                return (y - x){{.item.cast2primitive}}
             }
         )
 
@@ -244,7 +301,7 @@ function testTypedArrayMap(): number {
         {{.item.create}}(10)
     )
 
-    let mapWithConst = ta.map((): {{.item.type}} => (ta[0] as number))
+    let mapWithConst = ta.map((): {{.item.type}} => (ta[0] as {{.item.type}}))
     const isMappedWithConst = mapWithConst.every((num: {{.item.type}}) => num == (ta[0] as {{.item.type}}))
 
     let squared = ta.map((num: {{.item.type}}) => (num * num) as {{.item.type}})
@@ -489,6 +546,669 @@ const testTypedArrayReduceRight = parametrize<ObjectTypeAndExpectations<[{{.item
         failures += check(boolToResult(isCorrectPrevCurIndex), `Expected ${expectedWithIndices}, got ${testPrevCurIndex} on prevCurIndex`)
         failures += check(boolToResult(isCorrectPrevCurIndexArray), `Expected ${expectedResultFull}, got ${testPrevCurIndexArray} on prevCurIndexArray`)
 
+        return failures == 0 ? success : fail
+    }
+)
+
+const testTypedArrayFill1Arg = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill1Arg<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of({{.item.create}}(10), {{.item.create}}(20)),
+            {%- if (item.objectType == 'Uint8ClampedArray') %}
+            [true, true, false, true]
+            {%- else %}
+            [true, true, true, true]
+            {%- endif %}
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+                const fillVal = copy().fill(value);
+                const isAllChanged = fillVal.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[0]), `.fill(${value}) = ${fillVal}`)
+            }
+        }
+
+        {%- if item.objectType != 'BigUint64Array' %}
+
+        const fillNaN = copy().fill(NaN)
+        const isNanAllZeroes = fillNaN.every((x) => x == 0)
+        failures += check(boolToResult(isNanAllZeroes == expected[1]), `.fill(NaN) = ${fillNaN}`)
+
+        const fillPosInf = copy().fill(+Infinity)
+        const isPosInfAllZeroes = fillPosInf.every((x) => x == 0)
+        failures += check(boolToResult(isPosInfAllZeroes == expected[2]), `.fill(+Infinity) = ${fillPosInf}`)
+
+        const fillNegInf = copy().fill(-Infinity)
+        const isNegInfAllZeroes = fillNegInf.every((x) => x == 0)
+        failures += check(boolToResult(isNegInfAllZeroes == expected[3]), `.fill(-Infinity) = ${fillNegInf}`)
+
+        {%- endif %}
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFill2Args = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill2Args<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(10),
+                {{.item.create}}(20),
+                {{.item.create}}(30),
+                {{.item.create}}(40)
+            ),
+            [true, true, true, true, true]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const last = array.length - 1
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+
+                const fill0 = copy().fill(value, 0);
+                const isAllChanged = fill0.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[0]), `.fill(value, 0) = ${fill0}`)
+                
+                const fill1 = copy().fill(value, 1)
+                const isAllChangedExceptFirst = fill1[0] == array[0] &&
+                    fill1.slice(1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedExceptFirst == expected[1]), `.fill(value, 1) = ${fill1}`)
+                
+                const fillLen = copy().fill(value, array.length)
+                const isNothingChanged = fillLen.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChanged == expected[2]), `.fill(value, array.length) = ${fillLen}`)
+                
+                const fillM1 = copy().fill(value, -1)
+                const isOnlyLastChanged = fillM1[last]{{.item.cast2primitive}} == val &&
+                    fillM1.slice(0, last - 1).every((x, i) => x == array[i])
+                failures += check(boolToResult(isOnlyLastChanged == expected[3]), `.fill(value, -1) = ${fillM1}`)
+                
+                const fillMLen = copy().fill(value, -array.length);
+                const isAllChangedNeg = fillMLen.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedNeg == expected[4]), `.fill(value, -array.length) = ${fillMLen}`)
+            }
+        }
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFill3Args = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayFill3Args<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(10),
+                {{.item.create}}(20),
+                {{.item.create}}(30),
+                {{.item.create}}(40)
+            ),
+            [true, true, true, true, true, true, true, true, true]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        const sources = [source, abnormalSource]
+        const last = array.length - 1
+        const copy = () => new {{.item.objectType}}(array)
+
+        let failures = 0
+
+        for (let src of sources) {
+            for (let val of src) {
+                const value = {{.item.create}}(val)
+
+                const fill00 = copy().fill(value, 0, 0)
+                const isNothingChanged = fill00.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChanged == expected[0]), `.fill(value, 0, 0) = ${fill00}`)
+                
+                const fill01 = copy().fill(value, 0, 1)
+                const isOnlyFirstChanged = fill01[0]{{.item.cast2primitive}} == val &&
+                    fill01.slice(1).every((x, i) => x == array[i + 1])
+                failures += check(boolToResult(isOnlyFirstChanged == expected[1]), `.fill(value, 0, 1) = ${fill01}`)
+                
+                const fill0Len = copy().fill(value, 0, array.length)
+                const isAllChanged = fill0Len.every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChanged == expected[2]), `.fill(value, 0, array.length) = ${fill0Len}`)
+                
+                const fill0M1 = copy().fill(value, 0, -1)
+                const isAllChangedExceptLast = fill0M1[last] == array[last] &&
+                    fill0M1.slice(0, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isAllChangedExceptLast == expected[3]), `.fill(value, 0, -1) = ${fill0M1}`)
+                
+                const fill0MLen = copy().fill(value, 0, -array.length)
+                const isNothingChangedNeg = fill0MLen.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedNeg == expected[4]), `.fill(value, 0, -array.length) = ${fill0MLen}`)
+
+                const fill1Last = copy().fill(value, 1, last)
+                const isOnlyCenterChanged = fill1Last[0] == array[0] && fill1Last[last] == array[last] &&
+                    fill1Last.slice(1, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isOnlyCenterChanged == expected[5]), `.fill(value, 0, last) = ${fill1Last}`)
+
+                const fill1M1 = copy().fill(value, 1, -1)
+                const isOnlyCenterChangedNeg = fill1M1[0] == array[0] && fill1M1[last] == array[last] &&
+                    fill1M1.slice(1, last - 1).every((x) => x{{.item.cast2primitive}} == val)
+                failures += check(boolToResult(isOnlyCenterChangedNeg == expected[6]), `.fill(value, 0, -1) = ${fill1M1}`)
+            
+                const fillLast1 = copy().fill(value, last, 1)
+                const isNothingChangedReverse = fillLast1.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedReverse == expected[7]), `.fill(value, last, 1) = ${fillLast1}`)
+
+                const fillM11 = copy().fill(value, -1, 1)
+                const isNothingChangedReverseNeg = fillM11.every((x, i) => x == array[i])
+                failures += check(boolToResult(isNothingChangedReverseNeg == expected[8]), `.fill(value, -1, 1) = ${fillM11}`)
+            }
+        }
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFind = parametrize<ObjectTypeAndExpectations<({{.item.type}}|undefined)[]>>(
+    "testTypedArrayFind<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4),
+                {{.item.create}}(5)
+            ),
+            [
+                {{.item.create}}(1),
+                undefined,
+                {{.item.create}}(4),
+                undefined,
+                {{.item.create}}(3),
+                undefined,
+                {{.item.create}}(2),
+                undefined,
+                {{.item.create}}(1),
+                {{.item.create}}(5),
+                {{.item.create}}(5),
+            ]
+        ] as ObjectTypeAndExpectations<({{.item.type}}|undefined)[]>,
+        [
+            new {{.item.objectType}}(),
+            [
+                undefined, undefined, undefined, undefined, undefined,
+                undefined, undefined, undefined, undefined, undefined,
+                undefined
+            ]
+        ] as ObjectTypeAndExpectations<({{.item.type}}|undefined)[]>,
+    ],
+    (args: ObjectTypeAndExpectations<({{.item.type}}|undefined)[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+
+        let failures = 0
+
+        const alwaysTrue = array.find(() => true)
+        failures += check(
+            boolToResult(alwaysTrue == expected[0]),
+            `[${array}].find(() => true) = ${alwaysTrue}`
+        )
+
+        const alwaysFalse = array.find(() => false)
+        failures += check(
+            boolToResult(alwaysFalse == expected[1]),
+            `[${array}].find(() => false) = ${alwaysFalse}`
+        )
+
+        const valueMatches = array.find((value) => value > {{.item.create}}(3))
+        failures += check(
+            boolToResult(valueMatches == expected[2]),
+            `[${array}].find((value) => value > 3) = ${valueMatches}`
+        )
+
+        const noValueMatches = array.find((value) => value > {{.item.create}}(10))
+        failures += check(
+            boolToResult(noValueMatches == expected[3]),
+            `[${array}].find((value) => value > 10) = ${noValueMatches}`
+        )
+        
+        const accessIndexArray = array.find(
+            (value, index, obj) => value === {{.item.create}}(3) && index === 2 && obj === array
+        )
+        failures += check(
+            boolToResult(accessIndexArray == expected[4]),
+            `[${array}].find((value, index, obj) => value === 3 && index === 2 && obj === array) = ${accessIndexArray}`
+        )
+
+        const noIndexArrayMatch = array.find((value, index, obj) => value === {{.item.create}}(3) && index === 1 && obj === array)
+        failures += check(
+            boolToResult(noIndexArrayMatch == expected[5]),
+            `[${array}].find((value, index, obj) => value === 3 && index === 1 && obj === array) = ${noIndexArrayMatch}`
+        )
+
+        const valueIndexMatch = array.find((value, index) => value === {{.item.create}}(2) && index === 1)
+        failures += check(
+            boolToResult(valueIndexMatch == expected[6]),
+            `[${array}].find((value, index) => value === 2 && index === 1) = ${valueIndexMatch}`
+        )
+
+        const noValueIndexMatch = array.find((value, index) => value === {{.item.create}}(2) && index === 2)
+        failures += check(
+            boolToResult(noValueIndexMatch == expected[7]),
+            `[${array}].find((value, index) => value === 2 && index === 2) = ${noValueIndexMatch}`
+        )
+
+        const matchesStart = array.find((value, index) => index == 0)
+        failures += check(
+            boolToResult(matchesStart == expected[8]),
+            `[${array}].find((value, index) => index === 0) = ${matchesStart}`
+        )
+
+        const matchesEnd = array.find((value, index) => index == array.length - 1)
+        failures += check(
+            boolToResult(matchesEnd == expected[9]),
+            `[${array}].find((value, index) => index === array.length - 1) = ${matchesEnd}`
+        )
+
+        const mutable = new {{.item.objectType}}(array)
+        const changesArray = mutable.find((value, index, obj) => {
+            if (index === 1) {
+                obj[index] = {{.item.create}}(10)
+            }
+            return value > {{.item.create}}(4)
+        })
+        failures += check(
+            boolToResult(changesArray == expected[10]),
+            `[${mutable}].find((value, index, obj) => { /* changes array */}) = ${changesArray}`
+        )
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayFindIndex = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArrayFindIndex<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, 3, -1, 2, -1, 1, -1, 0, 4, 4,
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, 4, -1, 2, 1, -1, -1, 0, 4, 4,
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            new {{.item.objectType}}(),
+            [
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+
+        let failures = 0
+
+        const alwaysTrueIndex = array.findIndex(() => true)
+        failures += check(
+            boolToResult(alwaysTrueIndex == expected[0]),
+            `[${array}].findIndex(() => true) = ${alwaysTrueIndex}`
+        )
+
+        const alwaysFalseIndex = array.findIndex(() => false)
+        failures += check(
+            boolToResult(alwaysFalseIndex == expected[1]),
+            `[${array}].findIndex(() => false) = ${alwaysFalseIndex}`
+        )
+
+        const valueMatchesIndex = array.findIndex((value) => value > {{.item.create}}(3))
+        failures += check(
+            boolToResult(valueMatchesIndex == expected[2]),
+            `[${array}].findIndex((value) => value > 3) = ${valueMatchesIndex}`
+        )
+
+        const noValueMatchesIndex = array.findIndex((value) => value > {{.item.create}}(10))
+        failures += check(
+            boolToResult(noValueMatchesIndex == expected[3]),
+            `[${array}].findIndex((value) => value > 10) = ${noValueMatchesIndex}`
+        )
+
+        const accessIndexArrayIndex = array.findIndex(
+            (value, index, obj) => value === {{.item.create}}(3) && index === 2 && obj === array
+        )
+        failures += check(
+            boolToResult(accessIndexArrayIndex == expected[4]),
+            `[${array}].findIndex((value, index, obj) => value === 3 && index === 2 && obj === array) = ${accessIndexArrayIndex}`
+        )
+
+        const noIndexArrayMatchIndex = array.findIndex(
+            (value, index, obj) => value === {{.item.create}}(3) && index === 1 && obj === array
+        )
+        failures += check(
+            boolToResult(noIndexArrayMatchIndex == expected[5]),
+            `[${array}].findIndex((value, index, obj) => value === 3 && index === 1 && obj === array) = ${noIndexArrayMatchIndex}`
+        )
+
+        const valueIndexMatchIndex = array.findIndex((value, index) => value === {{.item.create}}(2) && index === 1)
+        failures += check(
+            boolToResult(valueIndexMatchIndex == expected[6]),
+            `[${array}].findIndex((value, index) => value === 2 && index === 1) = ${valueIndexMatchIndex}`
+        )
+
+        const noValueIndexMatchIndex = array.findIndex((value, index) => value === {{.item.create}}(2) && index === 2)
+        failures += check(
+            boolToResult(noValueIndexMatchIndex == expected[7]),
+            `[${array}].findIndex((value, index) => value === 2 && index === 2) = ${noValueIndexMatchIndex}`
+        )
+
+        const matchesStartIndex = array.findIndex((value, index) => index === 0)
+        failures += check(
+            boolToResult(matchesStartIndex == expected[8]),
+            `[${array}].findIndex((value, index) => index === 0) = ${matchesStartIndex}`
+        )
+
+        const matchesEndIndex = array.findIndex((value, index) => index === array.length - 1)
+        failures += check(
+            boolToResult(matchesEndIndex == expected[9]),
+            `[${array}].findIndex((value, index) => index === array.length - 1) = ${matchesEndIndex}`
+        )
+
+        const mutableIndexArray = new {{.item.objectType}}(array)
+        const changesArrayIndex = mutableIndexArray.findIndex((value, index, obj) => {
+            if (index === 1) {
+                obj[index] = {{.item.create}}(10)
+            }
+            return value > {{.item.create}}(4)
+        })
+        failures += check(
+            boolToResult(changesArrayIndex == expected[10]),
+            `[${mutableIndexArray}].findIndex((value, index, obj) => { /* changes array */ }) = ${changesArrayIndex}`
+        )
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArrayIndexOf2 = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArrayIndexOf2<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, 2, -1, 3, -1, 1, -1, 3, 4, -1, -1, 0, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, 2, -1, -1, -1, -1, -1, -1, 4, -1, 3, 0, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            new {{.item.objectType}}(),
+            [
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        
+        let failures = 0
+        
+        const indexOfFirstElement = array.indexOf({{.item.create}}(1))
+        failures += check(
+            boolToResult(indexOfFirstElement == expected[0]),
+            `[${array}].indexOf(1) = ${indexOfFirstElement}`
+        )
+        
+        const indexOfNonExistent = array.indexOf({{.item.create}}(42))
+        failures += check(
+            boolToResult(indexOfNonExistent == expected[1]),
+            `[${array}].indexOf(42) = ${indexOfNonExistent}`
+        )
+        
+        const indexOfWithStartIndex = array.indexOf({{.item.create}}(3), 2)
+        failures += check(
+            boolToResult(indexOfWithStartIndex == expected[2]),
+            `[${array}].indexOf(3, 2) = ${indexOfWithStartIndex}`
+        )
+        
+        const indexOfWithStartIndexOutOfBounds = array.indexOf({{.item.create}}(3), 10)
+        failures += check(
+            boolToResult(indexOfWithStartIndexOutOfBounds == expected[3]),
+            `[${array}].indexOf(3, 10) = ${indexOfWithStartIndexOutOfBounds}`
+        )
+        
+        const indexOfIntStartIndex = array.indexOf({{.item.create}}(4), 3 as int)
+        failures += check(
+            boolToResult(indexOfIntStartIndex == expected[4]),
+            `[${array}].indexOf(4, 3 as int) = ${indexOfIntStartIndex}`
+        )
+        
+        const indexOfIntOutOfBounds = array.indexOf({{.item.create}}(5), 5 as int)
+        failures += check(
+            boolToResult(indexOfIntOutOfBounds == expected[5]),
+            `[${array}].indexOf(5, 5 as int) = ${indexOfIntOutOfBounds}`
+        )
+        
+        const indexOfIntElement = array.indexOf(2 as int)
+        failures += check(
+            boolToResult(indexOfIntElement == expected[6]),
+            `[${array}].indexOf(2 as int) = ${indexOfIntElement}`
+        )
+        
+        const indexOfIntNonExistent = array.indexOf(99 as int)
+        failures += check(
+            boolToResult(indexOfIntNonExistent == expected[7]),
+            `[${array}].indexOf(99 as int) = ${indexOfIntNonExistent}`
+        )
+        
+        const indexOfIntWithStartIndex = array.indexOf(4 as int, 2)
+        failures += check(
+            boolToResult(indexOfIntWithStartIndex == expected[8]),
+            `[${array}].indexOf(4 as int, 2) = ${indexOfIntWithStartIndex}`
+        )
+        
+        const indexOfIntWithBothInt = array.indexOf(5 as int, 4 as int)
+        failures += check(
+            boolToResult(indexOfIntWithBothInt == expected[9]),
+            `[${array}].indexOf(5 as int, 4 as int) = ${indexOfIntWithBothInt}`
+        )
+
+        const indexOfIntWithNegativeStart = array.indexOf(3 as int, -1 as int)
+        failures += check(
+            boolToResult(indexOfIntWithNegativeStart == expected[10]),
+            `[${array}].indexOf(3 as int, -1 as int) = ${indexOfIntWithNegativeStart}`
+        )
+
+        const indexOfNegativeFromIndex = array.indexOf({{.item.create}}(3), -2)
+        failures += check(
+            boolToResult(indexOfNegativeFromIndex == expected[11]),
+            `[${array}].indexOf(3, -2) = ${indexOfNegativeFromIndex}`
+        )
+
+        const indexOfNegativeStartOutOfBounds = array.indexOf({{.item.create}}(1), -10)
+        failures += check(
+            boolToResult(indexOfNegativeStartOutOfBounds == expected[12]),
+            `[${array}].indexOf(1, -10) = ${indexOfNegativeStartOutOfBounds}`
+        )
+        
+        const indexOfNonExistentWithValidStart = array.indexOf(99 as int, 2 as int)
+        failures += check(
+            boolToResult(indexOfNonExistentWithValidStart == expected[13]),
+            `[${array}].indexOf(99 as int, 2 as int) = ${indexOfNonExistentWithValidStart}`
+        )
+        
+        return failures == 0 ? success : fail
+    }
+)
+
+const testTypedArrayLastIndexOf = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArrayLastIndexOf<{{.item.objectType}}>",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, -1, 3, 4, 4, 1, -1, 3, 2, 1, -1, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(3),
+                {{.item.create}}(5)
+            ),
+            [
+                0, -1, -1, -1, 4, 4, -1, -1, -1, 3, -1, -1, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            new {{.item.objectType}}(),
+            [
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+            ]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+        
+        let failures = 0
+        
+        const lastIndexOfElement = array.lastIndexOf({{.item.create}}(1))
+        failures += check(
+            boolToResult(lastIndexOfElement == expected[0]),
+            `[${array}].lastIndexOf(1) = ${lastIndexOfElement}`
+        )
+        
+        const lastIndexOfNonExistent = array.lastIndexOf({{.item.create}}(42))
+        failures += check(
+            boolToResult(lastIndexOfNonExistent == expected[1]),
+            `[${array}].lastIndexOf(42) = ${lastIndexOfNonExistent}`
+        )
+        
+        const lastIndexOfWithUndefined = array.lastIndexOf({{.item.create}}(3), undefined)
+        failures += check(
+            boolToResult(lastIndexOfWithUndefined == expected[2]),
+            `[${array}].lastIndexOf(3, undefined) = ${lastIndexOfWithUndefined}`
+        )
+        
+        const lastIndexOfFromIndex = array.lastIndexOf({{.item.create}}(4), 3)
+        failures += check(
+            boolToResult(lastIndexOfFromIndex == expected[3]),
+            `[${array}].lastIndexOf(4, 3) = ${lastIndexOfFromIndex}`
+        )
+        
+        const lastIndexOfIntFromIndex = array.lastIndexOf({{.item.create}}(5), 4 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntFromIndex == expected[4]),
+            `[${array}].lastIndexOf(5, 4 as int) = ${lastIndexOfIntFromIndex}`
+        )
+        
+        const lastIndexOfIntOutOfBounds = array.lastIndexOf({{.item.create}}(5), 10 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntOutOfBounds == expected[5]),
+            `[${array}].lastIndexOf(5, 10 as int) = ${lastIndexOfIntOutOfBounds}`
+        )
+        
+        const lastIndexOfIntElement = array.lastIndexOf(2 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntElement == expected[6]),
+            `[${array}].lastIndexOf(2 as int) = ${lastIndexOfIntElement}`
+        )
+        
+        const lastIndexOfIntNonExistent = array.lastIndexOf(99 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntNonExistent == expected[7]),
+            `[${array}].lastIndexOf(99 as int) = ${lastIndexOfIntNonExistent}`
+        )
+        
+        const lastIndexOfIntBothInt = array.lastIndexOf(4 as int, 3 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntBothInt == expected[8]),
+            `[${array}].lastIndexOf(4 as int, 3 as int) = ${lastIndexOfIntBothInt}`
+        )
+        
+        const lastIndexOfIntNegativeFromIndex = array.lastIndexOf(3 as int, -1 as int)
+        failures += check(
+            boolToResult(lastIndexOfIntNegativeFromIndex == expected[9]),
+            `[${array}].lastIndexOf(3 as int, -1 as int) = ${lastIndexOfIntNegativeFromIndex}`
+        )
+        
+        const lastIndexOfNegativeFromIndex = array.lastIndexOf({{.item.create}}(2), -2)
+        failures += check(
+            boolToResult(lastIndexOfNegativeFromIndex == expected[10]),
+            `[${array}].lastIndexOf(2, -2) = ${lastIndexOfNegativeFromIndex}`
+        )
+        
+        const lastIndexOfNegativeStartOutOfBounds = array.lastIndexOf({{.item.create}}(1), -10)
+        failures += check(
+            boolToResult(lastIndexOfNegativeStartOutOfBounds == expected[11]),
+            `[${array}].lastIndexOf(1, -10) = ${lastIndexOfNegativeStartOutOfBounds}`
+        )
+        
+        const lastIndexOfNonExistentWithValidStart = array.lastIndexOf(99 as int, 2 as int)
+        failures += check(
+            boolToResult(lastIndexOfNonExistentWithValidStart == expected[12]),
+            `[${array}].lastIndexOf(99 as int, 2 as int) = ${lastIndexOfNonExistentWithValidStart}`
+        )
+        
         return failures == 0 ? success : fail
     }
 )

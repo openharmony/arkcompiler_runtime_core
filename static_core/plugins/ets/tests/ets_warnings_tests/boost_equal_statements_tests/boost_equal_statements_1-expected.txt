@@ -1,1 +1,1 @@
-ETS Warning: Boost Equality Statement. Change sides of binary expression. [boost_equal_statements_1.sts:18:21]
+Warning: Boost Equality Statement. Change sides of binary expression. [boost_equal_statements_1.ets:18:21]

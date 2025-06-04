@@ -24,5 +24,5 @@ properties:
 cases:
   - { argument: "{i: 1.9, j: \"some str\"}", result: 3 }
   - { argument: "{i: 1.9}", result: 2 }
-  - { argument: "{j: \"some str\"}", result: 1 }
-  - { argument: "{}", result: 0 }
+  - { argument: "{j: \"some str\"}", result: 3 }
+  - { argument: "{}", result: 2 }

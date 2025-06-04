@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,27 @@
 #include "utils/logger.h"
 
 namespace ark::tooling::inspector {
+
+/// Empty response, returned on success
+class EmptyResponse final : public JsonSerializable {
+public:
+    EmptyResponse() = default;
+
+    DEFAULT_COPY_SEMANTIC(EmptyResponse);
+    DEFAULT_MOVE_SEMANTIC(EmptyResponse);
+
+    ~EmptyResponse() override = default;
+
+    void Serialize([[maybe_unused]] JsonObjectBuilder &builder) const override {}
+};
+
 void ServerEndpointBase::Call(const std::string &sessionId, const char *method,
                               std::function<void(JsonObjectBuilder &)> &&params)
 {
     EndpointBase::Call(sessionId, std::nullopt, method, std::move(params));
 }
 
-void ServerEndpointBase::OnCall(
-    const char *method, std::function<void(const std::string &, JsonObjectBuilder &, const JsonObject &)> &&handler)
+void ServerEndpointBase::OnCall(const char *method, Handler &&handler)
 {
     EndpointBase::OnCall(method, [this, handler = std::move(handler)](auto &sessionId, auto id, auto &params) {
         if (!id) {
@@ -33,9 +46,18 @@ void ServerEndpointBase::OnCall(
             return;
         }
 
-        Reply(sessionId, *id,
-              std::bind(std::ref(handler), std::cref(sessionId),  // NOLINT(modernize-avoid-bind)
-                        std::placeholders::_1, std::cref(params)));
+        // Execute the handler's code
+        auto optResult = handler(sessionId, params);
+        if (optResult) {
+            if (*optResult) {
+                JsonSerializable &res = **optResult;
+                Reply(sessionId, *id, res);
+            } else {
+                Reply(sessionId, *id, EmptyResponse());
+            }
+        } else {
+            ReplyError(sessionId, *id, std::move(optResult.Error()));
+        }
     });
 }
 }  // namespace ark::tooling::inspector

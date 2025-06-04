@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,12 @@
 
 #include <libpandafile/include/source_lang_enum.h>
 
+#include "include/mem/panda_smart_pointers.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/expected.h"
 #include "libpandabase/os/mutex.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/external_callback_poster.h"
 #include "runtime/include/gc_task.h"
@@ -54,21 +56,23 @@
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
+#include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/job_queue.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/mem/root_provider.h"
+#include "plugins/ets/runtime/ets_object_state_table.h"
 
 namespace ark::ets {
-
 class DoubleToStringCache;
 class FloatToStringCache;
 class LongToStringCache;
+class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
 
-class PandaEtsVM final : public PandaVM, public EtsVM {  // NOLINT(fuchsia-multiple-inheritance)
+class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
     static bool Destroy(PandaEtsVM *vm);
@@ -230,7 +234,7 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
-    PANDA_PUBLIC_API ObjectHeader *GetUndefinedObject();
+    PANDA_PUBLIC_API ObjectHeader *GetNullValue();
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
@@ -246,36 +250,14 @@ public:
         return static_cast<PandaEtsVM *>(vm);
     }
 
+    static PandaEtsVM *FromAniVM(ani_vm *vm)
+    {
+        return static_cast<PandaEtsVM *>(vm);
+    }
+
     void RegisterFinalizationRegistryInstance(EtsObject *instance);
 
     [[noreturn]] static void Abort(const char *message = nullptr);
-
-    void *GetExternalData()
-    {
-        return externalData_.data;
-    }
-
-    static PandaEtsVM *FromExternalData(void *externalData)
-    {
-        ASSERT(externalData != nullptr);
-        return reinterpret_cast<PandaEtsVM *>(ToUintPtr(externalData) - MEMBER_OFFSET(PandaEtsVM, externalData_));
-    }
-
-    struct alignas(16U) ExternalData {  // NOLINT(readability-magic-numbers)
-        static constexpr size_t SIZE = 256U * 3;
-        uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
-    };
-
-    JobQueue *GetJobQueue() const
-    {
-        return jobQueue_.get();
-    }
-
-    void InitJobQueue(JobQueue *jobQueue)
-    {
-        ASSERT(jobQueue_ == nullptr);
-        jobQueue_.reset(jobQueue);
-    }
 
     std::mt19937 &GetRandomEngine()
     {
@@ -288,22 +270,25 @@ public:
         return true;
     }
 
-    void SetClearInteropHandleScopesFunction(const std::function<void(Frame *)> &func)
+    void FinalizationRegistryCoroutineExecuted()
     {
-        clearInteropHandleScopes_ = func;
+        // // Atomic with acq_rel order reason: other threads should see correct value
+        [[maybe_unused]] uint32_t oldCnt = finRegCleanupCoroCount_.fetch_sub(1, std::memory_order_acq_rel);
+        ASSERT(oldCnt > 0);
     }
 
-    void ClearInteropHandleScopes(Frame *frame) override
+    void CleanupCompiledFrameResources(Frame *frame) override
     {
-        if (clearInteropHandleScopes_) {
-            clearInteropHandleScopes_(frame);
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *ifaces = coro->GetExternalIfaceTable();
+        if (ifaces->GetClearInteropHandleScopesFunction()) {
+            ifaces->GetClearInteropHandleScopesFunction()(frame);
         }
     }
 
-    void SetDestroyExternalDataFunction(const std::function<void(void *)> &func)
+    os::memory::Mutex &GetAniBindMutex()
     {
-        ASSERT(!destroyExternalData_);
-        destroyExternalData_ = func;
+        return aniBindMutex_;
     }
 
     os::memory::Mutex &GetAtomicsMutex()
@@ -356,16 +341,45 @@ public:
         callbackPosterFactory_ = MakePandaUnique<FactoryImpl>(args...);
     }
 
-    /// @brief Uses CallbackPosterFactory to create a CallbackPoster
+    /// @brief Method creates CallBackPoster using factory.
     PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        if (coro != coro->GetPandaVM()->GetCoroutineManager()->GetMainThread()) {
+        if (callbackPosterFactory_ == nullptr) {
             return nullptr;
         }
-        ASSERT(callbackPosterFactory_ != nullptr);
         return callbackPosterFactory_->CreatePoster();
     }
+
+    using RunEventLoopFunction = std::function<void()>;
+
+    void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
+    {
+        ASSERT(!runEventLoop_);
+        runEventLoop_ = std::move(cb);
+    }
+
+    void RunEventLoop()
+    {
+        if (runEventLoop_) {
+            runEventLoop_();
+        }
+    }
+
+    EtsObjectStateTable *GetEtsObjectStateTable() const
+    {
+        return objStateTable_.get();
+    }
+
+    void FreeInternalResources() override
+    {
+        objStateTable_->DeflateInfo();
+    }
+
+    PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
+    PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
+
+    /// @brief Create application `AbcRuntimeLinker` in managed scope.
+    ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
@@ -383,6 +397,23 @@ private:
     static void UpdateMovedVmRef(Value &ref);
 
     static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
+
+    /// @brief Increase number of cleanup coroutines and check if not exceeds limit
+    bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
+    {
+        // Limit of cleanup coroutines count
+        constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
+        // Atomic with acquire order reason: getting correct value
+        uint32_t cnt = finRegCleanupCoroCount_.load(std::memory_order_acquire);
+        uint32_t oldCnt = cnt;
+        // Atomic with acq_rel order reason: sync for counter
+        while (cnt < MAX_FINREG_CLEANUP_COROS &&
+               !finRegCleanupCoroCount_.compare_exchange_weak(cnt, cnt + 1U, std::memory_order_acq_rel,
+                                                              std::memory_order_acquire)) {
+            oldCnt = cnt;
+        }
+        return oldCnt < MAX_FINREG_CLEANUP_COROS;
+    }
 
     void InitializeRandomEngine()
     {
@@ -405,25 +436,27 @@ private:
     CoroutineManager *coroutineManager_ {nullptr};
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
-    mem::Reference *undefinedObjRef_ {nullptr};
+    mem::Reference *nullValueRef_ {nullptr};
     mem::Reference *finalizableWeakRefList_ {nullptr};
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
-    os::memory::Mutex finalizationRegistryLock_;
-    PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
-    PandaUniquePtr<JobQueue> jobQueue_;
+    size_t finRegLastIndex_ {0};
+    std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
+    mem::Reference *registeredFinalizationRegistryInstancesRef_ {nullptr};
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
+    os::memory::Mutex rootProviderlock_;
+    PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
+    os::memory::Mutex aniBindMutex_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
-    std::function<void(Frame *)> clearInteropHandleScopes_;
-    std::function<void(void *)> destroyExternalData_;
     // for JS Atomics
     os::memory::Mutex atomicsMutex_;
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
 
-    ExternalData externalData_ {};
+    PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
+    RunEventLoopFunction runEventLoop_ = nullptr;
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

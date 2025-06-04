@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,10 +46,10 @@ EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObjec
 static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
 {
     if (obj == nullptr) {
-        return "null";
-    }
-    if (obj == EtsObject::FromCoreType(coro->GetUndefinedObject())) {
         return "undefined";
+    }
+    if (obj == EtsObject::FromCoreType(coro->GetNullValue())) {
+        return "null";
     }
     return obj->GetClass()->GetDescriptor();
 }
@@ -64,9 +64,20 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
         ->GetCoreType();
 }
 
-EtsString *StdCoreRuntimeTypeof(EtsObject *obj)
+EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
 {
-    return EtsGetTypeof(EtsCoroutine::GetCurrent(), obj);
+    return nullptr;
+}
+
+ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
+{
+    if (UNLIKELY(!cls->IsArrayClass())) {
+        // should not appear for the optimized version of intrinsic, which is always inlined
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ERROR,
+                          "class is not an array");
+        return nullptr;
+    }
+    return coretypes::Array::Create(cls->GetRuntimeClass(), length);
 }
 
 }  // namespace ark::ets::intrinsics

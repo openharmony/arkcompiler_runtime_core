@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -155,6 +155,7 @@ set(OPTIMIZER_SOURCES
         optimizer/pass_manager_statistics.cpp
         optimizer/pipeline.cpp
         optimizer/analysis/alias_analysis.cpp
+        optimizer/analysis/alias_visitor.cpp
         optimizer/analysis/bounds_analysis.cpp
         optimizer/analysis/countable_loop_parser.cpp
         optimizer/analysis/catch_inputs.cpp
@@ -162,6 +163,7 @@ set(OPTIMIZER_SOURCES
         optimizer/analysis/linear_order.cpp
         optimizer/analysis/liveness_analyzer.cpp
         optimizer/analysis/liveness_use_table.cpp
+        optimizer/analysis/live_in_analysis.cpp
         optimizer/analysis/live_registers.cpp
         optimizer/analysis/loop_analyzer.cpp
         optimizer/analysis/monitor_analysis.cpp
@@ -202,6 +204,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/lse.cpp
         optimizer/optimizations/memory_barriers.cpp
         optimizer/optimizations/memory_coalescing.cpp
+        optimizer/optimizations/native_call_optimization.cpp
         optimizer/optimizations/object_type_check_elimination.cpp
         optimizer/optimizations/optimize_string_concat.cpp
         optimizer/optimizations/peepholes.cpp
@@ -347,6 +350,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/method_properties_test.cpp
     tests/monitor_analysis_test.cpp
     tests/move_constants_test.cpp
+    tests/ref_set_test.cpp
     tests/osr_test.cpp
     tests/panda_runner.cpp
     tests/peepholes_test.cpp
@@ -367,6 +371,13 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/profiling_runner_test.cpp
 )
 set_source_files_properties(tests/loop_unroll_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
+
+# Disable profiling_round_trip_test for AARCH32 and X86
+if(NOT (PANDA_TARGET_ARM32 OR PANDA_TARGET_X86))
+    list(APPEND PANDA_COMPILER_TESTS_SOURCES
+        tests/profiling_round_trip_test.cpp
+    )
+endif()
 
 # Distinguish 'PANDA_COMPILER_TARGET_..' and 'PANDA_TARGET_..' because for PANDA_TARGET_AMD64 tests
 # are being executed for Arch::AARCH64

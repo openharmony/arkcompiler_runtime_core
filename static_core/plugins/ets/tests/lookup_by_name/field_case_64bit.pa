@@ -23,8 +23,10 @@
     i64 baz
 }
 
-.union_field i64 bar
-.union_field i64 baz
+.record $NamedAccessMeta-i64 {
+    i64 bar
+    i64 baz
+}
 
 .function i32 main() {
     newobj v0, A
@@ -32,7 +34,7 @@
     ldai.64 5294967290
     stobj.64 v0, A.bar
     ldai 0
-    ets.ldobj.name.64 v0, bar
+    ets.ldobj.name.64 v0, $NamedAccessMeta-i64.bar
     movi.64 v3, 6
     add2.64 v3
     movi.64 v4, 5294967296
@@ -41,7 +43,7 @@
     jnez error1
     lda.64 v5
     stobj.64 v1, B.baz
-    ets.ldobj.name.64 v1, baz
+    ets.ldobj.name.64 v1, $NamedAccessMeta-i64.baz
     movi.64 v4, 5294967296
     cmp.64 v4
     jnez error2
