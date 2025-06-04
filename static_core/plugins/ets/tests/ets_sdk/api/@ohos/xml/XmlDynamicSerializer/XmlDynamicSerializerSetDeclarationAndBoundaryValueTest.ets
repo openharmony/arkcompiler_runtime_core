@@ -24,29 +24,42 @@ function main(): int {
     return suite.run();
 }
 
-// Test cases ported from ArkTS 1.0: XML_00100
-function testXMLDeclarationWithUtf8Encoding() {
-    let thatSer = new xml.XmlDynamicSerializer('utf-8');
-    thatSer.setDeclaration();
-    let result = '<?xml version="1.0" encoding="utf-8"?>';
+// Common function to perform XML serialization tests
+function performXmlTest(serializerSetup: (serializer: xml.XmlDynamicSerializer) => void, 
+                        encoding?: string, 
+                        expectedResult: string = ''): void {
+    let thatSer: xml.XmlDynamicSerializer;
+    if (encoding == undefined) {
+        thatSer = new xml.XmlDynamicSerializer();
+    } else {
+        thatSer = new xml.XmlDynamicSerializer(encoding);
+    }
+    serializerSetup(thatSer);
     let arrayBuffer = thatSer.getOutput();
     let view1 = '';
     let view = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < result.length; ++i) {
+    // Iterate through the appropriate length (either the expected result length or the full view)
+    const iterLength = expectedResult ? expectedResult.length : view.length;
+    for (let i = 0; i < iterLength; ++i) {
         view1 = view1 + String.fromCodePoint(view[i]);
     }
-    arktest.assertEQ(view1, result);
+    arktest.assertEQ(view1, expectedResult);
+}
+
+// Test cases ported from ArkTS 1.0: XML_00100
+function testXMLDeclarationWithUtf8Encoding() {
+    performXmlTest(
+        (serializer) => serializer.setDeclaration(),
+        'utf-8',
+        '<?xml version="1.0" encoding="utf-8"?>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_04600
 function testXMLSerializationWithZeroLength() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    let arrayBuffer = thatSer.getOutput();
-    let view1 = '';
-    let result = '';
-    let view = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < view.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => { /* No operations needed */ },
+        undefined,
+        ''
+    );
 }
