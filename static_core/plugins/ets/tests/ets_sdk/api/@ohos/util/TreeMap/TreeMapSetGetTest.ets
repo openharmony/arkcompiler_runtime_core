@@ -15,9 +15,6 @@
 
 import TreeMap from "@ohos.util.TreeMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("TreeMap Set Get API tests")
 
@@ -28,7 +25,7 @@ function main(): int {
     suite.addTest("TreeMap get data", testGetData)
     suite.addTest("TreeMap get not set data", testGetNonExistingData)
     suite.addTest("TreeMap get data from the null treeMap", testGetDataFromEmptyTreeMap)
-    suite.addTest("TreeMap get empty string data when treeMap is mepty", testGetEmptyStringDataFromEmptyTreeMap)
+    suite.addTest("TreeMap get empty string data when treeMap is empty", testGetEmptyStringDataFromEmptyTreeMap)
 
     return suite.run()
 }

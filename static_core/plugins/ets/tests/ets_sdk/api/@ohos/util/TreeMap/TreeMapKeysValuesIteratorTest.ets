@@ -15,9 +15,6 @@
 
 import TreeMap from "@ohos.util.TreeMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("TreeMap Keys Values Iterator API tests")
 
@@ -47,7 +44,7 @@ function testKeysReturnIteratorByKey() {
     let it = treeMap.keys();
     assertEQ(it.next().value, "aa", "The treeMap should return the correct key");
     assertEQ(it.next().value, "bb", "The treeMap should return the correct key");
-    assertEQ(it.next().value, undefined, "The treeMap should return undefined for the next key in an empty map");
+    arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next key in an empty map");
 }
 
 function testKeysReturnIteratorByKeyWithEmptyTreeMap() {
@@ -56,7 +53,7 @@ function testKeysReturnIteratorByKeyWithEmptyTreeMap() {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.keys();
-    assertEQ(it.next().value, undefined, "The treeMap should return undefined for the key in an empty map");
+    arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the key in an empty map");
 }
 
 function testValuesReturnIteratorByValue() {
@@ -69,7 +66,7 @@ function testValuesReturnIteratorByValue() {
     let it = treeMap.values();
     assertEQ(it.next().value, "123", "The treeMap should return the correct value");
     assertEQ(it.next().value, "456", "The treeMap should return the correct value");
-    assertEQ(it.next().value, undefined, "The treeMap should return undefined for the next value in an empty map");
+    arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next value in an empty map");
 }
 
 function testValuesReturnIteratorByValueWithEmptyTreeMap() {
@@ -78,7 +75,7 @@ function testValuesReturnIteratorByValueWithEmptyTreeMap() {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.values();
-    assertEQ(it.next().value, undefined, "The treeMap should return undefined for the next value in an empty map");
+    arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next value in an empty map");
 }
 
 function testIteratorReturnIterator() {
@@ -108,5 +105,5 @@ function testIteratorReturnIteratorWithEmptyTreeMap() {
             return secondValue.compareTo(firstValue)
         });
     let it = treeMap.$_iterator();
-    assertEQ(it.next().value, undefined, "The treeMap should return undefined for the next iterator in an empty map");
+    arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next iterator in an empty map");
 }
