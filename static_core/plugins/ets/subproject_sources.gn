@@ -113,6 +113,7 @@ srcs_runtime = [
   "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
   "runtime/ets_vtable_builder.cpp",
   "runtime/finalreg/finalization_registry_manager.cpp",
+  "runtime/unhandled_manager/unhandled_object_manager.cpp",
   "runtime/intrinsics/escompat_Array.cpp",
   "runtime/integrate/ets_ani_expo.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",

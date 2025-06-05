@@ -65,6 +65,7 @@
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
+#include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
 namespace ark::ets {
 class DoubleToStringCache;
@@ -241,6 +242,11 @@ public:
         return compiler_;
     }
 
+    UnhandledObjectManager *GetUnhandledObjectManager() const
+    {
+        return unhandledObjectManager_;
+    }
+
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
     PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
@@ -389,20 +395,8 @@ public:
         objStateTable_->DeflateInfo();
     }
 
-    /// @brief Adds failed job to an internal storage
-    void AddUnhandledFailedJob(EtsJob *job);
-
-    /// @brief Removes failed job from internal storage
-    void RemoveUnhandledFailedJob(EtsJob *job);
-
     /// @brief Invokes managed method to apply custom handler on stored failed jobs
     void ListUnhandledFailedJobs();
-
-    /// @brief Adds rejected promise to an internal storage
-    void AddUnhandledRejectedPromise(EtsPromise *promise);
-
-    /// @brief Removes rejected promise from internal storage
-    void RemoveUnhandledRejectedPromise(EtsPromise *promise);
 
     /// @brief Invokes managed method to apply custom handler on stored rejected promises
     void ListUnhandledRejectedPromises();
@@ -439,9 +433,6 @@ private:
 
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
-    void AddUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
-    void RemoveUnhandledObjectImpl(PandaUnorderedSet<EtsObject *> &unhandledObjects, EtsObject *object);
-
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
     PandaUniquePtr<EtsClassLinker> classLinker_;
@@ -470,9 +461,7 @@ private:
     DoubleToStringCache *doubleToStringCache_ {nullptr};
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
-    os::memory::Mutex unhandledMutex_;
-    PandaUnorderedSet<EtsObject *> unhandledFailedJobs_;
-    PandaUnorderedSet<EtsObject *> unhandledRejectedPromises_;
+    UnhandledObjectManager *unhandledObjectManager_ {nullptr};
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
