@@ -157,27 +157,9 @@
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_5.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_6.ets
 
-#23754
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_0.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_1.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_2.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_3.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_4.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_5.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_6.ets
-
 #20213 Generic instantiation depends on arguments order
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets
-
-#20214 Generic lambda is not supported by compiler
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_0.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_1.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_2.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_3.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_4.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_5.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.ets
 
 #24167 no methods should be inherited using readonly utility type
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_10.ets
@@ -318,7 +300,7 @@
 07.expressions/06.spread_expression/spex_lmbd_31.ets
 07.expressions/06.spread_expression/spex_32.ets
 
-#20214
+#25901
 07.expressions/06.spread_expression/spex_lmbd_46.ets
 
 #20376 No support for spread arguments in lambda
@@ -497,9 +479,6 @@
 
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
-
-#24401 Generic lambda is not supported by compiler
-07.expressions/32.lambda_expression/generic.ets
 
 #23513
 07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
