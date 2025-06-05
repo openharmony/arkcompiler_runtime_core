@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 
 #include "base/common.h"
 #include "objects/base_object_operator.h"
@@ -39,7 +39,7 @@ public:
     {
         if (IsForwarded()) {
             return GetSizeForwarded();
-        } else {
+        } else {  // NOLINT(readability-else-after-return)
             return GetOperator()->GetSize(this);
         }
     }
@@ -75,13 +75,13 @@ public:
         size_t objectHeaderSize = sizeof(BaseStateWord);
         DCHECK_CC(size >= objectHeaderSize + sizeof(size_t));
         auto addr = reinterpret_cast<MAddress>(this) + objectHeaderSize;
-        *reinterpret_cast<size_t*>(addr) = size;
+        *reinterpret_cast<size_t *>(addr) = size;
     }
 
     inline size_t GetSizeForwarded() const
     {
         auto addr = reinterpret_cast<MAddress>(this) + sizeof(BaseStateWord);
-        return *reinterpret_cast<size_t*>(addr);
+        return *reinterpret_cast<size_t *>(addr);
     }
 
     inline bool IsForwarding() const
@@ -185,7 +185,7 @@ protected:
     }
 
     static PUBLIC_API BaseObjectOperator operator_;
-    BaseStateWord state_;
+    BaseStateWord state_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H

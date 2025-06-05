@@ -20,6 +20,8 @@
 #include <functional>
 #include "objects/base_state_word.h"
 
+// NOLINTBEGIN(readability-identifier-naming, readability-else-after-return,-warnings-as-errors,
+// cppcoreguidelines-pro-type-union-access)
 namespace panda {
 class BaseObject;
 
@@ -28,10 +30,18 @@ class RefField {
 public:
     static constexpr uint64_t TAG_WEAK = 0x01ULL;
     static constexpr MAddress REF_UNDEFINED = 0x02ULL;
+
+    struct BitFieldLayout {
+        MAddress address : 48;
+        MAddress isTagged : 1;
+        MAddress tagID : 1;
+        MAddress padding : 14;
+    };
+
     // size in bytes
     static constexpr size_t GetSize()
     {
-        return sizeof(fieldVal);
+        return sizeof(RefFieldValue);
     }
 
     BaseObject *GetTargetObject(std::memory_order order = std::memory_order_relaxed) const
@@ -75,7 +85,6 @@ public:
 
         if (isAtomic) {
             __atomic_store_n(&fieldVal, static_cast<RefFieldValue>(newVal), order);
-        } else {
             fieldVal = static_cast<RefFieldValue>(newVal);
         }
     }
@@ -114,22 +123,22 @@ public:
 
     MAddress GetAddress() const
     {
-        return address;
+        return layout.address;
     }
 
     bool IsWeak() const
     {
-        return (address & TAG_WEAK);
+        return (layout.address & TAG_WEAK);
     }
 
-    // bool IsTagged() const { return isTagged == 1; }
     bool IsTagged() const
     {
         return false;
     }
+
     uint16_t GetTagID() const
     {
-        return tagID;
+        return layout.tagID;
     }
 
     ~RefField() = default;
@@ -137,16 +146,19 @@ public:
     RefField(const RefField &ref) : fieldVal(ref.fieldVal) {}
     explicit RefField(const BaseObject *obj) : fieldVal(0)
     {
-        address = reinterpret_cast<MAddress>(obj);
+        layout.address = reinterpret_cast<MAddress>(obj);
     }
-    RefField(const BaseObject* obj, bool forWeak) : fieldVal(0)
+    RefField(const BaseObject *obj, bool forWeak) : fieldVal(0)
     {
         MAddress tag = forWeak ? TAG_WEAK : 0;
-        address = reinterpret_cast<MAddress>(obj) | tag;
+        layout.address = reinterpret_cast<MAddress>(obj) | tag;
     }
-    RefField(const BaseObject *obj, uint16_t tagged, uint16_t tagid)
-        : address(reinterpret_cast<MAddress>(obj)), isTagged(tagged), tagID(tagid), padding(0)
+    RefField(const BaseObject *obj, uint16_t tagged, uint16_t tagid) : fieldVal(0)
     {
+        layout.address = reinterpret_cast<MAddress>(obj);
+        layout.isTagged = tagged;
+        layout.tagID = tagid;
+        layout.padding = 0;
     }
 
     RefField(RefField &&ref) : fieldVal(ref.fieldVal) {}
@@ -158,14 +170,11 @@ private:
     using RefFieldValue = MAddress;
 
     union {
-        struct {
-            MAddress address : 48;
-            MAddress isTagged : 1;
-            MAddress tagID : 1;
-            MAddress padding : 14;
-        };
+        BitFieldLayout layout;
         RefFieldValue fieldVal;
     };
 };
 }  // namespace panda
+// NOLINTEND(readability-identifier-naming, readability-else-after-return,-warnings-as-errors,
+// cppcoreguidelines-pro-type-union-access)
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H

@@ -27,11 +27,11 @@
 
 namespace panda::ecmascript {
 class JSThread;
-}
+}  // namespace panda::ecmascript
 
 namespace ark {
 class Coroutine;
-}
+}  // namespace ark
 
 namespace panda {
 class BaseThread;
@@ -53,6 +53,8 @@ public:
     using Coroutine = ark::Coroutine;
     using MutatorBase = panda::MutatorBase;
 
+    // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+    // NOLINTNEXTLINE(google-explicit-constructor)
     ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
     {
         SetCurrent(this);
@@ -111,7 +113,7 @@ public:
     void UnregisterCoroutine(Coroutine *coroutine);
     void VisitAllThreads(CommonRootVisitor visitor);
 
-    JSThread* GetJSThread() const
+    JSThread *GetJSThread() const
     {
         return jsThread_;
     }
@@ -127,9 +129,11 @@ public:
     }
 
     // Return if thread has already binded mutator.
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
     class TryBindMutatorScope {
     public:
-        TryBindMutatorScope(ThreadHolder *holder);
+        // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+        TryBindMutatorScope(ThreadHolder *holder);  // NOLINT(google-explicit-constructor)
         ~TryBindMutatorScope();
 
     private:

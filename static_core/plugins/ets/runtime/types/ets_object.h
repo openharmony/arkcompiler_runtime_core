@@ -62,7 +62,7 @@ public:
     }
 
     template <class T>
-    T GetFieldPrimitive(EtsField *field)
+    T GetFieldPrimitive(EtsField *field) const
     {
         ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
         ASSERT(HasField(field));

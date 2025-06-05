@@ -204,7 +204,7 @@ private:
         NO_MOVE_SEMANTIC(FlagsAndThreadStatus);
     };
 
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     FlagsAndThreadStatus fts_ {};
     PANDA_PUBLIC_API static ThreadFlag initialThreadFlag_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)

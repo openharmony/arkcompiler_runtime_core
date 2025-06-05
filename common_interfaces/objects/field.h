@@ -23,6 +23,7 @@ class BaseObject;
 
 using MemoryOrder = std::memory_order;
 // T is primitive field
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 template <typename T, bool isAtomic = false>
 class Field {
 public:
@@ -77,5 +78,6 @@ public:
 private:
     T value;
 };
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H

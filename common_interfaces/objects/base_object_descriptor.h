@@ -22,7 +22,7 @@
 
 namespace panda::ecmascript {
 class HandlerBase;
-}
+}  // namespace panda::ecmascript
 namespace panda {
 
 // for IC

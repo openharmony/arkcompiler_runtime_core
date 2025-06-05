@@ -28,6 +28,10 @@ static constexpr char const ETSGLOBAL_CLASS_NAME[] = "ETSGLOBAL";
 
 bool IsEtsGlobalClassName(const std::string &descriptor);
 
+EtsObject *GetBoxedValue(EtsCoroutine *coro, Value value, EtsType type);
+
+Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj);
+
 class LambdaUtils {
 public:
     PANDA_PUBLIC_API static void InvokeVoid(EtsCoroutine *coro, EtsObject *lambda);

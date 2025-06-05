@@ -27,16 +27,19 @@
 
 namespace panda {
 #ifndef PANDA_TARGET_WINDOWS
-#define PUBLIC_API __attribute__((visibility ("default")))
+#define PUBLIC_API __attribute__((visibility("default")))
 #else
 #define PUBLIC_API __declspec(dllexport)
 #endif
 
 #define NO_INLINE_CC __attribute__((noinline))
 
-#define LIKELY_CC(exp) (__builtin_expect((exp) != 0, true))
-#define UNLIKELY_CC(exp) (__builtin_expect((exp) != 0, false))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIKELY_CC(exp) (__builtin_expect((exp) != 0, true))  // CC-OFF(G.PRE.02-CPP) design decision
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define UNLIKELY_CC(exp) (__builtin_expect((exp) != 0, false))  // CC-OFF(G.PRE.02-CPP) design decision
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREACHABLE_CC()                                             \
     do {                                                             \
         std::cerr << "This line should be unreachable" << std::endl; \
@@ -44,13 +47,14 @@ namespace panda {
         __builtin_unreachable();                                     \
     } while (0)
 
-#define CHECK_CC(expr) \
-    do { \
-        if (UNLIKELY_CC(!(expr))) { \
-            std::cerr << "CHECK FAILED: " << #expr; \
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_CC(expr)                                                                                        \
+    do {                                                                                                      \
+        if (UNLIKELY_CC(!(expr))) {                                                                           \
+            std::cerr << "CHECK FAILED: " << #expr;                                                           \
             std::cerr << "          IN: " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << std::endl; \
-            std::abort(); \
-        } \
+            std::abort();                                                                                     \
+        }                                                                                                     \
     } while (0)
 
 #if defined(NDEBUG)
@@ -58,18 +62,17 @@ namespace panda {
 #define DCHECK_CC(x)
 #else
 #define ALWAYS_INLINE_CC
-#define DCHECK_CC(x) CHECK_CC(x)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DCHECK_CC(x) CHECK_CC(x)  // CC-OFF(G.PRE.02-CPP)
 #endif
 
 #if defined(__cplusplus)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define NO_COPY_CTOR_CC(TypeName) \
-    TypeName(const TypeName&) = delete
+#define NO_COPY_CTOR_CC(TypeName) TypeName(const TypeName &) = delete  // CC-OFF(G.PRE.02-CPP) design decision
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define NO_COPY_OPERATOR_CC(TypeName) \
-    void operator=(const TypeName&) = delete
+#define NO_COPY_OPERATOR_CC(TypeName) void operator=(const TypeName &) = delete  // CC-OFF(G.PRE.02-CPP) design decision
 
 // Disabling copy ctor and copy assignment operator.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -78,14 +81,14 @@ namespace panda {
     NO_COPY_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define NO_MOVE_CTOR_CC(TypeName)                   \
+#define NO_MOVE_CTOR_CC(TypeName)                \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName(TypeName&&) = delete
+    TypeName(TypeName &&) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define NO_MOVE_OPERATOR_CC(TypeName)               \
+#define NO_MOVE_OPERATOR_CC(TypeName)            \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName& operator=(TypeName&&) = delete
+    TypeName &operator=(TypeName &&) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_SEMANTIC_CC(TypeName) \
@@ -94,14 +97,15 @@ namespace panda {
 
 #endif  // defined(__cplusplus)
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 enum class PUBLIC_API LOG_LEVEL : uint8_t {
     DEBUG = 0,
     INFO = 1,
     WARN = 2,
     ERROR = 3,
     FATAL = 4,
-    FOLLOW = 100, // if hilog enabled follow hilog, otherwise use INFO level
+    FOLLOW = 100,  // if hilog enabled follow hilog, otherwise use INFO level
 };
-}  // panda
+}  // namespace panda
 
 #endif  // COMMON_INTERFACES_BASE_COMMON_H
