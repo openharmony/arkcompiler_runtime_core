@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 using panda::helpers::string::Format;
 
 namespace {
-const std::regex ANONYMOUS_FUNCTION_NAME_REG = std::regex("\\^\\d+");
+const std::regex ANONYMOUS_FUNCTION_NAME_REG = std::regex("\\^[\\da-f]+$");
 const std::regex ANONYMOUS_NAMESPACE_NAME_REG = std::regex("=ens\\d+");
 
 const char REGEX_DELIMITER = '/';

@@ -39,3 +39,8 @@
 - [ ] 不涉及
 
 **Email:** chenqiuyao@huawei.com
+
+##### **七、Panda_Guard版本号变更自检**
+
+- [ ]  涉及，**涉及请联系邮箱:** wutao185@huawei.com
+- [ ]  不涉及
