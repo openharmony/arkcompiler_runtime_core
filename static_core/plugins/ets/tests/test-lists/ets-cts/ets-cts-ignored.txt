@@ -1,6 +1,17 @@
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 
+#26256 Uninitialized value access
+03.types/19.union_types/03.keyof_types/keyof_generic_0.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_0.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_1.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_11.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_2.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_3.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_4.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_5.ets
+03.types/19.union_types/03.keyof_types/keyof_inheritance_7.ets
+
 #25172
 03.types/19.union_types/united_switch_ext_1.ets
 03.types/19.union_types/united_switch_ext_3.ets
@@ -367,6 +378,9 @@
 #14001 Type number cannot be used as an index type
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
+
+#26256 Uninitialized value access
+07.expressions/17.typeof_expression/tof_const_11.ets
 
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets

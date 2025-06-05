@@ -355,6 +355,13 @@ extern "C" uint8_t CompilerEtsIstrue(ObjectHeader *obj)
     return static_cast<uint8_t>(EtsIstrue(coro, EtsObject::FromCoreType(obj)));
 }
 
+extern "C" void CompilerEtsNullcheck(ObjectHeader *obj)
+{
+    if (UNLIKELY(obj == nullptr)) {
+        ThrowNullPointerException();
+    }
+}
+
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
                                                     [[maybe_unused]] uint64_t unused)
 {

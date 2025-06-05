@@ -329,3 +329,19 @@ groups:
         acc: out:i32
         format: [pref_op_v_8]
         intrinsic_name: INTRINSIC_COMPILER_ETS_ISTRUE
+
+  - title: Check if the value of reference is null (ets undefined)
+    description: >
+     Throw a NullPointerError if the value in the accumulator is null
+    verification:
+      - v1_obj_or_null
+      - acc_type
+    exceptions:
+      - x_null
+    namespace: ets
+    instructions:
+      - sig: ets.nullcheck
+        prefix: ets
+        acc: in:ref
+        format: [pref_op_none]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_NULLCHECK

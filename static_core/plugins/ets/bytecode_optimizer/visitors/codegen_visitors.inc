@@ -102,3 +102,10 @@ static void VisitEtsIstrue(GraphVisitor *visitor, Inst *inst)
     enc->result_.emplace_back(pandasm::Create_ETS_ISTRUE(v));
     DoSta(inst->GetDstReg(), enc->result_);
 }
+
+static void VisitEtsNullcheck(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    DoLdaObj(inst->GetSrcReg(0), enc->result_);
+    enc->result_.emplace_back(pandasm::Create_ETS_NULLCHECK());
+}

@@ -2851,6 +2851,23 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsNullcheck()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+
+        if (!CheckType(GetAccType(), refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnWide()
     {
         LOG_INST();
