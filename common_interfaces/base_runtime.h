@@ -23,6 +23,9 @@
 #include "base/runtime_param.h"
 
 namespace common {
+class BaseStringTableImpl;
+template <typename Impl>
+class BaseStringTableInterface;
 class BaseObject;
 class HeapManager;
 class MutatorManager;
@@ -91,6 +94,11 @@ public:
     {
         return *baseClassRoots_;
     }
+
+    BaseStringTableInterface<BaseStringTableImpl> &GetStringTable()
+    {
+        return *stringTable_;
+    }
 private:
     RuntimeParam param_ {};
 
@@ -98,6 +106,7 @@ private:
     MutatorManager* mutatorManager_ = nullptr;
     ThreadHolderManager* threadHolderManager_  = nullptr;
     BaseClassRoots* baseClassRoots_ = nullptr;
+    BaseStringTableInterface<BaseStringTableImpl>* stringTable_ = nullptr;
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;

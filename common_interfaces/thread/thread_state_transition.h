@@ -18,6 +18,7 @@
 
 #include "thread/thread_holder-inl.h"
 #include "thread/thread_holder_manager.h"
+#include "base_runtime.h"
 
 namespace common {
 
