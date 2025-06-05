@@ -487,6 +487,10 @@ ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
 
+  if (ark_hybrid) {
+    external_deps = [ "ets_runtime:libark_jsruntime" ]
+  }
+
   if (current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") {
     ldflags = [ "-latomic" ]

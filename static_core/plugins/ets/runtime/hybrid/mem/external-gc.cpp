@@ -96,4 +96,11 @@ void SweepStaticRoots(const WeakRefFieldVisitor &visitor)
     });
 }
 
+void RegisterStaticRootsProcessFunc()
+{
+    RegisterVisitStaticRootsHook(VisitStaticRoots);
+    RegisterUpdateStaticRootsHook(UpdateStaticRoots);
+    RegisterweepStaticRootsHook(SweepStaticRoots);
+}
+
 }  // namespace panda

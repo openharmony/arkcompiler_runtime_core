@@ -295,6 +295,12 @@ private:
 
         // Initialize GC:
         auto runtimeLang = paoc_->runtimeOptions_->GetRuntimeType();
+#ifdef ARK_HYBRID
+        if (!paoc_->runtimeOptions_->WasSetGcType(runtimeLang)) {
+            paoc_->runtimeOptions_->SetGcType("cmc-gc");
+            LOG_PAOC(INFO) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+        }
+#endif
         // Fix it in issue 8164:
         auto gcType = ark::mem::GCTypeFromString(paoc_->runtimeOptions_->GetGcType(runtimeLang));
         ASSERT(gcType != ark::mem::GCType::INVALID_GC);

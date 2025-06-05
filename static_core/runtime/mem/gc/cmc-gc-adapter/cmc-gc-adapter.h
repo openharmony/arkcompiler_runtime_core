@@ -53,6 +53,8 @@ public:
 
     bool IsPostponeGCSupported() const override;
 
+    void StopGC() override;
+
 private:
     void MarkObject(ObjectHeader *object) override;
     bool IsMarked(const ObjectHeader *object) const override;

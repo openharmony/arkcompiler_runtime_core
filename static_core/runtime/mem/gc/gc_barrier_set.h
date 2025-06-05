@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,16 @@ public:
     BarrierOperand GetBarrierOperand(BarrierPosition barrierPosition, std::string_view name);
 
     BarrierOperand GetPostBarrierOperand(std::string_view name);
+
+    virtual bool IsPreReadBarrierEnabled()
+    {
+        return false;
+    }
+
+    virtual void *PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
+    {
+        UNREACHABLE();
+    }
 
 protected:
     /**
@@ -264,6 +274,38 @@ private:
     void *minAddr_ {nullptr};
     ThreadLocalCardQueues *updatedRefsQueue_;
     os::memory::Mutex *queueLock_;
+};
+
+/// BarrierSet for hybird CMC GC
+class GCCMCBarrierSet : public GCBarrierSet {
+public:
+    explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
+        : GCBarrierSet(allocator, BarrierType::PRE_WRB_NONE, BarrierType::POST_CMC_WRITE_BARRIER)
+    {
+    }
+
+    NO_COPY_SEMANTIC(GCCMCBarrierSet);
+    NO_MOVE_SEMANTIC(GCCMCBarrierSet);
+    ~GCCMCBarrierSet() override = default;
+
+    void PreBarrier([[maybe_unused]] void *preValAddr) override
+    {
+        UNREACHABLE();
+    }
+
+    void PostBarrier(const void *objAddr, size_t offset, void *storedValAddr) override;
+
+    void PostBarrier(const void *objAddr, size_t offset, size_t count) override;
+
+    bool IsPreReadBarrierEnabled() override
+    {
+        return true;
+    }
+
+    void *PreReadBarrier(const void *objAddr, size_t offset) override;
+
+private:
+    class CMCWriteBarrierHandle;
 };
 
 }  // namespace ark::mem

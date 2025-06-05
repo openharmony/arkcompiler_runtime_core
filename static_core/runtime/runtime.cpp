@@ -74,6 +74,9 @@
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark {
 
@@ -348,6 +351,8 @@ bool Runtime::Create(const RuntimeOptions &options)
         return false;
     }
 
+    InitBaseRuntime();
+
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -496,6 +501,8 @@ bool Runtime::Destroy()
         taskmanager::TaskScheduler::Destroy();
         taskScheduler_ = nullptr;
     }
+
+    FiniBaseRuntime();
 
     return true;
 }
@@ -697,6 +704,12 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
+#ifdef ARK_HYBRID
+    if (!options.WasSetGcType(plugins::LangToRuntimeType(lang))) {
+        const_cast<RuntimeOptions &>(options).SetGcType("cmc-gc");
+        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+    }
+#endif
     auto gcType = ark::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
@@ -1536,6 +1549,24 @@ void Runtime::CheckOptionsFromOs() const
     // for qemu-aarch64 we will get 32 from GetCacheLineSize()
     // for native arm and qemu-arm we will get 0 from GetCacheLineSize()
     ASSERT(ark::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
+#endif
+}
+
+void Runtime::InitBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Init();
+#endif
+}
+
+void Runtime::FiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Fini();
 #endif
 }
 

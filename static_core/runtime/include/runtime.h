@@ -489,6 +489,10 @@ private:
 
     inline void InitializeVerifierRuntime();
 
+    static void InitBaseRuntime();
+
+    static void FiniBaseRuntime();
+
     Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator);
 
     ~Runtime();
