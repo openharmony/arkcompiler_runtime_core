@@ -679,6 +679,8 @@ class JSONWriter {
         } else if (obj instanceof JsonReplacer) {
             let temp: Record<String, NullishType> = obj.jsonReplacer()
             this.writeESCompatRecord(temp)
+        } else if (obj instanceof ESValue) {
+            this.writeInteropESValue(obj)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -808,7 +810,7 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        currentBuffer.append(entryDumped ? this.buffer.toString() : "{}")
+        currentBuffer.append(entryDumped ? this.buffer.toString() : JSONObject.EMPTY)
 
         this.buffer = currentBuffer
     }
@@ -857,14 +859,18 @@ class JSONWriter {
     }
 
     private writeRecordEntry<K extends Number | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
-        const entryValType = Type.of(entryVal)
-        if (entryValType instanceof LambdaType) {
-            return entryDumped
-        }
-
         const entryName = (entryKey as object).toString()
         const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
         return this.writeField(entryName, replacedVal, entryDumped)
+    }
+
+    private writeInteropESValue(obj: ESValue): void {
+        try {
+            const json = JSON.stringify(obj.unwrap())
+            this.buffer.append(json.toString())
+        } catch (e: TypeError) {
+            throw new TypeError("cyclic object value")
+        }
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
@@ -894,13 +900,18 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        currentBuffer.append(fieldDumped ? this.buffer.toString() : "{}")
+        currentBuffer.append(fieldDumped ? this.buffer.toString() : JSONObject.EMPTY)
 
         this.buffer = currentBuffer
     }
 
     private writeField(fieldName: string, fieldVal: NullishType, fieldDumped: boolean): boolean {
         if (fieldVal === undefined) {
+            return fieldDumped
+        }
+
+        const fieldValType = Type.of(fieldVal)
+        if (fieldValType instanceof LambdaType) {
             return fieldDumped
         }
 
@@ -957,42 +968,32 @@ class JSONWriter {
                     continue
                 }
 
-                const fieldType = classType.getFieldByName(fieldName)
-                if (!this.isWritableFieldType(fieldType)) {
+                const field = classType.getFieldByName(fieldName)
+                if (field.isStatic()) {
                     continue
                 }
 
                 const fieldValue = classValue.getFieldByName(fieldName)
 
-                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                const fieldTypeValuePair: [Field, Value] = [field, fieldValue]
                 writableFields.push(fieldTypeValuePair)
             }
         } else {
             const fieldsCount = classValue.getFieldsNum()
             for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
-                const fieldType = classType.getField(fieldIdx)
-                if (!this.isWritableFieldType(fieldType)) {
+                const field = classType.getField(fieldIdx)
+                if (field.isStatic()) {
                     continue
                 }
 
                 const fieldValue = classValue.getField(fieldIdx)
 
-                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                const fieldTypeValuePair: [Field, Value] = [field, fieldValue]
                 writableFields.push(fieldTypeValuePair)
             }
         }
 
         return writableFields
-    }
-
-    private isWritableFieldType(field: Field): boolean {
-        const fieldType = field.getType()
-
-        if (field.isStatic() || fieldType instanceof LambdaType) {
-            return false
-        }
-
-        return true
     }
 
     private writeArrayValue(arrayValue: ArrayValue, arrayType: ArrayType): void {

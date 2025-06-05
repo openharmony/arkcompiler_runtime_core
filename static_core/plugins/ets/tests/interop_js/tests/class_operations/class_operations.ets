@@ -53,6 +53,77 @@ class jsnew {
     native static $nn(top: JSValue, qname: String, a0: double, a1: double) : JSValue;
 };
 
+class C {
+    hash: int
+    val: ESObject
+
+    constructor(hash: int, val: ESObject) {
+        this.hash = hash
+        this.val = val
+    }
+}
+
+function testJSONStringifyESObjectInstance(): boolean {
+    const moduleObj = ESObject.getGlobal().getProperty("gtest_env").getProperty("module")
+    const createObjFn = moduleObj.getProperty("MyNamespace").getProperty("createKitten")
+
+    const id: number = 1.0
+    const name: string = "Nora"
+    const esObj = createObjFn.invoke(id, name)
+
+    assertEQ(JSON.stringify(esObj), `{"id":1,"name":"Nora","male":false}`)
+
+    esObj.setProperty("self", esObj)
+    expectError(() => {
+        JSON.stringify(esObj)
+    }, "cyclic object value")
+    esObj.setProperty("self", ESObject.instantiateEmptyObject())
+
+    const esObjName = esObj.getProperty("name")
+    assertEQ(JSON.stringify(esObjName), '"Nora"')
+
+    // testing that object entries of type 'function' are ignored
+    const withFnObj = ESObject.instantiateEmptyObject()
+    withFnObj.setProperty("name", ESObject.wrapString("foo"))
+
+    const moduleFn = moduleObj.getProperty("doNothing")
+    withFnObj.setProperty("fn", moduleFn)
+
+    assertEQ(JSON.stringify(withFnObj), `{"name":"foo"}`)
+
+    const c = new C(42, esObj)
+    assertEQ(JSON.stringify(c), `{"hash":42,"val":{"id":1,"name":"Nora","male":false,"self":{}}}`)
+
+    return true
+}
+
+function testJSONStringifyESObjectArray(): boolean {
+    const moduleObj = ESObject.getGlobal().getProperty("gtest_env").getProperty("module")
+
+    const arr: FixedArray<number> = new number[3]
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = i + 1
+    }
+
+    const evalArrFn = moduleObj.getProperty("evaluateArray")
+    const arrEsObj = evalArrFn.invoke(arr, arr.length)
+
+    assertEQ(JSON.stringify(arrEsObj), "[1,3,7]")
+
+    arrEsObj.setProperty(3, arrEsObj)
+    expectError(() => {
+        JSON.stringify(arrEsObj)
+    }, "cyclic object value")
+
+    const nestedArrEsObj = ESObject.instantiateEmptyArray()
+    nestedArrEsObj.setProperty(0, ESObject.wrapString("foo"))
+
+    arrEsObj.setProperty(3, nestedArrEsObj)
+    assertEQ(JSON.stringify(arrEsObj), `[1,3,7,["foo"]]`)
+
+    return true
+}
+
 function jscallEmpty(): int {
     jscall.void$(jsvars.m, ".evaluateNumber");
     return 0;

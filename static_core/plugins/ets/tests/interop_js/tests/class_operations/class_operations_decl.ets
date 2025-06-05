@@ -22,6 +22,14 @@ import {
     evaluateArray
 } from "module"
 
+function testJSONStringifyESObjectInstance(): boolean {
+	return true
+}
+
+function testJSONStringifyESObjectArray(): boolean {
+	return true
+}
+
 function jscallEmpty(): int {
 	evaluateNumber();
 	return 0;
