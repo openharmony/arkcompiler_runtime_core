@@ -20,6 +20,10 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
     popTrapped: boolean = false
     spliceTrapped: boolean = false
     shiftTrapped: boolean = false
+    pushTrapped: boolean = false
+    concatTrapped: boolean = false
+    unshiftTrapped: boolean = false
+    toSplicedTrapped: boolean = false
 
     override get(target: Array<string>, index: int): string {
         this.getTrapped = true
@@ -51,12 +55,21 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
     }
 
     override invoke(target: Array<string>, method: Method, args: FixedArray<NullishType>): NullishType {
-        if (method.getName() == "pop") {
+        const methodName = method.getName()
+        if (methodName == "pop") {
             this.popTrapped = true
-        } else if (method.getName() == "splice") {
+        } else if (methodName == "splice") {
             this.spliceTrapped = true
-        } else if (method.getName() == "shift") {
+        } else if (methodName == "shift") {
             this.shiftTrapped = true
+        } else if (methodName == "push") {
+            this.pushTrapped = true
+        } else if (methodName == "concat") {
+            this.concatTrapped = true
+        } else if (methodName == "unshift") {
+            this.unshiftTrapped = true
+        } else if (methodName == "toSpliced") {
+            this.toSplicedTrapped = true
         }
 
         return super.invoke(target, method, args)
@@ -87,7 +100,10 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
     assertEQ(popped, "two", "unexpected Array.pop() result")
     assertTrue(handler.popTrapped)
 
-    arrayProxy.push("5")
+    const lengthAfterPush = arrayProxy.push("5")
+    assertTrue(handler.pushTrapped)
+    assertEQ(lengthAfterPush, 3)
+
     const lastElem = arrayProxy.pop()
     assertEQ(lastElem, "5", "unexpected Array.pop() after Array.push() result")
 
@@ -106,6 +122,21 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
     arrayTail = arrayProxy.splice(1)
     assertEQ(arrayTail.length, 1, "unexpected Array.splice() result length")
     assertEQ(arrayProxy.length, 1, "unexpected array length after splice")
+
+    const lengthAfterUnshift = arrayProxy.unshift("I", "II")
+    assertTrue(handler.unshiftTrapped)
+    assertEQ(arrayProxy.length, 3)
+
+    const tail = ["V"]
+    const concatResult = arrayProxy.concat(tail)
+    assertTrue(handler.concatTrapped)
+    assertEQ(concatResult.length, 4)
+
+    const arrayLengthBefore = arrayProxy.length
+    const toSplicedResult = arrayProxy.toSpliced(1, 1)
+    assertTrue(handler.toSplicedTrapped)
+    assertEQ(toSplicedResult.length, 2)
+    assertEQ(arrayProxy.length, arrayLengthBefore)
 }
 
 function testArrayProxyOps(): void {

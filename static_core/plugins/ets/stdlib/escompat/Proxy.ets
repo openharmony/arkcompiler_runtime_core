@@ -527,9 +527,16 @@ abstract class ArrayProxy<T> extends Array<T> {
     }
 
     private static readonly POP_METHOD: Method = ArrayProxy.getArrayMethod("pop")
+    private static readonly PUSH_METHOD: Method = ArrayProxy.getArrayMethod("push", Type.of(new Array<object>()))
+    private static readonly CONCAT_METHOD: Method = ArrayProxy.getArrayMethod("concat", Type.of([] as FixedArray<ConcatArray<object>>))
+    private static readonly UNSHIFT_METHOD: Method = ArrayProxy.getArrayMethod("unshift", Type.of(new Array<object>()))
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
-    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0))
+    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as number))
     private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as int))
+    private static readonly TO_SPLICED_METHOD_NUM_NUM: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(Number(1)), Type.of(Number(1)))
+    private static readonly TO_SPLICED_METHOD_NUM_NUM_ARR: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1 as number), Type.of(1 as number), Type.of([] as FixedArray<object>))
+    private static readonly TO_SPLICED_METHOD_INT_INT_ARR: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1 as int), Type.of(1 as int), Type.of([] as FixedArray<object>))
+    private static readonly TO_SPLICED_METHOD_INT: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1))
 
     private static readonly SPLICE_METHOD_INT_INT_ARR: Method =
             ArrayProxy.getArrayMethod("splice", Type.of(1 as int), Type.of(1 as int), Type.of(new Array<Object>(0)))
@@ -597,11 +604,21 @@ abstract class ArrayProxy<T> extends Array<T> {
     }
 
     override concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
-        return this.target.concat(...items)
+        const result = this.handler.invoke(this.target, ArrayProxy.CONCAT_METHOD, [items])
+        if (result instanceof Array) {
+            return result as Array<T>
+        }
+
+        throw new AssertionError("Array.concat() unexpected result type: " + Type.of(result))
     }
 
     override push(...items: Array<T>): number {
-        return this.target.push(...items)
+        const result = this.handler.invoke(this.target, ArrayProxy.PUSH_METHOD, [items])
+        if (result instanceof Number) {
+            return result
+        }
+
+        throw new AssertionError("Array.push() unexpected result type: " + Type.of(result))
     }
 
     override pushECMA(...items: Array<T>): number {
@@ -647,22 +664,47 @@ abstract class ArrayProxy<T> extends Array<T> {
     }
 
     override toSpliced(start?: Number, deleteCount?: Number): Array<T> {
-        return this.target.toSpliced(start, deleteCount)
+        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_NUM_NUM, [start, deleteCount])
+        if (result instanceof Array) {
+            return result as Array<T>
+        }
+
+        throw new AssertionError("Array.toSpliced(Number, Number) unexpected result type: " + Type.of(result))
     }
 
     override toSpliced(start: number, deleteCount: number, ...items: FixedArray<T>): Array<T> {
-        return this.target.toSpliced(start, deleteCount, ...items)
+        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_NUM_NUM_ARR, [start, deleteCount, items])
+        if (result instanceof Array) {
+            return result as Array<T>
+        }
+
+        throw new AssertionError("Array.toSpliced(number, number, FixedArray<T>) unexpected result type: " + Type.of(result))
     }
 
     override toSpliced(start: int, deleteCount: int, ...items: FixedArray<T>): Array<T> {
-        return this.target.toSpliced(start, deleteCount, ...items)
+        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_INT_INT_ARR, [start, deleteCount, items])
+        if (result instanceof Array) {
+            return result as Array<T>
+        }
+
+        throw new AssertionError("Array.toSpliced(int, int, FixedArray<T>) unexpected result type: " + Type.of(result))
     }
 
     override toSpliced(start: int): Array<T> {
-        return this.target.toSpliced(start)
+        const result = this.handler.invoke(this.target, ArrayProxy.TO_SPLICED_METHOD_INT, [start])
+        if (result instanceof Array) {
+            return result as Array<T>
+        }
+
+        throw new AssertionError("Array.toSpliced(int) unexpected result type: " + Type.of(result))
     }
 
     override unshift(...items: T[]): number {
-        return this.target.unshift(...items)
+        const result = this.handler.invoke(this.target, ArrayProxy.UNSHIFT_METHOD, [items])
+        if (result instanceof Number) {
+            return result
+        }
+
+        throw new AssertionError("Array.unshift() unexpected result type: " + Type.of(result))
     }
 }
