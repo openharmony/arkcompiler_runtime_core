@@ -53,6 +53,7 @@ class Test:
         self.test_id = test_id
         self.update_expected = self.test_env.config.test_lists.update_expected
         self.expected = ""
+        self.expected_err = ""
         # Contains fields output, error, and return_code of the last executed step
         self.report: Optional[TestReport] = None
         # Test result: True if all steps passed, False is any step fails

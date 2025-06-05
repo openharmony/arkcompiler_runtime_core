@@ -17,8 +17,7 @@
 
 /*---
 desc: {{stm.desc}}
-tags:
-- negative
+
 ---*/
 
 function main(): void {

@@ -17,11 +17,13 @@ case_negative:
     logic: |-
       type MyArray<T> = Array<T>;
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
+      let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
       numArray.length = 2;
-      numArray[2] = 2;
+      arktest.expectThrow(() => {numArray[2] = 2;}, expectedException)
 
   - desc: Instantiate built-in generic arrays(Array<T>) with object types.
     logic: |-
       type MyArray<T> = Array<T>;
+      let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
-      numArray.length = 5;
+      arktest.expectThrow(() => {numArray.length = 5;}, expectedException)

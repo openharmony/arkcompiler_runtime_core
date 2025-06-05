@@ -10,16 +10,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+Simple string message
+42
+true
+undefined
+null
 
----
-cases:
-    - |-
-        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ClassCastError)}
-        function foo(n: number) {}
-        const f: Function = foo
-        arktest.expectThrow(() => {f.unsafeCall("just a test")}, exceptionCheck)
-    - |-
-        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ArgumentsUnderapplicationError)}
-        function foo(a: number, b: number) {}
-        const f: Function = foo
-        arktest.expectThrow(() => {f.unsafeCall(4.4)}, exceptionCheck)
+User: John Age: 30
+ConsoleErrorTest.A {name: John, age: 30}
+Hello, Alice!
+color: blue; Styled text
+Error: Test error
+null undefined 11 123 std.core.Object {}
+,,
+%d
+1
+1 2
+37 37
+19.5 19.5

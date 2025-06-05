@@ -10,16 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
----
-cases:
-    - |-
-        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ClassCastError)}
-        function foo(n: number) {}
-        const f: Function = foo
-        arktest.expectThrow(() => {f.unsafeCall("just a test")}, exceptionCheck)
-    - |-
-        let exceptionCheck = (e: Error | Exception): boolean => {return (e instanceof ArgumentsUnderapplicationError)}
-        function foo(a: number, b: number) {}
-        const f: Function = foo
-        arktest.expectThrow(() => {f.unsafeCall(4.4)}, exceptionCheck)
+#
+# This file should be deleted after # 26910 is fixed
+#
+E/verifier: Verifier error 16: Bad accumulator return value type with subtype

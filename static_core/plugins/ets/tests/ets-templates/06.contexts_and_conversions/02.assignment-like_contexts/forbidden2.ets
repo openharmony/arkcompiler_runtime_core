@@ -17,13 +17,13 @@
 /*---
 desc: >-
     Any conversion that is not explicitly allowed is forbidden.
-tags: [negative]
 ---*/
 
 {{c.defs}}
 
 function main(): void {
   let src: {{c.stype}} = {{c.sval|safe}};
-  let dst: {{c.dtype}} = src as {{c.dtype}};
-}
+  let expectedException = (e: Error | Exception): boolean => {return (e instanceof ClassCastError)};
+  arktest.expectThrow(() => {let dst: {{c.dtype}} = src as {{c.dtype}};}, expectedException);
+  }
 {% endfor %}

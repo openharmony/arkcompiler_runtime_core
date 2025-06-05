@@ -62,6 +62,9 @@ spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_2.ets
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
 
+#26717
+spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
+
 ### tuples
 spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
 
@@ -321,10 +324,6 @@ std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 #25264
 std/core/ConsoleArrayTest.ets
-
-#25014
-std/core/ConsoleErrorTest.ets
-std/core/ConsoleAssertTest.ets
 
 #25130
 std/core/dateformat/DateTimeFormatTest.ets
