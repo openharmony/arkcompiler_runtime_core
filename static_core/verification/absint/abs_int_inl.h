@@ -3503,6 +3503,86 @@ public:
         return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(regIdx);
     }
 
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        // NOTE: handle it
+        return true;
+    }
+
 private:
     Type GetCachedType() const
     {
