@@ -6238,8 +6238,8 @@ form: method_of_function_name (...parameter: Any[]): Any
 
 .. _R238:
 
-|CB_R| No types based on 'this' type
-------------------------------------
+|CB_R| No types based on type '``this``'
+----------------------------------------
 
 |CB_RULE| ``arkts-no-types-based-on-this-type``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
