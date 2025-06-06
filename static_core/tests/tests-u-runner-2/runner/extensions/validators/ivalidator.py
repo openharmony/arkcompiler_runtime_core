@@ -17,6 +17,10 @@
 
 from abc import ABC
 from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from runner.suites.test_standard_flow import TestStandardFlow
 
 # Signature:
 # test: TestStandardFlow - what test is running
@@ -24,7 +28,7 @@ from collections.abc import Callable
 # output: str - what stdout contains
 # error: str - what stderr contains
 # return_code: int - return code of the binary run on the step for the test
-ValidatorFunction = Callable[[object, str, str, str, int], bool]
+ValidatorFunction = Callable[["TestStandardFlow", str, str, str, int], bool]
 
 
 class IValidator(ABC):  # noqa: B024

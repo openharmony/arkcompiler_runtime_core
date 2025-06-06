@@ -33,8 +33,9 @@ RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner-2
 cd "${RUNNER_DIR}"
 
 echo "Pylint /runner, main.py"
-pylint --rcfile .pylintrc runner main.py --ignore=test262,config_test,reports,runner_file_based.py
+pylint --rcfile .pylintrc runner main.py --ignore=test262,config_test,reports,runner_file_based.py,expected_files_test.py
 pylint --rcfile .pylintrc runner/extensions/generators/test262/ runner/test/config_test runner/reports runner/runner_file_based.py --disable=duplicate-code
+pylint --rcfile .pylintrc runner/test/func_test/expected_files_test.py --disable=protected-access
 save_exit_code ${EXIT_CODE} $?
 EXIT_CODE=$?
 
