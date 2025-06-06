@@ -610,6 +610,9 @@ export abstract class Type extends Object {
         if (this.isNumericType() && other.isNumericType()) {
             return true
         }
+        if (this instanceof BooleanType && other instanceof BooleanType) {
+            return true
+        }
         return false
     }
 
