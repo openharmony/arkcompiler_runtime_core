@@ -40,6 +40,7 @@ panda_add_gtest(
         abc2program_test.cpp
     LIBRARIES
         abc2program
+        gmock
     SANITIZERS
         ${PANDA_SANITIZERS_LIST}
     DEPS_TARGETS

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <cstdlib>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>
 #include <sstream>
@@ -40,67 +42,12 @@ public:
 
     void TearDown() override {}
 
-    template <typename T>
-    bool ValidateString(const T &strings, const T &expectedStrings)
-    {
-        if (strings.size() != expectedStrings.size()) {
-            return false;
-        }
-        for (const std::string &expectedString : expectedStrings) {
-            const auto stringIter = std::find(strings.begin(), strings.end(), expectedString);
-            if (stringIter == strings.end()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    template <typename T>
-    bool ContainString(const T &strings, const T &expectedStrings)
-    {
-        for (const std::string &expectedString : expectedStrings) {
-            const auto stringIter = std::find(strings.begin(), strings.end(), expectedString);
-            if (stringIter == strings.end()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    template <typename T>
-    bool ValidateVector(const T &vec, const T &expectedVec)
-    {
-        if (vec.size() != expectedVec.size()) {
-            return false;
-        }
-        for (size_t i = 0; i < vec.size(); i++) {
-            if (vec[i] != expectedVec[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     bool ValidateAnnotationId(const std::vector<std::string> &id)
     {
         if (id.size() != ANNOTATION_ID_SIZE) {
             return false;
         }
         return id[0].size() > ANNOTATION_ID_PREFIX_SIZE && id[0].substr(0, ANNOTATION_ID_PREFIX_SIZE) == "id_";
-    }
-
-    bool ValidateBoolAttributes(const std::unordered_set<std::string> &boolAttributes,
-                                const std::unordered_set<std::string> &expectedBoolAttributes)
-    {
-        if (boolAttributes.size() != expectedBoolAttributes.size()) {
-            return false;
-        }
-        for (const auto &attr : boolAttributes) {
-            if (expectedBoolAttributes.find(attr) == expectedBoolAttributes.end()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     bool ValidateAttributes(const std::unordered_map<std::string, std::vector<std::string>> &attributes,
@@ -113,13 +60,11 @@ public:
                 }
                 continue;
             }
-            auto expectValuesIter = expectedAttributes.find(key);
+            const auto expectValuesIter = expectedAttributes.find(key);
             if (expectValuesIter == expectedAttributes.end()) {
                 return false;
             }
-            if (!ValidateVector(values, expectValuesIter->second)) {
-                return false;
-            }
+            EXPECT_THAT(values, ::testing::ContainerEq(expectValuesIter->second));
         }
         return true;
     }
@@ -202,27 +147,28 @@ public:
 
 TEST_F(Abc2ProgramHelloWorldTest, Lang)
 {
-    panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
-    bool langMatched = (prog->lang == expectedLang);
-    EXPECT_TRUE(langMatched);
+    EXPECT_EQ(prog->lang, panda_file::SourceLang::ETS);
 }
 
 TEST_F(Abc2ProgramHelloWorldTest, RecordTable)
 {
-    std::vector<std::string> expectedRecordNames = {"HelloWorld", "ETSGLOBAL"};
-    panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
-    std::vector<std::string> recordNames;
+    using namespace std::literals;
+    const std::array expectedRecordNames {
+        "HelloWorld.HelloWorld"s,
+        "HelloWorld.ETSGLOBAL"s,
+    };
+    std::set<std::string> recordNames;
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.second.language == expectedLang);
-        EXPECT_TRUE(it.first == it.second.name);
-        recordNames.emplace_back(it.first);
+        EXPECT_EQ(it.second.language, panda_file::SourceLang::ETS);
+        EXPECT_EQ(it.first, it.second.name);
+        recordNames.insert(it.first);
     }
-    ValidateString(recordNames, expectedRecordNames);
+    EXPECT_THAT(expectedRecordNames, ::testing::IsSubsetOf(recordNames));
 }
 
 TEST_F(Abc2ProgramHelloWorldTest, Functions)
 {
-    std::set<std::string> expectedFunctions = {
+    const std::set<std::string> expectedFunctions = {
         "HelloWorld.ETSGLOBAL._$init$_:void;",
         "HelloWorld.ETSGLOBAL._cctor_:void;",
         "HelloWorld.ETSGLOBAL.main:void;",
@@ -230,7 +176,8 @@ TEST_F(Abc2ProgramHelloWorldTest, Functions)
         "HelloWorld.HelloWorld.bar:HelloWorld.HelloWorld;std.core.Object;std.core.Object;",
         "HelloWorld.HelloWorld.foo:HelloWorld.HelloWorld;i32;i32;",
         "std.core.Console.log:std.core.Console;i32;void;",
-        "std.core.Object._ctor_:std.core.Object;void;"};
+        "std.core.Object._ctor_:std.core.Object;void;",
+    };
     std::set<std::string> existingFunctions {};
     for (auto &it : prog->functionStaticTable) {
         existingFunctions.insert(it.first);
@@ -238,38 +185,38 @@ TEST_F(Abc2ProgramHelloWorldTest, Functions)
     for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
-    bool result = ValidateString(existingFunctions, expectedFunctions);
-    EXPECT_TRUE(result);
+    EXPECT_EQ(existingFunctions, expectedFunctions);
 }
 
 TEST_F(Abc2ProgramHelloWorldTest, Fields)
 {
     for (const auto &it : prog->recordTable) {
         if (it.first == "HelloWorld") {
-            EXPECT_TRUE(it.second.fieldList.size() == 2U);
+            EXPECT_EQ(it.second.fieldList.size(), 2U);
         }
     }
 }
 
 TEST_F(Abc2ProgramHelloWorldTest, StringTable)
 {
-    std::set<std::string> expectedStrings = {R"(HelloWorld)", R"(NewLine\n)"};
-    bool stringMatched = ValidateString(prog->strings, expectedStrings);
-    EXPECT_TRUE(stringMatched);
+    const std::set<std::string> expectedStrings = {R"(HelloWorld)", R"(NewLine\n)"};
+    EXPECT_EQ(prog->strings, expectedStrings);
 }
 
 TEST_F(Abc2ProgramFunctionsTest, Lang)
 {
-    panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
-    bool langMatched = (prog->lang == expectedLang);
-    EXPECT_TRUE(langMatched);
+    EXPECT_EQ(prog->lang, panda_file::SourceLang::ETS);
 }
 
 TEST_F(Abc2ProgramFunctionsTest, RecordTable)
 {
-    std::vector<std::string> expectedRecordNames = {"Functions.ETSGLOBAL", "Functions.Cls",
-                                                    "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0",
-                                                    "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1"};
+    using namespace std::literals;
+    const std::array expectedRecordNames = {
+        "Functions.ETSGLOBAL"s,
+        "Functions.Cls"s,
+        "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0"s,
+        "Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1"s,
+    };
     panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
     std::vector<std::string> recordNames;
     for (const auto &it : prog->recordTable) {
@@ -277,14 +224,13 @@ TEST_F(Abc2ProgramFunctionsTest, RecordTable)
         EXPECT_TRUE(it.first == it.second.name);
         recordNames.emplace_back(it.first);
     }
-    bool result = ContainString(recordNames, expectedRecordNames);
-    EXPECT_TRUE(result);
+    EXPECT_THAT(recordNames, ::testing::IsSupersetOf(expectedRecordNames));
 }
 
 TEST_F(Abc2ProgramFunctionsTest, Functions)
 {
     const std::string prefix = "Functions.LambdaObject-ETSGLOBAL$lambda$invoke";
-    std::set<std::string> expectedFunctions = {
+    const std::set<std::string> expectedFunctions = {
         "Functions.Cls._ctor_:Functions.Cls;void;",
         "Functions.Cls.func_f:Functions.Cls;i32;i32;",
         "Functions.Cls.func_i:Functions.Cls;i32;i32;",
@@ -304,11 +250,12 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         prefix + "$1.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.Object;std.core.Object;",
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
-        "std.core.Object.toString:std.core.Object;std.core.String;",
+        "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;std.core.ClassCastError;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
-        "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;"};
+        "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;",
+    };
     std::set<std::string> existingFunctions {};
     for (auto &it : prog->functionStaticTable) {
         existingFunctions.insert(it.first);
@@ -316,21 +263,27 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
     for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
-    bool result = ValidateString(existingFunctions, expectedFunctions);
-    EXPECT_TRUE(result);
+    EXPECT_THAT(existingFunctions, ::testing::ContainerEq(expectedFunctions));
 }
 
 TEST_F(Abc2ProgramFunctionsTest, StringTable)
 {
-    std::set<std::string> expectedStrings = {"Function foo was called", "Function bar was called", "Hi,"};
-    bool result = ValidateString(prog->strings, expectedStrings);
-    EXPECT_TRUE(result);
+    const std::set<std::string> expectedStrings = {
+        "Function foo was called",
+        "Function bar was called",
+        "Hi,",
+        "String",
+    };
+    EXPECT_THAT(prog->strings, ::testing::ContainerEq(expectedStrings));
 }
 
 TEST_F(Abc2ProgramLiteralArrayTest, LiteralArray)
 {
-    std::string tagString = std::to_string(static_cast<int>(panda_file::LiteralTag::STRING));
-    std::set<std::string> expectedLiterArray = {tagString + " test ", tagString + " name01 " + tagString + " name02 "};
+    const auto tagString = std::to_string(static_cast<int>(panda_file::LiteralTag::STRING));
+    const std::set<std::string> expectedLiterArray = {
+        tagString + " test ",
+        tagString + " name01 " + tagString + " name02 ",
+    };
     std::set<std::string> existingLiterArray {};
     for (auto &[unused, litArray] : prog->literalarrayTable) {
         std::stringstream content {};
@@ -339,20 +292,21 @@ TEST_F(Abc2ProgramLiteralArrayTest, LiteralArray)
         }
         existingLiterArray.insert(content.str());
     }
-    bool result = ValidateString(existingLiterArray, expectedLiterArray);
-    EXPECT_TRUE(result);
+    EXPECT_EQ(existingLiterArray, expectedLiterArray);
 }
 
 TEST_F(Abc2ProgramTypeTest, Type)
 {
-    std::set<std::string> expectedType = {"Type.Cls$partial._ctor_ Type.Cls$partial void",
-                                          "Type.Cls._ctor_ Type.Cls void",
-                                          "Type.Cls.add_inner Type.Cls i32 i64 f32 f64 std.core.String",
-                                          "Type.ETSGLOBAL._$init$_ void",
-                                          "Type.ETSGLOBAL._cctor_ void",
-                                          "Type.ETSGLOBAL.add_outer i32 i64 f32 f64 std.core.String",
-                                          "Type.ETSGLOBAL.main void",
-                                          "std.core.Object._ctor_ std.core.Object void"};
+    const std::set<std::string> expectedType = {
+        "Type.Cls$partial._ctor_ Type.Cls$partial void",
+        "Type.Cls._ctor_ Type.Cls void",
+        "Type.Cls.add_inner Type.Cls i32 i64 f32 f64 std.core.String",
+        "Type.ETSGLOBAL._$init$_ void",
+        "Type.ETSGLOBAL._cctor_ void",
+        "Type.ETSGLOBAL.add_outer i32 i64 f32 f64 std.core.String",
+        "Type.ETSGLOBAL.main void",
+        "std.core.Object._ctor_ std.core.Object void",
+    };
     std::set<std::string> existingType {};
     for (auto &it : prog->functionInstanceTable) {
         std::stringstream str;
@@ -372,96 +326,104 @@ TEST_F(Abc2ProgramTypeTest, Type)
         str << " " << it.second.returnType.GetName();
         existingType.insert(str.str());
     }
-    bool result = ValidateString(existingType, expectedType);
-    EXPECT_TRUE(result);
+    EXPECT_EQ(existingType, expectedType);
 }
 
 TEST_F(Abc2ProgramRecordTest, Record)
 {
-    std::set<std::string> expectedRecord = {"Record.Anno",  "Record.Cls", "Record.ETSGLOBAL",
-                                            "Record.Enums", "Record.Itf", "Record.Ns"};
+    using namespace std::literals;
+    const std::array expectedRecord = {
+        "Record.Anno"s, "Record.Cls"s, "Record.ETSGLOBAL"s, "Record.Enums"s, "Record.Itf"s, "Record.Ns"s,
+    };
     std::set<std::string> existingRecord {};
-    panda_file::SourceLang expectedLang = panda_file::SourceLang::ETS;
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.second.language == expectedLang);
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.second.language, panda_file::SourceLang::ETS);
+        EXPECT_EQ(it.first, it.second.name);
         existingRecord.insert(it.first);
     }
-    bool result = ContainString(existingRecord, expectedRecord);
-    EXPECT_TRUE(result);
+    EXPECT_THAT(existingRecord, ::testing::IsSupersetOf(expectedRecord));
 }
 
 TEST_F(Abc2ProgramInsTest, Ins)
 {
-    std::set<std::string> expectedIns = {
+    const std::string expectedIns =
         "ldai 0x1 sta v0 ldai 0x2 sta v1 ldai 0x3 sta v2 lda v0 sta v4 lda v1 sta v5 lda v4 mov v4, v5 add2 v4 sta v3 "
-        "lda v2 sta v4 lda v3 mov v3, v4 add2 v3 return "};
-    std::set<std::string> existingIns {};
-    for (auto &it : prog->functionStaticTable) {
-        if (it.first == "Ins.ETSGLOBAL.test:i32;") {
-            std::stringstream str;
-            for (auto &i : it.second.ins) {
-                str << i.ToString(" ", true, it.second.regsNum);
-            }
-            existingIns.insert(str.str());
-        }
-    }
+        "lda v2 sta v4 lda v3 mov v3, v4 add2 v3 return ";
+    const auto &it = prog->functionStaticTable.find("Ins.ETSGLOBAL.test:i32;");
+    EXPECT_NE(it, prog->functionStaticTable.end());
 
-    bool result = ValidateString(expectedIns, existingIns);
-    EXPECT_TRUE(result);
+    std::stringstream str;
+    for (auto &i : it->second.ins) {
+        str << i.ToString(" ", true, it->second.regsNum);
+    }
+    EXPECT_EQ(str.str(), expectedIns);
 }
 
 TEST_F(Abc2ProgramFieldTest, Field)
 {
-    std::set<std::string> expectedField = {"anno1", "cls1", "enums1", "ns1"};
+    const std::set<std::string> expectedField = {
+        "anno1",
+        "cls1",
+        "enums1",
+        "ns1",
+    };
     std::set<std::string> existingField {};
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         for (const auto &r : it.second.fieldList) {
             existingField.insert(r.name);
         }
     }
-    bool result = ContainString(existingField, expectedField);
-    EXPECT_TRUE(result);
+    EXPECT_THAT(existingField, ::testing::IsSupersetOf(expectedField));
 }
 
 TEST_F(Abc2ProgramMetadataTest, Record1)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {"ets.annotation", "ets.abstract"};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.record", {"public"}}};
+    const std::unordered_set<std::string> expectedBoolAttributes = {
+        "ets.annotation",
+        "ets.abstract",
+    };
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"access.record", {"public"}},
+    };
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         if (it.second.name != "Metadata.Anno") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Record2)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {"ets.abstract", "ets.interface"};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
-        {"ets.extends", {"std.core.Object"}}, {"access.record", {"public"}}};
+    const std::unordered_set<std::string> expectedBoolAttributes = {
+        "ets.abstract",
+        "ets.interface",
+    };
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.extends", {"std.core.Object"}},
+        {"access.record", {"public"}},
+    };
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         if (it.second.name != "Metadata.Iface") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Record3)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+    const std::unordered_set<std::string> expectedBoolAttributes = {};
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
         {"ets.annotation.element.value", {"\"Cls\""}},
         {"ets.annotation.class", {"Metadata.Anno"}},
         {"ets.annotation.type", {"class"}},
@@ -469,53 +431,58 @@ TEST_F(Abc2ProgramMetadataTest, Record3)
         {"ets.annotation.element.type", {"string"}},
         {"ets.annotation.element.name", {"name"}},
         {"ets.extends", {"std.core.Object"}},
-        {"access.record", {"public"}}};
+        {"access.record", {"public"}},
+    };
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         if (it.second.name != "Metadata.Cls") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Record4)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {"ets.abstract"};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+    const std::unordered_set<std::string> expectedBoolAttributes = {
+        "ets.abstract",
+    };
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
         {"ets.annotation.element.value", {""}},
         {"ets.annotation.class", {"ets.annotation.Module"}},
         {"ets.annotation.type", {"class"}},
         {"ets.annotation.element.type", {"array"}},
         {"ets.annotation.element.name", {"exported"}},
         {"ets.extends", {"std.core.Object"}},
-        {"access.record", {"public"}}};
+        {"access.record", {"public"}},
+    };
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         if (it.second.name != "Metadata.Ns") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Field)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+    const std::unordered_set<std::string> expectedBoolAttributes = {};
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
         {"ets.annotation.element.type", {"string"}},
         {"ets.annotation.element.name", {"name"}},
         {"ets.annotation.class", {"Metadata.Anno"}},
         {"ets.annotation.element.value", {"\"foo\""}},
-        {"access.field", {"public"}}};
+        {"access.field", {"public"}},
+    };
     for (const auto &it : prog->recordTable) {
-        EXPECT_TRUE(it.first == it.second.name);
+        EXPECT_EQ(it.first, it.second.name);
         if (it.second.name != "Metadata.Cls") {
             continue;
         }
@@ -523,9 +490,9 @@ TEST_F(Abc2ProgramMetadataTest, Field)
             if (r.name != "foo") {
                 continue;
             }
-            auto boolAttributes = it.second.metadata->GetBoolAttributes();
-            EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-            auto attributes = r.metadata->GetAttributes();
+            const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+            EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+            const auto attributes = r.metadata->GetAttributes();
             EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
         }
     }
@@ -533,50 +500,59 @@ TEST_F(Abc2ProgramMetadataTest, Field)
 
 TEST_F(Abc2ProgramMetadataTest, Method1)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+    const std::unordered_set<std::string> expectedBoolAttributes = {};
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
         {"ets.annotation.element.type", {"string"}},
         {"ets.annotation.element.name", {"name"}},
         {"ets.annotation.class", {"Metadata.Anno"}},
         {"ets.annotation.element.value", {"\"bar\""}},
-        {"access.function", {"public"}}};
+        {"access.function", {"public"}},
+    };
     for (const auto &it : prog->functionInstanceTable) {
         if (it.second.name != "Metadata.Cls.bar") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Method2)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {"static"};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.function", {"public"}}};
+    const std::unordered_set<std::string> expectedBoolAttributes = {
+        "static",
+    };
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"access.function", {"public"}},
+    };
     for (const auto &it : prog->functionStaticTable) {
         if (it.second.name != "Metadata.Ns.add") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
 
 TEST_F(Abc2ProgramMetadataTest, Method3)
 {
-    std::unordered_set<std::string> expectedBoolAttributes = {"ctor"};
-    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.function", {"public"}}};
+    const std::unordered_set<std::string> expectedBoolAttributes = {
+        "ctor",
+    };
+    const std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"access.function", {"public"}},
+    };
     for (const auto &it : prog->functionInstanceTable) {
         if (it.second.name != "Metadata.Cls._ctor_") {
             continue;
         }
-        auto boolAttributes = it.second.metadata->GetBoolAttributes();
-        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
-        auto attributes = it.second.metadata->GetAttributes();
+        const auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_EQ(boolAttributes, expectedBoolAttributes);
+        const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
 }
