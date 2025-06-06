@@ -610,6 +610,27 @@ export class JSON {
             return parsingResult
         }
     }
+
+    /**
+      * Parses a JSON string and returns a JsonElement.
+      * @param {string} text - The JSON string to parse
+      * @returns {JsonElement} The parsed JSON element
+      * @throws {JsonParseError} If the JSON string is invalid
+      */
+    static parseJsonElement(text: string): jsonx.JsonElement {
+        return new JsonElementParser(text).parse()
+    }
+
+    /**
+      * Parses a JSON string with a reviver function and returns a JsonElement.
+      * @param {string} text - The JSON string to parse
+      * @param {(key: string, value: JsonElement) => JsonElement} reviver - Function to transform values
+      * @returns {JsonElement} The parsed JSON element
+      * @throws {JsonParseError} If the JSON string is invalid
+      */
+    static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement): jsonx.JsonElement {
+        return new JsonElementParser(text, reviver).parse()
+    }
 }
 
 class JSONWriter {
@@ -1677,6 +1698,530 @@ class JSONValueParser {
             setArrayElementFn(arr, i, elem)
         }
         return arr
+    }
+}
+
+export enum JsonTokenKind
+{
+    CurlyOpen    = 0,
+    CurlyClose   = 1,
+    SquareOpen   = 2,
+    SquareClose  = 3,
+    Colon        = 4,
+    Comma        = 5,
+    String       = 6,
+    Number       = 7,
+    True         = 8,
+    False        = 9,
+    Null         = 10
+}
+
+export class JsonTokenSpan
+{
+    start: int
+    end: int
+}
+
+export class JsonToken
+{
+    kind: JsonTokenKind
+    span: JsonTokenSpan
+    value: string
+    constructor(kind: JsonTokenKind, span: JsonTokenSpan, value: string) {
+        this.kind = kind
+        this.span = span
+        this.value = value
+    }
+}
+
+// Grammar:
+// =============================================================
+// start  ::= value
+// value  ::= object | array | string | number | true | false | null
+// object ::= "{" [pair ("," pair)*] "}"
+// array  ::= "[" [value ("," value)*] "]"
+// pair   ::= string ":" value
+// string ::= ESCAPED_STRING
+// number ::= SIGNED_NUMBER
+// true   ::= "true"
+// false  ::= "false"
+// null   ::= "null"
+
+/**
+ * Error thrown when parsing JSON fails.
+ */
+export class JsonParseError extends Error {
+    public constructor(msg: string, start_offset?: int, end_offset?: int) {
+        super(`${msg} at ${start_offset}..${end_offset}`)
+    }
+}
+
+class JsonElementParser
+{
+    source: string
+    tokens: Array<JsonToken>
+    position: int
+    reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
+
+    constructor(source: string) {
+        this.source = source
+        this.tokens = JsonLexer.fromString(source).tokenize()
+        this.position = 0
+    }
+
+    constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement) {
+        this.source = source
+        this.tokens = JsonLexer.fromString(source).tokenize()
+        this.position = 0
+        this.reviver = reviver
+    }
+
+    public lookahead(offset: int): JsonToken | undefined
+    {
+        if (this.position + offset >= this.tokens.length) {
+            return undefined
+        }
+        return this.tokens[this.position + offset]
+    }
+
+    public expect(kind: JsonTokenKind): JsonToken
+    {
+        let token = this.lookahead(0)
+        if (token == undefined || token.kind != kind) {
+            let start = token?.span.start ?? 0;
+            let end = token?.span.end ?? 0;
+            throw new JsonParseError(`Expected ${kind} but got ${token?.kind}`, start, end)
+        }
+        this.position++
+        return token
+    }
+
+    public parse(): jsonx.JsonElement
+    {
+        let result = this.parseValue()
+        if (this.reviver != undefined) {
+            return this.reviver!("", result)
+        }
+        return result
+    }
+
+    private parseValue(): jsonx.JsonElement
+    {
+        let maybe_token = this.lookahead(0)
+        if (maybe_token == undefined) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        if (maybe_token.kind == JsonTokenKind.String) {
+            return this.parseString()
+        }
+        if (maybe_token.kind == JsonTokenKind.Number) {
+            return this.parseNumber()
+        }
+        if (maybe_token.kind == JsonTokenKind.True) {
+            return this.parseBool()
+        }
+        if (maybe_token.kind == JsonTokenKind.False) {
+            return this.parseBool()
+        }
+        if (maybe_token.kind == JsonTokenKind.Null) {
+            return this.parseNull()
+        }
+        if (maybe_token.kind == JsonTokenKind.CurlyOpen) {
+            return this.parseObject()
+        }
+        if (maybe_token.kind == JsonTokenKind.SquareOpen) {
+            return this.parseArray()
+        }
+        throw new JsonParseError("Expected string, number, true, false, null, object, or array", maybe_token.span.start, maybe_token.span.end)
+    }
+
+    private parseArray(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.SquareOpen)
+        let array = new Array<jsonx.JsonElement>()
+        let index = 0
+        while (this.lookahead(0)?.kind != JsonTokenKind.SquareClose) {
+            let value = this.parseValue()
+            if (this.reviver != undefined) {
+                value = this.reviver!(`${index}`, value)
+            }
+            array.push(value)
+            index++
+            if (this.lookahead(0)?.kind == JsonTokenKind.Comma) {
+                this.expect(JsonTokenKind.Comma)
+            }
+        }
+        this.expect(JsonTokenKind.SquareClose)
+        return jsonx.JsonElement.createArray(array)
+    }
+
+    private parseObject(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.CurlyOpen)
+        let object = new Map<string, jsonx.JsonElement>()
+        while (this.lookahead(0)?.kind != JsonTokenKind.CurlyClose) {
+            let pair = this.parsePair()
+            let key = pair[0]
+            let value = pair[1]
+            if (this.reviver != undefined) {
+                value = this.reviver!(key, value)
+            }
+            object.set(key, value)
+            if (this.lookahead(0)?.kind == JsonTokenKind.Comma) {
+                this.expect(JsonTokenKind.Comma)
+            }
+        }
+        this.expect(JsonTokenKind.CurlyClose)
+        return jsonx.JsonElement.createObject(object)
+    }
+
+    private parsePair(): [string, jsonx.JsonElement]
+    {
+        let key = this.parseString().asString()
+        this.expect(JsonTokenKind.Colon)
+        let value = this.parseValue()
+        return [key, value] as [string, jsonx.JsonElement]
+    }
+
+    private parseString(): jsonx.JsonElement
+    {
+        let token = this.expect(JsonTokenKind.String)
+        return jsonx.JsonElement.createString(token.value)
+    }
+
+    private parseNumber(): jsonx.JsonElement
+    {
+        // can be extended with bigints later
+        let token = this.expect(JsonTokenKind.Number)
+        if (token.value.includes(".")) {
+            return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
+        }
+        return jsonx.JsonElement.createInteger(Double.parseInt(token.value) as int)
+    }
+
+    private parseBool(): jsonx.JsonElement
+    {
+        let maybe_token = this.lookahead(0)
+        if (maybe_token == undefined) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        if (maybe_token.kind == JsonTokenKind.True) {
+            this.expect(JsonTokenKind.True)
+            return jsonx.JsonElement.createBoolean(true)
+        }
+        if (maybe_token.kind == JsonTokenKind.False) {
+            this.expect(JsonTokenKind.False)
+            return jsonx.JsonElement.createBoolean(false)
+        }
+        throw new JsonParseError("Expected true or false", maybe_token.span.start, maybe_token.span.end)
+    }
+
+    private parseNull(): jsonx.JsonElement
+    {
+        this.expect(JsonTokenKind.Null)
+        return jsonx.JsonElement.createNull()
+    }
+}
+
+export class JsonLexer
+{
+    chars: char[]
+    index: int
+    constructor(chars: char[]) {
+        this.chars = chars
+        this.index = 0
+    }
+    public static fromString(json: string): JsonLexer {
+        return new JsonLexer(json.getChars())
+    }
+
+    /**
+     * Tokenizes the JSON input and returns an array of tokens.
+     * @returns Array of JsonToken objects representing the tokenized input
+     * @throws JsonError if invalid JSON syntax is encountered
+     */
+    public tokenize(): JsonToken[] {
+        let tokens = new Array<JsonToken>()
+
+        while (!this.isAtEnd()) {
+            this.skipWhitespace()
+            if (this.isAtEnd()) break
+
+            let token = this.nextToken()
+            if (token != null) {
+                tokens.push(token)
+            }
+        }
+
+        return tokens
+    }
+
+    /**
+     * Reads the next token from the input
+     * @returns JsonToken or null if no valid token found
+     * @throws JsonError if invalid syntax is encountered
+     */
+    private nextToken(): JsonToken | null {
+        let start = this.index
+        let ch = this.advance()
+
+        switch (ch) {
+            case c'{':
+                return this.makeToken(JsonTokenKind.CurlyOpen, start, "{")
+            case c'}':
+                return this.makeToken(JsonTokenKind.CurlyClose, start, "}")
+            case c'[':
+                return this.makeToken(JsonTokenKind.SquareOpen, start, "[")
+            case c']':
+                return this.makeToken(JsonTokenKind.SquareClose, start, "]")
+            case c':':
+                return this.makeToken(JsonTokenKind.Colon, start, ":")
+            case c',':
+                return this.makeToken(JsonTokenKind.Comma, start, ",")
+            case c'"':
+                return this.readString(start)
+            case c't':
+                return this.readKeyword(start, "true", JsonTokenKind.True)
+            case c'f':
+                return this.readKeyword(start, "false", JsonTokenKind.False)
+            case c'n':
+                return this.readKeyword(start, "null", JsonTokenKind.Null)
+            default:
+                if (this.isDigit(ch) || ch == c'-') {
+                    this.index-- // Back up to re-read the character
+                    return this.readNumber(start)
+                }
+                throw new JsonParseError(`Unexpected character '${ch}' at position ${start}`, start, start)
+        }
+    }
+
+    /**
+     * Reads a JSON string token, handling escape sequences
+     * @param start Starting position of the string
+     * @returns JsonToken representing the string
+     * @throws JsonError if string is malformed
+     */
+    private readString(start: int): JsonToken {
+        let value = ""
+
+        while (!this.isAtEnd() && this.peek() != c'"') {
+            let ch = this.advance()
+            if (ch == c'\\') {
+                if (this.isAtEnd()) {
+                    throw new JsonParseError("Unterminated string escape at end of input", start, this.index)
+                }
+                let escaped = this.advance()
+                switch (escaped) {
+                    case c'"':
+                        value += "\""
+                        break
+                    case c'\\':
+                        value += "\\"
+                        break
+                    case c'/':
+                        value += "/"
+                        break
+                    case c'b':
+                        value += "\b"
+                        break
+                    case c'f':
+                        value += "\f"
+                        break
+                    case c'n':
+                        value += "\n"
+                        break
+                    case c'r':
+                        value += "\r"
+                        break
+                    case c't':
+                        value += "\t"
+                        break
+                    case c'u':
+                        value += this.readUnicodeEscape()
+                        break
+                    default:
+                        throw new JsonParseError(`Invalid escape sequence '\\${escaped}' in string`, start, this.index)
+                }
+            } else {
+                value += ch
+            }
+        }
+
+        if (this.isAtEnd()) {
+            throw new JsonParseError("Unterminated string", start, this.index)
+        }
+
+        this.advance() // Consume closing quote
+        return this.makeToken(JsonTokenKind.String, start, value)
+    }
+
+    /**
+     * Reads a Unicode escape sequence (\uXXXX)
+     * @returns The Unicode character as a string
+     * @throws JsonError if escape sequence is malformed
+     */
+    private readUnicodeEscape(): string {
+        let codeStr = ""
+        for (let i = 0; i < 4; i++) {
+            if (this.isAtEnd()) {
+                throw new JsonParseError("Incomplete Unicode escape sequence")
+            }
+            let ch = this.advance()
+            if (!this.isHexDigit(ch)) {
+                throw new JsonParseError(`Invalid hexadecimal digit '${ch}' in Unicode escape`, this.index)
+            }
+            codeStr += ch
+        }
+
+        let codePoint = Double.parseInt(codeStr, 16) as int
+        return String.fromCharCode(codePoint as number)
+    }
+
+    /**
+     * Reads a JSON number token
+     * @param start Starting position of the number
+     * @returns JsonToken representing the number
+     * @throws JsonError if number format is invalid
+     */
+    private readNumber(start: int): JsonToken {
+        let value = ""
+
+        // Handle optional minus sign
+        if (this.peek() == c'-') {
+            value += this.advance()
+        }
+
+        // Read integer part
+        if (this.peek() == c'0') {
+            value += this.advance()
+        } else if (this.isDigit(this.peek())) {
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        } else {
+            throw new JsonParseError("Invalid number format", start, this.index)
+        }
+
+        // Read decimal part if present
+        if (!this.isAtEnd() && this.peek() == c'.') {
+            value += this.advance()
+            if (this.isAtEnd() || !this.isDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format: decimal point must be followed by digits", start, this.index)
+            }
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        }
+
+        // Read exponent part if present
+        if (!this.isAtEnd() && (this.peek() == c'e' || this.peek() == c'E')) {
+            value += this.advance()
+            if (!this.isAtEnd() && (this.peek() == c'+' || this.peek() == c'-')) {
+                value += this.advance()
+            }
+            if (this.isAtEnd() || !this.isDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format: exponent must contain digits", start, this.index)
+            }
+            while (!this.isAtEnd() && this.isDigit(this.peek())) {
+                value += this.advance()
+            }
+        }
+
+        return this.makeToken(JsonTokenKind.Number, start, value)
+    }
+
+    /**
+     * Reads a JSON keyword (true, false, null)
+     * @param start Starting position of the keyword
+     * @param expected The expected keyword string
+     * @param kind The token kind for this keyword
+     * @returns JsonToken representing the keyword
+     * @throws JsonError if keyword doesn't match
+     */
+    private readKeyword(start: int, expected: string, kind: JsonTokenKind): JsonToken {
+        this.index-- // Back up to re-read first character
+
+        for (let i = 0; i < expected.length; i++) {
+            if (this.isAtEnd() || this.advance() != expected.charAt(i)) {
+                throw new JsonParseError(`Invalid keyword at position ${start}`, start, this.index)
+            }
+        }
+
+        return this.makeToken(kind, start, expected)
+    }
+
+    /**
+     * Creates a JsonToken with the given parameters
+     * @param kind The token kind
+     * @param start Starting position
+     * @param value String value of the token
+     * @returns New JsonToken instance
+     */
+    private makeToken(kind: JsonTokenKind, start: int, value: string): JsonToken {
+        let span = new JsonTokenSpan()
+        span.start = start
+        span.end = this.index
+        return new JsonToken(kind, span, value)
+    }
+
+    /**
+     * Skips whitespace characters
+     */
+    private skipWhitespace(): void {
+        while (!this.isAtEnd()) {
+            let ch = this.peek()
+            if (ch == c' ' || ch == c'\t' || ch == c'\n' || ch == c'\r') {
+                this.advance()
+            } else {
+                break
+            }
+        }
+    }
+
+    /**
+     * Advances to the next character and returns it
+     * @returns The current character before advancing
+     */
+    private advance(): char {
+        if (this.isAtEnd()) return c'\0'
+        return this.chars[this.index++]
+    }
+
+    /**
+     * Returns the current character without advancing
+     * @returns The current character
+     */
+    private peek(): char {
+        if (this.isAtEnd()) return c'\0'
+        return this.chars[this.index]
+    }
+
+    /**
+     * Checks if we've reached the end of input
+     * @returns true if at end of input
+     */
+    private isAtEnd(): boolean {
+        return this.index >= this.chars.length
+    }
+
+    /**
+     * Checks if a character is a decimal digit
+     * @param ch Character to check
+     * @returns true if character is a digit
+     */
+    private isDigit(ch: char): boolean {
+        return ch >= c'0' && ch <= c'9'
+    }
+
+    /**
+     * Checks if a character is a hexadecimal digit
+     * @param ch Character to check
+     * @returns true if character is a hex digit
+     */
+    private isHexDigit(ch: char): boolean {
+        return (ch >= c'0' && ch <= c'9') ||
+                (ch >= c'A' && ch <= c'F') ||
+                (ch >= c'a' && ch <= c'f')
     }
 }
 
