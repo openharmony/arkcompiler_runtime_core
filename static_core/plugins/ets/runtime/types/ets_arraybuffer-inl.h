@@ -72,108 +72,108 @@ namespace ark::ets {
     } while (false)
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetElement(uint32_t index)
+T EtsEscompatArrayBuffer::GetElement(uint32_t index, uint32_t byteOffset)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Get, T, obj, index);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index, byteOffset);
     return val;
 }
 
 template <typename T>
-void EtsEscompatArrayBuffer::SetElement(uint32_t index, T element)
+void EtsEscompatArrayBuffer::SetElement(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
-    EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, element);
+    EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, byteOffset, element);
 }
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetVolatileElement(uint32_t index)
+T EtsEscompatArrayBuffer::GetVolatileElement(uint32_t index, uint32_t byteOffset)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index, byteOffset);
     return val;
 }
 
 template <typename T>
-void EtsEscompatArrayBuffer::SetVolatileElement(uint32_t index, T element)
+void EtsEscompatArrayBuffer::SetVolatileElement(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
-    EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, element);
+    EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, byteOffset, element);
 }
 
 template <typename T>
-std::pair<bool, T> EtsEscompatArrayBuffer::CompareAndExchangeElement(uint32_t index, T oldElement, T newElement,
-                                                                     bool strong)
+std::pair<bool, T> EtsEscompatArrayBuffer::CompareAndExchangeElement(uint32_t index, uint32_t byteOffset, T oldElement,
+                                                                     T newElement, bool strong)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     std::pair<bool, T> val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, CompareAndExchange, T, obj, index, oldElement, newElement, strong);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, CompareAndExchange, T, obj, index, byteOffset, oldElement, newElement, strong);
     return val;
 }
 template <typename T>
-T EtsEscompatArrayBuffer::ExchangeElement(uint32_t index, T element)
+T EtsEscompatArrayBuffer::ExchangeElement(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Exchange, T, obj, index, element);
-    return val;
-}
-
-template <typename T>
-T EtsEscompatArrayBuffer::GetAndAdd(uint32_t index, T element)
-{
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
-    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndAdd, T, obj, index, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Exchange, T, obj, index, byteOffset, element);
     return val;
 }
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetAndSub(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndAdd(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndSub, T, obj, index, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndAdd, T, obj, index, byteOffset, element);
     return val;
 }
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetAndBitwiseOr(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndSub(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndSub, T, obj, index, byteOffset, element);
     return val;
 }
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetAndBitwiseAnd(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseAnd, T, obj, index, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, byteOffset, element);
     return val;
 }
 
 template <typename T>
-T EtsEscompatArrayBuffer::GetAndBitwiseXor(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, T element)
 {
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseAnd, T, obj, index, byteOffset, element);
+    return val;
+}
+
+template <typename T>
+T EtsEscompatArrayBuffer::GetAndBitwiseXor(uint32_t index, uint32_t byteOffset, T element)
+{
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, byteOffset, element);
     return val;
 }
 
