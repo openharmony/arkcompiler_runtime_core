@@ -22,6 +22,7 @@
 #include "objects/base_object_descriptor.h"
 #include "objects/base_type_converter.h"
 #include "objects/static_object_accessor_interface.h"
+#include "objects/static_type_converter_interface.h"
 #include "thread/thread_holder.h"
 
 namespace panda {

@@ -113,6 +113,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_table.cpp
     ${ETS_EXT_SOURCES}/static_object_accessor.cpp
+    ${ETS_EXT_SOURCES}/static_type_converter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
