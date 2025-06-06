@@ -100,7 +100,7 @@ void RegisterStaticRootsProcessFunc()
 {
     RegisterVisitStaticRootsHook(VisitStaticRoots);
     RegisterUpdateStaticRootsHook(UpdateStaticRoots);
-    RegisterweepStaticRootsHook(SweepStaticRoots);
+    RegisterSweepStaticRootsHook(SweepStaticRoots);
 }
 
 }  // namespace panda

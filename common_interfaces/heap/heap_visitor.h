@@ -36,9 +36,9 @@ using VisitStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
 using UpdateStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
 using SweepStaticRootsHookFunc = void (*)(const WeakRefFieldVisitor &visitor);
 
-void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
-void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
-void RegisterweepStaticRootsHook(SweepStaticRootsHookFunc func);
+PUBLIC_API void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
+PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
+PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
 
 }  // namespace panda
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

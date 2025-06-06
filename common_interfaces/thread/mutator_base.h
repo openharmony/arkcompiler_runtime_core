@@ -146,12 +146,12 @@ public:
     __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
 
     // Called if current mutator should do corresponding task by suspensionFlag value
-    void HandleSuspensionRequest();
+    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
     // Called if current mutator should handle stw request
     void SuspendForStw();
 
     // temporary impl to clean GC callback, and need to refact to flip function
-    void HandleJSGCCallback();
+    __attribute__((visibility ("default"))) void HandleJSGCCallback();
 
     __attribute__((always_inline)) inline bool FinishedTransition() const
     {
