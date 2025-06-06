@@ -40,8 +40,8 @@ type NullishHelperType = null | string | number
 function cleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.Cause.FULL);
-        GC.waitForFinishGC(full_gc_id);
+        let fullGcId = GC.startGC(GC.Cause.FULL);
+        GC.waitForFinishGC(fullGcId);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
     }
