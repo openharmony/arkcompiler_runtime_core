@@ -25,12 +25,12 @@ static constexpr uint32_t BITS_PER_BYTE = 8;
 
 enum class CommonType : uint8_t {
     INVALID = 0,
-    LINE_STRING,
+    FIRST_OBJECT_TYPE,
+    LINE_STRING = FIRST_OBJECT_TYPE,
+
     SLICED_STRING,
     TREE_STRING,
-
-    FIRST_TYPE = LINE_STRING,
-    LAST_TYPE = TREE_STRING,
+    LAST_OBJECT_TYPE = TREE_STRING,
 
     STRING_FIRST = LINE_STRING,
     STRING_LAST = TREE_STRING,
@@ -50,6 +50,16 @@ public:
     CommonType GetObjectType() const
     {
         return ObjectTypeBits::Decode(bitfield_);
+    }
+
+    void SetObjectType(CommonType type)
+    {
+        bitfield_ = ObjectTypeBits::Update(bitfield_, type);
+    }
+
+    void ClearBitField()
+    {
+        bitfield_ = 0;
     }
 
     bool IsString() const

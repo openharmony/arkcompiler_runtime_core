@@ -180,6 +180,7 @@ public:
 
     void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
+        state_ = 0;
         state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
     }
 
