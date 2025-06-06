@@ -123,7 +123,7 @@ export class Reflect {
         let t = Type.of(target)
         if (t instanceof ArrayType) {
             let av = Value.of(target) as ArrayValue
-            return av.getElement(index as long).getData()!
+            return __narrowAny<object | undefined>(av.getElement(index as long).getData())
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")

@@ -97,13 +97,14 @@ export final class ESValue {
         return new ESValue(JSRuntime.newJSValueDouble(d));
     }
 
-    public static wrap(o: object | null | undefined): ESValue {
+    public static wrap(o: Any): ESValue {
         if (o == null) {
             return new ESValue(JSRuntime.getNull());
         }
         if (o == undefined) {
             return new ESValue(JSRuntime.getUndefined());
         }
+        o = o as object
         return new ESValue(JSRuntime.newJSValueObject(o), !JSRuntime.isJSValue(o));
     }
 

@@ -246,7 +246,7 @@ export final class Proxy {
                     if (handler instanceof ProxyHandler) {
                         const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
                         // using "wrapper" method to "capture" <T> after smartcast
-                        return this.handlerGet(target, handler, propertyName)
+                        return this.handlerGet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName)
                     }
 
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
@@ -275,7 +275,7 @@ export final class Proxy {
                 if (handler instanceof ProxyHandler) {
                     const target = Reflect.get(proxy, Proxy.PROXY_INSTANCE_TARGET_FIELD)
                     // using "wrapper" method to "capture" <T> after smartcast
-                    const success = this.handlerSet(target, handler, propertyName, value)
+                    const success = this.handlerSet(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), propertyName, value as object)
                     if (!success) {
                         throw new TypeError(`proxy set handler returned false for propety '"${propertyName}"'`)
                     }
@@ -306,7 +306,7 @@ export final class Proxy {
                     const handler = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_HANDLER_FIELD)
                     if (handler instanceof ProxyHandler) {
                         const target = Reflect.get(proxyInstance, Proxy.PROXY_INSTANCE_TARGET_FIELD)
-                        return this.handlerInvoke(target, handler, method, args)
+                        return this.handlerInvoke(__narrowAny<object>(target), __narrowAny<ProxyHandler<Object>>(handler), method, args)
                     }
 
                     throw new TypeError("unexpected proxy handler type: " + Type.of(handler).getName())
@@ -612,7 +612,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         const handler = this.handler
         const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM_OBJ_ARR, [start, deleteCount, items])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
@@ -622,7 +622,7 @@ abstract class ArrayProxy<T> extends Array<T> {
         const handler = this.handler
         const result = handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_INT_INT_ARR, [start, deleteCount, items])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int, int, T[]) unexpected result type: " + Type.of(result))
@@ -631,7 +631,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     override splice(start: number): Array<T> {
         const result = this.handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_NUM, [start])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(number) unexpected result type: " + Type.of(result))
@@ -640,7 +640,7 @@ abstract class ArrayProxy<T> extends Array<T> {
     override splice(start: int): Array<T> {
         const result = this.handler.invoke(this.target, ArrayProxy.SPLICE_METHOD_INT, [start])
         if (result instanceof Array) {
-            return result
+            return __narrowAny<Array<T>>(result)
         }
 
         throw new AssertionError("Array.splice(int) unexpected result type: " + Type.of(result))

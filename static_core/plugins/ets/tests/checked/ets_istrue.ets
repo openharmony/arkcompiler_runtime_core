@@ -32,9 +32,9 @@
 //! RUN_LLVM                options: "--compiler-regex='.*check_istrue.*'"
 //! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
-function check_istrue(v: Object | null | undefined) { return !!v }
+function check_istrue(v: Any) { return !!v }
 
-function erase<T>(v: T): Object | null | undefined {
+function erase<T>(v: T): Any {
     return v;
 }
 

@@ -155,7 +155,7 @@ function functionArgTypeCallableEts(functionToCall: () => JSValue): JSValue {
 }
 
 function genericTypeParameterEts<T>(arg: T): String {
-    return arg!.toString();
+    return "" + arg!
 }
 
 function genericTypeReturnValueEts<T>(arg: int, value: T): T {

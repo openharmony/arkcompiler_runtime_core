@@ -15,8 +15,19 @@
 
 package std.core;
 
-export type NullishType = Object | null | undefined
+/**
+ * @deprecated
+*/
+export type NullishType = Any
+
+/**
+ * @deprecated
+*/
 export type NullableType = Object | null
+
+/**
+ * @deprecated
+*/
 export type Nullish<T> = T | null | undefined
 
 export type PropertyKey = string

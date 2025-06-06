@@ -714,7 +714,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                         strArr[idxNonUndef] = "null"
                     } else {
                         this.$_set_unsafe(idxNonUndef, vl)
-                        strArr[idxNonUndef] = vl.toString()
+                        strArr[idxNonUndef] = (vl as object).toString() // #26217
                     }
                     idxNonUndef++
                 }
@@ -1682,7 +1682,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             }
             let x = this.$_get_unsafe(i) as NullishType;
             if ((null !== x) && (undefined !== x)) {
-                sb.append(x!.toLocaleString())
+                sb.append((x! as object).toLocaleString()) // #26217
             }
         }
         return sb.toString()

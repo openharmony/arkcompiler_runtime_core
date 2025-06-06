@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-function istrue(v: Object | null | undefined) { return !!v }
+function istrue(v: Any) { return !!v }
 
-function erase<T>(v: T): Object | null | undefined {
+function erase<T>(v: T): Any {
     return v;
 }
 
