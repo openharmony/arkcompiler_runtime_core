@@ -1441,22 +1441,20 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: byte, r: byte): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: byte, r: byte): number => {
-                const result = compareFn!((l).toDouble(), (r).toDouble())
-                return result
-            }
+            const result = compareFn!((l).toDouble(), (r).toDouble())
+            return result
         }
+
         const MAX_SHORT_LENGTH = 24
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<byte> = new byte[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
+            const arrLength = this.lengthInt
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -1466,7 +1464,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            const arrLength = this.lengthInt
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toByte())
             }
@@ -3199,22 +3199,20 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: short, r: short): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: short, r: short): number => {
-                const result = compareFn!((l).toDouble(), (r).toDouble())
-                return result
-            }
+            const result = compareFn!((l).toDouble(), (r).toDouble())
+            return result
         }
+
         const MAX_SHORT_LENGTH = 24
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<short> = new short[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
+            const arrLength = this.lengthInt
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -3224,7 +3222,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            const arrLength = this.lengthInt
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toShort())
             }
@@ -4935,22 +4935,20 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: int, r: int): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: int, r: int): number => {
-                const result = compareFn!((l).toDouble(), (r).toDouble())
-                return result
-            }
+            const result = compareFn!((l).toDouble(), (r).toDouble())
+            return result
         }
+
         const MAX_SHORT_LENGTH = 24
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<int> = new int[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
+            const arrLength = this.lengthInt
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -4960,7 +4958,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            const arrLength = this.lengthInt
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toInt())
             }
@@ -6681,26 +6681,24 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
 
         let cmp = (l: long, r: long): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: long, r: long): number => {
-                const result = compareFn!(new BigInt(l), new BigInt(r))
-                if (result instanceof BigInt) {
-                    return result.getLong()
-                } else {
-                    return result as number
-                }
+            const result = compareFn!(new BigInt(l), new BigInt(r))
+            if (result instanceof BigInt) {
+                return result.getLong()
+            } else {
+                return result.toDouble()
             }
         }
+
         const MAX_SHORT_LENGTH = 24
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<long> = new long[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
+            const arrLength = this.lengthInt
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -6710,7 +6708,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            const arrLength = this.lengthInt
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toLong())
             }
@@ -8404,22 +8404,29 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: float, r: float): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: float, r: float): number => {
-                const result = compareFn!((l).toDouble(), (r).toDouble())
-                return result
-            }
+            const result = compareFn!((l).toDouble(), (r).toDouble())
+            return result
         }
+
         const MAX_SHORT_LENGTH = 24
+        let naNCounter = 0
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<float> = new float[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
-                arr[i] = this.getUnsafe(i)
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    arr[i - naNCounter] = val
+                }
             }
+            for (let i = 0; i < naNCounter; ++i) {
+                arr[this.lengthInt - 1 - i] = NaN.toFloat()
+            }
+            const arrLength = this.lengthInt - naNCounter
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -8427,9 +8434,19 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         } else {
             let buffer: FixedArray<Float> = new Float[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
-                buffer[i] = this.getUnsafe(i)
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    buffer[i - naNCounter] = val
+                }
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < naNCounter; ++i) {
+                buffer[this.lengthInt - 1 - i] = NaN.toFloat()
+            }
+            const arrLength = this.lengthInt - naNCounter
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toFloat())
             }
@@ -10003,22 +10020,29 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: double, r: double): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: double, r: double): number => {
-                const result = compareFn!((l).toDouble(), (r).toDouble())
-                return result
-            }
+            const result = compareFn!((l).toDouble(), (r).toDouble())
+            return result
         }
+
         const MAX_SHORT_LENGTH = 24
+        let naNCounter = 0
+
         if (this.lengthInt > MAX_SHORT_LENGTH) {
             let arr: FixedArray<double> = new double[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
-                arr[i] = this.getUnsafe(i)
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    arr[i - naNCounter] = val
+                }
             }
+            for (let i = 0; i < naNCounter; ++i) {
+                arr[this.lengthInt - 1 - i] = NaN.toDouble()
+            }
+            const arrLength = this.lengthInt - naNCounter
 
-            arr = mergeSort(arr, cmp)
+            arr = mergeSort(arr, cmp, 0, arrLength)
 
             for (let i = 0; i < arr.length; ++i) {
                 this.setUnsafe(i, arr[i])
@@ -10026,9 +10050,19 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         } else {
             let buffer: FixedArray<Double> = new Double[this.lengthInt]
             for (let i = 0; i < this.lengthInt; ++i) {
-                buffer[i] = this.getUnsafe(i)
+                let val = this.getUnsafe(i)
+                if (isNaN(val)) {
+                    naNCounter++
+                } else {
+                    buffer[i - naNCounter] = val
+                }
             }
-            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < naNCounter; ++i) {
+                buffer[this.lengthInt - 1 - i] = NaN.toDouble()
+            }
+            const arrLength = this.lengthInt - naNCounter
+
+            arr_sort_stable(buffer, 0, arrLength, cmp)
             for (let i = 0; i < buffer.length; ++i) {
                 this.setUnsafe(i, buffer[i].toDouble())
             }
