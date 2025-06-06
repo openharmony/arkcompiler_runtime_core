@@ -43,13 +43,11 @@ public:
     virtual ~BaseObjectOperatorInterfaces() = default;
 };
 
-#ifdef USE_CMC_GC
 class BaseObjectOperator {
 private:
     BaseObjectOperatorInterfaces *dynamicObjOp_;
     BaseObjectOperatorInterfaces *staticObjOp_;
     friend BaseObject;
 };
-#endif
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H

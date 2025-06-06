@@ -28,7 +28,6 @@ namespace common {
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
-#ifdef USE_CMC_GC
     static BaseObject *Cast(MAddress address)
     {
         return reinterpret_cast<BaseObject *>(address);
@@ -176,8 +175,6 @@ public:
     }
     // The interfaces above only use for common code compiler. It will be deleted later.
 
-#endif
-
     void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
         state_ = 0;
@@ -195,7 +192,6 @@ public:
         return sizeof(BaseObject);
     }
 protected:
-#ifdef USE_CMC_GC
     static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
     {
         auto ref = reinterpret_cast<BaseObject *>(address);
@@ -211,7 +207,6 @@ protected:
     }
 
     static BaseObjectOperator operator_;
-#endif
     BaseStateWord state_;
 };
 }  // namespace common
