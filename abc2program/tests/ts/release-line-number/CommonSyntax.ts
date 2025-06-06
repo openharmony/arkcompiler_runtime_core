@@ -186,3 +186,34 @@ class Child extends Parent {
 
 const d = new Child();
 console.log(d.sayHello());
+
+// Exception Handling Chain Split
+somePromise
+  .then(value => {
+    console.log('resolved', value);
+  })
+  .
+  catch(err => {
+    console.error('caught', err);
+  }).
+  finally(() => {
+    console.log('cleanup done');
+  });
+
+// Object Property Access Split: Dot Before or After Line Break
+let x = someObj
+.
+very.deep.property
+.
+toString();
+
+let y = someObj.
+prop1?.
+prop2().
+method?.();
+
+// Chained Function Call with Computed Property Split
+let res = getContext().
+  config?.
+  ["someKey"].
+  toLowerCase();

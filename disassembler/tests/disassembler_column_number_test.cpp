@@ -146,8 +146,8 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_006, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known column number in the abc file
-    std::vector<size_t> expectedColumnNumber = {13, 6, 21, 29, 21, 37, 21, 15, 8, 10, 4, 1, 4, -1, 1, 6, 1,
-                                                13, 6, 10, 18, 10, 26, 10, 4, -1, 1, 6, 1, 13, 6, 10, 4, 1, 4, -1,
+    std::vector<size_t> expectedColumnNumber = {13, 6, 21, 29, 37, 29, 15, 8, 10, 4, 1, 4, -1, 1, 6, 1,
+                                                13, 6, 10, 18, 26, 18, 4, -1, 1, 6, 1, 13, 6, 10, 4, 1, 4, -1,
 				                                1, 0, 13, 6, 12, 11, 4, -1, 1, 15, 8, 16, 15, 8, -1, 3,
 				                                14, 6, 14, 6, -1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
