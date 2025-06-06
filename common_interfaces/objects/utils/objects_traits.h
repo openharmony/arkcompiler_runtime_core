@@ -19,8 +19,7 @@
 #include "common_interfaces/objects/base_object.h"
 #include <type_traits>
 
-namespace panda::objects_traits {
-
+namespace common::objects_traits {
 
 template <typename U>
 constexpr bool is_heap_object_v = std::is_base_of_v<BaseObject, std::remove_pointer_t<U>>;
@@ -73,7 +72,7 @@ using vector_with_same_alloc_t =
     std::vector<NewT, rebind_alloc_t<get_allocator_type_t<Vec>, NewT>>;
 
 
-} // namespace panda::objects_traits
+} // namespace common::objects_traits
 
 
 #endif //COMMON_INTERFACES_OBJECTS_TRAITS_H

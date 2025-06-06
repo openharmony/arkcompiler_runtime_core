@@ -18,7 +18,7 @@
 
 #include "common_interfaces/objects/string/base_string_declare.h"
 
-namespace panda {
+namespace common {
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |

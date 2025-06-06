@@ -22,7 +22,7 @@
 #include "base/common.h"
 #include "objects/ref_field.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
 using CommonRootVisitor = void (*)(void *root);
 using RefFieldVisitor = std::function<void(RefField<> &)>;
@@ -33,5 +33,5 @@ void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

@@ -22,7 +22,7 @@
 
 #include "thread/mutator_base-inl.h"
 
-namespace panda {
+namespace common {
 void ThreadHolder::TransferToRunning()
 {
     mutatorBase_->DoLeaveSaferegion();
@@ -42,5 +42,5 @@ bool ThreadHolder::TransferToNativeIfInRunning()
 {
     return mutatorBase_->EnterSaferegion(false);
 }
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_INL_H

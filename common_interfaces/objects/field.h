@@ -18,7 +18,7 @@
 
 #include <atomic>
 
-namespace panda {
+namespace common {
 class BaseObject;
 
 using MemoryOrder = std::memory_order;
@@ -77,5 +77,5 @@ public:
 private:
     T value;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H

@@ -19,7 +19,7 @@
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/tree_string.h"
 
-namespace panda {
+namespace common {
 template <typename ReadBarrier>
 bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
 {

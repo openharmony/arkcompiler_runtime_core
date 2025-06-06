@@ -21,7 +21,7 @@
 #include "common_interfaces/objects/string/sliced_string.h"
 #include "common_interfaces/objects/string/tree_string.h"
 
-namespace panda {
+namespace common {
 std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen);
 std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen);
 
@@ -56,8 +56,8 @@ uint32_t BaseString::ComputeRawHashcode(ReadBarrier &&readBarrier) const
 template <typename ReadBarrier>
 bool BaseString::EqualToSplicedString(ReadBarrier &&readBarrier, const BaseString *str1, const BaseString *str2)
 {
-    ASSERT(NotTreeString());
-    ASSERT(str1->NotTreeString() && str2->NotTreeString());
+    DCHECK_CC(NotTreeString());
+    DCHECK_CC(str1->NotTreeString() && str2->NotTreeString());
     if (GetLength() != str1->GetLength() + str2->GetLength()) {
         return false;
     }
@@ -103,9 +103,9 @@ template <typename ReadBarrier>
 void BaseString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t start, uint32_t destSize,
                            uint32_t length)
 {
-    ASSERT(IsLineString());
+    DCHECK_CC(IsLineString());
     if (IsUtf8()) {
-        ASSERT(src->IsUtf8());
+        DCHECK_CC(src->IsUtf8());
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), src, buf);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -140,15 +140,15 @@ inline bool BaseString::NotTreeString() const
 template <typename ReadBarrier>
 const uint8_t *BaseString::GetNonTreeUtf8Data(ReadBarrier &&readBarrier, const BaseString *src)
 {
-    ASSERT(src->IsUtf8());
-    ASSERT(!src->IsTreeString());
+    DCHECK_CC(src->IsUtf8());
+    DCHECK_CC(!src->IsTreeString());
     BaseString *string = const_cast<BaseString *>(src);
     if (string->IsSlicedString()) {
         SlicedString *str = SlicedString::Cast(string);
         return BaseString::Cast(str->GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)))->GetDataUtf8() +
                str->GetStartIndex();
     }
-    ASSERT(src->IsLineString());
+    DCHECK_CC(src->IsLineString());
     return string->GetDataUtf8();
 }
 
@@ -156,15 +156,15 @@ const uint8_t *BaseString::GetNonTreeUtf8Data(ReadBarrier &&readBarrier, const B
 template <typename ReadBarrier>
 const uint16_t *BaseString::GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src)
 {
-    ASSERT(src->IsUtf16());
-    ASSERT(!src->IsTreeString());
+    DCHECK_CC(src->IsUtf16());
+    DCHECK_CC(!src->IsTreeString());
     BaseString *string = const_cast<BaseString *>(src);
     if (string->IsSlicedString()) {
         SlicedString *str = SlicedString::Cast(string);
         return BaseString::Cast(str->GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)))->GetDataUtf16() +
                str->GetStartIndex();
     }
-    ASSERT(src->IsLineString());
+    DCHECK_CC(src->IsLineString());
     return string->GetDataUtf16();
 }
 
@@ -214,8 +214,8 @@ bool BaseString::StringsAreEqualDiffUtfEncoding(ReadBarrier &&readBarrier, BaseS
 template <typename ReadBarrier>
 bool BaseString::StringsAreEqual(ReadBarrier &&readBarrier, BaseString *str1, BaseString *str2)
 {
-    ASSERT(str1 != nullptr);
-    ASSERT(str2 != nullptr);
+    DCHECK_CC(str1 != nullptr);
+    DCHECK_CC(str2 != nullptr);
     if (str1 == str2) {
         return true;
     }
@@ -284,6 +284,6 @@ bool BaseString::StringsAreEqualUtf16(ReadBarrier &&readBarrier, const BaseStrin
         return BaseString::StringsAreEquals(data1, data2);
     }
 }
-} // namespace panda::ecmascript
+} // namespace common
 
 #endif //COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_IMPL_H

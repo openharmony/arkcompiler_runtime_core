@@ -16,6 +16,8 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL1_H
 #define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL1_H
 
+#include <cstring>
+
 #include "common_interfaces/objects/string/base_string_declare.h"
 
 #include "common_interfaces/objects/string/line_string-inl.h"
@@ -23,7 +25,7 @@
 #include "common_interfaces/objects/string/tree_string-inl.h"
 #include "common_interfaces/objects/utils/utf_utils.h"
 
-namespace panda {
+namespace common {
 inline bool BaseString::IsUtf8() const
 {
     uint32_t bits = GetLengthAndFlags();
@@ -44,7 +46,7 @@ inline uint32_t BaseString::GetLength() const
 
 inline void BaseString::InitLengthAndFlags(uint32_t length, bool compressed, bool isIntern)
 {
-    ASSERT(length < BaseString::MAX_STRING_LENGTH);
+    DCHECK_CC(length < BaseString::MAX_STRING_LENGTH);
     uint32_t newVal = 0;
     newVal = IsInternBit::Update(newVal, isIntern);
     newVal = CompressedStatusBit::Update(newVal, (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED));
@@ -101,7 +103,7 @@ uint32_t PUBLIC_API BaseString::GetHashcode(ReadBarrier &&readBarrier)
 template <typename T, typename T1>
 bool BaseString::StringsAreEquals(Span<const T> &str1, Span<const T1> &str2)
 {
-    ASSERT(str1.Size() <= str2.Size());
+    DCHECK_CC(str1.Size() <= str2.Size());
     size_t size = str1.Size();
     if constexpr (std::is_same_v<T, T1>) {
         return !memcmp(str1.data(), str2.data(), size * sizeof(T));
@@ -116,6 +118,6 @@ bool BaseString::StringsAreEquals(Span<const T> &str1, Span<const T1> &str2)
         return true;
     }
 }
-} // namespace panda
+} // namespace common
 
 #endif //COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL1_H

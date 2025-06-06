@@ -20,7 +20,7 @@
 #include "objects/base_type.h"
 #include "thread/thread_holder.h"
 
-namespace panda {
+namespace common {
 // The interface will be implemented in the dynamic runtime to provide the ability to access properties of 1.0 objects.
 class DynamicObjectAccessorInterface {
 public:
@@ -65,5 +65,5 @@ public:
     // SetElementByIdx is used to set the value of an element in a static object with the given index.
     virtual bool SetElementByIdx(ThreadHolder *thread, BaseObject *obj, uint32_t index, BoxedValue value) = 0;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_H

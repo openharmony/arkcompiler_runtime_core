@@ -16,11 +16,11 @@
 #ifndef COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 #define COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 
-#include "common_interfaces/objects/utils/objects_traits.h"
-#include "common_interfaces/base_runtime.h"
-#include "libpandabase/mem/mem.h"
 #include <type_traits>
 #include <utility>
+
+#include "common_interfaces/objects/utils/objects_traits.h"
+#include "common_interfaces/base_runtime.h"
 
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // CC-OFFNXT(G.PRE.02) code readability
@@ -98,7 +98,7 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
     static inline CAST_TYPE *Cast(BaseObject *object)                                       \
     {                                                                                       \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
-        ASSERT(object->CHECK_METHOD());                                                     \
+        DCHECK_CC(object->CHECK_METHOD());                                                     \
         /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                               \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
         return static_cast<CAST_TYPE *>(object);                                            \
@@ -106,7 +106,7 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
     static const inline CAST_TYPE *ConstCast(const BaseObject *object)                      \
     {                                                                                       \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
-        ASSERT(object->CHECK_METHOD());                                                     \
+        DCHECK_CC(object->CHECK_METHOD());                                                     \
         /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                               \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
         return static_cast<const CAST_TYPE *>(object);                                      \

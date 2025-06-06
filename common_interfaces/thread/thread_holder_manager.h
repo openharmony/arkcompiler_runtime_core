@@ -25,7 +25,7 @@
 #include "base/common.h"
 #include "thread/thread_holder.h"
 
-namespace panda {
+namespace common {
 
 class ThreadHolderManager final {
 public:
@@ -50,5 +50,5 @@ private:
     void ResumeAllImpl(ThreadHolder *current);
 };
 
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_MANAGER_H

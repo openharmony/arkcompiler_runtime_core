@@ -20,7 +20,7 @@
 
 #include "base/common.h"
 
-namespace panda {
+namespace common {
 inline void MutatorBase::DoEnterSaferegion()
 {
     // set current mutator in saferegion.
@@ -75,5 +75,5 @@ bool MutatorBase::TransitionToCpuProfile(bool bySelf)
         }
     } while (true);
 }
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H

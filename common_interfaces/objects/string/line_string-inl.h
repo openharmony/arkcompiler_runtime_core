@@ -19,7 +19,7 @@
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/line_string.h"
 
-namespace panda {
+namespace common {
 inline size_t LineString::ComputeSizeUtf8(uint32_t utf8Len)
 {
     return DATA_OFFSET + utf8Len;
@@ -61,7 +61,7 @@ uint16_t LineString::Get(int32_t index) const
 
 inline void LineString::Set(uint32_t index, uint16_t src)
 {
-    ASSERT(index < GetLength());
+    DCHECK_CC(index < GetLength());
     if (IsUtf8()) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         *(reinterpret_cast<uint8_t *>(GetData()) + index) = static_cast<uint8_t>(src);

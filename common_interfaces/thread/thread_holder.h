@@ -25,7 +25,6 @@
 #include "thread/mutator_base.h"
 #include "thread/thread_state.h"
 
-
 namespace panda::ecmascript {
 class JSThread;
 }
@@ -34,7 +33,7 @@ namespace ark {
 class Coroutine;
 }
 
-namespace panda {
+namespace common {
 class BaseThread;
 class ThreadHolderManager;
 
@@ -52,7 +51,7 @@ class ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
-    using MutatorBase = panda::MutatorBase;
+    using MutatorBase = common::MutatorBase;
 
     ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
     {
@@ -161,5 +160,5 @@ private:
     friend JSThread;
     friend ThreadHolderManager;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_H

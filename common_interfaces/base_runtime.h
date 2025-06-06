@@ -22,10 +22,9 @@
 
 #include "base/runtime_param.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
 class HeapManager;
-class LogManager;
 class MutatorManager;
 class ThreadHolderManager;
 class ThreadHolder;
@@ -90,7 +89,6 @@ private:
     RuntimeParam param_ {};
 
     HeapManager* heapManager_ = nullptr;
-    LogManager* logManager_ = nullptr;
     MutatorManager* mutatorManager_ = nullptr;
     ThreadHolderManager* threadHolderManager_  = nullptr;
 
@@ -98,5 +96,5 @@ private:
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
 };
-}  // namespace panda
+}  // namespace common
 #endif // COMMON_INTERFACES_BASE_RUNTIME_H

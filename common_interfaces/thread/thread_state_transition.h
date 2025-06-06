@@ -19,7 +19,7 @@
 #include "thread/thread_holder-inl.h"
 #include "thread/thread_holder_manager.h"
 
-namespace panda {
+namespace common {
 
 // Fixme: T is a temporary mock impl to adapt the current JSThread callback when transfer to RUNNING,
 // actually it should always be ThreadHolder, and need to be removed later.
@@ -130,5 +130,5 @@ private:
     ThreadStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
     NO_COPY_SEMANTIC_CC(SuspendAllScope);
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H

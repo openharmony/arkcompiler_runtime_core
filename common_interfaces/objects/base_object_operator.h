@@ -24,7 +24,7 @@
 #include "objects/ref_field.h"
 #include "objects/base_state_word.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
 
 class BaseObjectOperatorInterfaces {
@@ -51,5 +51,5 @@ private:
     friend BaseObject;
 };
 #endif
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H

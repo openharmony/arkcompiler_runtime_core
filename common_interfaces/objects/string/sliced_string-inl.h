@@ -19,7 +19,7 @@
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/sliced_string.h"
 
-namespace panda {
+namespace common {
 inline uint32_t SlicedString::GetStartIndex() const
 {
     uint32_t bits = GetStartIndexAndFlags();
@@ -28,7 +28,7 @@ inline uint32_t SlicedString::GetStartIndex() const
 
 inline void SlicedString::SetStartIndex(uint32_t startIndex)
 {
-    ASSERT(startIndex <= SlicedString::MAX_STRING_LENGTH);
+    DCHECK_CC(startIndex <= SlicedString::MAX_STRING_LENGTH);
     uint32_t bits = GetStartIndexAndFlags();
     uint32_t newVal = StartIndexBits::Update(bits, startIndex);
     SetStartIndexAndFlags(newVal);
@@ -58,7 +58,7 @@ uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
         }
     }
     BaseString *parent = BaseString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-    ASSERT(parent->IsLineString());
+    DCHECK_CC(parent->IsLineString());
     if (parent->IsUtf8()) {
         Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
         return sp[index];
