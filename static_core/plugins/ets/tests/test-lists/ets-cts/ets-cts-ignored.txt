@@ -874,8 +874,6 @@
 07.expressions/06.spread_expression/spex_lmbd_44.ets
 07.expressions/06.spread_expression/spex_lmbd_45.ets
 07.expressions/06.spread_expression/spex_lmbd_47.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_2.ets
-05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_2.ets
 
 # #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
