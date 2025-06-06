@@ -163,18 +163,13 @@ the declared interface also implements all interfaces that the interface
 
 A :index:`compile-time error` occurs if:
 
--  Interface type named by ``typeReference`` in the ``extends`` clause of an
-   interface declaration is not accessible (see :ref:`Accessible`).
+-  `typeReference`` in the ``extends`` clause refers directly to,
+   or is an alias of non-interface type.
+-  Interface type named by ``typeReference`` is not :ref:`Accessible`.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).
 -  The ``extends`` graph has a cycle.
--  At least one ``typeReference`` is an alias of one of primitive, enumeration,
-   union, or function  types.
-
-Each ``typeReference`` in the ``extends`` clause of an interface declaration
-must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
-:index:`compile-time error` occurs.
 
 .. index::
    extends clause
@@ -187,7 +182,6 @@ must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
    parameterized type
    type-parameterized declaration
    well-formed parameterized type
-   primitive type
    enumeration type
    union type
    function type
@@ -304,6 +298,7 @@ The syntax of *interface member* is presented below:
         : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
+        | overloadInterfaceMethodDeclaration
         )
         ;
 
@@ -528,16 +523,16 @@ The use of *overload signatures* is represented by the example below:
    :linenos:
 
     interface I {
-        foo(): number           // 1st signature
-        foo(p: string): string  // 2nd signature
+        foo(): number                        // 1st signature
+        foo(p: string): string               // 2nd signature
         foo(p1: string, p2?: number): number // 3rd signature       
     }
 
     function demo(i: I) {
-       i.foo()           // ok, 1st signature is used
-       i.foo("aa")       // ok, 2nd signature is used
-       let n: number = i.foo("aa") // compile-time error, as 2nd signature returns string
-       n = i.foo("aa", undefined)  // ok, 3rd signature is used
+       i.foo()                     // ok, call matches the 1st signature
+       i.foo("aa")                 // ok, call matches the 2nd signature
+       let n: number = i.foo("aa") // compile-time error, as the 2nd signature returns string
+       n = i.foo("aa", undefined)  // ok, call matches the 3rd signature
     }
 
 .. index::

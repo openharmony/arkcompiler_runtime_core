@@ -379,12 +379,12 @@ The scope of an entity depends on the context the entity is declared in:
     frontend_status: Done
 
 -  The scope of a type parameter name in a function declaration is that
-   entire declaration (*function parameter scope*).
+   entire declaration (*function type parameter scope*).
 
 .. index::
    parameter name
    function declaration
-   function parameter scope
+   function type parameter scope
    scope
 
 .. _function-access:
@@ -947,7 +947,6 @@ If the type of the initializer expression cannot be inferred, then a
    initializer
    subtyping
    supertype
-   normalization
    type inference
    inferred type
    type annotation
@@ -1596,7 +1595,6 @@ The example below represents type inference:
    return statement
    normalization
    type expression
-   normalization
    expression
    function
    implementation
@@ -1651,36 +1649,9 @@ Declarations with Overload Signatures
 have several *overload signatures* followed by one implementation body.
 
 A call of an entity with overload signatures is always a call of the
-implementation body. If the implementation body is missing, or does
-not immediately follow the declaration, then a :index:`compile-time error`
-occurs.
+implementation body. If the implementation body is missing then a
+:index:`compile-time error` occurs.
 
-The example below has two overload signatures defined for a function:
-
-.. index::
-   function
-   overload signature
-   function header
-   implementation function
-   implementation
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(): void           // 1st signature
-    function foo(x: string): void  // 2nd signature
-    function foo(x: Object|null|undefined): void // 3rd - implementation signature
-    {
-        console.log(x)
-    }
-
-    foo()          // ok, call fits 1st and 3rd signatures
-    foo("aa")      // ok, call fits 2nd and 3rd signatures
-    foo(undefined) // ok, call fits the 3rd signature
-
-The call of ``foo()`` is executed as a call of the implementation function
-with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
-of the implementation function with the ``x`` argument.
 
 |
 
@@ -1727,6 +1698,33 @@ implementation bodies (if any) are either exported or non-exported.
    overload signature
    compatibility
 
+The example below has two overload signatures defined for a function:
+
+.. index::
+   function
+   overload signature
+   implementation function
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void           // 1st signature
+    function foo(x: string): void  // 2nd signature
+    function foo(...args: Any[]): Any // implementation signature
+    {
+        console.log(args)
+    }
+
+    foo()          // ok, call fits the 1st signature
+    foo("aa")      // ok, call fits the 2nd signature
+    foo(undefined) // compile-time error, implementation signature is not accessible
+
+The call of ``foo()`` is executed as a call of the implementation function
+with an empty array argument. The call of ``foo(x)`` is executed as a call
+of the implementation function with the argument - array with the only ``x`` as
+an element.
+
+
 |
 
 .. _Class Method with Overload Signatures:
@@ -1770,6 +1768,51 @@ requirements are met:
   is allowed);
 - Overload signatures are not abstract.
 
+The example below has two overload signatures defined for a method:
+
+.. index::
+   method
+   overload signature
+   implementation method
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      foo(): void           // 1st signature
+      foo(x: string): void  // 2nd signature
+      foo(...args: Any[]): Any // implementation signature
+      {
+        console.log(args)
+        return new Object
+      }
+    }
+
+    const a = new A
+    a.foo()          // ok, call fits the 1st signature
+    a.foo("aa")      // ok, call fits the 2nd signature
+    a.foo(undefined) // compile-time error, implementation signature is not accessible
+
+The call of ``a.foo()`` is executed as a call of the implementation method
+with an empty array argument. The call of ``a.foo(x)`` is executed as a call
+of the implementation method with the argument - array with the only ``x`` as
+an element.
+
+.. code-block:: typescript
+   :linenos:
+
+    // compile-time errors: mix of different accessibility statuses,
+    // mix of static and non-static
+    class Incorrect {
+      foo(): void                    // 1st signature
+      private foo(x: string): void   // 2nd signature 
+      protected foo(x: string): void // 3rd signature
+      static foo(x: Object): void    // 4th signature
+      foo(...args: Any[]): Any       // implementation signature
+      { return new Object }
+    }
+
+
 |
 
 .. _Constructor with Overload Signatures:
@@ -1806,6 +1849,33 @@ A :index:`compile-time error` occurs in the following situations:
 The semantic rules for *implementation bodies* are discussed in
 :ref:`Overload Signatures Implementation Body`.
 
+The example below has two overload signatures defined for a constructor:
+
+.. index::
+   constructor
+   overload signature
+   implementation constructor
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      constructor ()           // 1st signature
+      constructor(x: string)  // 2nd signature
+      constructor(...args: Any[]) // implementation signature
+      {}
+    }
+
+    new A()          // ok, call fits the 1st signature
+    new A("aa")      // ok, call fits the 2nd signature
+    new A(undefined) // compile-time error, implementation signature is not accessible
+
+The call of ``A()`` is executed as a call of the implementation method
+with an empty array argument. The call of ``A(x)`` is executed as a call
+of the implementation constructor with the argument - array with the only ``x`` as
+an element.
+
+
 |
 
 .. _Overload Signatures Implementation Body:
@@ -1813,13 +1883,22 @@ The semantic rules for *implementation bodies* are discussed in
 Overload Signatures Implementation Body
 =======================================
 
-*Implementation body* must have a signature as follows (see
-:index:`Type Any`):
+*Implementation body* must have a signature 
+
+- for functions or methods as follows (see :index:`Type Any`):
 
 .. code-block:: typescript
    :linenos:
 
     (...args: Any[]): Any 
+
+- for constructors:
+
+.. code-block:: typescript
+   :linenos:
+
+    (...args: Any[])
+
 
 Otherwise, a :index:`compile-time error` occurs.
 

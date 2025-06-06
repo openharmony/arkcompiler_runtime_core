@@ -604,74 +604,152 @@ is undefined or inaccessible.
 
 Type of a *named reference* is the type of an expression.
 
-If a *named reference* refers to a non-static method of a class or an interface
-then the named reference is bounded with the object of that class or interface.
+If a *named reference* refers to a function name, it is called :ref:`Function Reference`.
+If a *named reference* refers to a method name, it is called :ref:`Method Reference`.
 
-.. index::
-   simple name
-   entity
-   compilation unit
-   compile-time error
-   namespace
-   named reference
-   expression
-   overloading
-   generic method
-   ambiguity
+|
+
+.. _Function Reference:
+
+Function Reference
+==================
+
+A *function reference* refers to a declared or imported function.
+Type of a *function reference* is derived from the function signature:
 
 .. code-block:: typescript
    :linenos:
 
-    import * as compilationUnitName from "someFile"
+   function foo(n: number): string {}
 
-    class Type {
-      static method() {}
-      method () {
-         let local = this.method // Qualified name referring an instance method
-      }
+   let func = foo // type of func is '(n: number) => string'
+
+A *function reference* can refer to a generic function but only
+if :ref:`Explicit Generic Instantiations` is present, otherwise
+a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    function gen<T> (x: T) {}
+
+    let a = gen<string> // ok
+    let b = gen // compile-time error: no explicit type arguments
+
+A :index:`compile-time error` occurs if an *overload alias* is
+used in a named reference:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo1(n: number) {}
+   function foo2(s: string) {}
+   overload foo( foo1, foo2 )
+
+   let x = foo // compile-time error, ambiguity
+   let y = foo2 // ok
+
+A name of a :ref:`Function with Overload Signatures` can be used
+as named reference. The type of a *function reference* is derived
+from a signature of implementation body
+(see :ref:`Overload Signatures Implementation Body`):
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(n: number)
+   function foo(s: string)
+   function foo(...x: Any[]): Any {)
+
+   let x = foo // ok, type is (...x: Any[]) => Any
+
+|
+
+.. _Method Reference:
+
+Method Reference
+================
+
+A *method reference* refers to a *static* or *instance* method
+of a class or an interface.
+Type of a *method reference* is derived from the method signature:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+      static foo(n: number) {}
+      bar (s: string): boolean {}
     }
-    const m1 = Type.method  // Qualified name referring a static method
-    const m2 = (new Type).method
 
-    function foo (parameter: Type) {
-      let local: Type = parameter /* 'parameter' here is the
-          expression in the form of simple name, type of 'parameter' is the
-          explicitly declared function parameter type */
-      local = new Type () /* 'local' here is the expression in the
-          form of simple name */
-      local = compilationUnitName.someExportedVariable /* qualifiedName here
-          refers to a variable imported from a compilation unit */
-      let func = foo /* foo is a simple name of the function declared in this
-          module, type of 'func' is the function type derived from the function
-          'foo()' signature. func itself is a new function object */
+    // Method reference to a static method
+    const m1 = C.foo  // type of 'm1' is (n: number) => void
 
-      goo() // goo is an undefined name - compile-time error
-      let bar_ref = bar // bar is an ambiguous reference - compile-time error
-    }
-
-    function bar (p: string) {}
-    function bar (p: number) {}
-
-    function generic_function<T> () {}
-    let instantiation = generic_function<string> /* type of 'instantiation' is
-         a function type derived from the signature of instantiated function
-         'generic_function<string> ()' */
+    // Method reference to an instance method
+    const m2 = new C().bar // type of 'm1' is (s: string) => boolean
 
 
-    class aClass {
+If *method reference* refers to an instance method, that the named reference
+is bounded with the used instance of that class or interface.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
         field = 123
         method(): number { return this.field }
     }
-    const anObject = new aClass
-    const aMethod = anObject.method
-    anObject.field = 42
-    console.log (aMethod()) // Outputs 42
+    let c1 = new C
+    let c2 = new C
+    let m1 = c1.method // 'c1' is bounded
+    let m2 = c2.method // 'c2' is bounded
+    c1.field = 42
+    console.log (m1(), m2()) // Outputs: 42 123
 
-    let global: Object = goo()
-    function goo() {
-        console.log (global) // compile-time or runtime error
+A *method reference* can refer to a generic method but only
+if :ref:`Explicit Generic Instantiations` is present, otherwise
+a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+	class C {
+		gen<T> (x: T) {}
+	}
+	
+    let a = new C().gen<string> // ok
+    let b = new C().gen // compile-time error: no explicit type arguments
+
+A :index:`compile-time error` occurs if a method *overload alias* is
+used in a named reference:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo1(n: number) {}
+        foo2(s: string)
+        overload foo { foo1, foo2 }
     }
 
+    let f = new C().foo // compile-time error
+
+A name of a :ref:`Class Method with Overload Signatures` 
+or :ref:`Interface Method Overload Signatures` can be used
+as a named reference. The type of a *method reference* is derived
+from a signature of implementation body
+(see :ref:`Overload Signatures Implementation Body`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo1(n: number)
+        foo2(s: string)
+        foo(...x: Any[]): Any {)
+    }
+
+    let f = new C().foo // ok, type is (...x: Any[]) => Any
 
 |
 
@@ -1148,6 +1226,20 @@ inferred from the context. A type inferred from the context can be either a
 named class (see :ref:`Object Literal of Class Type`), or an anonymous class
 created for the inferred interface type (see
 :ref:`Object Literal of Interface Type`).
+
+Thus any reference to ``this`` in object literals methods is the reference to
+the type of the object literal - the class defined above.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      method () {
+         this /* refers to class A type */
+         const b: B = { method () {  this /* refers to class B type */ } }
+      }
+    }
+
 
 
 A :index:`compile-time error` occurs if:
@@ -1684,7 +1776,7 @@ method, or constructor. A sequence of types of these values is the type of the
           return new MyIteratorResult<T|undefined>(this.data)
         }
         private data: T[]
-        constructor (...data: T[]) { this.data = data }       
+        constructor (...data: T[]) { this.data = data }
     }
     class MyIteratorResult <T> implements Iterator<T|undefined> {
         private data: T[]
@@ -2093,10 +2185,11 @@ Step 2: Selection of Method
 .. meta:
     frontend_status: Done
 
-After the type to use is known, the method to call must be determined. 
+After the type to use is known, the method to call must be determined.
 If a method name in the call refers an *overload declaration*
-(:ref:`Overload Declarations`),
-:ref:`Overload Resolution` is used to select the method to call. 
+(see :ref:`Overload Declarations`),
+:ref:`Overload Resolution  for Overload Declarations` is used
+to select the method to call.
 A :index:`compile-time error` occurs if no method is available to call.
 
 .. index::
@@ -2231,7 +2324,8 @@ The function call is *safe* because it handles nullish values properly.
 
 If the form of expression in the call is *qualifiedName*, and *qualifiedName*
 refers an *overload declaration* (:ref:`Overload Declarations`),
-:ref:`Overload Resolution` is used to select the function to call. 
+:ref:`Overload Resolution for Overload Declarations` is used
+to select the function to call.
 A :index:`compile-time error` occurs if no function is available to call.
 
 Semantic check for call is performed in accordance with
@@ -3226,7 +3320,7 @@ is defined as follows:
 +---------------------------------+-------------------------+-----------------------------+
 |       Type of Expression        |     Resulting String    |   Code Example              |
 +=================================+=========================+=============================+
-| ``number``                      | "number"                | .. code-block:: typescript  |
+| ``number``, ``double``          | "number"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let n: number = ...        |
 |                                 |                         |  typeof n                   |
@@ -3276,11 +3370,11 @@ is defined as follows:
 |                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
-| Numeric types:                  | "number"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  let x: byte = ...          |
-| ``byte``, ``short``, ``int``,   |                         |  typeof x                   |
-| ``long``, ``float``, ``double`` |                         |  ...                        |
+| Numeric types:                  | "byte", "short", "int", | .. code-block:: typescript  |
+|                                 | "long" or "float",      |                             |
+|                                 | depending on type of    |  let x: byte = ...          |
+| ``byte``, ``short``, ``int``,   | expression              |  typeof x                   |
+| ``long``, ``float``             |                         |  ...                        |
 +---------------------------------+-------------------------+-----------------------------+
 
 |
@@ -4989,7 +5083,7 @@ operands used as follows:
    operator
    value
    value equality
-   primitive type
+   predefined value type
    value type
    enumeration type
    bigint
@@ -5094,7 +5188,7 @@ following IEEE 754 standard rules:
    integer equality test
    IEEE 754
    widening
-   primitive conversion
+   numeric conversion
 
 -  The result of '``==``' or '``===``' is ``false`` but the result of '``!=``'
    is ``true`` if either operand is ``NaN``.
@@ -6253,7 +6347,7 @@ of the following ways:
       determined at compile time:
 
 
-      - If ``T`` is a primitive type, then ``S`` is the same as ``T``.
+      - If ``T`` is a predefined value type, then ``S`` is the same as ``T``.
 
         The saved value of the array element, and the value of
         *rhsExpression* are used to perform the binary operation of the
@@ -6296,7 +6390,7 @@ of the following ways:
    subexpression
    variable
    assignment operator
-   primitive type
+   predefined value type
    array element
    value
    operand
@@ -6478,8 +6572,7 @@ The examples below represent different scenarios with standalone expressions:
 
 .. index::
    conditional expression
-   normalization
-   union type
+   union type normalization
    evaluation
    operand expression
    conversion
@@ -6752,7 +6845,7 @@ If a *lambda body* is a single ``expression`` it is treated as
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``
 
-If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or 
+If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or
 ``never`` (see :ref:`Type never`), and the execution path of the lambda body
 has no return statement (see :ref:`Return Statements`) or no single expression
 as a body, then a :index:`compile-time error` occurs.
@@ -6904,10 +6997,10 @@ can act as follows:
 
 -  Replace the captured variable’s type for a proxy class that contains an
    original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
-   captured variable is of non-primitive type.
+   captured variable is of non-value type (see :ref:`Value Types`).
 
-If the captured variable is defined as ``const``, then
-proxying is not required.
+If the captured variable is defined as ``const``, then proxying is not
+required.
 
 If the captured formal parameter can be neither boxed nor proxied, then
 the implementation can require addition of a local variable as follows:
@@ -6915,11 +7008,10 @@ the implementation can require addition of a local variable as follows:
 .. index::
    lambda
    implementation
-   primitive type
+   predefined value type
    proxy class
    captured variable
    captured variable type
-   non-primitive type
    proxying
    local variable
    variable
@@ -6962,7 +7054,7 @@ A *constant expression* is an expression of a value type (see
 :ref:`Value Types`), or of type ``string`` that completes normally
 while being composed only of the following:
 
--  Literals of a primitive type, and literals of type ``string`` (see
+-  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
 
 -  Enumeration type constants;
@@ -7003,7 +7095,7 @@ while being composed only of the following:
 
 .. index::
    constant expression
-   primitive type
+   predefined value type
    string type
    enumeration type
    conversion

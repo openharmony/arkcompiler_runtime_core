@@ -254,7 +254,7 @@ The usage of types is presented by the example below:
 .. code-block:: typescript
    :linenos:
 
-    let n: number   // using identifier as a primitive value type name
+    let n: number   // using identifier as a predefined value type name
     let o: Object   // using identifier as a predefined class type name
     let a: number[] // using array type
     let t: [number, number] // using tuple type
@@ -1602,11 +1602,11 @@ syntax forms:
 
 Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
 
-Any varaible of *readonly array type* has the following characteristics: 
+Any varaible of *readonly array type* has the following characteristics:
 
 - its length cannot be changed
 - its elements cannot be modified after the initial assignment directly or
-  through a function or method call. 
+  through a function or method call.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -1953,9 +1953,7 @@ union type declaration leads to a circular reference.
    type declaration
    circular reference
    union
-   primitive type
    literal type
-   primitive type
    circular reference
 
 Typical usage examples of *union* type are represented below:
@@ -2042,7 +2040,6 @@ The following example represents literal types:
 
 .. index::
    union type
-   primitive type
    literal type
 
 **Note**. A :index:`compile-time error` occurs if an expression of a *union*
@@ -2087,8 +2084,8 @@ general types.
 
 Formally, union type ``T``:sub:`1` | ... | ``T``:sub:`N`, where ``N`` > 1, can
 be reduced to type ``U``:sub:`1` | ... | ``U``:sub:`M`, where ``M`` <= ``N``,
-or even to a non-union type *V*. In this latter case *V* can be a primitive
-type or a literal type.
+or even to a non-union type *V*. In this latter case *V* can be a predefined
+value type or a literal type.
 
 The normalization process presumes that the following steps are performed one
 after another:
@@ -2098,9 +2095,8 @@ after another:
    type safety
    value type
    non-union type
-   normalization
+   union type normalization
    literal type
-   primitive type
 
 #. All nested union types are linearized.
 #. All type aliases (if any and except recursive ones) are recursively replaced
@@ -2128,12 +2124,10 @@ after another:
    numeric type
    numeric literal type
    type never
-   primitive type
    alias
    non-alias
    linearization
    literal type
-   normalization
    Object type
    subtyping
 
@@ -2173,7 +2167,7 @@ handling the type inference for array literals (see
 
 .. index::
    union type
-   normalization
+   union type normalization
    array literal
    type inference
    array literal
@@ -2235,6 +2229,46 @@ A :index:`compile-time error` occurs otherwise:
    accessor
    signature
 
+A :index:`compile-time error` occurs if in some ``T``:sub:`i`
+the name ``m`` refers to the *overload alias*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        overload foo { foo1, foo2 }
+        foo1(a: number): void {}
+        foo2(a: string): void {}
+    }
+    class D {
+        foo(a: number): void {}
+        foo2(a: string): void {}
+    }
+
+    function test(x: C | D) {
+        x.foo() // compile-time error, as 'foo' in C is the overload alias
+        x.foo2("aa") // ok, as 'foo2' in both C and D is a method
+    }
+
+A :index:`compile-time error` also occurs if in some ``T``:sub:`i`
+the name ``m`` refers to the *method with overload signatures*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo(a: number): void
+        foo(a: string): void
+        foo(...x: Any[]): Any {}
+    }
+    class D {
+        foo(a: number): void {}
+    }
+    
+    function test(x: C | D) {
+        x.foo(1) // compile-time error, as 'foo' in C has overload signatures
+    }
+    
 |
 
 .. _Keyof Types:
@@ -2451,7 +2485,6 @@ Default values of value types are as follows:
    explicit initialization
    literal type
    nullable reference type
-   primitive type
    undefined type
    type parameter
    reference type

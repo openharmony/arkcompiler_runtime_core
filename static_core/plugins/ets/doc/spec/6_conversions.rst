@@ -363,7 +363,6 @@ The type of this operand is assumed to be ``int``.
    predefined type
    numeric type
    conversion
-   primitive type
    argument expression
    target type
    string conversion
@@ -447,7 +446,7 @@ Widening Numeric Conversions
 
 .. index::
    widening
-   primitive conversion
+   numeric conversion
    conversion
    numeric type
    value
@@ -496,7 +495,7 @@ is properly rounded to the integer value.
    IEEE 754
    enumeration constant
    widening
-   primitive conversion
+   numeric conversion
    rounding
 
 |
