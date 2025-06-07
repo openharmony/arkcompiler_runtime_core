@@ -274,27 +274,28 @@ static ani_array_ref StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env
     if (formatted == nullptr) {
         return nullptr;
     }
-    ani_array_ref result;
-    env->Array_New_Ref(nullptr, 1, nullptr, &result);
 
     ani_class cls;
     ani_method ctor;
     ani_object part;
-    env->FindClass("Lstd/core/Intl/RelativeTimeFormatPart;", &cls);
-    env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/RelativeTimeFormatPart;", &cls));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(cls, "<ctor>", ":V", &ctor));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    env->Object_New(cls, ctor, &part);
+    ANI_FATAL_IF_ERROR(env->Object_New(cls, ctor, &part));
+
+    ani_array_ref result;
+    ANI_FATAL_IF_ERROR(env->Array_New_Ref(cls, 1, nullptr, &result));
 
     ani_string typeStr;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr const char *K_LITERAL_TYPE = "literal";
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr size_t K_LITERAL_TYPE_LENGTH = std::char_traits<char>::length(K_LITERAL_TYPE);
-    env->String_NewUTF8(K_LITERAL_TYPE, K_LITERAL_TYPE_LENGTH, &typeStr);
+    ANI_FATAL_IF_ERROR(env->String_NewUTF8(K_LITERAL_TYPE, K_LITERAL_TYPE_LENGTH, &typeStr));
 
-    env->Object_SetFieldByName_Ref(part, "type", typeStr);
-    env->Object_SetFieldByName_Ref(part, "value", formatted);
-    env->Array_Set_Ref(result, 0, part);
+    ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Ref(part, "type", typeStr));
+    ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Ref(part, "value", formatted));
+    ANI_FATAL_IF_ERROR(env->Array_Set_Ref(result, 0, part));
     return result;
 }
 

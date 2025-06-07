@@ -94,7 +94,7 @@ export namespace Intl {
         }
     }
 
-    export interface RelativeTimeFormatPart {
+    export class RelativeTimeFormatPart {
         type: string;
         unit?: RelativeTimeFormatUnit;
         value: string;
