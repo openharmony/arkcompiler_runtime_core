@@ -132,7 +132,10 @@ export namespace taskpool {
         RUNNING = 2,
 
         /// the task state is canceled
-        CANCELED = 3
+        CANCELED = 3,
+
+        /// the task state is delayed
+        DELAYED = 4
     }
 
     /**
@@ -987,9 +990,18 @@ export namespace taskpool {
     export function executeDelayed(delayTime: number, task: Task, priority?: Priority): Promise<NullishType> {
         task.checkExecutionForDelayedTask(delayTime);
         task.isSubmitted = true;
+        ConcurrencyHelpers.lockGuard(mutex, () => {
+            pendingDelayed.add(task);
+        });
         return new Promise<NullishType>((resolve, reject) => {
             task.timerId = setTimeout(() => {
+                ConcurrencyHelpers.lockGuard(mutex, () => {
+                    pendingDelayed.delete(task);
+                });
                 if (task.timerId == -1.0 || isCanceled(task)) {
+                    ConcurrencyHelpers.lockGuard(mutex, () => {
+                        pendingDelayedCanceled.delete(task);
+                    });
                     reject(new Error("taskpool:: task has been canceled"));
                 }
                 taskSubmitted(task);
@@ -1062,6 +1074,10 @@ export namespace taskpool {
                 }
                 task.timerId = -1.0;
             }
+            if (pendingDelayed.has(task)) {
+                pendingDelayedCanceled.add(task);
+                return;
+            }
             if (waitingTasks.has(task) || runningTasks.has(task)) {
                 tasksToBeCanceled.add(task);
                 return;
@@ -1129,6 +1145,14 @@ export namespace taskpool {
             taskInfo.taskId = task.id;
             taskInfo.name = task.name;
             taskInfo.state =  (isCanceled(task)) ? State.CANCELED : State.WAITING;
+            taskInfos.push(taskInfo);
+        });
+        // Collect delay and canceled tasks info
+        pendingDelayed.forEach((task: Task) => {
+            const taskInfo: TaskInfo = new TaskInfo();
+            taskInfo.taskId = task.id;
+            taskInfo.name = task.name;
+            taskInfo.state =  (isCanceled(task)) ? State.CANCELED : State.DELAYED;
             taskInfos.push(taskInfo);
         });
         // Collect worker threads info
@@ -1333,7 +1357,7 @@ export namespace taskpool {
     }
 
     function isCanceled(task: Task): boolean {
-        return tasksToBeCanceled.has(task) || groupsToBeCanceled.has(task.groupId);
+        return pendingDelayedCanceled.has(task) || tasksToBeCanceled.has(task) || groupsToBeCanceled.has(task.groupId);
     }
 
     function hasTask(task: Task): boolean {
@@ -1530,6 +1554,8 @@ export namespace taskpool {
     // value is count of tasks
     const waitingTasks: Map<Task, int> = new Map<Task, int>();
     const runningTasks: Map<Task, int> = new Map<Task, int>();
+    const pendingDelayed: Set<Task> = new Set<Task>();
+    const pendingDelayedCanceled: Set<Task> = new Set<Task>();
     const tasksToBeCanceled: Set<Task> = new Set<Task>();
     // key is group id, value is count of associated tasks with this group
     const waitingGroupTasks: Map<long, int> = new Map<long, int>();
