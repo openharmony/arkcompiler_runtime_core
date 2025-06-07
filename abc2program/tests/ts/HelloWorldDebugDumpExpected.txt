@@ -774,9 +774,9 @@ _GLOBAL_2076 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	sta v19                                  # line: 90           # column: 6
 	lda v19                                  # line: 90           # column: 10
 	ldobjbyname 0x16, toString               # line: 90           # column: 10
-	sta v18                                  # line: 90           # column: 6
-	lda v18                                  # line: 90           # column: 6
-	callthis0 0x18, v19                      # line: 90           # column: 6
+	sta v18                                  # line: 90           # column: 10
+	lda v18                                  # line: 90           # column: 10
+	callthis0 0x18, v19                      # line: 90           # column: 10
 	sta v18                                  # line: 90           # column: 6
 	lda v17                                  # line: 90           # column: 0
 	callarg1 0x1a, v18                       # line: 90           # column: 0
