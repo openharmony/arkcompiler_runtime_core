@@ -336,14 +336,6 @@ add_ets_coroutines_test(FILE stats.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE elauncher_id.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT"
-)
-
 add_ets_coroutines_test(FILE eaworker_coroutines.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
@@ -430,4 +422,12 @@ add_ets_coroutines_test(FILE await_async_return_reject_promise.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE eworker_post_to_main.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
 )

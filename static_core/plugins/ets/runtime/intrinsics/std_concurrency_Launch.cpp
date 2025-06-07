@@ -89,7 +89,7 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
 }
 
 template <typename CoroResult>
-ObjectHeader *Launch(EtsObject *func, EtsArray *arr)
+ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -136,9 +136,9 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr)
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
-
-    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
-                                                            CoroutineLaunchMode::DEFAULT, EtsCoroutine::LAUNCH);
+    auto mode = postToMain ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
+                                                            EtsCoroutine::LAUNCH);
     if (UNLIKELY(!launchResult)) {
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         ThrowOutOfMemoryError("OOM");
@@ -146,6 +146,13 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr)
     }
 
     return coroResultHandle.GetPtr();
+}
+
+extern "C" {
+EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr)
+{
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, true));
+}
 }
 
 extern "C" {
