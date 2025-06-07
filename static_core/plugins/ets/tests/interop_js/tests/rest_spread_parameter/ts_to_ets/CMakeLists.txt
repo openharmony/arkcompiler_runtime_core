@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_rest_spread_ts_to_ets
+panda_ets_interop_js_gtest(ets_interop_js_rest_spread_ts_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/rest_spread.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/rest_spread.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_rest_spread.ts

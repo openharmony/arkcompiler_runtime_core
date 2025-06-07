@@ -21,7 +21,7 @@ import {
     CreateClassFunction,
 } from "main_js"
 
-const int = 1;
+const num = 1;
 const str = 'str';
 const foo = () => { }
 const obj: object = {}
@@ -29,7 +29,7 @@ const arr: int[] = []
 
 function checkCreateClassFunctionInt(): boolean {
     try {
-        const TSClass = CreateClassFunction(int, tsInt);
+        const TSClass = CreateClassFunction(num, tsInt);
 
         return false;
     } catch (e) {
@@ -79,7 +79,7 @@ function checkCreateClassFunctionArrow(): boolean {
 
 function checkCreateClassArrowFunctionInt(): boolean {
     try {
-        const TSClass = CreateClassFunction(int, tsInt);
+        const TSClass = CreateClassFunction(num, tsInt);
 
         return false;
     } catch (e) {
@@ -129,7 +129,7 @@ function checkCreateClassArrowFunctionArrow(): boolean {
 
 function checkParentClassInt(): boolean {
     try {
-        new ParentClass(int);
+        new ParentClass(num);
 
         return false;
     } catch (e) {
@@ -179,7 +179,7 @@ function checkParentClassArrow(): boolean {
 
 function checkChildClassInt(): boolean {
     try {
-        new ChildClass(int);
+        new ChildClass(num);
 
         return false;
     } catch (e) {
@@ -230,7 +230,7 @@ function checkChildClassArrow(): boolean {
 function checkMethodClassInt(): boolean {
     try {
         const TSClass = new MethodClass();
-        TSClass.init(int, int);
+        TSClass.init(num, num);
 
         return false;
     } catch (e) {
@@ -241,7 +241,7 @@ function checkMethodClassInt(): boolean {
 function checkMethodClassString(): boolean {
     try {
         const TSClass = new MethodClass();
-        TSClass.init(str, int);
+        TSClass.init(str, num);
 
         return false;
     } catch (e) {
@@ -252,7 +252,7 @@ function checkMethodClassString(): boolean {
 function checkMethodClassArr(): boolean {
     try {
         const TSClass = new MethodClass();
-        TSClass.init(arr, int);
+        TSClass.init(arr, num);
 
         return false;
     } catch (e) {
@@ -263,7 +263,7 @@ function checkMethodClassArr(): boolean {
 function checkMethodClassObj(): boolean {
     try {
         const TSClass = new MethodClass();
-        TSClass.init(obj, int);
+        TSClass.init(obj, num);
 
         return false;
     } catch (e) {
@@ -274,7 +274,7 @@ function checkMethodClassObj(): boolean {
 function checkMethodClassArrow(): boolean {
     try {
         const TSClass = new MethodClass();
-        TSClass.init(foo, int);
+        TSClass.init(foo, num);
 
         return false;
     } catch (e) {

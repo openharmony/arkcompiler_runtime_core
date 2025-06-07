@@ -14,7 +14,7 @@
 --- # List of keywords, denoting data types
 keywords:
     - bigint
-    - Bigint
+    - BigInt
     - boolean
     - Boolean
     - byte

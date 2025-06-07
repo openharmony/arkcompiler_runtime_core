@@ -21,7 +21,7 @@ function runTest(test, warmup, iters) {
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
 	const etsOpts = { // NB: Consider setting compiler-enable-jit=false for local run
 		'log-level': 'info',
 		'log-components': 'ets_interop_js',

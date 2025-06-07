@@ -155,6 +155,9 @@ static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/c
 // remove or make an Error
 static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/core/UnsupportedOperationException;";
 
+// coroutines
+static constexpr std::string_view INVALID_COROUTINE_OPERATION_ERROR    = "Lstd/core/InvalidCoroutineOperationError;";
+
 // stdlib Exception classes
 static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";
 

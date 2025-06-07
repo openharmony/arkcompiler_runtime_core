@@ -83,10 +83,9 @@ void AbcFileProcessor::GetETSMetadata(pandasm::Record *record, const panda_file:
         annList.insert(annList.end(), annListPart.begin(), annListPart.end());
     });
 
-    if (!annList.empty()) {
-        RecordAnnotations recordEtsAnn {};
-        recordEtsAnn.annList = std::move(annList);
-        progAnn_.recordAnnotations.emplace(recordName, std::move(recordEtsAnn));
+    for (const auto &anno : annList) {
+        AbcFileEntityProcessor::SetEntityAttributeValue(
+            *record, []() { return true; }, anno.first, anno.second.c_str());
     }
 }
 
@@ -149,10 +148,9 @@ void AbcFileProcessor::GetETSMetadata(pandasm::Function *method, const panda_fil
         annList.insert(annList.end(), annListPart.begin(), annListPart.end());
     });
 
-    if (!annList.empty()) {
-        AbcMethodProcessor methodProcessor(methodId, keyData_);
-        const auto methodName = methodProcessor.GetMethodSignature();
-        progAnn_.methodAnnotations.emplace(methodName, std::move(annList));
+    for (const auto &anno : annList) {
+        AbcFileEntityProcessor::SetEntityAttributeValue(
+            *method, []() { return true; }, anno.first, anno.second.c_str());
     }
 }
 
@@ -191,10 +189,9 @@ void AbcFileProcessor::GetETSMetadata(pandasm::Field *field, const panda_file::F
         annList.insert(annList.end(), annListPart.begin(), annListPart.end());
     });
 
-    if (!annList.empty()) {
-        const auto recordName = keyData_.GetFullRecordNameById(fieldAccessor.GetClassId());
-        const auto fieldName = stringTable_->StringDataToString(file_->GetStringData(fieldAccessor.GetNameId()));
-        progAnn_.recordAnnotations[recordName].fieldAnnotations.emplace(fieldName, std::move(annList));
+    for (const auto &anno : annList) {
+        AbcFileEntityProcessor::SetEntityAttributeValue(
+            *field, []() { return true; }, anno.first, anno.second.c_str());
     }
 }
 

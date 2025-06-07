@@ -1020,6 +1020,11 @@ add_gtests(
     tests/interpreter_test_resolve_ctor_class.cpp
 )
 
+add_gtests(
+    arkruntime_test_classhelper
+    tests/class_helper_test.cpp
+)
+
 if (PANDA_WITH_TESTS)
     file(MAKE_DIRECTORY ${PANDA_BINARY_ROOT}/bin-gtests/pre-build)
 

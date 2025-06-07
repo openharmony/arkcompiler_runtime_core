@@ -121,9 +121,15 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 
 extern "C" void StdSystemScheduleCoroutine()
 {
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
-    auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
-    cm->Schedule();
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+                          "Cannot switch coroutines in the current context!");
+        return;
+    }
+
+    ScopedNativeCodeThread nativeScope(coro);
+    coro->GetCoroutineManager()->Schedule();
 }
 
 extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)

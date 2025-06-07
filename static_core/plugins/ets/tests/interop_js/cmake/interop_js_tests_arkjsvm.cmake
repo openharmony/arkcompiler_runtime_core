@@ -11,13 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_custom_target(ets_interop_js_arkjsvm_gtests COMMENT "Run ets_interop_js_arkjsvm_gtests Gtests on ArkJSVM")
-add_dependencies(ets_gtests ets_interop_js_arkjsvm_gtests)
-add_dependencies(ets_interop_tests ets_interop_js_arkjsvm_gtests)
+add_custom_target(ets_interop_js_gtests COMMENT "Run ets_interop_js_gtests Gtests on ArkJSVM")
+add_dependencies(ets_gtests ets_interop_js_gtests)
+add_dependencies(ets_interop_tests ets_interop_js_gtests)
 
-add_custom_target(ets_interop_js_tests_arkjsvm COMMENT "Run ets_interop_js_tests_arkjsvm tests on ArkJSVM")
-add_dependencies(ets_tests ets_interop_js_tests_arkjsvm)
-add_dependencies(ets_interop_tests ets_interop_js_tests_arkjsvm)
+add_custom_target(ets_interop_js_tests COMMENT "Run ets_interop_js_tests tests on ArkJSVM")
+add_dependencies(ets_tests ets_interop_js_tests)
+add_dependencies(ets_interop_tests ets_interop_js_tests)
 
 function(compile_dynamic_file TARGET)
     cmake_parse_arguments(
@@ -75,10 +75,10 @@ function(compile_dynamic_file TARGET)
     add_custom_target(${TARGET} DEPENDS ${ABC_FILES})
 endfunction(compile_dynamic_file)
 
-# Add Gtest-based tests to ets_interop_js_arkjsvm_gtests target.
+# Add Gtest-based tests to ets_interop_js_gtests target.
 #
 # Example usage:
-#   panda_ets_interop_js_arkjsvm_gtest(test_name
+#   panda_ets_interop_js_gtest(test_name
 #     CPP_SOURCES
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
@@ -93,7 +93,7 @@ endfunction(compile_dynamic_file)
 #     PACKAGE_NAME
 #       unit1_test 
 #   )
-function(panda_ets_interop_js_arkjsvm_gtest TARGET)
+function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
@@ -107,7 +107,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
 
     panda_ets_interop_js_plugin(${TARGET}
         SOURCES ${ARG_CPP_SOURCES}
-        LIBRARIES ets_interop_js_gtest ets_interop_js_napi_arkjsvm ${ARG_LIBRARIES}
+        LIBRARIES ets_interop_js_gtest ets_interop_js_napi ${ARG_LIBRARIES}
         LIBRARY_OUTPUT_DIRECTORY ${SO_FILES_OUTPUT}
         OUTPUT_SUFFIX ".so"
     )
@@ -156,7 +156,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         NO_EXECUTABLE
         NO_CORES
         CUSTOM_PRERUN_ENVIRONMENT
-            "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+            "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
             "JS_ABC_OUTPUT_PATH=${CMAKE_CURRENT_BINARY_DIR}"
             "INTEROP_TEST_BUILD_DIR=${PANDA_BINARY_ROOT}/tests/ets_interop_js"
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
@@ -169,10 +169,10 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
             --enable-force-gc=false
-            --entry-point=gtest_launcher_arkjsvm
-            ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc
+            --entry-point=gtest_launcher
+            ${INTEROP_TESTS_DIR}/gtest_launcher.abc
             ${TARGET}
-        DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher_arkjsvm
+        DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}
         OUTPUT_DIRECTORY ${INTEROP_TESTS_DIR}
     )
@@ -181,10 +181,10 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         add_dependencies(${TARGET}_gtests ${TARGET}_dynamic_modules)
     endif()
 
-    add_dependencies(ets_interop_js_arkjsvm_gtests ${TARGET}_gtests)
-endfunction(panda_ets_interop_js_arkjsvm_gtest)
+    add_dependencies(ets_interop_js_gtests ${TARGET}_gtests)
+endfunction(panda_ets_interop_js_gtest)
 
-function(panda_ets_interop_js_test_arkjsvm TARGET)
+function(panda_ets_interop_js_test TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
@@ -236,19 +236,19 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
 
     # Make symbolic links to convinient work with requireNapiPreview
     set(SO_FILES_LINK_PATH "${CMAKE_CURRENT_BINARY_DIR}/module/")
-    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
-    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
+    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi.so")
+    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/interop_js/libinterop_test_helper.so")
 
     add_custom_target(${TARGET}_create_symlinks
         COMMAND mkdir -p ${SO_FILES_LINK_PATH}
                 && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_LINK_PATH}
-        DEPENDS ets_interop_js_napi_arkjsvm ${INTEROP_HELPER_LIB_SOURCE}
+        DEPENDS ets_interop_js_napi ${INTEROP_HELPER_LIB_SOURCE}
     )
 
     set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_interop_js_output.txt")
 
     set(CUSTOM_PRERUN_ENVIRONMENT
-        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
         "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
         "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
@@ -270,11 +270,11 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
             ${TARGET}_js_launcher
             ${TARGET}_create_symlinks
             ${TARGET_TEST_PACKAGE}
-            ets_interop_js_napi_arkjsvm
+            ets_interop_js_napi
     )
 
     if(DEFINED ARG_JS_SOURCES)
         add_dependencies(${TARGET} ${TARGET}_js_modules)
     endif()
-    add_dependencies(ets_interop_js_tests_arkjsvm ${TARGET})
-endfunction(panda_ets_interop_js_test_arkjsvm)
+    add_dependencies(ets_interop_js_tests ${TARGET})
+endfunction(panda_ets_interop_js_test)

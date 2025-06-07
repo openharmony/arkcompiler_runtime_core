@@ -92,7 +92,7 @@ async function doTestReject(p : Promise<Object>) : Promise<void> {
         globalTest!.fail();
     }).catch<void>((x: Error): void => {
         let jsx = x as JSValue;
-        if (jsx.message == "rejected") {
+        if (jsx.message == 'rejected') {
             globalTest!.success();
         } else {
             globalTest!.fail();
@@ -105,7 +105,7 @@ async function doTestRejectWithAwait(p : Promise<Object>) : Promise<void> {
         globalTest!.fail();
     }).catch((x: Error): void => {
         let jsx = x as JSValue;
-        if (jsx.message == "rejected") {
+        if (jsx.message == 'rejected') {
             globalTest!.success();
         } else {
             globalTest!.fail();

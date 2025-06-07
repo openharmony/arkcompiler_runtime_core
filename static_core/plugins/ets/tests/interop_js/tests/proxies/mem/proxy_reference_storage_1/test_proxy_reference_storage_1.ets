@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-// NOTE: this file is required by panda_ets_interop_js_test_arkjsvm()
+// NOTE: this file is required by panda_ets_interop_js_test()

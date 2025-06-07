@@ -59,7 +59,7 @@ function testXmlPullParserConstructor0007() {
             supportDoctype: true, ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -83,7 +83,7 @@ function testXmlPullParserConstructor0008() {
             supportDoctype: true, ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -117,7 +117,7 @@ function testXmlPullParserConstructor0013() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -150,7 +150,7 @@ function testXmlPullParserConstructor0014() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -183,7 +183,7 @@ function testXmlPullParserConstructor0015() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -216,7 +216,7 @@ function testXmlPullParserConstructor0016() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -246,7 +246,7 @@ function testXmlPullParserConstructor0017() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -270,7 +270,7 @@ function testXmlPullParserConstructor0018() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -294,7 +294,7 @@ function testXmlPullParserConstructor0019() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -321,7 +321,7 @@ function testXmlPullParserConstructor0020() {
             ignoreNameSpace: true,
             tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);

@@ -18,7 +18,6 @@
 
 #include <vector>
 #include <thread>
-#include <node_api.h>
 
 #include "libpandabase/os/filesystem.h"
 #include "libpandabase/utils/logger.h"

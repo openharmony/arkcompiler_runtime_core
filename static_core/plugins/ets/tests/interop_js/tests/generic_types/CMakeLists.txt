@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__ets_proxy_test_generic_types
+panda_ets_interop_js_gtest(ets_interop_js__ets_proxy_test_generic_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.ets
     JS_SOURCES

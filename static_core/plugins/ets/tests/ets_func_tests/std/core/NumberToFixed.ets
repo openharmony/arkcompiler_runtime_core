@@ -19,6 +19,7 @@ desc: Number toFixed tests
 
 function main(): int {
    const suite = new ArkTestsuite("Number API test for SDK");
+   suite.addTest("number.toFixed(num), treatment of Scientific notation", testNumberToFixed);
    suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
    suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
    return suite.run()

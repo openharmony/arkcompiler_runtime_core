@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__dot_operator_sts_to_js
+panda_ets_interop_js_gtest(ets_interop_js__dot_operator_sts_to_js
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/dot_operator.ets
     JS_SOURCES

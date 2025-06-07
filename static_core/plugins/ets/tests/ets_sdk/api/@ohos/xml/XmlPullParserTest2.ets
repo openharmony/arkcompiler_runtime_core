@@ -32,7 +32,7 @@ function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
     assertNE(parser, null)
-    parser.parse({} as xml.ParseOptions)
+    parser.parseXml({} as xml.ParseOptions)
 }
 
 function rawStringToBuffer( str: string ) : ArrayBuffer {
@@ -73,7 +73,7 @@ function testWithTagValueCb() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res : ReadonlyArray<string> = Array.of<string>(
         "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
@@ -125,7 +125,7 @@ function testWithTagValueCbWithIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res : ReadonlyArray<string> = Array.of<string>(
         "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
@@ -174,7 +174,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res : ReadonlyArray<string> = Array.of<string>(
         "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
@@ -226,7 +226,7 @@ function testWithAttributeValueCb() {
 
     let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
     assertEQ(processStr(g_testStr), processStr(expected))
@@ -256,7 +256,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
     assertEQ(processStr(g_testStr), processStr(expected));
@@ -314,7 +314,7 @@ function testXmlPullParserParseOptions0001() {
           ignoreNameSpace: true,
           tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -336,7 +336,7 @@ function testXmlPullParserParseOptions0002() {
           ignoreNameSpace: false,
           tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -358,7 +358,7 @@ function testXmlPullParserParseOptions0003() {
           ignoreNameSpace: true,
           tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -380,7 +380,7 @@ function testXmlPullParserParseOptions0004() {
           ignoreNameSpace: false,
           tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -402,7 +402,7 @@ function testXmlPullParserParseOptions0005() {
           ignoreNameSpace: false,
           tagValueCallbackFunction: undefined
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -424,7 +424,7 @@ function testXmlPullParserParseOptions0006() {
           ignoreNameSpace: false,
           tagValueCallbackFunction: (name: string, value: string) => true
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -448,7 +448,7 @@ function testXmlPullParserParseOptions0008() {
           tagValueCallbackFunction: (name: string, value: string) => true,
           tokenValueCallbackFunction: (key: xml.EventType, value: xml.ParseInfo) => true,
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -471,7 +471,7 @@ function testXmlPullParserParseOptions0009() {
           tagValueCallbackFunction: (name: string, value: string) => true,
           tokenValueCallbackFunction: undefined,
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)

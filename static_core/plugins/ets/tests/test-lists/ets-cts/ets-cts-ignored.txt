@@ -1,22 +1,3 @@
-#23500 Successful compilation instead of CTE
-02.lexical_elements/07.keywords/hard_16.ets
-02.lexical_elements/07.keywords/hard_29.ets
-02.lexical_elements/07.keywords/hard_41.ets
-02.lexical_elements/07.keywords/types_1.ets
-02.lexical_elements/07.keywords/types_2.ets
-02.lexical_elements/07.keywords/types_4.ets
-02.lexical_elements/07.keywords/types_6.ets
-02.lexical_elements/07.keywords/types_8.ets
-02.lexical_elements/07.keywords/types_10.ets
-02.lexical_elements/07.keywords/types_12.ets
-02.lexical_elements/07.keywords/types_14.ets
-02.lexical_elements/07.keywords/types_20.ets
-02.lexical_elements/07.keywords/types_24.ets
-
-#24028 not implemented
-03.types/01.predefined_types/class_types_declaration_2.ets
-03.types/03.using_types/array_value_types_declaration_18.ets
-
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
@@ -41,8 +22,6 @@
 #24032
 03.types/17.tuple_types/tt_7.ets
 
-#23581
-03.types/17.tuple_types/tt_16.ets
 
 #23975
 03.types/17.tuple_types/tt2_31.ets
@@ -50,8 +29,6 @@
 #23696 Readonly arrays and readonly tuples not supported
 03.types/19.union_types/01.union_types_normalization/norm_29.ets
 03.types/19.union_types/01.union_types_normalization/norm_30.ets
-03.types/19.union_types/01.union_types_normalization/norm_34.ets
-03.types/19.union_types/01.union_types_normalization/norm_35.ets
 
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,6 +135,20 @@ static RuntimeOptions GetRuntimeOptions(const std::string &triggerType)
         constexpr size_t YOUNG_SIZE = 512 * 1024;
         options.SetYoungSpaceSize(YOUNG_SIZE);
         options.SetInitYoungSpaceSize(YOUNG_SIZE);
+    } else if (triggerType == "heap-trigger-test") {
+        options.SetGcTriggerType("heap-trigger-test");
+    } else if (triggerType == "heap-trigger") {
+        options.SetGcTriggerType("heap-trigger");
+    } else if (triggerType == "adaptive-heap-trigger") {
+        options.SetGcTriggerType("adaptive-heap-trigger");
+    } else if (triggerType == "no-gc-for-start-up") {
+        options.SetGcTriggerType("no-gc-for-start-up");
+    } else if (triggerType == "trigger-heap-occupancy") {
+        options.SetGcTriggerType("trigger-heap-occupancy");
+    } else if (triggerType == "debug") {
+        options.SetGcTriggerType("debug");
+    } else if (triggerType == "pause-time-goal-trigger") {
+        options.SetGcTriggerType("pause-time-goal-trigger");
     } else {
         UNREACHABLE();
     }
@@ -220,6 +234,70 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
 
         // previous mixed collection should update target footprint
         ASSERT_GT(pauseTimeGoalTrigger->GetTargetFootprint(), INIT_TARGET_FOOTPRINT);
+    }
+    Runtime::Destroy();
+}
+
+TEST(CreateGCTriggerTest, PAUSE_TIME_GOAL_TRIGGER)
+{
+    Runtime::Create(GetRuntimeOptions("pause-time-goal-trigger"));
+    auto *thread = ark::ManagedThread::GetCurrent();
+    {
+        ScopedManagedCodeThread s(thread);
+        HandleScope<ObjectHeader *> scope(thread);
+
+        auto *runtime = Runtime::GetCurrent();
+        auto *vm = runtime->GetPandaVM();
+        auto *trigger = vm->GetGCTrigger();
+        ASSERT_EQ(mem::GCTriggerType::PAUSE_TIME_GOAL_TRIGGER, trigger->GetType());
+    }
+    Runtime::Destroy();
+}
+
+TEST(CreateGCTriggerTest, TRIGGER_HEAP_OCCUPANCY)
+{
+    Runtime::Create(GetRuntimeOptions("trigger-heap-occupancy"));
+    auto *thread = ark::ManagedThread::GetCurrent();
+    {
+        ScopedManagedCodeThread s(thread);
+        HandleScope<ObjectHeader *> scope(thread);
+
+        auto *runtime = Runtime::GetCurrent();
+        auto *vm = runtime->GetPandaVM();
+        auto *trigger = vm->GetGCTrigger();
+        ASSERT_EQ(mem::GCTriggerType::TRIGGER_HEAP_OCCUPANCY, trigger->GetType());
+    }
+    Runtime::Destroy();
+}
+
+TEST(CreateGCTriggerTest, NO_GC_FOR_START_UP)
+{
+    Runtime::Create(GetRuntimeOptions("no-gc-for-start-up"));
+    auto *thread = ark::ManagedThread::GetCurrent();
+    {
+        ScopedManagedCodeThread s(thread);
+        HandleScope<ObjectHeader *> scope(thread);
+
+        auto *runtime = Runtime::GetCurrent();
+        auto *vm = runtime->GetPandaVM();
+        auto *trigger = vm->GetGCTrigger();
+        ASSERT_EQ(mem::GCTriggerType::HEAP_TRIGGER, trigger->GetType());
+    }
+    Runtime::Destroy();
+}
+
+TEST(CreateGCTriggerTest, HEAP_TRIGGER_TEST)
+{
+    Runtime::Create(GetRuntimeOptions("heap-trigger-test"));
+    auto *thread = ark::ManagedThread::GetCurrent();
+    {
+        ScopedManagedCodeThread s(thread);
+        HandleScope<ObjectHeader *> scope(thread);
+
+        auto *runtime = Runtime::GetCurrent();
+        auto *vm = runtime->GetPandaVM();
+        auto *trigger = vm->GetGCTrigger();
+        ASSERT_EQ(mem::GCTriggerType::HEAP_TRIGGER, trigger->GetType());
     }
     Runtime::Destroy();
 }

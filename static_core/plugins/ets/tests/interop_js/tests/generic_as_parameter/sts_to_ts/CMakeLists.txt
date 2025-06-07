@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_as_parameter_sts_to_ts
+panda_ets_interop_js_gtest(ets_interop_js__generic_as_parameter_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.ets
     JS_SOURCES

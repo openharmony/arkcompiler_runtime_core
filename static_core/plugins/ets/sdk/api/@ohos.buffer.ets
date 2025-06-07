@@ -34,6 +34,13 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     return value.buffer;
 }
 
+function fillInPaddingBase64(str: string): string {
+    let base64Divisible: int = 4;
+    let remainder: int = str.length % base64Divisible as int;
+    const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
+    return str.padRight(c'=', str.length as int + paddingCount);
+}
+
 /**
  * Namespace containing Buffer implementation and related utilities
  * for handling binary data and various encoding operations.
@@ -56,8 +63,7 @@ export default namespace buffer {
         | 'binary'
         | 'hex';
 
-    type TypedArray = Int8Array;
-    type TypedArrayOrigin = Int8Array
+    type TypedArray = Int8Array
         | Uint8Array
         | Uint8ClampedArray
         | Int16Array
@@ -133,8 +139,11 @@ export default namespace buffer {
      */
     export function from(string: String, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
-        const byteLength: int = ArrayBuffer.bytesLength(string, resolvedEncoding);
-        return new Buffer(ArrayBuffer.from(string, resolvedEncoding, byteLength));
+        let resolvedString = string;
+        if (encoding == 'base64' || encoding == 'base64url') {
+            resolvedString = fillInPaddingBase64(string);
+        }
+        return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
     }
 
     /**
@@ -149,7 +158,7 @@ export default namespace buffer {
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
-        doc: string | Buffer | TypedArrayOrigin | DataView | ArrayBuffer,
+        doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
         encoding?: BufferEncoding
     ): number {
         if (doc instanceof string) {
@@ -369,8 +378,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         const resolvedSource = getArrayBufferFrom(source);
         const sourceBytesLength = resolvedSource.byteLength as int;
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
-        const newBytesLength = ArrayBuffer.bytesLength(str, toEnc);
-        const newBytes = ArrayBuffer.from(str, toEnc, newBytesLength);
+        const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
     }
 
@@ -751,10 +759,8 @@ Received value is: ${resolvedEnd}`)
 
             switch (klass) {
                 case "string":
-                    const bytesSize = ArrayBuffer.bytesLength(value as string, resolvedEncoding as string);
                     let buff = ArrayBuffer.from(value as string,
-                                                resolvedEncoding as string,
-                                                bytesSize);
+                                                resolvedEncoding as string);
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
                         this.buffer.set(i, buff.at((i % buff.byteLength) as int) as byte);
                     }
@@ -922,13 +928,6 @@ Received value is: ${value}`)
             return new DataView(this.buffer, 0, this.length);
         }
 
-        private fillInPaddingBase64(str: string): string {
-            let base64Divisible: int = 4
-            let remainder: int = str.length % base64Divisible as int
-            const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0
-            return str.padRight(c'=', str.length as int + paddingCount)
-        }
-
         /**
         * Writes a signed integer to the buffer at the specified offset using big-endian format
         *
@@ -963,8 +962,8 @@ Received value is: ${value}`)
             let val: number = 0;
             let multiplier = 1 << (8 * (byteLength - 1));
             for (let i = 0; i < byteLength; i++) {
-                const byte = view.getUint8(offset + i);
-                val += byte * multiplier;
+                const byt = view.getUint8(offset + i);
+                val += byt * multiplier;
                 multiplier >>= 8;
             }
             const signBit = 1 << (8 * byteLength - 1);
@@ -1008,8 +1007,8 @@ Received value is: ${value}`)
             let val: number = 0;
             let multiplier = 1;
             for (let i = 0; i < byteLength; i++) {
-                const byte = view.getUint8(offset + i);
-                val += byte * multiplier;
+                const byt = view.getUint8(offset + i);
+                val += byt * multiplier;
                 multiplier <<= 8;
             }
             if (val >= (1 << (8 * byteLength - 1))) {
@@ -1104,18 +1103,25 @@ Received value is: ${value}`)
         * @param {number} [length] - Maximum number of bytes to write
         * @param {string} [encoding='utf8'] - Character encoding of the string
         * @returns {number} Number of bytes written
+        * @throws { BusinessError } 10200001 - The value of "[offset/length]" is out of range. It mast be >= 0 and
+            <= buf.length. Received value is: [offset/length]
         */
         public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
             if (offset < 0 || offset > this.length - 1) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, "Offset value is out of range")
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${offset}`)
             }
 
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
+            if (tmpLength < 0 || tmpLength > this.length) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
+            }
             const resolvedLength = Math.min(tmpLength, this.length - offset)
             let resolvedString = str
             if (encoding == 'base64' || encoding == 'base64url') {
-                resolvedString = this.fillInPaddingBase64(str)
+                resolvedString = fillInPaddingBase64(str)
             }
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
@@ -1547,6 +1553,14 @@ Received value is: ${value}`)
         }
     }
 
+    enum TypeParameters {
+        StringType = "string",
+        ArrayBufferType = "ArrayBuffer",
+        DataViewType = "DataView",
+        TypedArrayType = "TypedArray",
+        BlobType = "Blob"
+    }
+
     export interface BlobOptions {
         /** The Blob content-type. The intent is for type to convey the MIME media type of the data, however no validation of the type format is performed. */
         type: string
@@ -1554,38 +1568,21 @@ Received value is: ${value}`)
         endings: 'transparent'|'native'
     };
 
-    type SrcType = string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]
-    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob
-    type ArrSrcType = Array<string> | Array<ArrayBuffer> | Array<TypedArray> | Array<DataView> | Array<Blob>
-
-    function typeKey(sources: SrcType): string {
-        if (sources instanceof string[]) {
-            return "string"
-        } else if (sources instanceof ArrayBuffer[]) {
-            return "ArrayBuffer"
-        } else if (sources instanceof TypedArray[]) {
-            return "TypedArray"
-        } else if (sources instanceof DataView[]) {
-            return "DataView"
-        } else if (sources instanceof Blob[]) {
-            return "Blob"
-        }
-        return ""
-    }
-
+    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>;
+    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob;
+    type ArrSrcType =  Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob>;
     function toString(src: SrcItemType): string {
         if (src instanceof string) {
             return src
         } else if (src instanceof ArrayBuffer) {
             return buffer.from(src as ArrayBuffer).toString()
         } else if (src instanceof TypedArray) {
-            return (src as TypedArray).join('')
+            return buffer.from(src.buffer as ArrayBuffer).toString()
         } else if (src instanceof DataView) {
             return buffer.from((src as DataView).buffer as ArrayBuffer).toString()
         }
         return ""
     }
-
     /**
     * A Blob encapsulates immutable, raw data that can be safely shared across multiple worker threads.
     */
@@ -1594,12 +1591,23 @@ Received value is: ${value}`)
          * Creates a new Blob object containing a concatenation of the given sources.
          * <ArrayBuffer>, <TypedArray>, <DataView>, and <Buffer> sources are copied into the 'Blob' and can therefore be safely modified after the 'Blob' is created.
          * String sources are encoded as UTF-8 byte sequences and copied into the Blob. Unmatched surrogate pairs within each string part will be replaced by Unicode U+FFFD replacement characters.
-         * @param {string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[]} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
+         * @param {FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
          * @param {BlobOptions} [options] - options
          */
-        constructor(sources: string[] | ArrayBuffer[] | TypedArray[] | DataView[] | Blob[], options?: BlobOptions) {
-            this.typeKey = typeKey(sources)
+        constructor(sources: SrcType, options?: BlobOptions) {
+            this.checkParameters(sources)
             this.createArray(sources)
+            if (options != undefined) {
+                this.type = options!.type ? options!.type! : ''
+            } else {
+                this.type = ''
+            }
+            this.calcSize()
+        }
+
+        constructor(sources: ArrSrcType, options?: BlobOptions) {
+            this.checkParameters(sources)
+            this.arr = sources
             if (options != undefined) {
                 this.type = options!.type ? options!.type! : ''
             } else {
@@ -1626,12 +1634,33 @@ Received value is: ${value}`)
             this.typeKey = blob.typeKey
         }
 
+        private checkParameters(sources: ArrSrcType | SrcType) {
+            for (const element of sources) {
+                if (element instanceof string) {
+                    this.typeKey = TypeParameters.StringType
+                   break;
+                } else if (element instanceof ArrayBuffer) {
+                    this.typeKey = TypeParameters.ArrayBufferType
+                    break;
+                } else if (element instanceof DataView) {
+                    this.typeKey = TypeParameters.DataViewType
+                    break;
+                } else if (element instanceof TypedArray) {
+                    this.typeKey = TypeParameters.TypedArrayType
+                    break;
+                } else if (element instanceof Blob) {
+                    this.typeKey = TypeParameters.BlobType
+                    break;
+                }
+            }
+        }
+
         private calcSize(): number {
             this.size = 0
             switch (this.typeKey) {
                 case "string": {
                     for (const item of this.arr as Array<string>) {
-                        this.size += item.length
+                        this.size += ArrayBuffer.bytesLength(item, "utf8")
                     }
                 } break
                 case "ArrayBuffer": {
@@ -1661,19 +1690,19 @@ Received value is: ${value}`)
         private createArray(sources: SrcType) {
             switch (this.typeKey) {
                 case "string": {
-                    this.arr = Array.from(sources as string[])
+                    this.arr = Array.from(sources as FixedArray<string>)
                 } break
                 case "ArrayBuffer": {
-                    this.arr = Array.from(sources as ArrayBuffer[])
+                    this.arr = Array.from(sources as FixedArray<ArrayBuffer>)
                 } break
                 case "TypedArray": {
-                    this.arr = Array.from(sources as TypedArray[])
+                    this.arr = Array.from(sources as FixedArray<TypedArray>)
                 } break
                 case "DataView": {
-                    this.arr = Array.from(sources as DataView[])
+                    this.arr = Array.from(sources as FixedArray<DataView>)
                 } break
                 case "Blob": {
-                    this.arr = Array.from(sources as Blob[])
+                    this.arr = Array.from(sources as FixedArray<Blob>)
                 } break
             }
         }
@@ -1742,7 +1771,7 @@ Received value is: ${value}`)
 
         private toArrayBuffer(): ArrayBuffer {
             const str = this.getString()
-            return ArrayBuffer.from(str, "utf-8", ArrayBuffer.bytesLength(str, "utf-8"))
+            return ArrayBuffer.from(str, "utf-8");
         }
 
         private getString(): string {
@@ -1767,6 +1796,5 @@ Received value is: ${value}`)
             }
             return b.toString()
         }
-
     }
 }

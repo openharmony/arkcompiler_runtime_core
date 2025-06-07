@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,4 +147,15 @@ TEST(DfxController, TestPrintDfxOptionValues)
     EXPECT_FALSE(DfxController::IsInitialized());
 }
 
+TEST(DfxController, TestSetDefaultOption)
+{
+    if (DfxController::IsInitialized()) {
+        DfxController::Destroy();
+    }
+    EXPECT_FALSE(DfxController::IsInitialized());
+
+    DfxController::Initialize();
+    DfxController::Initialize();
+    ASSERT_EQ(DfxController::GetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK), 1);
+}
 }  // namespace ark::test

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-function main() {
-	globalThis.test = requireNapiPreview('sample_function', true);
-	if ('Test' === globalThis.test.getSampleString()) {
-		print('Native function was successfully called');
-	} else {
-		throw new Error('Failed to call native function');
-	}
-}
+/*---
+desc: ES2PANDA_FAIL, TypeError, Structs are only used to define UI components, it should be translated at 'plugin after parser' phase.
+tags: [compile-only, negative]
+---*/
 
-main();
+export declare struct DD {
+    public static fdd(): void
+}

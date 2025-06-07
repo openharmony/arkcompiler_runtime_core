@@ -20,18 +20,18 @@ const {
 const deferentTypes = new DeferentStringTypes();
 
 function checkChar() {
-    ASSERT_TRUE(typeof deferentTypes.char === 'string');
-    ASSERT_TRUE(deferentTypes.char === 'a');
+    ASSERT_TRUE(typeof deferentTypes.ch === 'string');
+    ASSERT_TRUE(deferentTypes.ch === 'a');
 }
 
 function checkString() {
-    ASSERT_TRUE(typeof deferentTypes.string === 'string');
-    ASSERT_TRUE(deferentTypes.string === 'hello');
+    ASSERT_TRUE(typeof deferentTypes.str === 'string');
+    ASSERT_TRUE(deferentTypes.str === 'hello');
 }
 
 function checkLiteral() {
-    ASSERT_TRUE(typeof deferentTypes.literal === 'string');
-    ASSERT_TRUE(deferentTypes.literal === 'one');
+    ASSERT_TRUE(typeof deferentTypes.lit === 'string');
+    ASSERT_TRUE(deferentTypes.lit === 'one');
 }
 
 checkChar();

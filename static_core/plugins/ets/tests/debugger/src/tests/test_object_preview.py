@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,16 +21,16 @@ from arkdb.debug import StopOnPausedType
 
 TEST_OBJECT_PREVIEW = """\
 class A {
-    x: int[] = [1, 2, 3, 4, 5]
+    x: FixedArray<int> = [1, 2, 3, 4, 5]
 };
 
 function main(): void {
     let obj1 = new A()
     let obj2 = new A()
     let obj3 = new A()
-    let arr = [obj1, obj2, obj3]
+    let arr: FixedArray<A> = [obj1, obj2, obj3]
 
-    let primitiveArr = [5.0, 4.0, 3.0, 2.0, 1.0]
+    let primitiveArr: FixedArray<double> = [5.0, 4.0, 3.0, 2.0, 1.0]
 
     console.log("array"); // #BP
     console.log("array");
@@ -38,12 +38,16 @@ function main(): void {
 """
 
 
-def get_expected_preview_for_array():
+def get_expected_preview_for_array(class_name_prefix: str):
     property_preview = []
     for idx in range(0, 3):
         property_preview.append(
             cdp.runtime.PropertyPreview(
-                name="{i}".format(i=idx), type_="object", value="A", value_preview=None, subtype=None
+                name="{i}".format(i=idx),
+                type_="object",
+                value=f"{class_name_prefix}.A",
+                value_preview=None,
+                subtype=None,
             )
         )
 
@@ -112,7 +116,8 @@ async def test_object_preview(
             expected_preview: cdp.runtime.ObjectPreview
             generated_preview = prop_descriptor.value.preview
             if prop_descriptor.name == "arr":
-                expected_preview = get_expected_preview_for_array()
+                # Expect fully-qualified names of objects
+                expected_preview = get_expected_preview_for_array("test_string")
             elif prop_descriptor.name in ["obj1", "obj2", "obj3"]:
                 expected_preview = get_expected_preview_for_object()
             elif prop_descriptor.name == "primitiveArr":

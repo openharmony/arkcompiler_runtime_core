@@ -81,7 +81,7 @@ function testXmlParseInfoGetDepth0001() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:0 value:0"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -104,7 +104,7 @@ function testXmlParseInfoGetDepth0002() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:1 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -127,7 +127,7 @@ function testXmlParseInfoGetDepth0003() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:2"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -150,7 +150,7 @@ function testXmlParseInfoGetDepth0004() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:3 value:1"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -173,7 +173,7 @@ function testXmlParseInfoGetDepth0005() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:4 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -196,7 +196,7 @@ function testXmlParseInfoGetDepth0006() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:5 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -219,7 +219,7 @@ function testXmlParseInfoGetDepth0007() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:6 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -242,7 +242,7 @@ function testXmlParseInfoGetDepth0008() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:7 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -265,7 +265,7 @@ function testXmlParseInfoGetDepth0009() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:8 value:4"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -288,7 +288,7 @@ function testXmlParseInfoGetDepth0011() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:10 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -311,7 +311,7 @@ function testXmlParseInfoGetDepth0010() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             tokenValueCallbackFunction: func,
         };
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:9 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -345,7 +345,7 @@ function testGetDepth() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{  : 0 }; { note : 1 }; {  : 1 }; { title : 2 }; {  : 2 }; { title : 1 }; {  : 1 }; \
 { todo : 2 }; {  : 2 }; { todo : 1 }; {  : 1 }; { todo : 2 }; {  : 2 }; { todo : 1 }; { note : 1 }; {  : 0 }; '

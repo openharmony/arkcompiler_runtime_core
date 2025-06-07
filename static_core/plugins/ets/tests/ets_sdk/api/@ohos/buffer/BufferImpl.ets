@@ -38,6 +38,8 @@ function main(): int {
     suite.addTest("Test buffer.from with ArrayBuffer", testFromArrayBuffer)
     suite.addTest("Test buffer.from with Buffer/Uint8Array", testFromBufferOrUint8Array)
     suite.addTest("Test buffer.from with string", testFromString)
+    suite.addTest("Test buffer.from with string and base64 encoding", testFromStringWithBase64Encoding)
+    suite.addTest("Test buffer.from with string with invalid length", testFromStringWithInvalidLength)
 
     suite.addTest("Test alloc", testAlloc)
     suite.addTest("Test allocUninitialized", testAllocUninitialized)
@@ -78,6 +80,8 @@ function main(): int {
     suite.addTest("Test string write single parameter", testBufferWriteStringSingleParam)
     suite.addTest("Test string write with infinity length",  testBufferWriteStringInfinity)
     suite.addTest("Test string write wrong offset", testBufferWriteStringWrongOffset)
+    suite.addTest("Test string write out range offset", testBufferWriteStringOutRangeOffset)
+    suite.addTest("Test string write out range length", testBufferWriteStringOutRangeLength)
 
     return suite.run()
 }
@@ -214,6 +218,19 @@ function testFromString() {
     const specialStr = '你好，世界🌍'
     const buf4 = buffer.from(specialStr)
     assertEQ(buf4.toString(), specialStr)
+}
+
+function testFromStringWithBase64Encoding() {
+    let buf = buffer.from('abc', 'base64');
+    assertEQ(buf.toString(), 'i·');
+    assertEQ(buf.length as int, 2);
+    assertEQ(buf.toString('base64'), 'abc=');
+}
+
+function testFromStringWithInvalidLength() {
+    let buf = buffer.from(new String('this is a test'), 'utf8', -1);
+    assertEQ(buf.length as int, 14);
+    assertEQ(buf.toString(), 'this is a test');
 }
 
 // Buffer.toString() tests
@@ -740,15 +757,29 @@ function testBufferWriteStringSingleParam() {
 function testBufferWriteStringInfinity() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
-    let res = buf.write(str, 0, Infinity)
-    assertEQ(res, str.length)
-    assertEQ(buf.toString('utf8', 0, str.length), str)
+    expectError(() => {
+        buf.write(str, 0, Infinity);
+    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: Infinity");
 }
 
 function testBufferWriteStringWrongOffset() {
     const str = "abc"
     let buf = buffer.alloc(10)
-    expectError(() => { 
+    expectError(() => {
 		buf.write(str, -12)
-	}, "Offset value is out of range")
+    }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -12");
+}
+
+function testBufferWriteStringOutRangeOffset() {
+    let buf = buffer.alloc(10);
+    expectError(() => {
+        buf.write("abc", -Infinity, -Infinity, 'utf8');
+    }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -Infinity");
+}
+
+function testBufferWriteStringOutRangeLength() {
+    let buf = buffer.alloc(10);
+    expectError(() => {
+        buf.write("abcdefg", 3, -1);
+    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
 }

@@ -95,6 +95,12 @@ static ani_string Decode(ani_env *env, ani_object object, ani_object typedArray,
     return nullptr;
 }
 
+static void NativeDestroy([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_long textDecoderPtr)
+{
+    auto decodedPtr = reinterpret_cast<TextDecoder *>(textDecoderPtr);
+    delete decodedPtr;
+}
+
 static void BindNativeDecoder(ani_env *env, ani_object object, ani_string aniEncoding, ani_int flags)
 {
     std::string stringEncoding = ark::ets::stdlib::ConvertFromAniString(env, aniEncoding);
@@ -114,6 +120,7 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array methods = {
         ani_native_function {"bindNativeDecoder", "Lstd/core/String;I:V", reinterpret_cast<void *>(BindNativeDecoder)},
         ani_native_function {"decode", "Lescompat/Uint8Array;Z:Lstd/core/String;", reinterpret_cast<void *>(Decode)},
+        ani_native_function {"nativeDestroy", "J:V", reinterpret_cast<void *>(NativeDestroy)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

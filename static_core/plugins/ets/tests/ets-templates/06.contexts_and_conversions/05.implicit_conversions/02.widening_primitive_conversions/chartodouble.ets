@@ -17,8 +17,8 @@
 desc: Casting conversions char to double.
 ---*/
 
-let char: string = 'A';
-let doubleValue: number = char.charCodeAt(0);
+let ch: string = 'A';
+let doubleValue: number = ch.charCodeAt(0);
 let expectedDoubleValue: number = 65.0;
 
 function main(): void {

@@ -33,25 +33,19 @@ set(ETS_INTEROP_JS_NAPI_LIBRARIES
 )
 set(ETS_INTEROP_HYBRID_SOURCES)
 
+add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/runtime_options.yaml)
+
 panda_ets_interop_js_plugin(ets_interop_js_napi
     SOURCES ${ETS_INTEROP_JS_NAPI_SOURCES}
     LIBRARIES ${ETS_INTEROP_JS_NAPI_LIBRARIES}
-    OUTPUT_SUFFIX ".node"
+    OUTPUT_SUFFIX ".so"
 )
-
-add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/runtime_options.yaml)
 
 if (PANDA_JS_ETS_HYBRID_MODE)
     list(APPEND ETS_INTEROP_HYBRID_SOURCES
         ${ETS_EXT_SOURCES}/interop_js/handshake.cpp
     )
-
-    panda_ets_interop_js_plugin(ets_interop_js_napi_arkjsvm
-        SOURCES ${ETS_INTEROP_JS_NAPI_SOURCES}
-        LIBRARIES ${ETS_INTEROP_JS_NAPI_LIBRARIES}
-        OUTPUT_SUFFIX ".so"
-    )
-    panda_target_compile_definitions(ets_interop_js_napi_arkjsvm PRIVATE PANDA_JS_ETS_HYBRID_MODE)
+    panda_target_compile_definitions(ets_interop_js_napi PRIVATE PANDA_JS_ETS_HYBRID_MODE)
 endif(PANDA_JS_ETS_HYBRID_MODE)
 
 panda_target_sources(arkruntime_obj PRIVATE
@@ -90,7 +84,7 @@ if(PANDA_TARGET_OHOS)
     panda_target_link_libraries(arkruntime_obj ace_napi.z uv -Wl,--no-undefined)
 else()
     panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${ARKUI_NAPI_HEADERS_PATH})
-    # In case of running using NodeVM or running on ArkJSVM but using ark_js_napi_cli tool it is enough to include directories,
+    # In case of running using ArkJSVM but using ark_js_napi_cli tool it is enough to include directories,
     # because node and ark_js_napi_cli binaries are already linked with sources of uv and napi libraries
     panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${NAPI_HEADERS_PATH})
 

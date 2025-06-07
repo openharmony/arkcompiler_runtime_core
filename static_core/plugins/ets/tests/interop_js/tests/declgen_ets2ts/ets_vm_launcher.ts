@@ -33,9 +33,9 @@ const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
 const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
 // @ts-ignore
-export const etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+export const etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
 if (etsVm === undefined) {
-	throw new Error(`${launcherName}: Failed to load ets_interop_js_napi_arkjsvm.so`);
+	throw new Error(`${launcherName}: Failed to load ets_interop_js_napi.so`);
 }
 
 const etsOpts = {
