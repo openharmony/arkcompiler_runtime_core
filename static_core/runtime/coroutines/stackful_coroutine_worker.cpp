@@ -42,6 +42,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
         scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(GetRuntime(), GetPandaVM(), ScheduleLoopProxy, this,
                                                               "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
                                                               CoroutinePriority::MEDIUM_PRIORITY);
+        scheduleLoopCtx_->LinkToExternalHolder(true);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
@@ -69,6 +70,7 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
     ScopedNativeCodeThread n(coro);
     coro->RequestSuspend(false);
 
+    newCoro->LinkToExternalHolder(IsMainWorker() || InExclusiveMode());
     auto *currentCtx = GetCurrentContext();
     auto *nextCtx = newCoro->GetContext<StackfulCoroutineContext>();
     nextCtx->RequestResume();
@@ -145,6 +147,9 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
     ASSERT(finalizee->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
+#ifdef ARK_HYBRID
+    finalizee->UnbindMutator();
+#endif
     finalizationQueue_.push(finalizee);
     // finalizee will never be scheduled again
     ScheduleNextCoroUnlockNone();
@@ -248,6 +253,7 @@ void StackfulCoroutineWorker::ThreadProc()
     scheduleLoopCtx_ =
         coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
                                                     Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
+    scheduleLoopCtx_->LinkToExternalHolder(false);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
@@ -328,7 +334,7 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
     auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
-    newCoro->LinkToExternalHolder(IsMainWorker() && !canMigrate);
+    newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()
