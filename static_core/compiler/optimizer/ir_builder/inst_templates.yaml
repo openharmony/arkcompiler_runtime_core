@@ -300,6 +300,10 @@ templates:
     BuildIsInstance(instruction);
   throw: |-
     BuildThrow(instruction);
+  any: |-
+    % if inst.mnemonic.include? "call"
+    BuildAnyCall< <%= inst.acc_write? %> >(instruction);
+    % end
   nop: |-
   unimplemented: |-
     // TODO(msherstennikov): implement

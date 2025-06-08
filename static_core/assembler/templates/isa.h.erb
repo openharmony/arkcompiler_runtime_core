@@ -43,6 +43,7 @@
 %   flags << "InstFlags::STRING_ID" if insn.properties.include? 'string_id'
 %   flags << "InstFlags::LITERALARRAY_ID" if insn.properties.include? 'literalarray_id'
 %   flags << "InstFlags::CALL_RANGE" if (insn.properties.include?('call') || insn.stripped_mnemonic == 'initobj') && insn.range?
+%   flags << "InstFlags::ANY_CALL" if (insn.properties.include?('any_call'))
 %   flags = "(#{flags.join(" | ")})"
 %
 %   max_width = group.map do |i|

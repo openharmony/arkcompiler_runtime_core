@@ -3426,6 +3426,69 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCall0()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallRange()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallShort()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThis0()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisRange()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisShort()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNew0()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewRange()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewShort()
+    {
+        LOG_INST();
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleThrow()
     {
         LOG_INST();
