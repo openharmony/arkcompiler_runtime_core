@@ -111,3 +111,7 @@ std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 std/core/ConsoleInfoTest.ets
 std/core/ConsoleGroupTest.ets
 # End issue 25934
+
+# 26316
+std/concurrency/workerlocal_test.ets
+# End issue 26316
