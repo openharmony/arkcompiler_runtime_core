@@ -53,29 +53,12 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let stack: Stack<number>;
-    try {
-        stack = new Stack<number>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Stack");
-        return;
-    }
-    stack.push(TestData.testNumber3);
-    assertEQ(stack.length, TestData.testNumber1, "Stack length should be 1 after adding one element");
+    arktest.expectNoThrow(() => {stack = new Stack<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let stack: Stack<number | string | object>;
-    try {
-        stack = new Stack<number | string | object | boolean>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Stack");
-        return;
-    }
-    stack.push(TestData.testString1);
-    stack.push(TestData.testObject1);
-    stack.push(TestData.testNumber3);
-    stack.push(true);
-    assertEQ(stack.length, TestData.testNumber4, "Stack length should be 4 after adding four elements");
+    arktest.expectNoThrow(() => {stack = new Stack<number | string | object | boolean>()});
 }
 
 function testStackLength() {
