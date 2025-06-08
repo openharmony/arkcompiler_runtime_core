@@ -221,7 +221,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
             i = (i + 1) % this.capacity;
         }
 
-        this.rear = this.length as int;
+        this.rear = this.length.toInt();
         this.front = 0;
         this.capacity = newCap;
         this.buffer = newBuffer;

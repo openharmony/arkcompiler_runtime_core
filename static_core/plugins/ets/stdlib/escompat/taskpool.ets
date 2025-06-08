@@ -792,8 +792,9 @@ export namespace taskpool {
                 const taskRunner = (value: NullishType): NullishType => {
                     return task.execute();
                 };
-                this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType>(taskRunner, (error: Error) : void => {
+                this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType>(taskRunner, (error) => {
                     taskRunner(undefined);
+                    return new Promise<never>((resolve, reject) => {});
                 } ));
                 return this.impl.seqPromise;
             }
@@ -951,7 +952,7 @@ export namespace taskpool {
         if (group.isTaskAlreadySubmitted) {
             throw new Error("taskpool:: groupTask has been executed");
         }
-        let tasksCount = group.tasks.length as int;
+        const tasksCount = group.tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
         }
@@ -1139,7 +1140,7 @@ export namespace taskpool {
                 threadInfo.priority = worker!.currentPriority;
                 let tasks = workerToTasks.get(worker.workerId);
                 if (tasks != undefined) {
-                    let tasksCount : int = tasks.size as int;
+                    let tasksCount : int = tasks.size.toInt();
                     const taskIds: number[] = new number[tasksCount];
                     let currentIndex: int = 0;
                     tasks.forEach((task: Task) => {
@@ -1154,7 +1155,7 @@ export namespace taskpool {
             workerToTasks.forEach((tasks: Set<Task>, workerId: int) => {
                 const threadInfo: ThreadInfo = new ThreadInfo();
                 threadInfo.tid = workerId;
-                const tasksCount: int = tasks.size as int;
+                const tasksCount: int = tasks.size.toInt();
                 if (tasksCount == 0) {
                     threadInfos.push(threadInfo);
                     return;
@@ -1176,13 +1177,13 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.mutexUnlock(mutex);
         const Info: TaskPoolInfo = new TaskPoolInfo();
-        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length as int];
-        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length as int];
+        const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length.toInt()];
+        const threadInfosRes: ThreadInfo[] = new ThreadInfo[threadInfos.length.toInt()];
         taskInfos.forEach((taskInfo: TaskInfo, index: number) => {
-            taskInfosRes[index as int] = taskInfo;
+            taskInfosRes[index.toInt()] = taskInfo;
         });
         threadInfos.forEach((threadInfo: ThreadInfo, index: number) => {
-            threadInfosRes[index as int] = threadInfo;
+            threadInfosRes[index.toInt()] = threadInfo;
         });
         Info.taskInfos = taskInfosRes;
         Info.threadInfos = threadInfosRes;
@@ -1471,7 +1472,7 @@ export namespace taskpool {
 
     function getTaskImpl(tasksQueue: Array<Task>): Task | undefined {
         let task: Task | undefined = undefined;
-        let len = tasksQueue.length as int;
+        let len = tasksQueue.length.toInt();
         for (let i = 0; i < len; ++i) {
             task = tasksQueue.shift();
             if (task?.taskDependenciesCount == 0) {

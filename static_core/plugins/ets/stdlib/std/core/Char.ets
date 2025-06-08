@@ -169,6 +169,141 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     public static readonly MAX_VALUE: char = c'\uFFFF';
 
     /**
+     * Returns value of this instance
+     *
+     * @returns value as byte
+     * @tag arkts
+     */
+    public toByte(): byte {
+        return this.value.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as short
+     * @tag arkts
+     */
+    public toShort(): short {
+        return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as int
+     * @tag arkts
+     */
+    public toInt(): int {
+        return this.value.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as long
+     * @tag arkts
+     */
+    public toLong(): long {
+        return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public toFloat(): float {
+        return this.value.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public toDouble(): double {
+        return this.value.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     * @tag arkts
+     */
+    public toChar(): char {
+        return this.value;
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: char): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: char): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: char): int;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: char): long;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: char): float;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: char): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toChar(value: char): char {
+        return value;
+    };
+
+    /**
      * isInBasicMultilingualPlane(char) checks if the char is in Basic Multilingual Plane.
      * See UTF-16 for more details.
      *

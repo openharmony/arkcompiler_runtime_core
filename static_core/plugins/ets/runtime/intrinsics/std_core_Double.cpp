@@ -309,19 +309,23 @@ double StdCoreDoubleNumberFromString(EtsString *s)
     return ParseFloat(s, flags);
 }
 
-EtsInt StdCoreDoubleToInt(EtsDouble val)
+EtsShort StdCoreDoubleToShort(EtsDouble val)
 {
-    return CastFloatToInt<EtsDouble, EtsInt>(val);
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsDouble, EtsInt>(val);
+    return static_cast<int16_t>(intVal);
 }
 
 EtsByte StdCoreDoubleToByte(EtsDouble val)
 {
-    return static_cast<int8_t>(StdCoreDoubleToInt(val));
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsDouble, EtsInt>(val);
+    return static_cast<int8_t>(intVal);
 }
 
-EtsShort StdCoreDoubleToShort(EtsDouble val)
+EtsInt StdCoreDoubleToInt(EtsDouble val)
 {
-    return static_cast<int16_t>(StdCoreDoubleToInt(val));
+    return CastFloatToInt<EtsDouble, EtsInt>(val);
 }
 
 EtsLong StdCoreDoubleToLong(EtsDouble val)
@@ -332,6 +336,11 @@ EtsLong StdCoreDoubleToLong(EtsDouble val)
 EtsFloat StdCoreDoubleToFloat(EtsDouble val)
 {
     return static_cast<float>(val);
+}
+
+EtsChar StdCoreDoubleToChar(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsChar>(val);
 }
 
 }  // namespace ark::ets::intrinsics

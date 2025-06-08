@@ -48,7 +48,7 @@ export namespace collections {
         // |-  element  -|-  element  -|-  element  -|
         //       ↑
         //    elementId
-        // |---------------buffer--------------------| 
+        // |---------------buffer--------------------|
         elementId: number;
         index: number;
 
@@ -59,9 +59,9 @@ export namespace collections {
     }
     /**
      * An ordered collections of bit values, which are either 0 or 1.
-     * If multiple threads access a BitVector instance concurrently, 
+     * If multiple threads access a BitVector instance concurrently,
      * and at least one of the threads modifies the array structurally,
-     * it must be synchronized externally. 
+     * it must be synchronized externally.
      *
      */
     export class BitVector implements Iterable<number> {
@@ -128,7 +128,7 @@ export namespace collections {
 
         /**
          * Returns the item at that index.
-         * 
+         *
          * @param { number } index - The zero-based index of the desired code unit.
          * @returns { number } The element in the bitVector matching the given index.
          * @throws { BusinessError } 10200001 - If the index is out of range.
@@ -141,7 +141,7 @@ export namespace collections {
 
         /**
          * Sets the value of item at that index.
-         * 
+         *
          * @param { number } index - The zero-based index of the desired code unit.
          * @param { number } value - The value to set at the given index.
          * @throws { BusinessError } 10200001 - If the index is out of range.

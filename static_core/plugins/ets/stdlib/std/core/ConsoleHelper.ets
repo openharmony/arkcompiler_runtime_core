@@ -295,7 +295,7 @@ export class Formatter {
             return s.replaceAll("%%", "%")
         }
 
-        while((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
+        while((i = ((ss = s.substring(preI, s.length)).search("%")).toInt()) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
             res.append(s.substring(preI, preI + i))
             let flagIndex = preI + i + 1
             //NOTE(DZ): temporary solution until primitives remove patch will be merged

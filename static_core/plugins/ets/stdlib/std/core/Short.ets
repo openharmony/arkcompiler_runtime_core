@@ -84,7 +84,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns value as short
      */
     public override toByte(): byte {
-        return Short.toByte(this.value);
+        return (this.value).toByte();
     }
 
     /**
@@ -111,7 +111,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns value as long
      */
     public override toLong(): long {
-        return Short.toLong(this.value);
+        return this.value.toLong();
     }
 
     /**
@@ -138,7 +138,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns value as char
      */
     public toChar(): char {
-        return Short.toChar(this.value);
+        return this.value.toChar();
     }
 
     /**
@@ -194,6 +194,17 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns casted value
      */
     public static native toChar(value: short): char;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toShort(value: short): short {
+        return value;
+    }
 
     /**
      * Compares this instance to other Short object
@@ -264,7 +275,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the addition
      */
     public add(other: Short): Short {
-        return Short.valueOf((this.value + other.toShort()) as short)
+        return Short.valueOf((this.value + other.toShort()).toShort())
     }
 
     /**
@@ -275,7 +286,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the subtraction
      */
     public sub(other: Short): Short {
-        return Short.valueOf((this.value - other.toShort()) as short)
+        return Short.valueOf((this.value - other.toShort()).toShort())
     }
 
     /**
@@ -286,7 +297,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the multiplication
      */
     public mul(other: Short): Short {
-        return Short.valueOf((this.value * other.toShort()) as short)
+        return Short.valueOf((this.value * other.toShort()).toShort())
     }
 
     /**
@@ -297,7 +308,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the division
      */
     public div(other: Short): Short {
-        return Short.valueOf((this.value / other.toShort()) as short)
+        return Short.valueOf((this.value / other.toShort()).toShort())
     }
 
     /**
@@ -357,7 +368,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-                return Short.valueOf(num as short)
+                return Short.valueOf(num.toShort())
             }
         }
         throw new JSONTypeError("Cannot create Short from JSON", new ErrorOptions(json as Object))

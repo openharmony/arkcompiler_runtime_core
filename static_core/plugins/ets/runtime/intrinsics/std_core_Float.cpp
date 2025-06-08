@@ -71,19 +71,23 @@ extern "C" EtsBoolean StdCoreFloatIsSafeInteger(float v)
     return ToEtsBoolean(IsInteger(v) && (std::fabs(v) <= helpers::MaxSafeInteger<float>()));
 }
 
-EtsInt StdCoreFloatToInt(EtsFloat val)
-{
-    return CastFloatToInt<EtsFloat, EtsInt>(val);
-}
-
 EtsShort StdCoreFloatToShort(EtsFloat val)
 {
-    return static_cast<int16_t>(StdCoreFloatToInt(val));
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsFloat, EtsInt>(val);
+    return static_cast<int16_t>(intVal);
 }
 
 EtsByte StdCoreFloatToByte(EtsFloat val)
 {
-    return static_cast<int8_t>(StdCoreFloatToInt(val));
+    // CC-OFFNXT(G.NAM.03) false positive
+    int intVal = CastFloatToInt<EtsFloat, EtsInt>(val);
+    return static_cast<int8_t>(intVal);
+}
+
+EtsInt StdCoreFloatToInt(EtsFloat val)
+{
+    return CastFloatToInt<EtsFloat, EtsInt>(val);
 }
 
 EtsLong StdCoreFloatToLong(EtsFloat val)
@@ -94,6 +98,11 @@ EtsLong StdCoreFloatToLong(EtsFloat val)
 EtsDouble StdCoreFloatToDouble(EtsFloat val)
 {
     return static_cast<double>(val);
+}
+
+EtsChar StdCoreFloatToChar(EtsFloat val)
+{
+    return CastFloatToInt<EtsFloat, EtsChar>(val);
 }
 
 }  // namespace ark::ets::intrinsics

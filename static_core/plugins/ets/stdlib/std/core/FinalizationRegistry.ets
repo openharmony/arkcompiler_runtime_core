@@ -21,7 +21,7 @@ package std.core;
   * FinalizationRegistry is coroutine-safe class.
   * - It is safe to pass an instance to another coroutines.
   * - It is safe to call methods from several coroutines.
-  * 
+  *
   * Notes:
   * - Runtime doesn't provide any guarantees that the registered object will be
   * garbage collected (even if its dead).
@@ -117,10 +117,10 @@ export final class FinalizationRegistry<T> {
      * @returns size of the FinalizationRegistry
      */
     public getSize(): int {
-        let count: int;
+        let count: int = 0;
         this.mutex.lockGuard(() => {
             for (let i = this.idxarr[0]; i != -1; i = this.idxarr[i]) {
-                count++;
+                ++count;
             }
         });
         return count;
@@ -220,7 +220,7 @@ export final class FinalizationRegistry<T> {
 
     private allocTrimplet(): int {
         if (this.freeidx == -1) {
-            // The value selected relative to the internal issue 
+            // The value selected relative to the internal issue
             const mult: int = this.idxarr.length < 1024 ? 32 : 2;
             this.enlarge_arrays(this.idxarr.length * mult);
         }

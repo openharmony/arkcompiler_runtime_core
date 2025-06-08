@@ -506,8 +506,8 @@ abstract class ArrayProxy<T> extends Array<T> {
             }
 
             const signatureMatch = signature.every((paramType: Type, index: number) => {
-                const param = methodType.getParameter(index as int)
-                let tmp = paramType.equals(param.getType()) 
+                const param = methodType.getParameter(index.toInt())
+                let tmp = paramType.equals(param.getType())
                 return tmp
             })
 
@@ -528,14 +528,14 @@ abstract class ArrayProxy<T> extends Array<T> {
 
     private static readonly POP_METHOD: Method = ArrayProxy.getArrayMethod("pop")
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
-    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0))
-    private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1))
+    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0))
+    private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as int))
 
     private static readonly SPLICE_METHOD_INT_INT_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1), Type.of(1), Type.of(new Array<Object>(0)))
+            ArrayProxy.getArrayMethod("splice", Type.of(1 as int), Type.of(1 as int), Type.of(new Array<Object>(0)))
 
     private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1.0), Type.of(new Number(0)), Type.of(new Array<Object>(0)))
+            ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0), Type.of(new Number(0)), Type.of(new Array<Object>(0)))
 
     constructor(target: Array<T>, handler: ArrayProxyHandler<T>) {
         this.target = target
