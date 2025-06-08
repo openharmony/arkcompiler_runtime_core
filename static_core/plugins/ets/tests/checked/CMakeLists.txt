@@ -18,7 +18,7 @@ add_subdirectory(jitinterface)
 function(panda_add_checked_test_ets)
     set(prefix ARG)
     set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT BOOT_SELF)
-    set(singleValues NAME FILE LIBCORE OPT_LEVEL)
+    set(singleValues NAME FILE LIBCORE OPT_LEVEL CHECKER_FILTER)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
 
@@ -117,6 +117,10 @@ function(panda_add_checked_test_ets)
         set(PANDA_OPTIONS ${PANDA_OPTIONS} "--ets.native-library-path=${TEST_DIR}")
     endif()
 
+    if (ARG_CHECKER_FILTER)
+        set(FILTER_OPT "--checker-filter=${ARG_CHECKER_FILTER}")
+    endif()
+
     # Run checker
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
@@ -132,6 +136,7 @@ function(panda_add_checked_test_ets)
                                          --arch ${ARCHITECTURE}
                                          ${RELEASE_OPT}
                                          ${WITH_LLVM}
+                                         ${FILTER_OPT}
                       WORKING_DIRECTORY ${TEST_DIR}
                       COMMENT "Running ${TEST_NAME} checked test"
                       DEPENDS ${BINARY_FILE} ${EXT_FILES})
@@ -336,3 +341,8 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_options.ets)
+set(checker_filter "CHECKER_32")
+if(PANDA_TARGET_64 AND NOT PANDA_USE_32_BIT_POINTER)
+    set(checker_filter "CHECKER_64")
+endif()
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/interface_cache_intrinsic.ets CHECKER_FILTER "${checker_filter}")
