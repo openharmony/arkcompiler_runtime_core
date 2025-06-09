@@ -137,9 +137,9 @@ void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaStr
     // Load previous profile data if available
     auto profileCtxOrError = profilingLoader.LoadProfile(saveFilePath);
     if (!profileCtxOrError) {
-        LOG(INFO, RUNTIME) << "No previous profile data found. Saving new profile data.";
+        LOG(INFO, RUNTIME) << "[profile_saver] No previous profile data found. Saving new profile data.";
     } else {
-        LOG(INFO, RUNTIME) << "Previous profile data found. Merging with new profile data.";
+        LOG(INFO, RUNTIME) << "[profile_saver] Previous profile data found. Merging with new profile data.";
         profData = std::move(profilingLoader.GetAotProfilingData());
     }
 
@@ -151,9 +151,10 @@ void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaStr
     pgo::AotPgoFile pgoFile;
     auto writtenBytes = pgoFile.Save(saveFilePath, &profData, classCtxStr);
     if (writtenBytes > 0) {
-        LOG(INFO, RUNTIME) << "Profile data saved to " << saveFilePath << " with " << writtenBytes << " bytes.";
+        LOG(INFO, RUNTIME) << "[profile_saver] Profile data saved to " << saveFilePath << " with " << writtenBytes
+                           << " bytes.";
     } else {
-        LOG(ERROR, RUNTIME) << "Failed to save profile data to " << saveFilePath << ".";
+        LOG(ERROR, RUNTIME) << "[profile_saver] Failed to save profile data to " << saveFilePath << ".";
     }
 }
 }  // namespace ark

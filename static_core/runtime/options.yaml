@@ -703,7 +703,7 @@ options:
 
 - name: profilesaver-sleeping-time-ms
   type: uint32_t
-  default: 2000
+  default: 40000
   description: Set wake up period time of daemon thread for profile saver
 
 - name: profilesaver-delta-number-threshold
@@ -715,6 +715,11 @@ options:
   type: bool
   default: false
   description: whether open the profilesaver functions
+
+- name: incremental-profilesaver-enabled
+  type: bool
+  default: false
+  description: whether open the incremental profilesaver functions, only work when profiler is enabled
 
 - name: start-as-zygote
   type: bool
@@ -879,7 +884,7 @@ options:
 
 - name: profile-output
   type: std::string
-  default: "profile.bin"
+  default: "profile.ap"
   description: Specify the location the collected profile information
 
 - name: call-profiling-table-size

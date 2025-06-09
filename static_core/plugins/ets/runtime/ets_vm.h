@@ -25,6 +25,7 @@
 #include <libpandafile/include/source_lang_enum.h>
 
 #include "include/mem/panda_smart_pointers.h"
+#include "jit/profile_saver_worker.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/expected.h"
@@ -247,6 +248,11 @@ public:
         return unhandledObjectManager_;
     }
 
+    ProfileSaverWorker *GetProfileSaverWorker() const override
+    {
+        return saverWorker_;
+    }
+
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
     PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
@@ -439,6 +445,7 @@ private:
     mem::ReferenceProcessor *referenceProcessor_ {nullptr};
     PandaVector<ObjectHeader *> gcRoots_;
     Rendezvous *rendezvous_ {nullptr};
+    ProfileSaverWorker *saverWorker_ {nullptr};
     CompilerInterface *compiler_ {nullptr};
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};

@@ -19,6 +19,7 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_string.h"
+#include "jit/profile_saver_worker.h"
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -176,6 +177,17 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     auto allocator = heapManager->GetInternalAllocator();
 
     runtimeIface_ = allocator->New<EtsRuntimeInterface>();
+    if (options.IsIncrementalProfilesaverEnabled()) {
+        if (taskmanager::TaskScheduler::GetTaskScheduler() == nullptr) {
+            LOG(WARNING, RUNTIME)
+                << "[profile_saver] Cannot get current taskScheduler, disable incremental profile saver.";
+        } else {
+            saverWorker_ = allocator->New<ProfileSaverWorker>(allocator);
+            LOG(INFO, RUNTIME) << "[profile_saver] Profile saver worker created.";
+        }
+    } else {
+        LOG(INFO, RUNTIME) << "[profile_saver] Incremental profile saver disabled.";
+    }
     compiler_ = allocator->New<Compiler>(heapManager->GetCodeAllocator(), allocator, options,
                                          heapManager->GetMemStats(), runtimeIface_);
     stringTable_ = allocator->New<StringTable>();
@@ -210,6 +222,9 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
     allocator->Delete(unhandledObjectManager_);
+    if (saverWorker_ != nullptr) {
+        allocator->Delete(saverWorker_);
+    }
 
     objStateTable_.reset();
 
@@ -346,6 +361,9 @@ void PandaEtsVM::PreZygoteFork()
 
     mm_->PreZygoteFork();
     compiler_->PreZygoteFork();
+    if (saverWorker_ != nullptr) {
+        saverWorker_->PreZygoteFork();
+    }
 }
 
 void PandaEtsVM::PostZygoteFork()
@@ -355,6 +373,9 @@ void PandaEtsVM::PostZygoteFork()
 
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
+    if (saverWorker_ != nullptr) {
+        saverWorker_->PostZygoteFork();
+    }
     // Postpone GC on application start-up
     // Postpone GCEnd method should be called on start-up ending event
     mm_->GetGC()->PostponeGCStart();

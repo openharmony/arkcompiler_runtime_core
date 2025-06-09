@@ -137,6 +137,7 @@ set(SOURCES
     jit/libprofile/pgo_file_builder.cpp
     jit/profiling_loader.cpp
     jit/profiling_saver.cpp
+    jit/profile_saver_worker.cpp
     cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp

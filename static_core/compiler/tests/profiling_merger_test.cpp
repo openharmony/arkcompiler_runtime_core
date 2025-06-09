@@ -130,6 +130,7 @@ class ProfilingMergerTest : public ::testing::Test {
 public:
     void CollectProfile()
     {
+        runner_.GetRuntimeOptions().SetIncrementalProfilesaverEnabled(false);
         auto runtime = runner_.CreateRuntime();
         runner_.Run(runtime, SOURCE, std::vector<std::string> {});
     }
@@ -141,7 +142,8 @@ public:
             return;
         }
         ProfilingSaver profileSaver;
-        classCtxStr_ = runtime->GetClassLinker()->GetClassContextForAot(true);
+        classCtxStr_ = runtime->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                       runtime->GetClassLinker()->GetAotManager()->GetAppClassContext();
         auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
         auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
@@ -167,7 +169,6 @@ public:
     void InitPGOFilePath(const std::string &path)
     {
         pgoFilePath_ = path;
-        runner_.GetRuntimeOptions().SetProfileOutput(path);
         if (std::filesystem::exists(path)) {
             std::filesystem::remove(path);
         }
