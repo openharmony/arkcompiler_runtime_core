@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,9 +227,11 @@ CompiledCodeToInterpreterBridge:
     bne 2f
     // Result is a reference
     bl FreeFrame
+#if !defined(PANDA_TARGET_64) || defined(PANDA_USE_32_BIT_POINTER)
     // Clear the upper 32 bits, since the compiler may
     // generate code that uses them (ex: ldr w?, [x19, #?])
     mov w19, w19
+#endif
     mov x0, x19
     mov x1, x20
     b 4f

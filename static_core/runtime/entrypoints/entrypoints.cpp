@@ -485,7 +485,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
         return str;
     }
 
-    auto counter = reinterpret_cast<std::atomic_uint32_t *>(slot);
+    auto counter = reinterpret_cast<std::atomic<ObjectPointerType> *>(slot);
 
     // Atomic with acquire order reason: data race with slot with dependecies on reads after the load which should
     // become visible
@@ -501,8 +501,8 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
                                          std::memory_order_relaxed);
     } else {
         // try to replace the counter with string pointer and register the slot as GC root in case of success
-        if (counter->compare_exchange_strong(counterVal, static_cast<uint32_t>(reinterpret_cast<uint64_t>(str)),
-                                             std::memory_order_release, std::memory_order_relaxed)) {
+        if (counter->compare_exchange_strong(counterVal, ToObjPtr(str), std::memory_order_release,
+                                             std::memory_order_relaxed)) {
             bool isYoung = vm->GetHeapManager()->IsObjectInYoungSpace(str);
             aotManager->RegisterAotStringRoot(slot, isYoung);
             EVENT_AOT_RESOLVE_STRING(ConvertToString(str));
@@ -1622,8 +1622,8 @@ static T *ToClassPtr(uintptr_t obj)
 }
 
 /* offset values to be aligned with the StringBuilder class layout */
-static constexpr uint32_t SB_COUNT_OFFSET = 12;
-static constexpr uint32_t SB_VALUE_OFFSET = 8;
+static constexpr uint32_t SB_VALUE_OFFSET = ark::ObjectHeader::ObjectHeaderSize();
+static constexpr uint32_t SB_COUNT_OFFSET = SB_VALUE_OFFSET + ark::OBJECT_POINTER_SIZE;
 
 static uint32_t GetCountValue(ObjectHeader *sb)
 {

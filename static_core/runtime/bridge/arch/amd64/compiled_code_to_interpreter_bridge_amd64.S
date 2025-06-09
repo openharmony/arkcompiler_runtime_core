@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,9 +228,14 @@ CompiledCodeToInterpreterBridge:
     jne 2f
     // Result is a reference
     callq FreeFrame@plt
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+    // Ref is a 64-bit value, copy all bits
+    movq %r12, %rax
+#else
     // Clear the upper 32 bits, since the compiler may
     // generate code that uses them
     movl %r12d, %eax
+#endif
     movq %r13, %rdx
     jmp 4f
 2:

@@ -2115,6 +2115,7 @@ end
 
 macro(:handle_any_ldbyidx_v8) do |vs|
   # NOTE: handle it
+  set_acc_object(vs) # NOTE: fixes build for ARK_HYBRID
   Intrinsic(:UNREACHABLE).Terminator.void
 end
 

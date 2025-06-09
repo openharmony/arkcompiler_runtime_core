@@ -12,3 +12,7 @@ ets-common-tests/exporting-ambient-decl/main.ets
 
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
+
+# 26365
+ets-common-tests/intrinsics/string_from_char_code.ets
+ets-common-tests/intrinsics/string_from_char_code_escape.ets

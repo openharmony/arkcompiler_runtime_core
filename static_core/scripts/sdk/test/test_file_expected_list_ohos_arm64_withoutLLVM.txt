@@ -15,6 +15,7 @@ build-sdk/sdk/ohos_arm64/include/third_party
 build-sdk/sdk/ohos_arm64/include/tools
 build-sdk/sdk/ohos_arm64/include/verification
 build-sdk/sdk/ohos_arm64/lib
+build-sdk/sdk/ohos_arm64/lib/libani_helpers.so
 build-sdk/sdk/ohos_arm64/lib/libarkaotmanager.so
 build-sdk/sdk/ohos_arm64/lib/libarkassembler.so
 build-sdk/sdk/ohos_arm64/lib/libarkbase.so

@@ -1271,7 +1271,7 @@ void Codegen::CreateMultiArrayCall(CallInst *callInst)
     auto location = callInst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
 
-    GetEncoder()->EncodeMov(classOrig, ConvertRegister(location.GetValue(), DataType::INT32));
+    GetEncoder()->EncodeMov(classOrig, ConvertRegister(location.GetValue(), DataType::REFERENCE));
     CallRuntime(callInst, EntrypointId::CREATE_MULTI_ARRAY, dstReg, RegMask::GetZeroMask(), classReg, TypedImm(numArgs),
                 SpReg());
     if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {

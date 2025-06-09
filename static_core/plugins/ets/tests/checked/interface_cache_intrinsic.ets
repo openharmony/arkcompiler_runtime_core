@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-//! CHECKER_32    AOT, check inteface cache used for 32-bit pointers
-//! SKIP_IF       @architecture != "arm64"
+//! CHECKER       AOT, check inteface cache used for 32-bit pointers
+//! SKIP_IF       @architecture != "arm64" || is_hybrid_config?
 //! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets --compiler-enable-events=true"
 //!
 //! EVENT         "Codegen,Interface cache used"
 
-//! CHECKER_64    AOT, check cache not used for 64-bit pointers
-//! SKIP_IF       @architecture != "arm64"
+//! CHECKER       AOT, check cache not used for 64-bit pointers
+//! SKIP_IF       @architecture != "arm64" || !is_hybrid_config?
 //! RUN_PAOC      options: "--paoc-mode=aot --load-runtimes=ets --compiler-enable-events=true"
 //!
 //! EVENT         "Codegen,Interface cache not used"
