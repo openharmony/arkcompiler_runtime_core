@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -511,6 +511,47 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*moduleEnumerateClasses)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
 
     /**
+     * @brief Enumerates interfaces of the module `m`, invoking callback `cb` for each interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] m - Module to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*moduleEnumerateInterfaces)(AbckitCoreModule *m, void *data,
+                                      bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates enums of the module `m`, invoking callback `cb` for each enum.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] m - Module to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*moduleEnumerateEnums)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
+
+    /**
+     * @brief Enumerates fields of the module `m`, invoking callback `cb` for each field.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] m - Module to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*moduleEnumerateFields)(AbckitCoreModule *m, void *data,
+                                  bool (*cb)(AbckitCoreModuleField *field, void *data));
+
+    /**
      * @brief Enumerates top level functions of the module `m`, invoking callback `cb` for each top level function.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
@@ -763,6 +804,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitCoreNamespace *(*classGetParentNamespace)(AbckitCoreClass *klass);
 
     /**
+     * @brief Returns super classes of class `klass`.
+     * @return Pointer to the `AbckitCoreClass`.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    AbckitCoreClass *(*classGetSuperClass)(AbckitCoreClass *klass);
+
+    /**
      * @brief Enumerates methods of class `klass`, invoking callback `cb` for each method.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] klass - Class to be inspected.
@@ -789,6 +838,345 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     bool (*classEnumerateAnnotations)(AbckitCoreClass *klass, void *data,
                                       bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /**
+     * @brief Enumerates interfaces that class `klass` implements, invoking callback `cb` for each interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*classEnumerateInterfaces)(AbckitCoreClass *klass, void *data,
+                                     bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates fields of class `klass`, invoking callback `cb` for each field.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*classEnumerateFields)(AbckitCoreClass *klass, void *data,
+                                 bool (*cb)(AbckitCoreClassField *field, void *data));
+
+    /* ========================================
+     * Interface
+     * ======================================== */
+
+    /**
+     * @brief Returns binary file that the given interface `iface` is a part of.
+     * @return Pointer to the `AbckitFile`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    AbckitFile *(*interfaceGetFile)(AbckitCoreInterface *iface);
+
+    /**
+     * @brief Returns owning module for interface `iface`.
+     * @return Pointer to the `AbckitCoreModule`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    AbckitCoreModule *(*interfaceGetModule)(AbckitCoreInterface *iface);
+
+    /**
+     * @brief Returns name for interface `iface`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Allocates
+     */
+    AbckitString *(*interfaceGetName)(AbckitCoreInterface *iface);
+
+    /**
+     * @brief Enumerates super interfaces of interface `iface`, invoking callback `cb` for each super interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateSuperInterfaces)(AbckitCoreInterface *iface, void *data,
+                                              bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates methods of interface `iface`, invoking callback `cb` for each method.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateMethods)(AbckitCoreInterface *iface, void *data,
+                                      bool (*cb)(AbckitCoreFunction *func, void *data));
+
+    /**
+     * @brief Enumerates annotations of interface `iface`, invoking callback `cb` for each annotation.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateAnnotations)(AbckitCoreInterface *iface, void *data,
+                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /**
+     * @brief Enumerates fields of interface `iface`, invoking callback `cb` for each field.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateFields)(AbckitCoreInterface *iface, void *data,
+                                     bool (*cb)(AbckitCoreInterfaceField *field, void *data));
+
+    /* ========================================
+     * Module Field
+     * ======================================== */
+
+    /**
+     * @brief Returns module for module field `field`.
+     * @return Pointer to the `AbckitCoreModule`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreModule *(*moduleFieldGetModule)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns name for module field `field`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitString *(*moduleFieldGetName)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns type for module field `field`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitType *(*moduleFieldGetType)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns value for module field `field`.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitValue *(*moduleFieldGetValue)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns whether module field `field` is public.
+     * @return `true` if field `field` is public.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*moduleFieldIsPublic)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns whether module field `field` is private.
+     * @return `true` if field `field` is private.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*moduleFieldIsPrivate)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Enumerates annotations of module field `field`, invoking callback `cb` for each annotation.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*moduleFieldEnumerateAnnotations)(AbckitCoreModuleField *field, void *data,
+                                            bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /* ========================================
+     * Class Field
+     * ======================================== */
+
+    /**
+     * @brief Returns class for class field `field`.
+     * @return Pointer to the `AbckitCoreClass`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreClass *(*classFieldGetClass)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns name for class field `field`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitString *(*classFieldGetName)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns type for class field `field`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitType *(*classFieldGetType)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns value for class field `field`.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitValue *(*classFieldGetValue)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is public.
+     * @return `true` if field `field` is public.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsPublic)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is protected.
+     * @return `true` if field `field` is protected.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsProtected)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is private.
+     * @return `true` if field `field` is private.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsPrivate)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is static.
+     * @return `true` if field `field` is static.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsStatic)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Enumerates annotations of class field `field`, invoking callback `cb` for each annotation.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*classFieldEnumerateAnnotations)(AbckitCoreClassField *field, void *data,
+                                           bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /* ========================================
+     * Interface Field
+     * ======================================== */
+
+    /**
+     * @brief Returns interface for interface field `field`.
+     * @return Pointer to the `AbckitCoreInterface`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreInterface *(*interfaceFieldGetInterface)(AbckitCoreInterfaceField *field);
+
+    /**
+     * @brief Returns name for interface field `field`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitString *(*interfaceFieldGetName)(AbckitCoreInterfaceField *field);
+
+    /**
+     * @brief Returns type for interface field `field`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitType *(*interfaceFieldGetType)(AbckitCoreInterfaceField *field);
+
+    /**
+     * @brief Enumerates annotations of interface field `field`, invoking callback `cb` for each annotation.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceFieldEnumerateAnnotations)(AbckitCoreInterfaceField *field, void *data,
+                                               bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /* ========================================
+     * Enum Field
+     * ======================================== */
+
+    /**
+     * @brief Returns enum for enum field `field`.
+     * @return Pointer to the `AbckitCoreEnum`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreEnum *(*enumFieldGetEnum)(AbckitCoreEnumField *field);
+
+    /**
+     * @brief Returns name for enum field `field`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitString *(*enumFieldGetName)(AbckitCoreEnumField *field);
+
+    /**
+     * @brief Returns type for enum field `field`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitType *(*enumFieldGetType)(AbckitCoreEnumField *field);
+
+    /**
+     * @brief Returns value for enum field `field`.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitValue *(*enumFieldGetValue)(AbckitCoreEnumField *field);
 
     /* ========================================
      * Function
@@ -917,6 +1305,52 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      */
     bool (*functionIsAnonymous)(AbckitCoreFunction *function);
+
+    /**
+     * @brief Tells if function `function` is public.
+     * @return Returns `true` if given function `function` is public and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsPublic)(AbckitCoreFunction *function);
+
+    /**
+     * @brief Tells if function `function` is protected.
+     * @return Returns `true` if given function `function` is protected and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsProtected)(AbckitCoreFunction *function);
+
+    /**
+     * @brief Tells if function `function` is private.
+     * @return Returns `true` if given function `function` is private and `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsPrivate)(AbckitCoreFunction *function);
+
+    /**
+     * @brief Enumerates parameters of function `func`, invoking callback `cb` for each parameter.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] func - Function to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*functionEnumerateParameters)(AbckitCoreFunction *func, void *data,
+                                        bool (*cb)(AbckitCoreFunctionParam *param, void *data));
+
+    /**
+     * @brief Returns return type for function `func`.
+     * @return Pointer to the `AbckitType`.
+     * @param [ in ] func - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     */
+    AbckitType *(*functionGetReturnType)(AbckitCoreFunction *func);
 
     /* ========================================
      * Annotation

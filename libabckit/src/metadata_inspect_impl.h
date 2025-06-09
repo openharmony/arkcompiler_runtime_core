@@ -265,6 +265,11 @@ struct AbckitCoreClass {
     AbckitCoreFunction *parentFunction = nullptr;
 
     /*
+     * To refer to the properties of the super class.
+     */
+    AbckitCoreClass *superClass = nullptr;
+
+    /*
      * To store class methods.
      */
     std::vector<std::unique_ptr<AbckitCoreFunction>> methods {};
@@ -273,6 +278,16 @@ struct AbckitCoreClass {
      * To store links to the wrapped annotations.
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+
+    /*
+     * To store class fields.
+     */
+    std::vector<std::unique_ptr<AbckitCoreClassField>> fields {};
+
+    /*
+     * To store interfaces.
+     */
+    std::vector<AbckitCoreInterface *> interfaces {};
 
     /*
      * Language-dependent implementation to store class data.
@@ -349,6 +364,11 @@ struct AbckitCoreFunction {
      * To store links to the wrapped annotations.
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+
+    /*
+     * To store parameters of the function.
+     */
+    std::vector<std::unique_ptr<AbckitCoreFunctionParam>> parameters;
 
     std::vector<std::unique_ptr<AbckitCoreFunction>> nestedFunction;
     std::vector<std::unique_ptr<AbckitCoreClass>> nestedClasses;
@@ -482,6 +502,9 @@ struct AbckitCoreModule {
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreClass>> ct;
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotationInterface>> at;
     std::vector<std::unique_ptr<AbckitCoreNamespace>> namespaces;
+    std::vector<std::unique_ptr<AbckitCoreInterface>> interfaces;
+    std::vector<std::unique_ptr<AbckitCoreEnum>> enums;
+    std::vector<std::unique_ptr<AbckitCoreModuleField>> fields;
 
     /*
      * Only stores top level functions.
@@ -647,7 +670,9 @@ struct AbckitDynamicImportDescriptorPayload {
 };
 
 struct AbckitStaticImportDescriptorPayload {
-    std::variant<AbckitCoreAnnotationInterface *, AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreField *> impl;
+    std::variant<AbckitCoreAnnotationInterface *, AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreModuleField *,
+                 AbckitCoreClassField *, AbckitCoreInterfaceField *, AbckitCoreEnumField *>
+        impl;
     /*
      * Implementation for AbckitImportExportDescriptorKind::ANNOTATION.
      */
@@ -672,9 +697,30 @@ struct AbckitStaticImportDescriptorPayload {
     /*
      * Implementation for AbckitImportExportDescriptorKind::FIELD.
      */
-    AbckitCoreField *GetFieldPayload()
+    AbckitCoreModuleField *GetModuleFieldPayload()
     {
-        return std::get<AbckitCoreField *>(impl);
+        return std::get<AbckitCoreModuleField *>(impl);
+    }
+    /*
+     * Implementation for AbckitImportExportDescriptorKind::FIELD.
+     */
+    AbckitCoreClassField *GetClassFieldPayload()
+    {
+        return std::get<AbckitCoreClassField *>(impl);
+    }
+    /*
+     * Implementation for AbckitImportExportDescriptorKind::FIELD.
+     */
+    AbckitCoreInterfaceField *GetInterfaceFieldPayload()
+    {
+        return std::get<AbckitCoreInterfaceField *>(impl);
+    }
+    /*
+     * Implementation for AbckitImportExportDescriptorKind::FIELD.
+     */
+    AbckitCoreEnumField *GetEnumFieldPayload()
+    {
+        return std::get<AbckitCoreEnumField *>(impl);
     }
 };
 
@@ -769,7 +815,8 @@ struct AbckitDynamicExportDescriptorPayload {
 
 struct AbckitCoreExportDescriptorPayload {
     std::variant<AbckitDynamicExportDescriptorPayload, AbckitCoreAnnotationInterface *, AbckitCoreClass *,
-                 AbckitCoreFunction *, AbckitCoreField *>
+                 AbckitCoreFunction *, AbckitCoreModuleField *, AbckitCoreClassField *, AbckitCoreInterfaceField *,
+                 AbckitCoreEnumField *>
         impl;
 
     /*
@@ -807,9 +854,33 @@ struct AbckitCoreExportDescriptorPayload {
      * Payload for AbckitImportExportDescriptorKind::FIELD.
      * Should point to the LOCAL entity.
      */
-    AbckitCoreField *GetFieldPayload()
+    AbckitCoreModuleField *GetModuleFieldPayload()
     {
-        return std::get<AbckitCoreField *>(impl);
+        return std::get<AbckitCoreModuleField *>(impl);
+    }
+    /*
+     * Payload for AbckitImportExportDescriptorKind::FIELD.
+     * Should point to the LOCAL entity.
+     */
+    AbckitCoreClassField *GetClassFieldPayload()
+    {
+        return std::get<AbckitCoreClassField *>(impl);
+    }
+    /*
+     * Payload for AbckitImportExportDescriptorKind::FIELD.
+     * Should point to the LOCAL entity.
+     */
+    AbckitCoreInterfaceField *GetInterfaceFieldPayload()
+    {
+        return std::get<AbckitCoreInterfaceField *>(impl);
+    }
+    /*
+     * Payload for AbckitImportExportDescriptorKind::FIELD.
+     * Should point to the LOCAL entity.
+     */
+    AbckitCoreEnumField *GetEnumFieldPayload()
+    {
+        return std::get<AbckitCoreEnumField *>(impl);
     }
 };
 
@@ -863,6 +934,233 @@ struct AbckitCoreExportDescriptor {
     AbckitJsExportDescriptor *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsExportDescriptor>>(impl).get();
+    }
+};
+
+struct AbckitArktsModuleField {
+    AbckitCoreModuleField *core = nullptr;
+};
+
+struct AbckitCoreModuleField {
+    /*
+     * Name of the field.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Type of the field.
+     */
+    AbckitType *type = nullptr;
+    /*
+     * Value of the field.
+     */
+    AbckitValue *value = nullptr;
+    /*
+     * Table to store the annotations of the field.
+     */
+    std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * To refer to the properties of the origin module.
+     */
+    AbckitCoreModule *mod = nullptr;
+
+    std::variant<std::unique_ptr<AbckitArktsModuleField>> impl;
+    AbckitArktsModuleField *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsModuleField>>(impl).get();
+    }
+};
+
+struct AbckitArktsClassField {
+    AbckitCoreClassField *core = nullptr;
+};
+
+struct AbckitCoreClassField {
+    /*
+     * Name of the field.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Type of the field.
+     */
+    AbckitType *type = nullptr;
+    /*
+     * Value of the field.
+     */
+    AbckitValue *value = nullptr;
+    /*
+     * Table to store the annotations of the field.
+     */
+    std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * To refer to the properties of the origin class.
+     */
+    AbckitCoreClass *klass = nullptr;
+
+    std::variant<std::unique_ptr<AbckitArktsClassField>> impl;
+    AbckitArktsClassField *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsClassField>>(impl).get();
+    }
+};
+
+struct AbckitArktsInterfaceField {
+    AbckitCoreInterfaceField *core = nullptr;
+};
+
+struct AbckitCoreInterfaceField {
+    /*
+     * Name of the field.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Type of the field.
+     */
+    AbckitType *type = nullptr;
+    /*
+     * Table to store the annotations of the field.
+     */
+    std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * To refer to the properties of the origin interface.
+     */
+    AbckitCoreInterface *iface = nullptr;
+
+    std::variant<std::unique_ptr<AbckitArktsInterfaceField>> impl;
+    AbckitArktsInterfaceField *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsInterfaceField>>(impl).get();
+    }
+};
+
+struct AbckitArktsEnumField {
+    AbckitCoreEnumField *core = nullptr;
+};
+
+struct AbckitCoreEnumField {
+    /*
+     * Name of the field.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Type of the field.
+     */
+    AbckitType *type = nullptr;
+    /*
+     * Value of the field.
+     */
+    AbckitValue *value = nullptr;
+    /*
+     * Table to store the annotations of the field.
+     */
+    std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * To refer to the properties of the origin enum.
+     */
+    AbckitCoreEnum *enm = nullptr;
+
+    std::variant<std::unique_ptr<AbckitArktsEnumField>> impl;
+    AbckitArktsEnumField *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsEnumField>>(impl).get();
+    }
+};
+
+struct AbckitArktsInterface {
+    AbckitCoreInterface *core = nullptr;
+};
+
+struct AbckitCoreInterface {
+    /*
+     * Back link to the module.
+     */
+    AbckitCoreModule *owningModule = nullptr;
+    /*
+     * Name of the interface.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Table to store the methods of the interface.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreFunction>> methods;
+    /*
+     * Table to store the fields of the interface.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreInterfaceField>> fields;
+    /*
+     * Table to store the annotations of the interface.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotation>> annotations;
+    /*
+     * Table to store the classes implement the interface.
+     */
+    std::unordered_map<std::string, AbckitCoreClass *> classes;
+    /*
+     * Table to store the super interfaces of the interface.
+     */
+    std::unordered_map<std::string, AbckitCoreInterface *> superinterfaces;
+
+    std::variant<std::unique_ptr<AbckitArktsInterface>> impl;
+    AbckitArktsInterface *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsInterface>>(impl).get();
+    }
+};
+
+struct AbckitArktsEnum {
+    AbckitCoreEnum *core = nullptr;
+};
+
+struct AbckitCoreEnum {
+    /*
+     * Back link to the module.
+     */
+    AbckitCoreModule *module = nullptr;
+    /*
+     * Name of the enum.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Table to store the fields of the enum.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreEnumField>> fields;
+    /*
+     * Table to store the annotations of the enum.
+     */
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotation>> annotations;
+
+    std::variant<std::unique_ptr<AbckitArktsEnum>> impl;
+    AbckitArktsEnum *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsEnum>>(impl).get();
+    }
+};
+
+struct AbckitArktsFunctionParam {
+    AbckitCoreFunctionParam *core = nullptr;
+};
+
+struct AbckitCoreFunctionParam {
+    /*
+     * Back link to the function.
+     */
+    AbckitCoreFunction *function = nullptr;
+    /*
+     * Name of the parameter.
+     */
+    AbckitString *name = nullptr;
+    /*
+     * Type of the parameter.
+     */
+    AbckitType *type = nullptr;
+    /*
+     * Default value of the parameter.
+     */
+    AbckitValue *defaultValue = nullptr;
+
+    std::variant<std::unique_ptr<AbckitArktsFunctionParam>> impl;
+    AbckitArktsFunctionParam *GetArkTSImpl()
+    {
+        return std::get<std::unique_ptr<AbckitArktsFunctionParam>>(impl).get();
     }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)

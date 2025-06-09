@@ -436,12 +436,6 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_field") {
   extension = "cpp"
 }
 
-abckit_standalone_canary("abckit_canary_cpp_headers_arkts_field") {
-  configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/include/cpp/headers/arkts/field.h"
-  extension = "cpp"
-}
-
 group("abckit_canary_cpp_standalone") {
   deps = [
     ":abckit_canary_cpp_abckit_cpp",
@@ -458,7 +452,6 @@ group("abckit_canary_cpp_standalone") {
     ":abckit_canary_cpp_headers_arkts_class_impl",
     ":abckit_canary_cpp_headers_arkts_export_descriptor",
     ":abckit_canary_cpp_headers_arkts_export_descriptor_impl",
-    ":abckit_canary_cpp_headers_arkts_field",
     ":abckit_canary_cpp_headers_arkts_function",
     ":abckit_canary_cpp_headers_arkts_function_impl",
     ":abckit_canary_cpp_headers_arkts_import_descriptor",
