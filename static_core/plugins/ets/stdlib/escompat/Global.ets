@@ -630,7 +630,7 @@ function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 
 function stopTimer(timerId: number): void
 {
-    if (CoroutineExtras.isMainWorker()) {
+    if (CoroutineExtras.workerHasExternalScheduler()) {
         stopTimerImpl(timerId as int);
         return;
     }
