@@ -67,7 +67,7 @@ config("arkruntime_config") {
   ]
   if (ark_standalone_build) {
     include_dirs += [ "//third_party/icu/icu4c/source" ]
-  } 
+  }
 
 
   cflags_cc = [
@@ -501,8 +501,8 @@ ohos_shared_library("libarkruntime") {
     external_deps = [ "ets_runtime:libark_jsruntime" ]
   }
 
-  if (current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") {
+  if ((current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
     ldflags = [ "-latomic" ]
   }
 
