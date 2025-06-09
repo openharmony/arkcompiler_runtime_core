@@ -62,6 +62,9 @@ static bool GetStorage(napi_env env, napi_value *storage)
 
 bool HybridGrefCreateRefFromNapi(napi_env env, napi_value value, hybridgref *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     napi_value storage;
     if (!GetStorage(env, &storage)) {
         return false;
@@ -97,6 +100,9 @@ static bool CheckCorrectThread(napi_env env, napi_value storage)
 
 bool HybridGrefDeleteRefFromNapi(napi_env env, hybridgref ref)
 {
+    if (env == nullptr) {
+        return false;
+    }
     napi_value storage;
     if (!GetStorage(env, &storage)) {
         return false;
@@ -128,6 +134,9 @@ bool HybridGrefDeleteRefFromNapi(napi_env env, hybridgref ref)
 
 bool HybridGrefGetNapiValue(napi_env env, hybridgref ref, napi_value *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     napi_value storage;
     if (!GetStorage(env, &storage)) {
         return false;

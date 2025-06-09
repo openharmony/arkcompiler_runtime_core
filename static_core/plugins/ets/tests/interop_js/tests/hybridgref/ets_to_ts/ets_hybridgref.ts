@@ -13,87 +13,125 @@
  * limitations under the License.
  */
 
-let plusOne = (x: number)=> {
+let plusOne = (x: number) => {
     return x + 1;
+};
+
+function testPrimitiveTypes(etsVm: any): void {
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefChar')();
+    ASSERT_EQ(typeof nativeGetRef(), "string");
+    ASSERT_EQ(nativeGetRef(), "A");
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefByte')();
+    ASSERT_EQ(nativeGetRef(), 0x12);
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefShort')();
+    ASSERT_EQ(nativeGetRef(), 300);
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefInt')();
+    ASSERT_EQ(nativeGetRef(), 123456);
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefDouble')();
+    ASSERT_TRUE(Math.abs(nativeGetRef() - 100.111) < 1e-10);
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefFloat')();
+    ASSERT_TRUE(Math.abs(nativeGetRef() - 1.5) < 1e-6);
+
+    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefString')();
+    ASSERT_EQ(nativeGetRef(), "hello world");
 }
 
-function main(): void {
-    let etsVm = globalThis.gtest.etsVm;
-
-    let etsSaveNativeGrefChar = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefChar');
-    etsSaveNativeGrefChar();
-    let valueChar = nativeGetRef();
-    ASSERT_EQ(typeof valueChar, "string");
-    ASSERT_EQ(valueChar, "A");
-
-    let etsSaveNativeGrefByte = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefByte');
-    etsSaveNativeGrefByte();
-    let valueByte = nativeGetRef();
-    ASSERT_EQ(typeof valueByte, "number");
-    ASSERT_EQ(valueByte, 0x12);
-
-    let etsSaveNativeGrefShort = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefShort');
-    etsSaveNativeGrefShort();
-    let valueShort = nativeGetRef();
-    ASSERT_EQ(typeof valueShort, "number");
-    ASSERT_EQ(valueShort, 300);
-
-    let etsSaveNativeGrefInt = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefInt');
-    etsSaveNativeGrefInt();
-    let valueInt = nativeGetRef();
-    ASSERT_EQ(typeof valueInt, "number");
-    ASSERT_EQ(valueInt, 123456);
-
-    let etsSaveNativeGrefDouble = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefDouble');
-    etsSaveNativeGrefDouble();
-    let valueDouble = nativeGetRef();
-    ASSERT_EQ(typeof valueDouble, "number");
-    ASSERT_TRUE(Math.abs(valueDouble - 100.111) < 1e-10);
-
-    let etsSaveNativeGrefFloat = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefFloat');
-    etsSaveNativeGrefFloat();
-    let valueFloat = nativeGetRef();
-    ASSERT_EQ(typeof valueFloat, "number");
-    ASSERT_TRUE(Math.abs(valueFloat - 1.5) < 1e-6);
-
-    let etsSaveNativeGrefString = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefString');
-    etsSaveNativeGrefString();
-    let valueString = nativeGetRef();
-    ASSERT_EQ(typeof valueString, "string");
-    ASSERT_EQ(valueString, "hello world");
-
-    let etsSaveNativeGrefNumberArray = etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefNumberArray");
-    etsSaveNativeGrefNumberArray();
-    let arr = nativeGetRef();
+function testArrayAndObjectTypes(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefNumberArray")();
+    const arr = nativeGetRef();
     ASSERT_TRUE(arr instanceof Array);
     ASSERT_EQ(arr.length, 5);
     ASSERT_EQ(arr[2], 3);
 
-    let etsSaveNativeGrefObject = etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObject");
-    etsSaveNativeGrefObject();
-    let obj = nativeGetRef();
-    ASSERT_EQ(typeof obj, "object");
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObject")();
+    const obj = nativeGetRef();
     ASSERT_EQ(obj.name, "ArkTS");
     ASSERT_EQ(obj.version, 1);
+}
 
-    let etsSaveNativeGrefMap = etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefMap");
-    etsSaveNativeGrefMap();
-    let map = nativeGetRef();
+function testMapAndSetTypes(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefMap")();
+    const map = nativeGetRef();
     ASSERT_TRUE(map instanceof Map);
     ASSERT_EQ(map.get("a"), 10);
     ASSERT_EQ(map.get("b"), 20);
 
-    let etsSaveNativeGrefSet = etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefSet");
-    etsSaveNativeGrefSet();
-    let set = nativeGetRef();
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefSet")();
+    const set = nativeGetRef();
     ASSERT_TRUE(set instanceof Set);
     ASSERT_TRUE(set.has("x"));
     ASSERT_TRUE(set.has("y"));
+}
 
-    let etsSaveNativeGrefObjectFromTS = etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObjectFromTS");
-    etsSaveNativeGrefObjectFromTS(plusOne);
-    let plusOneGet = nativeGetRef();
-    ASSERT_TRUE(plusOneGet === plusOne);
+function testFunctionCallback(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObjectFromTS")(plusOne);
+    const fn = nativeGetRef();
+    ASSERT_TRUE(fn === plusOne);
+}
+
+function testBufferAndViewTypes(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefArrayBuffer")();
+    const arrbuf = nativeGetRef();
+    ASSERT_TRUE(arrbuf instanceof ArrayBuffer);
+    ASSERT_EQ(arrbuf.byteLength, 8);
+
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefTypedArray")();
+    const typed = nativeGetRef();
+    ASSERT_TRUE(typed instanceof Int8Array);
+    ASSERT_EQ(typed.length, 2);
+    ASSERT_EQ(typed[1], 2);
+
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefDataView")();
+    const view = nativeGetRef();
+    ASSERT_TRUE(view instanceof DataView);
+    ASSERT_TRUE(view.byteLength === 8);
+    ASSERT_TRUE(view.getUint32(0, true) === 0xbabe);
+    ASSERT_TRUE(view.getUint32(4, true) === 0xcafe);
+    view.setUint32(0, 0xbeef, true);
+    view.setUint32(4, 0xf00d, true);
+    ASSERT_TRUE(view.getUint32(0, true) === 0xbeef);
+    ASSERT_TRUE(view.getUint32(4, true) === 0xf00d);
+}
+
+function testPromiseAndErrorTypes(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefPromise")();
+    const promise = nativeGetRef();
+    ASSERT_TRUE(promise instanceof Promise);
+
+    let resolved = false;
+    promise.then((val: number) => {
+        ASSERT_EQ(val, 42);
+        resolved = true;
+    });
+
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefError")();
+    const err = nativeGetRef();
+    ASSERT_TRUE(err instanceof Error);
+    ASSERT_EQ(err.message, "Test error");
+}
+
+function testDateType(etsVm: any): void {
+    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefDate")();
+    const date = nativeGetRef();
+    ASSERT_TRUE(date instanceof Date);
+    ASSERT_EQ(date.toISOString(), "2025-05-27T12:34:56.789Z");
+}
+
+function main(): void {
+    const etsVm = globalThis.gtest.etsVm;
+
+    testPrimitiveTypes(etsVm);
+    testArrayAndObjectTypes(etsVm);
+    testMapAndSetTypes(etsVm);
+    testFunctionCallback(etsVm);
+    testBufferAndViewTypes(etsVm);
+    testPromiseAndErrorTypes(etsVm);
+    testDateType(etsVm);
 }
 
 (globalThis as any).nativeGetRef();

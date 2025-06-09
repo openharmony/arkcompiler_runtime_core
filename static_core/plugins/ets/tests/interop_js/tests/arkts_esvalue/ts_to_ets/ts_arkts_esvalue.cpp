@@ -170,4 +170,17 @@ TEST_F(NativeArktsESvalueTsToEtsTest, check_js_to_ets_arkts_value)
     ASSERT_TRUE(RegisterETSGetter(aniEnv));
     ASSERT_TRUE(RunJsTestSuite("ts_arkts_esvalue.ts"));
 }
+
+TEST_F(NativeArktsESvalueTsToEtsTest, UnwrapESValue_InvalidArgs)
+{
+    ani_env *aniEnv {};
+    ASSERT_TRUE(GetAniEnv(&aniEnv));
+
+    ani_ref dummyObj = nullptr;
+    void *resultPtr = nullptr;
+    ASSERT_EQ(aniEnv->GetUndefined(&dummyObj), ANI_OK);
+    ASSERT_FALSE(arkts_esvalue_unwrap(nullptr, static_cast<ani_object>(dummyObj), &resultPtr));
+    ASSERT_FALSE(arkts_esvalue_unwrap(aniEnv, nullptr, &resultPtr));
+    ASSERT_FALSE(arkts_esvalue_unwrap(aniEnv, static_cast<ani_object>(dummyObj), nullptr));
+}
 }  // namespace ark::ets::interop::js::testing

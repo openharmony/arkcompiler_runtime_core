@@ -57,6 +57,9 @@ static bool InitializeGlobalOnce(ani_env *env)
 
 PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     if (UNLIKELY(!InitializeGlobalOnce(env))) {
         return false;
     }

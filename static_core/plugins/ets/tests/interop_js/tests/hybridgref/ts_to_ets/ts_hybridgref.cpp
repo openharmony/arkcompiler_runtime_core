@@ -44,42 +44,6 @@ static napi_value NativeSaveRef(napi_env env, napi_callback_info info)
     napi_get_boolean(env, ok, &result);
     return result;
 }
-void NoopFinalize(napi_env env, void *finalizeData, void *finalizeHint)
-{
-    (void)env;
-    (void)finalizeData;
-    (void)finalizeHint;
-}
-
-static napi_value NativeWrapRef(napi_env env, napi_callback_info info)
-{
-    size_t argc = 1;
-    napi_value argv[1];  // NOLINT(modernize-avoid-c-arrays)
-    napi_status status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (status != napi_ok || argc < 1) {
-        return nullptr;
-    }
-    napi_valuetype valuetype;
-    status = napi_typeof(env, argv[0], &valuetype);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-
-    bool isObject = (valuetype == napi_object);
-
-    if (!isObject) {
-        return nullptr;
-    }
-    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
-    void *nativePtr = reinterpret_cast<void *>(DUMMY_NATIVE_POINTER);
-    status = napi_wrap(env, argv[0], nativePtr, NoopFinalize, nullptr, nullptr);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    napi_value result;
-    napi_get_undefined(env, &result);
-    return result;
-}
 
 static ani_object NativeGetRef(ani_env *env)
 {
@@ -119,21 +83,6 @@ public:
         return napi_set_named_property(env, global, "nativeSaveRef", fn) == napi_ok;
     }
 
-    static bool RegisterNativeWrapRef(napi_env env)
-    {
-        napi_value global;
-        if (napi_get_global(env, &global) != napi_ok) {
-            return false;
-        }
-
-        napi_value fn;
-        if (napi_create_function(env, "nativeWrapRef", NAPI_AUTO_LENGTH, NativeWrapRef, nullptr, &fn) != napi_ok) {
-            return false;
-        }
-
-        return napi_set_named_property(env, global, "nativeWrapRef", fn) == napi_ok;
-    }
-
     static bool RegisterETSGetter(ani_env *env)
     {
         ani_module mod {};
@@ -155,8 +104,40 @@ TEST_F(NativeGrefTsToEtsTest, check_js_to_ets_hybridgref)
     napi_env napiEnv = GetJsEnv();
 
     ASSERT_TRUE(RegisterNativeSaveRef(napiEnv));
-    ASSERT_TRUE(RegisterNativeWrapRef(napiEnv));
     ASSERT_TRUE(RegisterETSGetter(aniEnv));
     ASSERT_TRUE(RunJsTestSuite("ts_hybridgref.ts"));
+}
+
+TEST_F(NativeGrefTsToEtsTest, hybridgref_create_from_napi_invalid_args)
+{
+    napi_env env = GetJsEnv();
+    napi_value dummyValue {};
+    hybridgref ref = nullptr;
+
+    ASSERT_FALSE(hybridgref_create_from_napi(nullptr, dummyValue, &ref));
+    ASSERT_FALSE(hybridgref_create_from_napi(env, dummyValue, nullptr));
+    ASSERT_FALSE(hybridgref_create_from_napi(nullptr, nullptr, nullptr));
+}
+
+TEST_F(NativeGrefTsToEtsTest, hybridgref_delete_from_napi_invalid_args)
+{
+    napi_env env = GetJsEnv();
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    auto dummyRef = reinterpret_cast<hybridgref>(DUMMY_NATIVE_POINTER);
+
+    ASSERT_FALSE(hybridgref_delete_from_napi(nullptr, dummyRef));
+    ASSERT_FALSE(hybridgref_delete_from_napi(env, nullptr));
+}
+
+TEST_F(NativeGrefTsToEtsTest, hybridgref_get_napi_value_invalid_args)
+{
+    napi_env env = GetJsEnv();
+    napi_value result {};
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    auto dummyRef = reinterpret_cast<hybridgref>(DUMMY_NATIVE_POINTER);
+
+    ASSERT_FALSE(hybridgref_get_napi_value(nullptr, dummyRef, &result));
+    ASSERT_FALSE(hybridgref_get_napi_value(env, dummyRef, nullptr));
+    ASSERT_FALSE(hybridgref_get_napi_value(env, nullptr, &result));
 }
 }  // namespace ark::ets::interop::js::testing
