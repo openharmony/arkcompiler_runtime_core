@@ -389,23 +389,23 @@ function ntest4(): boolean {
 }
 
 function assert(condition: boolean, message: string) {
-    if(!condition) {
-        throw new AssertionError("\nERROR: " + message + "\n");
+    if (!condition) {
+        throw new AssertionError('\nERROR: ' + message + '\n');
     }
 }
 
 function main(): int {
     try {
-        assert(test1(), "one load case failed");
-        assert(test2(), "two loads case failed");
-        assert(test3(), "uneven branches case failed");
-        assert(test4(), "many inputs phi case failed");
-        assert(test5(), "partial scalarization test failed");
-        assert(test9(), "stdlib iterator case failed");
-        assert(ntest1(), "not a LoadObject user case failed");
-        assert(ntest2(), "one of users is not a LoadObject case failed");
-        assert(ntest3(), "object types are different case failed");
-        assert(ntest4(), "object types are different complex case failed");
+        assert(test1(), 'one load case failed');
+        assert(test2(), 'two loads case failed');
+        assert(test3(), 'uneven branches case failed');
+        assert(test4(), 'many inputs phi case failed');
+        assert(test5(), 'partial scalarization test failed');
+        assert(test9(), 'stdlib iterator case failed');
+        assert(ntest1(), 'not a LoadObject user case failed');
+        assert(ntest2(), 'one of users is not a LoadObject case failed');
+        assert(ntest3(), 'object types are different case failed');
+        assert(ntest4(), 'object types are different complex case failed');
     } catch (e) {
         return 1;
     }
