@@ -76,9 +76,12 @@
     title: Multiline String Literal
     status: Finished
 2.9.8:
+    title: Regex Literal
+    status: ''
+2.9.9:
     title: Null Literal
     status: Finished
-2.9.9:
+2.9.10:
     title: Undefined Literal
     status: Finished
 '2.10':
