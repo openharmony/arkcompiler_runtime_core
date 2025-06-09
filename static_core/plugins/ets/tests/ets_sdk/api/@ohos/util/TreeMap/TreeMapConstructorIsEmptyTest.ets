@@ -15,9 +15,6 @@
 
 import TreeMap from "@ohos.util.TreeMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("TreeMap Constructor IsEmpty API tests")
 
