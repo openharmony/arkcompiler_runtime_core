@@ -82,10 +82,6 @@ bool ProfileSaverWorker::TryAddTask()
     }
     LOG(INFO, RUNTIME) << "[profile_saver] profile saver task created.";
     AddTask();
-
-    // Workaround for issue #26299
-    // Taskmanager doesn't work after poskfork, so we execute saver task at current thread.
-    profileSaverTaskQueue_->ExecuteBackgroundTask();
     return true;
 }
 
