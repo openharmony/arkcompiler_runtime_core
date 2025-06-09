@@ -12,7 +12,9 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
+if (!ark_standalone_build) {
+  import("//build/ohos.gni")
+}
 import("$ark_root/plugins/plugins.gni")
 import("irtoc.gni")
 
@@ -28,6 +30,7 @@ if (enable_irtoc) {
       "-isystem",
       rebase_path("$ark_third_party_root/elfio", root_build_dir),
     ]
+    configs = [ "$ark_third_party_root/elfio:elfio_public_config" ]
   }
 
   irtoc_scripts = [
@@ -59,6 +62,8 @@ if (enable_irtoc) {
     }
 
     sources = irtoc_scripts + [ irtoc_plugins_file ]
+    inputs = sources
+    inputs += [ "scripts/common.irt" ]
 
     configs = [ "$ark_root:ark_config" ]
 
@@ -152,21 +157,41 @@ if (enable_irtoc) {
         get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})",
                        "root_out_dir")
     if (ark_static_standalone_build) {
-      irtoc_cmd = irtoc_root_out_dir + "/bin/irtoc"
+      irtoc_root_out_dir += "/bin"
     } else {
-      irtoc_cmd =
-          irtoc_root_out_dir + "/$ark_subsystem_name/$ark_part_name/irtoc"
+      irtoc_root_out_dir += "/$ark_subsystem_name/$ark_part_name"
     }
-
-    script = irtoc_cmd
-
+    irtoc_cmd = "${irtoc_root_out_dir}/irtoc"
     outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
-    args = [
-      "--irtoc-output",
-      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
-      "--compiler-cross-arch",
-      current_cpu,
-    ]
+
+    if (ark_static_standalone_build) {
+      script = irtoc_cmd
+      args = [
+        "--irtoc-output",
+        rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
+        "--compiler-cross-arch",
+        current_cpu,
+      ]
+    } else {
+      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
+      args = [
+        "--script-file",
+        rebase_path(irtoc_cmd),
+        "--script-args",
+        string_join(" ",
+                    [
+                      "--irtoc-output",
+                      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o",
+                                  root_build_dir),
+                      "--compiler-cross-arch",
+                      current_cpu,
+                    ]),
+        "--env-path",
+        rebase_path(irtoc_root_out_dir),
+        "--expect-output",
+        "0",
+      ]
+    }
     deps = [ ":irtoc(${host_toolchain})" ]
 
     if (is_llvm_interpreter || is_llvm_fastpath) {
