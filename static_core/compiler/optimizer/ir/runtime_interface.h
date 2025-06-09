@@ -306,12 +306,12 @@ public:
         return true;
     }
 
-    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
+    virtual bool IsMethodAbstract([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
 
-    virtual bool IsMethodAbstract([[maybe_unused]] MethodPtr method) const
+    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }
@@ -319,6 +319,11 @@ public:
     virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
+    }
+
+    virtual MethodPtr GetMethodAsIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
+    {
+        return nullptr;
     }
 
     // return true if the method is Native with exception

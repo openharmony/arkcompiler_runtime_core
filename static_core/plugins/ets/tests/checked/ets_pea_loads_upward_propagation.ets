@@ -14,9 +14,10 @@
  */
 
 //! CHECKER       PEA_propagate_load_objects_upwards JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::main"
-//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
+//! # Always inline escompat.IteratorResult::<ctor> because numbers depend on it
+//! RUN           force_jit: true, options: "--compiler-regex='.*test.*' --compiler-inlining-always-inline-bc-size=50", entry: "ets_pea_loads_upward_propagation.ETSGLOBAL::main"
 //!
+//! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test1"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 5
 //! INST_COUNT    /StoreObject.*res/, 4
@@ -69,9 +70,9 @@
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::test9"
 //! PASS_BEFORE   "EscapeAnalysis"
 //! INST_COUNT    /NewObject/, 10
-//! INST_COUNT    /StoreObject.*done/, 1
+//! INST_COUNT    /StoreObject.*done/, 2
 //! PASS_AFTER    "EscapeAnalysis"
-//! INST_COUNT    /NewObject/, 9
+//! INST_COUNT    /NewObject/, 8
 //! INST_COUNT    /StoreObject.*done/, 0
 //!
 //! METHOD        "ets_pea_loads_upward_propagation.ETSGLOBAL::ntest1"

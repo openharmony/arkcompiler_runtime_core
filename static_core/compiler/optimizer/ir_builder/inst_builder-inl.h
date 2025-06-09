@@ -44,10 +44,8 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
     pc_ = Builder()->GetPc(bcInst->GetAddress());
     hasImplicitArg_ = !GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_);
 
-    if (GetRuntime()->IsMethodIntrinsic(Builder()->GetMethod(), methodId_)) {
-        // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
-        // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
-        method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
+    if (auto *intrinsic = GetRuntime()->GetMethodAsIntrinsic(Builder()->GetMethod(), methodId_)) {
+        method_ = intrinsic;
         if (TryBuildIntrinsic()) {
             return;
         }

@@ -17,6 +17,7 @@
 //! RUN          force_jit: true, options: "", entry: "charAt.ETSGLOBAL::main"
 //! METHOD       "charAt.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
+//! INST_NOT     "Call.*std.core.String::charAt"
 //! INST_NOT     "Intrinsic.StdCoreStringCharAt"
 
 function main(): void {
