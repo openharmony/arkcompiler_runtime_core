@@ -434,12 +434,11 @@ function(compile_stdlib TARGET_ARCH)
             COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS_LLVM_PRE_OPT}" -paoc-output=etsstdlib_llvmaot_pre_opt_2_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
-        # 26279
-        # add_dependencies(
-        #         ets-compile-stdlib
-        #         ets-compile-stdlib-llvm-${TARGET_ARCH}
-        #         ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
-        # )
+        add_dependencies(
+            ets-compile-stdlib
+            ets-compile-stdlib-llvm-${TARGET_ARCH}
+            ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
+        )
     endif()
     if (TARGET_ARCH STREQUAL "arm64")
         add_custom_target(ets-compile-stdlib-osr-${TARGET_ARCH}
@@ -476,8 +475,9 @@ if(PANDA_TEST_COMPILE_STDLIB)
     set (COMPILER_OPTIONS_NO_INLINE "--compiler-inlining=false" ${COMPILER_OPTIONS})
     set (COMPILER_OPTIONS_GC_STW "--gc-type=stw" ${COMPILER_OPTIONS})
     if (PANDA_LLVM_AOT)
-        set (COMPILER_OPTIONS_LLVM ${COMPILER_OPTIONS})
-        set (COMPILER_OPTIONS_LLVM_PRE_OPT "--llvm-pre-opt=2" ${COMPILER_OPTIONS})
+        set (COMPILER_LLVMAOT_FIXUP "--llvm-gc=true") # Investigate in #26733
+        set (COMPILER_OPTIONS_LLVM ${COMPILER_LLVMAOT_FIXUP} ${COMPILER_OPTIONS})
+        set (COMPILER_OPTIONS_LLVM_PRE_OPT "--llvm-pre-opt=2" ${COMPILER_LLVMAOT_FIXUP} ${COMPILER_OPTIONS})
         # NOTE(zdenis): False positives come from libLLVM.so
         if (NOT PANDA_ENABLE_THREAD_SANITIZER)
             set (COMPILER_OPTIONS_LLVM "--llvmaot-threads=4" "--llvmaot-methods-per-module=512" ${COMPILER_OPTIONS_LLVM})
