@@ -86,6 +86,9 @@ function sameWorkerIdTest() {
 function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     for (let test of tests) {
+        test();
+    }
+    for (let test of tests) {
         launch<void, () => void>(test);
     }
 }
