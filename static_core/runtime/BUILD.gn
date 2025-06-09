@@ -67,7 +67,8 @@ config("arkruntime_config") {
   ]
   if (ark_standalone_build) {
     include_dirs += [ "//third_party/icu/icu4c/source" ]
-  }
+  } 
+
 
   cflags_cc = [
     "-Wno-invalid-offsetof",
@@ -83,6 +84,9 @@ config("arkruntime_config") {
     "$build_root/config/compiler:no_exceptions",
     "$build_root/config/compiler:no_rtti",
   ]
+  if (is_ohos && is_standard_system) {
+    configs += [ "$hitrace_root:libhitrace_pub_config" ]
+  }
 }
 
 group("arkruntime_header_deps") {
@@ -186,6 +190,8 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/allocator.cpp",
     "mem/gc/bitmap.cpp",
     "mem/gc/card_table.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/epsilon-g1/epsilon-g1.cpp",
     "mem/gc/epsilon/epsilon.cpp",
     "mem/gc/epsilon/epsilon_barrier.cpp",
@@ -199,8 +205,6 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/update_remset_task_queue.cpp",
     "mem/gc/g1/update_remset_thread.cpp",
     "mem/gc/g1/update_remset_worker.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
-    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
     "mem/gc/gc_adaptive_marking_stack.cpp",
@@ -460,9 +464,13 @@ ohos_source_set("libarkruntime_set_static") {
   }
 
   if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
+    defines = [
+      "PANDA_OHOS_USE_INNER_HILOG",
+      "PANDA_USE_HITRACE",
+    ]
     external_deps += [
       "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "libuv:uv",
     ]
   }
