@@ -141,7 +141,11 @@ void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
 #ifdef ARK_HYBRID
     auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
     if (wasCreated) {
+        auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();
         GetThreadHolder()->RegisterCoroutine(this);
+        if (wasInRunning) {
+            GetThreadHolder()->TransferToRunningIfInNative();
+        }
     }
 #endif
 }
