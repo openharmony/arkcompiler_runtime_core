@@ -39,18 +39,20 @@ export namespace stream {
         'windows-1253', 'windows-1254', 'windows-1255', 'windows-1256',
         'windows-1257', 'windows-1258', 'big5', 'euc-jp', 'iso-2022-jp',
         'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le');
-    const TYPE_ERROR_CODE_ID: number = 401;
-    const DO_READ_FUNC_ERROR_CODE_ID: number = 10200038;
 
-    enum ReadableEvent {
-        CLOSE = 'close',
-        DATA = 'data',
-        END = 'end',
-        ERROR = 'error',
-        READABLE = 'readable',
-        PAUSE = 'pause',
-        RESUME = 'resume',
-    }
+    // BusinessError
+    const ERR_INCORRECT_PARAMETER: BusinessError =
+        createBusinessError(401, 'Parameter error. Incorrect parameter.');
+    const ERR_DOWRITE_NOT_IMPLEMENTED: BusinessError =
+        createBusinessError(10200035, 'The doWrite() method is not implemented');
+    const ERR_WRITE_AFTER_END: BusinessError =
+        createBusinessError(10200036, 'write after end');
+    const ERR_MULTIPLE_CALLBACK: BusinessError =
+        createBusinessError(10200037, 'Callback called multiple times');
+    const ERR_DOREAD_NOT_IMPLEMENTED: BusinessError =
+        createBusinessError(10200038, 'The doRead() method is not implemented');
+    const ERR_DOTRANSFORM_NOT_IMPLEMENTED: BusinessError =
+        createBusinessError(10200039, 'The doTransform() method is not implemented');
 
     enum WritableEvent {
         CLOSE = 'close',
@@ -59,6 +61,36 @@ export namespace stream {
         FINISH = 'finish',
         PIPE = 'pipe',
         UNPIPE = 'unpipe',
+    }
+
+    enum ReadableEvent {
+        CLOSE = 'close',
+        DATA = 'data',
+        END = 'end',
+        ERROR = 'error',
+        PAUSE = 'pause',
+        READABLE = 'readable',
+        RESUME = 'resume',
+    }
+
+    function createBusinessError(code: number, message: string) {
+        let err = new BusinessError();
+        err.code = code;
+        err.name = 'BusinessError';
+        err.message = message;
+        return err;
+    }
+
+    function asyncFn(callback: () => void): void {
+        setTimeout((): void => {
+            callback();
+        });
+    }
+
+    interface WritableBuffer {
+        encoding?: string;
+        chunk: string | Uint8Array;
+        callback: Function;
     }
 
     export interface ReadablePipeStream {
@@ -74,52 +106,58 @@ export namespace stream {
      */
     export interface ReadableOptions {
         /**
-        * Specifies the encoding format of the data. If this parameter is provided,
-        * the readable stream decodes the data into a string in the specified encoding format. Default: utf8.
-        * If an invalid string is entered, a 401 exception is thrown in the Readable constructor.
-        * Supported encoding formats: utf-8, ibm866, iso-8859-2, iso-8859-3, iso-8859-4, iso-8859-5, iso-8859-6,
-        * iso-8859-7, iso-8859-8, iso-8859-8-i, iso-8859-10, iso-8859-13, iso-8859-14, iso-8859-15, koi8-r, koi8-u,
-        * macintosh, windows-874, windows-1250, windows-1251, windows-1252, windows-1253, windows-1254, windows-1255,
-        * windows-1256, windows-1257, windows-1258, x-mac-cyrillic, gbk, gb18030, big5, euc-jp, iso-2022-jp, shift_jis,
-        * euc-kr, utf-16be, utf-16le.
-        *
-        * @type { ?string }
-        */
+         * Specifies the encoding format of the data. If this parameter is provided,
+         * the readable stream decodes the data into a string in the specified encoding format. Default: utf8.
+         * If an invalid string is entered, a 401 exception is thrown in the Readable constructor.
+         * Supported encoding formats: utf-8, ibm866, iso-8859-2, iso-8859-3, iso-8859-4, iso-8859-5, iso-8859-6,
+         * iso-8859-7, iso-8859-8, iso-8859-8-i, iso-8859-10, iso-8859-13, iso-8859-14, iso-8859-15, koi8-r, koi8-u,
+         * macintosh, windows-874, windows-1250, windows-1251, windows-1252, windows-1253, windows-1254, windows-1255,
+         * windows-1256, windows-1257, windows-1258, x-mac-cyrillic, gbk, gb18030, big5, euc-jp, iso-2022-jp, shift_jis,
+         * euc-kr, utf-16be, utf-16le.
+         *
+         */
         encoding?: string;
         highWatermark?: number;
         doRead?: (size: number) => void;
     }
 
-    // TODO: to import from @ohos.util.ets
-    class StringDecoder {
-        constructor(encoding?: string) {}
-
-        write(chunk: string | Uint8Array): string {
-            return 'This is the write function of the mock StringDecoder.'
-        }
-
-        end(chunk?: string | Uint8Array): string {
-            return 'This is the end function of the mock StringDecoder.'
-        }
-    }
-
+    /**
+     * EventEmitter to which event callbacks can be held.
+     *
+     */
     class EventEmitter {
-        private handlers: Map<string, Array<CallbackFnType>>;
+        public handlers: Map<string, Array<Function>>;
 
+        /**
+         * The EventEmitter constructor.
+         *
+         */
         constructor() {
-            this.handlers = new Map<string, Array<CallbackFnType>>();
+            this.handlers = new Map<string, Array<Function>>();
         }
 
-        on(event: string, callback: CallbackFnType): void {
+        /**
+         * Registering event messages.
+         *
+         * @param { string } event - Register event.
+         * @param { Function } callback - Event callbacks.
+         */
+        on(event: string, callback: Function): void {
             if (!this.handlers.has(event)) {
-                const funcList = new Array<CallbackFnType>();
+                const funcList = new Array<Function>();
                 this.handlers.set(event, funcList);
             }
             const funcList = this.handlers.get(event);
             funcList!.push(callback);
         }
 
-        off(event: string, callback: CallbackFnType): void {
+        /**
+         * Unregistering event messages.
+         *
+         * @param { string } event - Unregister event.
+         * @param { Function } callback - Event callbacks.
+         */
+        off(event: string, callback: Function): void {
             if (this.handlers.has(event)) {
                 const funcList = this.handlers.get(event);
                 const pos = funcList!.findIndex((element) => element === callback);
@@ -129,6 +167,11 @@ export namespace stream {
             }
         }
 
+        /**
+         * Clear event messages.
+         *
+         * @param { string } event - Clear event.
+         */
         clear(event: string): void {
             if (this.handlers.has(event)) {
                 const funcList = this.handlers.get(event);
@@ -136,25 +179,43 @@ export namespace stream {
             }
         }
 
+        /**
+         * Emit event messages.
+         *
+         * @param { string } event - Emit event.
+         * @param { Object } [param] - The parameter of event callbacks.
+         */
         emit(event: string, param?: Object): void {
             if (this.handlers.has(event)) {
                 const funcList = this.handlers.get(event);
-                funcList!.forEach((callback: CallbackFnType) => {
+                funcList!.forEach((callback: Function) => {
                     if (param !== undefined) {
-                        callback(param);
+                        callback.unsafeCall(param);
                     } else {
-                        callback();
+                        callback.unsafeCall();
                     }
                 })
             }
         }
 
+        /**
+         * Judge the event is on or not.
+         *
+         * @param { string } event - The event to be judged is on or not.
+         * @returns { boolean } Event is on returns true, event is off returns false.
+         */
         isOn(event: string): boolean {
-            return this.handlers.has(event)? this.handlers.get(event)!.length > 0 : false;
+            return this.handlers.has(event) ? this.handlers.get(event)!.length > 0 : false;
         }
 
+        /**
+         * Find the event count in the listener.
+         *
+         * @param { string } event - The event to be found its count in the listener.
+         * @returns { number } The event count in the listener.
+         */
         listenerCount(event: string): number {
-            return this.handlers.has(event)? this.handlers.get(event)!.length : 0;
+            return this.handlers.has(event) ? this.handlers.get(event)!.length : 0;
         }
     }
 
@@ -163,22 +224,516 @@ export namespace stream {
      *
      */
     export class Writable {
+        public listener: EventEmitter | undefined;
+        private buffer: Array<WritableBuffer> = new Array<WritableBuffer>();
+        private writing: boolean = false;
+        private encoding: string | undefined;
+        protected encoder = new util.TextEncoder();
+        private ending: boolean = false;
         private writableObjectModeInner: boolean | undefined;
         private writableHighWatermarkInner: number;
         private writableInner: boolean | undefined;
         private writableLengthInner: number | undefined;
+        private writableBufferLength: number;
         private writableNeedDrainInner: boolean | undefined;
         private writableCorkedInner: number = 0;
         private writableEndedInner: boolean | undefined;
         private writableFinishedInner: boolean | undefined;
         private erroredInner: Error | undefined | null;
         private closedInner: boolean | undefined;
+        private writableCb: number = 0;
+        private writableSync: boolean = true;
+        private isDoWritevOverride: boolean = true;
+        private defaultEncoding: string | undefined;
+        private endCallback: Function | undefined;
+        private writeCallbackBuffer: Array<Function> = new Array<Function>();
+        private emitErrorExecutedInner: boolean = false;
+        private emitErrorIdInner: number;
+        doWriteFunc: ((chunk: string | Uint8Array, encoding: string, callback: Function) => void) | null;
+        doWritevFunc: ((chunks: string[] | Uint8Array[], callback: Function) => void) | null;
 
         /**
          * The Writable constructor.
          *
          */
-        constructor() {}
+        constructor() {
+            this.listener = new EventEmitter();
+            this.writableHighWatermarkInner = DEFAULT_HIGH_WATER_MARK as number;
+            this.writableObjectModeInner = false;
+            this.writableLengthInner = 0;
+            this.writableBufferLength = 0;
+            this.writableEndedInner = false;
+            this.writableNeedDrainInner = false;
+            this.writableInner = true;
+            this.writableCorkedInner = 0;
+            this.writableFinishedInner = false;
+            this.erroredInner = null;
+            this.encoding = 'utf-8';
+            this.closedInner = false;
+            this.writableCb = 0;
+            this.writableSync = true;
+            this.defaultEncoding = 'utf-8';
+            this.doWriteFunc = this.noWriteOpes;
+            this.doWritevFunc = null;
+            this.doInitialize((...param: Object[]): void => {
+                this.listener?.emit(WritableEvent.ERROR);
+            });
+        }
+
+        private getChunkLength(chunk: string | Uint8Array): number {
+            if (chunk instanceof Uint8Array) {
+                return chunk.byteLength;
+            } else {
+                return (chunk as string).length;
+            }
+        }
+
+        private setEncoding(encoding: string): boolean {
+            let encodingLowCase = encoding.toLowerCase();
+            if (encodingLowCase === 'utf8' || encodingLowCase === 'ascii') {
+                encoding = 'utf-8';
+                encodingLowCase = 'utf-8';
+            }
+
+            if (ENCODING_SET.indexOf(encodingLowCase) !== -1) {
+                this.encoding = encodingLowCase;
+                try {
+                    this.encoder = new util.TextEncoder(encodingLowCase);
+                } catch (e) {
+                    this.throwError(e as Error);
+                    return false;
+                }
+                return true;
+            } else {
+                this.throwError(createBusinessError(401, `Unknown encoding: ${encoding}`));
+                return false;
+            }
+        }
+
+        private writeUint8Array(chunk: Uint8Array, encoding?: string, callback?: Function): boolean {
+            const chunkLength = this.getChunkLength(chunk);
+            if (this.encoding !== this.defaultEncoding) {
+                this.setEncoding(this.defaultEncoding!);
+            }
+            this.writableLengthInner = this.writableLengthInner! + chunkLength;
+            const hasRemaining = this.writableLengthInner! < this.writableHighWatermark!;
+            let executed = false;
+            const fnBack = (...param: Object[]): void => {
+                if (!executed) {
+                    executed = true;
+                    if (param.length > 0 && param[0] instanceof Error) {
+                        this.writableInner = false;
+                        this.throwError(param[0] as Error);
+                        return;
+                    }
+                    callback?.unsafeCall(param);
+                    this.writableLengthInner = this.writableLengthInner! - chunkLength;
+                    this.writing = false;
+                    this.writableCb --;
+                    if (!this.writableSync) {
+                        this.freshCacheV();
+                    }
+                    this.afterWrite();
+                } else {
+                    Promise.resolve().then((): void => {
+                        this.listener?.emit(WritableEvent.ERROR, ERR_MULTIPLE_CALLBACK);
+                    });
+                }
+            };
+            if (this.writableCorkedInner === 0) {
+                if (!this.writing) {
+                    this.writing = true;
+                    this.writableCb ++;
+                    this.writableSync = true;
+                    this.doWrite(chunk, encoding ?? 'utf8', fnBack);
+                    this.writableSync = false;
+                } else {
+                    const buffInfo: WritableBuffer = {
+                        encoding: encoding,
+                        chunk: chunk,
+                        callback: fnBack
+                    };
+                    this.buffer.push(buffInfo);
+                    if (callback instanceof Function) {
+                        this.writeCallbackBuffer.push(callback);
+                    } else {
+                        this.writeCallbackBuffer.push((): void => {});
+                    }
+                    this.writableBufferLength += chunkLength;
+                }
+            } else {
+                const buffInfo: WritableBuffer = {
+                    encoding: encoding,
+                    chunk: chunk,
+                    callback: fnBack
+                };
+                this.buffer.push(buffInfo);
+                if (callback instanceof Function) {
+                    this.writeCallbackBuffer.push(callback);
+                } else {
+                    this.writeCallbackBuffer.push((): void => {});
+                }
+                this.writableBufferLength += chunkLength;
+            }
+            return hasRemaining;
+        }
+
+        private writeString(chunk: string, encoding?: string, callback?: Function): boolean {
+            const chunkLength = this.getChunkLength(chunk);
+            if (this.encoding !== this.defaultEncoding) {
+                this.setEncoding(this.defaultEncoding!);
+            }
+            this.writableLengthInner = this.writableLengthInner! + chunkLength;
+            const hasRemaining = this.writableLengthInner! < this.writableHighWatermark!;
+            let executed = false;
+            const fb = (...param: Object[]): void => {
+                if (!executed) {
+                    executed = true;
+                    if (param.length > 0) {
+                        this.erroredInner = param[0] as Error;
+                    }
+                    callback?.unsafeCall(param);
+                    this.writableLengthInner = this.writableLengthInner! - chunkLength;
+                    this.writing = false;
+                    this.writableCb --;
+                    if (!this.writableSync) {
+                        this.freshCacheV();
+                    }
+                    if (param.length > 0 && param[0] instanceof Error) {
+                        this.writableInner = false;
+                        this.erroredInner = param[0] as Error;
+                        Promise.resolve().then((): void => {
+                            if (this.isOnError()) {
+                                this.emitErrorOnce(this.erroredInner!);
+                            } else {
+                                this.emitErrorOnce(this.erroredInner!);
+                                throw this.erroredInner!;
+                            }
+                        });
+                        return;
+                    }
+                    this.afterWrite();
+                } else {
+                    Promise.resolve().then(():void => {
+                        this.emitErrorOnce(ERR_MULTIPLE_CALLBACK, true);
+                    });
+                }
+            };
+
+            if (this.writableCorkedInner === 0) {
+                if (!this.writing) {
+                    this.writing = true;
+                    this.writableCb ++;
+                    this.writableSync = true;
+                    this.doWrite(chunk, encoding ?? 'utf8', fb);
+                    this.writableSync = false;
+                } else {
+                    const buffInfo: WritableBuffer = {
+                        encoding: encoding,
+                        chunk: chunk,
+                        callback: fb
+                    };
+                    this.buffer.push(buffInfo);
+                    if (callback instanceof Function) {
+                        this.writeCallbackBuffer.push(callback);
+                    } else {
+                        this.writeCallbackBuffer.push((): void => {});
+                    }
+                    this.writableBufferLength += chunkLength;
+                }
+            } else {
+                const buffInfo: WritableBuffer = {
+                    encoding: encoding,
+                    chunk: chunk,
+                    callback: fb
+                };
+                this.buffer.push(buffInfo);
+                if (callback instanceof Function) {
+                    this.writeCallbackBuffer.push(callback);
+                } else {
+                    this.writeCallbackBuffer.push((): void => {});
+                }
+                this.writableBufferLength += chunkLength;
+            }
+            return this.erroredInner ? false : hasRemaining;
+        }
+
+        private freshCache(): void {
+            if (this.writableCorkedInner != 0) {
+                return;
+            }
+            let currentLength = this.buffer.length;
+            let current = this.buffer.splice(0, 1);
+            this.writeCallbackBuffer.splice(0, 1);
+            while (currentLength > 0) {
+                this.writableBufferLength -= this.getChunkLength(current[0].chunk);
+                this.writing = true;
+                this.writableCb ++;
+                this.writableSync = true;
+                this.doWrite(current[0].chunk, current[0].encoding ?? 'utf8', current[0].callback);
+                this.writableSync = false;
+                if (!this.writing) {
+                    currentLength = this.buffer.length;
+                    current = this.buffer.splice(0, 1);
+                } else {
+                    break;
+                }
+            }
+            if (this.finishMayBe()) {
+                this.finishWrite();
+            }
+        }
+
+        private freshCacheV(): void {
+            if (this.writableCorkedInner != 0) {
+                return;
+            }
+            if (this.buffer.length > 0) {
+                const bufferChunkLength = this.writableBufferLength;
+                this.writableBufferLength = 0;
+                let writeCallbacks: Array<Function> = new Array<Function>();
+                let executed = false;
+                const funCallback = (...param: Object[]): void => {
+                    if (!executed) {
+                        executed = true;
+                        if (param.length > 0 && param[0] instanceof Error) {
+                            this.erroredInner = param[0] as Error;
+                            this.listener?.emit(WritableEvent.ERROR, param[0] as Error);
+                            return;
+                        }
+                        this.writableLengthInner = this.writableLengthInner! - bufferChunkLength;
+                        this.writing = false;
+                        this.writableCb --;
+                        writeCallbacks.forEach(callback => {
+                            if (callback instanceof Function) {
+                                callback.unsafeCall();
+                            }
+                        });
+                        writeCallbacks = new Array<Function>();
+
+                        if (!this.writableSync) {
+                            this.freshCacheV();
+                        }
+                        this.afterWrite();
+                    } else {
+                        Promise.resolve().then(():void => {
+                            this.listener?.emit(WritableEvent.ERROR, ERR_MULTIPLE_CALLBACK);
+                        });
+                    }
+                };
+                const oldWriting = this.writing;
+                this.writing = true;
+                const oldWritableCb = this.writableCb;
+                this.writableCb ++;
+                const oldWritableSync = this.writableSync;
+                this.writableSync = true;
+                this.writeCallbackBuffer.forEach((callback: Function ) => {
+                    writeCallbacks.push(callback);
+                });
+                let strChunks = new (string)[this.buffer.length];
+                let arrayChunks = new (Uint8Array)[this.buffer.length];
+                let isString: boolean = false;
+                let index: int = 0;
+                this.buffer.forEach((value: WritableBuffer) => {
+                    if (value.chunk instanceof string) {
+                        strChunks[index] = value.chunk as string;
+                        isString = true;
+                    } else {
+                        arrayChunks[index] = value.chunk as Uint8Array;
+                    }
+                    index++;
+                });
+                if (isString) {
+                    this.doWritev(strChunks, funCallback);
+                } else {
+                    this.doWritev(arrayChunks, funCallback);
+                }
+                if (this.isDoWritevOverride) {
+                    this.writableSync = false;
+                    this.buffer = new Array<WritableBuffer>();
+                    this.writeCallbackBuffer = new Array<Function>();
+                    if (this.finishMayBe()) {
+                        this.finishWrite();
+                    }
+                } else {
+                    this.isDoWritevOverride = false;
+                    this.writableBufferLength = bufferChunkLength;
+                    this.writing = oldWriting;
+                    this.writableCb = oldWritableCb;
+                    this.writableSync = oldWritableSync;
+                    this.freshCache();
+                }
+            } else {
+                if (this.finishMayBe()) {
+                    this.finishWrite();
+                }
+            }
+        }
+
+        private isOnError(): boolean {
+            if (this.listener === undefined) {
+                return false;
+            }
+            return this.listener!.isOn(WritableEvent.ERROR) || false;
+        }
+
+        private emitErrorOnce(error: Error, reset?: boolean): void {
+            if (reset) {
+                this.emitErrorExecutedInner = false;
+                clearTimeout(this.emitErrorIdInner);
+            }
+            if (!this.emitErrorExecutedInner) {
+                this.emitErrorExecutedInner = true;
+                this.emitErrorIdInner = setTimeout((): void => {
+                    this.listener?.emit(WritableEvent.ERROR, this.erroredInner ?? error);
+                });
+            }
+        }
+
+        private finishMayBe(): boolean {
+            return !this.writing && this.writableCorkedInner === 0 && this.ending;
+        }
+
+        private finishWrite(): void {
+            if (!this.writableFinishedInner && this.writableCb == 0 &&
+                (!this.erroredInner || this.erroredInner!.message === 'write after end')) {
+                if (this.writableSync) {
+                    asyncFn((): void => {
+                        this.writableFinishedInner = true;
+                        this.endCallback?.unsafeCall(this.erroredInner);
+                        this.listener?.emit(WritableEvent.FINISH);
+                    });
+                } else {
+                    this.writableFinishedInner = true;
+                    this.endCallback?.unsafeCall(this.erroredInner);
+                    this.listener?.emit(WritableEvent.FINISH);
+                }
+                asyncFn((): void => {
+                    if (!this.erroredInner || this.erroredInner!.message === 'write after end') {
+                        this.listener?.emit(WritableEvent.CLOSE);
+                    }
+                });
+            }
+        }
+
+        private afterWrite(): void {
+            if (!this.finishMayBe() && this.writableNeedDrainInner && this.writableLengthInner == 0) {
+                this.writableNeedDrainInner = false;
+                this.listener?.emit(WritableEvent.DRAIN);
+            }
+        }
+
+        noWriteOpes(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+            if (chunk instanceof string) {
+                this.doWritev([chunk as string], callback);
+            } else {
+                this.doWritev([chunk as Uint8Array], callback);
+            }
+            if (!this.isDoWritevOverride) {
+                this.isDoWritevOverride = true;
+                this.throwError(ERR_DOWRITE_NOT_IMPLEMENTED);
+            }
+        }
+
+        private throwError(error: Error): void {
+            this.erroredInner = error;
+            if (this.listener && this.listener!.listenerCount(WritableEvent.ERROR) > 0) {
+                setTimeout(() => {
+                    this.listener?.emit(WritableEvent.ERROR, error);
+                });
+            } else {
+                throw error;
+            }
+        }
+
+        /**
+         * Writes a chunk to Writable and invokes callback when the chunk is flushed. The return value indicates
+         * whether the internal buffer of the Writable reaches the hightWaterMark. If true is returned, the buffer
+         * does not reach the hightWaterMark. If false is returned, the buffer has been reached. The write function
+         * should be called after the drain event is triggered. If the write function is called continuously,
+         * the chunk is still added to the buffer until the memory overflows.
+         *
+         * @param { string | Uint8Array } [chunk] - Data to be written.
+         * @param { string } [encoding] - Encoding type.
+         * @param { Function } [callback] - Callback after writing.
+         * @returns { boolean } Write success returns true, write failure returns false.
+         * @throws { BusinessError } 401 - Parameter error.
+         * @throws { BusinessError } 10200035 - The doWrite method has not been implemented.
+         * @throws { BusinessError } 10200036 - The stream has been ended.
+         * @throws { BusinessError } 10200037 - The callback is invoked multiple times consecutively.
+         */
+        write(chunk?: string | Uint8Array, encoding?: string, callback?: Function): boolean {
+            if (encoding) {
+                this.setEncoding(encoding!);
+            }
+            if (chunk === null) {
+                throw ERR_INCORRECT_PARAMETER;
+            }
+            if (!(chunk instanceof string) && !(chunk instanceof Uint8Array)) {
+                throw ERR_INCORRECT_PARAMETER;
+            }
+            if (this.ending) {
+                let cb = () => {
+                    this.erroredInner = ERR_WRITE_AFTER_END;
+                    callback?.unsafeCall(this.erroredInner!);
+                }
+                setTimeout((): void => {
+                    cb();
+                });
+                return false;
+            }
+            if (this.erroredInner) {
+                return false;
+            }
+            let flag = false;
+            if (chunk instanceof Uint8Array) {
+                flag = this.writeUint8Array(chunk, encoding ?? this.encoding, callback);
+            } else {
+                flag = this.writeString(chunk! as string, encoding ?? this.encoding, callback);
+            }
+            if (!flag) {
+                this.writableNeedDrainInner = true;
+            }
+            return flag;
+        }
+
+        /**
+         * This method is invoked by the Writable method during initialization and must not be invoked directly.
+         * After the resource is initialized in the doInitialize method, the callback () method is invoked.
+         *
+         * @param { Function } callback - Callback when the stream has completed the initial.
+         */
+        doInitialize(callback: Function): void {}
+
+        /**
+         * Implemented by subclass inheritance. The implementation logic of flushing chunks in the buffer must not be
+         * directly called. The call is controlled by Writable.write.
+         *
+         * @param { string | Uint8Array } [chunk] - Data to be written.
+         * @param { string } [encoding] - Encoding type.
+         * @param { Function } [callback] - Callback after writing.
+         */
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+            if (this.doWriteFunc != null) {
+                this.doWriteFunc?.(chunk, encoding, callback);
+                return;
+            }
+        }
+
+        /**
+         * The implementation logic of flushing chunks in the buffer in batches should not be actively called.
+         * The call is controlled by Writable.write.
+         *
+         * @param { string[] | Uint8Array[] } [chunks] - Data to be written.
+         * @param { Function } [callback] - Callback after writing.
+         */
+        doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
+            if (this.doWritevFunc != null) {
+                this.doWritevFunc?.(chunks, callback);
+                return;
+            }
+            this.isDoWritevOverride = false;
+        }
 
         /**
          * Returns boolean indicating whether it is in ObjectMode.
@@ -188,15 +743,15 @@ export namespace stream {
         }
 
         /**
-         * Value of highWaterMark.
+         * Value of highWatermark.
          */
         get writableHighWatermark(): number | undefined {
             return this.writableHighWatermarkInner;
         }
 
         /**
-         * Is true if it is safe to call writable.write(), which means the stream has not been destroyed,
-         * errored, or ended.
+         * Is true if it is safe to call writable.write(), which means
+         * the stream has not been destroyed or emitted 'error' or 'end'.
          *
          */
         get writable(): boolean | undefined {
@@ -204,7 +759,7 @@ export namespace stream {
         }
 
         /**
-         * Size of data this can be flushed, in bytes or objects.
+         * Size of data that can be flushed, in bytes or objects.
          */
         get writableLength(): number | undefined {
             return this.writableLengthInner;
@@ -218,7 +773,7 @@ export namespace stream {
         }
 
         /**
-         * Number of times writable.uncork() needs to be called in order to fully uncork the stream.
+         * Number of times Writable.uncork() needs to be called in order to fully uncork the stream.
          */
         get writableCorked(): number | undefined {
             return this.writableCorkedInner;
@@ -250,29 +805,6 @@ export namespace stream {
          */
         get closed(): boolean | undefined {
             return this.closedInner;
-        }
-
-        /**
-         * writes a chunk to Writable and invokes callback when the chunk is flushed. The return value indicates
-         * whether the internal buffer of the Writable reaches the hightWaterMark. If true is returned, the buffer
-         * does not reach the hightWaterMark. If false is returned, the buffer has been reached. The write function
-         * should be called after the drain event is triggered. If the write function is called continuously,
-         * the chunk is still added to the buffer until the memory overflows
-         *
-         * @param { string | Uint8Array } [chunk] - Data to be written.
-         * @param { string } [encoding] - Encoding type.
-         * @param { Function } [callback] - Callback after writing.
-         * @returns { boolean } Write success returns true, write failure returns false.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         * @throws { BusinessError } 10200035 - The doWrite method has not been implemented.
-         * @throws { BusinessError } 10200036 - The stream has been ended.
-         * @throws { BusinessError } 10200037 - The callback is invoked multiple times consecutively.
-        */
-        write(chunk?: string | Uint8Array, encoding?: string, callback?: () => void): boolean {
-            return false;
         }
 
         /**
@@ -346,44 +878,6 @@ export namespace stream {
          *     2.Incorrect parameter types.
          */
         off(event: string, callback?: CallbackFnType): void {}
-
-        /**
-         * This method is invoked by the Writable method during initialization and must not be invoked directly.
-         * After the resource is initialized in the doInitialize method, the callback () method is invoked.
-         *
-         * @param { Function } callback - Callback when the stream has completed the initial.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types.
-         */
-        doInitialize(callback: () => void): void {}
-
-        /**
-         * Implemented by subclass inheritance. The implementation logic of flushing chunks in the buffer must not be
-         * directly called. The call is controlled by Writable.write.
-         *
-         * @param { string | Uint8Array } [chunk] - Data to be written.
-         * @param { string } [encoding] - Encoding type.
-         * @param { Function } [callback] - Callback after writing.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         */
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: () => void): void {}
-
-        /**
-         * The implementation logic of flushing chunks in the buffer in batches should not be actively called.
-         * The call is controlled by Writable.write.
-         *
-         * @param { string[] | Uint8Array[] } [chunks] - Data to be written.
-         * @param { Function } [callback] - Callback after writing.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         */
-        doWritev(chunks: string[] | Uint8Array[], callback: () => void): void {}
     }
 
     /**
@@ -393,7 +887,7 @@ export namespace stream {
      */
     export class Readable {
         protected encoder = new util.TextEncoder();
-        protected stringDecoder = new StringDecoder();
+        protected stringDecoder = new util.StringDecoder();
 
         private buf: Uint8Array;
         private listener: EventEmitter | undefined;
@@ -470,13 +964,9 @@ export namespace stream {
         constructor() {
             this.initializeMembers();
             if (ENCODING_SET.findIndex((element) => element === this.readableEncodingInner.toLowerCase()) === -1) {
-                let err = new BusinessError();
-                err.code = TYPE_ERROR_CODE_ID;
-                err.name='BusinessError';
-                err.message = 'Parameter error. Incorrect parameter types.';
-                throw err;
+                throw ERR_INCORRECT_PARAMETER;
             }
-            this.stringDecoder = new StringDecoder(this.readableEncodingInner);
+            this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
             this.encoder = new util.TextEncoder(this.readableEncodingInner);
         }
 
@@ -504,13 +994,9 @@ export namespace stream {
             }
 
             if (ENCODING_SET.findIndex((element) => element === this.readableEncodingInner.toLowerCase()) === -1) {
-                let err = new BusinessError();
-                err.code = TYPE_ERROR_CODE_ID;
-                err.name='BusinessError';
-                err.message = 'Parameter error. Incorrect parameter types.';
-                throw err;
+                throw ERR_INCORRECT_PARAMETER;
             }
-            this.stringDecoder = new StringDecoder(this.readableEncodingInner);
+            this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
             this.encoder = new util.TextEncoder(this.readableEncodingInner);
         }
 
@@ -599,11 +1085,7 @@ export namespace stream {
                 this.readableInner = false;
                 Promise.resolve().then(() => {
                     this.closedInner = true;
-                    let err = new BusinessError();
-                    err.code = DO_READ_FUNC_ERROR_CODE_ID;
-                    err.name='BusinessError';
-                    err.message = 'The doRead() method is not implemented';
-                    this.erroredInner = err;
+                    this.erroredInner = ERR_DOREAD_NOT_IMPLEMENTED;
                     if (this.listener !== undefined) {
                         this.listener!.emit(ReadableEvent.ERROR, this.erroredInner!);
                         this.listener!.emit(ReadableEvent.CLOSE);
@@ -692,7 +1174,7 @@ export namespace stream {
             if (encoding === undefined) {
                 this.readableEncodingInner = DEFAULT_ENCODING;
                 this.encoder = new util.TextEncoder(this.readableEncodingInner);
-                this.stringDecoder = new StringDecoder(this.readableEncodingInner);
+                this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
                 return false;
             }
 
@@ -709,7 +1191,7 @@ export namespace stream {
             if (ENCODING_SET.indexOf(encodingLowCase) !== -1) {
                 try {
                     this.encoder = new util.TextEncoder(encoding);
-                    this.stringDecoder = new StringDecoder(encoding);
+                    this.stringDecoder = new util.StringDecoder(encoding);
                     this.readableEncodingInner = encodingLowCase;
                 } catch (e) {
                     this.throwError(e as Error);
