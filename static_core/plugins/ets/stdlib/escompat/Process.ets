@@ -209,7 +209,7 @@ export namespace StdProcess {
          *
          * @returns { boolean } resulting boolean
          */
-        static isAppUid(uid: number): boolean {
+        isAppUid(uid: number): boolean {
             throw new Error("not implemented");
         }
 
@@ -220,7 +220,7 @@ export namespace StdProcess {
          *
          * @returns { number } user id as number
          */
-        static native getUidForName(v: string): number;
+        native getUidForName(v: string): number;
 
         /**
          * Determine the priority for a given pid or tid
@@ -229,7 +229,7 @@ export namespace StdProcess {
          *
          * @returns { number } priority value as number
          */
-        static native getThreadPriority(v: number): number;
+        native getThreadPriority(v: number): number;
 
         /**
         * Get configuration information
@@ -238,7 +238,7 @@ export namespace StdProcess {
         *
         * @returns { number } value of the configuration parameter
         */
-        static native getSystemConfig(name: number): number;
+        native getSystemConfig(name: number): number;
 
         /**
          * Get value of an environment variable
@@ -247,7 +247,7 @@ export namespace StdProcess {
          *
          * @returns { string } value of the environment variable
          */
-        static native getEnvironmentVar(name: string): string;
+        native getEnvironmentVar(name: string): string;
 
         /**
          * Exit the program
@@ -255,7 +255,7 @@ export namespace StdProcess {
          * @param { number } code exit code
          *
          */
-        static native exit(code: number): void;
+        native exit(code: number): void;
 
         /**
          * Send a kill singnal to a process with a given pid
@@ -267,305 +267,275 @@ export namespace StdProcess {
          * @returns { boolean } value indicating if the signal was sent succesfully
          *
          */
-        static native kill(signal: number, pid: number): boolean;
+        native kill(signal: number, pid: number): boolean;
     }
 
     export type EventListener = (evt: Object) => void;
 
     /**
-     * @class Interface that allows to create and interact with processes in the system, retrieve process-specific and system-specific information
-     */
-    export final class process {
-        /**
-         * Get effective group id of the current process
-         *
-         * @returns { number } egid as number
-         */
-        static get egid(): number {
-            return process.getEgidImpl();
+    * Get effective group id of the current process
+    *
+    * @returns { number } egid as number
+    */
+    export native function egid(): number;
+
+    /**
+    * Get effective user id of the current process
+    *
+    * @returns { number } euid as number
+    */
+    export native function euid(): number;
+
+    /**
+    * Get group id of the current process
+    *
+    * @returns { number } gid as number
+    */
+    export native function gid(): number;
+
+    /**
+    * Get user id of the current process
+    *
+    * @returns { number } uid as number
+    */
+    export native function uid(): number;
+
+    /**
+    * Get groups to which the current process belongs
+    *
+    * @returns { number[] } groups as number array
+    */
+    export native function groups(): number[];
+
+    /**
+    * Get process id of the current process
+    *
+    * @returns { number } pid as number
+    */
+    export native function pid(): number;
+
+    /**
+    * Get parent process id of the current process
+    *
+    * @returns { number } ppid as number
+    */
+    export native function ppid(): number;
+
+    /**
+    * Get thread id of the current process
+    *
+    * @returns { number } tid as number
+    */
+    export native function tid(): number;
+
+    /**
+    * Determine if the current process is isolated
+    *
+    * @returns { boolean } value indicating if the current process is isolated
+    */
+    export function isIsolatedProcess(): boolean {
+        throw new Error("not implemented");
+    }
+
+    /**
+    * Determine if the current process is a 64-bit process
+    *
+    * @returns { boolean } value indicating if the current process is a 64-bit process
+    */
+    export native function is64Bit(): boolean;
+
+    /**
+    * Get start time of the current process
+    *
+    * @returns { number } current process's start time milliseconds as number
+    */
+    export native function getStartRealtime(): number;
+
+    /**
+    * Get past cpu time of the current process
+    *
+    * @returns { number } current process's past cpu time in milliseconds as number
+    */
+    export native function getPastCpuTime(): number;
+
+
+    /**
+    * Create a child process to execute a given command
+    *
+    * @param { string } command command to execute
+    *
+    * @param { ConditionType } [options] specifies timeout, kill signal and maximum buffer size for child process created
+    *
+    * @returns { ChildProcess } instance of ChildProcess
+    *
+    */
+    export function runCmd(command: string, options?: ConditionType): ChildProcess {
+        let args: int[] = getCmdOptions(options);
+        let childProcess = new ChildProcess(args[2]);
+        childProcess.spawn(command, args[0], args[1]);
+        return childProcess;
+    }
+
+    /**
+    * Abort the program
+    */
+    export native function abort(): void;
+
+
+    /**
+    * Store user-triggered event
+    *
+    * @param { string } type type of storage event
+    *
+    * @param { EventListener } listener callback for event handling
+    *
+    */
+    export function on(type: string, listener: EventListener): void {
+        if (type == "unhandledJobRejection") {
+            setFailedJobHandler(listener);
+            return;
         }
-
-        /**
-         * Get effective user id of the current process
-         *
-         * @returns { number } euid as number
-         */
-        static get euid(): number {
-            return process.getEuidImpl();
+        if (type == "unhandledPromiseRejection") {
+            setRejectedPromiseHandler(listener);
+            return;
         }
+        throw new Error("not implemented");
+    }
 
-        /**
-         * Get group id of the current process
-         *
-         * @returns { number } gid as number
-         */
-        static get gid(): number {
-            return process.getGidImpl();
+    /**
+    * Remove user-triggered event
+    *
+    * @param { string } type type of storage event
+    *
+    * @returns { boolean } indicating if the event has been removed successfully
+    *
+    */
+    export function off(type: string): boolean {
+        if (type == "unhandledJobRejection") {
+            setFailedJobHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+            return true;
         }
-
-        /**
-         * Get user id of the current process
-         *
-         * @returns { number } uid as number
-         */
-        static get uid(): number {
-            return process.getUidImpl();
+        if (type == "unhandledPromiseRejection") {
+            setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+            return true;
         }
+        throw new Error("not implemented");
+    }
 
-        /**
-         * Get groups to which the current process belongs
-         *
-         * @returns { number[] } groups as number array
-         */
-        static get groups(): number[] {
-            return process.getGroupsImpl();
-        }
+    /**
+    * Get the current working directory of the program
+    *
+    * @returns { string } current working directory as string
+    *
+    */
+    export native function cwd(): string;
 
-        /**
-         * Get process id of the current process
-         *
-         * @returns { number } pid as number
-         */
-        static get pid(): number {
-            return process.getPidImpl();
-        }
+    /**
+    * Change the current working directory of the program
+    *
+    * @param { string } path working directory
+    *
+    */
+    export native function chdir(path: string): void;
 
-        /**
-         * Get parent process id of the current process
-         *
-         * @returns { number } ppid as number
-         */
-        static get ppid(): number {
-            return process.getPpidImpl();
-        }
+    /**
+    * Get the system uptime
+    *
+    * @returns { number } uptime in milliseconds as number
+    *
+    */
+    export native function uptime(): number;
 
-        /**
-         * Get thread id of the current process
-         *
-         * @returns { number } tid as number
-         */
-        static get tid(): number {
-            return process.getTidImpl();
-        }
+    function getCmdOptions(options?: ConditionType): int[] {
+        let timeout: int = 0;
+        let killSignal: int = SIGNAL_MAP.get("SIGTERM")! as int;
+        let maxBuffer: int = MAX_BUFFER_SIZE;
 
-        /**
-         * Determine if the current process is isolated
-         *
-         * @returns { boolean } value indicating if the current process is isolated
-         */
-        static isIsolatedProcess(): boolean {
-            throw new Error("not implemented");
-        }
-
-        /**
-         * Determine if the current process is a 64-bit process
-         *
-         * @returns { boolean } value indicating if the current process is a 64-bit process
-         */
-        static native is64Bit(): boolean;
-
-        /**
-         * Get start time of the current process
-         *
-         * @returns { number } current process's start time milliseconds as number
-         */
-        static native getStartRealtime(): number;
-
-        /**
-         * Get past cpu time of the current process
-         *
-         * @returns { number } current process's past cpu time in milliseconds as number
-         */
-        static native getPastCpuTime(): number;
-
-
-        /**
-         * Create a child process to execute a given command
-         *
-         * @param { string } command command to execute
-         *
-         * @param { ConditionType } [options] specifies timeout, kill signal and maximum buffer size for child process created
-         *
-         * @returns { ChildProcess } instance of ChildProcess
-         *
-         */
-        public static runCmd(command: string, options?: ConditionType): ChildProcess {
-            let args: int[] = process.getCmdOptions(options);
-            let childProcess = new ChildProcess(args[2]);
-            childProcess.spawn(command, args[0], args[1]);
-            return childProcess;
-        }
-
-        /**
-         * Abort the program
-         */
-        static native abort(): void;
-
-
-        /**
-         * Store user-triggered event
-         *
-         * @param { string } type type of storage event
-         *
-         * @param { EventListener } listener callback for event handling
-         *
-         */
-        static on(type: string, listener: EventListener): void {
-            if (type == "unhandledJobRejection") {
-                process.setFailedJobHandler(listener);
-                return;
-            }
-            if (type == "unhandledPromiseRejection") {
-                process.setRejectedPromiseHandler(listener);
-                return;
-            }
-            throw new Error("not implemented");
-        }
-
-        /**
-         * Remove user-triggered event
-         *
-         * @param { string } type type of storage event
-         *
-         * @returns { boolean } indicating if the event has been removed successfully
-         *
-         */
-        static off(type: string): boolean {
-            if (type == "unhandledJobRejection") {
-                process.setFailedJobHandler(DEFAULT_JOB_HANDLER_CALLBACK);
-                return true;
-            }
-            if (type == "unhandledPromiseRejection") {
-                process.setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
-                return true;
-            }
-            throw new Error("not implemented");
-        }
-
-        /**
-         * Get the current working directory of the program
-         *
-         * @returns { string } current working directory as string
-         *
-         */
-        static native cwd(): string;
-
-        /**
-         * Change the current working directory of the program
-         *
-         * @param { string } path working directory
-         *
-         */
-        static native chdir(path: string): void;
-
-        /**
-        * Get the system uptime
-        *
-        * @returns { number } uptime in milliseconds as number
-        *
-        */
-        static native uptime(): number;
-
-        private static getCmdOptions(options?: ConditionType): int[] {
-            let timeout: int = 0;
-            let killSignal: int = SIGNAL_MAP.get("SIGTERM")! as int;
-            let maxBuffer: int = MAX_BUFFER_SIZE;
-
-            if (options == undefined) {
-                return [timeout, killSignal, maxBuffer];
-            }
-
-            if (options.timeout != undefined && options.timeout as number > 0) {
-                timeout = (options.timeout as number).toInt();
-            }
-
-            if (options.killSignal != undefined) {
-                if (options.killSignal instanceof string) {
-                    let key: string = options.killSignal as string;
-                    if (SIGNAL_MAP.has(key)) {
-                        killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
-                    }
-                } else {
-                    if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
-                        throw new RangeError("Invalid signal value");
-                    }
-                    killSignal = (options.killSignal as number).toInt();
-                }
-            }
-
-            if (options.maxBuffer != undefined) {
-                if ((options.maxBuffer as number).toInt() < 0) {
-                    throw new RangeError("Invalid buffer size value");
-                }
-                maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
-            }
-
+        if (options == undefined) {
             return [timeout, killSignal, maxBuffer];
         }
 
-        /**
-         * This method updates handler that is applied to
-         * unhandled failed jobs at the program exit
-         *
-         * @param { EventListener } listener user-provided handler
-         *
-         */
-        private static setFailedJobHandler(listener: EventListener): void {
-            process.failedJobHandler.reset(listener);
+        if (options.timeout != undefined && options.timeout as number > 0) {
+            timeout = (options.timeout as number).toInt();
         }
 
-        /**
-         * This method updates handler that is applied to
-         * unhandled rejected promises at the program exit
-         *
-         * @param { EventListener } listener user-provided handler
-         *
-         */
-        private static setRejectedPromiseHandler(listener: EventListener): void {
-            process.rejectedPromiseHandler.reset(listener);
-        }
-
-
-        /**
-         * This method applies default or user-provided handler to
-         * all unhandled failed job results
-         *
-         * @param { Object[] } errors results of failed jobs
-         *
-         */
-        private static listUnhandledJobs(errors: Object[]): void {
-            for (let error of errors) {
-                process.failedJobHandler.apply(error);
-            }
-        }
-
-        /**
-         * This method applies default or user-provided handler to
-         * all unhandled rejected promise results
-         *
-         * @param { Object[] } errors results of rejected promises
-         *
-         */
-        public static listUnhandledPromises(errors: NullishType[]): void {
-            for (let error of errors) {
-                if (error instanceof Object) {
-                    process.rejectedPromiseHandler.apply(error);
-                } else {
-                    process.rejectedPromiseHandler.apply(new Error());
+        if (options.killSignal != undefined) {
+            if (options.killSignal instanceof string) {
+                let key: string = options.killSignal as string;
+                if (SIGNAL_MAP.has(key)) {
+                    killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
                 }
+            } else {
+                if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
+                    throw new RangeError("Invalid signal value");
+                }
+                killSignal = (options.killSignal as number).toInt();
             }
         }
 
-        private static native getEgidImpl(): number;
-        private static native getEuidImpl(): number;
-        private static native getGidImpl(): number;
-        private static native getUidImpl(): number;
-        private static native getGroupsImpl(): number[];
-        private static native getPidImpl(): number;
-        private static native getPpidImpl(): number;
-        private static native getTidImpl(): number;
+        if (options.maxBuffer != undefined) {
+            if ((options.maxBuffer as number).toInt() < 0) {
+                throw new RangeError("Invalid buffer size value");
+            }
+            maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
+        }
 
-        private static failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
-        private static rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+        return [timeout, killSignal, maxBuffer];
     }
+
+    /**
+    * This method updates handler that is applied to
+    * unhandled failed jobs at the program exit
+    *
+    * @param { EventListener } listener user-provided handler
+    *
+    */
+    function setFailedJobHandler(listener: EventListener): void {
+        failedJobHandler.reset(listener);
+    }
+
+    /**
+    * This method updates handler that is applied to
+    * unhandled rejected promises at the program exit
+    *
+    * @param { EventListener } listener user-provided handler
+    *
+    */
+    function setRejectedPromiseHandler(listener: EventListener): void {
+        rejectedPromiseHandler.reset(listener);
+    }
+
+
+    /**
+    * This method applies default or user-provided handler to
+    * all unhandled failed job results
+    *
+    * @param { Object[] } errors results of failed jobs
+    *
+    */
+    function listUnhandledJobs(errors: Object[]): void {
+        for (let error of errors) {
+            failedJobHandler.apply(error);
+        }
+    }
+
+    /**
+    * This method applies default or user-provided handler to
+    * all unhandled rejected promise results
+    *
+    * @param { Object[] } errors results of rejected promises
+    *
+    */
+    export function listUnhandledPromises(errors: NullishType[]): void {
+        for (let error of errors) {
+            if (error instanceof Object) {
+                rejectedPromiseHandler.apply(error);
+            } else {
+                rejectedPromiseHandler.apply(new Error());
+            }
+        }
+    }
+
+    let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+    let rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
 }

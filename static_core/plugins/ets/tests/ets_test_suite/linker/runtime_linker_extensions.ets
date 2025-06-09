@@ -79,7 +79,8 @@ class Test {
     private static native loadFile(path: string): byte[] | undefined;
 
     private static getAdditionalFilesList(): string[] {
-        const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
+        let procManager = new StdProcess.ProcessManager();
+        const abcFiles = procManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
         assertLT(0, abcFiles.length, "this test must have additional abc files")
         return abcFiles.split(":");
     }
