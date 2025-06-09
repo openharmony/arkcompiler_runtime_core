@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani/ani.h"
 #include "ani_gtest.h"
 #include <thread>
 #include <stdexcept>
@@ -41,9 +42,19 @@ TEST_F(GetEnvTest, different_versions)
             ASSERT_EQ(vm_->GetEnv(i, &env), ANI_OK);
             ASSERT_NE(env, nullptr);
         } else {
-            ASSERT_EQ(vm_->GetEnv(i, &env), ANI_ERROR);
+            ASSERT_EQ(vm_->GetEnv(i, &env), ANI_INVALID_VERSION);
         }
     }
+}
+
+TEST_F(GetEnvTest, getEnv_withoutAttach)
+{
+    std::function<void(void)> func = [this]() {
+        ani_env *etsEnv {nullptr};
+        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &etsEnv), ANI_ERROR);
+    };
+    auto t = std::thread(func);
+    t.join();
 }
 
 TEST_F(GetEnvTest, invalid_argument)
