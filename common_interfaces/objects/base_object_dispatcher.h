@@ -23,7 +23,7 @@
 #include "objects/base_type_converter.h"
 #include "thread/thread_holder.h"
 
-namespace panda {
+namespace common {
 class BaseObjectDispatcher {
 enum class ObjectType : uint8_t { STATIC = 0x0, DYNAMIC, UNKNOWN };
 public:
@@ -248,5 +248,5 @@ private:
     DynamicObjectDescriptorInterface *dynObjDescriptor_;
     StaticObjectDescriptorInterface *stcObjDescriptor_;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H

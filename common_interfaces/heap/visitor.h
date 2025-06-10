@@ -21,7 +21,7 @@
 #include <functional>
 #include "objects/ref_field.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
 // For ArkTS1.2，It is just example.
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
@@ -30,5 +30,5 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 // For ArkTS1.1
 // using WeakRootVisitor = std::function<BaseObject *(BaseObject *p)>;
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

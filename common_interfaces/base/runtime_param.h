@@ -18,7 +18,7 @@
 
 #include "base/common.h"
 
-namespace panda {
+namespace common {
 /*
 * @struct HeapParam
 * @brief Data structure for Arkcommon heap configuration parameters,\n
@@ -175,6 +175,6 @@ struct RuntimeParam {
     struct HeapParam heapParam;
     struct GCParam gcParam;
 };
-}  // panda
+}  // namespace common
 
 #endif  // COMMON_INTERFACES_BASE_RUNTIME_PARAM_H

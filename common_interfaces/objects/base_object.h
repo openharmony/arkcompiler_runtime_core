@@ -24,7 +24,7 @@
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
 
-namespace panda {
+namespace common {
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
@@ -180,7 +180,7 @@ public:
 
     void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
-        state_.SetFullBaseClassAddress(reinterpret_cast<StateWordType>(cls));
+        state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
     }
 
     BaseClass *GetBaseClass() const
@@ -213,5 +213,5 @@ protected:
 #endif
     BaseStateWord state_;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H

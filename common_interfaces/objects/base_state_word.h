@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <cstdint>
 
-namespace panda {
+namespace common {
 using StateWordType = uint64_t;
 using MAddress = uint64_t;
 class TypeInfo;
@@ -92,7 +92,7 @@ public:
         return state_.forwardState_;
     }
 
-    StateWordType GetBaseClassAddress() const
+    common::StateWordType GetBaseClassAddress() const
     {
 #ifdef USE_CMC_GC
         return state_.padding_;
@@ -101,7 +101,7 @@ public:
 #endif
     }
 
-    void SetFullBaseClassAddress(StateWordType address)
+    void SetFullBaseClassAddress(common::StateWordType address)
     {
 #ifdef USE_CMC_GC
         state_.padding_ = address;
@@ -112,7 +112,7 @@ public:
 private:
     // Little endian
     struct State {
-        StateWordType padding_     : PADDING_WIDTH;
+        common::StateWordType padding_     : PADDING_WIDTH;
         LanguageType language_     : LANGUAGE_WIDTH;
         ForwardState forwardState_ : FORWARD_WIDTH;
     };
@@ -175,5 +175,5 @@ private:
     friend class BaseObject;
 };
 static_assert(sizeof(BaseStateWord) == sizeof(uint64_t), "Excepts 8 bytes");
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H

@@ -16,11 +16,12 @@
 #ifndef COMMON_INTERFACE_OBJECTS_BASE_CLASS_H
 #define COMMON_INTERFACE_OBJECTS_BASE_CLASS_H
 
-#include "libpandabase/globals.h"
-#include "libpandabase/utils/bit_field.h"
+#include "base/bit_field.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
+
+static constexpr uint32_t BITS_PER_BYTE = 8;
 
 enum class CommonType : uint8_t {
     INVALID = 0,
@@ -39,8 +40,8 @@ class BaseClass {
 public:
     BaseClass() = delete;
     ~BaseClass() = delete;
-    NO_MOVE_SEMANTIC(BaseClass);
-    NO_COPY_SEMANTIC(BaseClass);
+    NO_MOVE_SEMANTIC_CC(BaseClass);
+    NO_COPY_SEMANTIC_CC(BaseClass);
 
     static constexpr size_t TYPE_BITFIELD_NUM = BITS_PER_BYTE * sizeof(CommonType);
 

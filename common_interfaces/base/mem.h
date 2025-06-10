@@ -1,10 +1,10 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,17 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_HEAP_ROOT_H
-#define COMMON_INTERFACES_HEAP_ROOT_H
+#ifndef COMMON_INTERFACES_BASE_MEM_H
+#define COMMON_INTERFACES_BASE_MEM_H
 
-#include "heap/visitor.h"
+#include <cstddef>
+#include <cstdint>
 
 namespace common {
-class Root {
-public:
-    // ArkTS1.2 Roots scanning
-    // static inline void VisitStaticRoots(GCRootVisitor *visitor);
-};
+template <class T>
+inline uintptr_t ToUintPtr(T *val)
+{
+    return reinterpret_cast<uintptr_t>(val);
+}
 
-}  // namespace common
-#endif  // COMMON_INTERFACES_HEAP_ROOT_H
+inline uintptr_t ToUintPtr(std::nullptr_t)
+{
+    return reinterpret_cast<uintptr_t>(nullptr);
+}
+
+inline void *ToVoidPtr(uintptr_t val)
+{
+    return reinterpret_cast<void *>(val);
+}
+} // namespace common
+
+
+#endif

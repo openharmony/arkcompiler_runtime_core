@@ -20,7 +20,7 @@
 
 #include "base/common.h"
 
-namespace panda {
+namespace common {
 // Fixme: replace with real RootVisitor
 using MockRootVisitor = void (*)();
 
@@ -54,5 +54,5 @@ private:
     BaseThreadType threadType_ {};
     ThreadHolder *threadHolder_ {};
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_BASE_THREAD_H

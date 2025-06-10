@@ -18,19 +18,19 @@
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace panda {
+namespace common {
 template <typename T>
 class ReadOnlyHandle {
 public:
     inline explicit ReadOnlyHandle(uintptr_t slot) : address_(slot)
     {
-        ASSERT(slot != 0);
+        DCHECK_CC(slot != 0);
         T::Cast(*reinterpret_cast<BaseObject **>(slot));
     }
     inline ReadOnlyHandle() : address_(reinterpret_cast<uintptr_t>(nullptr)) {}
     ~ReadOnlyHandle() = default;
-    DEFAULT_NOEXCEPT_MOVE_SEMANTIC(ReadOnlyHandle);
-    DEFAULT_COPY_SEMANTIC(ReadOnlyHandle);
+    DEFAULT_NOEXCEPT_MOVE_SEMANTIC_CC(ReadOnlyHandle);
+    DEFAULT_COPY_SEMANTIC_CC(ReadOnlyHandle);
 
     uintptr_t GetAddress() const
     {

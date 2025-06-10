@@ -23,8 +23,7 @@
 namespace panda::ecmascript {
 class HandlerBase;
 }
-namespace panda {
-
+namespace common {
 // for IC
 using HandlerBase = panda::ecmascript::HandlerBase;
 
@@ -52,5 +51,5 @@ class DynamicObjectDescriptorInterface {
 // interfaces used to access property layout infomation for static object.
 // It will be declared and implemented by static vm side.
 class StaticObjectDescriptorInterface {};
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H

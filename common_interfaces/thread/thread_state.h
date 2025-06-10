@@ -21,7 +21,7 @@
 
 #include "base/common.h"
 
-namespace panda {
+namespace common {
 
 enum ThreadFlag : uint16_t {
     NO_FLAGS = 0 << 0,
@@ -76,5 +76,5 @@ public:
 private:
     std::atomic<int32_t> passBarrierCount_;
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_H

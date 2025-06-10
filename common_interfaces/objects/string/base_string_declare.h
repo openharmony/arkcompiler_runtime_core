@@ -16,19 +16,22 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 #define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 
+#include "common_interfaces/base/bit_field.h"
+#include "common_interfaces/base/mem.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/utils/field_macro.h"
 #include "common_interfaces/objects/utils/objects_traits.h"
 #include "common_interfaces/objects/readonly_handle.h"
-#include "libpandabase/utils/bit_field.h"
 #include "libpandabase/utils/span.h"
 
 #include <type_traits>
 
-namespace panda {
+namespace common {
 class LineString;
 class TreeString;
 class SlicedString;
+
+using ::panda::Span;
 
 /*
  +-----------------------------+ <-- offset 0
@@ -58,7 +61,6 @@ public:
     static constexpr size_t HASH_SHIFT = 5;
     static constexpr size_t LENGTH_AND_FLAGS_OFFSET = BaseObjectSize();
     static constexpr uint32_t STRING_LENGTH_BITS_NUM = 30;
-    static constexpr uint32_t BITS_PER_BYTE = 8;
 
     enum CompressedStatus {
         STRING_COMPRESSED,
@@ -307,5 +309,5 @@ public:
     template <typename ReadBarrier>
     static const uint16_t *PUBLIC_API GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
 };
-} // namespace panda
+} // namespace common
 #endif // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H

@@ -16,13 +16,16 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL2_H
 #define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL2_H
 
+#include "securec.h"
+
+#include "common_interfaces/base/mem.h"
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/line_string.h"
 #include "common_interfaces/objects/string/sliced_string.h"
 #include "common_interfaces/objects/string/tree_string.h"
 #include "common_interfaces/objects/utils/utf_utils.h"
 
-namespace panda {
+namespace common {
 template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>>
 BaseString *BaseString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf8Data, uint32_t utf8Len,
                                        bool canBeCompress)
@@ -30,15 +33,15 @@ BaseString *BaseString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf
     BaseString *string = nullptr;
     if (canBeCompress) {
         string = CreateLineString(allocator, utf8Len, true);
-        ASSERT(string != nullptr);
+        DCHECK_CC(string != nullptr);
         std::copy(utf8Data, utf8Data + utf8Len, string->GetDataUtf8Writable());
     } else {
-        auto utf16Len = panda::utf_utils::Utf8ToUtf16Size(utf8Data, utf8Len);
+        auto utf16Len = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
         string = CreateLineString(allocator, utf16Len, false);
-        ASSERT(string != nullptr);
+        DCHECK_CC(string != nullptr);
         [[maybe_unused]] auto len =
-            panda::utf_utils::ConvertRegionUtf8ToUtf16(utf8Data, string->GetDataUtf16Writable(), utf8Len, utf16Len);
-        ASSERT(len == utf16Len);
+            UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, string->GetDataUtf16Writable(), utf8Len, utf16Len);
+        DCHECK_CC(len == utf16Len);
     }
 
     ASSERT_PRINT(canBeCompress == CanBeCompressed(string), "Bad input canBeCompress!");
@@ -51,7 +54,7 @@ BaseString *BaseString::CreateFromUtf8CompressedSubString(Allocator &&allocator,
                                                           uint32_t offset, uint32_t utf8Len)
 {
     BaseString *subString = CreateLineString(allocator, utf8Len, true);
-    ASSERT(subString != nullptr);
+    DCHECK_CC(subString != nullptr);
 
     auto *utf8Data = string->GetDataUtf8() + offset;
     std::copy(utf8Data, utf8Data + utf8Len, subString->GetDataUtf8Writable());
@@ -64,7 +67,7 @@ BaseString *BaseString::CreateFromUtf16(Allocator &&allocator, const uint16_t *u
                                         bool canBeCompress)
 {
     auto string = CreateLineString(allocator, utf16Len, canBeCompress);
-    ASSERT(string != nullptr);
+    DCHECK_CC(string != nullptr);
 
     if (canBeCompress) {
         CopyChars(string->GetDataUtf8Writable(), utf16Data, utf16Len);
@@ -128,14 +131,14 @@ size_t BaseString::GetUtf8Length(ReadBarrier &&readBarrier, bool modify, bool is
     }
     std::vector<uint16_t> tmpBuf;
     const uint16_t *data = GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
-    return panda::utf_utils::Utf16ToUtf8Size(data, GetLength(), modify, isGetBufferSize);
+    return UtfUtils::Utf16ToUtf8Size(data, GetLength(), modify, isGetBufferSize);
 }
 
 template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint16_t>, int>>
 const uint16_t *BaseString::GetUtf16DataFlat(ReadBarrier &&readBarrier, const BaseString *src, Vec &buf)
 {
-    ASSERT(src->IsUtf16());
+    DCHECK_CC(src->IsUtf16());
     uint32_t length = src->GetLength();
     BaseString *string = const_cast<BaseString *>(src);
     if (string->IsTreeString()) {
@@ -222,8 +225,8 @@ inline uint16_t *BaseString::GetDataUtf16Writable()
 
 inline void BaseString::WriteData(uint32_t index, uint16_t src)
 {
-    ASSERT(index < GetLength());
-    ASSERT(IsLineString());
+    DCHECK_CC(index < GetLength());
+    DCHECK_CC(IsLineString());
     LineString::Cast(this)->Set(index, src);
 }
 
@@ -247,8 +250,8 @@ void BaseString::WriteToFlat(ReadBarrier &&readBarrier, BaseString *src, Char *b
         return;
     }
     while (true) {
-        ASSERT(length <= maxLength && length > 0);
-        ASSERT(length <= src->GetLength());
+        DCHECK_CC(length <= maxLength && length > 0);
+        DCHECK_CC(length <= src->GetLength());
         switch (src->GetStringType()) {
             case CommonType::LINE_STRING: {
                 if (src->IsUtf8()) {
@@ -330,9 +333,9 @@ void BaseString::WriteToFlatWithPos(ReadBarrier &&readBarrier, BaseString *src, 
         return;
     }
     while (true) {
-        ASSERT(length + pos <= maxLength && length > 0);
-        ASSERT(length <= src->GetLength());
-        ASSERT(pos >= 0);
+        DCHECK_CC(length + pos <= maxLength && length > 0);
+        DCHECK_CC(length <= src->GetLength());
+        DCHECK_CC(pos >= 0);
         switch (src->GetStringType()) {
             case CommonType::LINE_STRING: {
                 if (src->IsUtf8()) {
@@ -346,7 +349,7 @@ void BaseString::WriteToFlatWithPos(ReadBarrier &&readBarrier, BaseString *src, 
                 TreeString *treeSrc = TreeString::Cast(src);
                 BaseString *first = BaseString::Cast(
                     treeSrc->GetFirst<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-                ASSERT(first->IsLineString());
+                DCHECK_CC(first->IsLineString());
                 src = first;
                 continue;
             }
@@ -416,9 +419,9 @@ size_t BaseString::WriteOneByte(ReadBarrier &&readBarrier, uint8_t *buf, size_t 
     std::vector<uint16_t> tmpBuf;
     const uint16_t *data = GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
     if (length > maxLength) {
-        return panda::utf_utils::ConvertRegionUtf16ToLatin1(data, buf, maxLength, maxLength);
+        return UtfUtils::ConvertRegionUtf16ToLatin1(data, buf, maxLength, maxLength);
     }
-    return panda::utf_utils::ConvertRegionUtf16ToLatin1(data, buf, length, maxLength);
+    return UtfUtils::ConvertRegionUtf16ToLatin1(data, buf, length, maxLength);
 }
 
 
@@ -440,7 +443,7 @@ uint32_t BaseString::CopyDataUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
     }
     std::vector<uint8_t> tmpBuf;
     const uint8_t *data = GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
-    return panda::utf_utils::ConvertRegionUtf8ToUtf16(data, buf, length, maxLength);
+    return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, length, maxLength);
 }
 
 
@@ -454,10 +457,10 @@ Span<const uint8_t> BaseString::ToUtf8Span(ReadBarrier &&readBarrier, Vec &buf, 
         using U16Vec = objects_traits::vector_with_same_alloc_t<Vec, uint16_t>;
         U16Vec tmpBuf;
         const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
-        ASSERT(panda::utf_utils::Utf16ToUtf8Size(data, strLen, modify, false, cesu8) > 0);
-        size_t len = panda::utf_utils::Utf16ToUtf8Size(data, strLen, modify, false, cesu8) - 1;
+        DCHECK_CC(UtfUtils::Utf16ToUtf8Size(data, strLen, modify, false, cesu8) > 0);
+        size_t len = UtfUtils::Utf16ToUtf8Size(data, strLen, modify, false, cesu8) - 1;
         buf.reserve(len);
-        len = panda::utf_utils::ConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify, false, cesu8);
+        len = UtfUtils::ConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify, false, cesu8);
         str = Span<const uint8_t>(buf.data(), len);
     } else {
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
@@ -477,9 +480,9 @@ Span<const uint8_t> BaseString::DebuggerToUtf8Span(ReadBarrier &&readBarrier, Ve
         using U16Vec = objects_traits::vector_with_same_alloc_t<Vec, uint16_t>;
         U16Vec tmpBuf;
         const uint16_t *data = BaseString::GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
-        size_t len = panda::utf_utils::Utf16ToUtf8Size(data, strLen, modify) - 1;
+        size_t len = UtfUtils::Utf16ToUtf8Size(data, strLen, modify) - 1;
         buf.reserve(len);
-        len = panda::utf_utils::DebuggerConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify);
+        len = UtfUtils::DebuggerConvertRegionUtf16ToUtf8(data, buf.data(), strLen, len, 0, modify);
         str = Span<const uint8_t>(buf.data(), len);
     } else {
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, buf);
@@ -503,7 +506,7 @@ template <typename ReadBarrier, typename Vec,
           std::enable_if_t<objects_traits::is_std_vector_of_v<std::decay_t<Vec>, uint8_t>, int>>
 const uint8_t *BaseString::GetUtf8DataFlat(ReadBarrier &&readBarrier, const BaseString *src, Vec &buf)
 {
-    ASSERT(src->IsUtf8());
+    DCHECK_CC(src->IsUtf8());
     uint32_t length = src->GetLength();
     BaseString *string = const_cast<BaseString *>(src);
     if (string->IsTreeString()) {
@@ -548,11 +551,11 @@ size_t BaseString::CopyDataRegionUtf8(ReadBarrier &&readBarrier, uint8_t *buf, s
     std::vector<uint16_t> tmpBuf;
     const uint16_t *data = GetUtf16DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
     if (length > maxLength) {
-        return panda::utf_utils::ConvertRegionUtf16ToUtf8(data, buf, maxLength, maxLength, start,
-                                                          modify, isWriteBuffer);
+        return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, maxLength, maxLength, start,
+                                                  modify, isWriteBuffer);
     }
-    return panda::utf_utils::ConvertRegionUtf16ToUtf8(data, buf, length, maxLength, start,
-                                                      modify, isWriteBuffer);
+    return UtfUtils::ConvertRegionUtf16ToUtf8(data, buf, length, maxLength, start,
+                                              modify, isWriteBuffer);
 }
 
 template <typename ReadBarrier>
@@ -576,10 +579,10 @@ size_t BaseString::CopyDataToUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
     std::vector<uint8_t> tmpBuf;
     const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), this, tmpBuf);
     if (length > bufLength) {
-        return panda::utf_utils::ConvertRegionUtf8ToUtf16(data, buf, bufLength, bufLength);
+        return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, bufLength, bufLength);
     }
-    return panda::utf_utils::ConvertRegionUtf8ToUtf16(data, buf, length, bufLength);
+    return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, length, bufLength);
 }
-} // namespace panda::ecmascript
+} // namespace common
 
 #endif //COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_INL2_H

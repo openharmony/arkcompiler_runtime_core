@@ -16,12 +16,13 @@
 #ifndef COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 #define COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 
+#include <cstddef>
 #include <cstdint>
 
-namespace panda {
-class utf_utils {
-    friend BaseString;
+namespace common {
+class BaseString;
 
+class UtfUtils {
 private:
     static constexpr uint8_t UTF8_1B_MAX = 0x7f;
     static size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
@@ -41,6 +42,8 @@ private:
     static size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
                                            size_t utf8Len, size_t start, bool modify = true, bool isWriteBuffer = false,
                                            bool cesu = false);
+
+    friend BaseString;
 };
-} // namespace panda
+} // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_UTILS_UTF_H

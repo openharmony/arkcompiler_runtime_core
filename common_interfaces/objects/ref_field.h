@@ -20,7 +20,7 @@
 #include <functional>
 #include "objects/base_state_word.h"
 
-namespace panda {
+namespace common {
 class BaseObject;
 
 template <bool isAtomic = false>
@@ -167,5 +167,5 @@ private:
         RefFieldValue fieldVal;
     };
 };
-}  // namespace panda
+}  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H
