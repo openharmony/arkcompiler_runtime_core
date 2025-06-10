@@ -169,8 +169,8 @@ if (!(ark_standalone_build ||
   }
   group("commonsdk_packages") {
     deps = [
-      # ":ets2abc_commonsdk_api_etc",
-      # ":ets2abc_commonsdk_arkts_etc",
+      ":ets2abc_commonsdk_api_etc",
+      ":ets2abc_commonsdk_arkts_etc",
       ":ets_sdk_native",
     ]
   }
