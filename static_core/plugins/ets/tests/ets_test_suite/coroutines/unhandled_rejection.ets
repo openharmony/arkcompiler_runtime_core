@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AtomicFlag} from "std/debug/concurrency"
+import {AtomicFlag} from 'std/debug/concurrency'
 
 class Event {
     constructor() {
@@ -40,11 +40,11 @@ let current = 0;
 let event = new Event();
 
 async function AsyncFailing(): Promise<string> {
-    throw Error("AsyncFailing");
+    throw Error('AsyncFailing');
 }
 
 function Failing(): string {
-    throw Error("Failing");
+    throw Error('Failing');
 }
 
 function WaitAll(): null {
@@ -60,29 +60,29 @@ function Handler(obj: Object): void {
     if (current == kTotal) {
         event.Fire();
     } else {
-        arktest.assertTrue(current < kTotal, "More rejections that expected");
+        arktest.assertTrue(current < kTotal, 'More rejections that expected');
     }
 }
 
 function main(): void {
-    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
+    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
         arktest.assertTrue(false, "Job handler didn't switch");
     });
-    StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
+    StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
         arktest.assertTrue(false, "Promise handler didn't switch");
     });
 
-    StdProcess.on("unhandledJobRejection", Handler);
-    StdProcess.on("unhandledPromiseRejection", Handler);
+    StdProcess.on('unhandledJobRejection', Handler);
+    StdProcess.on('unhandledPromiseRejection', Handler);
 
     let g = launch<string, () => string>(Failing);
     launch<Promise<string>, () => Promise<string>>(AsyncFailing);
     AsyncFailing();
-    let p = Promise.reject(new Error("promise1"));
+    let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println("Test failed: Unreachable code");
+        console.println('Test failed: Unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     })
-    Promise.reject(new Error("promise2"));
+    Promise.reject(new Error('promise2'));
 }

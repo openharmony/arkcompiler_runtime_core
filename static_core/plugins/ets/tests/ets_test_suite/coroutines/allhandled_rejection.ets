@@ -14,11 +14,11 @@
  */
 
 async function AsyncFailing(): Promise<string> {
-    throw Error("AsyncFailing");
+    throw Error('AsyncFailing');
 }
 
 function Failing(): string {
-    throw Error("Failing");
+    throw Error('Failing');
 }
 
 function SingleRejectedJob(): null {
@@ -26,20 +26,19 @@ function SingleRejectedJob(): null {
 }
 
 function main(): void {
-    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
+    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
         arktest.assertTrue(false, "Job handler didn't switch");
     });
-    StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
-        arktest.assertTrue(false, "All promises should be handled");
+    StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
+        arktest.assertTrue(false, 'All promises should be handled');
     });
 
-    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        arktest.assertTrue(obj instanceof Error, "not Erorr is not expected")
-
+    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+        arktest.assertTrue(obj instanceof Error, 'not Erorr is not expected')
         arktest.assertEQ((obj as Error).message, "I'm your single rejected job");
 
-        StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-            arktest.assertTrue(false, "All jobs should be handled");
+        StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+            arktest.assertTrue(false, 'All jobs should be handled');
         });
     });
 
@@ -52,9 +51,9 @@ function main(): void {
 
     AsyncFailing().catch((e: NullishType) => {});
 
-    let p = Promise.reject(new Error("promise1"));
+    let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println("Test failed: unreachable code");
+        console.println('Test failed: unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     });
@@ -62,7 +61,7 @@ function main(): void {
 
     let f = async (): Promise<void> => {
         try {
-            await Promise.reject(new Error("promise2"));
+            await Promise.reject(new Error('promise2'));
         } catch (e) {
         }
     };
