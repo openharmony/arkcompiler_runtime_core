@@ -430,6 +430,7 @@ public:
     PANDA_PUBLIC_API static void ThrowJSError(napi_env env, const std::string &msg);
     static void ThrowJSTypeError(napi_env env, const std::string &msg);
     static void ThrowJSValue(napi_env env, napi_value val);
+    static napi_value CreateJSTypeError(napi_env env, const std::string &code, const std::string &msg);
 
     static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
     static void SetDefaultLinkerContext(EtsRuntimeLinker *linker);

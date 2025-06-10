@@ -211,6 +211,7 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 
 // Module annotation class
 static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
+static constexpr std::string_view ANNOTATION_MODULE_EXPORTED           = "exported";
 
 // Interface object literal annotation class
 static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
