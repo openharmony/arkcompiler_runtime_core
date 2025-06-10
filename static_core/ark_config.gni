@@ -108,13 +108,15 @@ ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
 enable_irtoc = true
 enable_codegen = true
-if (is_mingw) {
+if (is_mingw || current_os == "win" || current_os == "mingw" ||
+    current_os == "winuwp") {
+  # Disable irtoc and codegen for:
+  # - mingw and similar configurations
   enable_irtoc = false
   enable_codegen = false
 }
 
-if (ark_hybrid && !ark_standalone_build &&
-    !ark_static_standalone_build) {
+if (ark_hybrid && !ark_standalone_build && !ark_static_standalone_build) {
   enable_irtoc = false
 }
 
