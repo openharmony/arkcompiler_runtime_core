@@ -134,6 +134,36 @@ struct GCParam {
     * It will be set default value if the value is 0.
     */
     uint32_t gcThreads;
+
+    /*
+    * The maximum grow bytes of next heuristic gc threshold, the default value is 32MB;
+    */
+    size_t maxGrowBytes;
+
+    /*
+    * The minimum grow bytes of next heuristic gc threshold, the default value is 8MB;
+    */
+    size_t minGrowBytes;
+
+    /*
+    * Heruistic gc grow bytes multiplier, The default value of foreground is 1.0, background is 2.0.
+    */
+    double multiplier;
+
+    /*
+    * Young gc throughput adjustment factor, the default value is 0.5.
+    */
+    double ygcRateAdjustment;
+
+    /*
+    * The minimum remaining bytes for next heuristic gc, the default value is 128KB.
+    */
+    size_t kMinConcurrentRemainingBytes;
+
+    /*
+    * The maximum remaining bytes for next heuristic gc, the default value is 512KB.
+    */
+    size_t kMaxConcurrentRemainingBytes;
 };
 
 /*
