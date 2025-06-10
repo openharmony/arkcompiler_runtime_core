@@ -22,7 +22,7 @@ class NamespaceFindFunctionTest : public AniTest {};
 TEST_F(NamespaceFindFunctionTest, find_function01)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/Fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -45,7 +45,7 @@ TEST_F(NamespaceFindFunctionTest, find_function01)
 TEST_F(NamespaceFindFunctionTest, find_function02)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/Fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn1 {};
@@ -64,7 +64,7 @@ TEST_F(NamespaceFindFunctionTest, find_function02)
 TEST_F(NamespaceFindFunctionTest, find_function03)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/Fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
@@ -76,57 +76,57 @@ TEST_F(NamespaceFindFunctionTest, find_function03)
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "C", "I:Lstd/core/Promise;", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "c", "I:Lstd/core/Promise;", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 
 TEST_F(NamespaceFindFunctionTest, find_function04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/testA;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/TestA;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "B", ":I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", ":I", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 
 TEST_F(NamespaceFindFunctionTest, find_function05)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/testA;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/TestA;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->c_api->Namespace_FindFunction(nullptr, ns, "B", ":I", &fn), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Namespace_FindFunction(nullptr, ns, "b", ":I", &fn), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(nullptr, "B", ":I", &fn), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindFunction(nullptr, "b", ":I", &fn), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, nullptr, ":I", &fn), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "", ":I", &fn), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "BA", ":I", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "bA", ":I", &fn), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "B", nullptr, &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", nullptr, &fn), ANI_OK);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "B", "", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "", &fn), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "B", "D:II", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "D:II", &fn), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "B", "D:II", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "D:II", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(NamespaceFindFunctionTest, duplicate_no_signature)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/fnns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_function_test/Fnns;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};

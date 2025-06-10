@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-namespace fnns {
+namespace Fnns {
     function getInitialIntValue(): int {
         return 0;
     }
     function getInitialStringValue(): String {
-        return "";
+        return '';
     }
     function overloaded(i: int): int {
         return 0
@@ -35,7 +35,7 @@ namespace fnns {
     }
 
     class A extends B {
-        constructor(){};
+        constructor() {};
         static B(): double {
             return 1.00;
         };
@@ -51,15 +51,15 @@ namespace fnns {
         }
     }
 
-    async function C(a: int): Promise<int>{
+    async function c(a: int): Promise<int> {
         return a;
     };
 
 }
 
-namespace testA {
+namespace TestA {
     namespace A {
-        function B (): int {
+        function b(): int {
             return 1;
         }
     }
