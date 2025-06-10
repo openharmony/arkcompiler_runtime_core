@@ -242,13 +242,17 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     }
     size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
-    exclusiveWorkersLimit_ = config.exclusiveWorkersLimit;
+
+    // 1 is for MAIN
+    size_t eWorkersLimit =
+        std::min(stackful_coroutines::MAX_WORKERS_COUNT - 1, static_cast<size_t>(config.exclusiveWorkersLimit));
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
 
     // workaround for issue #21582
-    const size_t maxCommonWorkers = stackful_coroutines::MAX_WORKERS_COUNT - exclusiveWorkersLimit_;
+    const size_t maxCommonWorkers =
+        std::max(stackful_coroutines::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(2ULL));
 
     size_t targetNumberOfCommonWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                                              ? std::min(numberOfAvailableCores, maxCommonWorkers)
@@ -259,6 +263,13 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
                                << maxCommonWorkers << " = " << targetNumberOfCommonWorkers;
     }
     ASSERT(targetNumberOfCommonWorkers > 0);
+
+    exclusiveWorkersLimit_ =
+        std::min(stackful_coroutines::MAX_WORKERS_COUNT - targetNumberOfCommonWorkers, eWorkersLimit);
+
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): EWorkers limit is set to " << exclusiveWorkersLimit_
+                           << ", when suggested " << eWorkersLimit;
+    ASSERT(targetNumberOfCommonWorkers + exclusiveWorkersLimit_ <= stackful_coroutines::MAX_WORKERS_COUNT);
     InitializeWorkerIdAllocator();
     {
         os::memory::LockHolder lock(workersLock_);

@@ -267,6 +267,15 @@ if (NOT PANDA_TARGET_ARM32)
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
+
+    add_ets_coroutines_test(FILE eworker_unlimited.ets
+                            SKIP_ARM32_COMPILER
+                            OPTIONS "--coroutine-e-workers-limit=100500"
+                            IMPL "STACKFUL"
+                            OPTION_SETS_STACKFUL "DEFAULT"
+                            WORKERS "ONE"
+                            MODE "INT"
+    )
 endif()
 
 add_ets_coroutines_test(FILE eworker_id.ets
