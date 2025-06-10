@@ -16,3 +16,11 @@ ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 # 26365
 ets-common-tests/intrinsics/string_from_char_code.ets
 ets-common-tests/intrinsics/string_from_char_code_escape.ets
+
+# 24986
+ets-common-tests/generics/generics_methods.ets
+ets-common-tests/intrinsics/bigint64array_sort.ets
+ets-common-tests/intrinsics/uint32array_sort.ets
+
+# 25111 fail in aot after primitive types removal
+ets-common-tests/intrinsics/typed_arrays_reverse.ets

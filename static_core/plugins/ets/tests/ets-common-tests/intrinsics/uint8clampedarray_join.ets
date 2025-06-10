@@ -14,7 +14,7 @@
  */
 
 const SINGLE = [1];
-const ARRAY = [0,1,2,3,4,5,6,7,8,9,255];
+const ARRAY: Array<Double> = [0,1,2,3,4,5,6,7,8,9,255];
 const EMPTY_JOINED = "0123456789255";
 const COMMA_JOINED = "0,1,2,3,4,5,6,7,8,9,255";
 const NSIGN_JOINED = "0###1###2###3###4###5###6###7###8###9###255";

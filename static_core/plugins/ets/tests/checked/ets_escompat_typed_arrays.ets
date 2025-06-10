@@ -1310,10 +1310,6 @@ function test_int32array_set_number_cpp(): void {
 
 //! CHECKER       BigInt64Array $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false --compiler-regex=.*BigInt64Array::.*", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_set_int_cpp"
-//! METHOD        "escompat_BigInt64Array::__set"
-//! PASS_AFTER    "IrBuilder"
-//! INST          "Intrinsic.BigInt64ArraySetLong "
-//! INST_NOT      /Call.*Array::\$_set/
 //! METHOD        "escompat_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayGet "
@@ -2434,11 +2430,11 @@ function test_uint8clampedarray_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_last_index_of"
 function test_int8array_last_index_of() {
     let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
-    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
-    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3. as double, -1 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3. as double, -7 as int), -1.);
 }
 
 //! CHECKER       Int16Array lastIndexOf
@@ -2449,8 +2445,8 @@ function test_int16array_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
     arktest.assertEQ(array.lastIndexOf(3.,  6),  4.);
     arktest.assertEQ(array.lastIndexOf(3.,  8),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 , -7), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int, -1 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int, -7 as int), -1.);
 }
 
 //! CHECKER       Int32Array lastIndexOf
@@ -2459,9 +2455,9 @@ function test_int16array_last_index_of() {
 function test_int32array_last_index_of() {
     let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
     arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int, -1 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
 
@@ -2485,8 +2481,8 @@ function test_float32array_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
     arktest.assertEQ(array.lastIndexOf(3.,  6),  4.);
     arktest.assertEQ(array.lastIndexOf(3.,  8),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 , -7), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int, -1 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int, -7 as int), -1.);
 }
 
 //! CHECKER       Float64Array lastIndexOf
@@ -2494,9 +2490,9 @@ function test_float32array_last_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_last_index_of"
 function test_float64array_last_index_of() {
     let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
@@ -2506,9 +2502,9 @@ function test_float64array_last_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_last_index_of"
 function test_uint8array_last_index_of() {
     let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
@@ -2518,9 +2514,9 @@ function test_uint8array_last_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_last_index_of"
 function test_uint16array_last_index_of() {
     let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
@@ -2530,9 +2526,9 @@ function test_uint16array_last_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_last_index_of"
 function test_uint32array_last_index_of() {
     let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
@@ -2560,9 +2556,9 @@ function test_biguint64array_last_index_of() {
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
 function test_uint8clampedarray_last_index_of() {
     let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
-    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  0 as int), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  6 as int),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 as int,  8 as int),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }

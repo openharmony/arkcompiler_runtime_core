@@ -26,11 +26,8 @@ function foo<T extends {{case.type}}>(p: T): {{case.ptype}} {
   return dst;
 }
 
-function main(): int {
+function main() {
   let res: {{case.ptype}} = foo<{{case.type}}>(new {{case.type}}({{case.val|safe}}));
-  if (res != {{case.res|safe}}) {
-      return 1;
-  }
-  return 0;
+  assertEQ(res, {{case.res|safe}})
 }
 {% endfor %}

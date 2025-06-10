@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,7 @@ function testSliceWithOutParam(): int {
       {{.item.create}}(50),
       {{.item.create}}(60),
   ];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -85,13 +85,13 @@ function testSliceWithOutParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int) {
+  if (target.length.toInt() != origin.length.toInt()) {
     console.log("Array length mismatch on slice");
     return fail;
   }
 
   //Check all the data copied;
-  for (let i: int = 0; i< origin.length as int; i++) {
+  for (let i: int = 0; i< origin.length.toInt(); i++) {
     let tv = target[i] as {{.item.type}};
     let ov = origin[i] as {{.item.type}};
     console.log(source[i] + "->" + tv + "->" + ov);
@@ -102,7 +102,7 @@ function testSliceWithOutParam(): int {
   }
 
   origin= new {{.item.objectType}}(0);
-  if (origin.length as int != 0){
+  if (origin.length.toInt() != 0){
     return fail;
   }
 
@@ -113,7 +113,7 @@ function testSliceWithOutParam(): int {
     return fail;
   }
 
-  if (target.length as int != 0){
+  if (target.length.toInt() != 0){
     return fail;
   }
   return success;
@@ -128,7 +128,7 @@ function testSliceOneParam(): int {
       {{.item.create}}(50),
       {{.item.create}}(60)
   ]
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -141,7 +141,7 @@ function testSliceOneParam(): int {
   }
 
   let sliceStart: int = 1;
-  let sliceEnd: int = origin.length as int;
+  let sliceEnd: int = origin.length.toInt();
 
   let target: {{.item.objectType}};
 
@@ -152,7 +152,7 @@ function testSliceOneParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int - sliceStart) {
+  if (target.length.toInt() != origin.length.toInt() - sliceStart) {
     console.log("Array length mismatch on slice One Params" + target.length);
     return fail;
   }
@@ -176,7 +176,7 @@ function testSliceOneParam(): int {
     return fail;
   }
 
-  if (target.length as int != origin.length as int) {
+  if (target.length.toInt() != origin.length.toInt()) {
     console.log("Array length mismatch on slice One Params" + target.length);
     return fail;
   }
@@ -206,7 +206,7 @@ function testSliceTwoParams(): int {
       {{.item.create}}(70),
       {{.item.create}}(80)
   ]
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -230,7 +230,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - sliceStart) {
+  if (target.length.toInt() != sliceEnd - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -247,7 +247,7 @@ function testSliceTwoParams(): int {
   }
 
   sliceStart = 0;
-  sliceEnd = origin.length as int;
+  sliceEnd = origin.length.toInt();
   try {
     target = origin.slice(sliceStart, sliceEnd);
   } catch(e) {
@@ -255,7 +255,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - sliceStart) {
+  if (target.length.toInt() != sliceEnd - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -278,7 +278,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - sliceStart) {
+  if (target.length.toInt() != sliceEnd - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -301,7 +301,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - sliceStart) {
+  if (target.length.toInt() != sliceEnd - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -324,7 +324,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - sliceStart) {
+  if (target.length.toInt() != sliceEnd - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -347,7 +347,7 @@ function testSliceTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -366,7 +366,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
       {{.item.create}}(70),
       {{.item.create}}(80)
   ]
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -389,26 +389,26 @@ function testSliceTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
 
   sliceStart = -1;
-  sliceEnd = origin.length as int;
+  sliceEnd = origin.length.toInt();
   try {
     target = origin.slice(sliceStart, sliceEnd);
   } catch(e) {
     return fail;
   }
 
-  if (target.length as int != sliceEnd - (origin.length + sliceStart)) {
+  if (target.length.toInt() != sliceEnd - (origin.length + sliceStart)) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
 
   //Check all the data copied;
-  for (let i: int = (origin.length + sliceStart) as int; i< sliceEnd; i++) {
+  for (let i: int = (origin.length + sliceStart).toInt(); i< sliceEnd; i++) {
     let tv = target[i - (origin.length + sliceStart)] as {{.item.type}};
     let ov = origin[i] as {{.item.type}};
     console.log(source[i] + "->" + tv + "->" + ov);
@@ -419,7 +419,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
   }
 
   sliceStart = 0;
-  sliceEnd = -origin.length as int;
+  sliceEnd = -origin.length.toInt();
   try {
     target = origin.slice(sliceStart, sliceEnd);
   } catch(e) {
@@ -427,7 +427,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  if (target.length as int != (origin.length + sliceEnd) - sliceStart) {
+  if (target.length.toInt() != (origin.length + sliceEnd) - sliceStart) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -437,7 +437,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
 
 function testSliceOneLengthTwoParams(): int {
   let source: {{.item.type}}[] = [{{.item.create}}(10)];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
@@ -460,7 +460,7 @@ function testSliceOneLengthTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on slice2");
     return fail;
   }
@@ -473,7 +473,7 @@ function testSliceOneLengthTwoParams(): int {
     return fail;
   }
 
-  if (target.length as int != 0) {
+  if (target.length.toInt() != 0) {
     console.log("Array length mismatch on slice2");
     return fail;
   }

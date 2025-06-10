@@ -463,8 +463,8 @@ export namespace stream {
                 return;
             }
             let currentLength = this.buffer.length;
-            let current = this.buffer.splice(0, 1);
-            this.writeCallbackBuffer.splice(0, 1);
+            let current = this.buffer.splice(0 as int, 1 as int);
+            this.writeCallbackBuffer.splice(0 as int, 1 as int);
             while (currentLength > 0) {
                 this.writableBufferLength -= this.getChunkLength(current[0].chunk);
                 this.writing = true;
@@ -474,7 +474,7 @@ export namespace stream {
                 this.writableSync = false;
                 if (!this.writing) {
                     currentLength = this.buffer.length;
-                    current = this.buffer.splice(0, 1);
+                    current = this.buffer.splice(0 as int, 1 as int);
                 } else {
                     break;
                 }

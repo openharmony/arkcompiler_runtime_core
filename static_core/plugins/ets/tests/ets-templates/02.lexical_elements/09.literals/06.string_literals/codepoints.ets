@@ -23,10 +23,10 @@ function main() {
     let res = ""
     for (let i = 12; i < 0x10FFFF; i += 30009) {
         if (Char.codeUnitsToEncode(i) == 1) {
-            res += String.fromCharCode(i as number)
+            res += String.fromCharCode(Int.toDouble(i))
         } else {
-            res += String.fromCharCode(Char.getHighSurrogate(i) as number)
-            res += String.fromCharCode(Char.getLowSurrogate(i) as number)
+            res += String.fromCharCode(Char.toDouble(Char.getHighSurrogate(i)))
+            res += String.fromCharCode(Char.toDouble(Char.getLowSurrogate(i)))
         }
     }
     assertEQ(s, res)

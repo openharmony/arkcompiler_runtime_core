@@ -13,27 +13,31 @@
 
 ---
 cases:
-    # zeros
-    - val: '[0, 0, 0, 0, 0, ]'
-    - val: '[0.0f]'
+    # literals
+    - { val: '[0, 0, 0, 0, 0]', type: number }
+    - { val: '[0.0, 1.0, 2.0, 3.0, 4.0]', type: number }
+    - { val: '[0, 1.0, 0, 2.0, 0]', type: number }
+    - { val: '[0.0f]', type: float }
+    - val: '[0.0f, 1]'
+    - val: '[0.0f, 2.0]'
 
-    # primitive literals
-    - val: '[0b01 as byte, 0b10 as byte, 0b11 as byte, 0b01 as byte, 0b10 as byte, ]'
-    - val: '[0xF as short]'
-    - val: '[0o7 as int, 0o6 as int, 0o5 as int, ]'
-    - val: '[-9223372036854775807 as long]'
-    - val: '[111e11 as float, 222e11 as float, 333e11 as float, ]'
-    - val: '[222e22 as double]'
-    - val: '[11111111111n]'
+    # primitives
+    - { val: '[0b01 as byte, 0b10 as byte, 0b11 as byte, 0b01 as byte, 0b10 as byte, ]', type: byte }
+    - { val: '[0xF as short]', type: short }
+    - { val: '[0o7 as int, 0o6 as int, 0o5 as int, ]', type: int }
+    - { val: '[-9223372036854775807 as long]', type: long }
+    - { val: '[111e11 as float, 222e11 as float, 333e11 as float, ]', type: float }
+    - { val: '[222e22 as double]', type: number }
+    - { val: '[11111111111n]', type: BigInt }
 
     # boxed
-    - val: '[new Byte]'
-    - val: '[new Short]'
-    - val: '[new Int]'
-    - val: '[new Long]'
-    - val: '[new Float]'
-    - val: '[new Double]'
-    - val: '[new BigInt(5)]'
+    - { val: '[new Byte]', type: byte }
+    - { val: '[new Short]', type: short }
+    - { val: '[new Int]', type: int }
+    - { val: '[new Long]', type: long }
+    - { val: '[new Float]', type: float }
+    - { val: '[new Double]', type: number }
+    - { val: '[new BigInt(5)]', type: BigInt }
 
     # combinations
     - val: '[0b1, 0xF, 0o7, 1e1, 3f, 9223372036854775807]'
@@ -70,6 +74,7 @@ cases:
           let f: Double = 6
           let g: bigint = 7n
       val: '[a, b, c, d, e, f, g]'
+      type: Object
 
     - decl: |-
           let a: Byte = 1
@@ -80,6 +85,8 @@ cases:
           let f: double = 6
           let g: BigInt = new BigInt(7)
       val: '[a, b, c, d, e, f, g]'
+      type: Object
+
 
     # variables and constants
     - decl: |-
@@ -109,6 +116,7 @@ cases:
           let f: Double = 6
           const g: bigint = 7n
       val: '[a, b, 0, c, d, e, f, g]'
+      type: Object
 
     - decl: |-
           const a: Byte = 1
@@ -119,3 +127,4 @@ cases:
           let f: double = 6
           const g: BigInt = new BigInt(7)
       val: '[a, b, c, 0, d, e, f, g]'
+      type: Object

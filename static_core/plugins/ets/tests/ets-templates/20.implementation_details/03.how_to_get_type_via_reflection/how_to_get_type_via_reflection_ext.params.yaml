@@ -74,7 +74,7 @@ cases:
   - desc: How to get Int via reflection.
     logic: |-
       let type_of_int: Type = Type.from<int>();
-      assertEQ(type_of_int.toString(), "int");
+      assertEQ(type_of_int.toString(), "std.core.Int");
   - desc: How to get SomeInterface via reflection.
     logic: |-
       interface SomeInterface {
@@ -95,7 +95,7 @@ cases:
   - desc: How to get number via reflection.
     logic: |-
       let type_of_number: Type = Type.from<number>();
-      assertEQ(type_of_number.toString(), "double");
+      assertEQ(type_of_number.toString(), "std.core.Double");
   - desc: How to get object via reflection.
     logic: |-
       let type_of_object: Type = Type.from<object>();
@@ -174,11 +174,11 @@ cases:
   - desc: How to get short via reflection.
     logic: |-
       let type_of_short: Type = Type.from<short>();
-      assertEQ(type_of_short.toString(), "short");
+      assertEQ(type_of_short.toString(), "std.core.Short");
   - desc: How to get byte via reflection.
     logic: |-
       let type_of_byte: Type = Type.from<byte>();
-      assertEQ(type_of_byte.toString(), "byte");
+      assertEQ(type_of_byte.toString(), "std.core.Byte");
   - desc: How to get enum via reflection.
     logic: |-
       enum Color {

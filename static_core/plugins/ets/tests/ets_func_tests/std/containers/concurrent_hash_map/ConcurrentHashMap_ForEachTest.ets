@@ -325,7 +325,7 @@ function setAll() {
 function getAll() {
     for (let i: int = 0; i < 10; i++) {
         if (concurrentHashMapOne.has(i)) {
-            let getVal = concurrentHashMapOne.get(i) as string;
+            let getVal = concurrentHashMapOne.get(i) as String;
             arrValuesTest[i] = getVal;
         }
     }
@@ -359,7 +359,7 @@ function forEachZero() {
 
 function forEachOne() {
     concurrentHashMapOne.forEach((val: string) => {
-        let index = Atomics.load(flag, 0) as int;
+        let index = Atomics.load(flag, 0).toInt();
         arrValuesTest[index] = val;
         Atomics.add(flag, 0, 1);
     });
@@ -367,7 +367,7 @@ function forEachOne() {
 
 function forEachTwo() {
     concurrentHashMapOne.forEach((val: string, key: number) => {
-        let index = Atomics.load(flag, 0) as int;
+        let index = Atomics.load(flag, 0).toInt();
         arrKeysTest[index] = key;
         arrValuesTest[index] = val;
         Atomics.add(flag, 0, 1);
@@ -376,7 +376,7 @@ function forEachTwo() {
 
 function forEachThree() {
     concurrentHashMapOne.forEach((val: string, key: number, map: ConcurrentHashMap<number, string>) => {
-        let index = Atomics.load(flag, 0) as int;
+        let index = Atomics.load(flag, 0).toInt();
         arrKeysTest[index] = key;
         arrValuesTest[index] = val;
         Atomics.add(flag, 0, 1);

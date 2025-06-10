@@ -34,17 +34,22 @@ function foo(p: BA): int {
   return 3;
 }
 
+let a: CBA = new CBA();
+let b: DA = new DA();
+let d: A = new A();
+let f: BA = new BA();
+
+function check(): boolean {
+    return true
+}
+
 function main(): void {
-  let a: CBA = new CBA();
-  let b: DA = new DA();
-  let c = true ? a : b;
-  assertTrue(foo(c) == 2);
+  let c = check() ? a : b;
+  assertEQ(foo(c), 2);
 
-  let d: A = new A();
-  let e = true ? a : d;
-  assertTrue(foo(e) == 2);
+  let e = check() ? a : d;
+  assertEQ(foo(e), 2);
 
-  let f: BA = new BA();
-  let g = true ? a : f;
-  assertTrue(foo(g) == 3);
+  let g = check() ? a : f;
+  assertEQ(foo(g), 3);
 }

@@ -94,7 +94,7 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
     auto cls1 = obj1->GetClass();
     auto cls2 = obj2->GetClass();
-    ASSERT(cls1->IsValueTyped() && cls1->IsValueTyped());
+    ASSERT(cls1->IsValueTyped() && cls2->IsValueTyped());
 
     auto ptypes = PlatformTypes(coro);
     ASSERT(ptypes != nullptr);

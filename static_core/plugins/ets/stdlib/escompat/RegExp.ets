@@ -75,7 +75,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      * @returns resulting string
      */
     public $_get(index: number): String {
-        return this.$_get(Double.toInt(index));
+        return this.$_get(index.toInt());
     }
 
     /**
@@ -97,7 +97,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      * @param val
      */
     public $_set(index: number, val: String) {
-        return this.$_set(Double.toInt(index), val);
+        return this.$_set(index.toInt(), val);
     }
 
     get length(): int {

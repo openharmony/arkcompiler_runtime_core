@@ -23,13 +23,10 @@ interface J{{loop.index}} { fld: {{c.to_type}} }
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-    if (d{{loop.index}}.fld != {{t.val}}) {
-        return 1
-    }
+    assertEQ(d{{loop.index}}.fld, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

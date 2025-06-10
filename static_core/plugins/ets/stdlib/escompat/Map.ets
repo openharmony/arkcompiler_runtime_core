@@ -176,7 +176,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             this.buckets = new MapBucket<K, V>[bucketsCount]
 
             entriesBuf.forEach((e: [K, V]) => {
-                this.set(e[0] as K, e[1] as V)
+                this.set(e[Map.ENTRY_KEY] as K, e[Map.ENTRY_VAL] as V)
             })
         } else {
             const bucketsCount = this.getInitialBucketsCount(entries.actualLength)

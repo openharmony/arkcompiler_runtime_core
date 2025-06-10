@@ -18,6 +18,7 @@ require 'json'
 require 'optparse'
 require 'set'
 require 'yaml'
+require 'ostruct'
 
 def check_option(optparser, options, key)
   return if options[key]

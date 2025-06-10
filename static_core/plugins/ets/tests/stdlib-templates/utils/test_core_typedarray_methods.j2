@@ -84,7 +84,7 @@ const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
 const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};
 
 function testBytePerElement(): number {
-    if ({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
+    if ({{.item.objectType}}.BYTES_PER_ELEMENT == {{.item.primitiveSizeBytes}}) return success;
     return fail;
 }
 
@@ -216,14 +216,14 @@ function testNonEmptyTypedArrayAt(): number {
     atResult = typedArray.at(index);
     console.log("testNonEmptyTypedArrayAt [2/3] result: " + atResult);
     // Assertion
-    if (atResult == {{.item.create}}(source[index + length as int])) {
+    if (atResult == {{.item.create}}(source[index + length.toInt()])) {
         console.log("testNonEmptyTypedArrayAt [2/3] test passed.");
     } else {
         console.log("testNonEmptyTypedArrayAt [2/3] test failed.");
         return fail;
     }
 
-    index = typedArray.length as int;
+    index = typedArray.length.toInt();
     atResult = typedArray.at(index);
     console.log("testNonEmptyTypedArrayAt result [3/3]: " + atResult);
     // Assertion
@@ -595,7 +595,7 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         array.sort()
 
         const isEqualToGold =
-            array.every((x: {{.item.type}}, index: number) => x == expected[index as int])
+            array.every((x: {{.item.type}}, index: number) => x == expected[index.toInt()])
 
         // descending
         array.sort(
@@ -639,7 +639,7 @@ const testTypedArrayFindAndFindIndex = parametrize<ObjectTypeAndExpectations<FCA
            ),
            [
                (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => element < {{.item.create}}(0),
-               [{{.item.create}}(-5), 2 as number] as ExpectationsOptIN
+               [{{.item.create}}(-5), 2. as double] as ExpectationsOptIN
            ]
        ] as ObjectTypeAndExpectations<FCAndExpectations>,
    ],
@@ -718,7 +718,7 @@ const testTypedArrayOf = parametrize<FixedArray<{{.item.type}}>>(
        const viaCtor = new {{.item.objectType}}(args)
        const viaOf = {{.item.objectType}}.of(...args)
 
-       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index as int])
+       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index.toInt()])
 
        let failures = 0
        failures += check(boolToResult(isEqual), "result of .of method call is equal to ctor invoke")

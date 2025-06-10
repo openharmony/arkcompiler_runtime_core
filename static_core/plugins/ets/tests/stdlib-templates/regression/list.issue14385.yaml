@@ -29,7 +29,7 @@
 }
 - {
   "type": "float",
-  "value": 42.0
+  "value": 42.0f
 }
 - {
   "type": "double",

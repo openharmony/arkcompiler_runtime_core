@@ -27,7 +27,7 @@ let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
 class Z {
-    fld: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}}{%- endif %}
+    fld?: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}}{%- endif %}
 }
 
 function main() {

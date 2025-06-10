@@ -91,7 +91,7 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendShort",2
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendLong",2
-//! INST_COUNT    "std.core.StringBuilder::append",8
+//! INST_COUNT    "std.core.StringBuilder::append",2
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
@@ -279,7 +279,7 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendShort",2
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendLong",2
-//! INST_COUNT    "std.core.StringBuilder::append",8
+//! INST_COUNT    "std.core.StringBuilder::append",2
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
@@ -513,7 +513,7 @@ function supported_chain_concat6(): String {
        .append(space)
        .append(new Object())
        .append(space)
-       .append(1.0 as Float)
+       .append(1.0f as Float)
        .append(space)
        .append(1.0 as Double)
        .append(space)
@@ -546,7 +546,7 @@ function supported_chain_concat6(): String {
        .append(space)
        .append(new Object())
        .append(space)
-       .append(1.0 as Float)
+       .append(1.0f as Float)
        .append(space)
        .append(1.0 as Double)
        .append(space)

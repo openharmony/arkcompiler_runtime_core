@@ -17,11 +17,11 @@
     param_init_data_types: {"param1":"FixedArray<double>"} ,
     param_types: {"param1":Double},
     param_nature: {"param1": object},
-    param_list: {"param1": "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE as double, Byte.MIN_VALUE as double]"},
+    param_list: {"param1": "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE.toDouble(), Byte.MIN_VALUE.toDouble()]"},
     method_return_type: Double,
     expected_data_item_type: double,
     expected_data_type: "FixedArray<double>",
-    expected_test_data: "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE as double, Byte.MIN_VALUE as double]",
+    expected_test_data: "[(-1) as double, 0 as double, 1 as double, Byte.MAX_VALUE.toDouble(), Byte.MIN_VALUE.toDouble()]",
     verify_test_result_function: compareWrapperObjectValue
   }
 

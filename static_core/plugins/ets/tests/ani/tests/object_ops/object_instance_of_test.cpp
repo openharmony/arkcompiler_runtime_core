@@ -232,7 +232,7 @@ TEST_F(ObjectInstanceOfTest, object_boxed_primitive_instance_of)
 {
     ani_object objectInt;
     ani_class classF;
-    GetMethodData(&objectInt, &classF, "Lobject_instance_of_test/F;", "new_Boxed_Primitive", ":Lstd/core/Int;");
+    GetMethodData(&objectInt, &classF, "Lobject_instance_of_test/F;", "new_Boxed_Primitive", ":Lstd/core/Object;");
 
     ani_boolean res;
     ani_class classInt;

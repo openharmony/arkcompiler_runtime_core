@@ -14,7 +14,7 @@
  */
 
 const SINGLE = [1];
-const ARRAY = [Double.MIN_VALUE,Double.NaN,-1.1,0,0.2,1,2,3,4,5,6,7,8,9,Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.MAX_VALUE];
+const ARRAY: Array<Double> = [Double.MIN_VALUE,Double.NaN,-1.1,0,0.2,1,2,3,4,5,6,7,8,9,Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.MAX_VALUE];
 const EMPTY_JOINED = "5e-324NaN-1.100.2123456789Infinity-Infinity1.7976931348623157e+308";
 const COMMA_JOINED = "5e-324,NaN,-1.1,0,0.2,1,2,3,4,5,6,7,8,9,Infinity,-Infinity,1.7976931348623157e+308";
 const NSIGN_JOINED = "5e-324###NaN###-1.1###0###0.2###1###2###3###4###5###6###7###8###9###Infinity###-Infinity###1.7976931348623157e+308";

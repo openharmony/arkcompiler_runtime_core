@@ -23,7 +23,7 @@ desc: |-
 function main(): int {
   {%- for t in case['types'] %}
   let src_{{loop.index}}: {{t.stype}} = {{t.src|safe}};
-  if ((src_{{loop.index}} as {{t.dtype}}) != ({{t.dst|safe}}) ) {
+  if (src_{{loop.index}}.toChar() != ({{t.dst|safe}}) ) {
       return 1;
   }
   {% endfor %}

@@ -201,33 +201,7 @@ cases:
     call: new Derived().foo(1)
     result: 2
 
-  # override-compatible argument (covariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: string ): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: string): void {
-          res = 2;
-      }
-    call: new Derived().foo("some string");
-    result: 2
-
-  # override-incompatible argument (covariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: Number ): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: number): void {
-          res = 2;
-      }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-compatible argument (covariance)
+  # override-compatible argument (invariance)
   - base: |-
       foo( i: String ): void {
           res = 1;
@@ -236,33 +210,7 @@ cases:
       override foo(i: string): void {
           res = 2;
       }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-incompatible argument (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: Number): void {
-          res = 2;
-      }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-incompatible argument (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: string ): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: String): void {
-          res = 2;
-      }
-    call: new Derived().foo("\"some string\"");
+    call: new Derived().foo("str");
     result: 2
 
   # override-compatible return value (invariance)
@@ -279,79 +227,18 @@ cases:
     call: new Derived().foo(1);
     result: 2
 
-  # override-incompatible return value (covariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): Number {
-          res = 1;
-          return i;
+  # override-compatible return value (invariance)
+  - base: |-
+      foo(): String {
+          res = 1
+          return "str1"
       }
     derived: |-
-      override foo(i: number): number {
-          res = 2;
-          return i;
+      override foo(): string {
+          res = 2
+          return "str2"
       }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-incompatible return value (covariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): String {
-          res = 1;
-          return i;
-      }
-    derived: |-
-      override foo(i: number): string {
-          res = 2;
-          return i;
-      }
-    call: new Derived().foo("\"some string\"");
-    result: 2
-
-  # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): number {
-          res = 1;
-          return i;
-      }
-    derived: |-
-      override foo(i: number): Number {
-          res = 2;
-          return i;
-      }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): number {
-          res = 1;
-          return i;
-      }
-    derived: |-
-      override foo(i: number): void {
-          res = 2;
-          return i;
-      }
-    call: new Derived().foo(1);
-    result: 2
-
-  # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo( i: number ): string {
-          res = 1;
-          return i;
-      }
-    derived: |-
-      override foo(i: number): String {
-          res = 2;
-          return i;
-      }
-    call: new Derived().foo("\"some string\"");
+    call: new Derived().foo()
     result: 2
 
   # ARRAY TYPE

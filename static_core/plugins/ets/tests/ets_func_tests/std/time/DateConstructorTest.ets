@@ -68,7 +68,7 @@ const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.9
 function testIntMsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
         let cd = new Date(longYears[i]);
-        assertEQ(cd.valueOf() as long, longYears[i])
+        assertEQ(Double.toLong(cd.valueOf()), longYears[i])
     }
 }
 
@@ -77,7 +77,7 @@ function testIntYearMonthConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i]);
         let utc = Date.UTC(longYears[i], longMonths[i]);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], 1)
     }
 }
@@ -88,7 +88,7 @@ function testIntYearMonthDayConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day);
         let utc = Date.UTC(longYears[i], longMonths[i], day);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], day);
     }
 }
@@ -99,7 +99,7 @@ function testIntYearMonthDayHoursConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i]);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDH(cd, valueLongYears[i], longMonths[i], day, longHours[i]);
     }
 }
@@ -110,7 +110,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
     }
 }
@@ -121,7 +121,7 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHMS(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
     }
 }
@@ -134,7 +134,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHMSM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
     }
 }
@@ -151,7 +151,7 @@ function testDoubleYearMonthConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i]);
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], 1);
     }
 }
@@ -162,7 +162,7 @@ function testDoubleYearMonthDayConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day));
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], day);
     }
 }
@@ -173,7 +173,7 @@ function testDoubleYearMonthDayHoursConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]));
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDH(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i]);
     }
 }
@@ -184,7 +184,7 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]));
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
     }
 }
@@ -195,7 +195,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]));
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
     }
 }
@@ -209,7 +209,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day),
                 new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]), new Double(millis));
 
-        assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)
+        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
     }
 }

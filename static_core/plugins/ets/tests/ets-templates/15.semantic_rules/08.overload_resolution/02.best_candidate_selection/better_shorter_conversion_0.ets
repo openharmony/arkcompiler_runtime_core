@@ -19,7 +19,7 @@ desc: >-
         If argument type is of a numeric type (see Numeric Types), char, or its boxed counterpart,
         then the candidate with a shorter conversion is better.
 assert: No transformation is better than any transformation
-tags: []
+tags: [compile-only, negative]
 ---*/
 let candidate = 0;
 

@@ -22,10 +22,10 @@ float_comparison:
 
   # >, with type promotion
 
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue:  1.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue:  1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: ">", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: -1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue: -1.0, op: ">", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue:  1.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue:  1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: ">", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: -1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue: -1.0f, op: ">", result: "true"}
 
   # <, no type promotion
 
@@ -36,10 +36,10 @@ float_comparison:
 
   # <, with type promotion
 
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue:  1.0, op: "<", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue:  1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: "<", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: -1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: "<", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue: -1.0, op: "<", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue:  1.0f, op: "<", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue:  1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: "<", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: -1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: "<", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue: -1.0f, op: "<", result: "false"}
 
   # >=, no type promotion
 
@@ -50,10 +50,10 @@ float_comparison:
 
   # >=, with type promotion
 
-  - {xtype: double, xboxed: Double, xvalue:  0.0, ytype: float, yboxed: Float, yvalue:  1.0, op: ">=", result: "false"}
-  - {xtype: double, xboxed: Double, xvalue:  1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: ">=", result: "true"}
-  - {xtype: double, xboxed: Double, xvalue: -1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: ">=", result: "false"}
-  - {xtype: double, xboxed: Double, xvalue:  0.0, ytype: float, yboxed: Float, yvalue: -1.0, op: ">=", result: "true"}
+  - {xtype: double, xboxed: Double, xvalue:  0.0, ytype: float, yboxed: Float, yvalue:  1.0f, op: ">=", result: "false"}
+  - {xtype: double, xboxed: Double, xvalue:  1.0, ytype: float, yboxed: Float, yvalue:  0.0f, op: ">=", result: "true"}
+  - {xtype: double, xboxed: Double, xvalue: -1.0, ytype: float, yboxed: Float, yvalue:  0.0f, op: ">=", result: "false"}
+  - {xtype: double, xboxed: Double, xvalue:  0.0, ytype: float, yboxed: Float, yvalue: -1.0f, op: ">=", result: "true"}
 
   # <=, no type promotion
 
@@ -64,21 +64,21 @@ float_comparison:
 
   # <=, with type promotion
 
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue:  1.0, op: "<=", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue:  1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: "<=", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: -1.0, ytype: float, yboxed: Float, yvalue:  0.0, op: "<=", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue:  0.0, ytype: float, yboxed: Float, yvalue: -1.0, op: "<=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue:  1.0f, op: "<=", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue:  1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: "<=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: -1.0f, ytype: float, yboxed: Float, yvalue:  0.0f, op: "<=", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue:  0.0f, ytype: float, yboxed: Float, yvalue: -1.0f, op: "<=", result: "false"}
 
   # >=, <=
 
-  - {xtype: float, xboxed: Double, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: -0.0, op: ">=", result: "true"}
-  - {xtype: float, xboxed: Double, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: -0.0, op: "<=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (0.0), ytype: Float, yboxed: Float, yvalue: (-0.0), op: ">=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (0.0), ytype: Float, yboxed: Float, yvalue: (-0.0), op: "<=", result: "true"}
 
-  - {xtype: float, xboxed: Double, xvalue: 1.0, ytype: float, yboxed: Float, yvalue: 1.0, op: ">=", result: "true"}
-  - {xtype: float, xboxed: Double, xvalue: 1.0, ytype: float, yboxed: Float, yvalue: 1.0, op: "<=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (1.0), ytype: Float, yboxed: Float, yvalue: (1.0), op: ">=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (1.0), ytype: Float, yboxed: Float, yvalue: (1.0), op: "<=", result: "true"}
 
-  - {xtype: float, xboxed: Double, xvalue: -1.0, ytype: float, yboxed: Float, yvalue: -1.0, op: ">=", result: "true"}
-  - {xtype: float, xboxed: Double, xvalue: -1.0, ytype: float, yboxed: Float, yvalue: -1.0, op: "<=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (-1.0), ytype: Float, yboxed: Float, yvalue: (-1.0), op: ">=", result: "true"}
+  - {xtype: Double, xboxed: Double, xvalue: (-1.0), ytype: Float, yboxed: Float, yvalue: (-1.0), op: "<=", result: "true"}
 
 
   - {xtype: double, xboxed: Double, xvalue: 0.0, ytype: double, yboxed: Double, yvalue: -0.0, op: ">=", result: "true"}
@@ -92,17 +92,17 @@ float_comparison:
 
   # NaNs
 
-  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1)", ytype: float, yboxed: Float, yvalue: 0.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: "sqrt(-1)", op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: "sqrt(-1f)", op: ">", result: "false"}
 
-  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1)", ytype: float, yboxed: Float, yvalue: 0.0, op: "<", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: "sqrt(-1)", op: "<", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: "<", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: "sqrt(-1f)", op: "<", result: "false"}
 
-  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1)", ytype: float, yboxed: Float, yvalue: 0.0, op: ">=", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: "sqrt(-1)", op: ">=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: ">=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: "sqrt(-1f)", op: ">=", result: "false"}
 
-  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1)", ytype: float, yboxed: Float, yvalue: 0.0, op: "<=", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: "sqrt(-1)", op: "<=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "sqrt(-1)", ytype: float, yboxed: Float, yvalue: 0.0f, op: "<=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: "sqrt(-1f)", op: "<=", result: "false"}
 
   - {xtype: double, xboxed: Double, xvalue: "sqrt(-1)", ytype: double, yboxed: Double, yvalue: 0.0, op: ">", result: "false"}
   - {xtype: double, xboxed: Double, xvalue: 0.0, ytype: double, yboxed: Double, yvalue: "sqrt(-1)", op: ">", result: "false"}
@@ -118,20 +118,20 @@ float_comparison:
 
   # INFs
 
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 0.0, op: "<", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 0.0, op: "<=", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 0.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 0.0, op: ">=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: "<", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: "<=", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 0.0f, op: ">=", result: "false"}
 
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: "<", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: "<=", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: 0.0, ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: ">=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: "<", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: "<=", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: 0.0f, ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: ">=", result: "false"}
 
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: "<", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: "<=", result: "true"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: ">", result: "false"}
-  - {xtype: float, xboxed: Float, xvalue: "log(0)", ytype: float, yboxed: Float, yvalue: 1.0/0.0, op: ">=", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: "<", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: "<=", result: "true"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: ">", result: "false"}
+  - {xtype: float, xboxed: Float, xvalue: "log(0f)", ytype: float, yboxed: Float, yvalue: 1.0f/0.0f, op: ">=", result: "false"}
 
 
   - {xtype: double, xboxed: Double, xvalue: "log(0)", ytype: double, yboxed: Double, yvalue: 0.0, op: "<", result: "true"}

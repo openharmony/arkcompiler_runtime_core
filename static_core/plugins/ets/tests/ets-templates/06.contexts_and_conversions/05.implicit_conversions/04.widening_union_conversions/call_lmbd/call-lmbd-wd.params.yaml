@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 cases:
     - to_type: byte|short|int|long
       values:
-          - { from_type: 'byte|short', ref_type: 'Long', expr: '127', eq: '==' }
-          - { from_type: 'int|byte', ref_type: 'Long', expr: '-128', eq: '==' }
-          - { from_type: 'long|short|byte', ref_type: 'Long', expr: '0o777', eq: '==' }
+          - { from_type: 'byte|short', expr: '127 as byte', eq: '==' }
+          - { from_type: 'int|byte', expr: '-128', eq: '==' }
+          - { from_type: 'long|short|byte', expr: '0o777', eq: '==' }
 
     - to_type: Byte|Short|Int|Long
       decl: |-
@@ -33,9 +33,9 @@ cases:
 
     - to_type: float|double|number
       values:
-          - { from_type: 'float|number', ref_type: 'Double', expr: '3.5f', eq: '==' }
-          - { from_type: 'double|float', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
-          - { from_type: 'number|double', ref_type: 'Double', expr: '1234567e8', eq: '==' }
+          - { from_type: 'float|number', expr: '3.5f', eq: '==' }
+          - { from_type: 'double|float', expr: '-1.1E-20', eq: '==' }
+          - { from_type: 'number|double', expr: '1234567e8', eq: '==' }
 
     - to_type: Float|Double|Number
       decl: |-
@@ -49,13 +49,13 @@ cases:
 
     - to_type: byte|short|int|long|float|double
       values:
-          - { from_type: 'byte|float', ref_type: 'Double', expr: '127', eq: '==' }
-          - { from_type: 'short|int', ref_type: 'Double', expr: '-7', eq: '==' }
-          - { from_type: 'int|short|byte|double', ref_type: 'Double', expr: '0xCAFE', eq: '==' }
-          - { from_type: 'long|double', ref_type: 'Double', expr: '0o777', eq: '==' }
-          - { from_type: 'float|short|double|float', ref_type: 'Double', expr: '3.5f', eq: '==' }
-          - { from_type: 'double|int|long', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
-          - { from_type: 'number|byte', ref_type: 'Double', expr: '1234567e8', eq: '==' }
+          - { from_type: 'byte|float', expr: '127 as byte', eq: '==' }
+          - { from_type: 'short|int', expr: '-7', eq: '==' }
+          - { from_type: 'int|short|byte|double', expr: '0xCAFE', eq: '==' }
+          - { from_type: 'long|double', expr: '0o777 as long', eq: '==' }
+          - { from_type: 'float|short|double|float', expr: '3.5f', eq: '==' }
+          - { from_type: 'double|int|long', expr: '-1.1E-20', eq: '==' }
+          - { from_type: 'number|byte', expr: '1234567e8', eq: '==' }
 
     - to_type: Byte|Short|Int|Long|Float|Double
       decl: |-

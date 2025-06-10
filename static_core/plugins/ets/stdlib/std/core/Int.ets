@@ -120,7 +120,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      * @returns value as float
      */
     public override toFloat(): float {
-        return Int.toFloat(this.value);
+        return this.value.toFloat();
     }
 
     /**

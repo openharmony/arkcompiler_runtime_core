@@ -46,32 +46,24 @@ cases:
           class A {
               meth(p: Object): string { return "Object" } // should never be called
               meth(p: byte): string { return "byte" }
-              meth(p: Byte): string { return "Byte" }
-              meth(p: short): string { return "short" }
-              meth(p: Short): string { return "Short" }
+              meth(p: Short): string { return "short" }
               meth(p: int): string { return "int" }
-              meth(p: Int): string { return "Int" }
-              meth(p: long): string { return "long" }
-              meth(p: Long): string { return "Long" }
+              meth(p: Long): string { return "long" }
               meth(p: char): string { return "char" }
-              meth(p: Char): string { return "Char" }
-              meth(p: boolean): string { return "boolean" }
-              meth(p: Boolean): string { return "Boolean" }
+              meth(p: Boolean): string { return "boolean" }
               meth(p: float): string { return "float" }
-              meth(p: Float): string { return "Float" }
-              meth(p: double): string { return "double" }
-              meth(p: Double): string { return "Double" }
+              meth(p: Double): string { return "double" }
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(new Byte(-1 as byte)), "Byte" )
-          assertEQ( a.meth(new Short(-1 as short)), "Short" )
-          assertEQ( a.meth(new Int(-1 as int)), "Int" )
-          assertEQ( a.meth(new Long(-1 as long)), "Long" )
-          assertEQ( a.meth(new Char(c'A')), "Char" )
-          assertEQ( a.meth(new Boolean(false)), "Boolean" )
-          assertEQ( a.meth(new Float(3.14 as float)), "Float" )
-          assertEQ( a.meth(new Double(3.14)), "Double" )
+          assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
+          assertEQ( a.meth(new Short(-1 as short)), "short" )
+          assertEQ( a.meth(new Int(-1 as int)), "int" )
+          assertEQ( a.meth(new Long(-1 as long)), "long" )
+          assertEQ( a.meth(new Char(c'A')), "char" )
+          assertEQ( a.meth(new Boolean(false)), "boolean" )
+          assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          assertEQ( a.meth(new Double(3.14)), "double" )
           assertEQ( a.meth(-1 as long), "long" )
           assertEQ( a.meth(-1 as int), "int" )
           assertEQ( a.meth(-1 as short), "short" )
@@ -85,47 +77,36 @@ cases:
           // primitives and boxed, with sub/superclass
           abstract class B {
               meth(p: Object): string { return "" } // should never be called
-              meth(p: byte): string { return "" }
-              meth(p: Byte): string { return "Byte" }
-              meth(p: short): string { return "" }
-              meth(p: Short): string { return "Short" }
-              meth(p: int): string { return "" }
-              meth(p: Int): string { return "" }
-              meth(p: long): string { return "" }
-              meth(p: Long): string { return "" }
-              meth(p: char): string { return "" }
-              meth(p: Char): string { return "Char" }
+              meth(p: byte): string { return "byte" }
+              meth(p: short): string { return "short" }
+              meth(p: int): string { return "int" }
+              meth(p: long): string { return "long" }
+              meth(p: char): string { return "char" }
               meth(p: boolean): string { return "boolean" }
-              meth(p: Boolean): string { return "" }
               meth(p: float): string { return "float" }
-              meth(p: Float): string { return "" }
-              meth(p: double): string { return "" }
-              abstract meth(p: Double): string
+              meth(p: double): string { return "double" }
           }
           class A extends B {
               meth(p: Object): string { return "" } // should never be called
               meth(p: byte): string { return "byte" }
               meth(p: short): string { return "short" }
               meth(p: int): string { return "int" }
-              meth(p: Int): string { return "Int" }
               meth(p: long): string { return "long" }
-              meth(p: Long): string { return "Long" }
               meth(p: char): string { return "char" }
-              meth(p: Boolean): string { return "Boolean" }
-              meth(p: Float): string { return "Float" }
-              meth(p: double): string { return "double" }
-              meth(p: Double): string { return "Double" }
+              meth(p: Boolean): string { return "boolean" }
+              meth(p: Float): string { return "float" }
+              meth(p: Double): string { return "double" }
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(new Byte(-1 as byte)), "Byte" )
-          assertEQ( a.meth(new Short(-1 as short)), "Short" )
-          assertEQ( a.meth(new Int(-1 as int)), "Int" )
-          assertEQ( a.meth(new Long(-1 as long)), "Long" )
-          assertEQ( a.meth(new Char(c'A')), "Char" )
-          assertEQ( a.meth(new Boolean(false)), "Boolean" )
-          assertEQ( a.meth(new Float(3.14 as float)), "Float" )
-          assertEQ( a.meth(new Double(3.14)), "Double" )
+          assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
+          assertEQ( a.meth(new Short(-1 as short)), "short" )
+          assertEQ( a.meth(new Int(-1 as int)), "int" )
+          assertEQ( a.meth(new Long(-1 as long)), "long" )
+          assertEQ( a.meth(new Char(c'A')), "char" )
+          assertEQ( a.meth(new Boolean(false)), "boolean" )
+          assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          assertEQ( a.meth(new Double(3.14)), "double" )
           assertEQ( a.meth(-1 as long), "long" )
           assertEQ( a.meth(-1 as int), "int" )
           assertEQ( a.meth(-1 as short), "short" )
@@ -190,14 +171,6 @@ cases:
               meth(p: FixedArray<Color>): string { return "Color" }
               meth(p: FixedArray<Size>): string { return "Size" }
               meth(p: FixedArray<Object>): string { return "Object" }
-              meth(p: FixedArray<char>): string { return "char" }
-              meth(p: FixedArray<byte>): string { return "byte" }
-              meth(p: FixedArray<short>): string { return "short" }
-              meth(p: FixedArray<int>): string { return "int" }
-              meth(p: FixedArray<long>): string { return "long" }
-              meth(p: FixedArray<boolean>): string { return "boolean" }
-              meth(p: FixedArray<double>): string { return "double" }
-              meth(p: FixedArray<float>): string { return "float" }
               meth(p: FixedArray<Int>): string { return "Int" }
               meth(p: FixedArray<Short>): string { return "Short" }
               meth(p: FixedArray<Byte>): string { return "Byte" }          
@@ -209,22 +182,14 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth([-1 as byte]), "byte" )
-          assertEQ( a.meth([-1 as short]), "short" )
-          assertEQ( a.meth([-1 as int]), "int" )
-          assertEQ( a.meth([-1 as long]), "long" )
-          assertEQ( a.meth([c'A']), "char" )
-          assertEQ( a.meth([false]), "boolean" )
-          assertEQ( a.meth([3.14 as float]), "float" )
-          assertEQ( a.meth([3.14]), "double" )
-          assertEQ( a.meth([new Byte(-1 as byte)]), "Byte" )
-          assertEQ( a.meth([new Short(-1 as short)]), "Short" )
-          assertEQ( a.meth([new Int(-1)]), "Int" )
-          assertEQ( a.meth([new Long(-1 as long)]), "Long" )
-          assertEQ( a.meth([new Char(c'A')]), "Char" )
-          assertEQ( a.meth([new Boolean(false)]), "Boolean" )
-          assertEQ( a.meth([new Float(3.14 as float)]), "Float" )
-          assertEQ( a.meth([new Double(3.14)]), "Double" )
+          assertEQ( a.meth([(-1).toByte]), "Byte" )
+          assertEQ( a.meth([(-1).toShort]), "Short" )
+          assertEQ( a.meth([(-1).toInt()]), "Int" )
+          assertEQ( a.meth([(-1).toLong()]), "Long" )
+          assertEQ( a.meth([c'A']), "Char" )
+          assertEQ( a.meth([false]), "Boolean" )
+          assertEQ( a.meth([(3.14).toFloat()]), "Float" )
+          assertEQ( a.meth([3.14]), "Double" )
           assertEQ( a.meth([new Object()]), "Object" )
           assertEQ( a.meth([Color.Red]), "Color" )
           assertEQ( a.meth([Size.M]), "Size" )
@@ -284,14 +249,14 @@ cases:
           assertEQ( a.meth([false]), "boolean" )
           assertEQ( a.meth([3.14 as float]), "float" )
           assertEQ( a.meth([3.14]), "double" )
-          assertEQ( a.meth([new Byte(-1 as byte)]), "Byte" )
-          assertEQ( a.meth([new Short(-1 as short)]), "Short" )
-          assertEQ( a.meth([new Int(-1)]), "Int" )
-          assertEQ( a.meth([new Long(-1 as long)]), "Long" )
-          assertEQ( a.meth([new Char(c'A')]), "Char" )
-          assertEQ( a.meth([new Boolean(false)]), "Boolean" )
-          assertEQ( a.meth([new Float(3.14 as float)]), "Float" )
-          assertEQ( a.meth([new Double(3.14)]), "Double" )
+          assertEQ( a.meth([new Byte(-1 as byte)]), "byte" )
+          assertEQ( a.meth([new Short(-1 as short)]), "short" )
+          assertEQ( a.meth([new Int(-1)]), "int" )
+          assertEQ( a.meth([new Long(-1 as long)]), "long" )
+          assertEQ( a.meth([new Char(c'A')]), "char" )
+          assertEQ( a.meth([new Boolean(false)]), "boolean" )
+          assertEQ( a.meth([new Float(3.14 as float)]), "float" )
+          assertEQ( a.meth([new Double(3.14)]), "double" )
           assertEQ( a.meth([new Object()]), "Object" )
           assertEQ( a.meth([Color.Red]), "Color" )
           assertEQ( a.meth([Size.M]), "Size" )

@@ -13,7 +13,6 @@
 
 ---
 cases:
-  - { base: "Object", derived: "number" }
   - { base: "number", derived: "Object" }
   - { base: "Derived", derived: "Object" }
   - { base: "(q: Base)=>Derived", derived: "Object" }

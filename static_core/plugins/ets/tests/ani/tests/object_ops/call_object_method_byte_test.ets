@@ -36,14 +36,14 @@ class A {
         } else if (a2 > a3) {
             return a0;
         } else {
-            return (a4 + a0) as byte;
+            return (a4 + a0).toByte();
         }
     }
 
     public nestedMethod(data1: byte, data2: byte): byte
     {
         let method = (value1: byte, value2: byte): byte => {
-            return (value1 + value2) as byte;
+            return (value1 + value2).toByte();
         }
 
         return method(data1, data2);
@@ -54,7 +54,7 @@ class A {
         if (a0 > 100) {
             return a0 as byte;
         } else {
-            return this.recursionMethod((a0 + 10) as byte);
+            return this.recursionMethod((a0 + 10).toByte());
         }
     }
 }
@@ -73,12 +73,12 @@ abstract class C {
 
 class D extends C {
     public override func(a: byte, b: byte): byte {
-        return (a + b) as byte;
+        return (a + b).toByte();
     }
 }
 
 class E extends D {
     public override func(a: byte, b: byte): byte {
-        return (a - b) as byte;
+        return (a - b).toByte();
     }
 }

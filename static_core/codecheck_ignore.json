@@ -73,6 +73,8 @@
   "plugins/ets/tests/ets_test_suite/coroutines/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/linker": "*",
   "plugins/ets/tests/ets_test_suite/strings": "*",
+  "plugins/ets/tests/ets_test_suite/generics/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/ets_test_suite/intrinsics/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/functions/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/object_literal/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_warnings_tests": "*",

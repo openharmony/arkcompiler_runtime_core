@@ -31,7 +31,7 @@ function f2(): types.int16 {
 }
 
 function f3(): types.float_n {
-  return 0.0;
+  return 0.0f;
 }
 
 function f4(): types.text {

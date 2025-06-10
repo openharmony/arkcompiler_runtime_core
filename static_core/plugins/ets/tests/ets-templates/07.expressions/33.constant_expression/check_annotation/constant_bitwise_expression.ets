@@ -21,14 +21,14 @@ tags: [compile-only]
 ---*/
 
 @interface MyAnno {
-    id: int
+    id: {{c.type}}
     idN: number
 }
 
 const value: {{c.type}} = {{c.value}}
-const myId: {{c.type}} = (value {{c.operation}}) {{c.asChar}}
+const myId: {{c.type}} = value {{c.operation}}
 
-@MyAnno({id: myId{{c.asInt}}, idN: myId})
+@MyAnno({id: myId, idN: myId})
 class NewClass{}
 
 {% endfor %}

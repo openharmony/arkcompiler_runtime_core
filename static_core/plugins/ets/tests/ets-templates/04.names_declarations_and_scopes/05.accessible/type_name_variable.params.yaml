@@ -83,7 +83,7 @@ cases:
     check: |-
         function main() {
             let a: T = true;
-            assertEQ(foo(a), 8);
+            assertEQ(foo(a), 9);
         }
 
   # Boxed
@@ -92,7 +92,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Byte(0x7F as byte);
-            assertEQ(foo(a), 11);
+            assertEQ(foo(a), 1);
         }
 
   - decl: |-
@@ -100,7 +100,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Short(2 as short);
-            assertEQ(foo(a), 12);
+            assertEQ(foo(a), 2);
         }
 
   - decl: |-
@@ -108,7 +108,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Int(3 as int);
-            assertEQ(foo(a), 13);
+            assertEQ(foo(a), 3);
         }
 
   - decl: |-
@@ -116,7 +116,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Long(4 as long);
-            assertEQ(foo(a), 14);
+            assertEQ(foo(a), 4);
         }
 
   - decl: |-
@@ -124,7 +124,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Float(0.1 as float);
-            assertEQ(foo(a), 15);
+            assertEQ(foo(a), 5);
         }
 
   - decl: |-
@@ -132,7 +132,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Double(0.1 as double);
-            assertEQ(foo(a), 16); // Double is an alias to Number
+            assertEQ(foo(a), 6); // Double is an alias to Number
         }
 
   - decl: |-
@@ -140,7 +140,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Number(0.1 as number);
-            assertEQ(foo(a), 16);
+            assertEQ(foo(a), 6);
         }
 
   - decl: |-
@@ -148,7 +148,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Char(c'b');
-            assertEQ(foo(a), 17);
+            assertEQ(foo(a), 7);
         }
 
   - decl: |-
@@ -156,7 +156,7 @@ cases:
     check: |-
         function main() {
             let a: T = "some string";
-            assertEQ(foo(a), 18); // string is an alias to String
+            assertEQ(foo(a), 8); // string is an alias to String
         }
 
   - decl: |-
@@ -164,7 +164,7 @@ cases:
     check: |-
         function main() {
             let a: T = new String("some string");
-            assertEQ(foo(a), 18);
+            assertEQ(foo(a), 8);
         }
 
   - decl: |-
@@ -172,7 +172,7 @@ cases:
     check: |-
         function main() {
             let a: T = new Boolean(false);
-            assertEQ(foo(a), 19);
+            assertEQ(foo(a), 9);
         }
 
     # Custom

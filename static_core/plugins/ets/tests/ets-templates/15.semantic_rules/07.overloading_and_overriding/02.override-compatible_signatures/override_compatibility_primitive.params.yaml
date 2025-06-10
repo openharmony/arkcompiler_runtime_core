@@ -53,28 +53,6 @@ cases:
       }
     params: override-incompatible parameter (no invariance)
 
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(i: Number): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: number): void {
-          res = 2
-      }
-    params: override-incompatible parameter
-
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(i: number): void {
-          res = 1
-      }
-    derived: |-
-      override foo(i: Number): void {
-          res = 2
-      }
-    params: override-incompatible parameter
-
 # PRIMITIVES, RETURN VALUE
   - base: |-
       foo(): number {
@@ -101,32 +79,6 @@ cases:
       override foo(): boolean {
           res = 2
           return true
-      }
-    params: override-incompatible return value
-
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(): number {
-          res = 1
-          return 1.0
-      }
-    derived: |-
-      foo(): Number {
-          res = 2
-          return new Number()
-      }
-    params: override-incompatible return value
-
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(): Number {
-          res = 1
-          return new Number()
-      }
-    derived: |-
-      foo(): number {
-          res = 2
-          return 1.0
       }
     params: override-incompatible return value
 

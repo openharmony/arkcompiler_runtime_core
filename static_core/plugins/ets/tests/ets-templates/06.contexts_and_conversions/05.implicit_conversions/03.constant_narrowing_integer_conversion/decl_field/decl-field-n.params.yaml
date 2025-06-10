@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,31 +14,31 @@
 ---
 cases:
     # from short
-    - { expr: -129 as short, to_type: byte }
-    - { expr: 128 as short, to_type: byte }
+    - { expr: -129, from_type: short, to_type: byte }
+    - { expr: 128, from_type: short, to_type: byte }
 
     # from int
-    - { expr: -129 as int, to_type: byte }
-    - { expr: 128 as int, to_type: byte }
+    - { expr: -129, from_type: int, to_type: byte }
+    - { expr: 128, from_type: int, to_type: byte }
 
-    - { expr: -32769 as int, to_type: short }
-    - { expr: 32768 as int, to_type: short }
+    - { expr: -32769, from_type: int, to_type: short }
+    - { expr: 32768, from_type: int, to_type: short }
 
-    - { expr: -1 as int, to_type: char }
-    - { expr: 65536 as int, to_type: char }
+    - { expr: -1, from_type: int, to_type: char }
+    - { expr: 65536, from_type: int, to_type: char }
 
     # from long
-    - { expr: -129 as long, to_type: byte }
-    - { expr: 128 as long, to_type: byte }
+    - { expr: -129, from_type: long, to_type: byte }
+    - { expr: 128, from_type: long, to_type: byte }
 
-    - { expr: -32769 as long, to_type: short }
-    - { expr: 32768 as long, to_type: short }
+    - { expr: -32769, from_type: long, to_type: short }
+    - { expr: 32768, from_type: long, to_type: short }
 
-    - { expr: -2147483649 as long, to_type: int }
-    - { expr: 2147483648 as long, to_type: int }
+    - { expr: -2147483649, from_type: long, to_type: int }
+    - { expr: 2147483648, from_type: long, to_type: int }
 
-    - { expr: -1 as long, to_type: char }
-    - { expr: 65536 as long, to_type: char }
+    - { expr: -1, from_type: long, to_type: char }
+    - { expr: 65536, from_type: long, to_type: char }
 
     # from char
-    - { expr: "c'\\u0100'", to_type: byte }
+    - { expr: "c'\\u0100'", from_type: char, to_type: byte }

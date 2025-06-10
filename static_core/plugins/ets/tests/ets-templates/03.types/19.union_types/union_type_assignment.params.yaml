@@ -243,7 +243,7 @@ cases2:
       type StringOrNumber = string | number;
       let value: StringOrNumber;
     check: |-
-      value = new Char(("Hello").charAt(0)).toString();
+      value = ("Hello").charAt(0).toString();
       assertEQ(value, 'H');
 
   - desc: Basic union type(string lastIndexOf).
@@ -267,7 +267,7 @@ cases2:
       type StringOrNumber = string | number;
       let value: StringOrNumber;
     check: |-
-      value = ("ArkTS").charCodeAt(0) as number;
+      value = ("ArkTS").charCodeAt(0).toDouble();
       assertEQ(value, 65);
 
   - desc: Basic union type(string lastIndexOf).

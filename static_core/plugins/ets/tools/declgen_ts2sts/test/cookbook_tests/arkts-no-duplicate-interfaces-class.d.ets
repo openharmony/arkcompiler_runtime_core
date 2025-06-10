@@ -24,6 +24,5 @@ export interface Calculator {
 }
 export interface I {
     foo(a: number): void;
-    foo(a?: number): void;
     setAge(age: number): void;
 }

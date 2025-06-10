@@ -120,7 +120,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns value as long
      */
     public override toFloat(): float {
-        return Long.toFloat(this.value);
+        return this.value.toFloat();
     }
 
     /**
@@ -395,7 +395,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
-                return Long.valueOf(Double.toLong(num))
+                return Long.valueOf(num.toLong())
             }
         }
         throw new JSONTypeError("Cannot create Long from JSON", new ErrorOptions(json as Object))

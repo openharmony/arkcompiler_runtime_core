@@ -29,7 +29,7 @@ cases:
       assertEQ( res, 21 );
 
   - decl: |-
-      constructor() { 
+      constructor() {
         super(1.1 as number);
         res += 20;
       }
@@ -38,7 +38,7 @@ cases:
       assertEQ( res, 22 );
 
   - decl: |-
-      constructor() { 
+      constructor() {
         super("some string");
         res += 20;
       }
@@ -110,7 +110,7 @@ cases:
   - decl: |-
       constructor(i: TPL) { res = 26;}
     use: |-
-      let a: TPL = [ false, 1.2];
+      let a: TPL = [ false, 1.2f];
       new Derived<Number>(a);
       assertEQ( res, 26 );
 

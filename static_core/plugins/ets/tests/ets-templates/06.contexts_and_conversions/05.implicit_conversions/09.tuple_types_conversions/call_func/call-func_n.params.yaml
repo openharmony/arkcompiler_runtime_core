@@ -13,12 +13,6 @@
 
 ---
 cases:
-    # different types
-    - from:
-          - { type: number, expr: "Double.POSITIVE_INFINITY" }
-      to:
-          - { type: Number }
-
     # different number of elements
     - from:
           - { type: number, expr: "Double.POSITIVE_INFINITY" }

@@ -163,7 +163,7 @@ cases:
       }
 
       class Animal {
-          name: float = 66.66;
+          name: float = 66.66f;
       }
 
       class GenericClass implements GenericInterface<Animal> {
@@ -383,7 +383,7 @@ cases:
       }
     logic: |-
       let stringValue = new EnumValue();
-      assertEQ(stringValue.getEnumValue() as number, 1);
+      assertEQ(Int.toDouble(stringValue.getEnumValue()), 1);
 
   - desc: The return value type of a generic interface method is a enum type(string).
     decl: |-

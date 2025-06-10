@@ -169,7 +169,7 @@ class B extends Numeric {
     public toInt(): int { return 1 };
     public toShort(): short { return 1 };
     public toLong(): long { return 1 };
-    public toFloat(): float { return 1.1 };
+    public toFloat(): float { return 1.1f };
     public toDouble(): double { return 1.1 };
 }
 

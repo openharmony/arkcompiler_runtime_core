@@ -42,6 +42,6 @@ function CheckEscompatArray(array: Array<String | null>): boolean {
     return array[0] == "New String 1!" && array[1] == null && array[2] == "New String 2!";
 }
 
-function GetNumber(): Number {
-    return new Number(42);
+function GetObj(): Object {
+    return new Object();
 }

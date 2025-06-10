@@ -13,20 +13,20 @@
 
 ---
 cases:
-    - to_type: |- 
+    - to_type: |-
         [short, int, double]
       value: |-
         [0b0 as byte, 0b0 as short, 0]
-      result: 
+      result:
         - 0b0 as short
         - 0
         - 0.0
 
-    - to_type: |- 
+    - to_type: |-
         [int, long, double]
       value: |-
-        [0b0 as short, Byte.MIN_VALUE, 3.4028234663852886e38 as float]
-      result: 
+        [0b0 as short, Byte.MIN_VALUE, 3.4028234663852886e38f as float]
+      result:
         - 0
         - -128 as long
         - 3.4028234663852886e38 as double

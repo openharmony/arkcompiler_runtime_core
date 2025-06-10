@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani.h"
 #include "ani_gtest_array_ops.h"
 #include <iostream>
 
@@ -34,7 +35,7 @@ TEST_F(ArraySetRefTest, SetRefErrorTests)
     const ani_size invalidIndex = 5;
     ASSERT_EQ(env_->Array_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
-    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNumber"));
+    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetObj"));
     // Can set any object as a type
     ASSERT_EQ(env_->Array_Set_Ref(array, 0, num), ANI_OK);
 }
@@ -51,7 +52,7 @@ TEST_F(ArraySetRefTest, FixedSetRefErrorTests)
     const ani_size invalidIndex = 5;
     ASSERT_EQ(env_->Array_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
-    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNumber"));
+    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetObj"));
     ASSERT_EQ(env_->Array_Set_Ref(array, 0, num), ANI_INVALID_TYPE);
 }
 

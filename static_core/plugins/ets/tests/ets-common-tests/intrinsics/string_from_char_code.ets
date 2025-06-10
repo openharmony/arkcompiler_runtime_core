@@ -192,10 +192,10 @@ function StringFromCpsSeqTest() {
     let cpsActual = "";
     for (let i = 12; i < 0x10FFFF; i += 30009) {
         if (Char.codeUnitsToEncode(i) == 1) {
-            cpsActual += String.fromCharCode(i as number);
+            cpsActual += String.fromCharCode(Int.toDouble(i));
         } else {
-            cpsActual += String.fromCharCode(Char.getHighSurrogate(i) as number);
-            cpsActual += String.fromCharCode(Char.getLowSurrogate(i) as number);
+            cpsActual += String.fromCharCode(Char.toDouble(Char.getHighSurrogate(i)));
+            cpsActual += String.fromCharCode(Char.toDouble(Char.getLowSurrogate(i)));
         }
     }
     assertEQ(cpsActual, cpsGolden, "cpsActual must be equal to cpsGolden");
@@ -234,13 +234,13 @@ function StringFromCharVarTest() {
     let alpha: char = 0x3B1;
     let beta: char = 0x3B2;
     assertEQ(string.fromCharCode(alpha, beta), "αβ", "Must be 'αβ'");
-    assertEQ(string.fromCharCode(alpha as number, beta as number), "αβ", "Must be 'αβ'");
+    assertEQ(string.fromCharCode(Char.toDouble(alpha), Char.toDouble(beta)), "αβ", "Must be 'αβ'");
 }
 
 function StringFromSingleCharVarTest() {
     let beta: char = 0x3B2;
     assertEQ(string.fromCharCode(beta), "β", "Must be 'β'");
-    assertEQ(string.fromCharCode(beta as number), "β", "Must be 'β'");
+    assertEQ(string.fromCharCode(Char.toDouble(beta)), "β", "Must be 'β'");
 }
 
 function StringFromCompositeSymbolTest() {

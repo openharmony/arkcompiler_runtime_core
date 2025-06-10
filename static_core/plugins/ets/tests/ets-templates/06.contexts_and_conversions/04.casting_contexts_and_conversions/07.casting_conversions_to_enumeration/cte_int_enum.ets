@@ -15,6 +15,9 @@
 
 /*---
 desc: Casting conversions to enumeration int.
+tags:
+- compile-only
+- negative
 ---*/
 
 enum Status {

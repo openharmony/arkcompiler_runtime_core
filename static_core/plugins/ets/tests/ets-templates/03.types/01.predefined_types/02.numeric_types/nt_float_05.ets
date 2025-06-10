@@ -18,8 +18,8 @@ desc: Test floating-point comparison(!=).
 ---*/
 
 function main(): void {
-  let a: float = 10.5;
-  let b: float = 20.5;
+  let a: float = 10.5f;
+  let b: float = 20.5f;
 
   assertTrue(a !== b);
 }

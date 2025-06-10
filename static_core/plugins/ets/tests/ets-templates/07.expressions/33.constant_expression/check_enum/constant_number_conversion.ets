@@ -22,7 +22,7 @@ desc:
 const testValue: {{c.type}} = {{c.value}}
 
 function main() {
-    enum TestEnum { One = testValue as int }
+    enum TestEnum { One = testValue }
     assertEQ(TestEnum.One.valueOf(), {{c.expected}})
 }
 

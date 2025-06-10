@@ -22,17 +22,13 @@ params: from {{c.from_type}} to {{c.to_type}}
 const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: {{c.to_type}}[] = [{{v.expr|safe}}, {{v.expr|safe}}]  // expression
-    if (d{{loop.index}}[1] != {{v.val}}) {
-        return 1
-    }
-    d{{loop.index}} = [c{{loop.index}}]  // constant
-    if (d{{loop.index}}[0] != {{v.val}}) {
-        return 1
-    }
+    let d{{loop.index}}: {{c.to_type}}[] = [({{v.expr|safe}}).to{{c.to_type}}(), ({{v.expr|safe}}).to{{c.to_type}}()]  // expression
+    assertEQ(d{{loop.index}}[1], ({{v.val}}).to{{c.to_type}}())
+
+    d{{loop.index}} = [c{{loop.index}}.to{{c.to_type}}()]  // constant
+    assertEQ(d{{loop.index}}[0], ({{v.val}}).to{{c.to_type}}())
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -40,7 +40,7 @@ function main(): void {
     assertEQ(chars[4], c'o', "Fifth letter must be `o`");
 
     str2 = "bytesStr";
-    let byteChars: byte[] = str2.getBytes(0, str2.length as int);
+    let byteChars: byte[] = str2.getBytes(0, str2.length.toInt());
     assertEQ(byteChars[0], 98, "First byte must be 98");
     assertEQ(byteChars[1], 121, "Second byte must be 121");
     assertEQ(byteChars[2], 116, "Third byte must be 116");

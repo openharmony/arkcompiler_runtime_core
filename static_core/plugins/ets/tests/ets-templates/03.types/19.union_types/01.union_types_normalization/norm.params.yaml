@@ -98,15 +98,20 @@ cases:
           type AB = 'A' | 'B'
           type UT = 'A' | string | AB  // => string
           let v: UT = ''
+          let c: Char = new Char(c'\u0000')
       pos:
           - |-
               v = 'abc'
               assertEQ(v, 'abc')
               v = '\u0000' + '\u0000' + '\u0000'
               assertEQ(v, '\u0000\u0000\u0000')
-      neg:
+              c = c'X'
+              v = c.toString()
+              assertEQ(v, 'X')
           - |-
-              v = new Char(c'\u0000')
+              v = c.toString()
+              assertEQ(typeof v, 'string')
+      neg:
           - |-
               v = null
           - |-
@@ -120,11 +125,12 @@ cases:
           type C = string | 'byte'
           type UT = A | B | C   // => string
           let v: UT = ''
+          let c: char = c'3'
       pos:
           - |-
               v = new String('1')
               assertEQ(v, '1')
-              v = new Char(c'3').toString()
+              v = c.toString()
               assertEQ(v, '3')
       neg:
           - |-

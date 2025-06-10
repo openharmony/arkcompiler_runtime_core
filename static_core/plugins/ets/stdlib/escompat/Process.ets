@@ -451,9 +451,9 @@ export namespace StdProcess {
         let killSignal: int = SIGNAL_MAP.get("SIGTERM")! as int;
         let maxBuffer: int = MAX_BUFFER_SIZE;
 
-        if (options == undefined) {
-            return [timeout, killSignal, maxBuffer];
-        }
+            if (options == undefined) {
+                return [timeout, killSignal, maxBuffer] as int[];
+            }
 
         if (options.timeout != undefined && options.timeout as number > 0) {
             timeout = (options.timeout as number).toInt();
@@ -480,7 +480,11 @@ export namespace StdProcess {
             maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
         }
 
-        return [timeout, killSignal, maxBuffer];
+        let ret: Array<int> = new Array<int>(3);
+        ret[0] = timeout
+        ret[1] = killSignal
+        ret[2] = maxBuffer
+        return ret;
     }
 
     /**

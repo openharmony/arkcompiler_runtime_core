@@ -30,7 +30,6 @@ import {
     singleRequired,
 } from "decl_js"
 
-
 function testOptionals() {
     // #22991
     // let x = optionalCall(123, 321, 5)

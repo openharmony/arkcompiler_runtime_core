@@ -67,7 +67,7 @@ function main(): int {
     }
 
     for (let i = 0; i < Digits.getLength(); ++i) {
-        if (Digits.indexOf(Digits.charAt(i)) as char != i) {
+        if (Digits.indexOf(Digits.charAt(i)).toChar() != i) {
             return 9;
         }
     }

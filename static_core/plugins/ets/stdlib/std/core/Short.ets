@@ -120,7 +120,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns value as float
      */
     public override toFloat(): float {
-        return Short.toFloat(this.value);
+        return this.value.toFloat();
     }
 
     /**

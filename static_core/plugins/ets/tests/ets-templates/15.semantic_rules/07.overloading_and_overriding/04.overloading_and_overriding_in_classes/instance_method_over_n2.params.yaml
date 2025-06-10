@@ -17,7 +17,7 @@ cases:
   - { base: "i: Number|undefined|null", derived: "i: undefined|Number|null", call: "undefined", res: 2 }
   - { base: "i: Number|undefined|null", derived: "i: undefined|null|Number", call: "null", res: 2 }
   # overload base method as arguments are different
-  - { base: "i: Number, j: number", derived: "i: number, k: Number", call: "new Number(), 1", res: 1 }
+  - { base: "i: Number, j: number", derived: "i: number, k: Number", call: "new Number(), 1", res: 2 }
   - { base: "i: Number, j: number", derived: "i: number, k: Number", call: "1, new Number()", res: 2 }
 
 # Class

@@ -23,11 +23,11 @@ class ArrayClass {
 
     public static CheckStaticArray(): boolean {
         return (
-            ArrayClass.array[0] as int == 1.0 &&
-            ArrayClass.array[1] as int == 2.0 &&
-            ArrayClass.array[2] as int == 22.0 &&
-            ArrayClass.array[3] as int == 33.0 &&
-            ArrayClass.array[4] as int == 44.0
+            ArrayClass.array[0].toInt() == 1.0 &&
+            ArrayClass.array[1].toInt() == 2.0 &&
+            ArrayClass.array[2].toInt() == 22.0 &&
+            ArrayClass.array[3].toInt() == 33.0 &&
+            ArrayClass.array[4].toInt() == 44.0
         )
     }
 }
@@ -48,7 +48,7 @@ function GetEscompatArray(): Array<double> {
 }
 
 function CheckArray(a: double[]): boolean {
-    return a[0] as int == 1 && a[1] as int == 2 && a[2] as int == 30 && a[3] as int == 40 && a[4] as int == 50
+    return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
 function GetSpecialArray(): double[] {
@@ -60,9 +60,9 @@ function GetSpecialArray(): double[] {
 }
 
 function CheckEscompatArray(a: Array<double>): boolean {
-    return a[0] as int == 1 &&
-           a[1] as int == 2 &&
-           a[2] as int == 30 &&
-           a[3] as int == 40 &&
-           a[4] as int == 50
+    return a[0].toInt() == 1 &&
+           a[1].toInt() == 2 &&
+           a[2].toInt() == 30 &&
+           a[3].toInt() == 40 &&
+           a[4].toInt() == 50
 }

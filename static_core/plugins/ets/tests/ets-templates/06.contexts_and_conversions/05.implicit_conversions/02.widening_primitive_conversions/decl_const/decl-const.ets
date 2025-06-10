@@ -23,7 +23,7 @@ params: from {{c.from_type}} to {{c.to_type}}
 function main(): int {
 {%- for v in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}  // this const declaration is tested
+    const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}.to{{c.to_type}}()  // this const declaration is tested
     if (d{{loop.index}} != {{v.val}}) {
         return 1
     }

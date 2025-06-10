@@ -17,9 +17,9 @@ cases:
     - { val: '0x8000 as short', type: 'short' }
     - { val: '0x80000000', type: 'int' }
     - { val: '0x8000000000000000 as long', type: 'long' }
-    - { val: '0.000001', type: 'float' }
+    - { val: '0.000001f', type: 'float' }
     - { val: '0.0000000001', type: 'double' }
-    - { val: '0.000001', type: 'float' }
+    - { val: '0.000001f', type: 'float' }
 
     - { val: 'Byte.MIN_VALUE', type: 'byte' }
     - { val: 'Byte.MAX_VALUE', type: 'byte' }

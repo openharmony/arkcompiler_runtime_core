@@ -18,6 +18,7 @@ require 'optparse'
 require 'yaml'
 require 'json'
 require 'erb'
+require 'ostruct'
 
 # Extend Module to implement a decorator for ISAPI methods
 class Module

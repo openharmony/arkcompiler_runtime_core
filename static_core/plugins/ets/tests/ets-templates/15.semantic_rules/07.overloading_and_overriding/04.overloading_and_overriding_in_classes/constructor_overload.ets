@@ -33,7 +33,6 @@ class Base<T> {
     constructor() { res = 1;}
     constructor(i: number) { res = 2;}
     constructor(i: string) { res = 3;}
-    constructor(i: Number) { res = 4;}
     constructor(i: byte[]) { res = 5;}
     constructor(i: TPL) { res = 6;}
     constructor(i: BoolFun) { res = 7;}

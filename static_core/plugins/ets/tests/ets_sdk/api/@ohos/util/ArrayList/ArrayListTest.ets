@@ -89,26 +89,26 @@ function testArrayList0002() {
     }
 
     arr1.insert(999, 3);
-    testArray.splice(3, 0, 999);
+    testArray.splice(3 as int, 0 as int, 999);
     for (let i = 0; i < testArray.length; i++) {
         assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after insertion`);
     }
 
     arr1.removeByIndex(9);
-    testArray.splice(9, 1);
+    testArray.splice(9 as int, 1);
     for (let i = 0; i < testArray.length; i++) {
         assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by index`);
     }
 
     const removeRes = arr1.remove(7);
-    testArray.splice(8, 1);
+    testArray.splice(8 as int, 1);
     for (let i = 0; i < testArray.length; i++) {
         assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by value`);
     }
     assertTrue(removeRes, "The remove operation should return true");
 
     arr1.removeByRange(1, 3);
-    testArray.splice(1, 2);
+    testArray.splice(1 as int, 2);
     for (let i = 0; i < testArray.length; i++) {
         assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by range`);
     }

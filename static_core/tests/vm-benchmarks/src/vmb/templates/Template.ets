@@ -46,7 +46,7 @@ let SYS_GC_PAUSE: int = $gc;
 
 function log(msg: String): void {
     // timestamp is needed by GC parser
-    let now: long = Date.now() as long;
+    let now: long = Double.toLong(Date.now());
     console.info(now + " " + msg);
 }
 
@@ -81,12 +81,12 @@ function runIters(phase: String, count: int, time: int, bench: $state_name): voi
         let ops: long = 0;
         let elapsedMs: long = 0;
         doGC();
-        let start: long = Date.now() as long;
+        let start: long = Double.toLong(Date.now());
         while (elapsedMs < iterMs) {
             for (let i: long = 0; i < loopCount1; i++) {
                 $method_call
             }
-            elapsedMs = (Date.now() as long) - start;
+            elapsedMs = Double.toLong(Date.now()) - start;
             ops += loopCount1;
         }
         totalOps += ops;
@@ -98,7 +98,7 @@ function runIters(phase: String, count: int, time: int, bench: $state_name): voi
 
 function main(): void throws {
     let bench: $state_name = new $state_name();
-    log("Startup execution started: " + (Date.now() as long));
+    log("Startup execution started: " + Double.toLong(Date.now()));
 
     $state_params
     $state_setup
@@ -126,11 +126,11 @@ function main(): void throws {
 
     while (loopMs < iterMs && loopCount < MAX_LOOP_COUNT) {
         loopCount = loopCount * 2;
-        let start: long = Date.now() as long;
+        let start: long = Double.toLong(Date.now());
         for (let i = 0; i < loopCount; i++) {
             $method_call
         }
-        loopMs = (Date.now() as long) - start;
+        loopMs = Double.toLong(Date.now()) - start;
     }
 
     loopCount1 = loopCount * iterMs / loopMs;
@@ -176,13 +176,13 @@ class Consumer {
     public static intb: int = 53;
     public static longa: long = 24;
     public static longb: long = 53;
-    public static floata: float = 24.0;
-    public static floatb: float = 53.0;
+    public static floata: float = 24.0f;
+    public static floatb: float = 53.0f;
     public static doublea: double = 24.0;
     public static doubleb: double = 53.0;
     public static localObj = new Object();
     public static localObjs: Object[] = [new Object()];
-    public static pseudorand: long = Date.now() as long;
+    public static pseudorand: long = Double.toLong(Date.now());
 
     public static consumeBool(boolc: boolean): void throws {
         if (boolc == Consumer.boola && boolc == Consumer.boolb) {

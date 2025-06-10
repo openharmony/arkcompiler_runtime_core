@@ -59,7 +59,8 @@ cases:
           let obj = new A<Char>(c'a', c'b').toObj()
           let arr = foo<Char>(obj)
           let v: char = arr[0]
-          arr[1] = (arr[1] + v) as char
+          let v1: int = arr[1] + v
+          arr[1] = v1.toChar()
           assertEQ(arr[1], 195)
 
     - use: |-

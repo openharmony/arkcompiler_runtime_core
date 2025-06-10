@@ -84,7 +84,7 @@ function shaker_sort(arr: FixedArray<int>): void {
 }
 
 function comb_sort(arr: FixedArray<int>): void {
-    const factor: float = 1.2473309;
+    const factor: float = 1.2473309f;
     let step: int = arr.length - 1;
     while (step >= 1) {
         for (let i: int = 0; i + step < arr.length; ++i) {
@@ -92,7 +92,7 @@ function comb_sort(arr: FixedArray<int>): void {
                 swap(arr, i, i + step);
             }
         }
-        step = (step / factor) as int;
+        step = (step / factor).toInt();
     }
     for (let i: int = 0; i + 1 < arr.length; ++i) {
         for (let j = 0; j + 1 < arr.length - i; ++j) {

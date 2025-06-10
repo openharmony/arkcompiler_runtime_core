@@ -55,43 +55,7 @@ function foo(i: char) {
 }
 
 function foo(i: boolean) {
-    return 8;
-}
-
-function foo(i: Byte) {
-    return 11;
-}
-
-function foo(i: Short) {
-    return 12;
-}
-
-function foo(i: Int) {
-    return 13;
-}
-
-function foo(i: Long) {
-    return 14;
-}
-
-function foo(i: Float) {
-    return 15;
-}
-
-function foo(i: Number) {
-    return 16;
-}
-
-function foo(i: Char) {
-    return 17;
-}
-
-function foo(i: String) {
-    return 18;
-}
-
-function foo(i: Boolean) {
-    return 19;
+    return 9;
 }
 
 function foo(i: int[]) {

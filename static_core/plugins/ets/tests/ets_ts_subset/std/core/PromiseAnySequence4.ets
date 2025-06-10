@@ -43,17 +43,17 @@ Promise.any<Error>([p1, p2]).then<number>((): number => {
     sequence.push(5);
     checkSequence(sequence, 5);
     return 0;
-}).then<void, void>((value: number): void => {}, (err: AggregateError): void => {
-    if (err.errors.length != 2) {
-        console.log('Test failed. Expected number of errors 2, but got ' + err.errors.length);
+}).then<void, void>((value): void => {}, (err): void => {
+    if ((err as AggregateError).errors.length != 2) {
+        console.log('Test failed. Expected number of errors 2, but got ' + (err as AggregateError).errors.length);
         throw new Error('Test failed');
     }
-    if (err.errors[0] != p1Err) {
-        console.log('Test failed. Expected the first error is \'abc\', but got ' + err.errors[0]);
+    if ((err as AggregateError).errors[0] != p1Err) {
+        console.log('Test failed. Expected the first error is \'abc\', but got ' + (err as AggregateError).errors[0]);
         throw new Error('Test failed');
     }
-    if (err.errors[1] != p2Err) {
-        console.log('Test failed. Expected the first error is \'def\', but got ' + err.errors[1]);
+    if ((err as AggregateError).errors[1] != p2Err) {
+        console.log('Test failed. Expected the first error is \'def\', but got ' + (err as AggregateError).errors[1]);
         throw new Error('Test failed');
     }
     console.log('Test passed.');

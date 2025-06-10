@@ -75,7 +75,7 @@ function checkConversionIntToArrayChar(): boolean {
 }
 
 function checkConversionBinaryToArrayInt(): boolean {
-    const val: FixedArray<int> = [parseInt(tsBinary, systemBinary as int) as int];
+    const val: FixedArray<int> = [Double.toInt(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
@@ -87,25 +87,25 @@ function checkConversionBinaryToArrayNumber(): boolean {
 }
 
 function checkConversionBinaryToArrayFloat(): boolean {
-    const val: FixedArray<float> = [parseInt(tsBinary, systemBinary as int) as float];
+    const val: FixedArray<float> = [Double.toFloat(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBinaryToArrayByte(): boolean {
-    const val: FixedArray<byte> = [parseInt(tsBinary, systemBinary as int) as byte];
+    const val: FixedArray<byte> = [Double.toByte(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBinaryToArrayShort(): boolean {
-    const val: FixedArray<short> = [parseInt(tsBinary, systemBinary as int) as short];
+    const val: FixedArray<short> = [Double.toShort(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBinaryToArrayLong(): boolean {
-    const val: FixedArray<long> = [parseInt(tsBinary, systemBinary as int) as long];
+    const val: FixedArray<long> = [Double.toLong(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
@@ -117,13 +117,13 @@ function checkConversionBinaryToArrayDouble(): boolean {
 }
 
 function checkConversionBinaryToArrayChar(): boolean {
-    const val: FixedArray<char> = [parseInt(tsBinary, systemBinary as int) as char];
+    const val: FixedArray<char> = [Double.toChar(parseInt(tsBinary, systemBinary as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionHexadecimalToArrayInt(): boolean {
-    const val: FixedArray<int> = [parseInt(tsHexadecimal, systemHexadecimal as int) as int];
+    const val: FixedArray<int> = [Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
@@ -135,25 +135,25 @@ function checkConversionHexadecimalToArrayNumber(): boolean {
 }
 
 function checkConversionHexadecimalToArrayFloat(): boolean {
-    const val: FixedArray<float> = [parseInt(tsHexadecimal, systemHexadecimal as int) as float];
+    const val: FixedArray<float> = [Double.toFloat(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionHexadecimalToArrayByte(): boolean {
-    const val: FixedArray<byte> = [parseInt(tsHexadecimal, systemHexadecimal as int) as byte];
+    const val: FixedArray<byte> = [Double.toByte(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionHexadecimalToArrayShort(): boolean {
-    const val: FixedArray<short> = [parseInt(tsHexadecimal, systemHexadecimal as int) as short];
+    const val: FixedArray<short> = [Double.toShort(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionHexadecimalToArrayLong(): boolean {
-    const val: FixedArray<long> = [parseInt(tsHexadecimal, systemHexadecimal as int) as long];
+    const val: FixedArray<long> = [Double.toLong(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
@@ -165,13 +165,13 @@ function checkConversionHexadecimalToArrayDouble(): boolean {
 }
 
 function checkConversionHexadecimalToArrayChar(): boolean {
-    const val: FixedArray<char> = [parseInt(tsHexadecimal, systemHexadecimal as int) as char];
+    const val: FixedArray<char> = [Double.toChar(parseInt(tsHexadecimal, systemHexadecimal as int))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionIntStringToArrayInt(): boolean {
-    const val: FixedArray<int> = [parseInt(tsIntString) as int];
+    const val: FixedArray<int> = [Double.toInt(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
@@ -183,25 +183,25 @@ function checkConversionIntStringToArrayNumber(): boolean {
 }
 
 function checkConversionIntStringToArrayFloat(): boolean {
-    const val: FixedArray<float> = [parseInt(tsIntString) as float];
+    const val: FixedArray<float> = [Double.toFloat(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionIntStringToArrayByte(): boolean {
-    const val: FixedArray<byte> = [parseInt(tsIntString) as byte];
+    const val: FixedArray<byte> = [Double.toByte(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionIntStringToArrayShort(): boolean {
-    const val: FixedArray<short> = [parseInt(tsIntString) as short];
+    const val: FixedArray<short> = [Double.toShort(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionIntStringToArrayLong(): boolean {
-    const val: FixedArray<long> = [parseInt(tsIntString) as long];
+    const val: FixedArray<long> = [Double.toLong(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
@@ -213,7 +213,7 @@ function checkConversionIntStringToArrayDouble(): boolean {
 }
 
 function checkConversionIntStringToArrayChar(): boolean {
-    const val: FixedArray<char> = [parseInt(tsIntString) as char];
+    const val: FixedArray<char> = [Double.toChar(parseInt(tsIntString))];
 
     return typeof val[0] == 'number';
 }
@@ -315,7 +315,7 @@ function checkConversionByteToArrayChar(): boolean {
 }
 
 function checkConversionBigIntToArrayInt(): boolean {
-    const val: FixedArray<int> = [Number(tsBigInt) as int];
+    const val: FixedArray<int> = [Double.toInt(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
@@ -327,25 +327,25 @@ function checkConversionBigIntToArrayNumber(): boolean {
 }
 
 function checkConversionBigIntToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Number(tsBigInt) as float];
+    const val: FixedArray<float> = [Double.toFloat(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBigIntToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Number(tsBigInt) as byte];
+    const val: FixedArray<byte> = [Double.toByte(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBigIntToArrayShort(): boolean {
-    const val: FixedArray<short> = [Number(tsBigInt) as short];
+    const val: FixedArray<short> = [Double.toShort(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionBigIntToArrayLong(): boolean {
-    const val: FixedArray<long> = [Number(tsBigInt) as long];
+    const val: FixedArray<long> = [Double.toLong(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
@@ -357,13 +357,13 @@ function checkConversionBigIntToArrayDouble(): boolean {
 }
 
 function checkConversionBigIntToArrayChar(): boolean {
-    const val: FixedArray<char> = [Number(tsBigInt) as char];
+    const val: FixedArray<char> = [Double.toChar(Number(tsBigInt))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionExponentialToArrayInt(): boolean {
-    const val: FixedArray<int> = [parseInt(tsExponential) as int];
+    const val: FixedArray<int> = [Double.toInt(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }
@@ -375,25 +375,25 @@ function checkConversionExponentialToArrayNumber(): boolean {
 }
 
 function checkConversionExponentialToArrayFloat(): boolean {
-    const val: FixedArray<float> = [parseInt(tsExponential) as float];
+    const val: FixedArray<float> = [Double.toFloat(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionExponentialToArrayByte(): boolean {
-    const val: FixedArray<byte> = [parseInt(tsExponential) as byte];
+    const val: FixedArray<byte> = [Double.toByte(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionExponentialToArrayShort(): boolean {
-    const val: FixedArray<short> = [parseInt(tsExponential) as short];
+    const val: FixedArray<short> = [Double.toShort(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }
 
 function checkConversionExponentialToArrayLong(): boolean {
-    const val: FixedArray<long> = [parseInt(tsExponential) as long];
+    const val: FixedArray<long> = [Double.toLong(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }
@@ -405,7 +405,7 @@ function checkConversionExponentialToArrayDouble(): boolean {
 }
 
 function checkConversionExponentialToArrayChar(): boolean {
-    const val: FixedArray<char> = [parseInt(tsExponential) as char];
+    const val: FixedArray<char> = [Double.toChar(parseInt(tsExponential))];
 
     return typeof val[0] == 'number';
 }

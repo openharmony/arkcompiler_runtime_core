@@ -22,8 +22,8 @@ cases:
 
     - use: |-
           // casting context, tuple of primitives
-          let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as [number, byte, float, number]
-          assertTrue(Number.isNaN(a[0]))
+          let a = [Number.NaN, 0, 3.14f, 1.7976931348623157e+308, ] as [number, byte, float, number]
+          assertTrue(Number.isNaN(a[0].toDouble()))
           assertEQ(a[1], 0)
           assertEQ(a[2], 3.14f)
           assertEQ(a[3], 1.7976931348623157e+308)
@@ -38,11 +38,11 @@ cases:
 
     - use: |-
           // casting context, tuple of boxed
-          let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as [Number, Byte, Float, Double]
-          assertTrue(Number.isNaN(a[0].unboxed()))
-          assertEQ(a[1].unboxed(), 0)
-          assertEQ(a[2].unboxed(), 3.14f)
-          assertEQ(a[3].unboxed(), 1.7976931348623157e+308)
+          let a = [Number.NaN, 0, 3.14f, 1.7976931348623157e+308, ] as [Number, Byte, Float, Double]
+          assertTrue(Number.isNaN(a[0].toDouble()))
+          assertEQ(a[1], 0)
+          assertEQ(a[2], 3.14f)
+          assertEQ(a[3], 1.7976931348623157e+308)
 
     - use: |-
           // casting context, tuple of strings

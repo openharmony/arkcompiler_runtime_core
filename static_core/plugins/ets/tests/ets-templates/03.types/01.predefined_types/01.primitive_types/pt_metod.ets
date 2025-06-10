@@ -16,14 +16,12 @@
 {% for p in primitives %}
 /*---
 desc: >-
-    The predefined value types are called primitive types.
-    Primitive types have no methods.
-    They only have the operations as referred herein (see Value Types).
-tags: [negative, compile-only]
+    Types number, byte, short, int, long, float, double, char, and boolean are primitive types.
+tags: [{{p.tags}}]
 ---*/
 
 function main() {
-    let i: {{p}};
+    let i: {{p.type}};
     i.toString();
 }
 

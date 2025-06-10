@@ -16,7 +16,6 @@
 
 /*---
 desc: Assignment context, variable, constant narrowing integer conversion, implicit
-tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
@@ -25,17 +24,10 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 let d: {{c.to_type}}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    d = {{v.expr|safe}}  // literal constant value
-    if (d != {{v.val}}) {
-        return 1
-    }
-    d = c{{loop.index}}  // constant
-    if (d != {{v.val}}) {
-        return 1
-    }
+    d = c{{loop.index}}.to{{c.to_type}}()
+    assertEQ(d, {{v.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

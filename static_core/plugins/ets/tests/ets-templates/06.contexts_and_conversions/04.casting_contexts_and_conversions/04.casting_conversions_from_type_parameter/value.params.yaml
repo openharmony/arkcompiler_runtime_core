@@ -14,14 +14,6 @@
 --- # Tyoes for negative cases for casting conversions from type parameter
 cases:
   - decl: |-
-        class X<S, T> {
-            method (p: T): number {
-                let n = p as number // compile-time error, cast to value type
-                return n
-            }
-        }
-
-  - decl: |-
         function f<T>(p: T): number {
             let n = p as number // compile-time error, cast to value type
             return n

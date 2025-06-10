@@ -25,13 +25,10 @@ desc: |-
     -	double to byte, short, char, int, long, or float
 ---*/
 
-function main(): int {
+function main() {
   {%- for t in case['types'] %}
   let src_{{loop.index}}: {{t.stype}} = {{t.src|safe}};
-  if ((src_{{loop.index}} as {{t.dtype}}) != ({{t.dst|safe}}) ) {
-      return 1;
-  }
+  assertEQ((src_{{loop.index}}.to{{t.dtype}}()), ({{t.dst|safe}}),  "Assert fails on item {{loop.index}}"  )
   {% endfor %}
-  return 0;
 }
 {% endfor %}

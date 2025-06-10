@@ -29,7 +29,10 @@ export class User {}
 
 class UserWithFields extends User {
     id: BigInt = new BigInt()
-    g: Boolean = false
+    // NOTE(akmaev): if keep just Boolean it will throw RTE,
+    // because it will try to assign std.core.Boolean to primitive boolean
+    // seems need to fix Json.parse internals
+    g: Boolean|undefined = false
     name: String = ""
 }
 
@@ -74,7 +77,7 @@ function testStringifyParseBigIntWithReviver(): void {
 class NumbersTest extends User {
     val: Number = 1
     str: String = ""
-    bul: Boolean = false
+    bul: Boolean|undefined = false
 }
 
 function testParseNoBigInt() {

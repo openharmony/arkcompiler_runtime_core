@@ -100,12 +100,12 @@ class C implements I {
 
     public imethod(x: string): int
     {
-        return x.length as int
+        return x.length.toInt()
     }
 
     public override imethod_tuple(tuple: [int, long]): int
     {
-        return tuple[0] + tuple[1] as int
+        return (tuple[0] + tuple[1]).toInt()
     }
 
     public imethod_optional(z?: string): int
@@ -128,7 +128,7 @@ class C implements I {
     public method_union(x: int | string): int
     {
         if (x instanceof string) {
-            return x.length as int
+            return x.length.toInt()
         }
         return x
     }
@@ -217,7 +217,7 @@ class SpecialTypes {
     }
 
     public string_literal_method(a: "aaa"): int {
-        return a.length as int
+        return a.length.toInt()
     }
 
     public null_method(a: null): int {

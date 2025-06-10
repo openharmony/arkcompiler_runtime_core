@@ -18,5 +18,5 @@ function getReferenceTuple(): [String, double[], String] {
 }
 
 function getCharTuple(): [char, char, char, char, char] {
-    return [c'H', c'e', c'l', c'l', c'o']
+    return [c'H', c'e', c'l', c'l', c'o'];
 }

@@ -45,37 +45,7 @@ function foo(a: double): int {
 function foo(a: boolean): int {
   return 8;
 }
-function foo(a: Byte): int {
-  return 21;
-}
-function foo(a: Short): int {
-  return 22;
-}
-function foo(a: Char): int {
-  return 23;
-}
-function foo(a: Int): int {
-  return 24;
-}
-function foo(a: Long): int {
-  return 25;
-}
-function foo(a: Float): int {
-  return 26;
-}
-function foo(a: Double): int {
-  return 27;
-}
-function foo(a: Boolean): int {
-  return 28;
-}
-function foo(a: Integral): int {
-  return 29;
-}
-function foo(a: Floating): int {
-  return 30;
-}
-function foo(a: String): int {
+function foo(a: string): int {
   return 31;
 }
 function foo(a: Object): int {
@@ -105,46 +75,10 @@ function foo(a: FixedArray<double>): int {
 function foo(a: FixedArray<boolean>): int {
   return 108;
 }
-function foo(a: FixedArray<Byte>): int {
-  return 121;
-}
-function foo(a: FixedArray<Short>): int {
-  return 122;
-}
-function foo(a: FixedArray<Char>): int {
-  return 123;
-}
-function foo(a: FixedArray<Int>): int {
-  return 124;
-}
-function foo(a: FixedArray<Long>): int {
-  return 125;
-}
-function foo(a: FixedArray<Float>): int {
-  return 126;
-}
-function foo(a: FixedArray<Double>): int {
-  return 127;
-}
-function foo(a: FixedArray<Boolean>): int {
-  return 128;
-}
-function foo(a: FixedArray<Integral>): int {
-  return 129;
-}
-function foo(a: FixedArray<Floating>): int {
-  return 130;
-}
-function foo(a: FixedArray<String>): int {
-  return 131;
-}
-function foo(a: FixedArray<Object>): int {
-  return 132;
-}
+
 {{c.defs}}
 
-function main(): int {
-  if (foo({{c.exp}}) == {{c.res}}) return 0;
-  return 1;
+function main() {
+  assertEQ(foo({{c.exp}}), {{c.res}})
 }
 {% endfor %}

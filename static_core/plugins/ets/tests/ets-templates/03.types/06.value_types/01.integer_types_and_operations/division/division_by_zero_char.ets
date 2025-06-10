@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: check division by zero for char operand
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {

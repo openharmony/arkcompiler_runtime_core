@@ -102,7 +102,7 @@ class Derived extends Array<int> {
 
     public func1() : int {
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = 0; i < length; i++) {
             sum += this.$_get_unsafe(i)
         }
@@ -111,7 +111,7 @@ class Derived extends Array<int> {
 
     public func2() : int {
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = length - 1; i >= 0; i--) {
             sum += this.$_get_unsafe(i)
         }
@@ -120,7 +120,7 @@ class Derived extends Array<int> {
 
     public func3() : int {
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = 0; i < length / 2; i++) {
             sum += this.$_get_unsafe(i)
         }
@@ -129,7 +129,7 @@ class Derived extends Array<int> {
 
     public func4() : int {
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = 0; i < length; i++) {
             sum += this.$_get_unsafe(length - i - 1)
         }
@@ -141,7 +141,7 @@ class Derived extends Array<int> {
     public func5() : int {
         let has_error : boolean = false
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = 0; i < length + 1; i++) {
             try {
                 sum += this.$_get_unsafe(i)
@@ -156,7 +156,7 @@ class Derived extends Array<int> {
     public func6() : int {
         let has_error : boolean = false
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = 0; i < length; i--) {
             try {
                 sum += this.$_get_unsafe(i)
@@ -172,7 +172,7 @@ class Derived extends Array<int> {
     public func7() : int {
         let has_error : boolean = false
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = length; i >= 0; i--) {
             try {
                 sum += this.$_get_unsafe(i)
@@ -187,7 +187,7 @@ class Derived extends Array<int> {
     public func8() : int {
         let has_error : boolean = false
         let sum : int = 0
-        let length = this.length as int
+        let length = this.length.toInt()
         for (let i : int = -1; i < length; i++) {
             try {
                 sum += this.$_get_unsafe(i)
@@ -201,7 +201,7 @@ class Derived extends Array<int> {
 
     public func9() : int {
         let sum : int = 0
-        for (let i : int = 0; i < (this.length as int); i++) {
+        for (let i : int = 0; i < (this.length.toInt()); i++) {
             this.length = this.length - 1
             sum += this[i]
         }
@@ -210,7 +210,7 @@ class Derived extends Array<int> {
 
     public func10() : int {
         let sum : int = 0
-        for (let i : int = 0; i < (this.length as int); i++) {
+        for (let i : int = 0; i < (this.length.toInt()); i++) {
             this.__noinline__setlen(3)
             sum += this[i]
         }

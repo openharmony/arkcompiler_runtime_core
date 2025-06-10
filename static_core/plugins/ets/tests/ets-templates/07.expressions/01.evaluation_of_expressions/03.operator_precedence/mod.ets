@@ -37,11 +37,11 @@ function main(): int {
     if (res != 5) return 1;
 
     // modulo
-    res = t518 % t255 as byte
+    res = (t518 % t255).toByte()
     if (res != 8) return 1;
 
     // cast
-    res = t518 as byte % t255
+    res = t518.toByte() % t255
     if (res != 6) return 1;
 
     // shifts

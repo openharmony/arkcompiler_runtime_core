@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const FLOAT_PI: float = 3.14;
+const FLOAT_PI: float = 3.14f;
 
 async function byteFunc(): Promise<Object> {
     return -3 as byte as Object;

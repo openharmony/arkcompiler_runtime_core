@@ -21,35 +21,35 @@ cases:
   - { type: float, val: (-1.0) as float, res: 6 }
   - { type: double, val: -1.0, res: 7 }
   - { type: boolean, val: 'false', res: 8 }
-  - { type: Byte, val: new Byte(), res: 21 }
-  - { type: Short, val: new Short(), res: 22 }
-  - { type: Char, val: new Char(), res: 23 }
-  - { type: Int, val: new Int(), res: 24 }
-  - { type: Long, val: new Long(), res: 25 }
-  - { type: Float, val: new Float(), res: 26 }
-  - { type: Double, val: new Double(), res: 27 }
-  - { type: Boolean, val: new Boolean(), res: 28 }
-  - { type: Integral, val: new Short(), res: 22 }
-  - { type: Floating, val: new Float(), res: 26 }
-  - { type: String, val: '""', res: 31 }
-  - { type: Object, val: '""', res: 31 }
+  - { type: bigint, val: -1n, res: 9 }
+  - { type: Byte, val: (-1) as byte, res: 1 }
+  - { type: Short, val: (-1) as short, res: 2 }
+  - { type: Char, val: "c' '", res: 3 }
+  - { type: Int, val: -1, res: 4 }
+  - { type: Long, val: -1 as long, res: 5 }
+  - { type: Float, val: (-1.0) as float, res: 6 }
+  - { type: Double, val: -1.0, res: 7 }
+  - { type: Boolean, val: 'false', res: 8 }
+  - { type: BigInt, val: new BigInt(-1), res: 9 }
+  - { type: string, val: '""', res: 10 }
+  - { type: Object, val: '""', res: 11 }
   - { type: 'FixedArray<byte>', val: '[0 as byte]', res: 101 }
   - { type: 'FixedArray<short>', val: '[0 as short]', res: 102 }
   - { type: 'FixedArray<char>', val: '[]', res: 103 }
   - { type: 'FixedArray<int>', val: '[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]', res: 104 }
   - { type: 'FixedArray<long>', val: '[1 as long, 2 as long, 3 as long]', res: 105}
-  - { type: 'FixedArray<float>', val: '[1.0 as float, 2.0 as float, 3.0 as float]', res: 106 }
+  - { type: 'FixedArray<float>', val: '[1.0f as float, 2.0f as float, 3.0f as float]', res: 106 }
   - { type: 'FixedArray<boolean>', val: '[true, true, false]', res: 108 }
-  - { type: 'FixedArray<Byte>', val: '[new Byte()]', res: 121 }
-  - { type: 'FixedArray<Char>', val: 'new Char[1]', res: 123 }
-  - { type: 'FixedArray<Int>', val: 'new Int[200]', res: 124 }
-  - { type: 'FixedArray<FixedArray<FixedArray<Object>>>', val: 'new String[1][1][1]', res: 132 }
+  - { type: 'FixedArray<Byte>', val: '[new Byte()]', res: 101 }
+  - { type: 'FixedArray<Char>', val: "new Char[1]", res: 103 }
+  - { type: 'FixedArray<Int>', val: 'new Int[200]', res: 104 }
+  - { type: 'FixedArray<Short>', val: 'new Short[200]', res: 102 }
+  - { type: 'FixedArray<FixedArray<FixedArray<Object>>>', val: 'new String[1][1][1]', res: 109 }
   - {
       type: 'FixedArray<Boolean>',
       val: '[new Boolean(), new Boolean(), new Boolean()]',
-      res: 128,
+      res: 108
     }
-  - { type: 'FixedArray<Floating>', val: '[]', res: 130 }
-  - { type: 'FixedArray<Object>', val: '[new Int(1), new Boolean()]', res: 132 }
-  - { type: StringBuilder, val: new StringBuilder(), res: 32 }
+  - { type: 'FixedArray<Object>', val: '[new Int(1), new Boolean()]', res: 109 }
+  - { type: StringBuilder, val: new StringBuilder(), res: 11 }
   - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 32 }

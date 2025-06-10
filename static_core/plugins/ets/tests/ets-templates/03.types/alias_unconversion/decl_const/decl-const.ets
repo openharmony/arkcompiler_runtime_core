@@ -19,13 +19,11 @@ desc: Declaration context, constant, unboxing conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    if (d{{loop.index}} != {{t.val}}) {
-        return 1
-    }
+    assertEQ(d{{loop.index}}, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
     return 0
 }

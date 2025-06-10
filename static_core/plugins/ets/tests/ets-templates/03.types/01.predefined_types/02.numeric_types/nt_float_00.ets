@@ -18,8 +18,8 @@ desc: Test floating-point comparison(<).
 ---*/
 
 function main(): void {
-  let a: int = 10;
-  let b: int = 3;
+  let a: float = 10f;
+  let b: float = 3f;
 
   assertFalse(a < b);
 }

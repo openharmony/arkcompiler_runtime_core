@@ -23,14 +23,11 @@ class A {
     meth(p: {{c.to_type}}): {{c.to_type}} { return p }
 }
 
-function main(): int {
+function main() {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (a.meth(s{{loop.index}}) != {{t.val}}) {
-        return 1
-    }
+    assertEQ(a.meth(s{{loop.index}}), {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: The method with the same name has the same type and number of parameters, but the parameter order is different.
-tags: [compile-only, negative]
+desc: The method with the same name has the different parameters parameter type but same return types, valid overloading.
 ---*/
 
 interface Parent1 {

@@ -444,10 +444,10 @@ function main(): int {
         let task2 = new taskpool.Task(testCancelFunc, 300);
         let val: int = 0;
         let isExecuted = new Event();
-        taskpool.execute(task2).then((value: boolean): void => {
+        taskpool.execute(task2).then((value: NullishType): void => {
             val = 1;
             isExecuted.fire();
-        }).catch((e: object): void => {
+        }).catch((e: NullishType): void => {
             val = 2;
             isExecuted.fire();
         });
@@ -797,7 +797,7 @@ function main(): int {
         }
         let allExecuted = new Event();
         for (let i: int = 0; i < count; ++i) {
-            taskpool.execute(taskArray[i]).then((value: object): void => {
+            taskpool.execute(taskArray[i]).then((value: NullishType): void => {
                 num++;
                 if (num == count) {
                     allExecuted.fire();

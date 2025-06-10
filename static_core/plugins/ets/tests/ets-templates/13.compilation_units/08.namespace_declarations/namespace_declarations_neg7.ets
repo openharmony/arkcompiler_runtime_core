@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'nsConstValue' is not exported in 'myNamespace'
+desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'myNamespace'
 tags: [compile-only, negative]
 ---*/
 
 namespace myNamespace {
-    const nsConstValue = 53;
-    export function returnConst() {
+    export const nsConstValue = 53;
+    function returnConst() {
         return myNamespace.nsConstValue
     }
 }

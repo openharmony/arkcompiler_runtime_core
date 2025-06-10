@@ -15,14 +15,14 @@
 
 class Operations {
     static sum(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 }
 
 namespace na {
 class A {
     static funcA(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
     static funcA(a0: int, a1: int): int {
         return a1 - a0 as int;
@@ -34,7 +34,7 @@ namespace nb {
 namespace nc {
 class A {
     static funcA(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 }
 }
@@ -43,20 +43,20 @@ class A {
 namespace nd {
 class A {
     static funcA(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 }
 
 class B extends A{
     static funcA(a0: byte, a1: byte): byte {
-        return a1 - a0 as byte;
+        return (a1 - a0).toByte();
     }
 }
 }
 
 class A {
     static funcA(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 
     static funcA(a0: int, a1: int): int {
@@ -70,7 +70,7 @@ class A {
 
 class B extends A{
     static funcB(a0: byte, a1: byte): byte {
-        return a1 - a0 as byte;
+        return (a1 - a0).toByte();
     }
 }
 
@@ -79,7 +79,7 @@ class C extends A{
 
 class D extends A{
     static funcA(a0: byte, a1: byte): byte {
-        return a1 - a0 as byte;
+        return (a1 - a0).toByte();
     }
 }
 
@@ -104,11 +104,11 @@ class F {
 
 class G {
     public static publicMethod(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 
     private static privateMethod(a0: byte, a1: byte): byte {
-        return a1 - a0 as byte;
+        return (a1 - a0).toByte();
     }
 
     static callPrivateMethod(a0: byte, a1: byte): byte {

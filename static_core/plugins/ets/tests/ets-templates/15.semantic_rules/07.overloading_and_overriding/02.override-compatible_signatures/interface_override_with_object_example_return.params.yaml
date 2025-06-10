@@ -20,3 +20,4 @@ cases:
   - E1
   - Base[]
   - [ Base, Base ]
+  - number

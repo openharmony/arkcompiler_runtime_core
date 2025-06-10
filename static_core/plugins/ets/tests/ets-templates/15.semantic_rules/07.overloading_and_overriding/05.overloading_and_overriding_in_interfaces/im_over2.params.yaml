@@ -57,20 +57,17 @@ cases:
     - decl: |-
           // method overloaded with boxing/unboxing parameters
           interface J {
-              m(a: boolean): number { return 1.0 }
-              m(a: Boolean): number { return 2.0 }
-              m(a: boolean, b: number): number { return 3.0 }
-              m(a: boolean, b: Number): number { return 4.0 }
-              m(a: Boolean, b: Number): number { return 5.0 }
+            m(a: boolean): number { return 1.0 }
+            m(a: boolean, b: number): number { return 3.0 }
           }
           class A implements J {}
       use: |-
           let a = new A()
           assertEQ( a.m(true), 1.0 )
-          assertEQ( a.m(new Boolean()), 2.0 )
+          assertEQ( a.m(new Boolean()), 1.0 )
           assertEQ( a.m(true, 1.0), 3.0 )
-          assertEQ( a.m(false, new Double()), 4.0 )
-          assertEQ( a.m(new Boolean(), new Double()), 5.0 )
+          assertEQ( a.m(false, new Double()), 3.0 )
+          assertEQ( a.m(new Boolean(), new Double()), 3.0 )
 
     - decl: |-
           // method overloaded with rest parameters

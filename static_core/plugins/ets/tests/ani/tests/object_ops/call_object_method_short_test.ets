@@ -32,18 +32,18 @@ class A {
     public shortMethodMultipleParam(a0: int, a1: boolean, a2: float, a3: short, a4: short): short
     {
         if (a1) {
-            return (a3 + a4) as short;
+            return (a3 + a4).toShort();
         } else if (a0 > a3) {
             return a3;
         } else {
-            return (a3 - a4) as short;
+            return (a3 - a4).toShort();
         }
     }
 
     public nestedMethod(data1: short, data2: short): short
     {
         let method = (value1: short, value2: short): short => {
-            return (value1 + value2) as short;
+            return (value1 + value2).toShort();
         }
 
         return method(data1, data2);
@@ -54,7 +54,7 @@ class A {
         if (a0 > 100) {
             return a0;
         } else {
-            return this.recursionMethod((a0 + 10) as short);
+            return this.recursionMethod((a0 + 10).toShort());
         }
     }
 }
@@ -69,11 +69,11 @@ final class B extends A {
     public subMethodMultipleParam(a0: short, a1: boolean, a2:float, a3:short, a4:short): short
     {
         if (a1) {
-            return (a3 + a4) as short;
+            return (a3 + a4).toShort();
         } else if (a0 > a3) {
             return a3;
         } else {
-            return (a3 - a4) as short;
+            return (a3 - a4).toShort();
         }
     }
 }
@@ -84,12 +84,12 @@ abstract class C {
 
 class D extends C {
     public override func(a: short, b: short): short {
-        return (a + b) as short;
+        return (a + b).toShort();
     }
 }
 
 class E extends D {
     public override func(a: short, b: short): short {
-        return (a - b) as short;
+        return (a - b).toShort();
     }
 }

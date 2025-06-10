@@ -21,7 +21,7 @@ vals:
     # 1.
     - v1: c'\u0041'
       v2: c'\u0001'
-      exp: "(sub(v1, v2) - c' ') as char"
+      exp: "(sub(v1, v2) - c' ').toChar()"
       r: c' '
 
     # 2.
@@ -45,7 +45,7 @@ vals:
     # 5. Widening to int happens
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "sub((v1 - c'\\u0101') as char, (v2 - c'\\u1010') as char)"
+      exp: "sub((v1 - c'\\u0101').toChar(), (v2 - c'\\u1010').toChar())"
       r: c'\u1E1E'
 
     # 6.

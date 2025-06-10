@@ -18,7 +18,10 @@
 desc: Declaration context, constant declaration, constant narrowing integer conversion, implicit
 tags: [compile-only, negative]
 ---*/
+
+const s: {{c.from_type}} = {{c.expr|safe}}
+
 function main() {
-    const d: {{c.to_type}} = {{c.expr|safe}}  // constant expression value doesn't fit in the constant type range
+    const d: {{c.to_type}} = s  // constant expression value doesn't fit in the constant type range
 }
 {%- endfor %}

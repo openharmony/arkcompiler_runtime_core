@@ -48,7 +48,7 @@ function reflectGetBadCases(): int {
     let sh: short = 20
     let i: int = 30
     let lo: long = 40
-    let fl: float = 50.0
+    let fl: float = 50.0f
     let dou: double = 60.0
     let s: string = "abc"
 

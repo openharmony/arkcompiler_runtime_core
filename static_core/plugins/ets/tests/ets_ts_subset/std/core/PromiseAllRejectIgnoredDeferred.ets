@@ -32,7 +32,7 @@ class Reject implements PromiseLike<string> {
 }
 
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
-Promise.all(thenable).then<void, void>((values: Array<string>): void => {
+Promise.all<string>(thenable).then<void, void>((values): void => {
     if (values.length != 2) {
         console.log('Test failed. Expected a string array of length 2 but got length ' + values.length + '.');
         return;

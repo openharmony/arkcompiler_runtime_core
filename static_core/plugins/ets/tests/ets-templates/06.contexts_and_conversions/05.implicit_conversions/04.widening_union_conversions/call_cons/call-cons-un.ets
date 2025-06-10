@@ -35,7 +35,7 @@ class Z {
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( new Z(s{{loop.index}}).fld as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    assertTrue( new Z(s{{loop.index}}).fld {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

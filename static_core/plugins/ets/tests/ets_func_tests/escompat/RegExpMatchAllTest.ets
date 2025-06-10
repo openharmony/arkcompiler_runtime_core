@@ -31,14 +31,14 @@ function main(): int {
     let regexp = new RegExp(".", "g")
     let s = "abc"
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 1)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 1)
     let iter = s.matchAll(regexp)
     regexp.exec(s)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
     let next_result = iter.next()
     failure += checkTestResult(next_result.value!, new RegExpMatchArray(1, "abc", ["b"]))
     failure += checkTestResult(next_result.done, false)
-    failure += checkTestResult(regexp.lastIndex as int, 2)
+    failure += checkTestResult(regexp.lastIndex.toInt(), 2)
 
     let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
     regexplastIndextest.lastIndex = -1;

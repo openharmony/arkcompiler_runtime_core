@@ -22,7 +22,7 @@ function checkConversionBinaryToInt(): boolean {
 }
 
 function checkConversionBinaryToNumber(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int);
+    const val = parseInt(tsBinary, systemBinary as int).toDouble();
 
     return typeof val == 'number';
 }
@@ -52,7 +52,7 @@ function checkConversionBinaryToLong(): boolean {
 }
 
 function checkConversionBinaryToDouble(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int);
+    const val = parseInt(tsBinary, systemBinary as int).toDouble();
 
     return typeof val == 'number';
 }

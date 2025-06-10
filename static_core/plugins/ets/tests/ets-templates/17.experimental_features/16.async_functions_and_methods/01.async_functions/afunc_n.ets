@@ -21,5 +21,7 @@ tags: [compile-only, negative]
 
 {{c.decl}}
 
-function main() {}
+function main() {
+{{c.use}}
+}
 {% endfor %}

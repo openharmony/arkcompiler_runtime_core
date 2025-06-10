@@ -22,7 +22,7 @@ cases:
   - { type: char,   value: c'p',  expression: '== 112',   expected: 'yes p'    }
   - { type: char,   value: c'p',  expression: '> 100',    expected: 'yes p'    }
 
-  - { type: char,   value: c'p',  expression: '== "p"',   expected: 'yes p'    }
-  - { type: char,   value: c'p',  expression: '>= "W"',   expected: 'yes p'    }
+  - { type: string,   value: '"p"',  expression: '== "p"',   expected: 'yes p'    }
+  - { type: string,   value: '"p"',  expression: '>= "W"',   expected: 'yes p'    }
   - { type: float,  value: 26.7f, expression: '== 26.7',  expected: 'yes 26.7' }
   - { type: number, value: 26.3,  expression: '== 26.3f', expected: 'yes 26.3' }

@@ -96,7 +96,8 @@ class F implements I {
         return new Object();
     }
 
-    public static new_Boxed_Primitive(): Int {
+    /// @brief Returns boxed primitive, union is required for boxing of int
+    public static new_Boxed_Primitive(): Int | String {
         return 5;
     }
 }

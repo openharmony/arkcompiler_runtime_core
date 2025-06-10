@@ -41,7 +41,7 @@ cases:
 
     - use: |-
           let x = [new Long(), new Number(), new Short()]
-          assertTrue( x instanceof number[] )
+          assertTrue( x instanceof Numeric[] )
 
     - use: |-
           let x = [new Long(), new Number(), null, new Short(), undefined]

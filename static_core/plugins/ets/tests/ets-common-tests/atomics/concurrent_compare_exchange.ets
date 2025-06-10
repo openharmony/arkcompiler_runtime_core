@@ -30,7 +30,7 @@ function main() {
     arr_2 = new Int32Array(buf_2, 0, 1);
 
     for (let i = 0; i < 5; i++) {
-        launch<Int, (i: byte) => Int>(worker_i8, i as byte)
+        launch<Int, (i: byte) => Int>(worker_i8, i.toByte())
     }
     while (Atomics.load(arr, 0) != 5) {
     }
@@ -45,7 +45,7 @@ function main() {
 }
 
 function worker_i8(i: byte): Int {
-    while (Atomics.compareExchange(arr, 0, i as byte, (i + 1) as byte) != i) {
+    while (Atomics.compareExchange(arr, 0, i as byte, (i + 1).toByte()) != i) {
     }
     return 1
 }

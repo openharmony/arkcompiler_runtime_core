@@ -19,8 +19,8 @@ desc: check not equality of two floats
 ---*/
 
 function main(): void {
-  const a: float = {{v.left}} as float
-  const b: float = {{v.right}} as float
+  const a: float = ( {{v.left}} ).toFloat()
+  const b: float = ( {{v.right}} ).toFloat()
   assertEQ(  (a != b), {{v.result}} )
 }
 

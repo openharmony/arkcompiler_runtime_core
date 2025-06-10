@@ -33,7 +33,7 @@ class Reject implements PromiseLike<string> {
 }
 
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
-Promise.any(thenable).then<void, void>((value: string): void => {
+Promise.any<string>(thenable).then<void, void>((value): void => {
     if (value != 'abc') {
         console.log('Test failed. The promise should be resolved by the specified value.');
         return;

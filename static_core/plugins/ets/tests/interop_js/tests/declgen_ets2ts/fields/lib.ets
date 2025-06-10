@@ -15,7 +15,7 @@
 
 export class Fields {
     readonly readonlyBoolean_: boolean = true;
-    public static staticFloat_: float = 0.0;
+    public static staticFloat_: float = 0.0f;
     public number_: number = 2.2;
     public Number_: Number = 3.3;
     public double_: double = 4.4;
@@ -30,4 +30,4 @@ export class Fields {
     uint32Array_: Uint32Array = new Uint32Array();
     public cb = (a: number = 1, b: number = 2, c: number = 3) => {};
 };
-Fields.staticFloat_ = 1.1;
+Fields.staticFloat_ = 1.1f;

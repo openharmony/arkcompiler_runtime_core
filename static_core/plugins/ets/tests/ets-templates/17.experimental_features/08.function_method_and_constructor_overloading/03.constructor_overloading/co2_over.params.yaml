@@ -86,7 +86,7 @@ cases:
           assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
           assertTrue(new A(new Int(-1 as int)).getType() == "Int")
           assertTrue(new A(new Char(c'A')).getType() == "Char")
-          assertTrue(new A(new Float(3.14 as float)).getType() == "Float")
+          assertTrue(new A(new Float(3.14f)).getType() == "Float")
           assertTrue(new A(-1 as long).getType() == "long")
           assertTrue(new A(-1 as short).getType() == "short")
           assertTrue(new A(false).getType() == "boolean")

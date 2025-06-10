@@ -30,56 +30,28 @@ export function foo(i: boolean): int {
     return 2;
 }
 
-export function foo(i: Boolean): int {
-    return 3;
-}
-
 export function foo(i: char): int {
     return 4;
-}
-
-export function foo(i: Char): int {
-    return 5;
 }
 
 export function foo(i: short): int {
     return 6;
 }
 
-export function foo(i: Short): int {
-    return 7;
-}
-
 export function foo(i: int): int {
     return 8;
-}
-
-export function foo(i: Int): int {
-    return 9;
 }
 
 export function foo(i: long): int {
     return 10;
 }
 
-export function foo(i: Long): int {
-    return 11;
-}
-
 export function foo(i: float): int {
     return 12;
 }
 
-export function foo(i: Float): int {
-    return 13;
-}
-
 export function foo(i: double): int {
     return 14;
-}
-
-export function foo(i: Number): int {
-    return 15;
 }
 
 export function foo(i: string): int {
@@ -90,7 +62,7 @@ export function foo(i: Object): int {
     return 17;
 }
 
-export function foo(i: Number[]): int {
+export function foo(i: number[]): int {
     return 18;
 }
 

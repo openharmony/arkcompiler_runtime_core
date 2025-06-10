@@ -21,7 +21,7 @@ desc: check bitwise complement of char
 function main(): void {
   const v: char = {{v.value}}
   {% if v.result == "Char.MAX_VALUE" %}
-  assertEQ( ~(v) as char, {{v.result}} as char )
+  assertEQ( (~(v)).toChar(), {{v.result}}.toChar() )
   {% else %}
   assertEQ( ~(v), {{v.result}} )
   {% endif %}

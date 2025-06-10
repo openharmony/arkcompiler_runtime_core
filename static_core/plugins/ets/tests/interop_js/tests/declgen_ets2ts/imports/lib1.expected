@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import * as GG from "./lib2";
-import { Lib2Class, Lib2Class2, EC1 } from "./lib2";
+import { Lib2Class, Lib2Class2, IntAlias, EC1 } from "./lib2";
 import { B } from "./lib2";
 import { C, D } from "./lib2";
 import { E as EE, F } from "./lib2";
@@ -39,8 +39,8 @@ export declare class C1 {
     public set o1(value: Lib2Class);
     public get o2(): Lib2Class2;
     public set o2(value: Lib2Class2);
-    public get v1(): number;
-    public set v1(value: number);
+    public get v1(): IntAlias;
+    public set v1(value: IntAlias);
 }
 export declare class C2 {
     public get a(): EC1;

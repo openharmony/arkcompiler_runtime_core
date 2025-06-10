@@ -54,8 +54,8 @@ function main(): int {
 }
 
 function removeForPressure(pressureFlag: number) {
-    let num = pressureFlag as int;
+    let num = pressureFlag.toInt();
     for (let i: int = num; i < num + 1; i++) {
-        arrValuesTest[i] = concurrentHashMapOne.remove(i) as string;
+        arrValuesTest[i] = concurrentHashMapOne.remove(i) as String;
     }
 }

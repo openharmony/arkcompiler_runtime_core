@@ -24,17 +24,13 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 let d: {{c.to_type}}
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    d = {{v.expr|safe}}  // literal constant value
-    if (d != {{v.val}}) {
-        return 1
-    }
-    d = c{{loop.index}}  // constant
-    if (d != {{v.val}}) {
-        return 1
-    }
+    d = {{v.expr|safe}}.to{{c.to_type}}() // literal constant value
+    assertEQ(d, {{v.val}})
+
+    d = c{{loop.index}}.to{{c.to_type}}()  // constant
+    assertEQ(d, {{v.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

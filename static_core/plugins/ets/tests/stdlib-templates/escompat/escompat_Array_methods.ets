@@ -159,7 +159,7 @@ function testReverse(): int {
     let l = src.length
 
     for (let i = 0; i < l; i++) {
-        if (src.at(i as int) == source[l-i-1 as int]) continue
+        if (src.at(i.toInt()) == source[l-i-1]) continue
         console.println("Bad data after reverse")
         return FAILURE
     }
@@ -174,7 +174,7 @@ function testToReversed(): int {
     let l = reversed.length
 
     for (let i = 0; i < l; i++) {
-        if (reversed.at(i as int) == source[l-i-1 as int]) continue
+        if (reversed.at(i.toInt()) == source[l-i-1]) continue
         console.println("Bad data after reverse")
         return FAILURE
     }

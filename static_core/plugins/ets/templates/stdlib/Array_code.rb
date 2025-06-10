@@ -16,7 +16,7 @@
 module TemplateData
     def self.get_lambda_data()
         [
-            [2, ", i as number, #{$ctx.this}", ", index: number, array: #{$ctx.this_type}", ", index, #{$ctx.this}"],
+            [2, ", i.toDouble(), #{$ctx.this}", ", index: number, array: #{$ctx.this_type}", ", index, #{$ctx.this}"],
         ]
     end
 end

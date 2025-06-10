@@ -160,8 +160,8 @@ async def test_arkts_primitive(
         ("Double", 1),
         ("char", ("c'A'", "A")),
         ("string", ("'AA'", "AA")),
-        ("Char", ("c'A'", '"A"')),  # Char object will be output as String
-        ("Char", ("new Char(c'A')", '"A"')),  # Char object will be output as String
+        ("Char", ("c'A'", "A")),  # Char object will be output as String
+        ("Char", ("new Char(c'A')", "A")),  # Char object will be output as String
         ("boolean", ("true", True)),
         ("Boolean", ("true", True)),
         ("", ("null", None)),

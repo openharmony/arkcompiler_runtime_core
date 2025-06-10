@@ -16,8 +16,8 @@ values:
 - { left: 0, right: 0, result: 0 }
 - { left: 0, right: 1, result: 1 }
 - { left: 1, right: 1, result: 1 }
-- { left: "Char.MIN_VALUE as char", right: "Char.MIN_VALUE as char", result: "Char.MIN_VALUE as int" }
-- { left: "Char.MAX_VALUE as char", right: "Char.MAX_VALUE as char", result: "Char.MAX_VALUE as int" }
-- { left: "Char.MIN_VALUE as char", right: "Char.MAX_VALUE as char", result: "Char.MAX_VALUE as int" }
+- { left: "Char.MIN_VALUE", right: "Char.MIN_VALUE", result: "(Char.MIN_VALUE).toInt()" }
+- { left: "Char.MAX_VALUE", right: "Char.MAX_VALUE", result: "(Char.MAX_VALUE).toInt()" }
+- { left: "Char.MIN_VALUE", right: "Char.MAX_VALUE", result: "(Char.MAX_VALUE).toInt()" }
 - { left: 42, right: 42, result: 42 }
 - { left: "0x5555", right: "0xaaaa", result: 65535 }

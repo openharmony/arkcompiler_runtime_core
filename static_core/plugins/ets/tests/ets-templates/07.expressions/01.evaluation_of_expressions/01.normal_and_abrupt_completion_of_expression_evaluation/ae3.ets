@@ -25,7 +25,7 @@ function main(): int {
   let j: long = 0x0fffffff00000000;
 
   try {
-    let v: String = "X" + (a = 2) + (i as int) / (j as int) / (b = 2);
+    let v: String = "X" + (a = 2) + (i.toInt()) / (j.toInt()) / (b = 2);
     return 1;
   } catch (e: ArithmeticError) {
     if (a != 2 || b != 1) return 1;

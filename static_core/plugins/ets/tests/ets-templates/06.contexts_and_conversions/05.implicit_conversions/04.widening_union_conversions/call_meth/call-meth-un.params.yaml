@@ -15,9 +15,9 @@
 cases:
     - to_type: byte|short|int|long # normalized to Long
       values:
-          - { from_type: 'byte', ref_type: 'Long', expr: '127', eq: '==' }
-          - { from_type: 'short', ref_type: 'Long', expr: '-7', eq: '==' }
-          - { from_type: 'int', ref_type: 'Long', expr: '0xCAFE', eq: '==' }
+          - { from_type: 'byte', expr: '127', eq: '==' }
+          - { from_type: 'short', expr: '-7', eq: '==' }
+          - { from_type: 'int',  expr: '0xCAFE', eq: '==' }
           - { from_type: 'long', ref_type: 'Long', expr: '0o777', eq: '==' }
 
     - to_type: Byte|Short|Int|Long # normalized to Byte|Short|Int|Long
@@ -29,7 +29,7 @@ cases:
 
     - to_type: float|double|number # normalized to double
       values:
-          - { from_type: 'float', ref_type: 'Double', expr: '3.5f', eq: '==' }
+          - { from_type: 'float', expr: '3.5f', eq: '==' }
           - { from_type: 'double', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
           - { from_type: 'number', ref_type: 'Double', expr: '1234567e8', eq: '==' }
 
@@ -41,13 +41,13 @@ cases:
 
     - to_type: byte|short|int|long|float|double # normalized to Double
       values:
-          - { from_type: 'byte', ref_type: 'Double', expr: '127', eq: '==' }
-          - { from_type: 'short', ref_type: 'Double', expr: '-7', eq: '==' }
-          - { from_type: 'int', ref_type: 'Double', expr: '0xCAFE', eq: '==' }
-          - { from_type: 'long', ref_type: 'Double', expr: '0o777', eq: '==' }
-          - { from_type: 'float', ref_type: 'Double', expr: '3.5f', eq: '==' }
-          - { from_type: 'double', ref_type: 'Double', expr: '-1.1E-20', eq: '==' }
-          - { from_type: 'number', ref_type: 'Double', expr: '1234567e8', eq: '==' }
+          - { from_type: 'byte', expr: '127', eq: '==' }
+          - { from_type: 'short', expr: '-7', eq: '==' }
+          - { from_type: 'int', expr: '0xCAFE', eq: '==' }
+          - { from_type: 'long', expr: '0o777', eq: '==' }
+          - { from_type: 'float', expr: '3.5f', eq: '==' }
+          - { from_type: 'double', expr: '-1.1E-20', eq: '==' }
+          - { from_type: 'number', expr: '1234567e8', eq: '==' }
 
     - to_type: Byte|Short|Int|Long|Float|Double # normalized to Byte|Short|Int|Long|Float|Double
       values:

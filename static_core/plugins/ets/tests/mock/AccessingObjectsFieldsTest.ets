@@ -38,7 +38,7 @@ class F {
         this.member3 = 4;
         this.member4 = 5;
         this.member5 = 6;
-        this.member6 = 7.0;
+        this.member6 = 7.0f;
         this.member7 = 8.0;
         this.member8 = new A;
     }

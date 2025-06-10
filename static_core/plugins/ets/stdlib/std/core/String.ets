@@ -94,7 +94,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns a primitive at index
      */
     public $_get(index: number): char {
-        return this.$_get(Double.toInt(index));
+        return this.$_get(index.toInt());
     }
 
     /**
@@ -1073,7 +1073,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= n) {
             return undefined;
         }
-        return new String(this.charAt(index as int));
+        return new String(this.charAt(index.toInt()).toString());
     }
 
     private CreateHTMLString(tag: String, param: String): String{

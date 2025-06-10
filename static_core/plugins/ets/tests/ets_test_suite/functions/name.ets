@@ -52,7 +52,7 @@ function main() {
     assertEQ(a.lambda.name, 'lambda')
     assertEQ(A.staticBar.name, 'staticBar')
     assertEQ(b.buzz.name, 'buzz')
-    assertEQ(def?.name, '')
+    assertEQ(def?.name, 'def')
 
     assertEQ(returnFunctionName(foo), 'foo')
     assertEQ(returnFunctionName(x), 'x')
@@ -62,6 +62,6 @@ function main() {
     assertEQ(returnFunctionName(b.buzz), 'buzz')
     assertEQ(returnFunctionName(() => 1), '')
     if (def) {
-        assertEQ(returnFunctionName(def), '')
+        assertEQ(returnFunctionName(def), 'def')
     }
 }

@@ -16,9 +16,9 @@ values:
 - { left: 0, right: 1, result: 0 }
 - { left: 1, right: 1, result: 1 }
 - { left: 17882, right: 47212, result: 844244984 }
-- { left: 0, right: "Char.MAX_VALUE as char", result: 0 }
-- { left: 1, right: "Char.MAX_VALUE as char", result: "Char.MAX_VALUE as int" }
-- { left: 0, right: "Char.MIN_VALUE as char", result: 0 }
-- { left: 1, right: "Char.MIN_VALUE as char", result: "Char.MIN_VALUE as int" }
+- { left: 0, right: "Char.MAX_VALUE", result: 0 }
+- { left: 1, right: "Char.MAX_VALUE", result: "Char.MAX_VALUE.toInt()" }
+- { left: 0, right: "Char.MIN_VALUE", result: 0 }
+- { left: 1, right: "Char.MIN_VALUE", result: "Char.MIN_VALUE.toInt()" }
 - { left: "c'\uFFFF'", right: "c'\uFFFF'", result: -131071 }
-- { left: "Char.MIN_VALUE as char", right: "Char.MIN_VALUE as char", result: 0 }
+- { left: "Char.MIN_VALUE", right: "Char.MIN_VALUE", result: 0 }

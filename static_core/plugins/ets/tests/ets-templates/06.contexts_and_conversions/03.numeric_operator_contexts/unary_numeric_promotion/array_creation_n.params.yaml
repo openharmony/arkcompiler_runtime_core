@@ -15,3 +15,5 @@
 cases:
   - { type: long, val: 10, len: 10 }
   - { type: Long, val: new Long(1 as long), len: 1 }
+  - { type: char, val: "c'A'", len: 65 }
+  - { type: Char, val: new Char(c' '), len: 32 }

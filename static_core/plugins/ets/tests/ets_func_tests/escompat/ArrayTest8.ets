@@ -26,7 +26,7 @@ function main() {
 function testInvokeArrayNumber() {
     let arr = Array<number>(1.0, 2.0, 3.0, 4.0)
     for (let i: int = 0; i < arr.length; i++) {
-        assertEQ(arr[i], (i + 1) as double)
+        assertEQ(arr[i], (i + 1).toDouble())
     }
 }
 
@@ -45,7 +45,7 @@ function testInvokeArrayStringManyValues() {
 function testInvokeArrayNumberWithInt() {
     let arr = Array<number>(1, 2, 3)
     for (let i: int = 0; i < arr.length; i++) {
-        assertEQ(arr[i], (i + 1) as double)
+        assertEQ(arr[i], (i + 1).toDouble())
     }
 }
 

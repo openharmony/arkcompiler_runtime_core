@@ -22,7 +22,7 @@ function checkConversionStringToInt(): boolean {
 }
 
 function checkConversionStringToNumber(): boolean {
-    const val = parseInt(tsIntString);
+    const val = parseInt(tsIntString).toDouble();
 
     return typeof val == 'number';
 }
@@ -52,7 +52,7 @@ function checkConversionStringToLong(): boolean {
 }
 
 function checkConversionStringToDouble(): boolean {
-    const val = parseInt(tsIntString);
+    const val = parseInt(tsIntString).toDouble();
 
     return typeof val == 'number';
 }

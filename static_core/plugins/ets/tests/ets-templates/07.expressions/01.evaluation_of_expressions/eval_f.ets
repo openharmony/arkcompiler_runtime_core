@@ -22,7 +22,7 @@ desc: >-
 type Inc = (i: int) => long;
 
 function inc(p: int): long {
-    return (p + 1) as long;
+    return (p + 1).toLong();
 }
 
 function foo(i: int, func: Inc): long {

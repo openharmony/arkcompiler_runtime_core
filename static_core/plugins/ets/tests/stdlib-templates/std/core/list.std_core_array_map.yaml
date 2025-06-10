@@ -51,17 +51,17 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value * 2) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value * 2).toByte())}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value + index) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value + index).toByte())}',
           },
           test3:
           {
             arr: "[]",
-            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value + index) as byte)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): byte =>  {return ((value + index).toByte())}',
           },
       },
     method_expected_data:
@@ -84,17 +84,17 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value * 2) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value * 2).toShort())}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value + index) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value + index).toShort())}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value + index) as short)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): short =>  {return ((value + index).toShort())}',
           },
       },
     method_expected_data:
@@ -122,12 +122,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:FixedArray<int>): int =>  {return (value + index) as int}',
+            fn: '(value:int,index:number,self:FixedArray<int>): int =>  {return (value + index).toInt()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:int,index:number,self:FixedArray<int>): int =>  {return (value + index) as int}',
+            fn: '(value:int,index:number,self:FixedArray<int>): int =>  {return (value + index).toInt()}',
           },
 
       },
@@ -156,12 +156,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:FixedArray<long>): long =>  {return (value + index) as long}',
+            fn: '(value:long,index:number,self:FixedArray<long>): long =>  {return (value + index).toLong()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:long,index:number,self:FixedArray<long>): long =>  {return (value + index) as long}',
+            fn: '(value:long,index:number,self:FixedArray<long>): long =>  {return (value + index).toLong()}',
           },
 
       },
@@ -190,12 +190,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:FixedArray<float>): float =>  {return (value + index) as float}',
+            fn: '(value:float,index:number,self:FixedArray<float>): float =>  {return (value + index).toFloat()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:float,index:number,self:FixedArray<float>): float =>  {return (value + index) as float}',
+            fn: '(value:float,index:number,self:FixedArray<float>): float =>  {return (value + index).toFloat()}',
           },
 
       },
@@ -252,17 +252,17 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value * 2) as char)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value * 2).toChar())}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index) as char)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index).toChar())}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index) as char)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): char =>  {return ((value + index).toChar())}',
           },
       },
     method_expected_data:

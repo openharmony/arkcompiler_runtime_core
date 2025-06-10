@@ -51,7 +51,7 @@ function fillInPaddingBase64(str: string): string {
     const base64Divisible: int = 4;
     const normalized: String = normalizeBase64Url(str);
     const clean: String = sanitizeBase64(normalized);
-    const remainder: int = Double.toInt(clean.length % base64Divisible);
+    const remainder: int = clean.length.toInt() % base64Divisible;
     const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
     return clean.padRight(c'=', clean.length.toInt() + paddingCount);
 }
@@ -81,9 +81,9 @@ function sanitizeAscii(str: string): string {
 function sanitizeUtf8(str: string): string {
     const sb = new StringBuilder();
     for (let i = 0; i < str.length; i++) {
-        const cu = str.charCodeAt(i) as char;
+        const cu = str.charCodeAt(i).toChar();
         if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
-            const cu2 = str.charCodeAt(i + 1) as char;
+            const cu2 = str.charCodeAt(i + 1).toChar();
             if (Char.isLowSurrogate(cu2)) {
                 sb.append(str.charAt(i));
                 sb.append(str.charAt(i + 1));

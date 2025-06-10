@@ -38,11 +38,11 @@ function main() {
     for (let i = 0; i < N; i++) {
         launch<Int, () => Int>(task_1)
     }
-    let cur: byte = Atomics.load(bytearr_i8, 0) as byte
+    let cur: byte = Atomics.load(bytearr_i8, 0).toByte()
     while (cur != N) {
         L.log("waiting, finished tasks: " + cur)
         Atomics.wait(arr_1, 0, cur)
-        cur = Atomics.load(bytearr_i8, 0) as byte
+        cur = Atomics.load(bytearr_i8, 0).toByte()
     }
 
     for (let i = 0; i < N; i++) {
@@ -62,7 +62,7 @@ function task_1(): Int {
     L.log("Task finished. Notifying")
     Atomics.add(bytearr_i8, 0, 1 as byte)
     Atomics.notify(arr_1, 0)
-    
+
     return 1
 }
 
@@ -71,7 +71,7 @@ function task_2(): Int {
     L.log("Task finished. Notifying")
     Atomics.add(bytearr_i64, 0, new BigInt(1))
     Atomics.notify(arr_2, 0)
-    
+
     return 1
 }
 

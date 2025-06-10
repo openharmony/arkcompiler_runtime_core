@@ -17,14 +17,14 @@ import { CustomInt } from './CustomInt';
 
 export class CustomLong {
     public static calculateNumberOfLeadingZeros(value: long): int {
-        const asInt: int = (value >>> 32) as int;
-        return asInt == 0 ? 32 + CustomInt.calculateNumberOfLeadingZeros(value as int)
+        const asInt: int = (value >>> 32).toInt();
+        return asInt == 0 ? 32 + CustomInt.calculateNumberOfLeadingZeros(value.toInt())
             : CustomInt.calculateNumberOfLeadingZeros(asInt);
     }
 
     public static calculateNumberOfTrailingZeros(value: long): int {
-        const asInt: int = value as int;
-        return asInt == 0 ? 32 + CustomInt.calculateNumberOfTrailingZeros((value >>> 32) as int)
+        const asInt: int = value.toInt();
+        return asInt == 0 ? 32 + CustomInt.calculateNumberOfTrailingZeros((value >>> 32).toInt())
             : CustomInt.calculateNumberOfTrailingZeros(asInt);
     }
 

@@ -30,7 +30,7 @@ const l1: long = Long.MIN_VALUE
 const l2: long = 0 as long
 const l3: long = Long.MAX_VALUE
 const f1: float = Float.MIN_VALUE as float
-const f2: float = 0.0 as float
+const f2: float = 0.0.toFloat()
 const f3: float = Float.MAX_VALUE as float
 const n1: number = Number.MIN_VALUE
 const n2: number = 0.0
@@ -89,10 +89,10 @@ function main(): int {
         let cpsActual = "";
         for (let i = 12; i < 0x10FFFF; i += 30009) {
             if (Char.codeUnitsToEncode(i) == 1) {
-                cpsActual += String.fromCharCode(i as number);
+                cpsActual += String.fromCharCode(i.toDouble());
             } else {
-                cpsActual += String.fromCharCode(Char.getHighSurrogate(i) as number);
-                cpsActual += String.fromCharCode(Char.getLowSurrogate(i) as number);
+                cpsActual += String.fromCharCode(Char.getHighSurrogate(i).toDouble());
+                cpsActual += String.fromCharCode(Char.getLowSurrogate(i).toDouble());
             }
         }
         if (cpsActual != cpsGolden) {

@@ -82,8 +82,8 @@ function test_array_long_index_of() {
 //! INST          /CallVirtual.*escompat.Array::indexOf/
 //! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 4
 function test_array_float_index_of() {
-    let array: Array<float> = [1.1, 2.2, 3.3, 3.3, 5.5, 2.2, 4.4];
-    let searchElement : float = 2.2;
+    let array: Array<float> = [1.1f, 2.2f, 3.3f, 3.3f, 5.5f, 2.2f, 4.4f];
+    let searchElement : float = 2.2f;
     assertEQ(array.indexOf(searchElement,  0),  1.);
     assertEQ(array.indexOf(searchElement,  2),  5.);
     assertEQ(array.indexOf(searchElement, -2),  5.);
@@ -209,8 +209,8 @@ function test_array_long_last_index_of() {
 //! INST          /CallVirtual.*escompat.Array::lastIndexOf/
 //! INST_COUNT    /CallVirtual.*escompat.Array::lastIndexOf/, 4
 function test_array_float_last_index_of() {
-    let array: Array<float> = [1.1, 2.2, 3.3, 3.3, 5.5, 2.2, 4.4];
-    let searchElement : float = 2.2;
+    let array: Array<float> = [1.1f, 2.2f, 3.3f, 3.3f, 5.5f, 2.2f, 4.4f];
+    let searchElement : float = 2.2f;
     assertEQ(array.lastIndexOf(searchElement , 0),  -1.);
     assertEQ(array.lastIndexOf(searchElement,  2),   1.);
     assertEQ(array.lastIndexOf(searchElement, -2),   5.);

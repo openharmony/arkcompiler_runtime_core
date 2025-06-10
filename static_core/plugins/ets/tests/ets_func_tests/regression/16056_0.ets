@@ -23,5 +23,5 @@ type float32 = float
 export type EasingCurve = (t: float32) => float32
 
 function vis(v0: float32, f: float32): EasingCurve {
-    return (value: float32): float32 => ((v0 / (-4.2) * f) * (Math.exp((-4.2) * value * f) -1)) as float32
+    return (value: float32): float32 => ((v0 / (-4.2f) * f) * (Math.exp((-4.2) * value * f).toFloat() -1)) as float32
 }
