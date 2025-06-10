@@ -20,6 +20,10 @@
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "objects/ref_field.h"
 #include "heap/heap_visitor.h"
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "plugins/ets/runtime/mem/ets_reference_processor.h"
+#endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::mem::ets {
 
@@ -87,20 +91,88 @@ void SweepStaticRoots(const WeakRefFieldVisitor &visitor)
     if (vm == nullptr) {
         return;
     }
-    vm->SweepVmRefs([&visitor](ark::ObjectHeader *object) -> ark::ObjectStatus {
+    ark::GCObjectVisitor visitorWrap = [&visitor](ark::ObjectHeader *object) -> ark::ObjectStatus {
         // Provide the reference to a local variable.
         // The object must be forwarded during UpdateStaticRoots.
         // Here we need to know is the object alive or not.
         bool alive = visitor(reinterpret_cast<RefField<> &>(*reinterpret_cast<BaseObject **>(&object)));
         return alive ? ark::ObjectStatus::ALIVE_OBJECT : ark::ObjectStatus::DEAD_OBJECT;
-    });
+    };
+    vm->SweepVmRefs(visitorWrap);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor())->ClearDeadReference(visitorWrap);
+#endif
 }
+
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+void UnmarkAllXRefsImpl()
+{
+    ark::ets::interop::js::XGC::GetInstance()->UnmarkAllXRefs();
+}
+
+void SweepUnmarkedXRefsImpl()
+{
+    ark::ets::interop::js::XGC::GetInstance()->SweepUnmarkedXRefs();
+}
+
+void AddXRefToStaticRoots()
+{
+    ark::ets::interop::js::XGC::GetInstance()->AddXRefToStaticRoots();
+}
+
+void RemoveXRefFromStaticRoots()
+{
+    ark::ets::interop::js::XGC::GetInstance()->RemoveXRefFromStaticRoots();
+}
+
+bool TryTransferCurrentCoroutineToNative(panda::ThreadHolder *current)
+{
+    ark::Thread *thread = ark::Thread::GetCurrent();
+    if (thread == nullptr) {
+        return false;
+    }
+    ark::Coroutine *co = ark::Coroutine::GetCurrent();
+    if (co == nullptr) {
+        return false;
+    }
+    panda::ThreadHolder *holder = co->GetThreadHolder();
+    if (holder == current) {
+        return false;
+    }
+    return holder->TransferToNativeIfInRunning();
+}
+
+bool TryTransferCurrentCoroutineToRunning(panda::ThreadHolder *current)
+{
+    ark::Thread *thread = ark::Thread::GetCurrent();
+    if (thread == nullptr) {
+        return false;
+    }
+    ark::Coroutine *co = ark::Coroutine::GetCurrent();
+    if (co == nullptr) {
+        return false;
+    }
+    panda::ThreadHolder *holder = co->GetThreadHolder();
+    if (holder == current) {
+        return false;
+    }
+    return holder->TransferToRunningIfInNative();
+}
+#endif  // PANDA_JS_ETS_HYBRID_MODE
 
 void RegisterStaticRootsProcessFunc()
 {
     RegisterVisitStaticRootsHook(VisitStaticRoots);
     RegisterUpdateStaticRootsHook(UpdateStaticRoots);
     RegisterSweepStaticRootsHook(SweepStaticRoots);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    RegisterUnmarkAllXRefsHook(UnmarkAllXRefsImpl);
+    RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsImpl);
+    RegisterAddXRefToStaticRootsHook(AddXRefToStaticRoots);
+    RegisterRemoveXRefFromStaticRootsHook(RemoveXRefFromStaticRoots);
+    RegisterInterOpCoroutineToNativeHook(TryTransferCurrentCoroutineToNative);
+    RegisterInterOpCoroutineToRunningHook(TryTransferCurrentCoroutineToRunning);
+#endif
 }
 
 }  // namespace panda

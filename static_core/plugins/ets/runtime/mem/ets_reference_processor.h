@@ -45,6 +45,11 @@ public:
                          const ReferenceProcessPredicateT &pred) final;
     void HandleReference(GC *gc, const BaseClass *cls, const ObjectHeader *object,
                          const ReferenceProcessorT &processor) final;
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
+    bool IsReference(const BaseClass *baseCls) const;
+    void HandleReference(ObjectHeader *object, ObjectPointerType *&referentPointer);
+    void ClearDeadReference(GCObjectVisitor &visitor);
+#endif
 
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;

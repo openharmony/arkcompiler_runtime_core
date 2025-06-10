@@ -495,6 +495,8 @@ private:
 
     static void InitBaseRuntime();
 
+    static void PreFiniBaseRuntime();
+
     static void FiniBaseRuntime();
 
     Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator);

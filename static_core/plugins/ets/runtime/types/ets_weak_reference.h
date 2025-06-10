@@ -36,6 +36,15 @@ public:
         return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_)));
     }
 
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
+    ObjectPointerType *GetReferentAddress()
+    {
+        return reinterpret_cast<ObjectPointerType *>(ToUintPtr(&referent_));
+    }
+    EtsObject *GetReferentFromGCThread() const;
+    void ClearReferentFromGCCthread();
+#endif
+
     void ClearReferent();
 
     void SetReferent(EtsObject *addr);

@@ -51,6 +51,9 @@ void CMCGCAdapter<LanguageConfig>::RunPhasesImpl([[maybe_unused]] GCTask &task)
 template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 {
+#ifdef ARK_HYBRID
+    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+#endif
     return false;
 }
 
@@ -68,6 +71,9 @@ void CMCGCAdapter<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]
 template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
+#ifdef ARK_HYBRID
+    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+#endif
     return false;
 }
 

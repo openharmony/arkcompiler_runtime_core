@@ -469,6 +469,8 @@ bool Runtime::Destroy()
     // Stop debugger first to correctly remove it as listener.
     instance_->UnloadDebugger();
 
+    PreFiniBaseRuntime();
+
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1
@@ -1588,6 +1590,15 @@ void Runtime::InitBaseRuntime()
     auto *baseRuntime = panda::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Init();
+#endif
+}
+
+void Runtime::PreFiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    // Stop the current GC before all threads unregister
+    // Change to a more accurate function, when the function was provided (see #26240).
+    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
 #endif
 }
 

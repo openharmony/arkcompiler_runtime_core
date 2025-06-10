@@ -20,8 +20,12 @@
 #include "plugins/ets/runtime/interop_js/app_state_manager.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "runtime/mem/gc/gc_trigger.h"
+#if defined(ARK_HYBRID)
+#include "heap/heap_visitor.h"
+#endif
 
 namespace ark::ets {
+class EtsObject;
 class PandaEtsVM;
 }  // namespace ark::ets
 
@@ -111,6 +115,15 @@ public:
     void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
     void GCPhaseStarted(mem::GCPhase phase) override;
     void GCPhaseFinished(mem::GCPhase phase) override;
+
+#ifdef ARK_HYBRID
+    /// Methods to adatp XRef to cmc-gc ///
+    void UnmarkAllXRefs();
+    void SweepUnmarkedXRefs();
+    void AddXRefToStaticRoots();
+    void RemoveXRefFromStaticRoots();
+    void IterateEtsObjectXRef(EtsObject *etsObj, const panda::RefFieldVisitor &visitor);
+#endif
 
 private:
     // For allocation of XGC with the private constructor by internal allocator

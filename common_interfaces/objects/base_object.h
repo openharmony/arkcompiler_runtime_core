@@ -49,9 +49,20 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    void ForEachRefFieldSkipReferent(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->ForEachRefFieldSkipReferent(this, visitor);
+    }
+
     void ForEachRefField(const RefFieldVisitor &visitor)
     {
         GetOperator()->ForEachRefField(this, visitor);
+    }
+
+    void IterateXRef(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->IterateXRef(this, visitor);
     }
 
     inline BaseObject *GetForwardingPointer() const

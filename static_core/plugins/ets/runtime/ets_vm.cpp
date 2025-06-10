@@ -77,8 +77,6 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
-    mem::StaticObjectOperator::Initialize();
-
     return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
 }
 
@@ -115,6 +113,8 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
     if (vm == nullptr) {
         return Unexpected(PandaString("Cannot create PandaCoreVM"));
     }
+
+    mem::StaticObjectOperator::Initialize(vm);
 
     auto classLinker = EtsClassLinker::Create(runtime->GetClassLinker());
     if (!classLinker) {

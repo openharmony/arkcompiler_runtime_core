@@ -20,19 +20,31 @@
 #include "objects/base_object.h"
 #include "objects/base_object_operator.h"
 #include "runtime/include/object_header.h"
+#endif
+
+namespace ark::ets {
+class PandaEtsVM;
+}  // namespace ark::ets
+
+#if defined(ARK_HYBRID)
 
 namespace ark::mem {
 
 class StaticObjectOperator : public panda::BaseObjectOperatorInterfaces {
 public:
-    static void Initialize();
+    static void Initialize(ark::ets::PandaEtsVM *vm);
 
     bool IsValidObject([[maybe_unused]] const panda::BaseObject *object) const override
     {
         return true;
     }
 
+    void ForEachRefFieldSkipReferent(const panda::BaseObject *object,
+                                     const panda::RefFieldVisitor &visitor) const override;
+
     void ForEachRefField(const panda::BaseObject *object, const panda::RefFieldVisitor &visitor) const override;
+
+    void IterateXRef(const panda::BaseObject *object, const panda::RefFieldVisitor &visitor) const override;
 
     size_t GetSize(const panda::BaseObject *object) const override
     {
@@ -47,6 +59,7 @@ public:
 
 private:
     static StaticObjectOperator instance_;
+    ark::ets::PandaEtsVM *vm_ {nullptr};
 };
 
 }  // namespace ark::mem
@@ -56,7 +69,7 @@ private:
 namespace ark::mem {
 class StaticObjectOperator {
 public:
-    static void Initialize() {}
+    static void Initialize([[maybe_unused]] ark::ets::PandaEtsVM *vm) {}
 };
 }  // namespace ark::mem
 

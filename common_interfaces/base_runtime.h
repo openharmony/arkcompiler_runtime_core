@@ -35,6 +35,7 @@ enum class GcType : uint8_t {
     SYNC,
     FULL,  // Waiting finish
     APPSPAWN,
+    FULL_WITH_XREF,     // Waiting finish
 };
 using HeapVisitor = const std::function<void(BaseObject*)>;
 

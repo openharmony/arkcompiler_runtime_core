@@ -16,6 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_XGC_XGC_VM_ADAPTOR_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_XGC_XGC_VM_ADAPTOR_H
 
+#if defined(ARK_HYBRID)
+#include "heap/heap_visitor.h"
+#endif
 #include "hybrid/ecma_vm_interface.h"
 #include "libpandabase/macros.h"
 #include <node_api.h>
@@ -45,6 +48,14 @@ public:
      * @returns status of `napi_delete_reference` function execution
      */
     napi_status NapiDeleteReference(napi_ref ref);
+#if defined(ARK_HYBRID)
+    /**
+     * @brief Method use internal ecma interface to start ecma gc marking from specific reference
+     * @param ref: ecma vm napi ref you want to start gc marking with
+     * @param visitor: mark object callback.
+     */
+    virtual void MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const panda::RefFieldVisitor &visitor);
+#endif
     /**
      * @brief Method use internal ecma interface to start ecma gc marking from specific reference
      * @param ref: ecma vm napi ref you want to start gc marking with
