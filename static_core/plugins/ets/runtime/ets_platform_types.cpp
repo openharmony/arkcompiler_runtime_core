@@ -185,6 +185,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreField, FIELD);
     findType(&EtsPlatformTypes::coreMethod, METHOD);
     findType(&EtsPlatformTypes::coreParameter, PARAMETER);
+    findType(&EtsPlatformTypes::coreClassType, CLASS_TYPE);
 
     findType(&EtsPlatformTypes::escompatProcess, PROCESS);
     findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",

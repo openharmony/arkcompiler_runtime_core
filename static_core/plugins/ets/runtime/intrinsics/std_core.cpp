@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
+#include "runtime/mem/heap_manager.h"
 #include "runtime/runtime_helpers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
+#include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_typeapi_type.h"
 #include "runtime/include/thread_scopes.h"
 
 #include "runtime/include/stack_walker.h"
@@ -31,6 +35,26 @@
 #include "types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
+
+extern "C" EtsInt CountInstancesOfClass(EtsTypeAPIType *paramType)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *heapMgr = coro->GetPandaVM()->GetHeapManager();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
+    EtsHandle<EtsTypeAPIType> safeParamType(coro, paramType);
+    EtsHandle<EtsClass> klass(coro, paramType->GetClass());
+    ASSERT(klass.GetPtr() == PlatformTypes()->coreClassType);
+    EtsField *field = klass->GetFieldIDByName("cls", nullptr);
+    if (field == nullptr) {
+        return EtsInt(0);
+    }
+    auto *clsObj = safeParamType->GetFieldObject(field);
+    if (clsObj == nullptr) {
+        return EtsInt(0);
+    }
+    auto *etsCls = EtsClass::FromEtsClassObject(clsObj);
+    return static_cast<EtsInt>(heapMgr->CountInstancesOfClass(etsCls->GetRuntimeClass()));
+}
 
 extern "C" EtsArray *StdCoreStackTraceLines()
 {
