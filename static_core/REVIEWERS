@@ -201,3 +201,7 @@ static_core/plugins/ets/tests/interop_js/tests/promise/                       @u
 /platforms/ @gitee-dakeQI
 /templates/ @ctw-ian
 /verifier/ @oatuwwutao @hufeng20
+
+/common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
+/common_interfaces/objects/ @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
+/common_interfaces/thread/  @wuzhefengh @weng-changcheng @dmitriitr @konstanting
