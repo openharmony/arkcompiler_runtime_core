@@ -37,9 +37,10 @@ function RunTasksWithJsCallTest(): void {
     let w = new EAWorker(true);
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
-        let val = JSRuntime.getPropertyJSValue(module, 'returnTwo')();
+        let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
+        let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(val as int, 2);
+            assertEQ(JSRuntime.getValueDouble(val) as int, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");
@@ -62,7 +63,8 @@ function RunTasksWithJsAsyncCallTest(): void {
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let modified = false;
-        let promise = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait')() as Promise<Object>;
+        let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
+        let promise = (ESValue.wrap(JSRuntime.invoke(module, method))).toPromise();
         let promise1 = promise.then((x:Object): void => {
             modified = true;
         });
@@ -70,7 +72,7 @@ function RunTasksWithJsAsyncCallTest(): void {
         await promise1;
 
         try {
-            let value = JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'value') as int;
+            let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
             assertEQ(value, 7);
             assertEQ(modified, true);
         }

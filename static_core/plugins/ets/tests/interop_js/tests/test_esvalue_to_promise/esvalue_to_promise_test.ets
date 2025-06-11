@@ -18,7 +18,7 @@ async function checkToPromise() {
     let module = ESValue.load("../../plugins/ets/tests/interop_js/tests/test_esvalue_to_promise/esvalue_to_promise_test");
     let sleepRetNumber = module.getProperty("sleepRetNumber");
 
-    let p = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
+    let p = (sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise()) as Promise<ESValue>;
     let res = await p;
 
     assertTrue(res.toNumber() === 0xcafe);
