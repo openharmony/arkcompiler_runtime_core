@@ -34,6 +34,40 @@ namespace ark::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
 
+#if !defined(PANDA_TARGET_ARM32)
+namespace {
+InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
+{
+    auto interpreterType = InterpreterType::CPP;
+    bool wasSet = Runtime::GetOptions().WasSetInterpreterType();
+    // Dynamic languages default is always cpp interpreter (unless option was set)
+    if (!frame->IsDynamic() || wasSet) {
+        auto interpreterTypeStr = Runtime::GetOptions().GetInterpreterType();
+        if (interpreterTypeStr == "llvm") {
+            interpreterType = InterpreterType::LLVM;
+        } else if (interpreterTypeStr == "irtoc") {
+            interpreterType = InterpreterType::IRTOC;
+        } else {
+            ASSERT(interpreterTypeStr == "cpp");
+        }
+        if (!wasSet) {
+#ifndef PANDA_LLVM_INTERPRETER
+            if (interpreterType == InterpreterType::LLVM) {
+                interpreterType = InterpreterType::IRTOC;
+            }
+#endif
+#ifndef PANDA_WITH_IRTOC
+            if (interpreterType == InterpreterType::IRTOC) {
+                interpreterType = InterpreterType::CPP;
+            }
+#endif
+        }
+    }
+    return interpreterType;
+}
+}  // namespace
+#endif  // #if !defined(PANDA_TARGET_ARM32)
+
 void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, const uint8_t *pc, Frame *frame,
                      bool jumpToEh)
 {
@@ -80,37 +114,21 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     frame->SetInstruction(inst);
     InterpreterType interpreterType = InterpreterType::CPP;
 #if !defined(PANDA_TARGET_ARM32)  // Arm32 sticks to cpp - irtoc is not available there
-    bool wasSet = Runtime::GetOptions().WasSetInterpreterType();
-    // Dynamic languages default is always cpp interpreter (unless option was set)
-    if (!frame->IsDynamic() || wasSet) {
-        auto interpreterTypeStr = Runtime::GetOptions().GetInterpreterType();
-        if (interpreterTypeStr == "llvm") {
-            interpreterType = InterpreterType::LLVM;
-        } else if (interpreterTypeStr == "irtoc") {
-            interpreterType = InterpreterType::IRTOC;
-        } else {
-            ASSERT(interpreterTypeStr == "cpp");
-        }
-        if (!wasSet) {
-#ifndef PANDA_LLVM_INTERPRETER
-            if (interpreterType == InterpreterType::LLVM) {
-                interpreterType = InterpreterType::IRTOC;
-            }
-#endif
-#ifndef PANDA_WITH_IRTOC
-            if (interpreterType == InterpreterType::IRTOC) {
-                interpreterType = InterpreterType::CPP;
-            }
-#endif
-        }
-    }
+    interpreterType = GetInterpreterTypeFromRuntimeOptions(frame);
     if (interpreterType > InterpreterType::CPP) {
         if (Runtime::GetCurrent()->IsDebugMode()) {
             LOG(FATAL, RUNTIME) << "--debug-mode=true option is supported only with --interpreter-type=cpp";
             return;
         }
+        auto gcType = thread->GetVM()->GetGC()->GetType();
+#ifdef ARK_HYBRID
+        if (gcType != mem::GCType::CMC_GC) {
+            LOG(FATAL, RUNTIME) << "--gc-type=" << mem::GCStringFromType(gcType) << " option is supported only with "
+                                << "--interpreter-type=cpp. Use --gc-type=cmc-gc instead.";
+            return;
+        }
+#else
         if (frame->IsDynamic()) {
-            auto gcType = thread->GetVM()->GetGC()->GetType();
             if (gcType != mem::GCType::G1_GC) {
                 LOG(FATAL, RUNTIME) << "For dynamic languages, --gc-type=" << mem::GCStringFromType(gcType)
                                     << " option is supported only with --interpreter-type=cpp";
@@ -120,8 +138,9 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
                 LOG(INFO, RUNTIME) << "Dynamic types profiling disabled, use --interpreter-type=cpp to enable";
             }
         }
+#endif  // #ifdef ARK_HYBRID
     }
-#endif
+#endif  // #if !defined(PANDA_TARGET_ARM32)
     ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }
 

@@ -14,6 +14,9 @@
  */
 
 #include "encode_visitor.h"
+#include "optimizer/code_generator/operands.h"
+#include "optimizer/ir/datatype.h"
+#include "utils/regmask.h"
 
 namespace ark::compiler {
 
@@ -963,7 +966,10 @@ void EncodeVisitor::VisitLoad(GraphVisitor *visitor, Inst *inst)
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1U), DataType::UINT32);   // offset
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
     auto mem = MemRef(src0, src1, loadByOffset->GetScale());
-    if (loadByOffset->GetVolatile()) {
+
+    if (loadByOffset->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, loadByOffset->GetVolatile());
+    } else if (loadByOffset->GetVolatile()) {
         enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
     } else {
         enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
@@ -977,7 +983,11 @@ void EncodeVisitor::VisitLoadI(GraphVisitor *visitor, Inst *inst)
     auto type = inst->GetType();
     auto base = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0U), DataType::POINTER);  // pointer
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
-    if (loadByOffset->GetVolatile()) {
+    auto mem = MemRef(base, loadByOffset->GetImm());
+
+    if (loadByOffset->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, loadByOffset->GetVolatile());
+    } else if (loadByOffset->GetVolatile()) {
         enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(base, loadByOffset->GetImm()));
     } else {
         enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), MemRef(base, loadByOffset->GetImm()));
