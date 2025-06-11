@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandafile/class_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 #include "paoc_options.h"
 #include "aot/compiled_method.h"
 #include "paoc_clusters.h"

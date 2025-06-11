@@ -14,11 +14,11 @@
  */
 
 #include "backtrace.h"
-#include "libpandafile/class_data_accessor.h"
-#include "libpandafile/code_data_accessor.h"
-#include "libpandafile/debug_helpers.h"
-#include "libpandafile/file.h"
-#include "libpandafile/method_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/debug_helpers.h"
+#include "libarkfile/file.h"
+#include "libarkfile/method_data_accessor.h"
 #include "runtime/include/class.h"
 #include "runtime/include/class_helper.h"
 #include "runtime/include/stack_walker.h"

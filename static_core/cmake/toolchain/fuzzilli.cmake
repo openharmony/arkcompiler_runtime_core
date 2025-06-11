@@ -19,7 +19,7 @@ set_c_compiler(clang-14)
 set_cxx_compiler(clang++-14)
 
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT=1)
-add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libpandafile/,/libpandabase/")
+add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libarkfile/,/libpandabase/")
 add_definitions(-DFUZZING_FUZZILLI_BUILTIN=1)
 
 set(PANDA_BUILD_FUZZ_TARGETS false)

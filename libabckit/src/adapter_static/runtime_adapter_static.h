@@ -17,16 +17,16 @@
 #define LIBABCKIT_SRC_ADAPTER_STATIC_RUNTIME_ADAPTER_STATIC_H
 
 #include "static_core/compiler/optimizer/ir/runtime_interface.h"
-#include "static_core/libpandafile/bytecode_instruction.h"
-#include "static_core/libpandafile/class_data_accessor-inl.h"
-#include "static_core/libpandafile/code_data_accessor.h"
-#include "static_core/libpandafile/field_data_accessor.h"
-#include "static_core/libpandafile/file.h"
-#include "static_core/libpandafile/file_items.h"
-#include "static_core/libpandafile/method_data_accessor.h"
-#include "static_core/libpandafile/proto_data_accessor.h"
-#include "static_core/libpandafile/proto_data_accessor-inl.h"
-#include "static_core/libpandafile/type_helper.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/proto_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
+#include "libarkfile/type_helper.h"
 
 namespace libabckit {
 using ark::compiler::RuntimeInterface;

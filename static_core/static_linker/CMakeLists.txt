@@ -43,7 +43,7 @@ panda_target_include_directories(arklinker PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}/libpandabase
     ${PANDA_ROOT}
-    ${CMAKE_SOURCE_DIR}/libpandafile
+    ${CMAKE_BINARY_DIR}
 )
 
 panda_add_executable(ark_link link.cpp)
@@ -63,7 +63,6 @@ panda_target_include_directories(ark_link PUBLIC
 )
 
 include_directories(${PANDA_ROOT}/libpandabase/)
-include_directories(${CMAKE_BINARY_DIR}/libpandafile/include/)
 
 if (PANDA_WITH_TESTS)
     add_subdirectory(tests)

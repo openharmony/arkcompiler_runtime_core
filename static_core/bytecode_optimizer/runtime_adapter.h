@@ -16,16 +16,16 @@
 #define PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/code_data_accessor.h"
-#include "libpandafile/field_data_accessor.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/method_data_accessor.h"
-#include "libpandafile/proto_data_accessor.h"
-#include "libpandafile/proto_data_accessor-inl.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/proto_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
+#include "libarkfile/type_helper.h"
 
 namespace ark {
 using compiler::RuntimeInterface;

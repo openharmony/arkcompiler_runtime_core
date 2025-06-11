@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <string>
 
 #include "assembler/assembly-emitter.h"
-#include "libpandafile/method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 #include "compiler/optimizer/ir/constants.h"
 
 namespace ark::bytecodeopt {

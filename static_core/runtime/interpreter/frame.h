@@ -24,7 +24,7 @@
 #include "libpandabase/utils/logger.h"
 #include "runtime/interpreter/acc_vregister.h"
 #include "runtime/mem/frame_allocator-inl.h"
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark {
 

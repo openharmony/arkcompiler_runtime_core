@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "libpandafile/proto_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 
 namespace ark::ets {
 

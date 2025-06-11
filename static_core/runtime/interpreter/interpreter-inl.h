@@ -27,15 +27,15 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "intrinsics.h"
 #include "libpandabase/events/events.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/type_helpers.h"
-#include "libpandafile/bytecode_instruction-inl.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/shorty_iterator.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array-inl.h"

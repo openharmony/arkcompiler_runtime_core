@@ -21,7 +21,7 @@
 #include <variant>
 
 #include "libpandabase/macros.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
 namespace ark {

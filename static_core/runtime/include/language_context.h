@@ -16,8 +16,8 @@
 #define PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 
 #include "libpandabase/utils/utf.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/file_items.h"
 #include "macros.h"
 #include "compiler/code_info/vreg_info.h"
 #include "runtime/class_initializer.h"

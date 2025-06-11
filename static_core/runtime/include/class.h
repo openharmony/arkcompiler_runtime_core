@@ -21,8 +21,8 @@
 #include <iostream>
 #include <memory>
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/field.h"
 #include "runtime/include/itable.h"
 #include "runtime/include/method.h"

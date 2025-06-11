@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "runtime/include/field.h"
 

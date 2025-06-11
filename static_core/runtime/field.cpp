@@ -16,8 +16,8 @@
 #include "runtime/include/field.h"
 
 #include "libpandabase/utils/hash.h"
-#include "libpandafile/field_data_accessor.h"
-#include "libpandafile/file-inl.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/file-inl.h"
 #include "runtime/include/runtime.h"
 
 namespace ark {

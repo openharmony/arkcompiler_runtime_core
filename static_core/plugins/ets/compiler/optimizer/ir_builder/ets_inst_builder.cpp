@@ -21,8 +21,8 @@
 #include "optimizer/ir_builder/inst_builder.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/ir/inst.h"
-#include "bytecode_instruction.h"
-#include "bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark::compiler {
 

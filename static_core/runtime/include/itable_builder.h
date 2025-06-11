@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_ITABLE_BUILDER_H_
 
 #include "libpandabase/macros.h"
-#include "libpandafile/class_data_accessor-inl.h"
+#include "libarkfile/class_data_accessor-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 

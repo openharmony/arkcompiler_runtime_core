@@ -17,7 +17,7 @@
 #define PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
 
 #include "define.h"
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "isa.h"
 #include "libpandabase/macros.h"
 

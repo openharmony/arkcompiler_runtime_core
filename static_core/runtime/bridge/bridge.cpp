@@ -15,13 +15,12 @@
 
 #include "runtime/bridge/bridge.h"
 
-#include "libpandafile/bytecode_instruction-inl.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/interpreter/interpreter.h"
-#include "bytecode_instruction.h"
-#include "bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark {
 

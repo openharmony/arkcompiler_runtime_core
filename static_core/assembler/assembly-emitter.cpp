@@ -14,13 +14,13 @@
  */
 
 #include "assembly-emitter.h"
-#include "file_items.h"
-#include "file_writer.h"
-#include "literal_data_accessor.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_writer.h"
+#include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
 #include "os/file.h"
 #include "runtime/include/profiling_gen.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/type_helper.h"
 
 #include <algorithm>
 #include <iostream>

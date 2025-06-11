@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "include/tooling/pt_thread.h"
 #include "include/tooling/vreg_value.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "type.h"
+#include <libarkfile/include/type.h>
 #include "types/ets_primitives.h"
 
 namespace ark::ets::tooling {

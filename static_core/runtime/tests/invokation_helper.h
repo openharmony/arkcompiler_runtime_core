@@ -22,7 +22,7 @@
 #include "bridge/bridge.h"
 #include "include/managed_thread.h"
 #include "arch/helpers.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 
 namespace ark::test {
 

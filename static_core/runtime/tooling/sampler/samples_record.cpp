@@ -14,8 +14,8 @@
  */
 
 #include "samples_record.h"
-#include "libpandafile/debug_helpers.h"
-#include "libpandafile/class_data_accessor.h"
+#include "libarkfile/debug_helpers.h"
+#include "libarkfile/class_data_accessor.h"
 
 namespace ark::tooling::sampler {
 static constexpr size_t ROOT_NODE_ID = 1;

@@ -19,7 +19,7 @@
 
 #include "assembly-parser.h"
 #include "mangling.h"
-#include "libpandafile/value.h"
+#include "libarkfile/value.h"
 #include "libpandabase/utils/utils.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/compiler_interface.h"

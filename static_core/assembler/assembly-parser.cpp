@@ -19,9 +19,9 @@
 #include <iterator>
 
 #include "assembly-type.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/type_helper.h"
 #include "ins_emit.h"
-#include "modifiers.h"
+#include "libarkfile/modifiers.h"
 #include "opcode_parsing.h"
 #include "operand_types_print.h"
 #include "utils/number-utils.h"

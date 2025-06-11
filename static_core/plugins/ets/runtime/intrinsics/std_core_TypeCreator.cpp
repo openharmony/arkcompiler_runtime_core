@@ -26,7 +26,7 @@
 
 #include "runtime/include/runtime.h"
 #include "runtime/mem/vm_handle.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "types/ets_array.h"
 #include "types/ets_class.h"
 #include "types/ets_field.h"

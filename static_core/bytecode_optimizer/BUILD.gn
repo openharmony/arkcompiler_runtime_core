@@ -77,7 +77,7 @@ libarkbytecodeopt_configs = [
   ":bytecodeopt_public_config",
   "$ark_root/compiler:arkcompiler_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
-  "$ark_root/libpandafile:arkfile_public_config",
+  "$ark_root/libarkfile:arkfile_public_config",
   "$ark_root/assembler:arkassembler_public_config",
   "$ark_root/runtime:arkruntime_public_config",
 ]
@@ -111,7 +111,7 @@ ohos_shared_library("libarktsbytecodeopt") {
     "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
-    "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/libarkfile:libarktsfile",
   ]
 
   deps += plugin_bytecodeopt_deps
@@ -149,7 +149,7 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
     "$ark_root/assembler:libarktsassembler_frontend_static",
     "$ark_root/compiler:libarktscompiler_frontend_static",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
-    "$ark_root/libpandafile:libarktsfile_frontend_static",
+    "$ark_root/libarkfile:libarktsfile_frontend_static",
   ]
 
   deps += plugin_bytecodeopt_deps

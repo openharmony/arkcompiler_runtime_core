@@ -14,10 +14,10 @@
  */
 
 #include "disassembler.h"
-#include "class_data_accessor.h"
-#include "field_data_accessor.h"
-#include "libpandafile/type_helper.h"
-#include "literal_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/type_helper.h"
+#include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
 #include "utils/logger.h"
 

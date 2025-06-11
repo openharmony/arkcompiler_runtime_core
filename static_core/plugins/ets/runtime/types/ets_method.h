@@ -19,7 +19,7 @@
 #include <string_view>
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utf.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/thread.h"

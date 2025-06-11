@@ -16,7 +16,7 @@
 #include "abc_code_converter.h"
 #include "abc_method_processor.h"
 #include "os/file.h"
-#include "type_helper.h"
+#include "libarkfile/type_helper.h"
 
 namespace ark::abc2program {
 

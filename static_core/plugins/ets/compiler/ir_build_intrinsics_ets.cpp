@@ -15,7 +15,7 @@
 
 #include "optimizer/code_generator/encode.h"
 #include "optimizer/ir_builder/inst_builder.h"
-#include "bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {

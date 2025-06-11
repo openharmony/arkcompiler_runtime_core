@@ -28,8 +28,8 @@
 #include "libpandabase/utils/asan_interface.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/utf.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor-inl.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 #include "events/events.h"
 #include "runtime/handle_base-inl.h"
 

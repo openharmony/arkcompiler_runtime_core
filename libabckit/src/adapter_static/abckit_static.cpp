@@ -23,7 +23,7 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 #include "libabckit/src/logger.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 #include "src/adapter_static/metadata_modify_static.h"
 

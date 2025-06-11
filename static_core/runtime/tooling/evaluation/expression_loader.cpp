@@ -16,7 +16,7 @@
 #include "runtime/tooling/evaluation/expression_loader.h"
 
 #include "libpandabase/utils/span.h"
-#include "libpandafile/class_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::tooling {

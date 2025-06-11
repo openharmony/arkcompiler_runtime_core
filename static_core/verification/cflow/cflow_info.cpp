@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "bytecode_instruction-inl.h"
-#include "file_items.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
 #include "macros.h"
 #include "include/runtime.h"
 #include "runtime/include/thread_scopes.h"

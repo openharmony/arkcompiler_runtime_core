@@ -227,7 +227,7 @@ config("runtime") {
   configs = [
     "$ark_es2panda_root:libes2panda_public_config",
     "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/libarkfile:arkfile_public_config",
   ]
 }
 

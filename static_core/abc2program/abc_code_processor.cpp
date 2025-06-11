@@ -18,7 +18,7 @@
 #include "abc_field_processor.h"
 #include "abc_method_processor.h"
 #include "assembly-record.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 
 namespace ark::abc2program {
 

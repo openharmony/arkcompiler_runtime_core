@@ -14,7 +14,7 @@
  */
 
 #include "ets_platform_types.h"
-#include "file.h"
+#include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "os/mutex.h"

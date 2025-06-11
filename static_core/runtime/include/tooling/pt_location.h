@@ -17,7 +17,7 @@
 
 #include <cstring>
 
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "libpandabase/macros.h"
 
 namespace ark::tooling {

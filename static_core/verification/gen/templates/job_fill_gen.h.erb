@@ -135,7 +135,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %                cachedClass = classLinker_->GetClass(utf::CStringAsMutf8(descr), false, classLinkerCtx_, &errorHandler);
 %            };
-%            // descriptors for primitive types get from libpandafile/templates/type
+%            // descriptors for primitive types get from libarkfile/templates/type
 %            switch (tag) {
 %                case panda_file::LiteralTag::ARRAY_U1:
 %                    resolveAndLink("[Z");

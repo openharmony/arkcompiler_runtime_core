@@ -16,8 +16,8 @@
 #include <numeric>
 #include <sstream>
 
-#include "libpandafile/file_items.h"
-#include "libpandafile/file_reader.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_reader.h"
 #include "libpandabase/os/mutex.h"
 
 #include "linker.h"

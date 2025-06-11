@@ -19,9 +19,9 @@
 #include <atomic>
 
 #include "intrinsics_enum.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/modifiers.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/modifiers.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/class_helper.h"
 #include "runtime/include/value-inl.h"

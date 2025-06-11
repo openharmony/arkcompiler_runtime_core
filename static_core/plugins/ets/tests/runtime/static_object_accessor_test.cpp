@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <cstdint>
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"

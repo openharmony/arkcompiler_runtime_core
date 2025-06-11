@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,8 @@
 #define ABC2PROGRAM_COMMON_ABC_CODE_CONVERTER_H
 
 #include <assembly-ins.h>
-#include "bytecode_instruction-inl.h"
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "abc_string_table.h"
 #include "abc2program_key_data.h"
 

@@ -31,14 +31,14 @@
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-parser.h"
 #include "assembler/ins_create_api.h"
-#include "libpandafile/file_item_container.h"
-#include "libpandafile/file_writer.h"
+#include "libarkfile/file_item_container.h"
+#include "libarkfile/file_writer.h"
 #include "include/runtime_options.h"
 #include "linker.h"
 #include "linker_context.h"
 #include "linker_context_misc.cpp"
 #include "runtime/include/runtime.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 
 namespace {
 using Config = ark::static_linker::Config;

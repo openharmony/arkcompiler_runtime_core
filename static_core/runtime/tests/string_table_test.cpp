@@ -27,9 +27,9 @@
 #include "runtime/include/thread_scopes.h"
 #include "test_utils.h"
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_item_container.h"
-#include "libpandafile/file_writer.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_item_container.h"
+#include "libarkfile/file_writer.h"
 
 #include <limits>
 

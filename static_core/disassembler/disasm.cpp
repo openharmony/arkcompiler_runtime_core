@@ -18,7 +18,7 @@
 #include "utils/logger.h"
 #include "utils/pandargs.h"
 #include "ark_version.h"
-#include "file_format_version.h"
+#include <libarkfile/include/file_format_version.h>
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Options {

@@ -18,7 +18,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/hash.h"
 #include "libpandabase/utils/logger.h"
-#include "libpandafile/class_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/runtime.h"
 

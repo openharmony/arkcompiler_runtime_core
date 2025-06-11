@@ -17,7 +17,7 @@
 #define PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H
 
 #include "libpandabase/macros.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/typed_value.h"
 
 #include <optional>

@@ -43,15 +43,15 @@ panda_isa_gen(
         "abc_inst_convert.cpp.erb"
     REQUIRES
         "${PANDA_ROOT}/assembler/asm_isapi.rb"
-        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
+        "${ARKFILE_ROOT}/pandafile_isapi.rb"
 )
 
 set(ABC_TYPE_CONVERT_CPP ${CMAKE_CURRENT_BINARY_DIR}/abc_type_convert.cpp)
 panda_gen_file(
-    DATA ${PANDA_ROOT}/libpandafile/types.yaml
+    DATA ${ARKFILE_ROOT}/types.yaml
     TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/abc_type_convert.cpp.erb
     OUTPUTFILE ${ABC_TYPE_CONVERT_CPP}
-    API ${PANDA_ROOT}/libpandafile/types.rb
+    API ${ARKFILE_ROOT}/types.rb
 )
 add_custom_target(abc_type_convert_cpp DEPENDS ${ABC_TYPE_CONVERT_CPP})
 add_dependencies(panda_gen_files abc_type_convert_cpp)

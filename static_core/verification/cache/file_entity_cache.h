@@ -21,7 +21,7 @@
 #include "verification/util/hash.h"
 #include "verification/util/optional_ref.h"
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 #include "runtime/include/mem/panda_containers.h"
 

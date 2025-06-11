@@ -19,7 +19,7 @@
 #include "include/managed_thread.h"
 #include "include/stack_walker.h"
 #include "libpandabase/events/events.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "macros.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime.h"

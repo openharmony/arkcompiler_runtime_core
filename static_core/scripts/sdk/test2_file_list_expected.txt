@@ -67,7 +67,7 @@ build-sdk/sdk/ohos_arm64/bin/ark_aot
 build-sdk/sdk/ohos_arm64/include
 build-sdk/sdk/ohos_arm64/include/compiler
 build-sdk/sdk/ohos_arm64/include/libpandabase
-build-sdk/sdk/ohos_arm64/include/libpandafile
+build-sdk/sdk/ohos_arm64/include/libarkfile
 build-sdk/sdk/ohos_arm64/include/panda_gen_options
 build-sdk/sdk/ohos_arm64/include/platforms
 build-sdk/sdk/ohos_arm64/include/plugins

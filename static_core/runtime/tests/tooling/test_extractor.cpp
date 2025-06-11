@@ -20,12 +20,12 @@
 
 #include "libpandabase/utils/leb128.h"
 #include "libpandabase/utils/utf.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/code_data_accessor-inl.h"
-#include "libpandafile/debug_data_accessor-inl.h"
-#include "libpandafile/helpers.h"
-#include "libpandafile/method_data_accessor-inl.h"
-#include "libpandafile/proto_data_accessor-inl.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor-inl.h"
+#include "libarkfile/debug_data_accessor-inl.h"
+#include "libarkfile/helpers.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 
 namespace ark::tooling::test {
 

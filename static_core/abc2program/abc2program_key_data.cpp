@@ -14,7 +14,7 @@
  */
 
 #include "abc2program_key_data.h"
-#include "method_data_accessor.h"
+#include "libarkfile/method_data_accessor.h"
 
 namespace ark::abc2program {
 

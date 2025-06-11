@@ -18,8 +18,8 @@
 #include <string>
 #include <string_view>
 #include <utility>
-#include "class_data_accessor.h"
-#include "file.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/file.h"
 #include "handle_scope.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
@@ -29,7 +29,7 @@
 #include "macros.h"
 #include "mem/mem.h"
 #include "mem/vm_handle.h"
-#include "modifiers.h"
+#include "libarkfile/modifiers.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"

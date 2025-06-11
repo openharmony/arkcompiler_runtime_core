@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "header_writer.h"
 #include "source_language.h"
-#include "libpandafile/file-inl.h"
-#include "libpandafile/proto_data_accessor-inl.h"
+#include "libarkfile/file-inl.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 #include "plugins/ets/runtime/napi/ets_mangle.h"
 #include <typeinfo>
 

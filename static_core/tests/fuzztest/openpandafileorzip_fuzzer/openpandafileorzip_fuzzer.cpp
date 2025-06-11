@@ -14,7 +14,7 @@
  */
 
 #include "openpandafileorzip_fuzzer.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "libziparchive/zip_archive.h"
 
 namespace OHOS {

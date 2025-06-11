@@ -17,7 +17,7 @@
 #define ABC2PROGRAM_ABC_ANNOTATION_PROCESSOR_H
 
 #include "abc_file_entity_processor.h"
-#include "annotation_data_accessor.h"
+#include "libarkfile/annotation_data_accessor.h"
 #include "abc_file_utils.h"
 
 namespace ark::abc2program {

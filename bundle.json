@@ -176,10 +176,10 @@
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandafile:libarktsfile_package",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkfile:libarktsfile_package",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandafile"
+                        "header_base": "//arkcompiler/runtime_core/static_core/"
                     }
                 },
                 {
@@ -285,7 +285,7 @@
                     "name": "//arkcompiler/runtime_core/static_core/libpandabase:libpandabase_headers"
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandafile:libpandafile_headers"
+                    "name": "//arkcompiler/runtime_core/static_core/libarkfile:libpandafile_headers"
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/runtime:runtime_headers"

@@ -24,7 +24,7 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 #include "libpandabase/utils/utf.h"
-#include "libpandafile/modifiers.h"
+#include "libarkfile/modifiers.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker.h"

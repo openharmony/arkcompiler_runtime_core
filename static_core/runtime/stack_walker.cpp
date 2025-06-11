@@ -19,7 +19,7 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 #include "libpandabase/mem/mem.h"
-#include "libpandafile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "runtime/interpreter/runtime_interface.h"
 
 #include <iomanip>

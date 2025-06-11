@@ -3,7 +3,7 @@ compiler/aot
 compiler/code_info
 compiler/compiler_options.h
 libpandabase
-libpandafile
+libarkfile
 platforms/unix
 plugins/ets
 runtime

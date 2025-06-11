@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "libpandabase/macros.h"

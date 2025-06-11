@@ -18,7 +18,7 @@
 
 #include "libpandabase/utils/arch.h"
 #include "libpandabase/utils/range.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/include/cframe.h"
 #include "runtime/include/method.h"

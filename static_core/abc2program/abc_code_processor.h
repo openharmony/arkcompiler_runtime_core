@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "abc_file_entity_processor.h"
 #include "assembly-function.h"
 #include "common/abc_code_converter.h"
-#include "code_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor-inl.h"
 
 namespace ark::abc2program {
 

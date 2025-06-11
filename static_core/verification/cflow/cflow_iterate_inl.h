@@ -16,8 +16,8 @@
 #ifndef PANDA_VERIFIER_CFLOW_ITER_INL_H_
 #define PANDA_VERIFIER_CFLOW_ITER_INL_H_
 
-#include "bytecode_instruction-inl.h"
-#include "file_items.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
 #include "macros.h"
 #include "include/method.h"
 #include "include/runtime.h"

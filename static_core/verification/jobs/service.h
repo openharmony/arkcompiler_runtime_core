@@ -16,7 +16,7 @@
 #ifndef PANDA_VERIFIER_JOBS_SERVICE_H
 #define PANDA_VERIFIER_JOBS_SERVICE_H
 
-#include "libpandafile/include/source_lang_enum.h"
+#include "libarkfile/include/source_lang_enum.h"
 #include "runtime/include/mem/panda_containers.h"
 
 #include "verification/type/type_system.h"
