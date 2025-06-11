@@ -79,6 +79,8 @@ TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTest)
     ASSERT_EQ(res, true);
 }
 
+// 26982 64-bit pointer support
+#if !defined(PANDA_TARGET_ARM64) || defined(PANDA_USE_32_BIT_POINTER)
 TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTwiceTest)
 {
     ani_string oomName;
@@ -99,5 +101,6 @@ TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTwiceTest)
         CallEtsFunction<ani_boolean>("PreallocTest", "testThrowingPreallocOOMObjectTwice", oomName, oomMsg, oomStack);
     ASSERT_EQ(res, true);
 }
+#endif
 
 }  // namespace ark::ets::test
