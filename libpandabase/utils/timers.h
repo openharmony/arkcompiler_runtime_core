@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include "visibility.h"
 
 namespace panda {
 // Event list
@@ -45,36 +46,28 @@ constexpr std::string_view EVENT_EMIT_CACHE_FILE = "Emit cache file";
 
 // Event level, indicating the level of an event, where each event is a sub-event of the nearest preceding level event.
 // The top-level event's level is 0
-enum EventLevel {
-    ZEROTH = 0,
-    FIRST,
-    SECOND,
-    THIRD,
-    FORTH,
-    FIFTH,
-    SIXTH
-};
+enum EventLevel { ZEROTH = 0, FIRST, SECOND, THIRD, FORTH, FIFTH, SIXTH };
 
 // Holds pairs of {event, level} according to the order during compilation process.
 // When adding new events later, please add them in the compilation order for ease of reading and maintenance.
 const std::unordered_map<std::string_view, EventLevel> eventMap = {
-    { EVENT_TOTAL, EventLevel::ZEROTH },
-    { EVENT_COMPILE, EventLevel::FIRST },
-    { EVENT_READ_INPUT_AND_CACHE, EventLevel::SECOND },
-    { EVENT_COMPILE_ABC_FILE, EventLevel::SECOND },
-    { EVENT_COMPILE_ABC_FILE_RECORD, EventLevel::FORTH },
-    { EVENT_UPDATE_ABC_PKG_VERSION, EventLevel::THIRD },
-    { EVENT_UPDATE_ABC_PROGRAM_STRING, EventLevel::THIRD },
-    { EVENT_UPDATE_ABC_PROG_CACHE, EventLevel::THIRD },
-    { EVENT_COMPILE_FILE, EventLevel::SECOND },
-    { EVENT_PARSE, EventLevel::THIRD },
-    { EVENT_COMPILE_TO_PROGRAM, EventLevel::THIRD },
-    { EVENT_OPTIMIZE_PROGRAM, EventLevel::SECOND },
-    { EVENT_RESOLVE_DEPS, EventLevel::FIRST },
-    { EVENT_EMIT_ABC, EventLevel::FIRST },
-    { EVENT_EMIT_SINGLE_PROGRAM, EventLevel::SECOND },
-    { EVENT_EMIT_MERGED_PROGRAM, EventLevel::SECOND },
-    { EVENT_EMIT_CACHE_FILE, EventLevel::SECOND },
+    {EVENT_TOTAL, EventLevel::ZEROTH},
+    {EVENT_COMPILE, EventLevel::FIRST},
+    {EVENT_READ_INPUT_AND_CACHE, EventLevel::SECOND},
+    {EVENT_COMPILE_ABC_FILE, EventLevel::SECOND},
+    {EVENT_COMPILE_ABC_FILE_RECORD, EventLevel::FORTH},
+    {EVENT_UPDATE_ABC_PKG_VERSION, EventLevel::THIRD},
+    {EVENT_UPDATE_ABC_PROGRAM_STRING, EventLevel::THIRD},
+    {EVENT_UPDATE_ABC_PROG_CACHE, EventLevel::THIRD},
+    {EVENT_COMPILE_FILE, EventLevel::SECOND},
+    {EVENT_PARSE, EventLevel::THIRD},
+    {EVENT_COMPILE_TO_PROGRAM, EventLevel::THIRD},
+    {EVENT_OPTIMIZE_PROGRAM, EventLevel::SECOND},
+    {EVENT_RESOLVE_DEPS, EventLevel::FIRST},
+    {EVENT_EMIT_ABC, EventLevel::FIRST},
+    {EVENT_EMIT_SINGLE_PROGRAM, EventLevel::SECOND},
+    {EVENT_EMIT_MERGED_PROGRAM, EventLevel::SECOND},
+    {EVENT_EMIT_CACHE_FILE, EventLevel::SECOND},
 };
 
 typedef void (*TimeStartFunc)(const std::string_view event, std::string fileName);
@@ -97,8 +90,8 @@ public:
     static void InitializeTimer(std::string &perfFile);
     static void PrintTimers();
 
-    static TimeStartFunc timerStart;
-    static TimeEndFunc timerEnd;
+    PANDA_PUBLIC_API static TimeStartFunc timerStart;
+    PANDA_PUBLIC_API static TimeEndFunc timerEnd;
 
 private:
     static void TimerStartImpl(const std::string_view event, std::string fileName = "");

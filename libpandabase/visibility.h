@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H
-#define PANDA_LIBPANDABASE_PBASE_MACROS_H
+#ifndef LIBPANDABASE_VISIBILITY_H
+#define LIBPANDABASE_VISIBILITY_H
 
-#include "os/stacktrace.h"
-#include "utils/debug.h"
+#ifndef PANDA_TARGET_WINDOWS
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PANDA_PUBLIC_API __attribute__((visibility ("default")))
+#else
+#define PANDA_PUBLIC_API __declspec(dllexport)
+#endif
 
-#include "../../libpandabase/macros.h"
-
-#endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H
+#endif // LIBPANDABASE_VISIBILITY_H
