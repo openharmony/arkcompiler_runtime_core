@@ -15,13 +15,13 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with logical calculations as array size.
 ---*/
 
 const value1: {{c.type}} = {{c.value}}
 const decision: boolean = value1 {{c.expression}}
-const size: int = (decision ? value1 : value1 + 25) as int
+const size: int = (decision ? value1 : value1 + 25).toInt()
 
 function main() {
     const data = new int[size]

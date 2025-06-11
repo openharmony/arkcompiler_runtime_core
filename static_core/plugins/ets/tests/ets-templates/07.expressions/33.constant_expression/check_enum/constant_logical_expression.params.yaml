@@ -16,7 +16,7 @@ cases:
   - { type: short,  value: 260,   expression: '<= 25',    expected: 'no 260'   }
   - { type: int,    value: -30,   expression: '>= 0',     expected: 'no -30'   }
   - { type: long,   value: -260,  expression: '== -259',  expected: 'no -260'  }
-  - { type: float,  value: 26.0f, expression: '== 26',    expected: 'yes 26'   }
+  - { type: float,  value: 26.0f, expression: '== 26.0f',    expected: 'yes 26'   }
   - { type: number, value: 26.0,  expression: '== 26',    expected: 'yes 26'   }
   - { type: number, value: 26.3,  expression: '== 26.3',  expected: 'yes 26.3' }
   - { type: char,   value: c'p',  expression: '== 112',   expected: 'yes p'    }
@@ -24,5 +24,5 @@ cases:
 
   - { type: string,   value: '"p"',  expression: '== "p"',   expected: 'yes p'    }
   - { type: string,   value: '"p"',  expression: '>= "W"',   expected: 'yes p'    }
-  - { type: float,  value: 26.7f, expression: '== 26.7',  expected: 'yes 26.7' }
-  - { type: number, value: 26.3,  expression: '== 26.3f', expected: 'yes 26.3' }
+  - { type: float,  value: 26.7f, expression: '== 26.7f',  expected: 'yes 26.7' }
+  - { type: number, value: 26.3,  expression: '== 26.3', expected: 'yes 26.3' }

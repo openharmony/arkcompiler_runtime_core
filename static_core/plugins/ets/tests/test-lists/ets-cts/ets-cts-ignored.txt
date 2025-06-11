@@ -385,22 +385,6 @@
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
 #
-07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_11.ets
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.ets
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_12.ets
-
-#
-07.expressions/33.constant_expression/check_array/constant_logical_expression_12.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_13.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_14.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_15.ets
-
-#23871
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_9.ets
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_10.ets
-
-#
 07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_2.ets
 
 #es2panda aborts on for-of over a union type array
@@ -819,10 +803,6 @@
 05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
 05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
 
-# 51 ASSERT IN ES2PANDA 'SyntaxError: Invalid number.' This line should be unreachable: lexer/token/number.h:169
-07.expressions/20.unary_expressions/07.bitwise_complement/bitwise_complement_neg.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_13.ets
-
 # 52 ES2PANDA_NEG_FAIL missed cte: implicit cast T -> primitive
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
 
@@ -837,12 +817,6 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_4.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
-
-# 55 RUNTIME_FAIL bug in constant values equality (fe (26.7f == 26.7) is false now :( ))
-07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_11.ets
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.ets
-07.expressions/33.constant_expression/check_enum/constant_logical_expression_12.ets
 
 # 56 ES2PANDA_NEG_FAIL A value of type Function can not be called directly. A developer must use the unsafeCall method instead.
 03.types/18.function_types/01.type_function/negative_1.ets
