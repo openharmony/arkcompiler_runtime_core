@@ -868,3 +868,8 @@
 17.experimental_features/02.fixed_array_types/far3_3.ets
 17.experimental_features/02.fixed_array_types/far3_4.ets
 17.experimental_features/02.fixed_array_types/far3_7.ets
+
+#soft keywords can't be used as a variable.
+02.lexical_elements/07.keywords/soft_1.ets
+02.lexical_elements/07.keywords/soft_10.ets
+02.lexical_elements/07.keywords/soft_13.ets
