@@ -18,7 +18,7 @@ cases:
     - tags: |-
         compile-only, negative
       decl: |-
-        foo(i: int[]) {
+        function foo(i: int[]) {
             return 2;
         }
       use: |-
@@ -30,7 +30,7 @@ cases:
     - tags: |-
         compile-only, negative
       decl: |-
-        foo(i: Array<int>) {
+        function foo(i: Array<int>) {
             return 2;
         }
       use: |-
@@ -43,7 +43,7 @@ cases:
         compile-only, negative
       decl: |-
         type TPL = [number, string]
-        foo(i: TPL) {
+        function foo(i: TPL) {
             return 2;
         }
       use: |-
@@ -56,10 +56,10 @@ cases:
     - tags: |-
         compile-only, negative
       decl: |-
-        foo(i: readonly int[]) {
+        function foo(i: readonly int[]) {
             return 1;
         }
-        foo(i: int[]) {
+        function foo(i: int[]) {
             return 2;
         }
       use: |-
@@ -72,10 +72,10 @@ cases:
     - tags: |-
         compile-only, negative
       decl: |-
-        foo(i: readonly Array<int>) {
+        function foo(i: readonly Array<int>) {
             return 1;
         }
-        foo(i: Array<int>) {
+        function foo(i: Array<int>) {
             return 2;
         }
       use: |-
@@ -88,10 +88,10 @@ cases:
         compile-only, negative
       decl: |-
         type TPL = [number, string]
-        foo(i: readonly TPL) {
+        function foo(i: readonly TPL) {
             return 1;
         }
-        foo(i: TPL) {
+        function foo(i: TPL) {
             return 2;
         }
       use: |-

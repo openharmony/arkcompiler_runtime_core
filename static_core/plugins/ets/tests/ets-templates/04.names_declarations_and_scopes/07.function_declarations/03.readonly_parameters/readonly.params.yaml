@@ -63,7 +63,15 @@ cases:
         }
       check: |-
         let rw: int[] = [1, 2];
-        arktest.assertTrue(foo(rw) == 1);
+        arktest.assertEQ(1, foo(rw));
+
+    - decl: |-
+        function foo(values: readonly int[][]) {
+            return values.length;
+        }
+      check: |-
+        let rw: int[][] = [[1, 2], [3, 4], [5, 6]]
+        arktest.assertEQ(3, foo(rw));
 
     - decl: |-
         function foo(i: readonly Array<int>) {
@@ -71,7 +79,7 @@ cases:
         }
       check: |-
         let rw: Array<int> = new Array<int>(1);
-        arktest.assertTrue(foo(rw) == 1);
+        arktest.assertEQ(1, foo(rw));
 
   # tuple
     - decl: |-
@@ -81,7 +89,7 @@ cases:
         }
       check: |-
         let rw: TPL = [1.1, "str"];
-        arktest.assertTrue(foo(rw) == 1);
+        arktest.assertEQ(1, foo(rw));
 
 
   # readonly decl as function parameter
@@ -97,3 +105,60 @@ cases:
         }
         function foo(i: int, array?: readonly number[]) { }
       check: |-
+
+    # readonly type declaration as function parameter
+    - decl: |-
+        type TN = int
+        function foo(value: readonly Array<TN>) {
+            return value.length;
+        }
+      check: |-
+        let rw: Array<TN> = new Array<TN>(1);
+        arktest.assertEQ(1, foo(rw));
+
+    - decl: |-
+        type TA = Array<int>
+        function foo(value: readonly TA) {
+            return value.length;
+        }
+      check: |-
+        let rw: TA = new TA(1);
+        arktest.assertEQ(1, foo(rw));
+
+    - decl: |-
+        type TN = int
+        type TA = Array<TN>
+        function foo(value: readonly TA) {
+            return value.length;
+        }
+      check: |-
+        let rw: TA = new TA(1);
+        arktest.assertEQ(1, foo(rw));
+
+    - decl: |-
+        type TN = int
+        type TA = TN[]
+        function foo(value: readonly TA) {
+            return value.length;
+        }
+      check: |-
+        let rw: TA = [1,2,3,4]
+        arktest.assertEQ(4, foo(rw));
+
+  # readonly array passed to readonly parameter
+    - decl: |-
+        function foo(value: readonly int[]) {
+            return value.length;
+        }
+      check: |-
+        let rw: readonly int[] = [1, 2];
+        arktest.assertEQ(2, foo(rw));
+
+  # readonly tuple passed to readonly parameter
+    - decl: |-
+        function foo(value: readonly [number, string]) {
+            return 1
+        }
+      check: |-
+        let rw: readonly [number, string] = [1, "abc"]
+        arktest.assertEQ(1, foo(rw));
