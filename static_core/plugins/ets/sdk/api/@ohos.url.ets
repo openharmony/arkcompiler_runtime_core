@@ -2008,12 +2008,12 @@ export namespace url {
         toString(): string {
             return this.urlClass.toString();
         }
-        keys(): KeyValueIterator {
-            return new KeyValueIterator(this.urlClass.iterByKeys());
+        keys(): IterableIterator<string> {
+            return this.urlClass.iterByKeys().$_iterator();
         }
 
-        values(): KeyValueIterator {
-            return new KeyValueIterator(this.urlClass.iterByValues());
+        values(): IterableIterator<string> {
+            return this.urlClass.iterByValues().$_iterator();
         }
 
         getAll(getAllname: string): Array<string> {
@@ -2026,8 +2026,8 @@ export namespace url {
             return this.urlClass.get(getname);
         }
 
-        entries(): EntryIterator {
-            return new EntryIterator(this.urlClass.entries());
+        entries(): IterableIterator<[string,string]> {
+            return this.urlClass.entries().$_iterator();
         }
 
         delete(deleteName: string): void {
@@ -2056,8 +2056,8 @@ export namespace url {
             }
         }
 
-        $_iterator(): EntryIterator {
-            return new EntryIterator(this.urlClass.entries());
+        $_iterator(): IterableIterator<[string, string]> {
+            return this.urlClass.entries().$_iterator();
         }
 
         updateParams(input: string): void {
@@ -2105,13 +2105,10 @@ export namespace url {
             }
         }
 
-        entries(): Array<Array<string>> {
-            let result = new Array<Array<string>>();
-
+        entries(): Array<[string,string]> {
+            let result = new Array<[string, string]>();
             for (let i = 0; i < this.searchParams.length; i += 2) {
-                let arr = new Array<string>();
-                arr.push(this.searchParams[i]);
-                arr.push(this.searchParams[i + 1]);
+                let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]]; 
                 result.push(arr);
             }
             return result;
@@ -2494,42 +2491,6 @@ export namespace url {
             }
         }
         return result;
-    }
-
-    class EntryIterator implements Iterator<Array<string>> {
-        data: Array<Array<string>>;
-        index = 0;
-        constructor(data: Array<Array<string>>) {
-            this.data = data;
-        }
-        next(): IteratorResult<Array<string>> {
-            if (this.index < this.data.length) {
-                return { value: this.data[this.index++], done: false };
-            } else {
-                return { done: true };
-            }
-        }
-        $_iterator(): EntryIterator {
-            return this;
-        }
-    }
-
-    class KeyValueIterator implements Iterator<string> {
-        data: Array<string>;
-        index = 0;
-        constructor(data: Array<string>) {
-            this.data = data;
-        }
-        next(): IteratorResult<string> {
-            if (this.index < this.data.length) {
-                return { value: this.data[this.index++], done: false };
-            } else {
-                return { done: true };
-            }
-        }
-        $_iterator(): KeyValueIterator {
-            return this;
-        }
     }
 
     function encodePercentEncoding(str: string, noEscapeTable: Int8Array) {

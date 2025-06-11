@@ -343,6 +343,18 @@ function testParamsForEach007() {
 	assertEQ(arr[0], "value1 key1 true");
 }
 
+function testParamsArrayFrom() {
+    let params = new url.URLParams("key1=\b&\b=val2&key3=val3");
+    let arrayFromEntries = Array.from(params.entries());
+    let arrayFromKeys = Array.from(params.keys());
+    let arrayFromValues = Array.from(params.values());
+    let arrayFromIterator = Array.from(params.$_iterator());
+    assertEQ(arrayFromEntries.toString(), "key1,\b,\b,val2,key3,val3");
+    assertEQ(arrayFromIterator.toString(), "key1,\b,\b,val2,key3,val3");
+    assertEQ(arrayFromKeys.toString(), "key1,\b,key3");
+    assertEQ(arrayFromValues.toString(), "\b,val2,val3");
+}
+
 function main(): int {
 	let suite = new ArkTestsuite("URL UT tests");
 	suite.addTest("testParamsEntries001", testParamsEntries001);
@@ -361,6 +373,7 @@ function main(): int {
 	suite.addTest("testParamsForEach004", testParamsForEach004);
 	suite.addTest("testParamsForEach005", testParamsForEach005);
 	suite.addTest("testParamsForEach007", testParamsForEach007);
+    suite.addTest("testParamsArrayFrom", testParamsArrayFrom);
 
 	//passed
 	return suite.run();
