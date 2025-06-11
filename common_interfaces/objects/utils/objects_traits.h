@@ -16,18 +16,10 @@
 #ifndef COMMON_INTERFACES_OBJECTS_TRAITS_H
 #define COMMON_INTERFACES_OBJECTS_TRAITS_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/base_object.h"
-#include <type_traits>
-
-namespace common::objects_traits {
-=======
 #include "objects/base_object.h"
 #include <type_traits>
 
-namespace panda::objects_traits {
-
->>>>>>> OpenHarmony_feature_20250328
+namespace common::objects_traits {
 
 template <typename U>
 constexpr bool is_heap_object_v = std::is_base_of_v<BaseObject, std::remove_pointer_t<U>>;
@@ -47,11 +39,7 @@ constexpr bool is_read_barrier_callable_v =
 // Allocator: U (size_t, CommonType)
 template <typename F, typename U>
 constexpr bool is_allocate_callable_v =
-<<<<<<< HEAD
-    is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, CommonType>;
-=======
     is_heap_object_v<U> && std::is_invocable_r_v<U, F, size_t, ObjectType>;
->>>>>>> OpenHarmony_feature_20250328
 
 // ---- enable_if_is_* traits ----
 template <typename F>
@@ -84,11 +72,7 @@ using vector_with_same_alloc_t =
     std::vector<NewT, rebind_alloc_t<get_allocator_type_t<Vec>, NewT>>;
 
 
-<<<<<<< HEAD
 } // namespace common::objects_traits
-=======
-} // namespace panda::objects_traits
->>>>>>> OpenHarmony_feature_20250328
 
 
 #endif //COMMON_INTERFACES_OBJECTS_TRAITS_H

@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
-* Copyright (c) 2025 Huawei Device Co., Ltd.
-=======
  * Copyright (c) 2025 Huawei Device Co., Ltd.
->>>>>>> OpenHarmony_feature_20250328
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,24 +16,15 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
-
-namespace common {
-=======
 #include "objects/string/base_string.h"
 
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
+namespace common {
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
  +-----------------------------+ <-- offset = BaseObjectSize()
-<<<<<<< HEAD
-=======
  | Padding (uint64_t)          |
  +-----------------------------+
->>>>>>> OpenHarmony_feature_20250328
  | LengthAndFlags (uint32_t)   |
  +-----------------------------+
  | RawHashcode (uint32_t)      |
@@ -47,8 +34,6 @@ namespace panda {
  +-----------------------------+
  */
 // The LineString abstract class captures sequential string values, only LineString can store chars data
-<<<<<<< HEAD
-=======
 
 /**
  * @class LineString
@@ -57,7 +42,6 @@ namespace panda {
  * Derived from BaseString, this class is used to store and manage character sequences
  * directly within the object memory layout. It supports UTF-8 and UTF-16 encodings.
  */
->>>>>>> OpenHarmony_feature_20250328
 class LineString : public BaseString {
 public:
     BASE_CAST_CHECK(LineString, IsLineString);
@@ -65,33 +49,10 @@ public:
     NO_COPY_SEMANTIC_CC(LineString);
 
     static constexpr uint32_t MAX_LENGTH = (1 << 28) - 16;
-<<<<<<< HEAD
-    static constexpr uint32_t INIT_LENGTH_TIMES = 4;
-=======
->>>>>>> OpenHarmony_feature_20250328
     // DATA_OFFSET: the string data stored after the string header.
     // Data can be stored in utf8 or utf16 form according to compressed bit.
     static constexpr size_t DATA_OFFSET = BaseString::SIZE; // DATA_OFFSET equal to Empty String size
 
-<<<<<<< HEAD
-    uint16_t *GetData() const;
-
-    template <bool verify = true>
-    uint16_t Get(int32_t index) const;
-
-    void Set(uint32_t index, uint16_t src);
-
-    static size_t ComputeSizeUtf8(uint32_t utf8Len);
-
-    static size_t ComputeSizeUtf16(uint32_t utf16Len);
-
-    static size_t ObjectSize(BaseString *str);
-
-    static size_t DataSize(BaseString *str);
-};
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
-=======
     /**
      * @brief Create a line string from UTF-8 encoded data.
      * @tparam Allocator Callable allocator for allocating BaseObject.
@@ -240,6 +201,5 @@ public:
      */
     static bool CanBeCompressed(const LineString *string);
 };
-} // namespace panda
-#endif  // COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
->>>>>>> OpenHarmony_feature_20250328
+} // namespace common
+#endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H

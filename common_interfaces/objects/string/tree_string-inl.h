@@ -16,21 +16,10 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/tree_string.h"
-
-namespace common {
-template <typename ReadBarrier>
-bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
-{
-    auto strSecond = BaseString::Cast(GetSecond<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-    return strSecond->GetLength() == 0;
-=======
 #include "objects/string/base_string.h"
 #include "objects/string/tree_string.h"
 
-namespace panda {
+namespace common {
 template <typename Allocator, typename WriteBarrier,
           objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
           objects_traits::enable_if_is_write_barrier<WriteBarrier>>
@@ -46,45 +35,25 @@ TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrie
     return string;
 }
 
+
 template <typename ReadBarrier>
 bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
 {
     auto strRight = BaseString::Cast(GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
     return strRight->GetLength() == 0;
->>>>>>> OpenHarmony_feature_20250328
 }
 
 template <bool verify, typename ReadBarrier>
 uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     int32_t length = static_cast<int32_t>(GetLength());
-<<<<<<< HEAD
-    if (verify) {
-=======
     if constexpr (verify) {
->>>>>>> OpenHarmony_feature_20250328
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
 
     if (IsFlat(std::forward<ReadBarrier>(readBarrier))) {
-<<<<<<< HEAD
-        BaseString *first = BaseString::Cast(GetFirst<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-        return first->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
-    }
-    BaseString *string = const_cast<TreeString *>(this);
-    while (true) {
-        if (string->IsTreeString()) {
-            BaseString *first = BaseString::Cast(
-                TreeString::Cast(string)->GetFirst<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-            if (static_cast<int32_t>(first->GetLength()) > index) {
-                string = first;
-            } else {
-                index -= static_cast<int32_t>(first->GetLength());
-                string = BaseString::Cast(
-                    TreeString::Cast(string)->GetSecond<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-=======
         BaseString *left = BaseString::Cast(GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
         return left->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
     }
@@ -100,17 +69,12 @@ uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
                 string = BaseString::Cast(
                     TreeString::ConstCast(string)->GetRightSubString<BaseObject *>(
                         std::forward<ReadBarrier>(readBarrier)));
->>>>>>> OpenHarmony_feature_20250328
             }
         } else {
             return string->At<verify>(std::forward<ReadBarrier>(readBarrier), index);
         }
     }
-<<<<<<< HEAD
-    UNREACHABLE();
-=======
-    UNREACHABLE_COMMON();
->>>>>>> OpenHarmony_feature_20250328
+    UNREACHABLE_CC();
 }
 }
 #endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H

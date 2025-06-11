@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
- * Copyright (c) 2021 Huawei Device Co., Ltd.
-=======
  * Copyright (c) 2025 Huawei Device Co., Ltd.
->>>>>>> OpenHarmony_feature_20250328
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,22 +16,12 @@
 #ifndef COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 #define COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 
-<<<<<<< HEAD
 #include <cstddef>
 #include <cstdint>
 
 namespace common {
-class BaseString;
-
-class UtfUtils {
-private:
-    static constexpr uint8_t UTF8_1B_MAX = 0x7f;
-=======
-#include <cstdint>
-
-namespace panda {
 static constexpr unsigned char firstByteMark[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
-class utf_utils {
+class UtfUtils {
 public:
     static constexpr uint8_t UTF8_1B_MAX = 0x7f;
     static constexpr uint16_t UTF8_2B_MAX = 0x7ff;
@@ -74,19 +60,10 @@ public:
     static constexpr size_t L_SURROGATE_START = 0xDC00;
     static constexpr uint16_t UTF16_REPLACEMENT_CHARACTER = 0xFFFD;
     static constexpr uint8_t LATIN1_LIMIT = 0xFF;
->>>>>>> OpenHarmony_feature_20250328
     static size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
                                                    size_t utf8Len, size_t start, bool modify = true,
                                                    bool isWriteBuffer = false);
 
-<<<<<<< HEAD
-    static size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8Len);
-
-    static size_t Utf16ToUtf8Size(const uint16_t *utf16, uint32_t length, bool modify = true,
-                                  bool isGetBufferSize = false, bool cesu8 = false);
-
-    static size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_t utf8Len, size_t utf16Len);
-=======
     static size_t FixUtf8Len(const uint8_t *utf8, size_t utf8Len)
     {
         size_t trimSize = 0;
@@ -208,7 +185,7 @@ public:
                     uint32_t codePoint = ((src & LOW_3BITS) << OFFSET_18POS) | ((c2 & LOW_6BITS) << OFFSET_12POS) |
                                          ((c3 & LOW_6BITS) << OFFSET_6POS) | (c4 & LOW_6BITS);
                     if (codePoint >= SURROGATE_RAIR_START) {
-                        ASSERT_COMMON(utf16Len >= 1);
+                        DCHECK_CC(utf16Len >= 1);
                         // CC-OFFNXT(G.FUN.01-CPP) solid logic
                         if (outPos >= utf16Len - 1) {
                             return outPos;
@@ -250,20 +227,12 @@ public:
         }
         return outPos;
     }
->>>>>>> OpenHarmony_feature_20250328
 
     static size_t ConvertRegionUtf16ToLatin1(const uint16_t *utf16In, uint8_t *latin1Out, size_t utf16Len,
                                              size_t latin1Len);
 
     static size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
                                            size_t utf8Len, size_t start, bool modify = true, bool isWriteBuffer = false,
-<<<<<<< HEAD
-                                           bool cesu = false);
-
-    friend BaseString;
-};
-} // namespace common
-=======
                                            bool cesu8 = false)
     {
         if (utf16In == nullptr || utf8Out == nullptr || utf8Len == 0) {
@@ -341,6 +310,5 @@ public:
 private:
     static uint32_t HandleAndDecodeInvalidUTF16(uint16_t const *utf16, size_t len, size_t *index);
 };
-} // namespace panda
->>>>>>> OpenHarmony_feature_20250328
+} // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_UTILS_UTF_H

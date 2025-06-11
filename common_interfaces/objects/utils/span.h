@@ -21,7 +21,7 @@
 
 #include "base/common.h"
 
-namespace panda::common {
+namespace common {
 
 /**
  * Similar to std::span that will come in C++20.
@@ -129,14 +129,14 @@ public:
     // NOLINT(readability-identifier-naming)
     Reference operator[](size_t index)
     {
-        ASSERT_COMMON(index < size_);
+        DCHECK_CC(index < size_);
         return data_[index];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     // NOLINT(readability-identifier-naming)
     ConstReference operator[](size_t index) const
     {
-        ASSERT_COMMON(index < size_);
+        DCHECK_CC(index < size_);
         return data_[index];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
@@ -164,25 +164,25 @@ public:
 
     Span First(size_t length) const
     {
-        ASSERT_COMMON(length <= size_);
+        DCHECK_CC(length <= size_);
         return SubSpan(0, length);
     }
 
     Span Last(size_t length) const
     {
-        ASSERT_COMMON(length <= size_);
+        DCHECK_CC(length <= size_);
         return SubSpan(size_ - length, length);
     }
 
     Span SubSpan(size_t position, size_t length) const
     {
-        ASSERT_COMMON((position + length) <= size_);
+        DCHECK_CC((position + length) <= size_);
         return Span(data_ + position, length);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     Span SubSpan(size_t position) const
     {
-        ASSERT_COMMON(position <= size_);
+        DCHECK_CC(position <= size_);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return Span(data_ + position, size_ - position);
     }
@@ -190,8 +190,8 @@ public:
     template <typename SubT>
     Span<SubT> SubSpan(size_t position, size_t length) const
     {
-        ASSERT_COMMON((position * sizeof(T) + length * sizeof(SubT)) <= (size_ * sizeof(T)));
-        ASSERT_COMMON(((reinterpret_cast<uintptr_t>(data_ + position)) % alignof(SubT)) == 0);
+        DCHECK_CC((position * sizeof(T) + length * sizeof(SubT)) <= (size_ * sizeof(T)));
+        DCHECK_CC(((reinterpret_cast<uintptr_t>(data_ + position)) % alignof(SubT)) == 0);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return Span<SubT>(reinterpret_cast<SubT *>(data_ + position), length);
     }
@@ -224,11 +224,11 @@ public:
     }
     static constexpr uint32_t GetDataOffset()
     {
-        return MEMBER_OFFSET_COMMON(Span<T>, data_);
+        return MEMBER_OFFSET_CC(Span<T>, data_);
     }
     static constexpr uint32_t GetSizeOffset()
     {
-        return MEMBER_OFFSET_COMMON(Span<T>, size_);
+        return MEMBER_OFFSET_CC(Span<T>, size_);
     }
 
 private:

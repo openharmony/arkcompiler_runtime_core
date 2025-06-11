@@ -134,7 +134,7 @@ public:
         CLASS_COUNT = 3,
     };
 
-    BaseClass *GetBaseClass(CommonType type) const;
+    BaseClass *GetBaseClass(ObjectType type) const;
 
     void IterateCompositeBaseClass(const RefFieldVisitor &visitorFunc);
 
@@ -150,15 +150,15 @@ public:
     }
 
 private:
-    constexpr static size_t ObjectTypeCount = static_cast<size_t>(CommonType::LAST_OBJECT_TYPE) + 1;
+    constexpr static size_t ObjectTypeCount = static_cast<size_t>(ObjectType::LAST_OBJECT_TYPE) + 1;
     constexpr static std::array<ClassIndex, ObjectTypeCount> TypeToIndex = [] {
         std::array<ClassIndex, ObjectTypeCount> res{};
-        res[static_cast<size_t>(CommonType::LINE_STRING)] = LINE_STRING_CLASS;
-        res[static_cast<size_t>(CommonType::SLICED_STRING)] = SLICED_STRING_CLASS;
-        res[static_cast<size_t>(CommonType::TREE_STRING)] = TREE_STRING_CLASS;
+        res[static_cast<size_t>(ObjectType::LINE_STRING)] = LINE_STRING_CLASS;
+        res[static_cast<size_t>(ObjectType::SLICED_STRING)] = SLICED_STRING_CLASS;
+        res[static_cast<size_t>(ObjectType::TREE_STRING)] = TREE_STRING_CLASS;
         return res;
     }();
-    void CreateCompositeBaseClass(CommonType type, CompositeBaseClassAllocator &allocator);
+    void CreateCompositeBaseClass(ObjectType type, CompositeBaseClassAllocator &allocator);
     std::array<CompositeBaseClass *, CLASS_COUNT> compositeBaseClasses_{};
     std::array<BaseClass *, CLASS_COUNT> baseClasses_{};
     std::atomic_bool initialized_ = false;

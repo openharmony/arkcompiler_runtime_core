@@ -20,12 +20,12 @@
 #include "objects/utils/field_macro.h"
 #include "objects/utils/objects_traits.h"
 #include "objects/readonly_handle.h"
-#include "objects/utils/bit_field.h"
+#include "base/bit_field.h"
 #include "objects/utils/span.h"
 
 #include <type_traits>
 
-namespace panda {
+namespace common {
 class LineString;
 class TreeString;
 class SlicedString;
@@ -735,7 +735,7 @@ inline uint32_t BaseString::GetLength() const
 
 inline void BaseString::InitLengthAndFlags(uint32_t length, bool compressed, bool isIntern)
 {
-    ASSERT_COMMON(length < BaseString::MAX_STRING_LENGTH);
+    DCHECK_CC(length < BaseString::MAX_STRING_LENGTH);
     uint32_t newVal = 0;
     newVal = IsInternBit::Update(newVal, isIntern);
     newVal = CompressedStatusBit::Update(newVal, (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED));

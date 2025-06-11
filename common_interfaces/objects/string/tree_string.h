@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
-* Copyright (c) 2025 Huawei Device Co., Ltd.
-=======
  * Copyright (c) 2025 Huawei Device Co., Ltd.
->>>>>>> OpenHarmony_feature_20250328
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,27 +16,9 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
-
-namespace common {
-/*
- +-----------------------------+ <-- offset 0
- |      BaseObject fields      |
- +-----------------------------+
- | LengthAndFlags (uint32_t)   |
- +-----------------------------+
- | RawHashcode (uint32_t)      |
- +-----------------------------+ <-- offset = BaseString::SIZE
- | First (BaseString *)        | <-- FIRST_OFFSET
- +-----------------------------+
- | Second (BaseString *)       | <-- SECOND_OFFSET
- +-----------------------------+ <-- SIZE
-*/
-=======
 #include "objects/string/base_string.h"
 
-namespace panda {
+namespace common {
 /*
  +--------------------------------+ <-- offset 0
  |      BaseObject fields         |
@@ -64,7 +42,6 @@ namespace panda {
  * TreeString keeps references to both left-hand and right-hand BaseStrings and calculates
  * character data on demand.
  */
->>>>>>> OpenHarmony_feature_20250328
 class TreeString : public BaseString {
 public:
     BASE_CAST_CHECK(TreeString, IsTreeString);
@@ -74,20 +51,6 @@ public:
     // Minimum length for a tree string
     static constexpr uint32_t MIN_TREE_STRING_LENGTH = 13;
 
-<<<<<<< HEAD
-    static constexpr size_t FIRST_OFFSET = BaseString::SIZE;
-    POINTER_FIELD(First, FIRST_OFFSET, SECOND_OFFSET);
-    POINTER_FIELD(Second, SECOND_OFFSET, SIZE);
-
-    template <typename ReadBarrier>
-    bool IsFlat(ReadBarrier &&readBarrier) const;
-
-    template <bool verify = true, typename ReadBarrier>
-    uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
-};
-}
-#endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
-=======
     static constexpr size_t LEFT_OFFSET = BaseString::SIZE;
     POINTER_FIELD(LeftSubString, LEFT_OFFSET, RIGHT_OFFSET)
     POINTER_FIELD(RightSubString, RIGHT_OFFSET, SIZE)
@@ -133,6 +96,5 @@ public:
     template <bool verify = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
-} // namespace panda
-#endif  // COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H
->>>>>>> OpenHarmony_feature_20250328
+} // namespace common
+#endif //COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_H

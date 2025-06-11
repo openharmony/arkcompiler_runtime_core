@@ -16,16 +16,10 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_INL_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/sliced_string.h"
-
-namespace common {
-=======
 #include "objects/string/base_string.h"
 #include "objects/string/sliced_string.h"
 
-namespace panda {
+namespace common {
 template <typename Allocator, typename WriteBarrier,
           objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
           objects_traits::enable_if_is_write_barrier<WriteBarrier>>
@@ -39,7 +33,6 @@ SlicedString *SlicedString::Create(Allocator &&allocate, WriteBarrier &&writeBar
     return slicedString;
 }
 
->>>>>>> OpenHarmony_feature_20250328
 inline uint32_t SlicedString::GetStartIndex() const
 {
     uint32_t bits = GetStartIndexAndFlags();
@@ -48,11 +41,7 @@ inline uint32_t SlicedString::GetStartIndex() const
 
 inline void SlicedString::SetStartIndex(uint32_t startIndex)
 {
-<<<<<<< HEAD
     DCHECK_CC(startIndex <= SlicedString::MAX_STRING_LENGTH);
-=======
-    ASSERT_COMMON(startIndex <= SlicedString::MAX_STRING_LENGTH);
->>>>>>> OpenHarmony_feature_20250328
     uint32_t bits = GetStartIndexAndFlags();
     uint32_t newVal = StartIndexBits::Update(bits, startIndex);
     SetStartIndexAndFlags(newVal);
@@ -76,32 +65,18 @@ template <bool verify, typename ReadBarrier>
 uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     int32_t length = static_cast<int32_t>(GetLength());
-<<<<<<< HEAD
-    if (verify) {
-=======
     if constexpr (verify) {
->>>>>>> OpenHarmony_feature_20250328
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
-<<<<<<< HEAD
-    BaseString *parent = BaseString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-    DCHECK_CC(parent->IsLineString());
-    if (parent->IsUtf8()) {
-        Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
-        return sp[index];
-    }
-    Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
-=======
     LineString *parent = LineString::Cast(GetParent<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-    ASSERT_COMMON(parent->IsLineString());
+    DCHECK_CC(parent->IsLineString());
     if (parent->IsUtf8()) {
         common::Span<const uint8_t> sp(parent->GetDataUtf8() + GetStartIndex(), length);
         return sp[index];
     }
     common::Span<const uint16_t> sp(parent->GetDataUtf16() + GetStartIndex(), length);
->>>>>>> OpenHarmony_feature_20250328
     return sp[index];
 }
 }

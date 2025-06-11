@@ -16,18 +16,12 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
-#include "common_interfaces/objects/string/line_string.h"
-
-namespace common {
-=======
 #include "objects/string/base_string.h"
 #include "objects/string/line_string.h"
 #include "objects/utils/utf_utils.h"
 #include "securec.h"
 
-namespace panda {
+namespace common {
 template <typename Allocator, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>>
 LineString *LineString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf8Data, uint32_t utf8Len,
                                        bool canBeCompress)
@@ -35,19 +29,19 @@ LineString *LineString::CreateFromUtf8(Allocator &&allocator, const uint8_t *utf
     LineString *string = nullptr;
     if (canBeCompress) {
         string = Create(std::forward<Allocator>(allocator), utf8Len, true);
-        ASSERT_COMMON(string != nullptr);
+        DCHECK_CC(string != nullptr);
         std::copy(utf8Data, utf8Data + utf8Len, LineString::Cast(string)->GetDataUtf8Writable());
     } else {
-        auto utf16Len = panda::utf_utils::Utf8ToUtf16Size(utf8Data, utf8Len);
+        auto utf16Len = UtfUtils::Utf8ToUtf16Size(utf8Data, utf8Len);
         string = Create(allocator, utf16Len, false);
-        ASSERT_COMMON(string != nullptr);
+        DCHECK_CC(string != nullptr);
         [[maybe_unused]] auto len =
-            panda::utf_utils::ConvertRegionUtf8ToUtf16(utf8Data, LineString::Cast(string)->GetDataUtf16Writable(),
-                                                       utf8Len, utf16Len);
-        ASSERT_COMMON(len == utf16Len);
+            UtfUtils::ConvertRegionUtf8ToUtf16(utf8Data, LineString::Cast(string)->GetDataUtf16Writable(),
+                                               utf8Len, utf16Len);
+        DCHECK_CC(len == utf16Len);
     }
 
-    ASSERT_PRINT_COMMON(canBeCompress == LineString::CanBeCompressed(string), "Bad input canBeCompress!");
+    DCHECK_CC(canBeCompress == LineString::CanBeCompressed(string) && "Bad input canBeCompress!");
     return string;
 }
 
@@ -57,11 +51,11 @@ LineString *LineString::CreateFromUtf8CompressedSubString(Allocator &&allocator,
                                                           uint32_t offset, uint32_t utf8Len)
 {
     LineString *subString = Create(std::forward<Allocator>(allocator), utf8Len, true);
-    ASSERT_COMMON(subString != nullptr);
+    DCHECK_CC(subString != nullptr);
 
     auto *utf8Data = ReadOnlyHandle<LineString>::Cast(string)->GetDataUtf8() + offset;
     std::copy(utf8Data, utf8Data + utf8Len, subString->GetDataUtf8Writable());
-    ASSERT_PRINT_COMMON(LineString::CanBeCompressed(subString), "String cannot be compressed!");
+    DCHECK_CC(LineString::CanBeCompressed(subString) && "String cannot be compressed!");
     return subString;
 }
 
@@ -70,18 +64,18 @@ LineString *LineString::CreateFromUtf16(Allocator &&allocator, const uint16_t *u
                                         bool canBeCompress)
 {
     LineString *string = Create(std::forward<Allocator>(allocator), utf16Len, canBeCompress);
-    ASSERT_COMMON(string != nullptr);
+    DCHECK_CC(string != nullptr);
 
     if (canBeCompress) {
         CopyChars(string->GetDataUtf8Writable(), utf16Data, utf16Len);
     } else {
         uint32_t len = utf16Len * (sizeof(uint16_t) / sizeof(uint8_t));
         if (memcpy_s(string->GetDataUtf16Writable(), len, utf16Data, len) != EOK) {
-            UNREACHABLE_COMMON();
+            UNREACHABLE_CC();
         }
     }
 
-    ASSERT_PRINT_COMMON(canBeCompress == LineString::CanBeCompressed(string), "Bad input canBeCompress!");
+    DCHECK_CC(canBeCompress == LineString::CanBeCompressed(string) && "Bad input canBeCompress!");
     return string;
 }
 
@@ -96,7 +90,7 @@ LineString *LineString::Create(Allocator &&allocator, size_t length, bool compre
     return string;
 }
 
->>>>>>> OpenHarmony_feature_20250328
+
 inline size_t LineString::ComputeSizeUtf8(uint32_t utf8Len)
 {
     return DATA_OFFSET + utf8Len;
@@ -107,11 +101,7 @@ inline size_t LineString::ComputeSizeUtf16(uint32_t utf16Len)
     return DATA_OFFSET + utf16Len * sizeof(uint16_t);
 }
 
-<<<<<<< HEAD
-inline size_t LineString::ObjectSize(BaseString *str)
-=======
 inline size_t LineString::ObjectSize(const BaseString *str)
->>>>>>> OpenHarmony_feature_20250328
 {
     uint32_t length = str->GetLength();
     return str->IsUtf16() ? ComputeSizeUtf16(length) : ComputeSizeUtf8(length);
@@ -127,37 +117,22 @@ template <bool verify>
 uint16_t LineString::Get(int32_t index) const
 {
     int32_t length = static_cast<int32_t>(GetLength());
-<<<<<<< HEAD
-    if (verify) {
-=======
     if constexpr (verify) {
->>>>>>> OpenHarmony_feature_20250328
         if ((index < 0) || (index >= length)) {
             return 0;
         }
     }
     if (!IsUtf16()) {
-<<<<<<< HEAD
-        Span<const uint8_t> sp(GetDataUtf8(), length);
-        return sp[index];
-    }
-    Span<const uint16_t> sp(GetDataUtf16(), length);
-=======
         common::Span<const uint8_t> sp(GetDataUtf8(), length);
         return sp[index];
     }
     common::Span<const uint16_t> sp(GetDataUtf16(), length);
->>>>>>> OpenHarmony_feature_20250328
     return sp[index];
 }
 
 inline void LineString::Set(uint32_t index, uint16_t src)
 {
-<<<<<<< HEAD
     DCHECK_CC(index < GetLength());
-=======
-    ASSERT_COMMON(index < GetLength());
->>>>>>> OpenHarmony_feature_20250328
     if (IsUtf8()) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         *(reinterpret_cast<uint8_t *>(GetData()) + index) = static_cast<uint8_t>(src);
@@ -166,21 +141,19 @@ inline void LineString::Set(uint32_t index, uint16_t src)
         *(GetData() + index) = src;
     }
 }
-<<<<<<< HEAD
-=======
 
 template <typename ReadBarrier>
 void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t start, uint32_t destSize,
                            uint32_t length)
 {
-    ASSERT_COMMON(IsLineString());
+    DCHECK_CC(IsLineString());
     if (IsUtf8()) {
-        ASSERT_COMMON(src->IsUtf8());
+        DCHECK_CC(src->IsUtf8());
         std::vector<uint8_t> buf;
         const uint8_t *data = BaseString::GetUtf8DataFlat(std::forward<ReadBarrier>(readBarrier), src, buf);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (length != 0 && memcpy_s(GetDataUtf8Writable() + start, destSize, data, length) != EOK) {
-            UNREACHABLE_COMMON();
+            UNREACHABLE_CC();
         }
     } else if (src->IsUtf8()) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -197,7 +170,7 @@ void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (length != 0 && memcpy_s(GetDataUtf16Writable() + start,
                                     destSize * sizeof(uint16_t), data, length * sizeof(uint16_t)) != EOK) {
-            UNREACHABLE_COMMON();
+            UNREACHABLE_CC();
         }
     }
 }
@@ -209,6 +182,5 @@ inline bool LineString::CanBeCompressed(const LineString *string)
     }
     return BaseString::CanBeCompressed(string->GetDataUtf16(), string->GetLength());
 }
->>>>>>> OpenHarmony_feature_20250328
 }
 #endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H

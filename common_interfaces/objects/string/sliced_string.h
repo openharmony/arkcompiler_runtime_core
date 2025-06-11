@@ -16,25 +16,16 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 #define COMMON_INTERFACES_OBJECTS_STRING_SLICED_STRING_H
 
-<<<<<<< HEAD
-#include "common_interfaces/objects/string/base_string_declare.h"
+#include "objects/string/base_string.h"
+#include "base/bit_field.h"
 
 namespace common {
-=======
-#include "objects/string/base_string.h"
-#include "objects/utils/bit_field.h"
-
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
  +-----------------------------+
-<<<<<<< HEAD
-=======
  | Padding (uint64_t)          |
  +-----------------------------+
->>>>>>> OpenHarmony_feature_20250328
  | LengthAndFlags (uint32_t)   |
  +-----------------------------+
  | RawHashcode (uint32_t)      |
@@ -54,8 +45,6 @@ namespace panda {
    [2 - 31]    : StartIndexBits             (30 bits)
  */
 // The substrings of another string use SlicedString to describe.
-<<<<<<< HEAD
-=======
 
 /**
  * @class SlicedString
@@ -64,7 +53,6 @@ namespace panda {
  * Used for substring operations, SlicedString holds a reference to a parent BaseString
  * and an offset indicating the starting index of the slice.
  */
->>>>>>> OpenHarmony_feature_20250328
 class SlicedString : public BaseString {
 public:
     BASE_CAST_CHECK(SlicedString, IsSlicedString);
@@ -73,7 +61,6 @@ public:
     static constexpr uint32_t MIN_SLICED_STRING_LENGTH = 13;
     static constexpr size_t PARENT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t START_INDEX_BITS_NUM = 30U;
-<<<<<<< HEAD
     using HasBackingStoreBit = BitField<bool, 0>;                                 // 1
     using ReserveBit = HasBackingStoreBit::NextFlag;                              // 1
     using StartIndexBits = ReserveBit::NextField<uint32_t, START_INDEX_BITS_NUM>; // 30
@@ -83,26 +70,6 @@ public:
 
     POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET);
     PRIMITIVE_FIELD(StartIndexAndFlags, uint32_t, STARTINDEX_AND_FLAGS_OFFSET, SIZE);
-
-    uint32_t GetStartIndex() const;
-
-    void SetStartIndex(uint32_t startIndex);
-
-    bool GetHasBackingStore() const;
-
-    void SetHasBackingStore(bool hasBackingStore);
-
-    // Minimum length for a sliced string
-=======
-    using HasBackingStoreBit = common::BitField<bool, 0>;                    // 1
-    using ReserveBit = HasBackingStoreBit::NextFlag;                              // 1
-    using StartIndexBits = ReserveBit::NextField<uint32_t, START_INDEX_BITS_NUM>; // 30
-    static_assert(StartIndexBits::START_BIT + StartIndexBits::SIZE == sizeof(uint32_t) * common::BITS_PER_BYTE,
-                  "StartIndexBits does not match the field size");
-    static_assert(StartIndexBits::SIZE == LengthBits::SIZE, "The size of startIndex should be same with Length");
-
-    POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET)
-    PRIMITIVE_FIELD(StartIndexAndFlags, uint32_t, STARTINDEX_AND_FLAGS_OFFSET, SIZE)
 
     /**
      * @brief Create a SlicedString backed by a parent BaseString.
@@ -152,7 +119,6 @@ public:
      * @param index Index into the sliced string (not the parent).
      * @return UTF-16 character code unit.
      */
->>>>>>> OpenHarmony_feature_20250328
     template <bool verify = true, typename ReadBarrier>
     uint16_t Get(ReadBarrier &&readBarrier, int32_t index) const;
 };
