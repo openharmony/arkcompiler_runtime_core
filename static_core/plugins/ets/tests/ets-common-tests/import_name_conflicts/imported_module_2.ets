@@ -22,17 +22,17 @@ export const flt: float = 2.345;
 export let c: int = 3;
 
 export class C {
-    c: float;
+    public c: float;
 }
 
 class CType {}
 export type {CType}
 
-export function foo_2() : int {
+export function foo2() : int {
     return 0;
 }
 
-export function foo_2_1param(a : int) : int {
+export function foo2With1param(a : int) : int {
     return a;
 }
 

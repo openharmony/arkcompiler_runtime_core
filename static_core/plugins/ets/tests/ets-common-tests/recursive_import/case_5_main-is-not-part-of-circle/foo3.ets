@@ -17,10 +17,10 @@
 tags: [not-a-test]
 ---*/
 
-import {A} from "./foo2"
+import {A} from './foo2'
 
 export function foo_in_3(): int {
     let a = new A();
-    console.log("in foo_in_3")
+    console.log('in foo_in_3')
     return 0;
 }

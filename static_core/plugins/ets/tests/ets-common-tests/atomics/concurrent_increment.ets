@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- import { launch } from "std/concurrency"
+ import { launch } from 'std/concurrency'
 
 let N = 200
 let RESULT = N as byte

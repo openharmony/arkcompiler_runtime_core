@@ -15,8 +15,8 @@
 
 const ARRAY_SIZE = 15;
 const AB_SIZE = ARRAY_SIZE * Short.BYTE_SIZE;
-const UNSORTED = [5, 3, 127, 2, 4, -1, 99, 10, 32767, 7, 0, 45, 1, 88, -32768];
-const SORTED = [-32768, -1, 0, 1, 2, 3, 4, 5, 7, 10, 45, 88, 99, 127, 32767];
+const UNSORTED: Array<Double> = [5, 3, 127, 2, 4, -1, 99, 10, 32767, 7, 0, 45, 1,88, -32768];
+const SORTED = [-32768, -1, 0, 1, 2, 3, 4, 5, 7, 10, 45, 88, 99,127, 32767];
 const SORTED_UNALIGNED = [-32768, -1, 0, 1, 2, 3, 4, 7, 10, 45, 88, 99, 127, 32767];
 const SINGLE = [88];
 

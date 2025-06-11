@@ -18,11 +18,11 @@ files:
 - ./selective_export.ets
 ---*/
 
-import { a, foo, bar, COPT} from "./selective_export"
+import { a, foo, bar, COPT} from './selective_export'
 
 function foo(i: Required<COPT>) {
     let v: int = 0;
-    if(i.j != undefined) {
+    if (i.j != undefined) {
         v += 1
     }
     if (i.i != 0) {
@@ -31,10 +31,9 @@ function foo(i: Required<COPT>) {
     return v;
 }
 
-function main() : void
-{
+function main(): void {
     let sum: int = a + foo() + bar();
     const result: int = 7;
-    assertEQ(sum, result)
-    assertEQ( foo( {i: 1.9, j: "some str"} ), 3 )
+    arktest.assertEQ(sum, result)
+    arktest.assertEQ( foo( {i: 1.9, j: 'some str'} ), 3 )
 }

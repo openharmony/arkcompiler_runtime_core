@@ -23,7 +23,7 @@ interface I {
 }
 class A implements I{
     f1(): string {
-        return "default"
+        return 'default'
     }
     f1(s: string): string {
         return s
@@ -32,7 +32,7 @@ class A implements I{
 
 export function foo() {
     let aa = new A()
-    return aa?.f1("hello")
+    return aa?.f1('hello')
 }
 
 export function foo2() {

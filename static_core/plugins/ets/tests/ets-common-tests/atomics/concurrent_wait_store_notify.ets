@@ -17,7 +17,7 @@
 // 2. "0 not-equal": store -> wait -> notify, or store -> notify -> wait
 // All other outputs are invalid
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let buf: ArrayBuffer = new ArrayBuffer(0);
 let arr: Int32Array = new Int32Array;
@@ -34,7 +34,7 @@ function main() {
 
     let res = Atomics.wait(arr, 0, 0) as string
     c.println(res)
-    assertTrue(res == "ok" || res == "not-equal")
+    arktest.assertTrue(res == 'ok' || res == 'not-equal')
 }
 
 function writer(): Int {

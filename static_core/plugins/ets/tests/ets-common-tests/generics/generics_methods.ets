@@ -27,7 +27,7 @@ class Arr<T> {
 
 function main(): void {
     let a : Arr<Int> = new Arr<Int>(new Int[1])
-    assertNE(a, null, "Generics allocating error #1!")
+    arktest.assertNE(a, null, 'Generics allocating error #1!')
     let b : Arr<Int> = a.mg<Int>()
-    assertNE(b, null, "Generics allocating error #2!")
+    arktest.assertNE(b, null, 'Generics allocating error #2!')
 }

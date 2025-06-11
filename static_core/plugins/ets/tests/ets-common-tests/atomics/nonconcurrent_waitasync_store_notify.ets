@@ -26,5 +26,5 @@ function main() {
     Atomics.store(arr, 0, 5);
     let count = Atomics.notify(arr, 0);
     let res: string = await promise;
-    assertTrue(res == "ok" || res == "not-equal")
+    arktest.assertTrue(res == 'ok' || res == 'not-equal')
 }

@@ -19,7 +19,7 @@
     arktsconfig: arktsconfig.json
 ---*/
 
-import {fooIC} from "HarC"
+import {fooIC} from 'HarC'
 export function fooIB() {
     fooIC()
 }

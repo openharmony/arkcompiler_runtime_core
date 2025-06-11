@@ -14,35 +14,35 @@
  */
 
 class TestClass {
-    prop1:String = "123";
-    prop2:Int = 123;
-    prop3:Byte = 12;
-    prop4:Long = 456;
-    prop5:Short = 13;
+    public prop1: String = '123';
+    public prop2: Int = 123;
+    public prop3: Byte = 12;
+    public prop4: Long = 456;
+    public prop5: Short = 13;
 }
 class TestClass1 {
-    prop1:String = "345";
-    prop2:Int = 321;
-    prop3:Byte = 14;
-    prop4:Long = 654;
-    prop5:Short = 15;
+    public prop1: String = '345';
+    public prop2: Int = 321;
+    public prop3: Byte = 14;
+    public prop4: Long = 654;
+    public prop5: Short = 15;
 }
 function test(a: TestClass | TestClass1) {
-    assertEQ(a.prop1, "123", "expected \"123\", but got " + a.prop1);
-    a.prop1 = "234"
-    assertEQ(a.prop1, "234", "expected \"234\", but got " + a.prop1);
-    assertEQ(a.prop2, 123, "expected 123, but got " + a.prop2);
+    arktest.assertEQ(a.prop1, '123', 'expected \'123\', but got ' + a.prop1);
+    a.prop1 = '234'
+    arktest.assertEQ(a.prop1, '234', 'expected \'234\', but got ' + a.prop1);
+    arktest.assertEQ(a.prop2, 123, 'expected 123, but got ' + a.prop2);
     a.prop2 = 234
-    assertEQ(a.prop2, 234, "expected 234, but got " + a.prop2);
-    assertEQ(a.prop3, 12, "expected 12, but got " + a.prop3);
+    arktest.assertEQ(a.prop2, 234, 'expected 234, but got ' + a.prop2);
+    arktest.assertEQ(a.prop3, 12, 'expected 12, but got ' + a.prop3);
     a.prop3 = 13
-    assertEQ(a.prop3, 13, "expected 13, but got " + a.prop3);
-    assertEQ(a.prop4, 456, "expected 456, but got " + a.prop4);
+    arktest.assertEQ(a.prop3, 13, 'expected 13, but got ' + a.prop3);
+    arktest.assertEQ(a.prop4, 456, 'expected 456, but got ' + a.prop4);
     a.prop4 = 567
-    assertEQ(a.prop4, 567, "expected 567, but got " + a.prop4);
-    assertEQ(a.prop5, 13, "expected 13, but got " + a.prop5);
+    arktest.assertEQ(a.prop4, 567, 'expected 567, but got ' + a.prop4);
+    arktest.assertEQ(a.prop5, 13, 'expected 13, but got ' + a.prop5);
     a.prop5 = 14
-    assertEQ(a.prop5, 14, "expected 14, but got " + a.prop5);
+    arktest.assertEQ(a.prop5, 14, 'expected 14, but got ' + a.prop5);
 
     return 0;
 }

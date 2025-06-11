@@ -18,7 +18,7 @@ files:
 - ./source1.ets
 ---*/
 
-import {func} from "./source1"
+import {func} from './source1'
 
 function main() : void {
     func();

@@ -14,13 +14,13 @@
  */
 
 class IsIntegerFloatTest {
-  rightInteger: float;
-  wrongInteger: float;
+  public rightInteger: float;
+  public wrongInteger: float;
 }
 
 class IsIntegerDoubleTest {
-  rightInteger: double;
-  wrongInteger: double;
+  public rightInteger: double;
+  public wrongInteger: double;
 }
 
 function main(): int {
@@ -28,21 +28,40 @@ function main(): int {
     ft.rightInteger = 1.0;
     ft.wrongInteger = 1.0 as float + Float.DELTA + Float.DELTA;
 
-    if (Float.isInteger(Float.NaN) != false) return 1;
-    if (Float.isInteger(Float.POSITIVE_INFINITY) != false) return 2;
-    if (Float.isInteger(Float.NEGATIVE_INFINITY) != false) return 3;
-    if (Float.isInteger(ft.rightInteger) != true) return 4;
-    if (Float.isInteger(ft.wrongInteger) != false) return 5;
+    if (Float.isInteger(Float.NaN) != false) {
+      return 1;
+    }
+    if (Float.isInteger(Float.POSITIVE_INFINITY) != false) {
+      return 2;
+    }
+    if (Float.isInteger(Float.NEGATIVE_INFINITY) != false) {
+      return 3;
+    }
+    if (Float.isInteger(ft.rightInteger) != true) {
+      return 4;
+    }
+    if (Float.isInteger(ft.wrongInteger) != false) {
+      return 5;
+    }
 
     let dt = new IsIntegerDoubleTest();
     dt.rightInteger = 1.0;
     dt.wrongInteger = 1.0 as double + Double.DELTA + Double.DELTA;
 
-    if (Double.isInteger(Double.NaN) != false) return 21;
-    if (Double.isInteger(Double.POSITIVE_INFINITY) != false) return 22;
-    if (Double.isInteger(Double.NEGATIVE_INFINITY) != false) return 23;
-    if (Double.isInteger(dt.rightInteger) != true) return 24;
-    if (Double.isInteger(dt.wrongInteger) != false) return 25;
-
+    if (Double.isInteger(Double.NaN) != false) {
+      return 21;
+    }
+    if (Double.isInteger(Double.POSITIVE_INFINITY) != false) {
+      return 22;
+    }
+    if (Double.isInteger(Double.NEGATIVE_INFINITY) != false) {
+      return 23;
+    }
+    if (Double.isInteger(dt.rightInteger) != true) {
+      return 24;
+    }
+    if (Double.isInteger(dt.wrongInteger) != false) {
+      return 25;
+    }
     return 0;
 }

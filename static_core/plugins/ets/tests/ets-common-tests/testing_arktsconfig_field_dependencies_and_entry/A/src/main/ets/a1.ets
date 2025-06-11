@@ -18,9 +18,9 @@
   arktsconfig: ../../../arktsconfig.json
 ---*/
 
-import {fooIA} from "HarA"
-import {fooIB} from "HarB"
-import {B} from "HarB/pages/b"
+import {fooIA} from 'HarA'
+import {fooIB} from 'HarB'
+import {B} from 'HarB/pages/b'
 
 function main() {
     fooIA()

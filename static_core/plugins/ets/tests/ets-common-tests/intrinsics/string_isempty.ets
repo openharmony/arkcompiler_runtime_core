@@ -14,7 +14,7 @@
  */
 
 function newString(): String {
-    return new String("abcde");
+    return new String('abcde');
 }
 
 function main(): int {

@@ -14,16 +14,26 @@
  */
 
 const ARRAY_SIZE = 15;
-const UNSORTED = [Double.MAX_VALUE, 0, 100.5, 3.375, 1.125, -1.125, Double.POSITIVE_INFINITY, 10.5, 7.375, 45.125,
-                  1.375, Double.NEGATIVE_INFINITY, Double.MIN_VALUE, 36.625, 123.375];
-const SORTED = [Double.NEGATIVE_INFINITY, -1.125, 0, Double.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625,
-                45.125, 100.5, 123.375, Double.MAX_VALUE, Double.POSITIVE_INFINITY];
-const SORTED_UNALIGNED = [Double.NEGATIVE_INFINITY, -1.125, 0, Double.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5,
-                          36.625, 45.125, 100.5, 123.375, Double.POSITIVE_INFINITY];
-const UNSORTED_WITH_NAN = [Double.MAX_VALUE, 0.0, 100.5, Double.NaN, 1.125, -1.125, Double.POSITIVE_INFINITY, 10.5,
-                           7.375, 45.125, 1.375, Double.NEGATIVE_INFINITY, Double.MIN_VALUE, 36.625, 123.375];
-const SORTED_WITH_NAN = [Double.NEGATIVE_INFINITY, -1.125, 0.0, 100.5, Double.MAX_VALUE, Double.NaN, Double.MIN_VALUE,
-                         1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375, Double.POSITIVE_INFINITY];
+const UNSORTED: Array<Double> = [
+    Double.MAX_VALUE, 0, 100.5, 3.375, 1.125, -1.125,
+    Double.POSITIVE_INFINITY, 10.5, 7.375, 45.125, 1.375,
+    Double.NEGATIVE_INFINITY, Double.MIN_VALUE, 36.625, 123.375];
+const SORTED = [
+    Double.NEGATIVE_INFINITY, -1.125,0,
+    Double.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125, 100.5, 123.375,
+    Double.MAX_VALUE, Double.POSITIVE_INFINITY];
+const SORTED_UNALIGNED = [
+    Double.NEGATIVE_INFINITY, -1.125, 0,
+    Double.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125, 100.5, 123.375,
+    Double.POSITIVE_INFINITY];
+const UNSORTED_WITH_NAN = [
+    Double.MAX_VALUE, 0.0, 100.5, Double.NaN, 1.125, -1.125,
+    Double.POSITIVE_INFINITY, 10.5, 7.375, 45.125, 1.375,
+    Double.NEGATIVE_INFINITY, Double.MIN_VALUE, 36.625, 123.375];
+const SORTED_WITH_NAN = [
+    Double.NEGATIVE_INFINITY, -1.125, 0.0, 100.5,
+    Double.MAX_VALUE, Double.NaN, Double.MIN_VALUE, 1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375,
+    Double.POSITIVE_INFINITY];
 const SINGLE = [88.0];
 
 function checkSorted(a: Float64Array): void {

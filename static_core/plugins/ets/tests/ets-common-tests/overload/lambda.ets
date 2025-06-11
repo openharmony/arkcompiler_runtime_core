@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-let void_called: boolean = false;
-let int_called = false;
+let voidCalled: boolean = false;
+let intCalled = false;
 
 function reset(): void {
-    void_called = false;
-    int_called = false;
+    voidCalled = false;
+    intCalled = false;
 }
 
 function foo(callback: () => void): void {
-    void_called = true;
+    voidCalled = true;
 }
 
 function foo(callback: (x: int) => void): void {
-    int_called = true;
+    intCalled = true;
 }
 
 function main(): void {
     reset();
     foo((): void => {
     });
-    assertTrue(void_called);
-    assertFalse(int_called);
+    arktest.assertTrue(voidCalled);
+    arktest.assertFalse(intCalled);
 
     reset();
     foo((x: int): void => {
     });
-    assertFalse(void_called);
-    assertTrue(int_called);
+    arktest.assertFalse(voidCalled);
+    arktest.assertTrue(intCalled);
 }

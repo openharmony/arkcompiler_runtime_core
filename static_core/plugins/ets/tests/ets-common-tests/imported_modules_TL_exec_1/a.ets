@@ -17,8 +17,8 @@
   files: [b.ets, c.ets]
 ---*/
 
-import {b} from "./b.ets";
-import {c} from "./c.ets"
+import {b} from './b.ets';
+import {c} from './c.ets'
 
 
 function main() : void {

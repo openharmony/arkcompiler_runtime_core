@@ -20,15 +20,15 @@ function erase<T>(v: T): Any {
 }
 
 class Klass {
-    public f:number;
+    public f: number;
 
     constructor(f:number) {
-        this.f= f;
+        this.f = f;
     }
 }
 
 function foo(n: number): Klass | undefined {
-    if(n == 0){
+    if (n == 0) {
         return undefined;
     }
     return new Klass(n);
@@ -49,86 +49,86 @@ enum Color64 {
 }
 
 enum ColorString {
-    Red = "",
-    Green = "Green"
+    Red = '',
+    Green = 'Green'
 }
 
 function testNormal() {
-    assertTrue(!istrue(new Byte(0 as byte)));
-    assertTrue(istrue(new Byte(1 as byte)));
-    assertTrue(!istrue(new Short(0 as short)));
-    assertTrue(istrue(new Short(1 as short)));
-    assertTrue(!istrue(new Int(0)));
-    assertTrue(istrue(new Int(1)));
-    assertTrue(!istrue(new Long(0)));
-    assertTrue(istrue(new Long(1)));
-    assertTrue(!istrue(new Float(0.0)));
-    assertTrue(istrue(new Float(0.5)));
-    assertTrue(!istrue(new Double(0.0)));
-    assertTrue(istrue(new Double(0.5)));
-    assertTrue(!istrue(new Char(0 as char)));
-    assertTrue(istrue(new Char(c'0')));
-    assertTrue(!istrue(""));
-    assertTrue(istrue("Hello"));
-    assertTrue(!istrue(false));
-    assertTrue(istrue(true));
-    assertTrue(!istrue(null));
-    assertTrue(!istrue(undefined));
-    assertTrue(!istrue(NaN));
-    assertTrue(!istrue(new bigint(0)));
-    assertTrue(istrue(new bigint(1)));
-    assertTrue(!istrue(foo(0)));
-    assertTrue(istrue(foo(1)));
-    assertTrue(!istrue(Color.Red));
-    assertTrue(istrue(Color.Green));
-    assertTrue(istrue(Color.Blue));
-    assertTrue(istrue(Color.Yellow));
-    assertTrue(!istrue(Color64.Red));
-    assertTrue(istrue(Color64.Green));
-    assertTrue(istrue(Color64.Blue));
-    assertTrue(istrue(Color64.Yellow));
-    assertTrue(!istrue(ColorString.Red));
-    assertTrue(istrue(ColorString.Green));
+    arktest.assertTrue(!istrue(new Byte(0 as byte)));
+    arktest.assertTrue(istrue(new Byte(1 as byte)));
+    arktest.assertTrue(!istrue(new Short(0 as short)));
+    arktest.assertTrue(istrue(new Short(1 as short)));
+    arktest.assertTrue(!istrue(new Int(0)));
+    arktest.assertTrue(istrue(new Int(1)));
+    arktest.assertTrue(!istrue(new Long(0)));
+    arktest.assertTrue(istrue(new Long(1)));
+    arktest.assertTrue(!istrue(new Float(0.0)));
+    arktest.assertTrue(istrue(new Float(0.5)));
+    arktest.assertTrue(!istrue(new Double(0.0)));
+    arktest.assertTrue(istrue(new Double(0.5)));
+    arktest.assertTrue(!istrue(new Char(0 as char)));
+    arktest.assertTrue(istrue(new Char(c'0')));
+    arktest.assertTrue(!istrue(''));
+    arktest.assertTrue(istrue('Hello'));
+    arktest.assertTrue(!istrue(false));
+    arktest.assertTrue(istrue(true));
+    arktest.assertTrue(!istrue(null));
+    arktest.assertTrue(!istrue(undefined));
+    arktest.assertTrue(!istrue(NaN));
+    arktest.assertTrue(!istrue(new bigint(0)));
+    arktest.assertTrue(istrue(new bigint(1)));
+    arktest.assertTrue(!istrue(foo(0)));
+    arktest.assertTrue(istrue(foo(1)));
+    arktest.assertTrue(!istrue(Color.Red));
+    arktest.assertTrue(istrue(Color.Green));
+    arktest.assertTrue(istrue(Color.Blue));
+    arktest.assertTrue(istrue(Color.Yellow));
+    arktest.assertTrue(!istrue(Color64.Red));
+    arktest.assertTrue(istrue(Color64.Green));
+    arktest.assertTrue(istrue(Color64.Blue));
+    arktest.assertTrue(istrue(Color64.Yellow));
+    arktest.assertTrue(!istrue(ColorString.Red));
+    arktest.assertTrue(istrue(ColorString.Green));
     let a: bigint | null = 0n;
     assertTrue(istrue(!a));
 }
 
 function testErase() {
-    assertTrue(!istrue(erase(new Byte(0 as byte))));
-    assertTrue(istrue(erase(new Byte(1 as byte))));
-    assertTrue(!istrue(erase(new Short(0 as short))));
-    assertTrue(istrue(erase(new Short(1 as short))));
-    assertTrue(!istrue(erase(new Int(0))));
-    assertTrue(istrue(erase(new Int(1))));
-    assertTrue(!istrue(erase(new Long(0))));
-    assertTrue(istrue(erase(new Long(1))));
-    assertTrue(!istrue(erase(new Float(0.0))));
-    assertTrue(istrue(erase(new Float(0.5))));
-    assertTrue(!istrue(erase(new Double(0.0))));
-    assertTrue(istrue(erase(new Double(0.5))));
-    assertTrue(!istrue(erase(new Char(0 as char))));
-    assertTrue(istrue(erase(new Char(c'0'))));
-    assertTrue(!istrue(erase("")));
-    assertTrue(istrue(erase("Hello")));
-    assertTrue(!istrue(erase(false)));
-    assertTrue(istrue(erase(true)));
-    assertTrue(!istrue(erase(null)));
-    assertTrue(!istrue(erase(undefined)));
-    assertTrue(!istrue(erase(NaN)));
-    assertTrue(!istrue(erase(new bigint(0))));
-    assertTrue(istrue(erase(new bigint(1))));
-    assertTrue(!istrue(erase(foo(0))));
-    assertTrue(istrue(erase(foo(1))));
-    assertTrue(!istrue(erase(Color.Red)));
-    assertTrue(istrue(erase(Color.Green)));
-    assertTrue(istrue(erase(Color.Blue)));
-    assertTrue(istrue(erase(Color.Yellow)));
-    assertTrue(!istrue(erase(Color64.Red)));
-    assertTrue(istrue(erase(Color64.Green)));
-    assertTrue(istrue(erase(Color64.Blue)));
-    assertTrue(istrue(erase(Color64.Yellow)));
-    assertTrue(!istrue(erase(ColorString.Red)));
-    assertTrue(istrue(erase(ColorString.Green)));
+    arktest.assertTrue(!istrue(erase(new Byte(0 as byte))));
+    arktest.assertTrue(istrue(erase(new Byte(1 as byte))));
+    arktest.assertTrue(!istrue(erase(new Short(0 as short))));
+    arktest.assertTrue(istrue(erase(new Short(1 as short))));
+    arktest.assertTrue(!istrue(erase(new Int(0))));
+    arktest.assertTrue(istrue(erase(new Int(1))));
+    arktest.assertTrue(!istrue(erase(new Long(0))));
+    arktest.assertTrue(istrue(erase(new Long(1))));
+    arktest.assertTrue(!istrue(erase(new Float(0.0))));
+    arktest.assertTrue(istrue(erase(new Float(0.5))));
+    arktest.assertTrue(!istrue(erase(new Double(0.0))));
+    arktest.assertTrue(istrue(erase(new Double(0.5))));
+    arktest.assertTrue(!istrue(erase(new Char(0 as char))));
+    arktest.assertTrue(istrue(erase(new Char(c'0'))));
+    arktest.assertTrue(!istrue(erase('')));
+    arktest.assertTrue(istrue(erase('Hello')));
+    arktest.assertTrue(!istrue(erase(false)));
+    arktest.assertTrue(istrue(erase(true)));
+    arktest.assertTrue(!istrue(erase(null)));
+    arktest.assertTrue(!istrue(erase(undefined)));
+    arktest.assertTrue(!istrue(erase(NaN)));
+    arktest.assertTrue(!istrue(erase(new bigint(0))));
+    arktest.assertTrue(istrue(erase(new bigint(1))));
+    arktest.assertTrue(!istrue(erase(foo(0))));
+    arktest.assertTrue(istrue(erase(foo(1))));
+    arktest.assertTrue(!istrue(erase(Color.Red)));
+    arktest.assertTrue(istrue(erase(Color.Green)));
+    arktest.assertTrue(istrue(erase(Color.Blue)));
+    arktest.assertTrue(istrue(erase(Color.Yellow)));
+    arktest.assertTrue(!istrue(erase(Color64.Red)));
+    arktest.assertTrue(istrue(erase(Color64.Green)));
+    arktest.assertTrue(istrue(erase(Color64.Blue)));
+    arktest.assertTrue(istrue(erase(Color64.Yellow)));
+    arktest.assertTrue(!istrue(erase(ColorString.Red)));
+    arktest.assertTrue(istrue(erase(ColorString.Green)));
     let a: bigint | null = 0n;
     assertTrue(istrue(erase(!a)));
 }

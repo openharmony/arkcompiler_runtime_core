@@ -19,7 +19,7 @@
     arktsconfig: ../../../../arktsconfig.json
 ---*/
 
-import {C} from "HarC/pages/c"
+import {C} from 'HarC/pages/c'
 export class B {
-    x: C = new C()
+    public x: C = new C()
 }

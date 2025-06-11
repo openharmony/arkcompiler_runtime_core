@@ -18,8 +18,8 @@ files:
 - ./export.ets
 ---*/
 
-import c from "./export.ets";
+import c from './export.ets';
 
-function main(){
-    assertEQ(c, 10)
+function main() {
+    arktest.assertEQ(c, 10)
 }

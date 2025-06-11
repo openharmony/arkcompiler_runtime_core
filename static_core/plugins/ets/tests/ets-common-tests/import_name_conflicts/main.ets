@@ -17,11 +17,11 @@
   files: [imported_module_1.ets, imported_module_2.ets]
 ---*/
 
-import {foo_1, foo_1} from "./imported_module_1.ets"
-import {foo_2_1param as foo_2_1param} from "./imported_module_2.ets"
+import {foo1, foo1} from './imported_module_1.ets'
+import {foo2With1param as foo2With1param} from './imported_module_2.ets'
 
 
 function main() : void {
-    assertEQ(foo_1(), 0);
-    assertEQ(foo_2_1param(1), 1);
+    arktest.assertEQ(foo1(), 0);
+    arktest.assertEQ(foo2With1param(1), 1);
 }

@@ -18,7 +18,7 @@ files:
 - ./c_module.ets
 ---*/
 
-import {CC} from "./c_module"
+import {CC} from './c_module'
 
 function main(): void {
     let cc:CC;

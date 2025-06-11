@@ -17,20 +17,20 @@
   files: [ambient_const_vars.ets]
 ---*/
 
-import { int_1, int_2, int_3, int_4, int_5, int_6 } from "./ambient_const_vars.ets";
-import { double_1, double_2, double_3, double_4, double_5, double_6 } from "./ambient_const_vars.ets";
+import { INT_1, INT_2, INT_3, INT_4, INT_5, INT_6 } from './ambient_const_vars.ets';
+import { DOUBLE_1, DOUBLE_2, DOUBLE_3, DOUBLE_4, DOUBLE_5, DOUBLE_6 } from './ambient_const_vars.ets';
 
 function main(): void {
-    let a1 = int_1;
-    let a2 = int_2;
-    let a3 = int_3;
-    let a4 = int_4;
-    let a5 = int_5;
-    let a6 = int_6;
-    let b1 = double_1;
-    let b2 = double_2;
-    let b3 = double_3;
-    let b4 = double_4;
-    let b5 = double_5;
-    let b6 = double_6;
+    let a1 = INT_1;
+    let a2 = INT_2;
+    let a3 = INT_3;
+    let a4 = INT_4;
+    let a5 = INT_5;
+    let a6 = INT_6;
+    let b1 = DOUBLE_1;
+    let b2 = DOUBLE_2;
+    let b3 = DOUBLE_3;
+    let b4 = DOUBLE_4;
+    let b5 = DOUBLE_5;
+    let b6 = DOUBLE_6;
 }

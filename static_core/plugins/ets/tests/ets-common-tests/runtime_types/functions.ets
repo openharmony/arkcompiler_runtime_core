@@ -16,7 +16,7 @@
 function xassert(a: Any, b: Any) { return assertEQ(a, b) }
 
 function fakeLambdaInvoke(a: string, b: string | undefined): string {
-    return a + (b === undefined ? "u" : b);
+    return a + (b === undefined ? 'u' : b);
 }
 
 class FakeLambdaObject extends Lambda2 implements Function1<Any, Any> {
@@ -41,16 +41,16 @@ class FakeLambdaObject extends Lambda2 implements Function1<Any, Any> {
 }
 
 function testF1(f: Function1<Any, Any>) {
-    xassert(f.invoke1("a"), "au")
-    xassert(f.invoke2("a", "b"), "ab")
-    xassert(f.invoke3("a", "b", "c"), "ab")
-    xassert(f.invokeR1("a"), "au")
-    xassert(f.invokeR1("a", "b"), "ab")
-    xassert(f.invokeR1("a", "b", "c"), "ab")
-    xassert(f.invokeR2("a", "b"), "ab")
-    xassert(f.invokeR2("a", "b", "c"), "ab")
-    xassert(f.invokeR3("a", "b", "c"), "ab")
-    xassert(f.invokeR3("a", "b", "c", "d"), "ab")
+    xassert(f.invoke1('a'), 'au')
+    xassert(f.invoke2('a', 'b'), 'ab')
+    xassert(f.invoke3('a', 'b', 'c'), 'ab')
+    xassert(f.invokeR1('a'), 'au')
+    xassert(f.invokeR1('a', 'b'), 'ab')
+    xassert(f.invokeR1('a', 'b', 'c'), 'ab')
+    xassert(f.invokeR2('a', 'b'), 'ab')
+    xassert(f.invokeR2('a', 'b', 'c'), 'ab')
+    xassert(f.invokeR3('a', 'b', 'c'), 'ab')
+    xassert(f.invokeR3('a', 'b', 'c', 'd'), 'ab')
 }
 
 function main() {

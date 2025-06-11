@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-function EscapeTest() {
-    const escapeSeqGolden = "A%20B%u1234%00%20C";
+function escapeTest() {
+    const escapeSeqGolden = 'A%20B%u1234%00%20C';
     const escapeSeqActual = escape(String.fromCharCode(0x41, 0x20, 0x42, 0x1234, 0, 0x20, 0x43));
-    assertEQ(escapeSeqActual, escapeSeqGolden, "escapeSeqActual must be equal to escapeSeqGolden");
+    arktest.assertEQ(escapeSeqActual, escapeSeqGolden, 'escapeSeqActual must be equal to escapeSeqGolden');
 }
 
-function OverflowSingleCasesTest() {
+function overflowSingleCasesTest() {
     // on arm32 this case should be disabled due to
     // https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBSVYX
-    assertEQ(string.fromCharCode(NaN), "\u{0}", "CharCode[0] of a string built from NaN must be 0");
-    assertEQ(string.fromCharCode(NaN).length, 1);
-    assertEQ(string.fromCharCode(Infinity), "\u{0}", "CharCode[0] of a string built from Infinity must be 0");
-    assertEQ(string.fromCharCode(Infinity).length, 1);
+    arktest.assertEQ(string.fromCharCode(NaN), '\u{0}', 'CharCode[0] of a string built from NaN must be 0');
+    arktest.assertEQ(string.fromCharCode(NaN).length, 1);
+    arktest.assertEQ(string.fromCharCode(Infinity), '\u{0}', 'CharCode[0] of a string built from Infinity must be 0');
+    arktest.assertEQ(string.fromCharCode(Infinity).length, 1);
 }
 
 function main(): int {
-    let fromCharCodeEscapeTestsuite = new ArkTestsuite("intrinsics.string_from_char_code_escape");
-    fromCharCodeEscapeTestsuite.addTest("EscapeTest", EscapeTest);
-    fromCharCodeEscapeTestsuite.addTest("OverflowSingleCases", OverflowSingleCasesTest);
+    let fromCharCodeEscapeTestsuite = new arktest.ArkTestsuite('intrinsics.string_from_char_code_escape');
+    fromCharCodeEscapeTestsuite.addTest('escapeTest', escapeTest);
+    fromCharCodeEscapeTestsuite.addTest('OverflowSingleCases', overflowSingleCasesTest);
     return fromCharCodeEscapeTestsuite.run();
 }

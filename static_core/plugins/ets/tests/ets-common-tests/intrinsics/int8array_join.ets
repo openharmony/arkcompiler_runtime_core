@@ -14,12 +14,12 @@
  */
 
 const SINGLE = [1];
-const ARRAY = [-128,-1,0,1,2,3,4,5,6,7,8,9,127];
-const EMPTY_JOINED = "-128-10123456789127";
-const COMMA_JOINED = "-128,-1,0,1,2,3,4,5,6,7,8,9,127";
-const NSIGN_JOINED = "-128###-1###0###1###2###3###4###5###6###7###8###9###127";
-const UTF16_JOINED = "-128 ΔΘΩ -1 ΔΘΩ 0 ΔΘΩ 1 ΔΘΩ 2 ΔΘΩ 3 ΔΘΩ 4 ΔΘΩ 5 ΔΘΩ 6 ΔΘΩ 7 ΔΘΩ 8 ΔΘΩ 9 ΔΘΩ 127";
-const UTF16_JOINED_1 = "-128Ω-1Ω0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω127";
+const ARRAY: Array<Double> = [-128, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 127];
+const EMPTY_JOINED = '-128-10123456789127';
+const COMMA_JOINED = '-128,-1,0,1,2,3,4,5,6,7,8,9,127';
+const NSIGN_JOINED = '-128###-1###0###1###2###3###4###5###6###7###8###9###127';
+const UTF16_JOINED = '-128 ΔΘΩ -1 ΔΘΩ 0 ΔΘΩ 1 ΔΘΩ 2 ΔΘΩ 3 ΔΘΩ 4 ΔΘΩ 5 ΔΘΩ 6 ΔΘΩ 7 ΔΘΩ 8 ΔΘΩ 9 ΔΘΩ 127';
+const UTF16_JOINED_1 = '-128Ω-1Ω0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω127';
 
 function joinEmpty(): void {
     let a: Int8Array = new Int8Array(0);
@@ -29,8 +29,8 @@ function joinEmpty(): void {
 
 function joinSingle(): void {
     let a: Int8Array = new Int8Array(SINGLE);
-    assertEQ(a.join(), "1");
-    assertEQ(a.join(","), "1");
+    arktest.assertEQ(a.join(), '1');
+    arktest.assertEQ(a.join(','), '1');
 }
 
 function joinDefaultDelim(): void {
@@ -40,38 +40,38 @@ function joinDefaultDelim(): void {
 
 function joinEmptyDelim(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join(""), EMPTY_JOINED);
+    arktest.assertEQ(a.join(''), EMPTY_JOINED);
 }
 
 function joinCommaDelim(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join(","), COMMA_JOINED);
+    arktest.assertEQ(a.join(','), COMMA_JOINED);
 }
 
 function joinNsignDelim(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join("###"), NSIGN_JOINED);
+    arktest.assertEQ(a.join('###'), NSIGN_JOINED);
 }
 
 function joinUtf16Delim(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join(" ΔΘΩ "), UTF16_JOINED);
+    arktest.assertEQ(a.join(' ΔΘΩ '), UTF16_JOINED);
 }
 
 function joinUtf16Delim1(): void {
     let a: Int8Array = new Int8Array(ARRAY);
-    assertEQ(a.join("Ω"), UTF16_JOINED_1);
+    arktest.assertEQ(a.join('Ω'), UTF16_JOINED_1);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Int8Array.join() tests")
-    suite.addTest("join an empty Int8Array", joinEmpty)
-    suite.addTest("join a single-element Int8Array", joinSingle)
-    suite.addTest("join a normal Int8Array using default delimiter", joinDefaultDelim)
-    suite.addTest("join a normal Int8Array using empty delimiter", joinEmptyDelim)
-    suite.addTest("join a normal Int8Array using comma delimiter", joinCommaDelim)
-    suite.addTest("join a normal Int8Array using nsign delimiter", joinNsignDelim)
-    suite.addTest("join a normal Int8Array using utf16 delimiter", joinUtf16Delim)
-    suite.addTest("join a normal Int8Array using a single utf16 char delimiter", joinUtf16Delim1)
+    const suite = new arktest.ArkTestsuite('Int8Array.join() tests')
+    suite.addTest('join an empty Int8Array', joinEmpty)
+    suite.addTest('join a single-element Int8Array', joinSingle)
+    suite.addTest('join a normal Int8Array using default delimiter', joinDefaultDelim)
+    suite.addTest('join a normal Int8Array using empty delimiter', joinEmptyDelim)
+    suite.addTest('join a normal Int8Array using comma delimiter', joinCommaDelim)
+    suite.addTest('join a normal Int8Array using nsign delimiter', joinNsignDelim)
+    suite.addTest('join a normal Int8Array using utf16 delimiter', joinUtf16Delim)
+    suite.addTest('join a normal Int8Array using a single utf16 char delimiter', joinUtf16Delim1)
     return suite.run()
 }

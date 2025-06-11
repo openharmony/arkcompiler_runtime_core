@@ -17,11 +17,11 @@
   tags: [not-a-test]
 ---*/
 
-namespace foo {
+namespace Foo {
     export function foo(): int {
         return 142
     }
 }
 
-export default foo
+export default Foo
 

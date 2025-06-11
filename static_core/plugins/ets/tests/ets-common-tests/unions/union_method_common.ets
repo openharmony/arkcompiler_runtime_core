@@ -21,8 +21,8 @@ class B {
   meth(p: number): number { return p + 33.0 }
 }
 
-let u1: A|B = new A
-let u2: A|B = new B
+let u1: A | B = new A
+let u2: A | B = new B
 
 function main() {
   assertEQ(u1.meth(1.0), 43.0);
