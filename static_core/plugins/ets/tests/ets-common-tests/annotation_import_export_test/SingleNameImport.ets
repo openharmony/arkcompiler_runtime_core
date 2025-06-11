@@ -17,14 +17,14 @@
   files: [AnnotationsSrc.ets]
 ---*/
 
-import {ClassAuthor} from "./AnnotationsSrc"
+import {ClassAuthor} from './AnnotationsSrc'
 
 @ClassAuthor()
 class MyClass {
    @ClassAuthor
-   foo(){}
+   foo() {}
 }
 
 @ClassAuthor
-function main(){}
+function main() {}
 

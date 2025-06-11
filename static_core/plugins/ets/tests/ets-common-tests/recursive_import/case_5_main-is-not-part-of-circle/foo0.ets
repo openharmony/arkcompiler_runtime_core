@@ -17,7 +17,7 @@
     files: [foo1.ets]
 ---*/
 
-import {main as foo_main} from "./foo1"
+import {main as foo_main} from './foo1'
 
 function main() : void {
     foo_main();

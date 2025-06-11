@@ -13,49 +13,49 @@
  * limitations under the License.
  */
 
-let compressable_strings_table: FixedArray<String> = [
-    "\0",
-    "0",
-    "01",
-    "012",
-    "0123",
-    "01234",
-    "012345",
-    "0123456",
-    "01234567",
-    "012345678",
-    "0123456789",
-    "0123456789a",
-    "0123456789ab",
-    "0123456789abc",
-    "0123456789abcd",
-    "0123456789abcde",
-    "0123456789abcdef",
-    "0123456789abcdefg",
-    "0123456789abcdefgh",
-    "0123456789abcdefghi",
-    "0123456789abcdefghij",
-    "0123456789abcdefghijk"
+let compressableStringsTable: FixedArray<String> = [
+    '\0',
+    '0',
+    '01',
+    '012',
+    '0123',
+    '01234',
+    '012345',
+    '0123456',
+    '01234567',
+    '012345678',
+    '0123456789',
+    '0123456789a',
+    '0123456789ab',
+    '0123456789abc',
+    '0123456789abcd',
+    '0123456789abcde',
+    '0123456789abcdef',
+    '0123456789abcdefg',
+    '0123456789abcdefgh',
+    '0123456789abcdefghi',
+    '0123456789abcdefghij',
+    '0123456789abcdefghijk'
 ];
 
-let uncompressable_strings_table: FixedArray<String> = [
-    "\u0000",
-    "\u00b0",
-    "\u00b0\u00b1",
-    "\u00b0\u00b1\u00b2",
-    "\u00b0\u00b1\u00b2\u00b3",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be",
-    "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf"
+let uncompressableStringsTable: FixedArray<String> = [
+    '\u0000',
+    '\u00b0',
+    '\u00b0\u00b1',
+    '\u00b0\u00b1\u00b2',
+    '\u00b0\u00b1\u00b2\u00b3',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be',
+    '\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf'
 ];
 
 let compressable_hashcode_table: FixedArray<int> = [
@@ -103,60 +103,60 @@ let uncompressable_hashcode_table: FixedArray<int> = [
     -1966137336
 ];
 
-let hash_collision_a: FixedArray<char> = [ 1, 0 ];
-let hash_collision_b: FixedArray<char> = [ 0, 31 ];
-let hash_collision_c: FixedArray<char> = [ 2, 0 ];
-let hash_collision_d: FixedArray<char> = [ 1, 31 ];
+let hashCollisionA: FixedArray<char> = [1, 0];
+let hashCollisionB: FixedArray<char> = [0, 31];
+let hashCollisionC: FixedArray<char> = [2, 0];
+let hashCollisionD: FixedArray<char> = [1, 31];
 
 function main(): int {
-    for (let i: int = 0; i < compressable_strings_table.length; i++) {
-        let hashcode: int = compressable_strings_table[i].$_hashCode();
+    for (let i: int = 0; i < compressableStringsTable.length; i++) {
+        let hashcode: int = compressableStringsTable[i].$_hashCode();
         if (hashcode != compressable_hashcode_table[i]) {
-            console.println("Expected hashcode: " + compressable_hashcode_table[i] +
-                            ", computed hashcode: " + hashcode +
-                            " (compressable, i = " + i + ")");
-            console.println("FAIL");
+            console.println('Expected hashcode: ' + compressable_hashcode_table[i] +
+                            ', computed hashcode: ' + hashcode +
+                            ' (compressable, i = ' + i + ')');
+            console.println('FAIL');
             return 1;
         }
     }
 
-    for (let i: int = 0; i < uncompressable_strings_table.length; i++) {
-        let hashcode: int = uncompressable_strings_table[i].$_hashCode();
+    for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
+        let hashcode: int = uncompressableStringsTable[i].$_hashCode();
         if (hashcode != uncompressable_hashcode_table[i]) {
-            console.println("Expected hashcode: " + uncompressable_hashcode_table[i] +
-                            ", computed hashcode: " + hashcode +
-                            " (uncompressable, i = " + i + ")");
-            console.println("FAIL");
+            console.println('Expected hashcode: ' + uncompressable_hashcode_table[i] +
+                            ', computed hashcode: ' + hashcode +
+                            ' (uncompressable, i = ' + i + ')');
+            console.println('FAIL');
             return 2;
         }
     }
 
     // Test hash collisions
-    let hc_a: String = new String(hash_collision_a);
-    let hc_b: String = new String(hash_collision_b);
-    if (hc_a.$_hashCode() != 31) {
-      console.println("hc_a hashcode: " + hc_a.$_hashCode());
-      console.println("FAIL");
+    let hcA: String = new String(hashCollisionA);
+    let hcB: String = new String(hashCollisionB);
+    if (hcA.$_hashCode() != 31) {
+      console.println('hcA hashcode: ' + hcA.$_hashCode());
+      console.println('FAIL');
       return 3;
     }
-    if (hc_a.$_hashCode() != hc_b.$_hashCode()) {
-      console.println("hc_a hashcode: " + hc_a.$_hashCode());
-      console.println("hc_b hashcode: " + hc_b.$_hashCode());
-      console.println("FAIL");
+    if (hcA.$_hashCode() != hcB.$_hashCode()) {
+      console.println('hcA hashcode: ' + hcA.$_hashCode());
+      console.println('hcB hashcode: ' + hcB.$_hashCode());
+      console.println('FAIL');
       return 4;
     }
 
-    let hc_c: String = new String(hash_collision_c);
-    let hc_d: String = new String(hash_collision_d);
-    if (hc_c.$_hashCode() != 62) {
-      console.println("hc_c hashcode: " + hc_c.$_hashCode());
-      console.println("FAIL");
+    let hcC: String = new String(hashCollisionC);
+    let hcD: String = new String(hashCollisionD);
+    if (hcC.$_hashCode() != 62) {
+      console.println('hcC hashcode: ' + hcC.$_hashCode());
+      console.println('FAIL');
       return 5;
     }
-    if (hc_c.$_hashCode() != hc_d.$_hashCode()) {
-      console.println("hc_c hashcode: " + hc_c.$_hashCode());
-      console.println("hc_d hashcode: " + hc_d.$_hashCode());
-      console.println("FAIL");
+    if (hcC.$_hashCode() != hcD.$_hashCode()) {
+      console.println('hcC hashcode: ' + hcC.$_hashCode());
+      console.println('hcD hashcode: ' + hcD.$_hashCode());
+      console.println('FAIL');
       return 6;
     }
 

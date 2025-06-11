@@ -18,9 +18,9 @@ files:
 - ./export.ets
 ---*/
 
-import {default as c, bar} from "./export.ets";
+import {default as c, bar} from './export.ets';
 
-function main(){
+function main() {
     arktest.assertEQ(c, 10)
     arktest.assertEQ(bar, 7)
 }

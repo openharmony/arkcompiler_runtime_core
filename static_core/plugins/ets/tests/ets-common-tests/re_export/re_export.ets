@@ -18,4 +18,4 @@
   files: [export.ets]
 ---*/
 
-export * from "./export"
+export * from './export'

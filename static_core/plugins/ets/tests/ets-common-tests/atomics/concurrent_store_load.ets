@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let RESULT = 10 as long
 

@@ -19,14 +19,14 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo_in_3} from "./foo3"
+import {fooIn3} from './foo3'
 
 export class A {
-    a: int;
+    public a: int;
 }
 
 
 export function main() : void {
     let a = new A();
-    foo_in_3();
+    fooIn3();
 }

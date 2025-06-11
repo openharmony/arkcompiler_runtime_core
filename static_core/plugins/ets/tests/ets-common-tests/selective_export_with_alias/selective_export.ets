@@ -17,26 +17,26 @@
 tags: [not-a-test]
 ---*/
 
-function test_func(): void {}
+function testFunc(): void {}
 
-let msg = "hello";
+let msg = 'hello';
 
 class TestClass {
-    test_member = "test_member";
+    public testMember = 'test_member';
 
-    test_method(): void {}
+    testMethod(): void {}
 }
 
 class AliasClass {
-    alias_class_method(): void {
-        console.print("alias_class_method");
+    aliasClassMethod(): void {
+        console.print('alias_class_method');
     }
 }
 
 type aliased = AliasClass;
 
 export {
-    test_func as func, msg,
+    testFunc as func, msg,
     TestClass as tc,
     aliased
 }

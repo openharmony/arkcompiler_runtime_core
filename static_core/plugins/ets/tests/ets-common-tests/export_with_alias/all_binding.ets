@@ -18,7 +18,7 @@ files:
 - ./b_module.ets
 ---*/
 
-import * as B from "./b_module"
+import * as B from './b_module'
 
 function main(): void {
     let bb:B.BB;

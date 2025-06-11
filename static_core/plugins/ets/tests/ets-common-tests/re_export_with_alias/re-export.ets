@@ -18,7 +18,7 @@
   files: [export.ets]
 ---*/
 
-import {foo} from "./export"
+import {foo} from './export'
 
-export {foo as a} from "./export"
-export * from "./export"
+export {foo as a} from './export'
+export * from './export'

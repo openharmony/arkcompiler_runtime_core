@@ -19,12 +19,12 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo_in_3} from "./foo3"
+import {foo_in_3} from './foo3'
 
 export class A {}
 
 export function foo_in_2(): int {
-    console.log("in foo_in_2");
+    console.log('in foo_in_2');
     foo_in_3();
     return 0;
 }

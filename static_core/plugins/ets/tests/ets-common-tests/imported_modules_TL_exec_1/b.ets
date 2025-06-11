@@ -18,7 +18,7 @@
   files: [c.ets]
 ---*/
 
-import {c} from "./c.ets"
+import {c} from './c.ets'
 
 export let b : int = 1;
 

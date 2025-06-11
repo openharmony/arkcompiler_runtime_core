@@ -17,6 +17,6 @@
   tags: [not-a-test]
 ---*/
 
-export default function f(b : int){
+export default function f(b : int) {
     return b + 1;
 }

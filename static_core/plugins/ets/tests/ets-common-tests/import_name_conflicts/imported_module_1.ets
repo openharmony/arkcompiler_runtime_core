@@ -24,17 +24,17 @@ export let b: int = 2;
 export class B {}
 
 class BType {
-    b : int;
+    public b : int;
 }
 export type {BType}
 
-export function foo_1() : int {
+export function foo1() : int {
     return 0;
 }
 
-export function foo_1_1param(a : int) : int {
+export function foo1With1param(a : int) : int {
     return a;
 }
 
-export default function foo_1_default() : void {}
+export default function foo1default() : void {}
 

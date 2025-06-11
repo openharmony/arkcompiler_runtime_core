@@ -18,17 +18,17 @@ files:
 - ./selective_export.ets
 ---*/
 
-import * as all from "./selective_export"
-import {func} from "./selective_export"
+import * as all from './selective_export'
+import {func} from './selective_export'
 
 function main(): void {
     func();
     console.print(all.msg);
 
-    let test_var: all.tc = new all.tc();
-    console.print(test_var.test_member);
-    test_var.test_method();
+    let testVar: all.tc = new all.tc();
+    console.print(testVar.testMember);
+    testVar.testMethod();
 
-    let alias_var = new all.aliased();
-    alias_var.alias_class_method();
+    let aliasVar = new all.aliased();
+    aliasVar.aliasClassMethod();
 }

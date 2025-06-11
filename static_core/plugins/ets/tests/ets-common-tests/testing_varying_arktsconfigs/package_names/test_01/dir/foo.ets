@@ -18,7 +18,7 @@
   arktsconfig: arktsconfig.json
 ---*/
 
-import { bar } from "@dir_with_same_prefix/bar"
+import { bar } from '@dir_with_same_prefix/bar'
 
 function main() {
     bar();

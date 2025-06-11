@@ -17,7 +17,7 @@
     files: [class_module.ets]
 ---*/
 
-import * as A from "./class_module.ets"
+import * as A from './class_module.ets'
 
 function main() : void {
   A.TestClass.foo();

@@ -17,9 +17,9 @@
     files: [b.ets]
 ---*/
 
-import {foo} from "./b"
+import {foo} from './b'
 function main() {
     let x = foo()
-    arktest.assertEQ(x, "")
+    arktest.assertEQ(x, '')
 }
 
