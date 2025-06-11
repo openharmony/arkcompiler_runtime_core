@@ -1046,7 +1046,7 @@ function testCasetestBaseBoolFunc5() {
             });
     });
     let res: boolean;
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {
         res = await p;
     } catch (e) {
@@ -1067,7 +1067,7 @@ function testCasetestBaseBoolFunc5_1() {
             });
     });
     let res: boolean;
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {
         res = await p;
     } catch (e) {

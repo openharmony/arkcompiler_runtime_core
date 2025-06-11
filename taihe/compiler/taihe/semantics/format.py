@@ -119,7 +119,7 @@ class PrettyFormatter(DeclVisitor[str]):
         comment = self.as_comment(f"/* {real_package} */")
         return f"{package_ref_repr} {comment}"
 
-    def get_decl_ref_decl(self, d: "DeclarationRefDecl") -> str:
+    def get_declaration_ref_decl(self, d: "DeclarationRefDecl") -> str:
         decl_ref_repr = d.symbol
         if not d.is_resolved or not self.show_resolved:
             return decl_ref_repr
@@ -206,9 +206,9 @@ class PrettyPrinter(DeclVisitor[None]):
         as_kw = self.fmt.as_keyword("as")
 
         alias_pair = (
-            f"{self.fmt.get_decl_ref_decl(d.decl_ref)} {as_kw} {d.name}"
+            f"{self.fmt.get_declaration_ref_decl(d.decl_ref)} {as_kw} {d.name}"
             if d.is_alias()
-            else self.fmt.get_decl_ref_decl(d.decl_ref)
+            else self.fmt.get_declaration_ref_decl(d.decl_ref)
         )
 
         self.out.writeln(
@@ -331,11 +331,11 @@ class PrettyPrinter(DeclVisitor[None]):
     def visit_package_decl(self, p: "PackageDecl"):
         self.out.writeln(f"// {p.name}")
         self.write_pkg_attr(p)
-        for d in p.pkg_imports.values():
+        for d in p.pkg_imports:
             self.handle_decl(d)
-        for d in p.decl_imports.values():
+        for d in p.decl_imports:
             self.handle_decl(d)
-        for d in p.decls.values():
+        for d in p.declarations:
             self.handle_decl(d)
 
     @override

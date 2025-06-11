@@ -19,6 +19,7 @@
 #include <taihe/string.abi.h>
 #include <taihe/common.hpp>
 
+#include <algorithm>
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
@@ -145,7 +146,7 @@ struct string_view {
 
     friend struct string;
 
-    friend string concat(string_view left, string_view right);
+    friend string concat(std::initializer_list<string_view> sv_list);
     friend string_view substr(string_view sv, std::size_t pos, std::size_t len);
     friend string operator+(string_view left, string_view right);
     string_view substr(std::size_t pos, std::size_t len) const;
@@ -195,14 +196,19 @@ struct string : public string_view {
     string &operator+=(string_view other);
 };
 
-inline string concat(string_view left, string_view right)
+inline string concat(std::initializer_list<string_view> sv_list)
 {
-    return string(tstr_concat(left.m_handle, right.m_handle));
+    struct TString tstr_list[sv_list.size()];
+    std::size_t i = 0;
+    for (auto it : sv_list) {
+        tstr_list[i++] = it.m_handle;
+    }
+    return string(tstr_concat(sv_list.size(), tstr_list));
 }
 
 inline string operator+(string_view left, string_view right)
 {
-    return string(tstr_concat(left.m_handle, right.m_handle));
+    return concat({left, right});
 }
 
 inline string &string::operator+=(string_view other)
@@ -259,8 +265,7 @@ template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 inline string to_string(T value)
 {
     char buffer[32];
-    std::to_chars_result result = std::to_chars(std::begin(buffer),
-                                                std::end(buffer), value);
+    std::to_chars_result result = std::to_chars(std::begin(buffer), std::end(buffer), value);
     if (result.ec != std::errc {}) {
         TH_THROW(std::runtime_error, "Conversion to char failed");
     }
@@ -291,12 +296,12 @@ string to_string(T value)
     }
 }
 
-inline std::size_t hash_impl(adl_helper_t, string_view val)
+inline std::size_t hash_adl(adl_tag_t, string_view val)
 {
     return std::hash<std::string_view> {}(val);
 }
 
-inline bool same_impl(adl_helper_t, string_view lhs, string_view rhs)
+inline bool same_adl(adl_tag_t, string_view lhs, string_view rhs)
 {
     return lhs == rhs;
 }
