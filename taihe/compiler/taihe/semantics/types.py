@@ -51,9 +51,6 @@ class Type(metaclass=ABCMeta):
 
     ty_ref: "TypeRefDecl"
 
-    def __post_init__(self):
-        self.ty_ref.maybe_resolved_ty = self
-
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} {self.signature}>"
 

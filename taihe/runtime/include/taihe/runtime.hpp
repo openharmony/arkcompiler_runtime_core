@@ -73,6 +73,19 @@ void set_business_error(int32_t err_code, taihe::string_view msg);
 void reset_error();
 bool has_error();
 
+// convert between ani types and taihe types
+template <typename cpp_owner_t>
+struct from_ani_t;
+
+template <typename cpp_owner_t>
+struct into_ani_t;
+
+template <typename cpp_owner_t>
+constexpr inline from_ani_t<cpp_owner_t> from_ani;
+
+template <typename cpp_owner_t>
+constexpr inline into_ani_t<cpp_owner_t> into_ani;
+
 template <std::size_t N = 0>
 struct nullable_fixed_string {
     bool is_null;

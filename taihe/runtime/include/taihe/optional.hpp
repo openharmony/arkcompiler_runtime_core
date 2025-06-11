@@ -95,7 +95,25 @@ struct optional : public optional_view<cpp_owner_t> {
     template <typename... Args>
     static optional make(Args &&...args)
     {
-        return optional(std::in_place_t {}, std::forward<Args>(args)...);
+        return optional(std::in_place, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    cpp_owner_t &emplace(Args &&...args)
+    {
+        if (this->m_handle) {
+            delete this->m_handle;
+        }
+        this->m_handle = new cpp_owner_t(std::forward<Args>(args)...);
+        return *this->m_handle;
+    }
+
+    void reset()
+    {
+        if (this->m_handle) {
+            delete this->m_handle;
+            this->m_handle = nullptr;
+        }
     }
 
     optional(optional_view<cpp_owner_t> const &other) : optional(other ? new cpp_owner_t(*other) : nullptr) {}
@@ -119,13 +137,13 @@ struct optional : public optional_view<cpp_owner_t> {
 };
 
 template <typename cpp_owner_t>
-inline std::size_t hash_impl(adl_helper_t, optional_view<cpp_owner_t> val)
+inline std::size_t hash_adl(adl_tag_t, optional_view<cpp_owner_t> val)
 {
     return val ? hash(*val) + 0x9e3779b9 : 0;
 }
 
 template <typename cpp_owner_t>
-inline bool same_impl(adl_helper_t, optional_view<cpp_owner_t> lhs, optional_view<cpp_owner_t> rhs)
+inline bool same_adl(adl_tag_t, optional_view<cpp_owner_t> lhs, optional_view<cpp_owner_t> rhs)
 {
     return (!lhs && !rhs) || (lhs && rhs && same(*lhs, *rhs));
 }

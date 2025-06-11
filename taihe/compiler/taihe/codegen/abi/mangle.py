@@ -72,16 +72,8 @@ class DeclKind(Enum):
     UNION = "union"
     FTABLE = "ftable"
     VTABLE = "vtable"
-    COPY = "copy"
-    DROP = "drop"
     DYNAMIC_CAST = "dynamic"
     STATIC_CAST = "static"
-
-    NAPI_FUNC = "NAPI"
-
-    ANI_FUNC = "ANIFunc"
-    FROM_ANI = "fromANI"
-    INTO_ANI = "intoANI"
 
 
 def _encode_uleb8(value: int) -> list[int]:
@@ -211,7 +203,7 @@ def decode(mangled_name: str) -> tuple[list[str], DeclKind]:
 
     base_name = mangled_name[:last_underscore]
     kind = DeclKind(mangled_name[last_underscore + 1])
-    encoding = mangled_name[last_underscore + 2:]
+    encoding = mangled_name[last_underscore + 2 :]
 
     # Decode special underscore positions
     special_positions = []

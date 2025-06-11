@@ -45,7 +45,7 @@ class AniBridgeBackendConfig(BackendConfig):
                     return
                 for pkg in self._ci.package_group.packages:
                     if not pkg.get_last_attr("sts_keep_name"):
-                        d = AttrItemDecl(None, "sts_keep_name", ())
+                        d = AttrItemDecl(None, "sts_keep_name")
                         pkg.add_attr(d)
 
             def generate(self):

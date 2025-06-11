@@ -28,7 +28,18 @@ class CppCommonHeadersBackendConfig(BackendConfig):
     def construct(self, instance: CompilerInstance) -> Backend:
         from taihe.codegen.cpp.gen_common import CppHeadersGenerator
 
-        return CppHeadersGenerator(instance)
+        class CppCommonHeadersBackendImpl(Backend):
+            def __init__(self, ci: CompilerInstance):
+                super().__init__(ci)
+                self._ci = ci
+
+            def generate(self):
+                oc = self._ci.output_config
+                am = self._ci.analysis_manager
+                pg = self._ci.package_group
+                CppHeadersGenerator(oc, am).generate(pg)
+
+        return CppCommonHeadersBackendImpl(instance)
 
 
 @dataclass
@@ -66,4 +77,15 @@ class CppUserHeadersBackendConfig(BackendConfig):
     def construct(self, instance: CompilerInstance) -> Backend:
         from taihe.codegen.cpp.gen_user import CppUserHeadersGenerator
 
-        return CppUserHeadersGenerator(instance)
+        class CppUserHeadersBackendImpl(Backend):
+            def __init__(self, ci: CompilerInstance):
+                super().__init__(ci)
+                self._ci = ci
+
+            def generate(self):
+                oc = self._ci.output_config
+                am = self._ci.analysis_manager
+                pg = self._ci.package_group
+                CppUserHeadersGenerator(oc, am).generate(pg)
+
+        return CppUserHeadersBackendImpl(instance)

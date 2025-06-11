@@ -186,8 +186,7 @@ class FileWriter(BaseWriter):
             comment_prefix=comment_prefix,
             debug_level=oc.debug_level,
         )
-        pass
-        self._path = oc.dst_dir / path
+        self._path = None if oc.dst_dir is None else oc.dst_dir / path
 
     def __enter__(self):
         return self
@@ -201,7 +200,7 @@ class FileWriter(BaseWriter):
         del exc_val, exc_tb
 
         # Discard on exception
-        if not exc_type:
+        if not exc_type and self._path is not None:
             self.save_as(self._path)
 
         # Propagate the exception if exists

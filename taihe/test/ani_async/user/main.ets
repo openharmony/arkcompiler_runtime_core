@@ -20,7 +20,7 @@ loadLibrary("ani_async");
 function testSyncAdd() {
     {
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = async_test.addSync(1, 2);
         } catch (e) {
@@ -30,7 +30,7 @@ function testSyncAdd() {
     }
     {
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = async_test.addSync(0, 2);
         } catch (e) {
@@ -56,7 +56,7 @@ function testAsyncAdd() {
             });
         });
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = await promise;
         } catch (e) {
@@ -75,7 +75,7 @@ function testAsyncAdd() {
             });
         });
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = await promise;
         } catch (e) {
@@ -92,7 +92,7 @@ function testAsyncAdd() {
 function testPromiseAdd() {
     {
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = await async_test.add(1, 2);
         } catch (e) {
@@ -102,7 +102,7 @@ function testPromiseAdd() {
     }
     {
         let res: int;
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             res = await async_test.add(0, 2);
         } catch (e) {
@@ -135,7 +135,7 @@ function testStructMethods() {
         {a: "abc", b: "efg", c: 3});  // should not throw an error
 
     {
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             await async_test.fromStruct({a: "abc", b: "efg", c: 0});
         } catch (e) {
@@ -153,7 +153,7 @@ function testStructMethods() {
     assertEQ(data.c, 1, "Data.c should be 1");
 
     {
-        let err: BusinessError;
+        let err: BusinessError = new BusinessError();
         try {
             data = await async_test.toStruct("aaa", "bbb", 0);
         } catch (e) {

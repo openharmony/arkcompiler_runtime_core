@@ -27,7 +27,7 @@ from antlr4.tree.Tree import ErrorNodeImpl, TerminalNodeImpl, Tree
 from taihe.parse.antlr.TaiheAST import TaiheAST
 from taihe.parse.antlr.TaiheLexer import TaiheLexer
 from taihe.parse.antlr.TaiheParser import TaiheParser
-from taihe.utils.diagnostics import AbstractDiagnosticsManager
+from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import IDLSyntaxError
 from taihe.utils.sources import (
     SourceBase,
@@ -88,7 +88,7 @@ class TaiheErrorListener(ErrorListener):
     def __init__(
         self,
         recorder: SourceCodeLocator,
-        diag: AbstractDiagnosticsManager,
+        diag: DiagnosticsManager,
     ) -> None:
         super().__init__()
         self.recorder = recorder
@@ -153,7 +153,7 @@ class TaiheASTConverter:
         return getattr(TaiheAST, real_kind)(**kwargs)
 
 
-def generate_ast(source: SourceBase, diag: AbstractDiagnosticsManager) -> TaiheAST.Spec:
+def generate_ast(source: SourceBase, diag: DiagnosticsManager) -> TaiheAST.Spec:
     if isinstance(source, SourceBuffer):
         input_stream = InputStream(source.buf)
     elif isinstance(source, SourceFile):
