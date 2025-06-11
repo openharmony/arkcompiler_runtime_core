@@ -285,7 +285,7 @@ void TimerModule::TimerInfo::InvokeCallback(ani_env *env)
     ASSERT(status == ANI_OK);
 
     auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-    ark::ets::interop::js::INTEROP_CODE_SCOPE_JS(coro);
+    ark::ets::interop::js::INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     status = env->Object_CallMethod_Void(callback, invokeMethod);
     ASSERT(status == ANI_OK);

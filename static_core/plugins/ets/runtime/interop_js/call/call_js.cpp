@@ -130,7 +130,7 @@ private:
 template <bool IS_NEWCALL, typename ArgSetup>
 ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
 {
-    [[maybe_unused]] InteropCodeScopeETS codeScope(coro_, __PRETTY_FUNCTION__);
+    [[maybe_unused]] InteropETSToJSCodeScope codeScope(coro_, __PRETTY_FUNCTION__);
     napi_env env = ctx_->GetJSEnv();
     NapiScope jsHandleScope(env);
 

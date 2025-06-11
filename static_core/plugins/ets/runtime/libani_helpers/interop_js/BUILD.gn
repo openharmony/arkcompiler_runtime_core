@@ -30,6 +30,7 @@ ohos_source_set("hybridgref_static") {
 
   sources = [
     "arkts_esvalue.cpp",
+    "arkts_interop_js_api.cpp",
     "hybridgref_ani.cpp",
     "hybridgref_napi.cpp",
   ]

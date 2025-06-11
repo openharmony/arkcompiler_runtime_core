@@ -52,7 +52,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
@@ -91,7 +91,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
     size_t argc;
