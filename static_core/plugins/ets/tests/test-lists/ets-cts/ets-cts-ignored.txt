@@ -463,6 +463,18 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_2.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/single_interface_overload_neg_1.ets
 
+#26554 overloads for static methods span the inheritance
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_3.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_4.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_13.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_18.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_26.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_31.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_34.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_37.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_8.ets
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/static_method_over_n2_11.ets
+
 #23477: Bad candidate function invoked
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/ex_6_1.ets
 
@@ -545,6 +557,13 @@
 
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/05.iterable_types/it_4.ets
+
+#26554 overloads for static methods span the inheritance
+17.experimental_features/06.callable_types/01.callable_types_with_invoke_method/ct_invoke_10.ets
+17.experimental_features/06.callable_types/01.callable_types_with_invoke_method/ct_invoke_11.ets
+17.experimental_features/06.callable_types/02.callable_types_with_instantiate_method/ct_inst_12.ets
+17.experimental_features/06.callable_types/02.callable_types_with_instantiate_method/ct_inst_13.ets
+17.experimental_features/06.callable_types/02.callable_types_with_instantiate_method/ct_inst_access_4.ets
 
 #15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
