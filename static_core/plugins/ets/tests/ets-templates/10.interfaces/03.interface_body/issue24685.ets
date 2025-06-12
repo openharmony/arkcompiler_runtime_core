@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Issue 24865. Passing default value to interface method param gives AssertionError
+desc: Issue 24685. Passing default value to interface method param gives AssertionError
 tags: []
 ---*/
 
