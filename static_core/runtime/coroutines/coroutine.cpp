@@ -19,6 +19,8 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/panda_vm.h"
 
+#include "runtime/trace.h"
+
 namespace ark {
 #ifdef ARK_HYBRID
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
@@ -127,12 +129,24 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     bool hasWorker = (GetWorker() != nullptr);
     bool wasActive = hasWorker && (oldStatus == Coroutine::Status::RUNNABLE || oldStatus == Coroutine::Status::RUNNING);
     bool isActive = hasWorker && (newStatus == Coroutine::Status::RUNNABLE || newStatus == Coroutine::Status::RUNNING);
+    IssueTracingEvents(oldStatus, newStatus);
     if (UNLIKELY(wasActive != isActive)) {
         if (wasActive && !isActive) {
             GetManager()->OnCoroBecameNonActive(this);
         } else if (!wasActive && isActive) {
             GetManager()->OnCoroBecameActive(this);
         }
+    }
+}
+
+void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
+{
+    bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;
+    if (isMutator && newStatus == Coroutine::Status::RUNNING && oldStatus != Coroutine::Status::RUNNING) {
+        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+    }
+    if (isMutator && newStatus != Coroutine::Status::RUNNING && oldStatus == Coroutine::Status::RUNNING) {
+        Tracer::FinishAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
     }
 }
 

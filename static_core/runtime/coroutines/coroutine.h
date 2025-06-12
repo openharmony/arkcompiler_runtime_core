@@ -354,6 +354,8 @@ protected:
 private:
     /// a converter function that stores the data from EntrypointInfo in the member variables
     void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
+    /// Method starts or ends tracing base on statuses
+    void IssueTracingEvents(Status oldStatus, Status newStatus);
 
     PandaString name_;
     uint32_t coroutineId_ = 0;

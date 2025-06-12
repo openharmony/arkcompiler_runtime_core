@@ -29,8 +29,16 @@ enable_hilog =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
     (current_cpu == "arm64" || current_cpu == "arm")
 
+enable_hitrace =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
 if (enable_hilog) {
   hiviewdfx_ext_deps += [ "hilog:libhilog" ]
+}
+
+if (enable_hitrace) {
+  hiviewdfx_ext_deps += [ "hitrace:hitrace_meter" ]
 }
 
 if (is_standard_system || ark_standalone_build) {
@@ -172,6 +180,7 @@ is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
 
 if (is_ohos && is_standard_system) {
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
+  hitrace_root = "//base/hiviewdfx/hitrace/interfaces/native/innerkits"
 }
 
 ## TODO add other arch

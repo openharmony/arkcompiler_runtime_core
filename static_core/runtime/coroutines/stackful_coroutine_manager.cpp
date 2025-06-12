@@ -26,6 +26,8 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread_scopes.h"
 
+#include "runtime/trace.h"
+
 namespace ark {
 
 uint8_t *StackfulCoroutineManager::AllocCoroutineStack()
@@ -57,11 +59,14 @@ void StackfulCoroutineManager::CreateMainCoroAndWorkers(size_t howMany, Runtime 
 void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
     os::memory::LockHolder lh(workersLock_);
+    Tracer::Start(Tracer::WORKERS_EXPANSION);
     CreateWorkersImpl(howMany, runtime, vm);
+    Tracer::Finish();
 }
 
 void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
+    Tracer::Start(Tracer::WORKERS_CONTRACTION);
     struct EntrypointParam {
         explicit EntrypointParam(size_t wCount, CoroutineManager *coroMan)
             : wCount_(wCount), workerFinalizationEvent(coroMan)
@@ -107,6 +112,7 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
         workersCv_.Wait(&workersLock_);
     }
     ASSERT(activeWorkersCount_ > 0);
+    Tracer::Finish();
 }
 
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForFinalization()
@@ -717,6 +723,8 @@ bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo
     if (!result) {
         ThrowOutOfMemoryError("LaunchWithMode failed");
     }
+
+    Tracer::Count(Tracer::LAUNCH, 1U);
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithMode finished";
     return result;
