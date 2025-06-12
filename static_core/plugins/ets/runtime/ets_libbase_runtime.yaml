@@ -1374,6 +1374,60 @@ intrinsics:
     safe_intrinsic: true
 
 #################
+# escompat.JSON #
+#################
+  - name: EscompatJSONGetJSONStringifyIgnoreByIdx
+    space: ets
+    class_name: escompat.JSONAPI
+    method_name: getJSONStringifyIgnoreByIdx
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::EscompatJSONGetJSONStringifyIgnoreByIdx
+
+  - name: EscompatJSONGetJSONStringifyIgnoreByName
+    space: ets
+    class_name: escompat.JSONAPI
+    method_name: getJSONStringifyIgnoreByName
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class, std.core.String ]
+    impl: ark::ets::intrinsics::EscompatJSONGetJSONStringifyIgnoreByName
+
+  - name: EscompatJSONGetJSONParseIgnoreFromAnnotation
+    space: ets
+    class_name: escompat.JSONAPI
+    method_name: getJSONParseIgnoreFromAnnotation
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::EscompatJSONGetJSONParseIgnoreFromAnnotation
+
+  - name: EscompatJSONGetJSONRenameByIdx
+    space: ets
+    class_name: escompat.JSONAPI
+    method_name: getJSONRenameByIdx
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class, i64 ]
+    impl: ark::ets::intrinsics::EscompatJSONGetJSONRenameByIdx
+
+  - name: EscompatJSONGetJSONRenameByName
+    space: ets
+    class_name: escompat.JSONAPI
+    method_name: getJSONRenameByName
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Class, std.core.String ]
+    impl: ark::ets::intrinsics::EscompatJSONGetJSONRenameByName
+
+
+#################
 # escompat.Date #
 #################
   - name: EscompatDateNow
