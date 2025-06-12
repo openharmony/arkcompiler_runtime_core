@@ -617,6 +617,7 @@ Runtime::~Runtime()
     signalManager_->DeleteHandlersArray();
     delete signalManager_;
 #endif
+
     delete cha_;
     delete classLinker_;
     if (dprofiler_ != nullptr) {
@@ -816,6 +817,10 @@ bool Runtime::InitializePandaVM()
 
 bool Runtime::HandleAotOptions()
 {
+    if (AotEscapeSignalHandler::IsEscapeSignalFlagExists()) {
+        LOG(WARNING, AOT) << "HandleAotOptions: AOT mode has escaped and roll back to interpreter mode";
+        return true;
+    }
     auto aotFiles = options_.GetAotFiles();
     const auto &name = options_.GetAotFile();
     if (!name.empty()) {
@@ -880,6 +885,7 @@ void Runtime::HandleJitOptions()
     }
     RegisterSignalHandler<StackOverflowHandler>(signalManager_, true);
     RegisterSignalHandler<CrashFallbackDumpHandler>(signalManager_, false);
+    RegisterSignalHandler<AotEscapeSignalHandler>(signalManager_, false);
 #endif
 }
 
