@@ -7306,6 +7306,22 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
 ###############################
+# std.core.RuntimeDebug #
+###############################
+
+####################
+
+  - name: StdDebugCountInstancesOfClass
+    space: ets
+    class_name: std.debug.RuntimeDebug
+    method_name: countInstancesOfClass
+    static: true
+    signature:
+      ret: i32
+      args: [ std.core.ClassType ]
+    impl: ark::ets::intrinsics::CountInstancesOfClass
+
+###############################
 # std.core.Debugger #
 ###############################
 

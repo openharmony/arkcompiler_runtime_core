@@ -103,6 +103,7 @@ public:
     EtsClass *coreField {};
     EtsClass *coreMethod {};
     EtsClass *coreParameter {};
+    EtsClass *coreClassType {};
 
     /* escompat.Process */
     EtsClass *escompatProcess {};

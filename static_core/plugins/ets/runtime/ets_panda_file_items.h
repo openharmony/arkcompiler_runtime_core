@@ -49,6 +49,9 @@ static constexpr std::string_view METHOD                               = "Lstd/c
 static constexpr std::string_view PARAMETER                            = "Lstd/core/Parameter;";
 static constexpr std::string_view STRING_BUILDER                       = "Lstd/core/StringBuilder;";
 
+// TypeAPI classes
+static constexpr std::string_view CLASS_TYPE                           = "Lstd/core/ClassType;";
+
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
 static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
