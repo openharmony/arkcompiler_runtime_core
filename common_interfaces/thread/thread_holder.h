@@ -34,6 +34,19 @@ class Coroutine;
 }  // namespace ark
 
 namespace panda {
+// This is a temporary impl to adapt interop to cmc, because some interop call napi
+// without transfering to NATIVE
+using InterOpCoroutineToNativeHookFunc = bool (*)(ThreadHolder *current);
+using InterOpCoroutineToRunningHookFunc = bool (*)(ThreadHolder *current);
+
+bool InterOpCoroutineToNative(ThreadHolder *current);
+bool InterOpCoroutineToRunning(ThreadHolder *current);
+
+void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
+void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
+}  // namespace panda
+
+namespace panda {
 class BaseThread;
 class ThreadHolderManager;
 
