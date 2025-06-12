@@ -102,31 +102,37 @@ class TestSuiteOptions(IOptions):
         return str(self.__parameters[self.__WORK_DIR])
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument(
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
+        dest = f"{dest}." if dest else ""
+        config = parser.add_argument_group(title="Test suite default options")
+        config.add_argument(
             f'--{TestSuiteOptions.__FILTER}', '-f', action='store',
             default=TestSuiteOptions.__DEFAULT_FILTER,
+            dest=f"{dest}{TestSuiteOptions.__FILTER}",
             help=f'test filter wildcard. By default \'{TestSuiteOptions.__DEFAULT_FILTER}\'')
         repeats_group = parser.add_mutually_exclusive_group(required=False)
         repeats_group.add_argument(
             f'--{TestSuiteOptions.__REPEATS}', action='store',
             type=lambda arg: check_int(arg, f"--{TestSuiteOptions.__REPEATS}", is_zero_allowed=False),
             default=TestSuiteOptions.__DEFAULT_REPEATS,
+            dest=f"{dest}{TestSuiteOptions.__REPEATS}",
             help=f'how many times to repeat the suite entirely. By default {TestSuiteOptions.__DEFAULT_REPEATS}')
         repeats_group.add_argument(
             f'--{TestSuiteOptions.__REPEATS_BY_TIME}', action='store',
             type=lambda arg: check_int(arg, f"--{TestSuiteOptions.__REPEATS_BY_TIME}", is_zero_allowed=True),
             default=TestSuiteOptions.__DEFAULT_REPEATS_BY_TIME,
+            dest=f"{dest}{TestSuiteOptions.__REPEATS_BY_TIME}",
             help=f'number of seconds during which the suite is repeated. '
                  f'Number of repeats is always integer. By default {TestSuiteOptions.__DEFAULT_REPEATS_BY_TIME}')
-        parser.add_argument(
+        config.add_argument(
             f'--{TestSuiteOptions.__WITH_JS}', action='store_true',
             default=TestSuiteOptions.__WITH_JS,
+            dest=f"{dest}{TestSuiteOptions.__WITH_JS}",
             help='enable JS-related tests')
 
-        TestListsOptions.add_cli_args(parser)
-        ETSOptions.add_cli_args(parser)
-        GroupsOptions.add_cli_args(parser)
+        TestListsOptions.add_cli_args(parser, dest)
+        ETSOptions.add_cli_args(parser, dest)
+        GroupsOptions.add_cli_args(parser, dest)
 
     @staticmethod
     def __fill_collection(content: dict) -> dict:

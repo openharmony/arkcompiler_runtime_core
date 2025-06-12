@@ -19,7 +19,16 @@ import argparse
 from functools import cached_property
 from typing import Any
 
+from runner.enum_types.base_enum import BaseEnum
 from runner.options.options import IOptions
+
+
+class ETSOptionsConsts(BaseEnum):
+    PARAMETERS = "parameters"
+    FORCE_GENERATE = "force-generate"
+    COMPARE_FILES = "compare-files"
+    COMPARE_FILES_ITERATIONS = "compare-files-iterations"
+    DEFAULT_COMPARE_FILES_ITERATIONS = 2
 
 
 class ETSOptions(IOptions):
@@ -37,16 +46,21 @@ class ETSOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         parser.add_argument(
-            f'--{ETSOptions.__FORCE_GENERATE}', action='store_true', default=False,
+            f'--{ETSOptionsConsts.FORCE_GENERATE.value}',
+            action='store_true',
+            default=False,
+            dest=f"{dest}{ETSOptionsConsts.FORCE_GENERATE.value}",
             help='force generating the ETS test cases from templates')
         parser.add_argument(
-            f'--{ETSOptions.__COMPARE_FILES}', action='store_true', default=False,
+            f'--{ETSOptionsConsts.COMPARE_FILES.value}', action='store_true', default=False,
+            dest=f"{dest}{ETSOptionsConsts.COMPARE_FILES.value}",
             help='switch on mode of comparing compiled abc files')
         parser.add_argument(
-            f'--{ETSOptions.__COMPARE_FILES_ITERATIONS}', action='store_true',
-            default=ETSOptions.__DEFAULT_COMPARE_FILES_ITERATIONS,
+            f'--{ETSOptionsConsts.COMPARE_FILES_ITERATIONS.value}', action='store_true',
+            default=ETSOptionsConsts.DEFAULT_COMPARE_FILES_ITERATIONS.value,
+            dest=f"{dest}{ETSOptionsConsts.COMPARE_FILES_ITERATIONS.value}",
             help='number of comparing abc files. By default 2')
 
     @cached_property

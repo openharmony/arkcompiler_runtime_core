@@ -48,33 +48,40 @@ class TestListsOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         # Test lists options
         parser.add_argument(
             f'--{TestListsOptions.__TEST_LIST}', default=None,
+            dest=f"{dest}{TestListsOptions.__TEST_LIST}",
             help='run only the tests listed in this file')
         parser.add_argument(
             f'--{TestListsOptions.__TEST_FILE}', default=None,
+            dest=f"{dest}{TestListsOptions.__TEST_FILE}",
             help='run only one test specified here')
         parser.add_argument(
             f'--{TestListsOptions.__SKIP_TEST_LISTS}', action='store_true', default=False,
+            dest=f"{dest}{TestListsOptions.__SKIP_TEST_LISTS}",
             help='do not use ignored or excluded lists, run all available tests, report all found failures')
         parser.add_argument(
             f'--{TestListsOptions.__UPDATE_EXCLUDED}', action='store_true', default=False,
+            dest=f"{dest}{TestListsOptions.__UPDATE_EXCLUDED}",
             help='update list of excluded tests - put all failed tests into default excluded test list')
         parser.add_argument(
             f'--{TestListsOptions.__UPDATE_EXPECTED}', action='store_true', default=False,
+            dest=f"{dest}{TestListsOptions.__UPDATE_EXPECTED}",
             help='update files with expected results')
         parser.add_argument(
             f'--{TestListsOptions.__TEST_LIST_ARCH}', action='store',
             default=TestListsOptions.__DEFAULT_ARCH,
             type=lambda arg: ArchitectureKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_ARCH}"),
+            dest=f"{dest}{TestListsOptions.__TEST_LIST_ARCH}",
             help='load specified architecture specific test lists. '
                  f'One of: {ArchitectureKind.values()}')
         parser.add_argument(
             f'--{TestListsOptions.__TEST_LIST_SAN}', action='store',
             default=TestListsOptions.__DEFAULT_SAN,
             type=lambda arg: SanitizerKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_SAN}"),
+            dest=f"{dest}{TestListsOptions.__TEST_LIST_SAN}",
             help='load specified sanitizer specific test lists. '
                  f'One of {SanitizerKind.values()} where '
                  'asan - used on running against build with ASAN and UBSAN sanitizers), '
@@ -83,12 +90,14 @@ class TestListsOptions(IOptions):
             f'--{TestListsOptions.__TEST_LIST_OS}', action='store',
             default=TestListsOptions.__DEFAULT_OS,
             type=lambda arg: OSKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_OS}"),
+            dest=f"{dest}{TestListsOptions.__TEST_LIST_OS}",
             help='load specified operating system specific test lists. '
                  f'One of {OSKind.values()}')
         parser.add_argument(
             f'--{TestListsOptions.__TEST_LIST_BUILD}', action='store',
             default=TestListsOptions.__DEFAULT_BUILD_TYPE,
             type=lambda arg: BuildTypeKind.is_value(arg, f"--{TestListsOptions.__TEST_LIST_BUILD}"),
+            dest=f"{dest}{TestListsOptions.__TEST_LIST_BUILD}",
             help='load specified build type specific test lists. '
                  f'One of {BuildTypeKind.values()}')
 

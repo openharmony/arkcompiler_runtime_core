@@ -15,15 +15,16 @@
 # limitations under the License.
 
 import argparse
-import sys
 from glob import glob
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from runner import utils
 from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
 from runner.enum_types.config_type import ConfigType
 from runner.logger import Log
+from runner.options import cli_options_utils as cli_utils
+from runner.options.cli_options_utils import CliOptionsConsts
 from runner.options.options_general import GeneralOptions
 from runner.options.options_test_suite import TestSuiteOptions
 
@@ -32,6 +33,7 @@ _LOGGER = Log.get_logger(__file__)
 CliOptionType = str | int | float | bool | list
 OptionType = CliOptionType | dict | Path | None
 ArgListType = list[str]
+
 
 
 class CliOptions:
@@ -289,6 +291,163 @@ class CliOptions:
         self.__process_test_suite(test_suite_cli)
 
 
+class ConfigsLoader:
+
+    def __init__(self, workflow_name: str, test_suite_name: str):
+        self.workflow_name = workflow_name
+        self.test_suite_name = test_suite_name
+
+    def get_workflow_path(self) -> Path:
+        return utils.get_config_workflow_folder().joinpath(self.workflow_name + '.yaml')
+
+    def get_test_suite_path(self) -> Path:
+        return utils.get_config_test_suite_folder().joinpath(self.test_suite_name + '.yaml')
+
+    def load_workflow_config(self) -> dict[str, cli_utils.ConfigPropertyType]:
+        return utils.load_config(self.get_workflow_path())
+
+    def load_test_suite_config(self) -> dict[str, cli_utils.ConfigPropertyType]:
+        return utils.load_config(self.get_test_suite_path())
+
+
+class CliParserBuilder:
+
+    def __init__(self, configs_loader: ConfigsLoader):
+        self.configs = configs_loader
+
+    @staticmethod
+    def runner_options(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+        GeneralOptions.add_cli_args(parser, f"{CliOptionsConsts.CFG_RUNNER.value}")
+        return parser
+
+    @staticmethod
+    def create_parser_for_runner() -> argparse.ArgumentParser:
+        return CliParserBuilder.runner_options(argparse.ArgumentParser(
+                add_help=False, description="Config 'URunner' options",
+                conflict_handler="resolve"))
+
+    @staticmethod
+    def default_test_suite_options(parser: argparse.ArgumentParser, test_suite_name: str) -> argparse.ArgumentParser:
+        TestSuiteOptions.add_cli_args(parser, f"{test_suite_name}.{CliOptionsConsts.CFG_PARAMETERS.value}")
+        return parser
+
+    @staticmethod
+    def gather_config_options(cfg_name: str, cfg_data: dict,
+                              parser: argparse.ArgumentParser) -> tuple[argparse.ArgumentParser, dict]:
+
+        if CliOptionsConsts.CFG_TYPE.value not in cfg_data:
+            raise InvalidConfiguration(f"Cannot detect type of config {cfg_name}. "
+                                       f"Have you specified key {CliOptionsConsts.CFG_TYPE.value}?")
+        cli_params = cfg_data.get(CliOptionsConsts.CFG_PARAMETERS.value, {})
+
+        config = parser.add_argument_group(title=f"Config '{cfg_name}' options")
+
+        keys_with_default_lists = {}
+        for key, default_value in cli_params.items():
+            if isinstance(default_value, list):
+                keys_with_default_lists[f'{cfg_name}.{CliOptionsConsts.CFG_PARAMETERS.value}.{key}'] = default_value
+            try:
+                config.add_argument(
+                    f"--{key}", action='append' if isinstance(default_value, list) else 'store',
+                    default=None if isinstance(default_value, list) else default_value,
+                    dest=f'{cfg_name}.{CliOptionsConsts.CFG_PARAMETERS.value}.{key}',
+                    help=f"Config '{cfg_name}', parameter '{key}'"
+                )
+            except (argparse.ArgumentError, argparse.ArgumentTypeError) as exp:
+                raise InvalidConfiguration(f"An exception occurred when adding parameter {key} "
+                                           f"with default value = {default_value}") from exp
+        return parser, keys_with_default_lists
+
+    def create_parser_for_workflow(self) -> tuple[argparse.ArgumentParser, dict[str, list]]:
+        parser_for_config, keys_from_wf = self.create_parser_for_config(
+            config_name=self.configs.workflow_name,
+            config_data=self.configs.load_workflow_config()
+        )
+        return parser_for_config, keys_from_wf
+
+    def create_parser_for_test_suite(self) -> tuple[argparse.ArgumentParser, dict[str, list]]:
+        parser_for_test_suite, keys_from_ts = self.create_parser_for_config(
+            config_name=self.configs.test_suite_name,
+            config_data=self.configs.load_test_suite_config())
+        return parser_for_test_suite, keys_from_ts
+
+    def create_parser_for_default_test_suite(self) -> argparse.ArgumentParser:
+        return CliParserBuilder.default_test_suite_options(argparse.ArgumentParser(
+            add_help=False, description="Config 'URunner' options",
+            conflict_handler="resolve"), self.configs.test_suite_name)
+
+    def create_parser_for_config(self, config_name: str,
+                                 config_data: dict) -> tuple[argparse.ArgumentParser, dict]:
+        wf_config = argparse.ArgumentParser(
+            add_help=False, description=f"Config '{config_name}' options",
+            conflict_handler="resolve",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser_options, keys_list = self.gather_config_options(cfg_name=config_name, cfg_data=config_data,
+                                                               parser=wf_config)
+        return parser_options, keys_list
+
+
+class CliOptionsParser:
+
+    def __init__(self, configs_loader: ConfigsLoader, runner_parser: argparse.ArgumentParser,
+                 test_suite_parser: argparse.ArgumentParser,
+                 default_test_suite_parser: argparse.ArgumentParser,
+                 workflow_parser: argparse.ArgumentParser, *argv: str):
+        self.configs = configs_loader
+
+        self.runner_parser = runner_parser
+        self.test_suite_parser = test_suite_parser
+        self.default_test_suite_parser = default_test_suite_parser
+        self.workflow_parser = workflow_parser
+        self.argv = argv
+        self.full_options: dict[str, Any] = {} # type: ignore[explicit-any]
+
+    def parse_args(self) -> None:
+        usage_wf_configs = (f'WORKFLOW - workflow config name, one of '
+                            f'{cli_utils.get_config_list(Path(utils.get_config_workflow_folder()))}')
+        usage_ts_configs = ('\nTEST_SUITE - test suite config name, one of '
+                            f'{cli_utils.get_config_list(Path(utils.get_config_test_suite_folder()))}')
+        usage = (f"%(prog)s {self.configs.workflow_name} {self.configs.test_suite_name} [options]\n\n"
+                 f"{usage_wf_configs} {usage_ts_configs}")
+        parser = argparse.ArgumentParser(
+            usage=usage,
+            description="Regression test runner",
+            parents=[self.runner_parser, self.test_suite_parser, self.default_test_suite_parser,
+                     self.workflow_parser],
+            conflict_handler="resolve",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        try:
+            self.full_options = vars(parser.parse_args(self.argv))
+        except (argparse.ArgumentError, argparse.ArgumentTypeError):
+            parser.print_help()
+
+
 def get_args() -> dict[str, OptionType]:
-    cli = CliOptions(sys.argv[1:])
-    return cli.data
+    usage = "Urunner should be run with at least two options: WORKFLOW_NAME, TEST_SUITE"
+    parser = argparse.ArgumentParser(description="Urunner arg parser", usage=usage)
+
+    parser.add_argument("workflow_name", help="Workflow name")
+    parser.add_argument("test_suite_name", help="Test suite name")
+    parser.add_argument("other_args", nargs=argparse.REMAINDER, help="Other urunner options")
+    args = parser.parse_args()
+
+    configs_loader = ConfigsLoader(args.workflow_name, args.test_suite_name)
+    cli_utils.check_valid_workflow_name(cli_utils.WorkflowName(args.workflow_name))
+    cli_utils.check_valid_test_suite_name(cli_utils.TestSuiteName(args.test_suite_name))
+
+    parser_builder = CliParserBuilder(configs_loader)
+    test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+    workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+    cli = CliOptionsParser(configs_loader, parser_builder.create_parser_for_runner(),
+                            test_suite_parser,
+                            parser_builder.create_parser_for_default_test_suite(),
+                            workflow_parser, *args.other_args)
+    cli.parse_args()
+
+    parsed_options = cli.full_options
+    parsed_options = cli_utils.restore_duplicated_options(configs_loader, parsed_options)
+    parsed_options = cli_utils.add_config_info(configs_loader, parsed_options)
+    parsed_options = cli_utils.restore_default_list(parsed_options, key_lists_ts | key_lists_wf)
+
+    return parsed_options
