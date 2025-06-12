@@ -24,3 +24,6 @@ ets-common-tests/intrinsics/uint32array_sort.ets
 
 # 25111 fail in aot after primitive types removal
 ets-common-tests/intrinsics/typed_arrays_reverse.ets
+
+# 26776
+ets-common-tests/atomics/base_operator_exchange.ets

@@ -158,7 +158,7 @@ export namespace taskpool {
          */
         constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
             this.name = name;
-            this.f = (): NullishType => {
+            this.taskFunction = (): NullishType => {
                 return func.unsafeCall(...args);
             };
             this.totalDuration = 0;
@@ -179,7 +179,7 @@ export namespace taskpool {
          * @param { ...NullishType } args arguments for function to execute with
          */
         constructor(func: Function, ...args: FixedArray<NullishType>) {
-            this("", func, ...args);
+            this(func.name, func, ...args);
         }
 
         /**
@@ -347,7 +347,7 @@ export namespace taskpool {
         }
 
         /// Concurrent function to execute in taskpool
-        f: () => NullishType;
+        taskFunction: () => NullishType;
 
         /// The concurrent function arguments
         arguments?: NullishType[];
@@ -467,7 +467,7 @@ export namespace taskpool {
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
-                result = this.f();
+                result = this.taskFunction();
                 this.callUserCallback(this.onSuccessCallback);
             } catch (e: Error) {
                 try {
@@ -912,7 +912,7 @@ export namespace taskpool {
         if (isTaskPoolUseLaunch) {
             return launchPromise(func, ...args);
         }
-        let task = new Task("", func, ...args);
+        let task = new Task(func.name, func, ...args);
         return execute(task);
     }
 
@@ -1276,6 +1276,7 @@ export namespace taskpool {
         executingTasks.set(CoroutineExtras.getCoroutineId(), task);
         const currentWorkerId: int = CoroutineExtras.getWorkerId();
         task.workerId = currentWorkerId;
+        currentExecutingTasks.set(currentWorkerId, task);
         const workerTasks: Set<Task> = workerToTasks.get(currentWorkerId, /* default */ new Set<Task>());
         workerTasks.add(task);
         workerToTasks.set(currentWorkerId, workerTasks);
@@ -1310,7 +1311,10 @@ export namespace taskpool {
 
     function getCurrentTaskUnsafe(): Task | undefined {
         // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
-        return executingTasks.get(CoroutineExtras.getCoroutineId());
+        if (isTaskPoolUseLaunch) {
+            return executingTasks.get(CoroutineExtras.getCoroutineId());
+        }
+        return currentExecutingTasks.get(CoroutineExtras.getWorkerId());
     }
 
     function getCurrentTask(): Task | undefined {
@@ -1538,6 +1542,8 @@ export namespace taskpool {
     const groupsToBeCanceled: Set<long> = new Set<long>();
     // value is executing task on the associated coroutine
     const executingTasks: Map<CoroutineId, Task> = new Map<CoroutineId, Task>();
+    // value is current executing task on the associated worker
+    const currentExecutingTasks: Map<WorkerId, Task> = new Map<WorkerId, Task>();
     // value is set of executing tasks on this worker
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
 
