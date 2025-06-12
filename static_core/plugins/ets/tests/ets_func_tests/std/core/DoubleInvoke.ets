@@ -40,10 +40,16 @@ function testUndefinedInvoke(): void {
     assertEQ(tmp.toFixed(2).toString(), 'NaN');
 }
 
+function testNullInvoke(): void {
+    let tmp = Number(null);
+    assertEQ(tmp.toFixed(2).toString(), '0.00');
+}
+
 function main() {
     testVoidInvoke();
     testStringInvoke();
     testNumberInvoke();
     testBigintInvoke();
     testUndefinedInvoke();
+    testNullInvoke();
 }
