@@ -60,6 +60,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/arkplatform:arkplatform_header",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/arkplatform"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/libpandafile:arkfile_header_deps",
                     "header": {
                         "header_files": [],

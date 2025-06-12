@@ -95,3 +95,10 @@ ohos_shared_library("libarkplatform") {
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
+
+ohos_static_library("arkplatform_header") {
+  public_configs = [ ":arkplatform_public_config" ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
