@@ -24,6 +24,8 @@
 #include "runtime/coroutines/priority_queue.h"
 #include "runtime/include/external_callback_poster.h"
 
+#include "runtime/coroutines/stackful_coroutine_state_info.h"
+
 namespace ark {
 
 class StackfulCoroutineContext;
@@ -161,6 +163,12 @@ public:
 
     /// @brief Migrate all not affinned coroutines from worker
     void MigrateCoroutines() {}
+
+    /**
+     * @brief Method prints in info next information about coroutine worker:
+     *  - list of coroutine stacks on this worker
+     */
+    void GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const;
 
 #ifndef NDEBUG
     void PrintRunnables(const PandaString &requester);

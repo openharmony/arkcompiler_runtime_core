@@ -21,6 +21,8 @@
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 #include "runtime/coroutines/coroutine_stats.h"
 
+#include "runtime/coroutines/stackful_coroutine_state_info.h"
+
 namespace ark {
 
 /**
@@ -133,6 +135,8 @@ public:
      * @param co the awakened coroutine
      */
     void MigrateAwakenedCoro(Coroutine *co);
+
+    PandaUniquePtr<StackfulCoroutineStateInfoTable> GetAllWorkerFullStatus() const;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
