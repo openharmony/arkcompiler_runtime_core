@@ -3429,7 +3429,7 @@ public:
     bool HandleAnyCall0()
     {
         LOG_INST();
-        return false;
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -3660,6 +3660,15 @@ public:
         DBGBRK();
         Sync();
         // NOTE: handle it
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyIsinstance()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
         return true;
     }
 

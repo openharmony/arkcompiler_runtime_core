@@ -444,4 +444,6 @@ void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_
 }
 }  // namespace ark::intrinsics
 
+#include "core_any_intrinsics.inc"
+
 #include <intrinsics_gen.h>

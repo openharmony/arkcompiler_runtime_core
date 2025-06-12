@@ -242,6 +242,18 @@ JSCONVERT_UNWRAP(JSValue)
     return JSValue::Create(EtsCoroutine::GetCurrent(), ctx, jsVal);
 }
 
+JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
+JSCONVERT_WRAP(EtsObject)
+{
+    InteropFatal("Wrap of EtsObject should be done with relevant converter");
+    UNREACHABLE();
+}
+JSCONVERT_UNWRAP(EtsObject)
+{
+    auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
+    return objectConverter->Unwrap(ctx, jsVal);
+}
+
 // ESError convertors are supposed to box JSValue objects, do not treat them in any other way
 JSCONVERT_DEFINE_TYPE(ESError, EtsObject *);
 JSCONVERT_WRAP(ESError)
@@ -388,8 +400,8 @@ JSCONVERT_UNWRAP(EtsNull)
 #undef JSCONVERT_UNWRAP
 
 template <typename T>
-static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(InteropCtx *ctx, JSValue *jsvalue,
-                                                                                const char *name)
+ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(InteropCtx *ctx, JSValue *jsvalue,
+                                                                         const char *name)
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
@@ -405,8 +417,8 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
 }
 
 template <typename T>
-[[nodiscard]] static ALWAYS_INLINE inline bool JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
-                                                                typename T::cpptype etsPropVal)
+[[nodiscard]] ALWAYS_INLINE inline bool JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
+                                                         typename T::cpptype etsPropVal)
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);

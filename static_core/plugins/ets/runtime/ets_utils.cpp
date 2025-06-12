@@ -139,4 +139,87 @@ EtsField *ManglingUtils::GetFieldIDByDisplayName(EtsClass *klass, const PandaStr
 
     return field;
 }
+
+EtsObject *GetPropertyValue(EtsCoroutine *coro, const EtsObject *etsObj, EtsField *field)
+{
+    EtsType type = field->GetEtsType();
+    switch (type) {
+        case EtsType::BOOLEAN: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsBoolean>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::BYTE: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsByte>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::CHAR: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsChar>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::SHORT: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsShort>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::INT: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsInt>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::LONG: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsLong>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::FLOAT: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsFloat>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::DOUBLE: {
+            auto etsVal = etsObj->GetFieldPrimitive<EtsDouble>(field);
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+        }
+        case EtsType::OBJECT: {
+            return reinterpret_cast<EtsObject *>(etsObj->GetFieldObject(field));
+        }
+        default:
+            return nullptr;
+    }
+}
+
+bool SetPropertyValue(EtsCoroutine *coro, EtsObject *etsObj, EtsField *field, EtsObject *valToSet)
+{
+    ark::Value etsVal = GetUnboxedValue(coro, valToSet);
+    EtsType type = field->GetEtsType();
+    switch (type) {
+        case EtsType::BOOLEAN:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsBoolean>());
+            break;
+        case EtsType::BYTE:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsByte>());
+            break;
+        case EtsType::CHAR:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsChar>());
+            break;
+        case EtsType::SHORT:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsShort>());
+            break;
+        case EtsType::INT:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsInt>());
+            break;
+        case EtsType::LONG:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsLong>());
+            break;
+        case EtsType::FLOAT:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsFloat>());
+            break;
+        case EtsType::DOUBLE:
+            etsObj->SetFieldPrimitive(field, etsVal.GetAs<EtsDouble>());
+            break;
+        case EtsType::OBJECT:
+            etsObj->SetFieldObject(field, reinterpret_cast<EtsObject *>(valToSet));
+            break;
+        default:
+            return false;
+    }
+
+    return true;
+}
 }  // namespace ark::ets

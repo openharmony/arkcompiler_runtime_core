@@ -121,6 +121,7 @@ public:
     using UniqId = uint64_t;
     static constexpr uint32_t STRING_CLASS = DYNAMIC_CLASS << 1U;
     static constexpr uint32_t IS_CLONEABLE = STRING_CLASS << 1U;
+    static constexpr uint32_t XREF_CLASS = IS_CLONEABLE << 1U;
     static constexpr size_t IMTABLE_SIZE = 32;
 
     enum {
@@ -355,6 +356,11 @@ public:
         return (GetFlags() & STRING_CLASS) != 0;
     }
 
+    bool IsXRefClass() const
+    {
+        return (GetFlags() & XREF_CLASS) != 0;
+    }
+
     void SetStringClass()
     {
         SetFlags(GetFlags() | STRING_CLASS);
@@ -363,6 +369,11 @@ public:
     void SetCloneable()
     {
         SetFlags(GetFlags() | IS_CLONEABLE);
+    }
+
+    void SetXRefClass()
+    {
+        SetFlags(GetFlags() | XREF_CLASS);
     }
 
     bool IsVariableSize() const

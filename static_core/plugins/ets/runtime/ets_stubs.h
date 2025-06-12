@@ -47,6 +47,27 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj);
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj);
 
+EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name);
+
+void EtsStbyname(EtsCoroutine *coro, EtsObject *obj, panda_file::File::StringData propName, EtsObject *value);
+
+EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t index);
+
+bool EtsStbyidx(EtsCoroutine *coro, EtsObject *obj, uint32_t idx, EtsObject *value);
+
+bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *value);
+
+EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj);
+
+bool EtsIsinstance(EtsCoroutine *coro, EtsObject *lhsObj, EtsObject *rhsObj);
+
+EtsObject *EtsCall(EtsCoroutine *coro, EtsObject *funcObj, Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name,
+                       Span<VMHandle<ObjectHeader>> args);
+
+EtsObject *EtsCallNew(EtsCoroutine *coro, EtsObject *ctor, Span<VMHandle<ObjectHeader>> args);
+
 template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField);
 

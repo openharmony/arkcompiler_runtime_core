@@ -389,6 +389,7 @@ private:
     void BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
     void BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
     void BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildIsInstanceAny(const BytecodeInstruction *bcInst, DataType::Type type);
     template <bool IS_ACC_WRITE>
     void BuildAnyCall(const BytecodeInstruction *bcInst);
 

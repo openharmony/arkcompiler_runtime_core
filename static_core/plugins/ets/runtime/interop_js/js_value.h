@@ -166,6 +166,73 @@ public:
         return MEMBER_OFFSET(JSValue, type_);
     }
 
+    bool StrictEquals(JSValue *that)
+    {
+        if (this->GetType() != that->GetType()) {
+            return false;
+        }
+        switch (this->GetType()) {
+            case napi_string:
+                return this->GetString().Data() == that->GetString().Data();
+            case napi_undefined:
+            case napi_null:
+                return true;
+            case napi_boolean:
+                return this->GetBoolean() == that->GetBoolean();
+            case napi_number:
+                return this->GetNumber() == that->GetNumber();
+            case napi_bigint:
+                return this->GetBigInt() == that->GetBigInt();
+            default: {
+                ASSERT(IsRefType(GetType()));
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+                auto env = InteropCtx::Current()->GetJSEnv();
+                return *((uintptr_t *)(this->GetRefValue(env))) == *((uintptr_t *)(that->GetRefValue(env)));
+#else
+                INTEROP_LOG(ERROR) << "unable to perform gc-safe strict equal without hybrid VM";
+                return false;
+#endif
+            }
+        }
+    }
+
+    bool IsTrue()
+    {
+        switch (this->GetType()) {
+            case napi_string:
+                return !this->GetString().Data()->empty();
+            case napi_undefined:
+            case napi_null:
+                return true;
+            case napi_number:
+                return this->GetNumber() != 0;
+            case napi_bigint:
+                return this->GetBigInt()->second != 0;
+            default:
+                return true;
+        }
+    }
+
+    PandaString TypeOf()
+    {
+        switch (this->GetType()) {
+            case napi_string:
+                return "string";
+            case napi_undefined:
+                return "undefined";
+            case napi_null:
+                return "object";
+            case napi_number:
+                return "number";
+            case napi_bigint:
+                return "bigint";
+            case napi_function:
+                return "function";
+            default:
+                return "object";
+        }
+    }
+
     JSValue() = delete;
 
 private:

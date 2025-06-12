@@ -169,6 +169,13 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     SetClassRoot(ClassRoot::STRING, stringClass);
     stringClass->SetStringClass();
 
+    auto *jsValueClass = GetClassLinker()->GetClass(utf::CStringAsMutf8(JS_VALUE.data()), false, GetBootContext());
+    if (jsValueClass == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << JS_VALUE << "'";
+        return false;
+    }
+    jsValueClass->SetXRefClass();
+
     InitializeClassRoots();
 
     return true;

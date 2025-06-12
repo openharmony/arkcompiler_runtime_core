@@ -16,13 +16,15 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
 
-#include "runtime/include/runtime.h"
-#include "runtime/include/coretypes/string-inl.h"
+#include <cmath>
+
+#include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
-#include <cmath>
+#include "runtime/include/runtime.h"
+#include "runtime/include/coretypes/string-inl.h"
 
 namespace ark::ets {
 

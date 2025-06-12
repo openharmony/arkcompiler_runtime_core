@@ -322,6 +322,8 @@ templates:
     BuildLoadFromAnyByVal(instruction, <%= get_type(inst.dtype) %>);
     % when "stbyval"
     BuildStoreFromAnyByVal(instruction, <%= get_type(inst.type(0)) %>);
+    % when "isinstance"
+    BuildIsInstanceAny(instruction, <%= get_type(inst.dtype) %>);
     % else
     UNREACHABLE();
     % end

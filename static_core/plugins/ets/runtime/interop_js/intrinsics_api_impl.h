@@ -60,6 +60,15 @@ JSValue *JSRuntimeInvoke(JSValue *recv, JSValue *func, EtsArray *args);
 JSValue *JSRuntimeInstantiate(JSValue *callable, EtsArray *args);
 EtsString *JSValueToString(JSValue *object);
 napi_value ToLocal(void *value);
+void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value);
+void SetIndexedPropertyWithObject(JSValue *object, uint32_t index, EtsObject *value);
+void SetNamedPropertyWithObject(JSValue *object, const char *key, EtsObject *value);
+EtsObject *GetPropertyObject(JSValue *object, JSValue *property);
+EtsObject *GetPropertyObjectByString(JSValue *object, const char *property);
+EtsObject *GetNamedPropertyObject(JSValue *object, const char *property);
+JSValue *GetNamedPropertyJSValue(JSValue *object, const char *property);
+EtsObject *InvokeWithObjectReturn(JSValue *thisObj, JSValue *function, Span<VMHandle<ObjectHeader>> args);
+EtsObject *CreateObject(JSValue *ctor, Span<VMHandle<ObjectHeader>> args);
 void *CompilerGetJSNamedProperty(void *val, char *propStr);
 void *CompilerGetJSProperty(void *val, void *prop);
 void *CompilerGetJSElement(void *val, int32_t index);
@@ -127,7 +136,7 @@ void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T:
 }
 
 template <typename T>
-typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int32_t index)
+typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -166,7 +175,7 @@ void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptyp
     NapiScope jsHandleScope(env);
 
     auto rec = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
-                                JSConvertJSValue::WrapWithNullCheck(env, value));
+                                T::WrapWithNullCheck(env, value));
     if (rec != napi_ok) {
         ctx->ForwardJSException(coro);
     }

@@ -1623,63 +1623,78 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     return true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
 void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
 void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
                                           [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
                                         [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
                                         [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
-// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE: handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
 void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
 {
-    // NOTE(nsizov): issue(26115) support any type in 1.2 bytecode
-    // handle it
-    UNREACHABLE();
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildIsInstanceAny([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                     [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
 }  // namespace ark::compiler
