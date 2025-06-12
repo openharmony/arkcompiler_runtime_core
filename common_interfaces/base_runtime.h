@@ -28,6 +28,7 @@ class HeapManager;
 class MutatorManager;
 class ThreadHolderManager;
 class ThreadHolder;
+class BaseClassRoots;
 
 enum class GcType : uint8_t {
     ASYNC,
@@ -85,13 +86,18 @@ public:
     {
         return *heapManager_;
     }
+
+    BaseClassRoots &GetBaseClassRoots()
+    {
+        return *baseClassRoots_;
+    }
 private:
     RuntimeParam param_ {};
 
     HeapManager* heapManager_ = nullptr;
     MutatorManager* mutatorManager_ = nullptr;
     ThreadHolderManager* threadHolderManager_  = nullptr;
-
+    BaseClassRoots* baseClassRoots_ = nullptr;
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
