@@ -118,7 +118,7 @@ function(generate_code_from_idl this_target_name idl_files gen_ets_files idl_dir
 
   # 如果启用覆盖率，使用 coverage run
   if(ENABLE_COVERAGE)
-    list(APPEND COMMAND_TO_RUN "coverage" "run" "--parallel-mode" "-m" "taihe.cli.compiler" "-I" "${idl_dir}/idl" "-O" "${generated_dir}" "--ani" "--author" "${taihe_conf}")
+    list(APPEND COMMAND_TO_RUN "coverage" "run" "--parallel-mode" "-m" "taihe.cli.compiler" "-I" "${idl_dir}/idl" "-O" "${generated_dir}" "--ani" "--author" "${taihe_conf}" "--debug")
   else()
     list(APPEND COMMAND_TO_RUN "python" "-m" "taihe.cli.compiler" "-I" "${idl_dir}/idl" "-O" "${generated_dir}" "--ani" "--author" "${taihe_conf}")
   endif()
@@ -161,7 +161,7 @@ function(setup_panda_sdk)
   # 自动下载模式
   else()
     # 设置 PANDA 路径
-    set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.31538.tgz")
+    set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.36087.tgz")
     set(PANDA_SDK_URL "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/${PANDA_SDK_FILENAME}")
     set(PANDA_EXTRACT_DIR "${CMAKE_SOURCE_DIR}/.panda_vm")
     set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")

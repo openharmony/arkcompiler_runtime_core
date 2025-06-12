@@ -137,10 +137,22 @@ class DiagFatalError(DiagError):
 ########################
 
 
-class AbstractDiagnosticsManager(ABC):
+class DiagnosticsManager(ABC):
+    _max_level_record: Level = Level.NOTE
+
+    @property
+    def current_max_level(self):
+        """Returns the current maximum diagnostic level."""
+        return self._max_level_record
+
+    def reset(self):
+        """Resets the current maximum diagnostic level."""
+        self._max_level_record = Level.NOTE
+
     @abstractmethod
     def emit(self, diag: DiagBase) -> None:
-        ...
+        """Emits a new diagnostic message, don't forget to call it in subclasses."""
+        self._max_level_record = max(self._max_level_record, diag.LEVEL)
 
     @contextmanager
     def capture_error(self):
@@ -184,7 +196,7 @@ class AbstractDiagnosticsManager(ABC):
         return no_error
 
 
-class DiagnosticsManager(AbstractDiagnosticsManager):
+class ConsoleDiagnosticsManager(DiagnosticsManager):
     """Manages diagnostic messages."""
 
     def __init__(self, out: TextIO = stderr):
@@ -193,25 +205,15 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
             self._color_filter_fn = _passthrough
         else:
             self._color_filter_fn = _discard
-        self.reset_max_level()
 
     @override
     def emit(self, diag: DiagBase) -> None:
         """Emits a new diagnostic message."""
-        self._max_level_record = max(self._max_level_record, diag.LEVEL)
+        super().emit(diag)
         self._render(diag)
         for n in diag.notes():
             self._render(n)
         stderr.flush()
-
-    def reset_max_level(self):
-        self._max_level_record = -1
-
-    def current_max_level(self):
-        return self._max_level_record
-
-    def has_errors(self):
-        return self.current_max_level() >= Level.ERROR
 
     def _write(self, s: str):
         self._out.write(s)
@@ -219,7 +221,6 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
     def _flush(self):
         self._out.flush()
 
-    # TODO: could be slow.
     def _render_source_location(self, loc: SourceLocation):
         MAX_LINE_NO_SPACE = 5
         if not loc.text_range:

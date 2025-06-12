@@ -27,7 +27,18 @@ class AbiHeaderBackendConfig(BackendConfig):
     def construct(self, instance: CompilerInstance) -> Backend:
         from taihe.codegen.abi.gen_abi import ABIHeadersGenerator
 
-        return ABIHeadersGenerator(instance)
+        class ABIHeaderBackendImpl(Backend):
+            def __init__(self, ci: CompilerInstance):
+                super().__init__(ci)
+                self._ci = ci
+
+            def generate(self):
+                oc = self._ci.output_config
+                am = self._ci.analysis_manager
+                pg = self._ci.package_group
+                ABIHeadersGenerator(oc, am).generate(pg)
+
+        return ABIHeaderBackendImpl(instance)
 
 
 @dataclass
@@ -38,7 +49,18 @@ class AbiSourcesBackendConfig(BackendConfig):
     def construct(self, instance: CompilerInstance) -> Backend:
         from taihe.codegen.abi.gen_abi import ABISourcesGenerator
 
-        return ABISourcesGenerator(instance)
+        class ABISourcesBackendImpl(Backend):
+            def __init__(self, ci: CompilerInstance):
+                super().__init__(ci)
+                self._ci = ci
+
+            def generate(self):
+                oc = self._ci.output_config
+                am = self._ci.analysis_manager
+                pg = self._ci.package_group
+                ABISourcesGenerator(oc, am).generate(pg)
+
+        return ABISourcesBackendImpl(instance)
 
 
 @dataclass

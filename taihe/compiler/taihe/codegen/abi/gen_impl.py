@@ -59,6 +59,12 @@ class CImplHeadersGenerator:
         ) as pkg_c_impl_target:
             pkg_c_impl_target.add_include("taihe/common.h", pkg_abi_info.header)
             for func in pkg.functions:
+                for param in func.params:
+                    type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
+                    pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
+                if return_ty_ref := func.return_ty_ref:
+                    type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
                 self.gen_func(func, pkg_c_impl_target)
 
     def gen_func(
@@ -73,14 +79,12 @@ class CImplHeadersGenerator:
         args = []
         for param in func.params:
             type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
-            pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
             params.append(f"{type_abi_info.as_param} {param.name}")
             args.append(param.name)
         params_str = ", ".join(params)
         args_str = ", ".join(args)
         if return_ty_ref := func.return_ty_ref:
             type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
-            pkg_c_impl_target.add_include(*type_abi_info.impl_headers)
             return_ty_name = type_abi_info.as_owner
         else:
             return_ty_name = "void"

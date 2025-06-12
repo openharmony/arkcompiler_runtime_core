@@ -41,7 +41,7 @@ from taihe.parse.convert import (
 from taihe.semantics.analysis import analyze_semantics
 from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
-from taihe.utils.diagnostics import DiagnosticsManager
+from taihe.utils.diagnostics import ConsoleDiagnosticsManager, DiagnosticsManager, Level
 from taihe.utils.exceptions import AdhocNote
 from taihe.utils.outputs import DebugLevel, OutputConfig
 from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
@@ -89,14 +89,14 @@ class CompilerInstance:
 
     def __init__(self, invocation: CompilerInvocation):
         self.invocation = invocation
-        self.diagnostics_manager = DiagnosticsManager()
+        self.diagnostics_manager = ConsoleDiagnosticsManager()
         self.analysis_manager = AnalysisManager(self.diagnostics_manager)
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
         self.output_config = OutputConfig(
-            self.invocation.out_dir, self.invocation.out_debug_level
+            self.invocation.out_dir,
+            self.invocation.out_debug_level,
         )
-
         self.backends = [conf.construct(self) for conf in invocation.backends]
 
     ##########################
@@ -149,35 +149,33 @@ class CompilerInstance:
 
     def parse(self):
         for src in self.source_manager.sources:
+            conv = AstConverter(src, self.diagnostics_manager)
+            pkg = conv.convert()
             with self.diagnostics_manager.capture_error():
-                conv = AstConverter(src, self.diagnostics_manager)
-                pkg = conv.convert()
                 self.package_group.add(pkg)
+
+        for b in self.backends:
+            b.post_process()
+
+    def validate(self):
+        analyze_semantics(self.package_group, self.diagnostics_manager)
+
+        for b in self.backends:
+            b.validate()
 
     def generate(self):
         if not self.invocation.out_dir:
             return
 
-        if self.diagnostics_manager.has_errors():
+        if self.diagnostics_manager.current_max_level >= Level.ERROR:
             return
 
         for b in self.backends:
             b.generate()
 
     def run(self):
-        self.diagnostics_manager.reset_max_level()
-
         self.scan()
         self.parse()
-
-        analyze_semantics(self.package_group, self.diagnostics_manager)
-
-        for b in self.backends:
-            b.post_process()
-
-        for b in self.backends:
-            b.validate()
-
+        self.validate()
         self.generate()
-
-        return not self.diagnostics_manager.has_errors()
+        return not self.diagnostics_manager.current_max_level >= Level.ERROR

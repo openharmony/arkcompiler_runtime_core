@@ -22,6 +22,7 @@ from taihe.semantics.declarations import (
     CallbackTypeRefDecl,
     DeclarationRefDecl,
     EnumDecl,
+    EnumItemDecl,
     GenericTypeRefDecl,
     GlobFuncDecl,
     IfaceDecl,
@@ -49,7 +50,7 @@ from taihe.semantics.types import (
     UserType,
 )
 from taihe.semantics.visitor import RecursiveDeclVisitor
-from taihe.utils.diagnostics import AbstractDiagnosticsManager
+from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import (
     DeclarationNotInScopeError,
     DeclNotExistError,
@@ -66,7 +67,7 @@ from taihe.utils.exceptions import (
 )
 
 
-def analyze_semantics(pg: PackageGroup, diag: AbstractDiagnosticsManager):
+def analyze_semantics(pg: PackageGroup, diag: DiagnosticsManager):
     """Runs semantic analysis passes on the given package group."""
     _check_decl_confilct_with_namespace(pg, diag)
     _ResolveImportsPass(diag).handle_decl(pg)
@@ -77,11 +78,12 @@ def analyze_semantics(pg: PackageGroup, diag: AbstractDiagnosticsManager):
 
 def _check_decl_confilct_with_namespace(
     pg: PackageGroup,
-    diag: AbstractDiagnosticsManager,
+    diag: DiagnosticsManager,
 ):
     """Checks for declarations conflicts with namespaces."""
     namespaces: set[str] = set()
-    for pkg_name in pg.package_dict:
+    for pkg in pg.packages:
+        pkg_name = pkg.name
         # package "a.b.c" -> namespaces ["a.b.c", "a.b", "a"]
         while True:
             namespaces.add(pkg_name)
@@ -92,7 +94,7 @@ def _check_decl_confilct_with_namespace(
                 break
 
     for p in pg.packages:
-        for d in p.decls.values():
+        for d in p.declarations:
             name = p.name + "." + d.name
             if name in namespaces:
                 diag.emit(SymbolConflictWithNamespaceError(d, p))
@@ -101,9 +103,9 @@ def _check_decl_confilct_with_namespace(
 class _ResolveImportsPass(RecursiveDeclVisitor):
     """Resolves imports and type references within a package group."""
 
-    diag: AbstractDiagnosticsManager
+    diag: DiagnosticsManager
 
-    def __init__(self, diag: AbstractDiagnosticsManager):
+    def __init__(self, diag: DiagnosticsManager):
         self._current_pkg_group = None
         self._current_pkg = None  # Always points to the current package.
         self.diag = diag
@@ -145,7 +147,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
         d.maybe_resolved_pkg = pkg
 
     @override
-    def visit_decl_ref_decl(self, d: DeclarationRefDecl) -> None:
+    def visit_declaration_ref_decl(self, d: DeclarationRefDecl) -> None:
         if d.is_resolved:
             return
         d.is_resolved = True
@@ -158,7 +160,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             # No need to repeatedly throw exceptions
             return
 
-        decl = pkg.decls.get(d.symbol)
+        decl = pkg.lookup(d.symbol)
 
         if decl is None:
             self.diag.emit(DeclNotExistError(d.symbol, loc=d.loc))
@@ -173,7 +175,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
         d.is_resolved = True
 
         # Find the corresponding imported package according to the package name
-        pkg_import = self.pkg.pkg_imports.get(d.pkname)
+        pkg_import = self.pkg.lookup_pkg_import(d.pkname)
 
         if pkg_import is None:
             self.diag.emit(PackageNotInScopeError(d.pkname, loc=d.loc))
@@ -186,7 +188,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             # No need to repeatedly throw exceptions
             return
 
-        decl = pkg.decls.get(d.symbol)
+        decl = pkg.lookup(d.symbol)
 
         if decl is None:
             self.diag.emit(DeclNotExistError(d.symbol, loc=d.loc))
@@ -196,7 +198,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
             return
 
-        decl.as_type(d)
+        d.maybe_resolved_ty = decl.as_type(d)
 
     @override
     def visit_short_type_ref_decl(self, d: ShortTypeRefDecl) -> None:
@@ -208,22 +210,22 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
         builder = BUILTIN_TYPES.get(d.symbol)
 
         if builder:
-            builder(d)
+            d.maybe_resolved_ty = builder(d)
             return
 
         # Find types declared in the current package
-        decl = self.pkg.decls.get(d.symbol)
+        decl = self.pkg.lookup(d.symbol)
 
         if decl:
             if not isinstance(decl, TypeDecl):
                 self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
                 return
 
-            decl.as_type(d)
+            d.maybe_resolved_ty = decl.as_type(d)
             return
 
         # Look for imported type declarations
-        decl_import = self.pkg.decl_imports.get(d.symbol)
+        decl_import = self.pkg.lookup_decl_import(d.symbol)
 
         if decl_import is None:
             self.diag.emit(DeclarationNotInScopeError(d.symbol, loc=d.loc))
@@ -239,7 +241,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
             return
 
-        decl.as_type(d)
+        d.maybe_resolved_ty = decl.as_type(d)
 
     @override
     def visit_generic_type_ref_decl(self, d: GenericTypeRefDecl) -> None:
@@ -266,7 +268,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             return
 
         try:
-            builder(d, *args_ty)
+            d.maybe_resolved_ty = builder(d, *args_ty)
         except TypeError:
             self.diag.emit(GenericArgumentsError(d.text, loc=d.loc))
 
@@ -294,15 +296,15 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
                 return
             params_ty.append(arg_ty)
 
-        CallbackType(d, return_ty, tuple(params_ty))
+        d.maybe_resolved_ty = CallbackType(d, return_ty, tuple(params_ty))
 
 
 class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
     """Check for duplicate field names in declarations and name anonymous declarations."""
 
-    diag: AbstractDiagnosticsManager
+    diag: DiagnosticsManager
 
-    def __init__(self, diag: AbstractDiagnosticsManager):
+    def __init__(self, diag: DiagnosticsManager):
         self.diag = diag
 
     @override
@@ -337,7 +339,7 @@ class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
 
     @override
     def visit_package_decl(self, p: PackageDecl) -> None:
-        self.check_collision_helper(p.decls.values())
+        self.check_collision_helper(p.declarations)
         return super().visit_package_decl(p)
 
     def check_collision_helper(self, children: Iterable[NamedDecl]):
@@ -350,9 +352,9 @@ class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
 class _CheckEnumTypePass(RecursiveDeclVisitor):
     """Validated enum item types."""
 
-    diag: AbstractDiagnosticsManager
+    diag: DiagnosticsManager
 
-    def __init__(self, diag: AbstractDiagnosticsManager):
+    def __init__(self, diag: DiagnosticsManager):
         self.diag = diag
 
     def visit_enum_decl(self, d: EnumDecl) -> None:
@@ -360,8 +362,8 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
             return not isinstance(val, bool) and isinstance(val, int)
 
         valid: Callable[[Any], bool]
-        increment: Callable[[Any, Any], Any]
-        default: Callable[[Any], Any]
+        increment: Callable[[Any, EnumItemDecl], Any]
+        default: Callable[[EnumItemDecl], Any]
 
         match d.ty_ref.maybe_resolved_ty:
             case ScalarType(_, ScalarKind.I8):
@@ -432,9 +434,9 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
 class _CheckRecursiveInclusionPass(RecursiveDeclVisitor):
     """Validates struct fields for type correctness and cycles."""
 
-    diag: AbstractDiagnosticsManager
+    diag: DiagnosticsManager
 
-    def __init__(self, diag: AbstractDiagnosticsManager):
+    def __init__(self, diag: DiagnosticsManager):
         self.diag = diag
         self.type_table: dict[
             TypeDecl,

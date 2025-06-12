@@ -21,6 +21,8 @@
 
 // Converts a TString into its corresponding heap-allocated TStringData
 // structure.
+// # Arguments
+// - `tstr`: The TString to be converted.
 // # Returns
 // - A pointer to the TStringData structure if the TString is heap-allocated.
 // - `NULL` if the TString is a reference (TSTRING_REF is set).
@@ -82,15 +84,18 @@ void tstr_drop(struct TString tstr)
     }
 }
 
-struct TString tstr_concat(struct TString left, struct TString right)
+struct TString tstr_concat(size_t count, struct TString const *tstr_list)
 {
-    size_t len = left.length + right.length;
+    size_t len = 0;
+    for (size_t i = 0; i < count; ++i) {
+        len += tstr_list[i].length;
+    }
     struct TString tstr;
     char *buf = tstr_initialize(&tstr, len + 1);
-    memcpy(buf, left.ptr, sizeof(char) * left.length);
-    buf += left.length;
-    memcpy(buf, right.ptr, sizeof(char) * right.length);
-    buf += right.length;
+    for (size_t i = 0; i < count; ++i) {
+        memcpy(buf, tstr_list[i].ptr, sizeof(char) * tstr_list[i].length);
+        buf += tstr_list[i].length;
+    }
     *buf = '\0';
     tstr.length = len;
     return tstr;
