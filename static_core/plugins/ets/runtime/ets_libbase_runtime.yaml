@@ -7634,6 +7634,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::IsLiteralInitializedInterfaceImpl
 
+  - name: StdCoreDoubleNumberFromStringForReflect
+    space: ets
+    class_name: escompat.Reflect
+    method_name: numberFromString
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::StdCoreDoubleNumberFromString
+
 ######################################
 # std.concurrency.ConcurrencyHelpers #
 ######################################
