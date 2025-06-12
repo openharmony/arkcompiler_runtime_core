@@ -17,6 +17,7 @@ const fakeLocale = "er-or"
 
 function main() throws {
     testFormat()
+    testFormatToParts()
     testResolvedOptions()
     testSelectWithOptions()
     testSupportedLocalesOf()
@@ -35,6 +36,46 @@ function testFormat() {
     runFormatTest("ru", 0, "day", "сегодня", { numeric: "always" })
     runFormatTest("fr", 5, "month", "dans 5 mois", { style: "long" })
     runFormatTest("fr", -5, "month", "il y a 5 mois", { style: "long" })
+}
+
+function runFormatToPartsTest(locale: string, value: number, unit: Intl.RelativeTimeFormatUnit, expected: string, options?: Intl.RelativeTimeFormatOptions) {
+    const format = new Intl.RelativeTimeFormat(locale, options)
+    const result = format.formatToParts(value, unit)
+    arktest.assertEQ(result[0].value, expected)
+}
+
+function testFormatToParts() {
+    runFormatToPartsTest('zh-CN', 3, 'day', '3天后', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', 2, 'day', '后天', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', 1, 'day', '明天', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', 0, 'day', '今天', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', -1, 'day', '昨天', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', -2, 'day', '前天', { numeric: 'auto' })
+    runFormatToPartsTest('zh-CN', -3, 'day', '3天前', { numeric: 'auto' })
+
+    runFormatToPartsTest('en', 3, 'day', 'in 3 days', { numeric: 'auto' })
+    runFormatToPartsTest('en', 2, 'day', 'in 2 days', { numeric: 'auto' })
+    runFormatToPartsTest('en', 1, 'day', 'tomorrow', { numeric: 'auto' })
+    runFormatToPartsTest('en', 0, 'day', 'today', { numeric: 'auto' })
+    runFormatToPartsTest('en', -1, 'day', 'yesterday', { numeric: 'auto' })
+    runFormatToPartsTest('en', -2, 'day', '2 days ago', { numeric: 'auto' })
+    runFormatToPartsTest('en', -3, 'day', '3 days ago', { numeric: 'auto' })
+
+    runFormatToPartsTest('ru', 3, 'day', 'через 3 дня', { numeric: 'auto' })
+    runFormatToPartsTest('ru', 2, 'day', 'послезавтра', { numeric: 'auto' })
+    runFormatToPartsTest('ru', 1, 'day', 'завтра', { numeric: 'auto' })
+    runFormatToPartsTest('ru', 0, 'day', 'сегодня', { numeric: 'auto' })
+    runFormatToPartsTest('ru', -1, 'day', 'вчера', { numeric: 'auto' })
+    runFormatToPartsTest('ru', -2, 'day', 'позавчера', { numeric: 'auto' })
+    runFormatToPartsTest('ru', -3, 'day', '3 дня назад', { numeric: 'auto' })
+
+    runFormatToPartsTest('fr', 3, 'day', 'dans 3 jours', { numeric: 'auto' })
+    runFormatToPartsTest('fr', 2, 'day', 'après-demain', { numeric: 'auto' })
+    runFormatToPartsTest('fr', 1, 'day', 'demain', { numeric: 'auto' })
+    runFormatToPartsTest('fr', 0, 'day', 'aujourd’hui', { numeric: 'auto' })
+    runFormatToPartsTest('fr', -1, 'day', 'hier', { numeric: 'auto' })
+    runFormatToPartsTest('fr', -2, 'day', 'avant-hier', { numeric: 'auto' })
+    runFormatToPartsTest('fr', -3, 'day', 'il y a 3 jours', { numeric: 'auto' })
 }
 
 function testResolvedOptions() {
