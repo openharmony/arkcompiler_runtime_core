@@ -452,6 +452,11 @@ PANDA_PUBLIC_API std::unique_ptr<const File> OpenPandaFile(
     panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
 
 /*
+ * Check ptr point valid panda file: checksum
+ */
+bool ValidateChecksum(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
+
+/*
  * Check ptr point valid panda file: magic
  */
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "",
