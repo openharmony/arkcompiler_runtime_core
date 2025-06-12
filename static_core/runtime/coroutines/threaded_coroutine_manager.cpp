@@ -180,7 +180,7 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
 
 bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                       PandaVector<Value> &&arguments, [[maybe_unused]] CoroutineLaunchMode mode,
-                                      CoroutinePriority priority)
+                                      CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
@@ -197,14 +197,16 @@ bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEven
                                                  [[maybe_unused]] Method *entrypoint,
                                                  [[maybe_unused]] PandaVector<Value> &&arguments,
                                                  [[maybe_unused]] CoroutineLaunchMode mode,
-                                                 [[maybe_unused]] CoroutinePriority priority)
+                                                 [[maybe_unused]] CoroutinePriority priority,
+                                                 [[maybe_unused]] bool abortFlag)
 {
     LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager::LaunchImmediately not supported";
     return false;
 }
 
 bool ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                                            [[maybe_unused]] CoroutineLaunchMode mode, CoroutinePriority priority)
+                                            [[maybe_unused]] CoroutineLaunchMode mode, CoroutinePriority priority,
+                                            [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};

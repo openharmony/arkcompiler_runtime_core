@@ -44,11 +44,11 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode, CoroutinePriority priority) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode, CoroutinePriority priority) override;
+                           CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                      CoroutinePriority priority) override;
+                      CoroutinePriority priority, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -160,14 +160,14 @@ private:
     stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
     Coroutine *GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                             CoroutinePriority priority,
-                                             stackful_coroutines::AffinityMask affinityMask);
+                                             CoroutinePriority priority, stackful_coroutines::AffinityMask affinityMask,
+                                             bool abortFlag);
     bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                    CoroutinePriority priority);
+                    CoroutinePriority priority, bool abortFlag);
     bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                               CoroutinePriority priority);
+                               CoroutinePriority priority, bool abortFlag);
     bool LaunchWithMode(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                        CoroutinePriority priority, bool launchImmediately);
+                        CoroutinePriority priority, bool launchImmediately, bool abortFlag);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.

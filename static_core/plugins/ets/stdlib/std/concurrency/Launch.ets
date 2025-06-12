@@ -46,18 +46,33 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Fix
   return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
 }
 
-// This overload is currently blocked by issue #22472. Enable when frontend supports it
-// export interface LaunchParams {
-//   settings?: string
-// }
-// 
-// export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams,...args: NullishType[]): Job<R> {
-//     return launchInternal<R, F>(coroFun, launchParams, args as NullishType[])
-// }
+/**
+ * @interface LaunchParams Interface for coroutine launch params.
+ */
+export interface LaunchParams {
+  /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
+  abortFlag: boolean;
+}
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>): Job<R> {
+/**
+ * Launch new coroutine with LaunchParams
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param launchParams parameters of the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ */
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<NullishType>): Job<R> {
+    return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>, launchParams);
+}
+
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
-  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>);
+  if (launchParams) {
+    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag);
+  }
+  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, false);
 }
 
 function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
@@ -72,4 +87,4 @@ function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
   return res;
 }
 
-native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<NullishType>): Job<R>;
+native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<NullishType>, abortFlag: boolean): Job<R>;
