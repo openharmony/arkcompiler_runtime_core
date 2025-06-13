@@ -53,28 +53,12 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let deque: Deque<number>;
-    try {
-        deque = new Deque<number>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Deque");
-        return;
-    }
-    deque.insertFront(TestData.testNumber3);
-    assertEQ(deque.length, TestData.testNumber1, "Deque length should be 1 after inserting one element at the front");
+    arktest.expectNoThrow(() => {deque = new Deque<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let deque: Deque<number | string>;
-    try {
-        deque = new Deque<number | string>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Deque");
-        return;
-    }
-    deque.insertFront(TestData.testString1);
-    deque.insertFront(TestData.testNumber3);
-    deque.insertFront(TestData.testString1);
-    assertEQ(deque.length, TestData.testNumber3, "Deque length should be 3 after inserting three elements at the front");
+    arktest.expectNoThrow(() => {deque = new Deque<number | string>()});
 }
 
 function testDequeLength() {
