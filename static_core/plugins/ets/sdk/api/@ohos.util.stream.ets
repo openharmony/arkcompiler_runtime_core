@@ -189,11 +189,7 @@ export namespace stream {
             if (this.handlers.has(event)) {
                 const funcList = this.handlers.get(event);
                 funcList!.forEach((callback: Function) => {
-                    if (param !== undefined) {
-                        callback.unsafeCall(param);
-                    } else {
-                        callback.unsafeCall();
-                    }
+                    callback.unsafeCall(param);
                 })
             }
         }
@@ -268,11 +264,11 @@ export namespace stream {
             this.writableCorkedInner = 0;
             this.writableFinishedInner = false;
             this.erroredInner = null;
-            this.encoding = 'utf-8';
+            this.encoding = DEFAULT_ENCODING;
             this.closedInner = false;
             this.writableCb = 0;
             this.writableSync = true;
-            this.defaultEncoding = 'utf-8';
+            this.defaultEncoding = DEFAULT_ENCODING;
             this.doWriteFunc = this.noWriteOpes;
             this.doWritevFunc = null;
             this.doInitialize((...param: Object[]): void => {
@@ -291,8 +287,8 @@ export namespace stream {
         private setEncoding(encoding: string): boolean {
             let encodingLowCase = encoding.toLowerCase();
             if (encodingLowCase === 'utf8' || encodingLowCase === 'ascii') {
-                encoding = 'utf-8';
-                encodingLowCase = 'utf-8';
+                encoding = DEFAULT_ENCODING;
+                encodingLowCase = DEFAULT_ENCODING;
             }
 
             if (ENCODING_SET.indexOf(encodingLowCase) !== -1) {
@@ -345,7 +341,7 @@ export namespace stream {
                     this.writing = true;
                     this.writableCb ++;
                     this.writableSync = true;
-                    this.doWrite(chunk, encoding ?? 'utf8', fnBack);
+                    this.doWrite(chunk, encoding ?? DEFAULT_ENCODING, fnBack);
                     this.writableSync = false;
                 } else {
                     const buffInfo: WritableBuffer = {
@@ -425,7 +421,7 @@ export namespace stream {
                     this.writing = true;
                     this.writableCb ++;
                     this.writableSync = true;
-                    this.doWrite(chunk, encoding ?? 'utf8', fb);
+                    this.doWrite(chunk, encoding ?? DEFAULT_ENCODING, fb);
                     this.writableSync = false;
                 } else {
                     const buffInfo: WritableBuffer = {
@@ -470,7 +466,7 @@ export namespace stream {
                 this.writing = true;
                 this.writableCb ++;
                 this.writableSync = true;
-                this.doWrite(current[0].chunk, current[0].encoding ?? 'utf8', current[0].callback);
+                this.doWrite(current[0].chunk, current[0].encoding ?? DEFAULT_ENCODING, current[0].callback);
                 this.writableSync = false;
                 if (!this.writing) {
                     currentLength = this.buffer.length;
@@ -580,7 +576,6 @@ export namespace stream {
         private emitErrorOnce(error: Error, reset?: boolean): void {
             if (reset) {
                 this.emitErrorExecutedInner = false;
-                clearTimeout(this.emitErrorIdInner);
             }
             if (!this.emitErrorExecutedInner) {
                 this.emitErrorExecutedInner = true;
@@ -646,6 +641,22 @@ export namespace stream {
             }
         }
 
+        private endInner(callback?: Function): void {
+            if (this.writableEndedInner) {
+                this.erroredInner = ERR_WRITE_AFTER_END;
+                callback?.unsafeCall(this.erroredInner!);
+            } else if (!this.writableFinishedInner && this.writableCb == 0) {
+                asyncFn((): void => {
+                    if (!this.erroredInner || this.erroredInner!.message === 'write after end') {
+                        this.writableFinishedInner = true;
+                        callback?.unsafeCall(this.erroredInner);
+                        this.listener?.emit(WritableEvent.FINISH);
+                        this.listener?.emit(WritableEvent.CLOSE);
+                    }
+                });
+            }
+        }
+
         /**
          * Writes a chunk to Writable and invokes callback when the chunk is flushed. The return value indicates
          * whether the internal buffer of the Writable reaches the hightWaterMark. If true is returned, the buffer
@@ -676,6 +687,7 @@ export namespace stream {
                 let cb = () => {
                     this.erroredInner = ERR_WRITE_AFTER_END;
                     callback?.unsafeCall(this.erroredInner!);
+                    this.throwError(this.erroredInner!);
                 }
                 setTimeout((): void => {
                     cb();
@@ -695,6 +707,121 @@ export namespace stream {
                 this.writableNeedDrainInner = true;
             }
             return flag;
+        }
+
+        /**
+         * Write the last chunk to Writable.
+         *
+         * @param { string | Uint8Array } [chunk] - Data to be written.
+         * @param { string } [encoding] - Encoding type.
+         * @param { Function } [callback] - Callback after writing.
+         * @returns { Writable } Returns the Writable object.
+         * @throws { BusinessError } 401 - Parameter error.
+         * @throws { BusinessError } 10200035 - The doWrite method has not been implemented.
+         */
+        end(chunk?: string | Uint8Array, encoding?: string, callback?: Function): Writable {
+
+            if (this.writableFinishedInner || this.writableEndedInner) {
+                this.erroredInner = ERR_WRITE_AFTER_END;
+                setTimeout((): void => {
+                    callback?.unsafeCall(this.erroredInner!);
+                });
+                this.emitErrorOnce(this.erroredInner!);
+                return this;
+            }
+            if (this.erroredInner) {
+                setTimeout((): void => {
+                    callback?.unsafeCall(this.erroredInner!);
+                });
+                return this;
+            }
+
+            this.writableNeedDrainInner = false;
+            this.closedInner = true;
+            this.writableInner = false;
+
+            if (chunk) {
+                this.write(chunk, encoding);
+            }
+
+            if (this.writableCorkedInner > 0) {
+                this.writableCorkedInner = 1;
+                this.uncork();
+            }
+
+            this.endCallback = callback;
+            this.ending = true;
+            this.endInner(callback);
+            this.writableEndedInner = true;
+            return this;
+        }
+
+        /**
+         * Set the default encoding mode.
+         *
+         * @param { string } [encoding] - Encoding type. Default: utf-8.
+         * @returns { boolean } Setting successful returns true, setting failed returns false.
+         */
+        setDefaultEncoding(encoding?: string): boolean {
+            if (!encoding) {
+                encoding = DEFAULT_ENCODING;
+            }
+
+            const ret = this.setEncoding(encoding);
+            if (ret) {
+                this.defaultEncoding = encoding;
+            }
+            return ret;
+        }
+
+        /**
+         * After the call, all Write operations will be forced to write to the buffer instead of being flushed.
+         *
+         * @returns { boolean } Setting successful returns true, setting failed returns false.
+         */
+        cork(): boolean {
+            this.writableCorkedInner += 1;
+            return true;
+        }
+
+        /**
+         * After calling, flush all buffers.
+         *
+         * @returns { boolean } Setting successful returns true, setting failed returns false.
+         */
+        uncork(): boolean {
+            if (this.writableCorkedInner > 0) {
+                this.writableCorkedInner -= 1;
+                if (this.writableCorkedInner === 0  && !this.writing) {
+                    this.freshCacheV();
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * Registering Event Messages.
+         *
+         * @param { string } event - Register Event.
+         * @param { Function } callback - event callbacks.
+         */
+        on(event: string, callback: Function): void {
+            this.listener!.on(event, callback);
+        }
+
+        /**
+         * Cancel event message.
+         *
+         * @param { string } event - Register Event.
+         * @param { Function } [callback] - event callbacks.
+         */
+        off(event: string, callback?: Function): void {
+            if (callback) {
+                this.listener!.off(event, callback);
+            } else {
+                this.listener!.clear(event);
+            }
         }
 
         /**
@@ -806,78 +933,6 @@ export namespace stream {
         get closed(): boolean | undefined {
             return this.closedInner;
         }
-
-        /**
-         * Write the last chunk to Writable.
-         *
-         * @param { string | Uint8Array } [chunk] - Data to be written.
-         * @param { string } [encoding] - Encoding type.
-         * @param { Function } [callback] - Callback after writing.
-         * @returns { Writable } Returns the Writable object.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         * @throws { BusinessError } 10200035 - The doWrite method has not been implemented.
-         */
-        end(chunk?: string | Uint8Array, encoding?: string, callback?: () => void): Writable {
-            return this;
-        }
-
-        /**
-         * Set the default encoding mode.
-         *
-         * @param { string } [encoding] - Encoding type.Default: utf8.
-         * @returns { boolean } Setting successful returns true, setting failed returns false.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-        */
-        setDefaultEncoding(encoding?: string): boolean {
-            return false;
-        }
-
-        /**
-         * After the call, all Write operations will be forced to write to the buffer instead of being flushed.
-         *
-         * @returns { boolean } Setting successful returns true, setting failed returns false.
-         */
-        cork(): boolean {
-            return false;
-        }
-
-        /**
-         * After calling, flush all buffers.
-         *
-         * @returns { boolean } Setting successful returns true, setting failed returns false.
-         */
-        uncork(): boolean {
-            return false;
-        }
-
-        /**
-         * Registering Event Messages.
-         *
-         * @param { string } event - Register Event.
-         * @param { Callback<emitter.EventData> } callback - event callbacks.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         */
-        on(event: string, callback: CallbackFnType): void {}
-
-        /**
-         * Cancel event message.
-         *
-         * @param { string } event - Register Event.
-         * @param { Callback<emitter.EventData> } callback - event callbacks.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types.
-         */
-        off(event: string, callback?: CallbackFnType): void {}
     }
 
     /**
@@ -1179,7 +1234,7 @@ export namespace stream {
             }
 
             if (encoding!.toLowerCase() === 'utf8') {
-                encoding = 'utf-8';
+                encoding = DEFAULT_ENCODING;
             }
 
             if (this.buf.length !== 0) {

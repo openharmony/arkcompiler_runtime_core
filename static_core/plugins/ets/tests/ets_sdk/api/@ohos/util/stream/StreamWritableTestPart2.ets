@@ -1,0 +1,190 @@
+/*
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the 'License')
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { BusinessError } from "@ohos.base";
+import { stream } from "@ohos.util.stream";
+
+const mustChecks: Array<Function> = new Array<Function>();
+
+function main(): int {
+    const suite = new arktest.ArkTestsuite("Stream API tests")
+
+    suite.addTest("Multiple callbacks", testWritableMultipleCallbacks);
+    suite.addTest("Callback repeatedly", testWritableCallbackRepeatedly);
+    suite.addTest("Callback duplicate", testWritableCallbackDuplicate);
+    suite.addTest("Write data error", testWritableWriteError);
+    suite.addTest("Unknown encoding error", testWritableUnknownEncoding);
+
+    return suite.run();
+}
+
+async function mustCallCheckAll() {
+    return new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+            try {
+                mustChecks.forEach(check => {
+                    check.unsafeCall();
+                });
+                mustChecks.length = 0;
+                resolve(undefined);
+            } catch (e: Error) {
+                reject(e)
+            }
+        }, 2000)
+    })
+}
+
+function mustCallUint8Array(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+        callCount++;
+        fn?.unsafeCall(chunk, encoding, callback);
+    }
+    mustChecks.push(() => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
+        }
+    });
+    return wrappedFn;
+}
+
+function mustCall(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn: Function = (err: Error | undefined | null): void => {
+        callCount++;
+        fn?.unsafeCall(err);
+    }
+
+    mustChecks.push((): void => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+        }
+    });
+    return wrappedFn;
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableCbTwice001
+function testWritableMultipleCallbacks() {
+    class MyWritable extends stream.Writable {
+        constructor() {
+            super();
+        }
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+                callback.unsafeCall();
+                callback.unsafeCall();
+            }
+            let wrappedFn = mustCallUint8Array(fn);
+            wrappedFn(chunk, encoding, callback);
+        }
+    }
+    let writableStream = new MyWritable();
+    writableStream.write('test');
+    writableStream.on('error', mustCall((error: Error): void => {
+        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.name, 'BusinessError');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableCbTwice002
+function testWritableCallbackRepeatedly() {
+    class MyWritable extends stream.Writable {
+        constructor() {
+            super();
+        }
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+            callback.unsafeCall();
+            setTimeout(() => {
+                callback.unsafeCall();
+            }, 0);
+        }
+    }
+    let writableStream = new MyWritable();
+    writableStream.write('test');
+    writableStream.on('error', mustCall((error: Error): void => {
+        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.name, 'BusinessError');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableCbTwice003
+function testWritableCallbackDuplicate() {
+    class MyWritable extends stream.Writable {
+        constructor() {
+            super();
+        }
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+            setTimeout(() => {
+                callback.unsafeCall();
+            }, 0);
+            setTimeout(() => {
+                callback.unsafeCall();
+            }, 0);
+        }
+    }
+    let writableStream = new MyWritable();
+    writableStream.write('test');
+    writableStream.on('error', mustCall((error: Error): void => {
+        arktest.assertEQ(error.message, 'Callback called multiple times');
+        arktest.assertEQ(error.name, 'BusinessError');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableWriteError001
+function testWritableWriteError() {
+    class MyWritable extends stream.Writable {
+        constructor() {
+            super();
+        }
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        }
+    }
+    let writableStream = new MyWritable();
+    let ticked = false;
+    writableStream.end();
+    writableStream.write('test', 'utf8', mustCall((error: Error): void => {
+        arktest.assertTrue(ticked);
+        arktest.assertEQ(error.message, 'write after end');
+    }));
+    ticked = true;
+    writableStream.on('error', mustCall((error: Error): void => {
+        arktest.assertEQ(error.message, 'write after end');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+function testMyWritableDoWrite() {
+    class MyWritable extends stream.Writable {
+        constructor() {
+            super();
+        }
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+            callback.unsafeCall();
+        }
+    }
+    let writableStream = new MyWritable();
+    writableStream.write('my', 'test');
+}
+
+// Test cases ported from ArkTS 1.0:testStreamWritableWriteError003
+function testWritableUnknownEncoding() {
+    let exceptionCheck = (e: Error | Exception): boolean => {
+        return ((e as BusinessError).message == "Unknown encoding: test")
+    }
+    arktest.expectThrow(testMyWritableDoWrite, exceptionCheck);
+}
