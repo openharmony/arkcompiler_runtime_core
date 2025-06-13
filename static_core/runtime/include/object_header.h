@@ -370,8 +370,13 @@ private:
     static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool nonMovable);
 };
 
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_32)
+constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
+static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkOffset());
+#else
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
+#endif
 
 // NOLINTBEGIN(readability-identifier-naming)
 template <class T>
