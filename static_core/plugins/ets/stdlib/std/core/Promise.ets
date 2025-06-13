@@ -39,6 +39,7 @@ class PromiseSettledResultBase {
  * The class describes fulfillment result of Promise.allSettled's argument.
  */
 export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
+    constructor(){}
 
     constructor(value: T) {
         this.status = PromiseStatus.fulfilled;
@@ -52,6 +53,9 @@ export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
  * The class describes rejection result of Promise.allSettled's argument.
  */
 export class PromiseRejectedResult extends PromiseSettledResultBase {
+    constructor(){
+        this.reason =  new Error();
+    }
 
     constructor(reason: Error) {
         this.status = PromiseStatus.rejected;
