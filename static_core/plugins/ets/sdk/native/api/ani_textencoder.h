@@ -38,16 +38,7 @@ struct UConverterWrapper {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     UConverter *converter;
 
-    explicit UConverterWrapper(const char *encodingStr) : encoding(encodingStr)
-    {
-        UErrorCode codeflag = U_ZERO_ERROR;
-        converter = ucnv_open(encoding, &codeflag);
-        if (U_FAILURE(codeflag) != 0) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            LOG_ERROR_SDK("ncnv_open failed with encoding '%s' and error '%s'.", encodingStr, u_errorName(codeflag));
-            // converter is nullptr on failure
-        }
-    }
+    explicit UConverterWrapper(const char *encodingStr);
 
     UConverterWrapper(const UConverterWrapper &) = delete;
     UConverterWrapper &operator=(const UConverterWrapper &) = delete;

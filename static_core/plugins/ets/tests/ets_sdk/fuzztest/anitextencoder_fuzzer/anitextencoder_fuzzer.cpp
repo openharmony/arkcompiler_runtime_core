@@ -13,38 +13,36 @@
  * limitations under the License.
  */
 
-#include "anitextdecoder_fuzzer.h"
+#include "anitextencoder_fuzzer.h"
 
 #include "test_common.h"
-#include "api/ani_textdecoder.h"
+#include "api/ani_textencoder.h"
 #include "core/stdlib_ani_helpers.h"
 
 #include <cstddef>
 #include <cstdint>
 
-using TextDecoder = ark::ets::sdk::util::TextDecoder;
-
 namespace OHOS {
-class TextDecoderEngine : public FuzzTestEngine {
+class TextEncoderEngine : public FuzzTestEngine {
 public:
-    static TextDecoderEngine *GetInstance()
+    static TextEncoderEngine *GetInstance()
     {
-        static TextDecoderEngine instanceEngine;
+        static TextEncoderEngine instanceEngine;
         return &instanceEngine;
     }
 
-    void AniTextDecoder(const char *source, int32_t offset, int32_t length, bool iflag)
+    void AniTextEncoder(const char *source, int32_t length)
     {
-        std::string encodingStr = "GBK";
-        TextDecoder decoder(encodingStr, iflag);
-        decoder.DecodeToString(env_, source, offset, length, iflag);
+        std::string_view inputString(source, static_cast<size_t>(length));
+        std::u16string u16Str = ani_helper::Utf8ToUtf16LE(inputString);
+        ani_helper::Utf16LEToBE(u16Str);
     }
 
 private:
-    TextDecoderEngine() : FuzzTestEngine() {}
+    TextEncoderEngine() : FuzzTestEngine() {}
 };
 
-void AniTextDecoderFuzzTest(const char *data, size_t size)
+void AniTextEncoderFuzzTest(const char *data, size_t size)
 {
     if (size <= 0) {
         return;
@@ -54,11 +52,8 @@ void AniTextDecoderFuzzTest(const char *data, size_t size)
         size = MAX_INPUT_SIZE;
     }
 
-    TextDecoderEngine *engine = TextDecoderEngine::GetInstance();
-    engine->AniTextDecoder(data, 0, size, true);
-    engine->AniTextDecoder(data, 0, size, false);
-    engine->AniTextDecoder(data, 1, size, true);
-    engine->AniTextDecoder(data, 1, size, false);
+    TextEncoderEngine *engine = TextEncoderEngine::GetInstance();
+    engine->AniTextEncoder(data, size);
 }
 }  // namespace OHOS
 
@@ -66,6 +61,6 @@ void AniTextDecoderFuzzTest(const char *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const char *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AniTextDecoderFuzzTest(data, size);
+    OHOS::AniTextEncoderFuzzTest(data, size);
     return 0;
 }
