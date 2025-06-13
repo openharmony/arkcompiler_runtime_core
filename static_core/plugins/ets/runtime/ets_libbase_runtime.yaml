@@ -652,6 +652,20 @@ intrinsics:
     impl: ark::ets::intrinsics::LoadLibrary
 
 ###################
+# Escompat.JSON #
+###################
+
+  - name: EscompatJSONStringifyFast
+    space: ets
+    class_name: escompat.JSON
+    method_name: stringifyFast
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EscompatJSONStringifyFast
+
+###################
 # std.core.String #
 ###################
   - name: StdCoreStringGetChars

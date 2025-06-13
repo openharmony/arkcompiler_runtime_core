@@ -110,6 +110,10 @@ public:
     EtsMethod *escompatProcessListUnhandledJobs {};
     EtsMethod *escompatProcessListUnhandledPromises {};
 
+    EtsClass *coreTuple {};
+    EtsClass *escompatRegExpExecArray {};
+    EtsClass *escompatJsonReplacer {};
+
     struct Entry {
         size_t slotIndex {};
     };

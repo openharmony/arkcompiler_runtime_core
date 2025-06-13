@@ -192,6 +192,10 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
                "Lescompat/Array;:V", true);
     findMethod(&EtsPlatformTypes::escompatProcessListUnhandledPromises, escompatProcess, "listUnhandledPromises",
                "Lescompat/Array;:V", true);
+
+    findType(&EtsPlatformTypes::coreTuple, TUPLE);
+    findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
+    findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
 }
 
 }  // namespace ark::ets
