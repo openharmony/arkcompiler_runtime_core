@@ -20,6 +20,7 @@
 #include "objects/base_class.h"
 #include "objects/base_object.h"
 #include "heap/heap_visitor.h"
+#include <array>
 #include <atomic>
 #include <functional>
 
