@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "util/assert_util.h"
 #include "util/file_util.h"
 #include "util/json_util.h"
+#include "version.h"
 
 namespace {
 constexpr std::string_view TAG = "[Guard_NameCache]";
@@ -335,6 +336,7 @@ std::string panda::guard::NameCache::BuildJson(const ProjectNameCacheInfo &nameC
     }
     builder.AddProperty(ENTRY_PACKAGE_INFO, nameCacheInfo.entryPackageInfo);
     builder.AddProperty(COMPILE_SDK_VERSION, nameCacheInfo.compileSdkVersion);
+    builder.AddProperty(ARK_GUARD_DYNAMIC_VERSION, OBFUSCATION_TOOL_VERSION);
 
     if (options_->IsPropertyObfEnabled() || options_->IsExportObfEnabled()) {
         builder.AddProperty(PROPERTY_CACHE, MapToJson(nameCacheInfo.propertyCacheMap, true));

@@ -196,7 +196,7 @@ static_core/plugins/ets/tests/interop_js/tests/promise/                       @u
 /libpandafile/ @gitee-dakeQI @chenqy930
 /libziparchive/ @gitee-dakeQI
 /panda/ @gitee-dakeQI
-/panda_guard/ @zenghang11 @hufeng20
+/panda_guard/ @zenghang11 @hufeng20 @oatuwwutao
 /pandastdlib/ @ctw-ian
 /platforms/ @gitee-dakeQI
 /templates/ @ctw-ian

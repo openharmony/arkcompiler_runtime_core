@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "generator/order_name_generator.h"
 #include "guard_args_parser.h"
 #include "util/assert_util.h"
+#include "version.h"
 
 namespace {
 constexpr std::string_view TAG = "[Guard_Context]";
@@ -42,8 +43,9 @@ void panda::guard::GuardContext::Init(int argc, const char **argv)
     PANDA_GUARD_ASSERT_PRINT(!parser.Parse(argc, argv), TAG, ErrorCode::COMMAND_PARAMS_PARSE_ERROR,
                              "obfuscate command param parse failed");
 
-    debugMode_ = parser.IsDebugMode();
+    LOG(INFO, PANDAGUARD) << TAG << ARK_GUARD_DYNAMIC_VERSION << ":" << OBFUSCATION_TOOL_VERSION;
     LOG(INFO, PANDAGUARD) << TAG << "[param parse success], config file:" << parser.GetConfigFilePath();
+    debugMode_ = parser.IsDebugMode();
 
     options_ = std::make_shared<GuardOptions>();
     options_->Load(parser.GetConfigFilePath());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,4 +57,46 @@ HWTEST(StringUtilUnitTest, string_util_test_002, TestSize.Level4)
     EXPECT_EQ(result[1], "");
     EXPECT_EQ(result[2], "a");
     EXPECT_EQ(result[3], "");
+}
+
+/**
+ * @tc.name: string_util_test_003
+ * @tc.desc: test string util is anonymous function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(StringUtilUnitTest, string_util_test_003, TestSize.Level4)
+{
+    auto result = StringUtil::IsAnonymousFunctionName("");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^1");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^11");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^a");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^a1");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^1a");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^aa");
+    EXPECT_EQ(result, true);
+
+    result = StringUtil::IsAnonymousFunctionName("^g");
+    EXPECT_EQ(result, false);
+
+    result = StringUtil::IsAnonymousFunctionName("^1g");
+    EXPECT_EQ(result, false);
+
+    result = StringUtil::IsAnonymousFunctionName("^g1");
+    EXPECT_EQ(result, false);
+
+    result = StringUtil::IsAnonymousFunctionName("^gg");
+    EXPECT_EQ(result, false);
 }
