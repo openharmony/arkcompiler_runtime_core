@@ -132,9 +132,9 @@ For example here is `functionGetName()` API implementation (`./src/metadata_insp
 ```cpp
     switch (function->module->target) {
         case ABCKIT_TARGET_JS:
-        case ABCKIT_TARGET_ARKTS_V1:
+        case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionGetNameDynamic(function);
-        case ABCKIT_TARGET_ARKTS_V2:
+        case ABCKIT_TARGET_ARK_TS_V2:
             return FunctionGetNameStatic(function);
     }
 ```
