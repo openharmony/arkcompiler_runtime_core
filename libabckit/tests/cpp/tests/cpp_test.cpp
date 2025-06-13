@@ -327,6 +327,9 @@ TEST_F(LibAbcKitCppTest, CppTest11)
     for (auto &mdl : file.GetModules()) {
         moduleSet.insert(mdl);
     }
+
+    const int sizeT = 2;
+    ASSERT_EQ(moduleSet.size(), sizeT);
 }
 
 // Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=cpp
