@@ -1194,7 +1194,7 @@ macro(:handle_ldarr_obj_v8) do |vs|
     move_to_exception
   }
   elem_offset = AddI(ShlI(acc.i32).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).u32
-  load_array := Load(vs, elem_offset).ref
+  load_array := Load(vs, elem_offset).SetNeedBarrier(true).ref
   set_acc_object(load_array)
 end
 
@@ -1459,7 +1459,7 @@ macro(:handle_ldobj_obj_v8_id16) do |vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).ref
+  value := Load(vs, offset).SetNeedBarrier(true).ref
   set_acc_object(value).ref
 end
 
@@ -1522,7 +1522,7 @@ macro(:handle_ldobj_v_obj_v4_v4_id16) do |vd, vs, id|
   assert_non_volatile(field)
 
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  value := Load(vs, offset).ref
+  value := Load(vs, offset).SetNeedBarrier(true).ref
   set_object(vd, value).ref
 end
 
@@ -1659,7 +1659,7 @@ macro(:handle_ldstatic_obj_id16) do |id|
   class_managed_object := LoadI(bitcast_to_ref(field_class)).Imm(Constants::BASE_CLASS_MANAGED_OBJECT_OFFSET).ref_uint
   offset_managed_object := Add(offset, Sub(field_class, class_managed_object).ref_uint).u32
 
-  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).ref
+  value := Load(bitcast_to_ref(class_managed_object), offset_managed_object).SetNeedBarrier(true).ref
   set_acc_object(value).ref
 end
 

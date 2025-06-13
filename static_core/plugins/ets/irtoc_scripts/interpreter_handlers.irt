@@ -145,7 +145,7 @@ end
 
 macro(:"load_field_obj") do |field, klass|
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Load(klass, offset).ref
+  Load(klass, offset).SetNeedBarrier(true).ref
 end
 
 ['short', 'long', 'obj'].each do |flavor|

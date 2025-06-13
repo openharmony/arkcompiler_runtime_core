@@ -759,6 +759,12 @@ public:
     {
         return 0;
     }
+
+    virtual ::ark::mem::BarrierType GetPreReadType() const
+    {
+        return ::ark::mem::BarrierType::PRE_RB_NONE;
+    }
+
     virtual ::ark::mem::BarrierType GetPreType() const
     {
         return ::ark::mem::BarrierType::PRE_WRB_NONE;
@@ -767,6 +773,26 @@ public:
     virtual ::ark::mem::BarrierType GetPostType() const
     {
         return ::ark::mem::BarrierType::POST_WRB_NONE;
+    }
+
+    bool NeedsPreReadBarrier() const
+    {
+        auto type = GetPreReadType();
+        return type == ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
+    }
+
+    bool NeedsPreWriteBarrier() const
+    {
+        auto type = GetPreType();
+        return type == ::ark::mem::BarrierType::PRE_SATB_BARRIER;
+    }
+
+    bool NeedsPostWriteBarrier() const
+    {
+        auto type = GetPostType();
+        return type == ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 
     virtual ::ark::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::ark::mem::BarrierPosition barrierPosition,

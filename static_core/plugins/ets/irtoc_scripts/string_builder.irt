@@ -1,5 +1,5 @@
 # plugin ets_string_builder
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -516,7 +516,7 @@ Label(:ForEachBufferSlot)
   i := Phi(i1, i2).i32
   dst_data := Phi(dst_data1, dst_data2).ptr
   slot := AddI(ShlI(i).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
-  obj := Load(buffer, slot).ref
+  obj := Load(buffer, slot).SetNeedBarrier(true).ref
   klass := load_class(obj)
   klass_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
   If(AndI(klass_flags).Imm("ark::Class::STRING_CLASS").u32, 0).EQ.b {

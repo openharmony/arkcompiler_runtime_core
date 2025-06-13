@@ -15,6 +15,7 @@
 
 #include "runtime/entrypoints/entrypoints.h"
 
+#include "include/object_header.h"
 #include "libpandabase/events/events.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utils.h"
@@ -41,6 +42,10 @@
 #include "utils/cframe_layout.h"
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
+
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark {
 
@@ -382,6 +387,39 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
         return nullptr;
     }
     return ObjectHeader::Clone(obj);
+}
+
+extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
+                                    [[maybe_unused]] ark::ObjectHeader *ref)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    panda::BaseRuntime::WriteBarrier(obj, field, ref);
+#else
+    UNREACHABLE();
+#endif
+}
+
+extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    return panda::BaseRuntime::ReadBarrier(obj, field);
+#else
+    UNREACHABLE();
+    return nullptr;  // No-op
+#endif
+}
+
+extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    return panda::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
+#else
+    UNREACHABLE();
+    return nullptr;  // No-op
+#endif
 }
 
 extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t size)
