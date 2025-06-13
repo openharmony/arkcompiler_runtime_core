@@ -358,19 +358,23 @@ void PandaEtsVM::PreZygoteFork()
 {
     ASSERT(mm_ != nullptr);
     ASSERT(compiler_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
     mm_->PreZygoteFork();
     compiler_->PreZygoteFork();
     if (saverWorker_ != nullptr) {
         saverWorker_->PreZygoteFork();
     }
+    coroutineManager_->PreZygoteFork();
 }
 
 void PandaEtsVM::PostZygoteFork()
 {
     ASSERT(compiler_ != nullptr);
     ASSERT(mm_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
+    coroutineManager_->PostZygoteFork();
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
     if (saverWorker_ != nullptr) {
