@@ -20,21 +20,31 @@ repo forall -c 'git lfs pull'
 
 # How to build and test
 
-## Build AbcKit for Linux
+## Linux target (build on Linux host)
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # Release mode
-./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 ```
 
-## Build AbcKit for Windows
+## Windows target (build on Linux host)
+
 ```sh
 # Debug mode
-./ark.py mingw_x86_64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 # Release mode
-./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+```
+
+## macOS target (build on macOS host, compatible with ARM64 architecture)
+
+```sh
+# Debug mode
+./ark.py mac_arm64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
+# Release mode
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true enable_cmc_gc=false"
 ```
 
 ## Output Locations
@@ -47,24 +57,24 @@ The generated binary and library depend on the libraries in:
 - `out/${target}/thirdparty/icu/`
 - `out/${target}/thirdparty/zlib/`
 
-NOTE: Replace ${target} with build target: x64.debug, x64.release, mingw\_x86\_64.debug or mingw\_x86\_64.release.
+NOTE: Replace ${target} with build target: x64.debug, x64.release, mingw\_x86\_64.debug, mingw\_x86\_64.release, mac\_arm64.debug or mac\_arm64.release.
 
 ## Run unit tests
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 # Release mode
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 ## Run unit tests with sanitizers
 
 ```sh
 # Debug mode
-./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 # Release mode
-./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true abckit_enable_tests=true enable_cmc_gc=false"
 ```
 
 # How to use AbcKit

@@ -37,13 +37,15 @@ repo forall -c 'git lfs pull'
 ### Build AbcKit:
 
 ```sh
-# Linux Version
+# Linux Version (build on Linux)
 ./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
-# Windows Version
+# Windows Version (build on Linux)
 ./ark.py mingw_x86_64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
+# macOS Version (build on macOS)
+./ark.py mac_arm64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
 ```
 
-### Generate doxygen documentation
+### API documentation generation
 ```sh
 cd out/x64.release
 ninja abckit_documentation

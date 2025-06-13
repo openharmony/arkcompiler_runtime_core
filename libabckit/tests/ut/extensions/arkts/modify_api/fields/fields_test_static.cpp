@@ -137,6 +137,8 @@ static void TransformMethodModuleFieldSetType(AbckitFile *file, AbckitCoreFuncti
 
     AbckitType *type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
     auto arkModuleField = g_implArkI->coreModuleFieldToArktsModuleField(cmf);
+    auto coreModuleField = g_implArkI->arktsModuleFieldToCoreModuleField(arkModuleField);
+    ASSERT_NE(coreModuleField, nullptr);
     bool ret = g_implArkM->moduleFieldSetType(arkModuleField, type);
     ASSERT_EQ(ret, true);
     ASSERT_EQ(g_implI->typeGetTypeId(g_implI->moduleFieldGetType(cmf)), AbckitTypeId::ABCKIT_TYPE_ID_STRING);
