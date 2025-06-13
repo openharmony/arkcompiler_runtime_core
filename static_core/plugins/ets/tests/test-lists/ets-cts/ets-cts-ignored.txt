@@ -196,9 +196,6 @@
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
 
-#15577 union type inference
-07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.ets
-
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 
