@@ -559,15 +559,6 @@ def add_declgen_ets2ets_args(parser: argparse.ArgumentParser) -> None:
         help="run declgen_ets2ets tests")
 
 
-def add_declgen_ets2ets_isolated_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--declgen-ets2ets-isolated",
-        action="store_true",
-        dest="declgen_ets2etsisolated",
-        default=None,
-        help="run declgen-ets2ets-isolated tests")
-
-
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
@@ -589,6 +580,5 @@ def get_args() -> argparse.Namespace:
     add_declgen_ets2ts_args(parser)
     add_declgen_ts2ets_args(parser)
     add_declgen_ets2ets_args(parser)
-    add_declgen_ets2ets_isolated_args(parser)
 
     return parser.parse_args()
