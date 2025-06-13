@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <pthread.h>
 #include "base/common.h"
 
 namespace common {
