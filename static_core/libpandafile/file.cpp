@@ -557,10 +557,10 @@ bool ValidateChecksum(const os::mem::ConstBytePtr &ptr, const std::string_view &
         return false;
     }
     auto header = reinterpret_cast<const File::Header *>(ptr.Get());
-    uint32_t checksumSize = sizeof(File::Header::checksum);
-    uint32_t fileContentOffset = File::MAGIC_SIZE + checksumSize;
+    auto checksumSize = sizeof(File::Header::checksum);
+    auto fileContentOffset = File::MAGIC_SIZE + checksumSize;
     Span<const uint8_t> dataSpan(reinterpret_cast<const uint8_t *>(ptr.Get()), header->fileSize);
-    const uint8_t *pData = dataSpan.SubSpan(fileContentOffset).data();
+    auto pData = dataSpan.SubSpan(fileContentOffset).data();
     uint32_t calChecksum = adler32(1, pData, header->fileSize - fileContentOffset);
     if (header->checksum != calChecksum) {
         LOG(ERROR, PANDAFILE) << "Checksum mismatch. The abc file has been corrupted. Expected checksum: 0x" << std::hex
