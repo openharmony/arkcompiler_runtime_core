@@ -72,7 +72,7 @@ class Tool(ToolBase):
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
                    f'--load-runtimes=ets {opts} {self.custom} ' \
-                   '{options} {abc} {name}.ETSGLOBAL::main'
+                   '{options} {abc} {name}.VmbLauncher::main'
 
     @property
     def name(self) -> str:

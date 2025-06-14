@@ -16,6 +16,7 @@
 #
 
 import logging
+from pathlib import Path
 from typing import List, Tuple
 from subprocess import TimeoutExpired
 from vmb.platform import PlatformBase
@@ -25,7 +26,8 @@ from vmb.tool import VmbToolExecError
 from vmb.hook import HookRegistry
 from vmb.cli import Args
 from vmb.result import ExtInfo
-from vmb.helpers import Timer
+from vmb.helpers import Timer, create_file
+from vmb.report import test_passed
 
 log = logging.getLogger('vmb')
 
@@ -49,6 +51,21 @@ class VmbRunner:
         self.fail_logs = args.fail_logs
         self.tests_per_batch = args.tests_per_batch
 
+    @staticmethod
+    def save_failure_lists(bus: List[BenchUnit], lst: str = 'failures.lst') -> None:
+        lst_path = Path(lst).resolve().with_suffix('.lst')  # force suffix
+        tst_path = Path(lst).resolve().with_suffix('.txt')
+        # Note: paths are absolute
+        names, srcs = tuple(zip(*[(str(bu.name), str(bu.doclet_src)) for bu in bus if not test_passed(bu.result)]))
+        if not names:
+            return
+        with create_file(lst_path) as f:
+            f.write("\n".join(set(srcs)) + "\n")
+        with create_file(tst_path) as f:
+            f.write("\n".join(names) + "\n")
+        log.warning('Failure lists created. Re-run with:\n--test-list=%s %s',
+                    str(tst_path), str(lst_path))
+
     def process_error(self, bu: BenchUnit, e: Exception) -> None:
         msg = str(e)
         if isinstance(e, VmbToolExecError):
@@ -69,10 +86,9 @@ class VmbRunner:
     def run_one_unit(self, bu: BenchUnit) -> None:
         timer_unit = Timer()
         if bu.name in self.exclude_list:
-            log.info('Excluding bench unit: %s', bu.name)
+            log.warning('Excluding bench unit: %s', bu.name)
             bu.status = BUStatus.SKIPPED
             return
-        log.info('Starting bench unit: %s', bu.name)
         try:
             self.hooks.run_before_unit(bu)
             timer_unit.start()
@@ -98,23 +114,34 @@ class VmbRunner:
             if not self.dry_run:
                 self.platform.cleanup(bu)
             timer_unit.finish()
-            log.trace('Bench total time: %s %f', bu.name,
-                      timer_unit.elapsed().total_seconds())
+            elapsed = timer_unit.elapsed().total_seconds()
+            bu.result.full_time = elapsed
+            log.debug('%s total time: %f', bu.name, elapsed)
 
     def run_suite_batch(self, bench_units: List[BenchUnit]) -> List[BenchUnit]:
-        for i in range(0, len(bench_units), self.tests_per_batch):
-            log.info('Batch run %s tests, starting from %d', self.tests_per_batch, i + 1)
+        tests_per_batch = self.tests_per_batch if self.tests_per_batch > 0 else 5
+        current = 0
+        total = len(bench_units)
+        groups = list(range(0, total, tests_per_batch))
+        batch = 0
+        for i in groups:
+            batch += 1
+            log.info('Starting bench group %d/%d', batch, len(groups))
+            end = i + tests_per_batch
             try:
-                self.platform.run_batch(bench_units[i:i + self.tests_per_batch])
-            except (VmbToolExecError, TimeoutExpired, RuntimeError):
+                self.platform.run_batch(bench_units[i:end])
+            except (VmbToolExecError, TimeoutExpired, RuntimeError) as e:
                 log.error('Batch run failed in pre-phase!')
-                for bu in bench_units[i:i + self.tests_per_batch]:
+                log.error(str(e))
+                for bu in bench_units[i:end]:
                     bu.status = BUStatus.ERROR
                 continue
             except KeyboardInterrupt:
                 log.warning('Aborting batch run...')
                 break
-            for bu in bench_units[i:i + self.tests_per_batch]:
+            for bu in bench_units[i:end]:
+                current += 1
+                log.info('Starting bench (%d/%d): %s', current, total, bu.name)
                 try:
                     self.run_one_unit(bu)
                 except KeyboardInterrupt:
@@ -123,7 +150,11 @@ class VmbRunner:
         return bench_units
 
     def run_suite_serial(self, bench_units: List[BenchUnit]) -> List[BenchUnit]:
+        total = len(bench_units)
+        current = 0
         for bu in bench_units:
+            current += 1
+            log.info('Starting bench (%d/%d): %s', current, total, bu.name)
             try:
                 self.run_one_unit(bu)
             except KeyboardInterrupt:

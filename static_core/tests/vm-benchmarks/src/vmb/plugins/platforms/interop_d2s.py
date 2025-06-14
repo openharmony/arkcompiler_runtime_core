@@ -51,7 +51,7 @@ class Platform(InteropPlatformBase):
     def template(self) -> Optional[GenSettings]:
         """Special template for D2S Interop: single lang."""
         lang = self.langs[0]
-        ext, tpl = ('.js', 'Template.mjs') if lang == 'js' else ('.ts', 'Template.ts')
+        ext, tpl = ('.js', 'js.j2') if lang == 'js' else ('.ts', 'ts.j2')
         return GenSettings(src={ext},
                            template=tpl,
                            out=ext,

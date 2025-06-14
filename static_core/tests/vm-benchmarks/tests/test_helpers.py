@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,9 +22,11 @@ import json
 import inspect
 from unittest import TestCase
 from typing import Optional
+from pathlib import Path
 from dataclasses import dataclass, field
 from collections import namedtuple
-from vmb.helpers import Singleton, remove_prefix, Jsonable
+from vmb.helpers import Singleton, remove_prefix, Jsonable, get_plugin
+from vmb.helpers_numbers import auto_str, nano_str
 from vmb.plugins.hooks.cpumask import parse_bitmask
 
 NameVal = namedtuple("NameVal", "name value")
@@ -103,3 +105,30 @@ def test_bitmask():
     test.assertTrue(parse_bitmask('0xF0')[1] == [False] * 4 + [True] * 4)
     test.assertTrue(
         parse_bitmask('0x100')[1] == [False] * 8 + [True] + [False] * 3)
+
+
+def test_numbers():
+    test = TestCase()
+    test.assertEqual(auto_str(1.40e-09), '1n')
+    test.assertEqual(auto_str(0.123), '123m')
+    test.assertEqual(auto_str(123456), '123K')
+    test.assertEqual(nano_str(1.40e-09), '1n')
+    test.assertEqual(nano_str(1.0), '1000000000n')
+    test.assertEqual(nano_str(1.50e+07), '15000000000000000n')
+
+
+def check_plugin(kind: str, plugin_name: str):
+    plugin = get_plugin(kind, plugin_name)
+    if 'langs' == kind:
+        plugin.Lang()
+
+
+def test_load_plugins():
+    # try load all the plugins
+    plug_root = Path(__file__).parent.parent.joinpath('src', 'vmb', 'plugins').resolve()
+    for kind in ('hooks', 'tools', 'langs', 'platforms'):
+        for p in [f.with_suffix('').name for f in plug_root.joinpath(kind).glob('*.py')]:
+            try:
+                check_plugin(kind, p)
+            except SystemExit:
+                TestCase().assertTrue(False, 'sys.exit called')

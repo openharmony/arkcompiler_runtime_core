@@ -38,7 +38,7 @@ class BenchUnit:
     """
 
     __result_patt = re.compile(
-        r'.*: ([\w-]+) (-?\d+(\.\d+)?([eE][+\-]\d+)?)')
+        r'.*Benchmark result: ([\w-]+) (-?\d+(\.\d+)?([eE][+\-]\d+)?)')
     __warmup_patt = re.compile(
         r'.*Warmup \d+:.* (?P<value>\d+(\.\d+)?) ns/op')
     __iter_patt = re.compile(
@@ -116,6 +116,7 @@ class BenchUnit:
             if mtch.groups()[0] != self.name:
                 log.warning('Name mismatch: %s vs %s',
                             mtch.groups()[0], self.name)
+                log.warning(res.out)
             avg_time = float(mtch.groups()[1])
             warms = [
                 float(m.group("value"))

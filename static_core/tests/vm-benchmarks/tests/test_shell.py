@@ -21,7 +21,9 @@
 import os
 import pytest  # type: ignore
 from unittest import TestCase
+from pathlib import Path
 from vmb.shell import ShellUnix, ShellResult, ShellHdc
+from vmb.unit import BenchUnit
 
 here = os.path.realpath(os.path.dirname(__file__))
 sh = ShellUnix()
@@ -65,10 +67,26 @@ def test_hilog_output() -> None:
         04-01 13:02:22.555  8146  8146 I A00000/com.example.helllopanda/VMB: 123456 Iter 1:3 ops, 3 ns/op
         04-01 13:02:54.111  8146  8146 I A00000/com.example.helllopanda/VMB: 123456 Benchmark result: testOne 3 ns/op
     '''
+    hilog_out_wo_ts = '''
+        04-01 13:01:22.555  8146  8146 I A00000/com.example.helllopanda/VMB: Starting testTwo @ size=1;x="123"
+        04-01 13:02:22.777  8146  8146 I A00000/com.example.helllopanda/VMB: Tuning: 10 ops, 10.5555 ns/op => 5 reps
+        04-01 13:02:23.123  8146  8146 I A00000/com.example.helllopanda/VMB: Warmup 1:3 ops, 3.1234 ns/op
+        04-01 13:02:23.456  8146  8146 I A00000/com.example.helllopanda/VMB: Iter 1:4 ops, 4.5345 ns/op
+        04-01 13:02:24.555  8146  8146 I A00000/com.example.helllopanda/VMB: Iter 2:8 ops, 8.534534 ns/op
+        04-01 13:02:54.111  8146  8146 I A00000/com.example.helllopanda/VMB: Benchmark result: testTwo 9.6343 ns/op
+    '''
+    assert_eq = TestCase().assertEqual
     res = ShellResult()
+    res.ret = 0
     res.out = hilog_out
     res.replace_out(ShellHdc.hilog_re)
-    TestCase().assertEqual(res.out,
-                           "123456 Starting testOne\n" +
-                           "123456 Iter 1:3 ops, 3 ns/op\n" +
-                           "123456 Benchmark result: testOne 3 ns/op")
+    assert_eq(res.out, "123456 Starting testOne\n"
+                       "123456 Iter 1:3 ops, 3 ns/op\n"
+                       "123456 Benchmark result: testOne 3 ns/op")
+    res.out = hilog_out_wo_ts
+    res.replace_out(ShellHdc.hilog_re)
+    bu = BenchUnit(Path('bu_testTwo'))
+    bu.name = 'testTwo'
+    bu.parse_run_output(res)
+    assert_eq(bu.result.execution_forks[0].avg_time, 9.6343)
+    assert_eq(bu.result.name, 'testTwo')

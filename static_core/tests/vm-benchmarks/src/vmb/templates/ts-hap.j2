@@ -1,4 +1,4 @@
-/*
+{#/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,21 +11,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */#}
+{# overrides for hap #}
+{%- set print_func = 'hilog' -%}
+{%- set wi = [1,wi] | min -%}
+{%- set mi = [2,mi] | min -%}
+{%- set wt,it = 1,1 -%}
+{# forcing 0.25 sec iterations for hap #}
+{%- set max_loop_count = 250_000_000 -%}
+{%- set s2ms  = 250 -%}
 
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import hilog from "@ohos.hilog";
 import UIAbility from "@ohos.app.ability.UIAbility";
 import Want from "@ohos.app.ability.Want";
 import window from "@ohos.window";
-import { InitEtsRuntime } from "./EtsRuntime";
 
-export default class ${BENCH_NAME}_Ability extends UIAbility {
+{# import statements #}
+{{imports}}
+{# common code and includes #}
+{{common}}
+{# Benchmark class #}
+{{src}}
+
+{%- include "ts-consumer.j2" -%}
+
+{# VmbLauncher class #}
+{%- include "ts-launcher.j2" %}
+
+export default class {{bench_name}}_Ability extends UIAbility {
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
-        AppStorage.SetOrCreate<string>("runtimeMode", "$BENCH_MODE");
         hilog.info(0, "VMB", "%{public}s", "ABILITY ON CREATE");
-        InitEtsRuntime("$BENCH_FILE_SO", "$BENCH_MODE");
-        hilog.info(0, "VMB", "%{public}s", "ETS RUNTIME INIT");
     }
 
     onWindowStageCreate(windowStage: window.WindowStage) {
@@ -38,8 +54,7 @@ export default class ${BENCH_NAME}_Ability extends UIAbility {
                 hilog.info(0, "VMB", "%{public}s", "PAGE LOADED");
             }
         });
-        const launcher = globalThis.Panda.getClass("L$BENCH_NAME/VmbLauncher;");
-        launcher.main();
+        VmbLauncher.main();;
         hilog.info(0, "VMB", "%{public}s", "VMB MAIN FINISHED");
     }
 
