@@ -117,26 +117,30 @@ export class Declgen {
     this.rootFiles.forEach((fileName) => {
       const sourceFile = program.getSourceFile(fileName);
       if (sourceFile && sourceFile.isDeclarationFile) {
-
-        const compilerOptions = program.getCompilerOptions();
-        const outDir = compilerOptions.outDir || path.dirname(fileName);
-        const rootDir = compilerOptions.rootDir || path.dirname(fileName);
-        const relativePath = path.relative(rootDir, fileName);
-        const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
-        const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
-
-        const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
-        const printer = ts.createPrinter();
-        const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
-
-        if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
-          if (!fs.existsSync(outDir)) {
-            fs.mkdirSync(outDir, { recursive: true });
-          }
-          fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
-        }
+        this.processDeclarationFile(program, sourceFile, typeChecker);
       }
     });
+  }
+
+  private processDeclarationFile(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): void {
+    const compilerOptions = program.getCompilerOptions();
+    const outDir = compilerOptions.outDir || path.dirname(sourceFile.fileName);
+    const rootDir = compilerOptions.rootDir || path.dirname(sourceFile.fileName);
+    const relativePath = path.relative(rootDir, sourceFile.fileName);
+    const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
+    const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
+
+    const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
+    const printer = ts.createPrinter();
+    const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
+
+    if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+      const outPath = path.dirname(dEtsFilePath);
+      if (!fs.existsSync(outPath)) {
+        fs.mkdirSync(outPath, { recursive: true });
+      }
+      fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+    }
   }
 
   private transformDeclarationFiles(program:ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker,): ts.TransformationResult<ts.Node> { 
