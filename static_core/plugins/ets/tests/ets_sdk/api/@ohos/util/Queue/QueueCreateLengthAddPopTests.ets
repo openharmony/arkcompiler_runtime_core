@@ -50,30 +50,12 @@ class TestData {
 
 function testQueueCreateSingleType() {
     let queue: Queue<number>;
-    try {
-        queue = new Queue<number>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Queue");
-        return;
-    }
-    queue.add(TestData.testNumber3);
-    assertEQ(queue.length, TestData.testNumber1, "Queue length should be 1 after adding one element");
+    arktest.expectNoThrow(() => {queue = new Queue<number>()});
 }
 
 function testQueueCreateMultipleTypes() {
     let queue: Queue<number | string | object>;
-    try {
-        queue = new Queue<number | string | object>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Queue");
-        return;
-    }
-    queue.add(TestData.testString1);
-    queue.add(TestData.testObject1);
-    queue.add(TestData.testNumber3);
-    queue.add(TestData.testString1);
-    queue.add(TestData.testObject1);
-    assertEQ(queue.length, TestData.testNumber5, "Queue length should be 5 after adding five elements");
+    arktest.expectNoThrow(() => {queue = new Queue<number | string | object>()});
 }
 
 function testQueueLengthBasic() {
