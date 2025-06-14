@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
+{%- for c in cases %}
 
 /*---
-desc: Compile-time error test for BigInt equality
-tags: [negative, compile-only]
+desc: Case of if not both operants are bigint 
+tags: []
 ---*/
 
-class TestClass {}
+let b: bigint = {{c.b}}
 
-function main(): void {
-    let x: {{case.ltype}} = {{case.lval}}
-    let y: {{case.rtype}} = {{case.rval}}
-    x {{case.op}} y
+function main(): int {
+    if (b {{c.op}} {{c.exp}}) { 
+        return 0
+    }
+    return 1
 }
-
-{% endfor %}
+{%- endfor %}

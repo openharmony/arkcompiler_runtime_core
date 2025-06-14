@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,23 +15,11 @@ cases:
     - { b: '0n', exp: '"0"', op: '<' }
     - { b: '0n', exp: '"0"', op: '<=' }
 
-    - { b: '0n', exp: "c'\\u0000'", op: '>' }
-    - { b: '0n', exp: "c'\\u0000'", op: '>=' }
-
-    - { b: '0n', exp: '0', op: '<' }
-    - { b: '0n', exp: '0', op: '<=' }
-
-    - { b: '0n', exp: '0.0', op: '>' }
-    - { b: '0n', exp: '0.0', op: '>=' }
-
     - { b: '0n', exp: 'false', op: '<' }
     - { b: '0n', exp: 'false', op: '<=' }
 
     - { b: '0n', exp: 'new Error()', op: '>' }
     - { b: '0n', exp: 'new Error()', op: '>=' }
 
-    - { b: 'new BigInt(0)', exp: '0', op: '<' }
-    - { b: 'new BigInt(0)', exp: '0', op: '<=' }
-
     - { b: 'new BigInt(0)', exp: '"0"', op: '>' }
-    - { b: 'new BigInt(0)', exp: '"0"', op: '>=' }
+    - { b: 'new BigInt(0)', exp: '"0"', op: '>=' } 
