@@ -23,6 +23,11 @@ const DataModel = etsVm.getClass('Lobject_literal/DataModel;');
 const hasValidRecordProperty = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'hasValidRecordProperty');
 const testRecord = etsVm.getInstance('Lescompat/Record;');
 
+const IDataInterface = etsVm.getClass('Lobject_literal/object_literal$IDataInterface$ObjectLiteral;');
+const isValidDataInterface = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'isValidDataInterface');
+const IUserProfile = etsVm.getClass('Lobject_literal/object_literal$IUserProfile$ObjectLiteral;');
+const isValidUserProfile = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'isValidUserProfile');
+
 function main(): void {
     let testEntity;
     let isEntityResult = isEntity((testEntity = new Entity(), testEntity.id = 2, testEntity));
@@ -41,6 +46,18 @@ function main(): void {
     } catch (err) {
         ASSERT_EQ('Unsupported ETS instance type: Lescompat/wrongclass;', err.message);
     }
+
+    let testDataInterface;
+    let isInterfaceResult = isValidDataInterface((testDataInterface = new IDataInterface(),
+                                                  testDataInterface.value = 1, testDataInterface));
+    ASSERT_TRUE(isInterfaceResult);
+
+    let testUserInterface;
+    let isInterfaceResult1 = isValidUserProfile((testUserInterface = new IUserProfile(),
+                                                 testUserInterface.name = 'Tom',
+                                                 testUserInterface.age = 10,
+                                                 testUserInterface));
+    ASSERT_TRUE(isInterfaceResult1);
 }
 
 main();
