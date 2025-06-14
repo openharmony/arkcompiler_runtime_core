@@ -38,6 +38,7 @@ class ObjectHeader;
 class BaseClass {
 public:
     static constexpr uint32_t DYNAMIC_CLASS = 1U;
+    using HeaderType = uint64_t;
 
 public:
     explicit BaseClass(panda_file::SourceLang lang) : lang_(lang) {}
@@ -107,6 +108,8 @@ protected:
     }
 
 private:
+    FIELD_UNUSED HeaderType hclass_ {0};  // store ptr
+    FIELD_UNUSED uint64_t bitField_ {0};  // store StringType
     uint32_t flags_ {0};
     // Size of the object of this class. In case of static classes it is 0
     // for abstract classes, interfaces and classes whose objects
