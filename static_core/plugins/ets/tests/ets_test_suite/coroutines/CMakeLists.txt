@@ -350,6 +350,7 @@ add_ets_coroutines_test(FILE setTimeout.ets
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE scale_workers_pool.ets

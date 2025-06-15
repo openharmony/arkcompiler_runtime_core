@@ -29,12 +29,18 @@ let shortTimeout = 10;
 let mediumTimeout = 100;
 let longTimeout = 1000;
 
+function assertTrue(expr: boolean) {
+    if (!expr) {
+        console.log(new Error().stack);
+        StdProcess.process.abort();
+    }
+}
+
 function setTimeoutTest() {
     let flag = false;
     let start = Date.now();
     setTimeout(() => {
         assertTrue(flag);
-        console.log(Date.now() - start);
         assertTrue(Date.now() - start >= shortTimeout);
     }, shortTimeout);
     flag = true;
@@ -47,7 +53,7 @@ function clearTimeoutTest() {
 
 function clearIntervalTestFromCallback() {
     let flag = true;
-    let id = -1;
+    let id: number = -1;
     id = setInterval(() => {
         assertTrue(flag);
         flag = false;

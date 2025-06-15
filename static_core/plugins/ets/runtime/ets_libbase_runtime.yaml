@@ -75,6 +75,9 @@ coretypes:
 - managed_class: std.core.OutOfMemoryError
   mirror_class: ark::ets::EtsOutOfMemoryError
 
+- managed_class: std.core.QueueSpinlock
+  mirror_class: ark::ets::EtsQueueSpinlock
+
 - managed_class: escompat.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
@@ -3084,6 +3087,19 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
+######################
+# std.core.QueueSpinlock #
+######################
+  - name: StdQueueSpinlockGuard
+    space: ets
+    class_name: std.core.QueueSpinlock
+    method_name: guard
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
+
 ############################
 #   escompat.SharedMemory  #
 ############################
@@ -6016,6 +6032,26 @@ intrinsics:
       ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEventFire
+
+  - name: stdConcurrencyHelpersSpinlockCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: spinlockCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsQueueSpinlockCreate
+
+  - name: stdConcurrencyHelpersSpinlockGuard
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: spinlockGuard
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
   - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
     space: ets
