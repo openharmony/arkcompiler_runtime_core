@@ -441,7 +441,8 @@ export final class ESValue {
     }
 
     public toPromise(): Promise<Any> {
-        let linker = Class.ofCaller().getLinker();
+        const callerClass = Class.ofCaller();
+        const linker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker();
         let clsName = 'std.core.Promise';
         return new Promise<ESValue>((resolve, reject) => {
             let jsPromise = 

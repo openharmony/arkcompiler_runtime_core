@@ -28,12 +28,8 @@ export class Dummy { }
 
 export function dummy(): Dummy { return new Dummy() }
 
-function getCurrentLinker() {
-    return Class.ofCaller().getLinker();
-}
-
 function testLazyLoading() {
-    const appLinker = getCurrentLinker();
+    const appLinker = Class.current().getLinker();
 
     // disabled as runtime verification is enabled
     const verifierEnabled: boolean = true;

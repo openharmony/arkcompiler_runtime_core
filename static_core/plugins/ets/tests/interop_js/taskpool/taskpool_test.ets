@@ -43,7 +43,7 @@ function RunTasksWithJsAsyncCallTest(): void {
         let modified = false;
         let method = JSRuntime.getPropertyJSValue(module, 'asyncWithAwait');
         let callRes = JSRuntime.invoke(module, method);
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = 'std.core.Promise';
         let promise = JSRuntime.getValueObject(callRes, linker.loadClass(clsName, false)) as Promise<Object>;
         let promise1 = promise.then((x:Object): void => {
