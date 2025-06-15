@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,41 @@
 
 namespace ark::panda_file {
 
+MemoryWriter::MemoryWriter() : checksum_(adler32(0, nullptr, 0)) {}
+
+bool MemoryWriter::WriteBytes(const std::vector<uint8_t> &bytes)
+{
+    if (bytes.empty()) {
+        return true;
+    }
+    if (countChecksum_) {
+        checksum_ = adler32(checksum_, bytes.data(), bytes.size());
+    }
+    data_.insert(data_.end(), bytes.cbegin(), bytes.cend());
+    return true;
+}
+
+MemoryBufferWriter::MemoryBufferWriter(uint8_t *buffer, size_t size)
+    : sp_(buffer, size), checksum_(adler32(0, nullptr, 0))
+{
+}
+
+bool MemoryBufferWriter::WriteBytes(const std::vector<uint8_t> &bytes)
+{
+    if (bytes.empty()) {
+        return true;
+    }
+    if (countChecksum_) {
+        checksum_ = adler32(checksum_, bytes.data(), bytes.size());
+    }
+    auto subSp = sp_.SubSpan(offset_, bytes.size());
+    if (memcpy_s(subSp.data(), subSp.size(), bytes.data(), bytes.size()) != 0) {
+        return false;
+    }
+    offset_ += bytes.size();
+    return true;
+}
+
 FileWriter::FileWriter(const std::string &fileName) : checksum_(adler32(0, nullptr, 0))
 {
 #ifdef PANDA_TARGET_WINDOWS
@@ -34,6 +69,7 @@ FileWriter::~FileWriter()
     if (file_ != nullptr) {
         fclose(file_);
     }
+    file_ = nullptr;
 }
 
 bool FileWriter::WriteByte(uint8_t data)

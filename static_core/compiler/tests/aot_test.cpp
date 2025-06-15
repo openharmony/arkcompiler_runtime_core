@@ -832,7 +832,7 @@ TEST_F(AotTest, PandaZipFile)
 
         const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pfData.assign(headerPtr, headerPtr + sizeof(panda_file::File::Header));
+        pfData.assign(headerPtr, headerPtr + pf->GetHeader()->fileSize);
     }
 
     const char *archivename = "__TestPaocOpenZipPandaFile__.zip";
