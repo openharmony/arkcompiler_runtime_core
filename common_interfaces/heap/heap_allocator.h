@@ -32,7 +32,7 @@ public:
     static Address AllocateInOld(size_t size, LanguageType language);
     static Address AllocateInHuge(size_t size, LanguageType language);
     static Address AllocateInReadOnly(size_t size, LanguageType language);
-    static Address AllocateLargeJitFortRegion(size_t size, LanguageType language);
+    static uintptr_t AllocateLargeJitFortRegion(size_t size, LanguageType language);
     // below are interfaces used for serialize
     static Address AllocateNoGC(size_t size);
     static Address AllocatePinNoGC(size_t size);
