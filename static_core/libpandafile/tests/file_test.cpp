@@ -339,6 +339,57 @@ TEST(File, Open)
     remove(ABC_FILE);
 }
 
+TEST(File, TestValidChecksum)
+{
+    ItemContainer container;
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    auto fp = fopen(ABC_FILE, "rbe");
+    EXPECT_NE(fp, nullptr);
+
+    os::mem::ConstBytePtr ptr = os::mem::MapFile(os::file::File(fileno(fp)), os::mem::MMAP_PROT_READ,
+                                                 os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset())
+                                    .ToConst();
+    EXPECT_TRUE(ValidateChecksum(ptr, ABC_FILE));
+    fclose(fp);
+
+    remove(ABC_FILE);
+}
+
+TEST(File, TestInvalidChecksum)
+{
+    ItemContainer container;
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk, and make it invalid
+    auto fp = fopen(ABC_FILE, "rb+e");
+    EXPECT_NE(fp, nullptr);
+    File::Header hdr = {};
+    auto cnt = fread(&hdr, sizeof(File::Header), 1, fp);
+    EXPECT_GT(cnt, 0);
+    const uint32_t destructiveBytes = 100;
+    hdr.numIndexes = destructiveBytes;
+    fseek(fp, 0, SEEK_SET);
+    cnt = fwrite(&hdr, sizeof(uint8_t), sizeof(File::Header), fp);
+    EXPECT_GT(cnt, 0);
+    fclose(fp);
+
+    // Read and Check
+    fp = fopen(ABC_FILE, "rbe");
+    EXPECT_NE(fp, nullptr);
+    cnt = fread(&hdr, sizeof(File::Header), 1, fp);
+    EXPECT_GT(cnt, 0);
+    os::mem::ConstBytePtr ptr = os::mem::MapFile(os::file::File(fileno(fp)), os::mem::MMAP_PROT_READ,
+                                                 os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset())
+                                    .ToConst();
+    EXPECT_FALSE(ValidateChecksum(ptr, ABC_FILE));
+    fclose(fp);
+    remove(ABC_FILE);
+}
+
 TEST(File, OpenUncompressedArchive)
 {
     // Invalid FD

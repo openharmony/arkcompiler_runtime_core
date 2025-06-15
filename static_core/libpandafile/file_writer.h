@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,17 +102,26 @@ public:
 
 class MemoryWriter : public Writer {
 public:
-    bool WriteByte(uint8_t byte) override
+    PANDA_PUBLIC_API MemoryWriter();
+
+    void CountChecksum(bool counting) override
     {
-        data_.push_back(byte);
-        return true;
+        countChecksum_ = counting;
     }
 
-    bool WriteBytes(const std::vector<uint8_t> &bytes) override
+    bool WriteChecksum(size_t offset) override
     {
-        data_.insert(data_.end(), bytes.cbegin(), bytes.cend());
-        return true;
+        auto span = Span(data_.data(), data_.size());
+        auto sub = span.SubSpan(offset);
+        return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
     }
+
+    bool WriteByte(uint8_t byte) override
+    {
+        return WriteBytes({byte});
+    }
+
+    bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
     const std::vector<uint8_t> &GetData()
     {
@@ -126,36 +135,36 @@ public:
 
 private:
     std::vector<uint8_t> data_;
+    uint32_t checksum_;
+    bool countChecksum_ {false};
 };
 
 class MemoryBufferWriter : public Writer {
 public:
-    explicit MemoryBufferWriter(uint8_t *buffer, size_t size) : sp_(buffer, size) {}
+    PANDA_PUBLIC_API explicit MemoryBufferWriter(uint8_t *buffer, size_t size);
 
     ~MemoryBufferWriter() override = default;
 
     NO_COPY_SEMANTIC(MemoryBufferWriter);
     NO_MOVE_SEMANTIC(MemoryBufferWriter);
 
+    void CountChecksum(bool counting) override
+    {
+        countChecksum_ = counting;
+    }
+
+    bool WriteChecksum(size_t offset) override
+    {
+        auto sub = sp_.SubSpan(offset);
+        return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) != 0);
+    }
+
     bool WriteByte(uint8_t byte) override
     {
-        sp_[offset_++] = byte;
-        return true;
+        return WriteBytes({byte});
     }
 
-    bool WriteBytes(const std::vector<uint8_t> &bytes) override
-    {
-        if (bytes.empty()) {
-            return true;
-        }
-
-        auto subSp = sp_.SubSpan(offset_, bytes.size());
-        if (memcpy_s(subSp.data(), subSp.size(), bytes.data(), bytes.size()) != 0) {
-            return false;
-        }
-        offset_ += bytes.size();
-        return true;
-    }
+    bool WriteBytes(const std::vector<uint8_t> &bytes) override;
 
     size_t GetOffset() const override
     {
@@ -165,6 +174,8 @@ public:
 private:
     Span<uint8_t> sp_;
     size_t offset_ {0};
+    uint32_t checksum_;
+    bool countChecksum_ {false};
 };
 
 class FileWriter : public Writer {

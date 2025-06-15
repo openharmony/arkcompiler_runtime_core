@@ -147,14 +147,15 @@ TEST(ItemContainer, TestFileFormatVersionValid)
     {
         ItemContainer container;
         auto writer = FileWriter(fileName);
-
         File::Header header {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
         header.version = {0, 0, 0, 5};
         header.fileSize = sizeof(File::Header);
-
+        auto pChecksumData = reinterpret_cast<uint8_t *>(&header.version);
+        auto checksum = adler32(1, pChecksumData, sizeof(header) - offsetof(File::Header, version));
+        header.checksum = checksum;
         for (uint8_t b : Span<uint8_t>(reinterpret_cast<uint8_t *>(&header), sizeof(header))) {
             writer.WriteByte(b);
         }

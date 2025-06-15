@@ -550,6 +550,26 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
+bool ValidateChecksum(const os::mem::ConstBytePtr &ptr, const std::string_view &filename)
+{
+    if (ptr.Get() == nullptr || ptr.GetSize() < sizeof(File::Header)) {
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
+        return false;
+    }
+    auto header = reinterpret_cast<const File::Header *>(ptr.Get());
+    uint32_t checksumSize = sizeof(File::Header::checksum);
+    uint32_t fileContentOffset = File::MAGIC_SIZE + checksumSize;
+    Span<const uint8_t> dataSpan(reinterpret_cast<const uint8_t *>(ptr.Get()), header->fileSize);
+    const uint8_t *pData = dataSpan.SubSpan(fileContentOffset).data();
+    uint32_t calChecksum = adler32(1, pData, header->fileSize - fileContentOffset);
+    if (header->checksum != calChecksum) {
+        LOG(ERROR, PANDAFILE) << "Checksum mismatch. The abc file has been corrupted. Expected checksum: 0x" << std::hex
+                              << header->checksum << ", Actual checksum: 0x" << std::hex << calChecksum << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename, const size_t &expectedLength)
 {
     if (ptr.Get() == nullptr || ptr.GetSize() < sizeof(File::Header)) {
@@ -567,6 +587,10 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         return false;
     }
 
+    if (!ValidateChecksum(ptr)) {
+        return false;
+    }
+
     auto fileVersion = header->version;
 
     if (fileVersion < MIN_VERSION || fileVersion > VERSION) {
@@ -579,7 +603,6 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         }
         return false;
     }
-
     return true;
 }
 
