@@ -137,6 +137,7 @@ export enum FaultID {
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,
+  AddDeclareToTopLevelInterfaces,
   // this should always be last enum
   LAST_ID
 }
