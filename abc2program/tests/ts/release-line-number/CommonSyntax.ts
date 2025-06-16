@@ -162,25 +162,25 @@ a.then(result => {
 	console.error('yy occur error');
 }).finally(()=>{
 	console.error('yy occur finally');
-})
+});
 
 // Chain Expression
 let result = obj.
 foo().
 bar[0].
-baz()
+baz();
 
 // SuperExpression
 class Parent {
-    sayHello() {
-        return "Hello from Parent";
+    sayHello(): string {
+        return 'Hello from Parent';
     }
 }
 
 class Child extends Parent {
-    sayHello() {
+    sayHello(): string {
         return super.
-        sayHello() + " and Child";
+        sayHello() + ' and Child';
     }
 }
 
@@ -215,5 +215,5 @@ method?.();
 // Chained Function Call with Computed Property Split
 let res = getContext().
   config?.
-  ["someKey"].
+  ['someKey'].
   toLowerCase();
