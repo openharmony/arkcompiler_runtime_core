@@ -19,6 +19,6 @@ files:
 - ./test2.ets
 ---*/
 
-import {c} from "./test2.ets"
+import {c} from './test2.ets'
 
 export let b: number = 2
