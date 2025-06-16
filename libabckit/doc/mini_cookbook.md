@@ -31,7 +31,7 @@ assert(impl->getLastError() == ABCKIT_STATUSNO_ERROR);
 Here is an useful example of a custom function for working with strings in libabckit:
 
 ```cpp
-AbckitString *str = implI->createString(file, "new_string");
+AbckitString *str = implI->createString(file, "new_string", strlen("new_string"));
 
 std::string AbckitStringToString(AbckitFile *file, AbckitString *str)
 {
@@ -55,7 +55,7 @@ std::string AbckitStringToString(AbckitFile *file, AbckitString *str)
 Mandatory and only entry point
 
 ```cpp
-AbckitFile *file = implI->openAbc(path_to_abc);
+AbckitFile *file = implI->openAbc(path_to_abc, path_to_abc_length);
 ```
 
 Make sure that you have used the WriteAbc() or CloseFile() function after working with the file. This way you will avoid memory leaks
@@ -63,7 +63,7 @@ Make sure that you have used the WriteAbc() or CloseFile() function after workin
 ### _Write or Close_
 
 ```cpp
-impl->writeAbc(file, path_to_output_file); // save changes and close
+impl->writeAbc(file, path_to_output_file, path_to_output_file_length); // save changes and close
 // or
 impl->closeFile(file); // close without saving changes
 ```
@@ -139,7 +139,7 @@ AbckitString *GetModuleName(AbckitCoreModule *mod) {
 
 ## Metadata Lang API
 
-### _Add annotation for arkts method_
+### _Add annotation for ArkTS method_
 
 ```cpp
 void AddAnno(AbckitModifyContext *file, AbckitCoreMethod *method) {
@@ -320,7 +320,7 @@ AbckitInst *add_inst = dynG->iCreateAdd2(ctxG, neg_inst, new_inst);
 AbckitInst *ret = dynG->iCreateReturnundefined(ctxG);
 ```
 
-### _Create 'print("Hello")' for ArkTS1.0_
+### _Create 'print("Hello")' for ArkTS_
 
 ```cpp
 AbckitInst *str = dynG->iCreateLoadString(ctxG, implM->createString(file, "Hello", strlen("Hello")));
