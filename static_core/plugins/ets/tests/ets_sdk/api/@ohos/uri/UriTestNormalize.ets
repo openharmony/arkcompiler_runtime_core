@@ -44,27 +44,27 @@ function testNormalize004() {
 }
 
 function NormalizeTest001() {
-  let uri = new uri.UriEntry("http://user@[1:0:0:1:2:1:2:1]:99/path/66./../././mm/.././path1?query#fagment");
-  let normalize = uri.normalize();
-  arktest.assertEQ(normalize, "http://user@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
+  let muri = new uri.URI("http://user@[1:0:0:1:2:1:2:1]:99/path/66./../././mm/.././path1?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://user@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
 }
 
 function NormalizeTest002() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
-  let normalize = uri.normalize();
-  arktest.assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
 }
 
 function NormalizeTest003() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path/.././../aa/bb/cc?query#fagment");
-  let normalize = uri.normalize();
-  arktest.assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path/.././../aa/bb/cc?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
 }
 
 function NormalizeTest004() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
-  let normalize = uri.normalize();
-  arktest.assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
 }
 
 function main(): int {

@@ -15,31 +15,31 @@
 import {uri} from "@ohos.uri";
  
 function testCheckIsAbsolute001() {
-  let gaogao = new uri.URI('f/tp://username:password@www.baidu.com:88/path?query#fagment');
+  let gaogao = new uri.URI('f/tp://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
   arktest.assertFalse(res);
 }
 
 function testCheckIsAbsolute002() {
-  let gaogao = new uri.URI('ftp://username:password@www.baidu.com:88/path?query#fagment');
+  let gaogao = new uri.URI('ftp://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
   arktest.assertTrue(res);
 }
 
 function testCheckIsAbsolute003() {
-  let gaogao = new uri.URI('htt/p://username:password@www.baidu.com:88/path?query#fagment');
+  let gaogao = new uri.URI('htt/p://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
   arktest.assertFalse(res);
 }
 
 function testCheckIsAbsolute004() {
-  let gaogao = new uri.URI('https://username:password@www.baidu.com:88/path?query#fagment');
+  let gaogao = new uri.URI('https://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
   arktest.assertTrue(res);
 }
 
 function testCheckIsAbsolute005() {
-  let gaogao = new uri.URI('http1://username:password@www.baidu.com:88/path?query#fagment');
+  let gaogao = new uri.URI('http1://username:password@www.test.com:88/path?query#fagment');
   let res = gaogao.checkIsAbsolute();
   arktest.assertTrue(res);
 }

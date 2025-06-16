@@ -16,13 +16,9 @@ import { uri } from "@ohos.uri";
 import { BusinessError } from "@ohos.base";
 
 function testUriConstruction001() {
-  try {
-    let that = new uri.URI('#http://username:password@host:8080/directory/file?foo=1&bar=2');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The #It can't be the first.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The #It can't be the first.")
-  }
+  let uriText = '#http://username:password@host:8080/directory/file?foo=1&bar=2';
+  let errText = 'BusinessError: Syntax Error. Invalid Uri string: The #It can\'t be the first.';
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction003() {
@@ -31,92 +27,59 @@ function testUriConstruction003() {
 }
 
 function testUriConstruction004() {
-  try {
-    let that = new uri.URI('http://username:password@[::]:8080/directory/file?Query#gaogao faofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string.")
-  }
+  let uriText = 'http://username:password@[::]:8080/directory/file?Query#gaogao faofao';
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function testUriConstruction005() {
-  try {
-    let that = new uri.URI('http://username:password@host:8080/directory/file?foo^=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Query does not conform to the rule.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Query does not conform to the rule.")
-  }
+  let uriText = 'http://username:password@host:8080/directory/file?foo^=1&bar=2#gaogaofaofao';
+  let errText = 'BusinessError: Syntax Error. Invalid Uri string: The Query does not conform to the rule.'
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction006() {
-  try {
-    let that = new uri.URI('1http://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.")
-  }
+  let uriText = '1http://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction007() {
-  try {
-    let that = new uri.URI('ht@tp://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.")
-  }
+  let uriText = 'ht@tp://username:password@host:8080/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction008() {
-  try {
-    let that = new uri.URI('http://username:password@[::]:80r80/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Port does not conform to the rule.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Port does not conform to the rule.")
-  }
+  let uriText = 'http://username:password@[::]:80r80/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Port does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction009() {
-  try {
-    let that = new uri.URI('http://username:password@[::12:55:8080/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.")
-  }
+  let uriText = 'http://username:password@[::12:55:8080/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction010() {
-  try {
-    let that = new uri.URI('http://username:pa^ssword@[::12:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The UserInfo does not conform to the rule.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The UserInfo does not conform to the rule.")
-  }
+  let uriText = 'http://username:pa^ssword@[::12:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The UserInfo does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction011() {
-  try {
-    let that = new uri.URI('http://username:password@[::1你2:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao');
-  } catch (err: BusinessError) {
-    arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.");
-    arktest.assertEQ(err.code, 10200002);
-    arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.")
-  }
+  let uriText = 'http://username:password@[::1你2:55]:8080/directory/file?foo=1&bar=2#gaogaofaofao';
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function testUriConstruction012() {
-  let gaogao = new uri.URI('http://gg:gaogao@www.baidu.com:99/path/path?query#fagment');
+  let gaogao = new uri.URI('http://gg:gaogao@www.test.com:99/path/path?query#fagment');
   arktest.assertEQ(gaogao.scheme, "http");
-  arktest.assertEQ(gaogao.authority, "gg:gaogao@www.baidu.com:99");
-  arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.baidu.com:99/path/path?query");
+  arktest.assertEQ(gaogao.authority, "gg:gaogao@www.test.com:99");
+  arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");
   arktest.assertEQ(gaogao.userInfo, "gg:gaogao");
-  arktest.assertEQ(gaogao.host, "www.baidu.com");
+  arktest.assertEQ(gaogao.host, "www.test.com");
   arktest.assertEQ(gaogao.port, "99");
   arktest.assertEQ(gaogao.path, "/path/path");
   arktest.assertEQ(gaogao.query, "query");
@@ -280,12 +243,12 @@ function testUriConstruction024() {
 }
 
 function testUriConstruction025() {
-  let gaogao = new uri.URI('http://user@www.baidu.com/path/path23?query#qwer');
+  let gaogao = new uri.URI('http://user@www.test.com/path/path23?query#qwer');
   arktest.assertEQ(gaogao.scheme, "http");
-  arktest.assertEQ(gaogao.authority, "user@www.baidu.com");
-  arktest.assertEQ(gaogao.ssp, "//user@www.baidu.com/path/path23?query");
+  arktest.assertEQ(gaogao.authority, "user@www.test.com");
+  arktest.assertEQ(gaogao.ssp, "//user@www.test.com/path/path23?query");
   arktest.assertEQ(gaogao.userInfo, "user");
-  arktest.assertEQ(gaogao.host, "www.baidu.com");
+  arktest.assertEQ(gaogao.host, "www.test.com");
   arktest.assertEQ(gaogao.port, "-1");
   arktest.assertEQ(gaogao.path, "/path/path23");
   arktest.assertEQ(gaogao.query, "query");
@@ -357,6 +320,13 @@ function testUriConstruction030() {
   arktest.assertEQ(gaogao.fragment, "qwer");
 }
 
+function testConstructorThrow(uriText: string, errText: string) {
+  let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).toString() == errText)
+  }
+  arktest.expectThrow((): void throws => { let that = new uri.URI(uriText); }, exceptionCheck)
+}
+
 function testUriConstruction031() {
   let gaogao = new uri.URI('http://[::192:0:5]/path/path23?query#qwer');
   arktest.assertEQ(gaogao.scheme, "http");
@@ -373,7 +343,6 @@ function testUriConstruction031() {
 function main(): int {
   let suite = new arktest.ArkTestsuite("URI XTS tests");
   suite.addTest("testUriConstruction001", testUriConstruction001);
-  //    suite.addTest("testUriConstruction002", testUriConstruction002);
   suite.addTest("testUriConstruction003", testUriConstruction003);
   suite.addTest("testUriConstruction004", testUriConstruction004);
   suite.addTest("testUriConstruction005", testUriConstruction005);

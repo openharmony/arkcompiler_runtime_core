@@ -710,33 +710,30 @@ export namespace uri {
 
   const MAX_BIT_SIZE: number = 128;
 
-  class UriData {
-    port: number = -1;
-    scheme: string = "";
-    userInfo: string = "";
-    host: string = "";
-    query: string = "";
-    fragment: string = "";
-    path: string = "";
-    authority: string = "";
-    SchemeSpecificPart: string = "";
-  };
-
   /**
   * Handling specific URI logic
   */
-  export class UriEntry {
-    uriData: UriData = new UriData();
-    data: string = "";
-    inputUri: string = "";
-    errStr: string = "";
+  class UriEntry {
+    private errStr: string = "";
+    private data: string = "";
+    private inputUri: string = "";
+
+    private port: number = -1;
+    private scheme: string = "";
+    private userInfo: string = "";
+    private host: string = "";
+    private query: string = "";
+    private fragment: string = "";
+    private path: string = "";
+    private authority: string = "";
+    private schemeSpecificPart: string = "";
 
     private REG_ALPHA = new RegExp("[a-zA-Z]", 'g');
     private REG_SCHEME = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*]", 'g');
     private REG_URLC = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/?:@\\[\\]%\"]", 'g');
     private REG_PATH = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/:@%]", 'g');
     private REG_USER_INFO = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*:%]", 'g');
-    private REG_PORT = new RegExp("[\\da-zA-Z\\-]", 'g');
+    private REG_PORT = new RegExp("[\\da-zA-Z\\-.]", 'g');
     private REG_NONASC = new RegExp("[^\\x00-\\x7F]", 'g');
     private REG_DIGIT = new RegExp("[\\d]", 'g');
 
@@ -753,10 +750,10 @@ export namespace uri {
     }
 
     private assignSchemeSpecificPart() {
-      this.uriData.SchemeSpecificPart += this.data;
-      if (this.uriData.query != "") {
-        this.uriData.SchemeSpecificPart += "?";
-        this.uriData.SchemeSpecificPart += this.uriData.query;
+      this.schemeSpecificPart += this.data;
+      if (this.query != "") {
+        this.schemeSpecificPart += "?";
+        this.schemeSpecificPart += this.query;
       }
     }
 
@@ -789,12 +786,12 @@ export namespace uri {
         this.analysisHostAndPath();
         this.checkErrAndThrow();
       } else if (this.data.length != 0 && this.data[0] == c'/') {
-        this.uriData.path = this.data;
+        this.path = this.data;
         this.assignSchemeSpecificPart();
         this.data = "";
       } else {
         this.assignSchemeSpecificPart();
-        this.uriData.query = "";
+        this.query = "";
         this.data = "";
       }
     }
@@ -812,7 +809,7 @@ export namespace uri {
         this.errStr = "SpecialPath does not conform to the rule.";
         return;
       }
-      this.uriData.path = this.data;
+      this.path = this.data;
       this.data = "";
     }
 
@@ -826,7 +823,7 @@ export namespace uri {
         this.errStr = "Fragment does not conform to the rule.";
         return;
       }
-      this.uriData.fragment = fragment;
+      this.fragment = fragment;
       this.data = this.data.substring(0, pos);
     }
 
@@ -836,7 +833,7 @@ export namespace uri {
         this.errStr = "Query does not conform to the rule.";
         return;
       }
-      this.uriData.query = query;
+      this.query = query;
       this.data = this.data.substring(0, pos);
     }
 
@@ -844,9 +841,9 @@ export namespace uri {
       let slashPos = this.data.indexOf('/');
       if (slashPos != -1 && slashPos < pos) {
         this.specialPath();
-        this.uriData.SchemeSpecificPart += (this.uriData.path);
-        this.uriData.SchemeSpecificPart += ("?");
-        this.uriData.SchemeSpecificPart += (this.uriData.query);
+        this.schemeSpecificPart += (this.path);
+        this.schemeSpecificPart += ("?");
+        this.schemeSpecificPart += (this.query);
         this.data = "";
       } else {
         if (!this.REG_ALPHA.test(this.data.substring(0, 1))) {
@@ -858,7 +855,7 @@ export namespace uri {
           this.errStr = "Scheme does not conform to the rule.";
           return;
         }
-        this.uriData.scheme = scheme;
+        this.scheme = scheme;
         this.data = this.data.substring(pos + 1);
       }
     }
@@ -884,9 +881,9 @@ export namespace uri {
         }
         // ipv4
         if (!isLawfulPort || !this.analysisIPV4()) {
-          this.uriData.port = -1;
-          this.uriData.host = "";
-          this.uriData.userInfo = "";
+          this.port = -1;
+          this.host = "";
+          this.userInfo = "";
         }
       }
     }
@@ -901,7 +898,7 @@ export namespace uri {
         this.analysisPath(pos);
         this.checkErrAndThrow();
       }
-      this.uriData.authority = this.data;
+      this.authority = this.data;
       // find UserInfo
       pos = this.data.indexOf('@');
       if (pos != -1) {
@@ -927,7 +924,7 @@ export namespace uri {
         this.errStr = "Path does not conform to the rule.";
         return;
       }
-      this.uriData.path = path;
+      this.path = path;
       this.data = this.data.substring(0, pos);
     }
 
@@ -937,13 +934,14 @@ export namespace uri {
         this.errStr = "UserInfo does not conform to the rule.";
         return;
       }
-      this.uriData.userInfo = userInfo;
+      this.userInfo = userInfo;
       this.data = this.data.substring(pos + 1);
     }
 
     private analysisPort(pos: number) {
       let port = this.data.substring(pos + 1);
       if (!this.checkCharacter(port, this.REG_PORT, true)) {
+        console.log('<>> 944 '+port)
         this.errStr = "Port does not conform to the rule.";
         return false;
       } else if (this.checkCharacter(port, this.REG_DIGIT, false)) {
@@ -955,7 +953,7 @@ export namespace uri {
         if (tempPort < 0 || tempPort > Int.MAX_VALUE) {
           return false;
         }
-        this.uriData.port = tempPort;
+        this.port = tempPort;
         this.data = this.data.substring(0, pos);
         return true;
       } else {
@@ -973,7 +971,7 @@ export namespace uri {
       if (!isIpv4 && !isHosName) {
         return false;
       } else {
-        this.uriData.host = this.data;
+        this.host = this.data;
         this.data = "";
         return true;
       }
@@ -995,36 +993,36 @@ export namespace uri {
         this.errStr = "Ipv6 does not conform to the rule.";
         return;
       }
-      this.uriData.host = this.data;
+      this.host = this.data;
       this.data = "";
     }
 
     equals(other: UriEntry): boolean {
-      if (this.uriData.port != other.uriData.port) {
+      if (this.port != other.port) {
         return false;
       }
-      if (this.uriData.scheme != other.uriData.scheme) {
+      if (this.scheme != other.scheme) {
         return false;
       }
-      if (this.uriData.userInfo != other.uriData.userInfo) {
+      if (this.userInfo != other.userInfo) {
         return false;
       }
-      if (this.uriData.host != other.uriData.host) {
+      if (this.host != other.host) {
         return false;
       }
-      if (this.uriData.query != other.uriData.query) {
+      if (this.query != other.query) {
         return false;
       }
-      if (this.uriData.fragment != other.uriData.fragment) {
+      if (this.fragment != other.fragment) {
         return false;
       }
-      if (this.uriData.path != other.uriData.path) {
+      if (this.path != other.path) {
         return false;
       }
-      if (this.uriData.authority != other.uriData.authority) {
+      if (this.authority != other.authority) {
         return false;
       }
-      if (this.uriData.SchemeSpecificPart != other.uriData.SchemeSpecificPart) {
+      if (this.schemeSpecificPart != other.schemeSpecificPart) {
         return false;
       }
       return true;
@@ -1035,11 +1033,11 @@ export namespace uri {
     }
 
     isAbsolute(): boolean {
-      return this.uriData.scheme != "";
+      return this.scheme != "";
     }
 
     isRelative(): boolean {
-      return this.uriData.scheme == "";
+      return this.scheme == "";
     }
 
     isOpaque(): boolean {
@@ -1067,14 +1065,14 @@ export namespace uri {
 
     private buildUriString(str: string, param: string) {
       let result = "";
-      if (this.uriData.scheme != "") {
-        result += this.uriData.scheme + ":";
+      if (this.scheme != "") {
+        result += this.scheme + ":";
       }
-      if (this.uriData.authority != "") {
-        result += "//" + this.uriData.authority;
+      if (this.authority != "") {
+        result += "//" + this.authority;
       }
-      if (this.uriData.path != "") {
-        result += this.uriData.path;
+      if (this.path != "") {
+        result += this.path;
       }
       if (str == "segment") {
         let lastChar = result[result.length - 1];
@@ -1085,40 +1083,40 @@ export namespace uri {
         }
       }
       if (str != "clearquery") {
-        if (this.uriData.query == "") {
+        if (this.query == "") {
           if (str == "query") {
             result += "?" + param;
           }
         } else {
-          result += "?" + this.uriData.query;
+          result += "?" + this.query;
           if (str == "query") {
             result += "&" + param;
           }
         }
       }
-      if (this.uriData.fragment != "") {
-        result += "#" + this.uriData.fragment;
+      if (this.fragment != "") {
+        result += "#" + this.fragment;
       }
       return result;
     }
 
     getSegment(): Array<string> {
       let segments = new Array<string>();
-      if (this.uriData.path == "") {
+      if (this.path == "") {
         return segments;
       }
       let previous = 0;
       let current = 0;
-      for (current = this.uriData.path.indexOf('/', previous); current != -1;
-        current = this.uriData.path.indexOf('/', previous)) {
+      for (current = this.path.indexOf('/', previous); current != -1;
+        current = this.path.indexOf('/', previous)) {
         if (previous < current) {
-          let segment = this.uriData.path.substring(previous, current);
+          let segment = this.path.substring(previous, current);
           segments.push(segment);
         }
         previous = current + 1;
       }
-      if (previous < this.uriData.path.length) {
-        segments.push(this.uriData.path.substring(previous));
+      if (previous < this.path.length) {
+        segments.push(this.path.substring(previous));
       }
       return segments;
     }
@@ -1135,18 +1133,18 @@ export namespace uri {
 
     normalize(): string {
       let temp = new Array<string>;
-      let pathLen = this.uriData.path.length;
+      let pathLen = this.path.length;
       if (pathLen == 0) {
         return this.inputUri;
       }
       let pos = 0;
       let left = 0;
-      while ((pos = this.uriData.path.indexOf('/', left)) != -1) {
-        temp.push(this.uriData.path.substring(left, pos));
+      while ((pos = this.path.indexOf('/', left)) != -1) {
+        temp.push(this.path.substring(left, pos));
         left = pos + 1;
       }
       if (left != pathLen) {
-        temp.push(this.uriData.path.substring(left));
+        temp.push(this.path.substring(left));
       }
       const STR_DOTDOT = '..';
       let tempLen = temp.length;
@@ -1177,69 +1175,69 @@ export namespace uri {
 
     private split(path: string): string {
       let normalizeUri = "";
-      if (this.uriData.scheme != "") {
-        normalizeUri += this.uriData.scheme + ":";
+      if (this.scheme != "") {
+        normalizeUri += this.scheme + ":";
       }
-      if (this.uriData.path == "") {
-        normalizeUri += this.uriData.SchemeSpecificPart;
+      if (this.path == "") {
+        normalizeUri += this.schemeSpecificPart;
       } else {
-        if (this.uriData.host != "") {
+        if (this.host != "") {
           normalizeUri += "//";
-          if (this.uriData.userInfo != "") {
-            normalizeUri += this.uriData.userInfo + "@";
+          if (this.userInfo != "") {
+            normalizeUri += this.userInfo + "@";
           }
-          normalizeUri += this.uriData.host;
-          if (this.uriData.port != -1) {
-            normalizeUri += ":" + Number.toString(this.uriData.port);
+          normalizeUri += this.host;
+          if (this.port != -1) {
+            normalizeUri += ":" + Number.toString(this.port);
           }
-        } else if (this.uriData.authority != "") {
-          normalizeUri += "//" + this.uriData.authority;
+        } else if (this.authority != "") {
+          normalizeUri += "//" + this.authority;
         }
         normalizeUri += path;
       }
-      if (this.uriData.query != "") {
-        normalizeUri += "?" + this.uriData.query;
+      if (this.query != "") {
+        normalizeUri += "?" + this.query;
       }
-      if (this.uriData.fragment != "") {
-        normalizeUri += '#' + this.uriData.fragment;
+      if (this.fragment != "") {
+        normalizeUri += '#' + this.fragment;
       }
       return normalizeUri;
     }
 
     getScheme() {
-      return this.uriData.scheme;
+      return this.scheme;
     }
 
     getAuthority() {
-      return this.uriData.authority;
+      return this.authority;
     }
 
     getSsp() {
-      return this.uriData.SchemeSpecificPart;
+      return this.schemeSpecificPart;
     }
 
     getUserinfo() {
-      return this.uriData.userInfo;
+      return this.userInfo;
     }
 
     getHost() {
-      return this.uriData.host;
+      return this.host;
     }
 
     getPort() {
-      return this.uriData.port;
+      return this.port;
     }
 
     getPath() {
-      return this.uriData.path;
+      return this.path;
     }
 
     getQuery() {
-      return this.uriData.query;
+      return this.query;
     }
 
     getFragment() {
-      return this.uriData.fragment;
+      return this.fragment;
     }
 
     clearQuery() {
@@ -1263,16 +1261,16 @@ export namespace uri {
         this.errStr = "Scheme does not conform to the rule.";
         return;
       }
-      this.uriData.scheme = temp;
+      this.scheme = temp;
       this.inputUri = this.updateToString();
     }
 
     setAuthority(authorityStr: string): void {
       // Reset values
-      this.uriData.port = -1;
-      this.uriData.host = "";
-      this.uriData.userInfo = "";
-      this.uriData.authority = authorityStr;
+      this.port = -1;
+      this.host = "";
+      this.userInfo = "";
+      this.authority = authorityStr;
       this.data = authorityStr;
 
       // Find UserInfo
@@ -1285,7 +1283,7 @@ export namespace uri {
           this.errStr = "userInfo does not conform to the rule";
           return;
         }
-        this.uriData.userInfo = userStr;
+        this.userInfo = userStr;
       }
 
       let isLawfulPort = true;
@@ -1307,13 +1305,13 @@ export namespace uri {
 
     setSsp(sspStr: string): void {
       // Reset all relevant fields
-      this.uriData.authority = "";
-      this.uriData.port = -1;
-      this.uriData.host = "";
-      this.uriData.userInfo = "";
-      this.uriData.query = "";
-      this.uriData.path = "";
-      this.uriData.SchemeSpecificPart = "";
+      this.authority = "";
+      this.port = -1;
+      this.host = "";
+      this.userInfo = "";
+      this.query = "";
+      this.path = "";
+      this.schemeSpecificPart = "";
       this.data = sspStr;
 
       // Handle query part
@@ -1329,24 +1327,24 @@ export namespace uri {
         this.data = this.data.substring(2); // Skip the '//'
         this.analysisHostAndPath();
       } else if (this.data[0] === c'/') {
-        this.uriData.path = this.data;
+        this.path = this.data;
         this.assignSchemeSpecificPart();
         this.data = "";
       } else {
         this.assignSchemeSpecificPart();
-        this.uriData.path = "";
-        this.uriData.query = "";
+        this.path = "";
+        this.query = "";
         this.data = "";
       }
       this.inputUri = this.updateToString();
     }
 
     setUserInfo(userInfo: string): void {
-      if (!this.uriData.host || !this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
+      if (!this.host || !this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
         this.errStr = "userInfo does not conform to the rule";
         return;
       }
-      this.uriData.userInfo = userInfo;
+      this.userInfo = userInfo;
       this.updateAuthority();
       this.updateSsp();
       this.inputUri = this.updateToString();
@@ -1357,7 +1355,7 @@ export namespace uri {
         this.errStr = "pathStr does not conform to the rule";
         return;
       }
-      this.uriData.path = pathStr;
+      this.path = pathStr;
       this.updateSsp();
       this.inputUri = this.updateToString();
     }
@@ -1367,7 +1365,7 @@ export namespace uri {
         this.errStr = "QueryStr does not conform to the rule";
         return;
       }
-      this.uriData.query = queryStr;
+      this.query = queryStr;
       this.updateSsp();
       this.inputUri = this.updateToString();
     }
@@ -1377,72 +1375,72 @@ export namespace uri {
         this.errStr = "Fragment does not conform to the rule";
         return;
       }
-      this.uriData.fragment = fragmentStr;
+      this.fragment = fragmentStr;
       this.inputUri = this.updateToString();
     }
 
     private updateAuthority(): void {
-      let temp = this.uriData.userInfo;
-      if (this.uriData.userInfo) {
+      let temp = this.userInfo;
+      if (this.userInfo) {
         temp += "@";
       }
-      temp += this.uriData.host;
-      if (this.uriData.port !== -1) {
-        temp += `:${this.uriData.port}`;
+      temp += this.host;
+      if (this.port !== -1) {
+        temp += `:${this.port}`;
       }
-      this.uriData.authority = temp;
+      this.authority = temp;
     }
 
     private updateSsp(): void {
       let temp = "";
-      if (this.uriData.authority) {
-        temp += `//${this.uriData.authority}`;
+      if (this.authority) {
+        temp += `//${this.authority}`;
       }
-      if (this.uriData.path) {
-        temp += this.uriData.path.startsWith('/')
-          ? this.uriData.path
-          : `/${this.uriData.path}`;
+      if (this.path) {
+        temp += this.path.startsWith('/')
+          ? this.path
+          : `/${this.path}`;
       }
-      if (this.uriData.query) {
-        temp += `?${this.uriData.query}`;
+      if (this.query) {
+        temp += `?${this.query}`;
       }
-      this.uriData.SchemeSpecificPart = temp;
+      this.schemeSpecificPart = temp;
     }
 
     private updateToString(): string {
       let uriStr = "";
       let addQuery = false;
-      if (this.uriData.scheme) {
-        uriStr += this.uriData.scheme + ":";
+      if (this.scheme) {
+        uriStr += this.scheme + ":";
       }
-      if (!this.uriData.path) {
-        uriStr += this.uriData.SchemeSpecificPart;
+      if (!this.path) {
+        uriStr += this.schemeSpecificPart;
         addQuery = true;
       } else {
-        if (this.uriData.host) {
+        if (this.host) {
           uriStr += "//";
-          if (this.uriData.userInfo) {
-            uriStr += this.uriData.userInfo + "@";
+          if (this.userInfo) {
+            uriStr += this.userInfo + "@";
           }
-          uriStr += this.uriData.host;
-          if (this.uriData.port !== -1) {
-            uriStr += ":" + this.uriData.port;
+          uriStr += this.host;
+          if (this.port !== -1) {
+            uriStr += ":" + this.port;
           }
-        } else if (this.uriData.authority) {
-          uriStr += "//" + this.uriData.authority;
+        } else if (this.authority) {
+          uriStr += "//" + this.authority;
         }
-        if (this.uriData.path) {
-          uriStr += this.uriData.path.startsWith('/')
-            ? this.uriData.path
-            : "/" + this.uriData.path;
+        if (this.path) {
+          uriStr += this.path.startsWith('/')
+            ? this.path
+            : "/" + this.path;
         }
       }
-      if (this.uriData.query && !addQuery) {
-        uriStr += "?" + this.uriData.query;
+      if (this.query && !addQuery) {
+        uriStr += "?" + this.query;
       }
 
-      if (this.uriData.fragment) {
-        uriStr += "#" + this.uriData.fragment;
+      if (this.fragment) {
+        uriStr += "#" + this.fragment;
       }
       return uriStr;
     }

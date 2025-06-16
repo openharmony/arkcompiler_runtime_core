@@ -126,14 +126,14 @@ function testUriAddQueryValue007() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param 1", "value 1");
   arktest.assertEQ(newRoute.getQueryValue("param 1"), "value 1");
-  let mui = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
+  let mui = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
   arktest.assertEQ(mui.getQueryValue('sa='), "\ud83d\ude0a");
 }
 
 function testUriAddQueryValue008() {
   let route = new uri.URI('https://www.com?param1=\ud83d\ude0a&param2=value2');
   arktest.assertEQ(route.getQueryValue("abc"), null);
-  let newRoute = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
+  let newRoute = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
   arktest.assertEQ(newRoute.getQueryValue('aa'), null);
 }
 

@@ -78,56 +78,56 @@ function testEqualsTo005() {
 }
 
 function EqualsTest001() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
+  let uri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
   let uri2 = uri;
   arktest.assertTrue(uri.equals(uri2));
 }
 
 function EqualsTest002() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
-  let uri2 = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
+  let uri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
+  let uri2 = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
   arktest.assertTrue(uri.equals(uri2));
 }
 
 function EqualsTest003() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
-  let uri2 = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment123");
+  let uri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment");
+  let uri2 = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path1?query#fagment123");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest004() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  let uri2 = new uri.UriEntry("http://username:password@www.baidu.com:29/path/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  let uri2 = new uri.URI("http://username:password@www.test.com:29/path/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest005() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  let uri2 = new uri.UriEntry("http://user1name:password@www.baidu.com:99/path/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  let uri2 = new uri.URI("http://user1name:password@www.test.com:99/path/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest006() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  let uri2 = new uri.UriEntry("http://username:password@w2ww.baidu.com:99/path/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  let uri2 = new uri.URI("http://username:password@w2ww.baidu.com:99/path/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest007() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  let uri2 = new uri.UriEntry("http://username:password@www.baidu.com:99/pa4th/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  let uri2 = new uri.URI("http://username:password@www.test.com:99/pa4th/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest008() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?qu4ery#fagment");
-  let uri2 = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?qu4ery#fagment");
+  let uri2 = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
 function EqualsTest009() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  let uri2 = new uri.UriEntry("h4ttp://username:password@www.baidu.com:99/path/path?query#fagment");
+  let uri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  let uri2 = new uri.URI("h4ttp://username:password@www.test.com:99/path/path?query#fagment");
   arktest.assertFalse(uri.equals(uri2));
 }
 
@@ -143,7 +143,6 @@ function EqualsTest009() {
 
 
   suite.addTest("testEqualsTo001", testEqualsTo001);
-  //    suite.addTest("testEqualsTo002", testEqualsTo002);
   suite.addTest("testEqualsTo003", testEqualsTo003);
   suite.addTest("testEqualsTo004", testEqualsTo004);
   suite.addTest("testEqualsTo005", testEqualsTo005);
