@@ -29,6 +29,7 @@ namespace ark::ets::intrinsics {
 
 namespace {
 constexpr int INT_MAX_SIZE = 63;
+constexpr double ROUND_BIAS = 0.5;
 
 int32_t ToInt32(double x)
 {
@@ -111,7 +112,14 @@ extern "C" double StdMathFloor(double val)
 
 extern "C" double StdMathRound(double val)
 {
-    return std::round(val);
+    if (std::signbit(val) && val >= -ROUND_BIAS) {
+        return -0.0;
+    }
+    double res = std::ceil(val);
+    if (res - val > ROUND_BIAS) {
+        res -= 1.0;
+    }
+    return res;
 }
 
 extern "C" double StdMathTrunc(double val)
