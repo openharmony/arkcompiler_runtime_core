@@ -33,7 +33,8 @@
                 "vixl",
                 "c_utils",
                 "openssl",
-                "libuv"
+                "libuv",
+                "node"
             ],
             "third_party": [
                 "openssl",
