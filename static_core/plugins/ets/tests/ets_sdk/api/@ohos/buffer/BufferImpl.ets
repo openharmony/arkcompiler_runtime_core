@@ -70,6 +70,8 @@ function main(): int {
     suite.addTest("Test fill utf8 with unicode", testFillUtf8WithUnicode)
     suite.addTest("Test fill base64 with unicode", testFillBase64WithUnicode)
     suite.addTest("Test fill base64url with unicode", testFillBase64UrlWithUnicode)
+    suite.addTest("Test fill ucs2 with unicode", testFillUcs2WithUnicode)
+    suite.addTest("Test fill utf16le with unicode", testFillUtf16leWithUnicode);
     suite.addTest("Test includes hex", testIncludesHex);
     suite.addTest("Test from hex", testFromHex);
     suite.addTest("Test keys", testKeys)
@@ -1063,4 +1065,19 @@ function testBufferToJSON() {
     for (let i: int = 0; i < array.length; ++i) {
         arktest.assertEQ(array[i].jsonType, jsonx.JsonType.JsonNumber);
     }
+}
+
+function testFillUcs2WithUnicode() {
+    const buf = buffer.alloc(10).fill('F1刘FG', 0, 10, 'ucs2');
+    const str = buf.toString('hex');
+    arktest.assertEQ(str, '46003100185246004700');
+    const buf1 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'ucs-2');
+    const str1 = buf1.toString('hex');
+    arktest.assertEQ(str1, '46003100185246004700');
+}
+
+function testFillUtf16leWithUnicode() {
+    const buf = buffer.alloc(10).fill('F1刘FG', 0, 10, 'utf16le');
+    const hex = buf.toString('hex');
+    arktest.assertEQ(hex, '46003100185246004700');
 }
