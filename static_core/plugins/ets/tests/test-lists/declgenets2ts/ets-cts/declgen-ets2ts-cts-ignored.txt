@@ -505,13 +505,6 @@
 05.generics/03.utility_types/incorrect_utility_type_1.ets
 05.generics/03.utility_types/incorrect_utility_type_2.ets
 05.generics/generic_declarations/generic_interfaces/generic_interface_static_member_2.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_11.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_13.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_2.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_5.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_7.ets
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_9.ets
-06.contexts_and_conversions/01.assignment-like_contexts/null_call.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_n_0.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/assn_var/assn-var-lit_n_1.ets

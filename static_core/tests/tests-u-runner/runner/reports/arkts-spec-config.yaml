@@ -304,12 +304,15 @@
     title: Contexts and Conversions
     status: No testable assertions
 '6.1':
-    title: Assignment-like Contexts
+    title: Type of Expressiom
     status: ''
 '6.2':
-    title: String Operator Contexts
+    title: Assignment-like Contexts
     status: ''
 '6.3':
+    title: String Operator Contexts
+    status: ''
+'6.4':
     title: Numeric Operator Contexts
     status: ''
 '6.4':
