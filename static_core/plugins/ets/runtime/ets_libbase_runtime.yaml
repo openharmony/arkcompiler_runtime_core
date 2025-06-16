@@ -4680,7 +4680,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI8
 
   - name: ArrayBufferAndI8
@@ -4690,7 +4690,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI8
 
   - name: ArrayBufferCompareExchangeI8
@@ -4700,7 +4700,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8, i8 ]
+      args: [ i32, i32, i8, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI8
 
   - name: ArrayBufferExchangeI8
@@ -4710,7 +4710,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI8
 
   - name: ArrayBufferLoadI8
@@ -4720,7 +4720,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI8
 
   - name: ArrayBufferrI8
@@ -4730,7 +4730,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI8
 
   - name: ArrayBufferStoreI8
@@ -4740,7 +4740,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI8
 
   - name: ArrayBufferSubI8
@@ -4750,7 +4750,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI8
 
   - name: ArrayBufferXorI8
@@ -4760,7 +4760,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI8
 
   - name: ArrayBufferAddI16
@@ -4770,7 +4770,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI16
 
   - name: ArrayBufferAndI16
@@ -4780,7 +4780,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI16
 
   - name: ArrayBufferCompareExchangeI16
@@ -4790,7 +4790,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16, i16 ]
+      args: [ i32, i32, i16, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI16
 
   - name: ArrayBufferExchangeI16
@@ -4800,7 +4800,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI16
 
   - name: ArrayBufferLoadI16
@@ -4810,7 +4810,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI16
 
   - name: ArrayBufferOrI16
@@ -4820,7 +4820,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI16
 
   - name: ArrayBufferStoreI16
@@ -4830,7 +4830,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI16
 
   - name: ArrayBufferSubI16
@@ -4840,7 +4840,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI16
 
   - name: ArrayBufferXorI16
@@ -4850,7 +4850,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI16
 
   - name: ArrayBufferAddI32
@@ -4860,7 +4860,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI32
 
   - name: ArrayBufferAndI32
@@ -4870,7 +4870,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI32
 
   - name: ArrayBufferCompareExchangeI32
@@ -4880,7 +4880,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32, i32 ]
+      args: [ i32, i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI32
 
   - name: ArrayBufferExchangeI32
@@ -4890,7 +4890,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI32
 
   - name: ArrayBufferLoadI32
@@ -4900,7 +4900,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI32
 
   - name: ArrayBufferOrI32
@@ -4910,7 +4910,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI32
 
   - name: ArrayBufferStoreI32
@@ -4920,7 +4920,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI32
 
   - name: ArrayBufferSubI32
@@ -4930,7 +4930,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI32
 
   - name: ArrayBufferXorI32
@@ -4940,7 +4940,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI32
 
   - name: ArrayBufferAddI64
@@ -4950,7 +4950,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI64
 
   - name: ArrayBufferAndI64
@@ -4960,7 +4960,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI64
 
   - name: ArrayBufferCompareExchangeI64
@@ -4970,7 +4970,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64, i64 ]
+      args: [ i32, i32, i64, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI64
 
   - name: ArrayBufferExchangeI64
@@ -4980,7 +4980,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI64
 
   - name: ArrayBufferLoadI64
@@ -4990,7 +4990,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI64
 
   - name: ArrayBufferOrI64
@@ -5000,7 +5000,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI64
 
   - name: ArrayBufferStoreI64
@@ -5010,7 +5010,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI64
 
   - name: ArrayBufferSubI64
@@ -5020,7 +5020,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI64
 
   - name: ArrayBufferXorI64
@@ -5030,7 +5030,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI64
 
   - name: ArrayBufferAddU8
@@ -5040,7 +5040,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU8
 
   - name: ArrayBufferAndU8
@@ -5050,7 +5050,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU8
 
   - name: ArrayBufferCompareExchangeU8
@@ -5060,7 +5060,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8, i8 ]
+      args: [ i32, i32, i8, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU8
 
   - name: ArrayBufferExchangeU8
@@ -5070,7 +5070,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU8
 
   - name: ArrayBufferLoadU8
@@ -5080,7 +5080,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU8
 
   - name: ArrayBufferOrU8
@@ -5090,7 +5090,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU8
 
   - name: ArrayBufferStoreU8
@@ -5100,7 +5100,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU8
 
   - name: ArrayBufferSubU8
@@ -5110,7 +5110,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU8
 
   - name: ArrayBufferXorU8
@@ -5120,7 +5120,7 @@ intrinsics:
     static: false
     signature:
       ret: i8
-      args: [ i32, i8 ]
+      args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU8
 
   - name: ArrayBufferAddU16
@@ -5130,7 +5130,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU16
 
   - name: ArrayBufferAndU16
@@ -5140,7 +5140,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU16
 
   - name: ArrayBufferCompareExchangeU16
@@ -5150,7 +5150,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16, i16 ]
+      args: [ i32, i32, i16, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU16
 
   - name: ArrayBufferExchangeU16
@@ -5160,7 +5160,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU16
 
   - name: ArrayBufferLoadU16
@@ -5170,7 +5170,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU16
 
   - name: ArrayBufferOrU16
@@ -5180,7 +5180,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU16
 
   - name: ArrayBufferStoreU16
@@ -5190,7 +5190,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU16
 
   - name: ArrayBufferSubU16
@@ -5200,7 +5200,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU16
 
   - name: ArrayBufferXorU16
@@ -5210,7 +5210,7 @@ intrinsics:
     static: false
     signature:
       ret: i16
-      args: [ i32, i16 ]
+      args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU16
 
   - name: ArrayBufferAddU32
@@ -5220,7 +5220,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU32
 
   - name: ArrayBufferAndU32
@@ -5230,7 +5230,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU32
 
   - name: ArrayBufferCompareExchangeU32
@@ -5240,7 +5240,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32, i32 ]
+      args: [ i32, i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU32
 
   - name: ArrayBufferExchangeU32
@@ -5250,7 +5250,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU32
 
   - name: ArrayBufferLoadU32
@@ -5260,7 +5260,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU32
 
   - name: ArrayBufferOrU32
@@ -5270,7 +5270,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU32
 
   - name: ArrayBufferStoreU32
@@ -5280,7 +5280,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU32
 
   - name: ArrayBufferSubU32
@@ -5290,7 +5290,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU32
 
   - name: ArrayBufferXorU32
@@ -5300,7 +5300,7 @@ intrinsics:
     static: false
     signature:
       ret: i32
-      args: [ i32, i32 ]
+      args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU32
 
   - name: ArrayBufferAddU64
@@ -5310,7 +5310,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU64
 
   - name: ArrayBufferAndU64
@@ -5320,7 +5320,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU64
 
   - name: ArrayBufferCompareExchangeU64
@@ -5330,7 +5330,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64, i64 ]
+      args: [ i32, i32, i64, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU64
 
   - name: ArrayBufferExchangeU64
@@ -5340,7 +5340,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU64
 
   - name: ArrayBufferLoadU64
@@ -5350,7 +5350,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32 ]
+      args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU64
 
   - name: ArrayBufferOrU64
@@ -5360,7 +5360,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU64
 
   - name: ArrayBufferStoreU64
@@ -5370,7 +5370,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU64
 
   - name: ArrayBufferSubU64
@@ -5380,7 +5380,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU64
 
   - name: ArrayBufferXorU64
@@ -5390,7 +5390,7 @@ intrinsics:
     static: false
     signature:
       ret: i64
-      args: [ i32, i64 ]
+      args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU64
 
   - name: StdCoroutineGetWorkerId
