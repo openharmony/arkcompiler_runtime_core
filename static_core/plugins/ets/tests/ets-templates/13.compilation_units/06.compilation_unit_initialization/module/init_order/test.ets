@@ -15,18 +15,19 @@
 
 /*---
 desc:  >-
-    Compilation unit is a separate module (see Separate Module Initializer) or a package (see Package Initializer) that
-    is initialized once before an entity (function, variable, or type), exported from the compilation unit, is used for the
-    first time.
+    Compilation unit is a separate module (see Separate Module Initializer)
+    or a package (see Package Initializer) that is initialized once
+    before an entity (function, variable, or type), exported from the compilation unit,
+    is used for the first time.
 tags: [no-warmup]
 files:
 - ./module.ets
 ---*/
 
-import {i} from "./module.ets";
-import {j} from "./module.ets";
+import {i} from './module.ets';
+import {j} from './module.ets';
 
 function main() {
-  assertEQ(i, 1.0, i + " != 1.0");
-  assertEQ(j, 3.0, j + " != 3.0");
+  arktest.assertEQ(i, 1.0, i + ' != 1.0');
+  arktest.assertEQ(j, 3.0, j + ' != 3.0');
 }

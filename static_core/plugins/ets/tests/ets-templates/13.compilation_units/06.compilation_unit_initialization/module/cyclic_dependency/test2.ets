@@ -23,6 +23,6 @@ files:
 - ./module_a.ets
 ---*/
 
-import {a} from "./module_a.ets"
+import {a} from './module_a.ets'
 
 export let c: number = 3;
