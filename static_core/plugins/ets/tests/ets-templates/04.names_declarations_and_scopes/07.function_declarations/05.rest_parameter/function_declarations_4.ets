@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Rest parameters with fixed array type.
+desc: Nested functions are not allowed
 tags: [compile-only, negative]
 ---*/
 

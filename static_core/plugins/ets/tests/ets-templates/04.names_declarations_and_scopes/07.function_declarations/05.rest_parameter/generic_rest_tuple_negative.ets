@@ -14,15 +14,16 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: static Rest function spread with generic tuple
+tags: [compile-only, negative]
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+class TH<A,B,C> {
+    static restMethod(...v: [A, B, C]) {
+    }
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    let mc = new TH<number, string, boolean>
 }
+

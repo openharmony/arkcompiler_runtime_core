@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: Rest function with record literals as param
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+type TEntity = Record<number, string>
+
+function receiver(...classes: TEntity) {
+    return classes.length
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    let users: TEntity = {1: "Bob", 2: "Alice"}
 }

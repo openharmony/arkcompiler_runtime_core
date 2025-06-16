@@ -14,15 +14,17 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: Rest function with object literals as param
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+interface ITest {
+    value: number
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function receiver(...classes: ITest[]) {
+    return classes.length
+}
+
+function main() {
+    arktest.assertEQ(receiver({value: 1}, {value: 2}), 2)
 }

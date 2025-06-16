@@ -14,15 +14,14 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: bad class method call Rest parameters with array type.
+tags: [compile-only, negative]
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+function sums(...numbers: number[]): number {
+    return 0;
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    RestClass.sums(...)
 }

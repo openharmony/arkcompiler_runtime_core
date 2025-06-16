@@ -14,15 +14,28 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: Rest function spread with generic tuple
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+
+function genericRestFunction<A,B,C>(...tuple: [A, B, C]) {
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+class TH<A,B,C> {
+    genericRestMethod(...tuple: [A, B, C]) {
+        genericRestFunction<A, B, C>(...tuple)
+    }
+
+    static restMethod<A,B,C>(...v: [A, B, C]) {
+    }
 }
+
+function main() {
+    genericRestFunction<number, string, boolean>(1, "2", false);
+
+    let mc = new TH<number, string, boolean>
+    mc.genericRestMethod(1, "2", false);
+
+    TH.restMethod<number, string, boolean>(1, "2", false);
+}
+

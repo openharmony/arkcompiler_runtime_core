@@ -14,15 +14,30 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: class method Rest parameters with array type.
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+class RestClass {
+    static sums(...numbers: number[]): number {
+        let res = 0;
+        for (let num of numbers) {
+            res += num;
+        }
+        return res;
+    }
+
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    let emp: number[] = []
+    let tmp: number[] = [1, 2, 3];
+    let arr: Array<number> = Array.create<number>(1, 1.0)
+
+    arktest.assertEQ(RestClass.sums(), 0);
+    arktest.assertEQ(RestClass.sums(...emp), 0);
+
+    arktest.assertEQ(RestClass.sums(1,2,3), 6);
+    arktest.assertEQ(RestClass.sums(...tmp), 6);
+    arktest.assertEQ(RestClass.sums(...arr), 1);
+
 }

@@ -14,15 +14,25 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: Rest function with class receiver
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+interface ITest {
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+class Testee implements ITest {
+}
+
+function receiver(this: Testee, ...classes: ITest[]): number {
+    return classes.length
+}
+
+function main() {
+    let testee: Testee = new Testee
+    let rest: ITest[] = [new Testee, new Testee]
+    arktest.assertEQ(receiver(new Testee, new Testee, new Testee), 2)
+    arktest.assertEQ(receiver(new Testee, ...rest), 2)
+
+    arktest.assertEQ(testee.receiver(new Testee, new Testee), 2)
+    arktest.assertEQ(testee.receiver(...rest), 2)
 }
