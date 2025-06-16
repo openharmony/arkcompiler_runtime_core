@@ -109,11 +109,11 @@ def test_bitmask():
 
 def test_numbers():
     test = TestCase()
-    test.assertEqual(auto_str(1.40e-09), '1n')
-    test.assertEqual(auto_str(0.123), '123m')
-    test.assertEqual(auto_str(123456), '123K')
-    test.assertEqual(nano_str(1.40e-09), '1n')
-    test.assertEqual(nano_str(1.0), '1000000000n')
+    test.assertEqual(auto_str(1.40e-09), f'{1:>7}n')
+    test.assertEqual(auto_str(0.123), f'{123:>7}m')
+    test.assertEqual(auto_str(123456), f'{123:>7}K')
+    test.assertEqual(nano_str(1.40e-09), f'{1:>11}n')
+    test.assertEqual(nano_str(1.0), f'{1000000000:>11}n')
     test.assertEqual(nano_str(1.50e+07), '15000000000000000n')
 
 

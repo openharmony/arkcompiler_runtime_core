@@ -38,12 +38,22 @@ def __suffix(level: int) -> str:
 
 
 def nano_str(val: float) -> str:
-    return f'{int(round(val * (10 ** 9)))}n'
+    return f'{int(round(val * (10 ** 9))):>11}n'
 
 
 def auto_str(val: float) -> str:
+    if 0 == val:
+        return f'{0:>8}'
     d = __degre(val)
     s = __suffix(d)
     if not s:
-        return str(val)
-    return f'{int(round(val / (10 ** d)))}{s}'
+        return f'{int(round(val)):>8}'
+    return f'{int(round(val / (10 ** d))):>7}{s}'
+
+
+def format_number(val: float, fmt: str = 'expo') -> str:
+    if 'nano' == fmt:
+        return nano_str(val)
+    if 'auto' == fmt:
+        return auto_str(val)
+    return f'{val:.2e}'

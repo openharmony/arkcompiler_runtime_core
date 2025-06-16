@@ -21,7 +21,7 @@ import sys
 import json
 import re
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Union, Iterable, Optional, List, Set, Dict, Tuple, Any
 from dataclasses import dataclass
 from statistics import geometric_mean, mean
@@ -57,10 +57,14 @@ class VMBComparison(Jsonable):
         self.summary = ''
         self.tests = {}
         self._regressions = 0
+        self._perf_regressions = []
         self._name_len = 0
 
     def add(self, t, diff) -> None:
         self.tests[t] = diff
+
+    def add_perf_regression(self, t: str, diff: str):
+        self._perf_regressions.append((t, diff))
 
     def set_summary(self, t_diff: str, s_diff: str, r_diff: str,
                     new: int, fixed: int, new_fail: int, missed: int) -> None:
@@ -78,6 +82,15 @@ class VMBComparison(Jsonable):
             if not full and diff.status not in ('new fail', 'missed'):
                 continue
             print(f'{name:<{self._name_len}}; {diff}')
+
+    def process_perf_regressions(self) -> int:
+        if len(self._perf_regressions) == 0:
+            log.passed('No performance degradation (within %.1f%%)', TOLERANCE)
+            return 0
+        log.warning('Some tests have perfomance degradation more than %.1f%%', TOLERANCE)
+        for r in self._perf_regressions:
+            print(f'{r[0]:<{self._name_len}} {r[1]}')
+        return 1
 
 
 @dataclass
@@ -123,8 +136,7 @@ class VMBReport(Jsonable):
         missed, new, fixed, new_fail = 0, 0, 0, 0
         # compare tests present in both reports
         common_tests = tests1.intersection(tests2)
-        log.info('Comparison: %d common tests selected',
-                 len(common_tests))
+        log.info('Comparison: %d common tests selected', len(common_tests))
         for t in common_tests:
             t1, t2 = results1[t], results2[t]
             status1, status2 = test_passed(t1), test_passed(t2)
@@ -137,10 +149,11 @@ class VMBReport(Jsonable):
                     comparison._regressions += 1
                     new_fail += 1
             time_diff = diff_str(t1.mean_time, t2.mean_time)
+            if 'worse' in time_diff:
+                comparison.add_perf_regression(t, time_diff)
             size_diff = diff_str(t1.code_size, t2.code_size)
             rss_diff = diff_str(t1.mem_bytes, t2.mem_bytes)
-            comparison.add(t, VMBDiff(
-                time_diff, size_diff, rss_diff, status_diff))
+            comparison.add(t, VMBDiff(time_diff, size_diff, rss_diff, status_diff))
             if status1 and status2:
                 times1.append(t1.mean_time)
                 times2.append(t2.mean_time)
@@ -161,8 +174,7 @@ class VMBReport(Jsonable):
         t_diff = diff_str_gm(times1, times2)
         s_diff = diff_str_gm(sizes1, sizes2)
         r_diff = diff_str_gm(rss1, rss2)
-        comparison.set_summary(t_diff, s_diff, r_diff,
-                               new, fixed, new_fail, missed)
+        comparison.set_summary(t_diff, s_diff, r_diff, new, fixed, new_fail, missed)
         return comparison
 
     @classmethod
@@ -218,22 +230,38 @@ class VMBReport(Jsonable):
                        f'Size(GM): {self.size_gm:.1f} ' \
                        f'RSS(GM): {self.rss_gm:.1f}'
 
-    def text_report(self, full: bool = True,
-                    exclude: OptList = None) -> None:
-        self.recalc(exclude=exclude)
-        caption(f'{self.title}')
+    def print_full_time(self) -> None:
         s = datetime.strptime(self.report.run.start_time, Timer.tm_format)
         e = datetime.strptime(self.report.run.end_time, Timer.tm_format)
         print(f'Run took {e - s}')
+
+    def compile_time(self) -> None:
+        caption(f'{self.title}')
+        self.print_full_time()
+        compile_time = [t.compile_time for t in self.report.tests if t.compile_time]
+        total_ns = sum(compile_time)
+        total = len(compile_time)
+        min_ns, max_ns = min(compile_time), max(compile_time)
+        mean_ns = mean(compile_time)
+        total_time = str(timedelta(microseconds=total_ns / 1000)).split('.', maxsplit=1)
+        print(f'Compile: {total_time[0]} for {total} tests')
+        print(f'Min: {min_ns / 1e9:.1f} Max: {max_ns / 1e9:.1f} Mean: {mean_ns / 1e9:.1f} (seconds)')
+
+    def text_report(self, full: bool = True, exclude: OptList = None,
+                    fmt: str = 'auto') -> None:
+        self.recalc(exclude=exclude)
+        caption(f'{self.title}')
+        self.print_full_time()
         caption(f'{self.summary}')
         print()
         if self.fail_cnt > 0 or full:
-            caption(f"{'Test':<{self._name_len}} |   Time   | "
+            time_head = '    Time    ' if 'nano' == fmt else '  Time  '
+            caption(f"{'Test':<{self._name_len}} | {time_head} | "
                     f'CodeSize |   RSS    | Status  |')
         for t in sorted(self.report.tests, key=lambda x: x.name):
             if test_passed(t) and not full:
                 continue
-            print(f'{pad_left(t.name, self._name_len)} | {t} |')
+            print(f'{pad_left(t.name, self._name_len)} | {t.to_str(fmt)} |')
         print()
 
     def csv_report(self, csv: Union[str, Path],
@@ -563,7 +591,7 @@ def compare_meta(r1: VMBReport, r2: VMBReport) -> None:
     tests1, tests2 = set(rep1.keys()), set(rep2.keys())
     # pylint: disable-next=protected-access
     name_len = max(r1._name_len, r2._name_len, len('name'))
-    caption('Full test time comaprison (seconds)')
+    caption('Full test time comparison (seconds)')
     print(f'{"name":<{name_len}}| r1 | r2 |')
     print('=' * (name_len + 11))
     for t in tests1.intersection(tests2):
@@ -575,34 +603,35 @@ def compare_reports(args):
     if len(args.paths) != 2:
         print('Need 2 reports for comparison')
         sys.exit(1)
-    else:
-        flaky = read_list_file(args.flaky_list) if args.flaky_list else []
-        with open(args.paths[0], 'r', encoding="utf-8") as f1:
-            r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
-        with open(args.paths[1], 'r', encoding="utf-8") as f2:
-            r2 = VMBReport.parse(f2.read(), tags=args.tags, skip_tags=args.skip_tags)
-        if args.compare_meta:
-            compare_meta(r1, r2)
-            return
-        cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky)
-        cmp_vmb.print(full=args.full)
-        if args.json:
-            cmp_vmb.save(args.json)
-        if args.aot_stats_json:
-            cmp_stats = compare_aot_stats(r1, r2)
-            cmp_stats.save(args.aot_stats_json)
-            caption(cmp_stats.title)
-            print(cmp_stats.summary)
-        if args.aot_passes_json:
-            cmp_passes = compare_aot_passes(r1, r2)
-            cmp_passes.save(args.aot_passes_json)
-        if args.gc_stats_json:
-            cmp_gc = compare_gc_stats(r1, r2)
-            cmp_gc.save(args.gc_stats_json)
-        print_flaky(flaky)
-        sys.exit(  # pylint: disable-next=protected-access
-            0 if len(cmp_vmb.tests) > 0 and cmp_vmb._regressions == 0
-            else 1)
+    flaky = read_list_file(args.flaky_list) if args.flaky_list else []
+    with open(args.paths[0], 'r', encoding="utf-8") as f1:
+        r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
+    with open(args.paths[1], 'r', encoding="utf-8") as f2:
+        r2 = VMBReport.parse(f2.read(), tags=args.tags, skip_tags=args.skip_tags)
+    if args.compare_meta:
+        compare_meta(r1, r2)
+        return
+    cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky)
+    cmp_vmb.print(full=args.full)
+    if args.json:
+        cmp_vmb.save(args.json)
+    if args.aot_stats_json:
+        cmp_stats = compare_aot_stats(r1, r2)
+        cmp_stats.save(args.aot_stats_json)
+        caption(cmp_stats.title)
+        print(cmp_stats.summary)
+    if args.aot_passes_json:
+        cmp_passes = compare_aot_passes(r1, r2)
+        cmp_passes.save(args.aot_passes_json)
+    if args.gc_stats_json:
+        cmp_gc = compare_gc_stats(r1, r2)
+        cmp_gc.save(args.gc_stats_json)
+    if args.status_by_compare:
+        sys.exit(cmp_vmb.process_perf_regressions())
+    print_flaky(flaky)
+    sys.exit(  # pylint: disable-next=protected-access
+        0 if len(cmp_vmb.tests) > 0 and cmp_vmb._regressions == 0
+        else 1)
 
 
 def report_main(args: Args,
@@ -634,7 +663,7 @@ def report_main(args: Args,
             vmb_rep.json_report(args.report_json, pretty=not compact)
         if args.report_csv:
             vmb_rep.csv_report(args.report_csv)
-        vmb_rep.text_report(full=True, exclude=args.exclude_list)
+        vmb_rep.text_report(full=True, exclude=args.exclude_list, fmt=args.number_format)
         sys.exit(vmb_rep.get_exit_code())
     # if called standalone
     if not args.paths:
@@ -648,8 +677,11 @@ def report_main(args: Args,
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
         with open(args.paths[0], 'r', encoding="utf-8") as f:
             r = VMBReport.parse(f.read(), exclude=flaky, tags=args.tags, skip_tags=args.skip_tags)
+        if args.compile_time:
+            r.compile_time()
+            sys.exit(0)
         if not args.status_only:
-            r.text_report(full=args.full, exclude=args.exclude_list)
+            r.text_report(full=args.full, exclude=args.exclude_list, fmt=args.number_format)
             print_flaky(flaky)
         exit_code = r.get_exit_code()
         if exit_code == 0:

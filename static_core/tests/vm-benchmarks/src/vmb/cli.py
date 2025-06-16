@@ -156,9 +156,13 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--tolerance', default=0.5, type=float,
                         help='Percentage of tolerance in comparison')
     parser.add_argument('--status-only', action='store_true',
-                        help='Set exit code 1, if run has fails')
+                        help='Set exit code 1 if run has fails')
+    parser.add_argument('--status-by-compare', action='store_true',
+                        help='Set exit code 1 if second run has performance regressions')
     parser.add_argument('--compare-meta', action='store_true',
                         help='Compare meta info between 2 reports')
+    parser.add_argument('--compile-time', action='store_true',
+                        help='Print compile time stats')
 
 
 def add_filter_opts(parser: argparse.ArgumentParser) -> None:
@@ -170,6 +174,11 @@ def add_filter_opts(parser: argparse.ArgumentParser) -> None:
                         default=set(),
                         type=comma_separated_list,
                         help='Skip if tagged (comma-separated list)')
+
+
+def add_presentation_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('--number-format', type=str, default='auto',
+                        choices=('nano', 'auto', 'expo'), help='Number format')
 
 
 class _ArgumentParser(argparse.ArgumentParser):
@@ -199,9 +208,12 @@ class _ArgumentParser(argparse.ArgumentParser):
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
+            add_presentation_opts(self)
+        # Report-specific options
         if command in (Command.REPORT,):
             add_report_opts(self)
             add_filter_opts(self)
+            add_presentation_opts(self)
 
     @staticmethod
     def __epilog() -> str:

@@ -265,9 +265,22 @@ def test_vmb_report():
         vmb_rep = VMBReport.parse(REPORT)
         vmb_rep.text_report(full=True)
         lines = [line.strip() for line in f.getvalue().split("\n") if line]
-        assert_in('Test_One_Blah | 9.48e+04 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+        assert_in('Test_One_Blah |      95µ |      97K |      89K | Passed  |', lines)
         assert_in('2 tests; 0 failed; 0 excluded; '
                   'Time(GM): 94783.8 Size(GM): 97384.0 RSS(GM): 89336.0', lines)
+    f1 = io.StringIO()
+    with contextlib.redirect_stdout(f1):
+        vmb_rep = VMBReport.parse(REPORT)
+        vmb_rep.text_report(full=True, fmt='expo')
+        lines = [line.strip() for line in f1.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+        assert_in('Test_Two      | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+    f2 = io.StringIO()
+    with contextlib.redirect_stdout(f2):
+        vmb_rep = VMBReport.parse(REPORT)
+        vmb_rep.text_report(full=True, fmt='nano')
+        lines = [line.strip() for line in f2.getvalue().split("\n") if line]
+        assert_in('Test_One_Blah |       94784n |      97K |      89K | Passed  |', lines)
 
 
 def test_vmb_compare():
@@ -319,12 +332,13 @@ def test_vmb_compare_flaky():
 
 def test_vmb_report_exclude():
     f = io.StringIO()
-    assert_in = TestCase().assertIn
+    tc = TestCase()
+    assert_in = tc.assertIn
     with contextlib.redirect_stdout(f):
         vmb_rep = VMBReport.parse(REPORT)
-        vmb_rep.text_report(full=True, exclude=['Test_Two'])
+        vmb_rep.text_report(full=True, exclude=['Test_Two'], fmt='expo')
         lines = [line.strip() for line in f.getvalue().split("\n") if line]
-        assert_in('Test_One_Blah | 9.48e+04 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
+        assert_in('Test_One_Blah | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
         assert_in('1 tests; 0 failed; 1 excluded; Time(GM): 94783.8 Size(GM): '
                   '97384.0 RSS(GM): 89336.0', lines)
 
