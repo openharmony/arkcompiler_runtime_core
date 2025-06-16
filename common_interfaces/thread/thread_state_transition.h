@@ -112,7 +112,7 @@ public:
     {
 #if defined(TODO_MACRO)
         TRACE_GC(GCStats::Scope::ScopeId::SuspendAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-        ECMA_BYTRACE_NAME(HITRACE_LEVEL_MAX, HITRACE_TAG_ARK, "SuspendAll", "");
+        ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "SuspendAll", "");
 #endif
         BaseRuntime::GetInstance()->GetThreadHolderManager().SuspendAll(self_);
     }
@@ -121,7 +121,7 @@ public:
     {
 #if defined(TODO_MACRO)
         TRACE_GC(GCStats::Scope::ScopeId::ResumeAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-        ECMA_BYTRACE_NAME(HITRACE_LEVEL_MAX, HITRACE_TAG_ARK, "ResumeAll", "");
+        ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "ResumeAll", "");
 #endif
         BaseRuntime::GetInstance()->GetThreadHolderManager().ResumeAll(self_);
     }
