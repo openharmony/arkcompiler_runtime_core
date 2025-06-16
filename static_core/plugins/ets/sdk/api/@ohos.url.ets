@@ -176,37 +176,7 @@ export namespace url {
     }
 
     function deleteC0OrSpace(input: string): string {
-        if (input == "") {
-            return "";
-        }
-        let i: number = 0;
-        let strLen = input.length;
-        let charCodeOfC0 = '\0'.charCodeAt(0);
-        let charCodeOfSpace = ' '.charCodeAt(0);
-        while (i < strLen) {
-            let inputCharCode = input.charCodeAt(i);
-            if (inputCharCode >= charCodeOfC0 && inputCharCode <= charCodeOfSpace) {
-                i++;
-                continue;
-            }
-            break;
-        }
-        let trimHead = input.substring(i);
-        strLen = trimHead.length;
-        if (strLen == 0) {
-            return "";
-        }
-        for (i = strLen - 1; i >= 0; i--) {
-            let inputCharCode = trimHead.charCodeAt(i);
-            if (inputCharCode >= charCodeOfC0 && inputCharCode <= charCodeOfSpace) {
-                continue;
-            }
-            break;
-        }
-        if (i < 0) {
-            return "";
-        }
-        return trimHead.substring(0, i + 1);
+        return input.trim([c'\0', c' ']);
     }
 
     function isAlpha(ch: string): boolean {
@@ -226,11 +196,7 @@ export namespace url {
     }
 
     function isFileNotHost(input: string) {
-        let ch = new Char(input[0]);
-        if (isAlpha(ch.toString()) && (input[1] == c':' || input[1] == c'|')) {
-            return true;
-        }
-        return false;
+        return isAlpha(input.substring(0, 1)) && (input[1] == c':' || input[1] == c'|');
     }
 
     function isHexDigit(ch: string): boolean {
@@ -262,57 +228,33 @@ export namespace url {
         return temp;
     }
 
-    function toHex(num: number): string {
-        const hexDigits = "0123456789abcdef";
-        let hexStr = "";
-        while (num > 0) {
-            const remainder = num % 16;
-            hexStr = hexDigits[remainder] + hexStr;
-            num = Math.floor(num / 16);
+    function dealIPv4(str: string): string {
+        const pos = str.lastIndexOf(":");
+        if (pos === -1) {
+            return "";
         }
 
-        return hexStr || "0";
-    }
+        const prefix = str.substring(0, pos + 1);
+        const ipv4Part = str.substring(pos + 1);
 
-    function dealIPv4(input: string): string {
-        let temp = new Array<string>();
-        let pos: number = input.lastIndexOf(':');
-        let index: number = pos;
-        let left = pos + 1;
-        let hexVal = "";
-        let val = "";
-        while (true) {
-            pos = input.indexOf(".", left);
-            if (pos == -1) {
-                break;
+        const parts = ipv4Part.split(".");
+        if (parts.length !== 4) {
+            return "";
+        }
+
+        let result = new StringBuilder(prefix);
+
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            const num = parseInt(part, 10);
+            if (isNaN(num)) {
+                return part;
             }
+            const hexPart = ("0" + num.toString(16)).slice(-2);
+            result.append(":" + hexPart);
+        }
 
-            val = input.substring(left, pos);
-            let num = parseInt(val, 10);
-            if (isNaN(num) && num > 255) {
-                return val;
-            }
-
-            hexVal = toHex(num);
-            if (hexVal.length == 1) {
-                hexVal = c'0' + hexVal;
-            }
-            temp.push(hexVal);
-            left = pos + 1;
-        }
-        val = input.substring(left);
-        let num = parseInt(val, 10);
-        if (isNaN(num) && num > 255) {
-            return val;
-        }
-        hexVal = toHex(num);
-        if (hexVal.length == 1) {
-            hexVal = c'0' + hexVal;
-        }
-        temp.push(hexVal);
-        let res = input.substring(0, index);
-        res = res + ":" + temp[0] + temp[1] + ":" + temp[2] + temp[3];
-        return res;
+        return result.toString();
     }
 
     function formatIPv6(input: string): string {
@@ -337,26 +279,6 @@ export namespace url {
             }
         }
         return input;
-    }
-
-    function removeLeadingZeros(inputs: Array<string>) {
-        let inputSize = inputs.length;
-        for (let i = 0; i < inputSize; i++) {
-            let strLen: number = inputs[i].length;
-            let count: number = 0;
-            let j = 0;
-            for (j = 0; j < strLen; j++) {
-                if (inputs[i][j] != c'0') {
-                    break;
-                }
-                count++;
-            }
-            if (count == strLen) {
-                inputs[i] = "0";
-            } else if (count != 0) {
-                inputs[i] = inputs[i].substring(j);
-            }
-        }
     }
 
     function zeroCompression(inputs: Array<string>): string {
@@ -397,20 +319,11 @@ export namespace url {
     }
 
     function compress(input: string): string {
-        let temp = new Array<string>();
-        let pos: number = 0;
-        let left: number = 0;
-        while (true) {
-            pos = input.indexOf(":", left);
-            if (pos == -1) {
-                break;
-            }
-            temp.push(input.substring(left, pos));
-            left = pos + 1;
-        }
-        temp.push(input.substring(left));
-        removeLeadingZeros(temp);
-        let res: string = zeroCompression(temp);
+       let array = Array.from<string, string>(
+            input.split(':'),
+            (it) => it.trimLeft([c'0'])
+        )
+        let res: string = zeroCompression(array);
         return res.toLowerCase();
     }
 
@@ -471,7 +384,7 @@ export namespace url {
         return num;
     }
 
-    function isFormatIPv4(nums: Array<string>): number {
+    function getFormatIPv4Index(nums: Array<string>): number {
         let len = nums.length;
         for (let i = 0; i < len; i++) {
             if (nums[i].length > 8) {
@@ -640,10 +553,8 @@ export namespace url {
         }
 
         private removalIPv4(inputStr: string): boolean {
-            // this.ipv4Array = new Array<string>();
             let pos: number = 0;
             let left: number = 0;
-            // let inputs = new Array<string>()
             pos = inputStr.indexOf(".", left);
             while (pos != -1) {
                 this.ipv4Array.push(inputStr.substring(left, pos));
@@ -682,7 +593,7 @@ export namespace url {
 
         private formatIPv4(nums: Array<string>) {
             let len: number = nums.length;
-            let index: number = isFormatIPv4(nums);
+            let index: number = getFormatIPv4Index(nums);
             let res: string = "";
             if (index == -1) {
                 for (let i = 0; i < len - 1; i++) {
@@ -737,7 +648,7 @@ export namespace url {
                     this.cHost = res;
                     this.flags[4] = true;
                 } else if (tempLen == 4) {
-                    if (isFormatIPv4(temp) == -1) {
+                    if (getFormatIPv4Index(temp) == -1) {
                         this.cHost = res;
                         this.flags[4] = true;
                     } else {
