@@ -63,14 +63,22 @@ class equality {
 
 
     comparisonObject(valueA: JSValue, valueB: JSValue, compare: string): boolean {
-        if (compare == this.equal && valueA !== valueB) throw Error();
-        if (compare == this.noEqual && valueA === valueB) throw Error();
+        if (compare == this.equal && valueA !== valueB) {
+            throw Error();
+        }
+        if (compare == this.noEqual && valueA === valueB) {
+            throw Error();
+        }
         return true;
     }
 
     comparison<T>(valueA: T, valueB: T, compare: string): boolean {
-        if (compare == this.equal && valueA != valueB) throw Error();
-        if (compare == this.noEqual && valueA == valueB) throw Error();
+        if (compare == this.equal && valueA != valueB) {
+            throw Error();
+        }
+        if (compare == this.noEqual && valueA == valueB) {
+            throw Error();
+        }
         return true;
     }
 
