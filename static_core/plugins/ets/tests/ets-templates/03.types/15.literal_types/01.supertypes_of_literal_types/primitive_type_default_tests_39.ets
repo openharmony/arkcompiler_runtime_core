@@ -23,5 +23,5 @@ function checkStatus(status: "ok") {
 
 function main(): void {
     const result = checkStatus("ok");
-    assertEQ(result, "ok");
+    arktest.assertEQ(result, "ok");
 }

@@ -46,9 +46,9 @@ function main() {
     let func_result = foo(...arr);
 
     {%- for res in c['result'] %}
-    assertEQ(method_result[{{ loop.index0 }}], {{ res }})
-    assertEQ(func_result[{{ loop.index0 }}], {{ res }})
-    assertEQ(a.field[{{ loop.index0 }}], {{ res }})
+    arktest.assertEQ(method_result[{{ loop.index0 }}], {{ res }})
+    arktest.assertEQ(func_result[{{ loop.index0 }}], {{ res }})
+    arktest.assertEQ(a.field[{{ loop.index0 }}], {{ res }})
     {%- endfor %}
 }
 

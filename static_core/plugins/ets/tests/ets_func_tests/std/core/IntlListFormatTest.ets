@@ -25,45 +25,45 @@ function testFormat() {
     {
         const formatter = new Intl.ListFormat("en-US")
         const arr = new Array<string>()
-        assertEQ(formatter.format(arr), "")
+        arktest.assertEQ(formatter.format(arr), "")
     }
     {
         const formatter = new Intl.ListFormat("en-US")
         const arr = Array.from(["apple"])
-        assertEQ(formatter.format(arr), "apple")
+        arktest.assertEQ(formatter.format(arr), "apple")
     }
     {
         const formatter = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" })
         const arr = Array.from(["apples", "oranges", "bananas"])
-        assertEQ(formatter.format(arr), "apples, oranges, and bananas")
+        arktest.assertEQ(formatter.format(arr), "apples, oranges, and bananas")
     }
     {
         const formatter = new Intl.ListFormat("ru-RU", { style: "long", type: "conjunction" })
         const arr = Array.from(["яблоки", "апельсины", "бананы"])
-        assertEQ(formatter.format(arr), "яблоки, апельсины и бананы")
+        arktest.assertEQ(formatter.format(arr), "яблоки, апельсины и бананы")
     }
     {
         const formatter = new Intl.ListFormat("en-US", { style: "short", type: "disjunction" })
         const arr = Array.from(["cats", "dogs", "birds"])
-        assertEQ(formatter.format(arr), "cats, dogs, or birds")
+        arktest.assertEQ(formatter.format(arr), "cats, dogs, or birds")
     }
     {
         const formatter = new Intl.ListFormat("en-US", { style: "narrow", type: "unit" })
         const arr = Array.from(["5", "10", "15"])
-        assertEQ(formatter.format(arr), "5 10 15")
+        arktest.assertEQ(formatter.format(arr), "5 10 15")
     }
     {
         const formatter = new Intl.ListFormat("en-US")
         const arr = Array.from(["a", "b", "c"])
-        assertEQ(formatter.format(arr), "a, b, and c")
+        arktest.assertEQ(formatter.format(arr), "a, b, and c")
     }
 }
 
 function testParts(parts: Array<Intl.FormatToPartsResult>, expected: Intl.FormatToPartsResult[]) {
-    assertEQ(parts.length, expected.length)
+    arktest.assertEQ(parts.length, expected.length)
     for (let i = 0; i < parts.length; i++) {
-        assertEQ(parts[i].type, expected[i].type)
-        assertEQ(parts[i].value, expected[i].value)
+        arktest.assertEQ(parts[i].type, expected[i].type)
+        arktest.assertEQ(parts[i].value, expected[i].value)
     }
 }
 
@@ -173,12 +173,12 @@ function testFormatToParts() {
 function runSupportedLocalesTest(
     locales: string | string[],
     options: Intl.ListFormatLocaleMatcher | undefined,
-    assertEQed: string[])
+    expected: string[])
 {
     const result = Intl.ListFormat.supportedLocalesOf(locales, options)
-    assertEQ(result.length, assertEQed.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i = 0; i < result.length; i++) {
-        assertEQ(result[i], assertEQed[i])
+        arktest.assertEQ(result[i], expected[i])
     }
 }
 

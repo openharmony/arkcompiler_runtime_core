@@ -17,7 +17,7 @@ import { Decimal } from "@arkts.math.Decimal";
 
 function t(n: string | number, expected: number) {
     let v = new Decimal(n).toNumber();
-    assertEQ(expected, v, `Decimal(${n}).toNumber(), actual:${v} is not equal to ${expected}`);
+    arktest.assertEQ(expected, v, `Decimal(${n}).toNumber(), actual:${v} is not equal to ${expected}`);
 }
 
 function testToNumber() {
@@ -69,7 +69,7 @@ function config() {
 }
 
 function main() {
-    const suite = new ArkTestsuite("Decimal toNumber API tests");
+    const suite = new arktest.ArkTestsuite("Decimal toNumber API tests");
     suite.addTest("Decimal toNumber 001", testToNumber);
     config();
     return suite.run();

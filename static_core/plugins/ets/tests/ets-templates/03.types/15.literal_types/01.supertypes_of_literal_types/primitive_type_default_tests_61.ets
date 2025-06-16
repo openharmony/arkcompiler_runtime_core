@@ -23,5 +23,5 @@ function divideByTwo(num: number = 15 as number) {
 
 function main(): void {
     const result = divideByTwo();
-    assertEQ(result, 7.5);
+    arktest.assertEQ(result, 7.5);
 }

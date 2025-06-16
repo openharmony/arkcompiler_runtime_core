@@ -24,5 +24,5 @@ import CLASS_A from "../../07.top-level_declarations/01.exported_declarations/de
 
 function main() {
     let c: CLASS_A = new CLASS_A();
-    assertTrue( c instanceof B);
+    arktest.assertTrue( c instanceof B);
 }

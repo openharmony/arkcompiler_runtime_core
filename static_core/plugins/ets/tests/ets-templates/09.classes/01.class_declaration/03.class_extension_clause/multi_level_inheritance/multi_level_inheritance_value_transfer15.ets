@@ -41,5 +41,5 @@ class C extends B {
 
 function main(): void {
   let test: C = new C();
-  assertEQ(test._publicVar, null);
+  arktest.assertEQ(test._publicVar, null);
 }

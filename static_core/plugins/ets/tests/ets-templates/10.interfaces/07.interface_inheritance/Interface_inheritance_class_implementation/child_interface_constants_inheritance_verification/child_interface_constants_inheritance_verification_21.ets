@@ -34,5 +34,5 @@ class ReturnEnumConstantChild implements ReturnEnumConstantInterface {
 
 function main(): void {
   const instance = new ReturnEnumConstantChild();
-  assertEQ(instance.CONST(), Direction.UP);
+  arktest.assertEQ(instance.CONST(), Direction.UP);
 }

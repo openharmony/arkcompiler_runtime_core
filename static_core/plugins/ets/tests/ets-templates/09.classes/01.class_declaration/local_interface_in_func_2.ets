@@ -33,5 +33,5 @@ function foo(): int {
 }
 
 function main() {
-    assertEQ(foo(), 42)
+    arktest.assertEQ(foo(), 42)
 }

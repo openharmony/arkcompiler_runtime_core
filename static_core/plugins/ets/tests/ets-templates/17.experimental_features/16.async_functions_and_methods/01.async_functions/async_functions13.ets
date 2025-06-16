@@ -30,7 +30,7 @@ async function startTest() {
   const start = Date.now();
   await asyncLoop()
   const end = Date.now();
-  assertEQ((end - start) >= 1500, true);
+  arktest.assertEQ((end - start) >= 1500, true);
 }
 
 function main(): void {

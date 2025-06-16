@@ -23,5 +23,5 @@ function byteToShort(byteValue: number): number {
 }
 
 function main(): void {
-    assertEQ(byteToShort(10), 10);
+    arktest.assertEQ(byteToShort(10), 10);
 }

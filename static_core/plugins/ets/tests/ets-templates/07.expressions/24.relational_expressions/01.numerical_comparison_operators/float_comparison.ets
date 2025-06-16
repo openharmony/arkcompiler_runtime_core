@@ -24,9 +24,9 @@ function main(): void {
   let bx: {{fc.xboxed}} = new {{fc.xboxed}}(x);
   let y: {{fc.ytype}} = {{fc.yvalue}}.to{{fc.yboxed}}();
   let by: {{fc.yboxed}} = new {{fc.yboxed}}(y);
-  assertEQ( (x {{fc.op}} y), {{fc.result}} )
-  assertEQ( (bx {{fc.op}} by), {{fc.result}} )
-  assertEQ( (x {{fc.op}} by), {{fc.result}} )
+  arktest.assertEQ( (x {{fc.op}} y), {{fc.result}} )
+  arktest.assertEQ( (bx {{fc.op}} by), {{fc.result}} )
+  arktest.assertEQ( (x {{fc.op}} by), {{fc.result}} )
 }
 
 {% endfor %}

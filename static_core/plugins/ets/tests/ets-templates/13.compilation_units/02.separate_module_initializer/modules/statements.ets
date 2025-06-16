@@ -36,16 +36,16 @@ export const cn: number = 2.5;
     if(i != 0) {
         i++;
     } else {
-        assertTrue(false);
+        arktest.assertTrue(false);
     }
-    assertEQ( i, 2 );
+    arktest.assertEQ( i, 2 );
 }
 
 {
     for(let j = 0; j < 5; j++) {
         n += 1;
     }
-    assertEQ( n, 5.1 );
+    arktest.assertEQ( n, 5.1 );
 }
 
 {
@@ -54,7 +54,7 @@ export const cn: number = 2.5;
         n += 1;
         j++;
     }
-    assertEQ( n, 10.1 );
+    arktest.assertEQ( n, 10.1 );
 }
 
 {
@@ -62,21 +62,21 @@ export const cn: number = 2.5;
     do j++; while (j < 5) {
         n += 1;
     }
-    assertEQ( n, 11.1 );
+    arktest.assertEQ( n, 11.1 );
 }
 
 {
     for(let z of arr) i += z;
-    assertEQ( i, 17 );
+    arktest.assertEQ( i, 17 );
 }
 
 {
     try {
         if( 1 != 2)
             throw new Error();
-        assertTrue(false);
+        arktest.assertTrue(false);
     } catch(e) {
-        assertEQ( i, 17 );
+        arktest.assertEQ( i, 17 );
     }
 }
 

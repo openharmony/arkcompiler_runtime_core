@@ -33,8 +33,8 @@ class ChildClass3 implements ParentInterface4 {
 function main(): void {
   const instance = new ChildClass3();
 
-  assertEQ(instance.GRAND_CONSTANT, 200);
-  assertEQ(typeof instance.GRAND_CONSTANT, 'number');
-  assertEQ(instance.PARENT_CONSTANT, 'inheritance');
-  assertEQ(typeof instance.PARENT_CONSTANT, 'string');
+  arktest.assertEQ(instance.GRAND_CONSTANT, 200);
+  arktest.assertEQ(typeof instance.GRAND_CONSTANT, 'number');
+  arktest.assertEQ(instance.PARENT_CONSTANT, 'inheritance');
+  arktest.assertEQ(typeof instance.PARENT_CONSTANT, 'string');
 }

@@ -25,6 +25,6 @@ tags: []
     let form2: String[] = [];
 
     form1 = form2;
-    assertEQ(0, form1.length)
-    assertEQ(0, form2.length)
+    arktest.assertEQ(0, form1.length)
+    arktest.assertEQ(0, form2.length)
  }

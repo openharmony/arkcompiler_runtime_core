@@ -21,5 +21,5 @@ files: ['./module_a.ets', './module_all.ets']
 import { ClassA, InterfaceA, foo, BAR } from './module_all'
 
 function main() {
-    assertEQ(BAR, 146)
+    arktest.assertEQ(BAR, 146)
 }

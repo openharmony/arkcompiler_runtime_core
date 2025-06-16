@@ -22,5 +22,5 @@ function main(): void {
 
   let arrThree: ThreeDArray = [[["aa", "bb"], ["cc", "dd"]], [["ee", "ff"], ["gg", "hh"], ["ii", "jj"]]];
   let a = arrThree[1][1][0];
-  assertEQ(a, "gg");
+  arktest.assertEQ(a, "gg");
 }

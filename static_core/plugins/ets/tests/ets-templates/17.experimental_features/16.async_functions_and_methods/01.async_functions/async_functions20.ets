@@ -24,7 +24,7 @@ async function functionReturnGeneric<T>(value: T): Promise<T> {
 
 async function startTest() {
    const res = await functionReturnGeneric("Generic!");
-   assertEQ(res, "Generic!")
+   arktest.assertEQ(res, "Generic!")
 }
 
 function main(): void {

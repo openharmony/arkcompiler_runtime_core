@@ -33,6 +33,6 @@ function main(): void {
   const result1 = checkTypeIdentity(val1, val2);
   const result2 = checkTypeIdentity(val2, val1);
 
-  assertEQ(result1, false);
-  assertEQ(result2, false);
+  arktest.assertEQ(result1, false);
+  arktest.assertEQ(result2, false);
 }

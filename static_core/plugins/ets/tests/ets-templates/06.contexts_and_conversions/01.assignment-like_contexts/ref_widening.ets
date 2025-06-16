@@ -26,6 +26,6 @@ tags: [{{t.tags}}]
 function main() {
   let src: {{t.stype}} = {{t.src|safe}};
   let dst: {{t.dtype}} = src as {{t.dtype}};
-  assertEQ(src, dst) // reference equality
+  arktest.assertEQ(src, dst) // reference equality
 }
 {% endfor %}

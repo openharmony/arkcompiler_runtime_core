@@ -21,7 +21,7 @@ desc: check remainder of division operation for two char operands
 function main(): void {
     const a: char = {{v.left}}
     const b: char = {{v.right}}
-    assertEQ( (a % b), {{v.result}})
+    arktest.assertEQ( (a % b), {{v.result}})
 }
 
 {% endfor %}

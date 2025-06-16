@@ -40,14 +40,14 @@ function foo(i: Char[]): void {
 
 function main(): void {
   foo(new Gen<Number>());
-  assertEQ(res, 1);
+  arktest.assertEQ(res, 1);
   foo(undefined);
-  assertEQ(res, 2);
+  arktest.assertEQ(res, 2);
   foo(null);
-  assertEQ(res, 2);
+  arktest.assertEQ(res, 2);
   let a: TPL = [true, "some str"];
   foo(a);
-  assertEQ(res, 3);
+  arktest.assertEQ(res, 3);
   foo(new Char[2]);
-  assertEQ(res, 4);
+  arktest.assertEQ(res, 4);
 }

@@ -277,7 +277,7 @@ function groupsTest(): void {
                     }
                 }
             }
-            assertEQ(ans, fromTS[currentId], "new RegExp('" + pattern + "').exec('" + input + "') : FAILED\n" +
+            arktest.assertEQ(ans, fromTS[currentId], "new RegExp('" + pattern + "').exec('" + input + "') : FAILED\n" +
                 "expected: " + fromTS[currentId] + "\n" +
                 "got: " + ans)
             currentId += 1
@@ -286,7 +286,7 @@ function groupsTest(): void {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("ArrayBuffer properties")
+    const suite = new arktest.ArkTestsuite("ArrayBuffer properties")
 
     suite.addTest("RegExp named groups check", groupsTest)
 

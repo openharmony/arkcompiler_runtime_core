@@ -47,14 +47,14 @@ class E {
 }
 
 function main() : void {
-  assertEQ(A.foo(), 5)
-  assertEQ(B.foo(), 5)
-  assertEQ(new B().foo, 10)
+  arktest.assertEQ(A.foo(), 5)
+  arktest.assertEQ(B.foo(), 5)
+  arktest.assertEQ(new B().foo, 10)
 
-  assertEQ(D.foo(), 5)
-  assertEQ(new C().foo, 10)
-  assertEQ(new D().foo, 10)
+  arktest.assertEQ(D.foo(), 5)
+  arktest.assertEQ(new C().foo, 10)
+  arktest.assertEQ(new D().foo, 10)
   
-  assertEQ(E.foo(), 5)
-  assertEQ(new E().foo, 10)
+  arktest.assertEQ(E.foo(), 5)
+  arktest.assertEQ(new E().foo, 10)
 }

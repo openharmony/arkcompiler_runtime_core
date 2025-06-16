@@ -41,7 +41,7 @@ cases:
           return a + b + c
         }
       call: |-
-        assertEQ( foo(, 11), 15 )
-        assertEQ( foo(,, 11), 14 )
-        assertEQ( foo(11,, 11), 24 )
-        assertEQ( foo(,,), 6 )
+        arktest.assertEQ( foo(, 11), 15 )
+        arktest.assertEQ( foo(,, 11), 14 )
+        arktest.assertEQ( foo(11,, 11), 24 )
+        arktest.assertEQ( foo(,,), 6 )

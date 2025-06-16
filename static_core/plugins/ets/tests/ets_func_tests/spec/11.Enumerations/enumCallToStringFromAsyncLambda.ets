@@ -73,5 +73,5 @@ function main(): void {
 
     let big_string_from_enum: string = await stringPromise();
 
-    assertEQ(expected_big_string, big_string_from_enum)
+    arktest.assertEQ(expected_big_string, big_string_from_enum)
 }

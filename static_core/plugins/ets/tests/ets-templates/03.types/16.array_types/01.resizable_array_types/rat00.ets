@@ -21,5 +21,5 @@ function main(): void {
   let array1: number[] = [1, 2, 3];
 
   let a: number = array1[2];
-  assertTrue(a === 3);
+  arktest.assertTrue(a === 3);
 }

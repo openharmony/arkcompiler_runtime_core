@@ -32,7 +32,7 @@ function main(): void {
     { value: 3 },
   ];
   
-  assertEQ(items[0].value, 1);
-  assertEQ(items[1].value, 2);
-  assertEQ(items[2].value, 3);
+  arktest.assertEQ(items[0].value, 1);
+  arktest.assertEQ(items[1].value, 2);
+  arktest.assertEQ(items[2].value, 3);
 }

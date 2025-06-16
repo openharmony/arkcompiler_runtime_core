@@ -22,5 +22,5 @@ class A implements I {
 }
 
 function main(): void {
-    assertEQ(((x: I) => x.foo())(new A()), 1);
+    arktest.assertEQ(((x: I) => x.foo())(new A()), 1);
 }

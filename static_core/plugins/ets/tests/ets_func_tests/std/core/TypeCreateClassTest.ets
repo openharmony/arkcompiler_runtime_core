@@ -28,7 +28,7 @@ function fooType(): ClassType {
 function main(): void throws {
     const fooClass = fooType()
     const creator = new ClassTypeCreator("MyClass").addBaseType(fooClass)
-    assertEQ( fooClass.getConstructorsNum(), 1)
+    arktest.assertEQ( fooClass.getConstructorsNum(), 1)
     const ctor = fooClass.getConstructor(0)
     creator.addMethod(
         new MethodCreator("constructor")
@@ -45,5 +45,5 @@ function main(): void throws {
     const cls = creator.create()
 
     const f = cls.make() as Foo
-    assertEQ( f.bar(), 41)
+    arktest.assertEQ( f.bar(), 41)
 }

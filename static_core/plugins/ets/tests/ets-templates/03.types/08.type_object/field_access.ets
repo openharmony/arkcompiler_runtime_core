@@ -23,5 +23,5 @@ class A {
 
 function main(): void {
     let a: A = new A();
-    assertTrue( a.x == 5)
+    arktest.assertTrue( a.x == 5)
 }

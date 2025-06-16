@@ -26,5 +26,5 @@ const func: MyFunction = (p: number): number => {
 function main(): void {
   let result = func(42);
 
-  assertEQ(result, 42);
+  arktest.assertEQ(result, 42);
 }

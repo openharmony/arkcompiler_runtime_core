@@ -20,7 +20,7 @@ desc: check unary plus operation for char operand
 
 function main(): void {
   const v: char = {{v.value}}
-  assertTrue( +(v) == {{v.result}})
+  arktest.assertTrue( +(v) == {{v.result}})
 }
 
 {% endfor %}

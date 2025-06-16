@@ -16,7 +16,7 @@ cases:
   - desc: single expression
     impl: |-
         let f = () => "Hello, World!"
-        assertEQ(f(), "Hello, World!", "single expression failed")
+        arktest.assertEQ(f(), "Hello, World!", "single expression failed")
 
   - desc: block
     impl: |-
@@ -27,7 +27,7 @@ cases:
 
             return a + b + c
         }
-        assertEQ(f(), "Hello, World!", "block failed")
+        arktest.assertEQ(f(), "Hello, World!", "block failed")
 
   - desc: capture "this"
     impl: |-
@@ -45,7 +45,7 @@ cases:
 
         let a = new A()
         a.increment()
-        assertEQ(a.count, 1, "capture \"this\" failed")
+        arktest.assertEQ(a.count, 1, "capture \"this\" failed")
 
   - desc: capture "super"
     impl: |-
@@ -73,7 +73,7 @@ cases:
 
         let b = new B()
         b.decrement()
-        assertEQ(b.count, -1, "capture \"super\" failed")
+        arktest.assertEQ(b.count, -1, "capture \"super\" failed")
 
   - desc: capture local variable
     impl: |-
@@ -82,7 +82,7 @@ cases:
             let x = () => { return y + 1 }
             return x()
         }
-        assertEQ(f(), 2, "use local variable failed")
+        arktest.assertEQ(f(), 2, "use local variable failed")
 
   - desc: capture local variable
     impl: |-
@@ -92,7 +92,7 @@ cases:
             x()
             return y
         }
-        assertEQ(f(), 2, "modify local variable failed")
+        arktest.assertEQ(f(), 2, "modify local variable failed")
 
   - desc: capture formal parameter
     impl: |-
@@ -100,7 +100,7 @@ cases:
             let x = () => { return y + 1 }
             return x()
         }
-        assertEQ(f(4), 5, "use formal parameter failed")
+        arktest.assertEQ(f(4), 5, "use formal parameter failed")
 
   - desc: capture formal parameter
     impl: |-
@@ -109,4 +109,4 @@ cases:
             x()
             return y
         }
-        assertEQ(f(6), 7, "modify formal parameter failed")
+        arktest.assertEQ(f(6), 7, "modify formal parameter failed")

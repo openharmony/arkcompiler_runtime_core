@@ -21,5 +21,5 @@ function main(): void {
   let array: string[] = ["aa", "bb", "cc"];
   let a: Object = array;
 
-  assertEQ(a, array);
+  arktest.assertEQ(a, array);
 } 

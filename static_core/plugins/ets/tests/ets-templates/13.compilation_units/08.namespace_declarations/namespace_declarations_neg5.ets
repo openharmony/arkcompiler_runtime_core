@@ -29,5 +29,5 @@ class NS2 {
 }
 
 function main() {
-   assertEQ(NS2.sayHello(),"Hello from Class")
+   arktest.assertEQ(NS2.sayHello(),"Hello from Class")
 }

@@ -20,8 +20,8 @@ tags: []
 ---*/
 
 function receiver(tuple: [number, string]): void {
-    assertEQ( tuple[0], 123.0)
-    assertEQ( tuple[1], "123.0")
+    arktest.assertEQ( tuple[0], 123.0)
+    arktest.assertEQ( tuple[1], "123.0")
 }
 function main(): void {
 

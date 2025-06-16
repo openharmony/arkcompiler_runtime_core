@@ -33,6 +33,6 @@ class C {
 function main(): void {
     let x: C = new C()
     x=x.foo().foo2().foo().foo2().foo().foo2().foo().foo2().foo().foo2().foo2().foo2().foo().foo().foo()
-    assertEQ(x.b, 9)
-    assertEQ(x.b2, 8)
+    arktest.assertEQ(x.b, 9)
+    arktest.assertEQ(x.b2, 8)
 }

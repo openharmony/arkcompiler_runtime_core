@@ -21,6 +21,6 @@ function main(): void {
   let a: boolean = true;
   let b: boolean = false;
 
-  assertTrue( !b == true )
-  assertTrue( !a == false )
+  arktest.assertTrue( !b == true )
+  arktest.assertTrue( !a == false )
 }

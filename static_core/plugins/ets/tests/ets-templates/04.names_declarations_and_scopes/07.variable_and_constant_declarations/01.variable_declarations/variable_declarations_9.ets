@@ -20,5 +20,5 @@ desc: Variable declaration with initializer.
 function main(): void {
   let arr: number[];
   arr = [1, 2, 3];
-  assertEQ(arr[0], 1);
+  arktest.assertEQ(arr[0], 1);
 }

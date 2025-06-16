@@ -43,16 +43,16 @@ class D {
 function main(): void {
     // access from D
     let d:D = new D(new C())
-    assertEQ( d.get(), 1 )
+    arktest.assertEQ( d.get(), 1 )
     d.put(42)
-    assertEQ( d.get(), 42 )
+    arktest.assertEQ( d.get(), 42 )
 
     // access from module
     let c:C = new C();
-    assertEQ( c.x, 1 )
+    arktest.assertEQ( c.x, 1 )
     c.x = 100
-    assertEQ( c.x, 100 )
+    arktest.assertEQ( c.x, 100 )
 
     // module level scope is not affected
-    assertEQ( x, -10)
+    arktest.assertEQ( x, -10)
 }

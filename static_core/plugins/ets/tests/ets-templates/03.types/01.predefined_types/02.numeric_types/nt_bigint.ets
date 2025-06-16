@@ -19,5 +19,5 @@ desc: Test the value of bigint type.
 
 function main(): void {
   let bigNumber: bigint = 123456789012345678901234567890n;
-  assertEQ(bigNumber, 123456789012345678901234567890n);
+  arktest.assertEQ(bigNumber, 123456789012345678901234567890n);
 }

@@ -29,7 +29,7 @@ params: >
 function foo<X extends {{c.type}}>(p: X): X { return p };
 {% if c.tags != "negative" %}
 function main(): void {
-  assertEQ( foo<{{c.use}}>({{c.p}}), {{c.p}} )
+  arktest.assertEQ( foo<{{c.use}}>({{c.p}}), {{c.p}} )
 }
 {% endif %}
 {% endfor %}

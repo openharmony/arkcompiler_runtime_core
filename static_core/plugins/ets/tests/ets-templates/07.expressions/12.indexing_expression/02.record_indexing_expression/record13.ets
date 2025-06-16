@@ -27,5 +27,5 @@ function getValueOrDefault(key: string, defaultValue: number): number {
 }
 
 function main(): void {
-  assertEQ(getValueOrDefault("a", 0), 1);
+  arktest.assertEQ(getValueOrDefault("a", 0), 1);
 }

@@ -66,14 +66,14 @@ function main(): int {
 
     for (let i: int = 0; i <= golden.getLength(); ++i) {
         let subs: String = golden.substring(i, golden.getLength());
-        assertLT(i, string_table1.length);
+        arktest.assertLT(i, string_table1.length);
         if (subs == string_table1[i]) {
             ++hits;
         }
         if (DUMP) console.println(subs);
     }
     for (let i: int = 0; i <= golden.getLength(); ++i) {
-        assertLT(i, string_table2.length);
+        arktest.assertLT(i, string_table2.length);
         let subs: String = golden.substring(0, i);
         if (subs == string_table2[i]) {
             ++hits;
@@ -81,7 +81,7 @@ function main(): int {
         if (DUMP) console.println(subs);
     }
 
-    assertLT(golden.getLength(), str_len_plus_1);
+    arktest.assertLT(golden.getLength(), str_len_plus_1);
     // If begin_index < 0, then it is assumed to be equal to zero.
     if (golden.substring(-1, 1) == "a") {
         ++hits;

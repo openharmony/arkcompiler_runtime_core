@@ -58,5 +58,5 @@ class GermanShepherd implements Dog, Guard {
 
 function main(): void {
     const dog: Dog = new GermanShepherd("Rex", 3, "German Shepherd");
-    assertEQ(dog instanceof GermanShepherd, true);
+    arktest.assertEQ(dog instanceof GermanShepherd, true);
 }

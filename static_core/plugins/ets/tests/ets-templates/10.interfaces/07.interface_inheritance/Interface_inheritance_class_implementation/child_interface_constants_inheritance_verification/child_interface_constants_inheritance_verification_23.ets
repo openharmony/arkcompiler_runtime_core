@@ -27,6 +27,6 @@ class DateArrayConstantChild implements DateArrayConstantInterface {
 
 function main(): void {
   const instance = new DateArrayConstantChild();
-  assertTrue(instance.CONST[0] instanceof Date);
-  assertTrue(instance.CONST[1] instanceof Date);
+  arktest.assertTrue(instance.CONST[0] instanceof Date);
+  arktest.assertTrue(instance.CONST[1] instanceof Date);
 }

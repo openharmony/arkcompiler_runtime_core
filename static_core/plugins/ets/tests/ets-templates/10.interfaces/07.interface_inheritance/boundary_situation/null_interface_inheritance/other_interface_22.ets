@@ -33,5 +33,5 @@ function main(): void {
   };
   
   obj.callback();
-  assertEQ(result, "Callback");
+  arktest.assertEQ(result, "Callback");
 }

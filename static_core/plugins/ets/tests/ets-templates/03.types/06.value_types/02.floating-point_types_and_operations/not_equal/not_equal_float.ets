@@ -21,7 +21,7 @@ desc: check not equality of two floats
 function main(): void {
   const a: float = ( {{v.left}} ).toFloat()
   const b: float = ( {{v.right}} ).toFloat()
-  assertEQ(  (a != b), {{v.result}} )
+  arktest.assertEQ(  (a != b), {{v.result}} )
 }
 
 {% endfor %}

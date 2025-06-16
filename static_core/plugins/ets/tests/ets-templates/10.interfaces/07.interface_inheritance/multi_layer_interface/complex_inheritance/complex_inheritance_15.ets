@@ -35,5 +35,5 @@ class D extends B implements C {
 
 function main(): void {
     const d = new D();
-    assertEQ(d.CONSTANT, "Constant from D");
+    arktest.assertEQ(d.CONSTANT, "Constant from D");
 }

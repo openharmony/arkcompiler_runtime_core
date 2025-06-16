@@ -26,7 +26,7 @@ class A {
 
 function main(): void {
   let a = new A();
-  assertEQ( a.x, {{i.value}} )
+  arktest.assertEQ( a.x, {{i.value}} )
 }
 
 {% endfor %}

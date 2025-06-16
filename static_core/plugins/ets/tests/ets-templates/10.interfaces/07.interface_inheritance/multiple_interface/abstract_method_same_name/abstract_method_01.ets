@@ -36,5 +36,5 @@ class MyClass implements Parent1, Parent2 {
 function main(): void {
   const obj = new MyClass();
   obj.greet("Alice");
-  assertEQ(result, "Hello, Alice!");
+  arktest.assertEQ(result, "Hello, Alice!");
 }

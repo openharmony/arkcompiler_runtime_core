@@ -25,8 +25,8 @@ function withDefault(param: number = defaultVal + 1): number {
 
 function main(): void {
   let x: number = withDefault();
-  assertEQ(x, 6);
+  arktest.assertEQ(x, 6);
 
   let y: number = withDefault(10);
-  assertEQ(y, 10);
+  arktest.assertEQ(y, 10);
 }

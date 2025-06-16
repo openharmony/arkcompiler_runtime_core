@@ -21,12 +21,12 @@ function main(): int {
     for (let i: int = 0; i < 10 ; i++) {
         map.set(arrKeys[i], arrValues[i]);
     }
-    let concurrentHashMapOneTestsuite = new ArkTestsuite("concurrentHashMapConstructorTest");
+    let concurrentHashMapOneTestsuite = new arktest.ArkTestsuite("concurrentHashMapConstructorTest");
 
     concurrentHashMapOneTestsuite.addTest("constructorTest_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        assertTrue(concurrentHashMap.isEmpty());
+        arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_002", () =>
     {
@@ -37,9 +37,9 @@ function main(): int {
         }
         let arrayLike = array as ArrayLike<[Number, string]>;
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(arrayLike);
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
+            arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_003", () =>
@@ -50,9 +50,9 @@ function main(): int {
             arr[i] = arrKV;
         }
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(arr);
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i: int = 0; i < 10 ; i++) {
-            assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
+            arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_004", () =>
@@ -60,20 +60,20 @@ function main(): int {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
         let iterable = concurrentHashMap.entries();
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
+            arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }
         let concurrentHashMapIter: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(iterable);
-        assertEQ(concurrentHashMapIter.size, 10);
+        arktest.assertEQ(concurrentHashMapIter.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
+            arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_005", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
+            arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }
     });
 

@@ -20,5 +20,5 @@ desc: Handling empty string literal types.
 function main(): void {
     let tmp: "stringliteral" = "stringliteral";
     let tmp1: string | number = tmp;
-    assertTrue(tmp1 === "stringliteral");
+    arktest.assertTrue(tmp1 === "stringliteral");
 }

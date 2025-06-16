@@ -24,5 +24,5 @@ class B {}
 function main() {
   let a: A = new A();
   let b: B = new B();
-  assertTrue(a != b)   // CTE expected, A cannot be cast to B
+  arktest.assertTrue(a != b)   // CTE expected, A cannot be cast to B
 }

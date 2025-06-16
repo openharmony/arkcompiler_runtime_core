@@ -35,5 +35,5 @@ function main(): void {
             return 2
         }
     }
-    assertEQ( a, 360)
+    arktest.assertEQ( a, 360)
 }

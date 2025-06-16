@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList create an instance that stores single-type data", testCreateSingleTypeInstance);
     suite.addTest("ArrayList create an instance that stores multiple types of data", testCreateMultiTypeInstance);
@@ -45,37 +45,37 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let arrayList: ArrayList<number>;
-    expectNoThrow(() => {arrayList = new ArrayList<number>()});
+    arktest.expectNoThrow(() => {arrayList = new ArrayList<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let arrayList: ArrayList<number | string>;
-    expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
+    arktest.expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
 }
 
 function testArrayListLength() {
     let arrayList = new ArrayList<number>();
-    assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
+    arktest.assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
     arrayList.add(TestData.testNumber3);
     arrayList.add(TestData.testNumber1);
     arrayList.add(TestData.testNumber2);
-    assertEQ(arrayList.length, TestData.testNumber3, "ArrayList length should be 3 after adding three elements");
+    arktest.assertEQ(arrayList.length, TestData.testNumber3, "ArrayList length should be 3 after adding three elements");
     arrayList.remove(TestData.testNumber3);
     arrayList.remove(TestData.testNumber2);
-    assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
+    arktest.assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
 }
 
 function testArrayListLengthMixedTypes() {
     let arrayList = new ArrayList<number | string | boolean>();
-    assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
+    arktest.assertEQ(arrayList.length, 0, "Initial ArrayList length should be 0");
     arrayList.add(TestData.testNumber3);
     arrayList.add(TestData.testString1);
     arrayList.add(true);
-    assertEQ(arrayList.length, TestData.testNumber3,
+    arktest.assertEQ(arrayList.length, TestData.testNumber3,
         "ArrayList length should be 3 after adding three elements of mixed types");
     arrayList.remove(TestData.testNumber3);
     arrayList.remove(TestData.testString1);
-    assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
+    arktest.assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
 }
 
 function testArrayListLengthSetterLarge() {
@@ -83,16 +83,16 @@ function testArrayListLengthSetterLarge() {
     for (let i: number = 0; i < TestData.testNumber1w; i++) {
         arrayList.add(TestData.testNumber1);
     }
-    assertEQ(arrayList.length, TestData.testNumber1w, "ArrayList length should be 10000 after adding elements");
+    arktest.assertEQ(arrayList.length, TestData.testNumber1w, "ArrayList length should be 10000 after adding elements");
 }
 
 function testArrayListAdd() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i], `Element at index ${i} should match`);
     }
-    assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after adding elements");
+    arktest.assertEQ(arrayList.length, TestData.testNumber5, "ArrayList length should be 5 after adding elements");
 }
 
 function testArrayListAddSpecialCharacters() {
@@ -101,7 +101,7 @@ function testArrayListAddSpecialCharacters() {
     arrayList.add(TestData.testString1);
     arrayList.add(TestData.testString2);
     arrayList.add(TestData.testString4);
-    assertEQ(JSON.stringify(arrayList), TestData.arrayResult9, "Element should be equal");
+    arktest.assertEQ(JSON.stringify(arrayList), TestData.arrayResult9, "Element should be equal");
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

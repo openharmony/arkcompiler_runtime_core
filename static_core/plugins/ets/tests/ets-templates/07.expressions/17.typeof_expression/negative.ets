@@ -30,7 +30,7 @@ function main() {
         // do nothing
     }
 
-    assertEQ(t, "initial value")
+    arktest.assertEQ(t, "initial value")
 }
 
 {%- endfor %}

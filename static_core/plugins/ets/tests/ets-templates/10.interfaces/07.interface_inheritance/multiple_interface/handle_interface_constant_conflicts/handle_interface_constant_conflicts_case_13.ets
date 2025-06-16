@@ -31,5 +31,5 @@ class TestClass implements InterfaceA, InterfaceB {
 
 function main(): void {
     const test = new TestClass();
-    assertEQ(test.CONSTANT, "Value from TestClass");
+    arktest.assertEQ(test.CONSTANT, "Value from TestClass");
 }

@@ -35,6 +35,6 @@ function main() : void
 {
     let sum: int = a + foo() + bar();
     const result: int = 7;
-    assertEQ(sum, result)
-    assertEQ( foo( {i: 1.9, j: "some str"} ), 3 )
+    arktest.assertEQ(sum, result)
+    arktest.assertEQ( foo( {i: 1.9, j: "some str"} ), 3 )
 }

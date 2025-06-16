@@ -438,6 +438,6 @@ function gcJsruntimeCleanup(): void {
         Coroutine.Schedule();
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        assertTrue( false, "Unexpected exception during GC");
+        arktest.assertTrue( false, "Unexpected exception during GC");
     }
 }

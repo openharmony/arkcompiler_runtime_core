@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
     suite.addTest("supportedLocalesOf", testSupportedLocalesOf);
     suite.addTest("supportedLocalesOfEmpty", testSupportedLocalesOfEmpty);
     suite.addTest("supportedLocalesOfUndefined", testSupportedLocalesOfUndefined);
@@ -32,9 +32,9 @@ function testSupportedLocalesOf() {
     let localeList: string[] = [ru_RU, zh_CN, en_US];
     let expected: string[] = [ru_RU, zh_CN, en_US];
     let result: string[] = Intl.NumberFormat.supportedLocalesOf(localeList);
-    assertEQ(expected[0], result[0], "Error. Got: " + result[0] + ". Expected: " + expected[0]);
-    assertEQ(expected[1], result[1], "Error. Got: " + result[1] + ". Expected: " + expected[1]);
-    assertEQ(expected[2], result[2], "Error. Got: " + result[2] + ". Expected: " + expected[2]);
+    arktest.assertEQ(expected[0], result[0], "Error. Got: " + result[0] + ". Expected: " + expected[0]);
+    arktest.assertEQ(expected[1], result[1], "Error. Got: " + result[1] + ". Expected: " + expected[1]);
+    arktest.assertEQ(expected[2], result[2], "Error. Got: " + result[2] + ". Expected: " + expected[2]);
 }
 
 function testSupportedLocalesOfEmpty() {
@@ -62,6 +62,6 @@ function testSupportedLocalesOf0003() {
 function testSupportedLocalesOf0004() {
     let locales: string[] = [];
     let result = Intl.NumberFormat.supportedLocalesOf(locales);
-    assertEQ(result.toString(), [''].toString());
-    assertTrue(Array.isArray(result));
+    arktest.assertEQ(result.toString(), [''].toString());
+    arktest.assertTrue(Array.isArray(result));
 }

@@ -26,7 +26,7 @@ function foo(p: bigint): bigint {
 function main() {
 {%- for t in c['values'] %}
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    assertTrue( foo(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
+    arktest.assertTrue( foo(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
 {%- endfor %}
 }
 {%- endfor %}

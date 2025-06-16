@@ -41,5 +41,5 @@ class Dog extends Animal {
 
 function main(): void {
     const animal = new Animal("Generic");
-    assertEQ(animal.name, "Generic");
+    arktest.assertEQ(animal.name, "Generic");
 }

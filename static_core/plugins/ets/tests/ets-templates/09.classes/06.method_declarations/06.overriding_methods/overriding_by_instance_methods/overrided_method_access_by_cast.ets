@@ -33,5 +33,5 @@ final class C extends A {
 function main(): void {
   let instance: A = new C() as A;
 
-  assertTrue( instance.m() == 5 );
+  arktest.assertTrue( instance.m() == 5 );
 }

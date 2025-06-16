@@ -38,13 +38,13 @@ function main(): void {
   let a: CBA = new CBA();
   let b: DA = new DA();
   let c = a ?? b;
-  assertTrue(foo(c) == 2);
+  arktest.assertTrue(foo(c) == 2);
 
   let d: A = new A();
   let e = a ?? d;
-  assertTrue(foo(e) == 2);
+  arktest.assertTrue(foo(e) == 2);
   
   let f: BA = new BA();
   let g = a ?? f;
-  assertEQ(foo(g), 3);
+  arktest.assertEQ(foo(g), 3);
 }

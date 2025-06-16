@@ -33,5 +33,5 @@ class MethodVarConflictClass implements MethodVarConflictInterface {
 function main(): void {
   const instance = new MethodVarConflictClass();
   instance.someMethod();
-  assertEQ(instance.CONST, 37);
+  arktest.assertEQ(instance.CONST, 37);
 }

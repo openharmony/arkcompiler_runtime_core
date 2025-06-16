@@ -118,7 +118,7 @@ export class Undefinable{{T}}Array {
      * @returns popped value
      */
     public popBack(): Undefinable{{T}} {
-        assertLT(0, this.curSize, "No data to popBack in Undefinable{{T}}Array!")
+        arktest.assertLT(0, this.curSize, "No data to popBack in Undefinable{{T}}Array!")
         --this.curSize
         return this.data[this.curSize]
     }

@@ -33,6 +33,6 @@ function foo({{c.arg}}): void {
 function main(): void {
     {% for d in cases %}
     foo({{d.call}});
-    assertEQ(res, {{d.res}});
+    arktest.assertEQ(res, {{d.res}});
     {% endfor %}
 }

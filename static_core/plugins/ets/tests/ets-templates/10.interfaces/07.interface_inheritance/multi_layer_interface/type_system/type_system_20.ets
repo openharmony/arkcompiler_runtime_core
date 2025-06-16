@@ -36,6 +36,6 @@ class B implements A {
 
 function main(): void {
     const b: A = new B("merry");
-    assertEQ(b.a, "merry");
-    assertEQ(b.sayHello(), "Hello");
+    arktest.assertEQ(b.a, "merry");
+    arktest.assertEQ(b.sayHello(), "Hello");
 }

@@ -61,13 +61,13 @@ function main(): void {
   let b = new Derived2<String, Number>();
   let c: TPL = [ false, 1.2f];
   b.foo({{c.call}}); // base instance method call
-  assertEQ( res, 100 + {{c.res}} );
+  arktest.assertEQ( res, 100 + {{c.res}} );
   a.foo({{c.call}}); // derived instance method call
-  assertEQ( res, 200 + {{c.res}} );
+  arktest.assertEQ( res, 200 + {{c.res}} );
   Derived.foo({{c.call}}); // base static method call
-  assertEQ( res, 300 + {{c.res}} );
+  arktest.assertEQ( res, 300 + {{c.res}} );
   Derived2.foo({{c.call}}); // derived static method call
-  assertEQ( res, 400 + {{c.res}} );
+  arktest.assertEQ( res, 400 + {{c.res}} );
 }
 
 {% endfor %}

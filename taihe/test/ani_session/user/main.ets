@@ -19,25 +19,25 @@ loadLibrary("ani_session");
 
 function test_func_a(my_iface: lib.IfaceD) {
     const result = my_iface.func_a();
-    assertEQ(result, "a");
+    arktest.assertEQ(result, "a");
 }
 
 function test_func_b(my_iface: lib.IfaceD) {
     const result = my_iface.func_b();
-    assertEQ(result, "b");
+    arktest.assertEQ(result, "b");
 }
 
 function test_func_c(my_iface: lib.IfaceD) {
     const result = my_iface.func_c();
-    assertEQ(result, "c");
+    arktest.assertEQ(result, "c");
 }
 
 function test_func_d(my_iface: lib.IfaceD) {
     const result = my_iface.func_d();
-    assertEQ(my_iface.name, "IfaceD");
+    arktest.assertEQ(my_iface.name, "IfaceD");
     my_iface.name = "new name";
-    assertEQ(my_iface.name, "new name");
-    assertEQ(result, "d");
+    arktest.assertEQ(my_iface.name, "new name");
+    arktest.assertEQ(result, "d");
     try {
         my_iface.on("set", () => {
             console.log("void input void output callback!");
@@ -56,13 +56,13 @@ function test_func_d(my_iface: lib.IfaceD) {
 
 function test_func_e(my_iface: lib.IfaceE) {
     let result = my_iface.func_a();
-    assertEQ(result, "aa");
+    arktest.assertEQ(result, "aa");
     result = my_iface.func_b();
-    assertEQ(result, "bb");
+    arktest.assertEQ(result, "bb");
     result = my_iface.func_c();
-    assertEQ(result, "cc");
+    arktest.assertEQ(result, "cc");
     result = my_iface.func_e();
-    assertEQ(result, "ee");
+    arktest.assertEQ(result, "ee");
 }
 
 function main() {
@@ -79,7 +79,7 @@ function main() {
         vs.canPreconfig();
     }
 
-    const suite = new ArkTestsuite("Interface Tests");
+    const suite = new arktest.ArkTestsuite("Interface Tests");
     const my_iface = lib.getIfaceD();
     const my_iface_e = lib.getIfaceE();
 

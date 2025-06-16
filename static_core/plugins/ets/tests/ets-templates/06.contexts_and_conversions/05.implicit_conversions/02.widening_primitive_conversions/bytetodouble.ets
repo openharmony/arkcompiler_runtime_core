@@ -28,5 +28,5 @@ for (let i = 0; i < byteArray.length; i++) {
 function main(): void {
   let doubleValue: number = dataView.getFloat64(0, true);
   let expectedValue: number = 3.14159;
-  assertFalse(Math.abs(doubleValue - expectedValue) < 0.00001);
+  arktest.assertFalse(Math.abs(doubleValue - expectedValue) < 0.00001);
 }

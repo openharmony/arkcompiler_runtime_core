@@ -48,7 +48,7 @@ function main(): void {
   const result = fm.read('test.txt')
   const result1 = fm.write('Hello, world!', 'test.txt');
   const result2 = fm.delete('Our memories');
-  assertEQ(result, "Reading content from test.txt");
-  assertEQ(result1, "Writing Hello, world! to test.txt");
-  assertEQ(result2, "Deleting Our memories");
+  arktest.assertEQ(result, "Reading content from test.txt");
+  arktest.assertEQ(result1, "Writing Hello, world! to test.txt");
+  arktest.assertEQ(result2, "Deleting Our memories");
 }

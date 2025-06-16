@@ -20,6 +20,6 @@
 import {foo} from "./b"
 function main() {
     let x = foo()
-    assertEQ(x, "")
+    arktest.assertEQ(x, "")
 }
 

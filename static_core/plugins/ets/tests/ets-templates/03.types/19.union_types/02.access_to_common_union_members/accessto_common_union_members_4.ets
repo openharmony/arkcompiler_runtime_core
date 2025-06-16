@@ -32,5 +32,5 @@ class C {
 function main(): void {
     let account: A | B = new A();
     let result = account.tmp;
-    assertTrue(result === 1);
+    arktest.assertTrue(result === 1);
 }

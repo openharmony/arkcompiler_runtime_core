@@ -26,7 +26,7 @@ class A<T> {
 
 function main(): void {
   let a = new A<String>();
-  assertTrue( a instanceof {{case.type}} )
+  arktest.assertTrue( a instanceof {{case.type}} )
 }
 
 {% endfor %}

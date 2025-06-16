@@ -16,7 +16,7 @@
 import TreeMap from "@ohos.util.TreeMap";
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap Keys Values Iterator API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap Keys Values Iterator API tests")
 
     suite.addTest("TreeMap keys return iterator by key",
         testKeysReturnIteratorByKey)
@@ -42,8 +42,8 @@ function testKeysReturnIteratorByKey() {
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
     let it = treeMap.keys();
-    assertEQ(it.next().value, "aa", "The treeMap should return the correct key");
-    assertEQ(it.next().value, "bb", "The treeMap should return the correct key");
+    arktest.assertEQ(it.next().value, "aa", "The treeMap should return the correct key");
+    arktest.assertEQ(it.next().value, "bb", "The treeMap should return the correct key");
     arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next key in an empty map");
 }
 
@@ -64,8 +64,8 @@ function testValuesReturnIteratorByValue() {
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
     let it = treeMap.values();
-    assertEQ(it.next().value, "123", "The treeMap should return the correct value");
-    assertEQ(it.next().value, "456", "The treeMap should return the correct value");
+    arktest.assertEQ(it.next().value, "123", "The treeMap should return the correct value");
+    arktest.assertEQ(it.next().value, "456", "The treeMap should return the correct value");
     arktest.assertTrue(it.next().done, "The treeMap iterator.done should true for the next value in an empty map");
 }
 
@@ -96,7 +96,7 @@ function testIteratorReturnIterator() {
         }
     }
     let strAll = "aa,123,bb,456,cc,789,dd,112";
-    assertEQ(str, strAll, "The treeMap should return the correct iterator");
+    arktest.assertEQ(str, strAll, "The treeMap should return the correct iterator");
 }
 
 function testIteratorReturnIteratorWithEmptyTreeMap() {

@@ -20,5 +20,5 @@ desc: Type compatibility test for string literal type in union type array elemen
 const unionArray: (number | "unionElement")[] = ["unionElement", 1];
 
 function main(): void {
-    assertEQ(unionArray[0], "unionElement");
+    arktest.assertEQ(unionArray[0], "unionElement");
 }

@@ -34,9 +34,9 @@ class Child extends Parent {}
 function main(): void {
     let parent = new Parent();
     parent.getValue();
-    assertEQ(parent.wasExecuted(), true);
+    arktest.assertEQ(parent.wasExecuted(), true);
 
     let child = new Child();
     child.getValue();
-    assertEQ(child.wasExecuted(), true);
+    arktest.assertEQ(child.wasExecuted(), true);
 }

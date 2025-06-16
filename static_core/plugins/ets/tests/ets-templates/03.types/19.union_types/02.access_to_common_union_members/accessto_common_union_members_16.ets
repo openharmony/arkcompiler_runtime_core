@@ -24,7 +24,7 @@ function main(): void {
 
   if (car_code === "325") {
     car_code = "530";
-    assertTrue(car_code === "530");
+    arktest.assertTrue(car_code === "530");
   } else if (car_code === "530") {
     car_code = "735";
   }

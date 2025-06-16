@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray create a single-type container", testCreateSingleTypeInstance);
     suite.addTest("PlainArray create a composite-type container", testCreateCompositeTypeContainer);
@@ -60,12 +60,12 @@ function testCreateSingleTypeInstance() {
     try {
         plainArray = new PlainArray<number>();
     } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of PlainArray");
+        arktest.assertTrue(false, "Failed to create a single-type instance of PlainArray");
         return;
     }
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
-    assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
+    arktest.assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
+    arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
 }
 
 function testCreateCompositeTypeContainer() {
@@ -73,7 +73,7 @@ function testCreateCompositeTypeContainer() {
     try {
         plainArray = new PlainArray<number | string | boolean | object | null | undefined>();
     } catch (e) {
-        assertTrue(false, "Failed to create a composite-type instance of PlainArray");
+        arktest.assertTrue(false, "Failed to create a composite-type instance of PlainArray");
         return;
     }
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
@@ -82,33 +82,33 @@ function testCreateCompositeTypeContainer() {
     plainArray.add(TestData.testNumber4, TestData.testObject1);
     plainArray.add(TestData.testNumber5, null);
     plainArray.add(TestData.testNumber6, undefined);
-    assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
-    assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
+    arktest.assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
+    arktest.assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
 }
 
 function testLengthSyncSingleType() {
     let plainArray = new PlainArray<number>();
-    assertEQ(plainArray.length, 0, "PlainArray length should be 0");
+    arktest.assertEQ(plainArray.length, 0, "PlainArray length should be 0");
     initializePlainArray(plainArray, TestData.forNumber1);
-    assertEQ(plainArray.length, TestData.forNumber1.length,
+    arktest.assertEQ(plainArray.length, TestData.forNumber1.length,
         "PlainArray length should be TestData.forNumber1 length");
     plainArray.remove(TestData.testNumber1);
-    assertEQ(plainArray.length, TestData.forNumber1.length - TestData.testNumber1, "PlainArray length should - 1");
+    arktest.assertEQ(plainArray.length, TestData.forNumber1.length - TestData.testNumber1, "PlainArray length should - 1");
 }
 
 function testLengthSyncMultiType() {
     let plainArray = new PlainArray<number | string | boolean | null | object | undefined>();
-    assertEQ(plainArray.length, 0, "PlainArray length should be 0");
+    arktest.assertEQ(plainArray.length, 0, "PlainArray length should be 0");
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber2, TestData.testString1);
     plainArray.add(TestData.testNumber3, false);
     plainArray.add(TestData.testNumber4, TestData.testObject1);
     plainArray.add(TestData.testNumber5, null);
     plainArray.add(TestData.testNumber6, undefined);
-    assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
+    arktest.assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
     plainArray.remove(TestData.testNumber1);
     plainArray.remove(TestData.testNumber4);
-    assertEQ(plainArray.length, TestData.testNumber4, "PlainArray length should be 4");
+    arktest.assertEQ(plainArray.length, TestData.testNumber4, "PlainArray length should be 4");
 }
 
 function testLengthWithLargeValue() {
@@ -116,39 +116,39 @@ function testLengthWithLargeValue() {
     for (let i: number = 0; i < TestData.testNumber1w; i++) {
         plainArray.add(i, TestData.testNumber1);
     }
-    assertEQ(plainArray.length, TestData.testNumber1w, "PlainArray length should be 10000 after adding elements");
+    arktest.assertEQ(plainArray.length, TestData.testNumber1w, "PlainArray length should be 10000 after adding elements");
 }
 
 function testIsEmptyAfterAddingElement() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber1);
-    assertFalse(plainArray.isEmpty(), "The plainArray should not be empty");
-    assertEQ(plainArray.length, TestData.forNumber1.length,
+    arktest.assertFalse(plainArray.isEmpty(), "The plainArray should not be empty");
+    arktest.assertEQ(plainArray.length, TestData.forNumber1.length,
         "The plainArray length should be TestData.forNumber1 length");
 }
 
 function testIsEmptyInitially() {
     let plainArray = new PlainArray<number>();
-    assertTrue(plainArray.isEmpty(), "The plainArray should be empty");
-    assertEQ(plainArray.length, 0, "The plainArray length should be 0");
+    arktest.assertTrue(plainArray.isEmpty(), "The plainArray should be empty");
+    arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0");
 }
 
 function testHasWithExisting() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber1);
     for (let i = 0; i < plainArray.length; i++) {
-        assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
-        assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
+        arktest.assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
+        arktest.assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
     }
-    assertTrue(plainArray.has(TestData.testNumber1), "The plainArray should contain the key");
+    arktest.assertTrue(plainArray.has(TestData.testNumber1), "The plainArray should contain the key");
 }
 
 function testHasWithNonExisting() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber1);
     for (let i = 0; i < plainArray.length; i++) {
-        assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
-        assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
+        arktest.assertEQ(plainArray.getKeyAt(i), i, "The key should be exist");
+        arktest.assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
     }
-    assertFalse(plainArray.has(TestData.testNumber1w), "The plainArray should not contain the key");
+    arktest.assertFalse(plainArray.has(TestData.testNumber1w), "The plainArray should not contain the key");
 }

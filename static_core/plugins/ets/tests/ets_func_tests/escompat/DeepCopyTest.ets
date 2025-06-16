@@ -62,14 +62,14 @@ function testObjectClone(): void {
 	obj.tag = new ObjTag("object")
 
 	const objCopy = deepcopy(obj)
-	assertTrue(obj !== objCopy, "cloned object is the same as source object")
-	assertTrue(objCopy != null, "cloned object is null")
+ arktest.assertTrue(obj !== objCopy, "cloned object is the same as source object")
+ arktest.assertTrue(objCopy != null, "cloned object is null")
 
-	assertEQ(obj.id,  objCopy!.id, "cloned object 'id' field unexpected value")
-	assertEQ(obj.name,  objCopy!.name, "cloned object 'name' field unexpected value")
+ arktest.assertEQ(obj.id,  objCopy!.id, "cloned object 'id' field unexpected value")
+ arktest.assertEQ(obj.name,  objCopy!.name, "cloned object 'name' field unexpected value")
 
-	assertTrue(objCopy!.next === undefined, "cloned object 'next' field unexpected value")
-	assertTrue(obj.tag !== objCopy!.tag, "object tag is not cloned")
+ arktest.assertTrue(objCopy!.next === undefined, "cloned object 'next' field unexpected value")
+ arktest.assertTrue(obj.tag !== objCopy!.tag, "object tag is not cloned")
 }
 
 function testObjectShallowCopy(): void {
@@ -77,10 +77,10 @@ function testObjectShallowCopy(): void {
 	obj.tag = new ObjTag("shallow")
 
 	const objCopy = deepcopy(obj, 1)
-	assertTrue(obj !== objCopy, "cloned object is the same as source object")
-	assertTrue(objCopy != null, "cloned object is null")
+ arktest.assertTrue(obj !== objCopy, "cloned object is the same as source object")
+ arktest.assertTrue(objCopy != null, "cloned object is null")
 
-	assertTrue(obj.tag === objCopy!.tag, "object tag is cloned also")
+ arktest.assertTrue(obj.tag === objCopy!.tag, "object tag is cloned also")
 }
 
 function testObjectNoCopy(): void {
@@ -88,7 +88,7 @@ function testObjectNoCopy(): void {
 	obj.tag = new ObjTag("no copy")
 
 	const objCopy = deepcopy(obj, 0)
-	assertTrue(obj === objCopy, "returned object should be same as the source object")
+ arktest.assertTrue(obj === objCopy, "returned object should be same as the source object")
 }
 
 function testObjectCloneDepth2(): void {
@@ -102,11 +102,11 @@ function testObjectCloneDepth2(): void {
 
 	const objCopy = deepcopy(obj, 2)
 
-	assertTrue(objCopy != null, "cloned object is null")
-	assertTrue(obj !== objCopy, "cloned object is the same as source")
+ arktest.assertTrue(objCopy != null, "cloned object is null")
+ arktest.assertTrue(obj !== objCopy, "cloned object is the same as source")
 
-	assertTrue(obj.next !== objCopy!.next, "one level nested object is the same as source")
-	assertTrue(obj.next!.tag === objCopy!.next!.tag, "2 level nested objects should not be cloned")
+ arktest.assertTrue(obj.next !== objCopy!.next, "one level nested object is the same as source")
+ arktest.assertTrue(obj.next!.tag === objCopy!.next!.tag, "2 level nested objects should not be cloned")
 }
 
 function testObjectRefCycleClone(): void {
@@ -115,11 +115,11 @@ function testObjectRefCycleClone(): void {
 
 	const refCopy = deepcopy(ref)
 
-	assertTrue(ref === ref.ref, "not a reference cycle")
-	assertTrue(ref !== refCopy, "source object returned")
-	assertTrue(refCopy != null, "null returned")
+ arktest.assertTrue(ref === ref.ref, "not a reference cycle")
+ arktest.assertTrue(ref !== refCopy, "source object returned")
+ arktest.assertTrue(refCopy != null, "null returned")
 
-	assertTrue(refCopy === refCopy!.ref, "cloned object has broken reference cycle")
+ arktest.assertTrue(refCopy === refCopy!.ref, "cloned object has broken reference cycle")
 }
 
 function testBuiltinArrayClone(): void {
@@ -127,12 +127,12 @@ function testBuiltinArrayClone(): void {
 	const objs: Obj[] = [obj, obj]
 
 	const objsCopy = deepcopy(objs)
-	assertTrue(objsCopy != null, "cloned array is null")
+ arktest.assertTrue(objsCopy != null, "cloned array is null")
 
-	assertEQ(objs.length,  objsCopy!.length, "cloned array invalid length")
-	assertTrue(objs !== objsCopy!, "source array returned")
-	assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
-	assertTrue(objsCopy![0] === objsCopy![1], "cloned array elements are different")
+ arktest.assertEQ(objs.length,  objsCopy!.length, "cloned array invalid length")
+ arktest.assertTrue(objs !== objsCopy!, "source array returned")
+ arktest.assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
+ arktest.assertTrue(objsCopy![0] === objsCopy![1], "cloned array elements are different")
 }
 
 function testArrayClone(): void {
@@ -142,13 +142,13 @@ function testArrayClone(): void {
 	objs.push(undefined)
 
 	const objsCopy = deepcopy(objs)
-	assertTrue(objsCopy != null, "cloned array is null")
+ arktest.assertTrue(objsCopy != null, "cloned array is null")
 
-	assertEQ(objs.length,  objsCopy!.length, "cloned array length is not the as source length")
-	assertTrue(objs !== objsCopy, "cloned array is the same as source array")
-	assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
-	assertTrue(objs[1] === null, "null element copied incorrectly")
-	assertTrue(objs[2] === undefined, "undefined element copied incorrectly")
+ arktest.assertEQ(objs.length,  objsCopy!.length, "cloned array length is not the as source length")
+ arktest.assertTrue(objs !== objsCopy, "cloned array is the same as source array")
+ arktest.assertTrue(objs[0] !== objsCopy![0], "array elements are not cloned")
+ arktest.assertTrue(objs[1] === null, "null element copied incorrectly")
+ arktest.assertTrue(objs[2] === undefined, "undefined element copied incorrectly")
 }
 
 function testObjectWithLambdaClone(): void {
@@ -156,11 +156,11 @@ function testObjectWithLambdaClone(): void {
 	fnBox.fn = () => true
 
 	const fnBoxCopy = deepcopy(fnBox)
-	assertTrue(fnBoxCopy != null, "cloned object is null")
+ arktest.assertTrue(fnBoxCopy != null, "cloned object is null")
 
-	assertTrue(fnBox !== fnBoxCopy, "cloned object is the same as source object")
-	assertTrue(fnBox.fn === fnBoxCopy!.fn, "lambda field is cloned")
-	assertEQ(fnBox.fn!(),  fnBoxCopy!.fn!(), "not the same results")
+ arktest.assertTrue(fnBox !== fnBoxCopy, "cloned object is the same as source object")
+ arktest.assertTrue(fnBox.fn === fnBoxCopy!.fn, "lambda field is cloned")
+ arktest.assertEQ(fnBox.fn!(),  fnBoxCopy!.fn!(), "not the same results")
 }
 
 function testSetClone(): void {
@@ -170,11 +170,11 @@ function testSetClone(): void {
 	set.add(obj)
 
 	const setCopy = deepcopy(set)
-	assertTrue(setCopy != null, "cloned set is null")
+ arktest.assertTrue(setCopy != null, "cloned set is null")
 
-	assertTrue(set !== setCopy, "cloned set is the same as source set")
-	assertEQ(set.size,  setCopy!.size, "cloned set size is not the same as source set size")
-	assertFalse(setCopy!.has(obj), "cloned set contains original element")
+ arktest.assertTrue(set !== setCopy, "cloned set is the same as source set")
+ arktest.assertEQ(set.size,  setCopy!.size, "cloned set size is not the same as source set size")
+ arktest.assertFalse(setCopy!.has(obj), "cloned set contains original element")
 }
 
 function testMapClone(): void {
@@ -186,24 +186,24 @@ function testMapClone(): void {
 	map.set("undefined", undefined)
 
 	const mapCopy = deepcopy(map)
-	assertTrue(mapCopy != null, "cloned map is null")
+ arktest.assertTrue(mapCopy != null, "cloned map is null")
 
-	assertTrue(map != mapCopy, "cloned map is the same as source map")
-	assertEQ(map.size,  mapCopy!.size, "cloned map size != source map size")
-	assertTrue(mapCopy!.has(key), "existing key not found in cloned map")
+ arktest.assertTrue(map != mapCopy, "cloned map is the same as source map")
+ arktest.assertEQ(map.size,  mapCopy!.size, "cloned map size != source map size")
+ arktest.assertTrue(mapCopy!.has(key), "existing key not found in cloned map")
 
-	assertTrue(mapCopy!.get("null") === null, "'null' key has wrong value")
-	assertTrue(mapCopy!.get("undefined") === undefined, "'undefined' key has wrong value")
+ arktest.assertTrue(mapCopy!.get("null") === null, "'null' key has wrong value")
+ arktest.assertTrue(mapCopy!.get("undefined") === undefined, "'undefined' key has wrong value")
 }
 
 function testDateClone(): void {
 	const date = new Date()
 
 	const dateCopy = deepcopy(date)
-	assertTrue(dateCopy != null, "cloned date is null")
+ arktest.assertTrue(dateCopy != null, "cloned date is null")
 
-	assertTrue(date != dateCopy, "cloned date is the same as source date")
-	assertEQ(date.valueOf(),  dateCopy!.valueOf(), "cloned date value is not equal to source date value")
+ arktest.assertTrue(date != dateCopy, "cloned date is the same as source date")
+ arktest.assertEQ(date.valueOf(),  dateCopy!.valueOf(), "cloned date value is not equal to source date value")
 }
 
 function testWeakRefClone(): void {
@@ -228,7 +228,7 @@ function testPromiseClone(): void {
 }
 
 function main(): int {
-	const suite = new ArkTestsuite("deepcopy() API")
+	const suite = new arktest.ArkTestsuite("deepcopy() API")
 
 	suite.addTest("object deep copy", testObjectClone)
 	suite.addTest("object shallow copy", testObjectShallowCopy)

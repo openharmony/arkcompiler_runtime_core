@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isMapIterator() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isMapIterator() API tests")
 
     suite.addTest("Verify Map.keys() is identified as MapIterator", testIsMapIterator001)
     suite.addTest("Verify Map.values() is identified as MapIterator", testIsMapIterator002)
@@ -40,7 +40,7 @@ function testIsMapIterator001() {
   let proc = new util.types();
   const map = new Map<int, int>();
   let result = proc.isMapIterator(map.keys());
-  assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+  arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0100
@@ -54,7 +54,7 @@ function testIsMapIterator002() {
   let proc = new util.types();
   const map = new Map<int, int>();
   let result = proc.isMapIterator(map.values());
-  assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+  arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0101
@@ -68,7 +68,7 @@ function testIsMapIterator003() {
   let proc = new util.types();
   const map = new Map<int, int>();
   let result = proc.isMapIterator(map.entries());
-  assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+  arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0102
@@ -82,7 +82,7 @@ function testIsMapIterator004() {
   let proc = new util.types();
   const map = new Map<int, int>();
   let result = proc.isMapIterator(map.$_iterator());
-  assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+  arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0103
@@ -96,7 +96,7 @@ function testIsMapIterator005() {
   let proc = new util.types();
   const map = new Map<int, int>();
   let result = proc.isMapIterator(map);
-  assertTrue(result == false, "The Map should not be of the same type as the MapIterator");
+  arktest.assertTrue(result == false, "The Map should not be of the same type as the MapIterator");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0104
@@ -110,5 +110,5 @@ function testIsMapIterator006() {
   let proc = new util.types();
   const array = new Array<int>();
   let result = proc.isMapIterator(array);
-  assertTrue(result == false, "The Array should not be of the same type as the MapIterator");
+  arktest.assertTrue(result == false, "The Array should not be of the same type as the MapIterator");
 }

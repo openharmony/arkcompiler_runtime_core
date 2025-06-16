@@ -39,7 +39,7 @@ function main(): void {
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 
-  assertEQ(result1, true);
-  assertEQ(result2, false);
+  arktest.assertEQ(result1, true);
+  arktest.assertEQ(result2, false);
 }
 

@@ -35,6 +35,6 @@ class Child extends Parent {
 
 function main(): void {
   let child = new Child();
-  assertEQ(child.greet(), "Hello from Child");
-  assertEQ(child.newMethod(), "This is a new method in Child");
+  arktest.assertEQ(child.greet(), "Hello from Child");
+  arktest.assertEQ(child.newMethod(), "This is a new method in Child");
 }

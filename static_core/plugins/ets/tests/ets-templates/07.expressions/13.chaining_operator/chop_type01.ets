@@ -24,5 +24,5 @@ interface Data {
 function main(): void {
   const data: Data = { value: "hello" };
   const length = data.value?.toUpperCase()?.length as number;
-  assertEQ(length, 5);
+  arktest.assertEQ(length, 5);
 }

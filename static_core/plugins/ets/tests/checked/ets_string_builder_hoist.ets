@@ -93,7 +93,7 @@ function will_not_hoist2() {
 }
 
 function main() {
-    assertEQ(will_hoist1(), "test:0123456789")
-    assertEQ(will_not_hoist1(), "test:123456789")
-    assertEQ(will_not_hoist2(), "test:012345678")
+    arktest.assertEQ(will_hoist1(), "test:0123456789")
+    arktest.assertEQ(will_not_hoist1(), "test:123456789")
+    arktest.assertEQ(will_not_hoist2(), "test:012345678")
 }

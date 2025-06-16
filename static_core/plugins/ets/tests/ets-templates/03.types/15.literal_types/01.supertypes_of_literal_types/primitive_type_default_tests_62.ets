@@ -25,5 +25,5 @@ function main(): void {
     const num1 = 10;
     const num2 = 4;
     const result = subtractNumbers(num1, num2);
-    assertEQ(result, 6);
+    arktest.assertEQ(result, 6);
 }

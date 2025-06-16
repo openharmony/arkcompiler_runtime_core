@@ -43,7 +43,7 @@ function dateFormatRangeUsingFormattingOptionsTest(): void {
 
 		const expectedResult = res[2]
 		if (actualResult !== expectedResult) {
-			assertEQ(actualResult, expectedResult, `Unexpected date formatting result for locale: ${locale} and options: ${options}`)
+		 arktest.assertEQ(actualResult, expectedResult, `Unexpected date formatting result for locale: ${locale} and options: ${options}`)
 		}
 	})
 }
@@ -51,7 +51,7 @@ function dateFormatRangeUsingFormattingOptionsTest(): void {
 function main(): int {
 	initFormatResults()
 
-	const suite = new ArkTestsuite("Intl.DateTimeFormat.formatRange()")
+	const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatRange()")
 	suite.addTest("using formatting options", dateFormatRangeUsingFormattingOptionsTest)
 	return suite.run()
 }

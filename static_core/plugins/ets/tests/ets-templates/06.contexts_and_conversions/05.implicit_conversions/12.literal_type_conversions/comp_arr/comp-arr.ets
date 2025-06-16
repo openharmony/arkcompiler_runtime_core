@@ -29,7 +29,7 @@ function main() {
     let d{{loop.index}}: {{c.to_type}}[] = [s{{loop.index}}];
     d{{loop.index}} = []
     d{{loop.index}} = [s{{loop.index}}, s{{loop.index}}]
-    assertEQ(d{{loop.index}}[1], {{v.val or v.expr}})
+    arktest.assertEQ(d{{loop.index}}[1], {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

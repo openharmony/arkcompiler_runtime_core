@@ -18,11 +18,11 @@ cases:
           return x == undefined
         }
       use: |-
-        assertTrue( foo(null) )
+        arktest.assertTrue( foo(null) )
 
     - decl: |-
         function foo(x: String | null): boolean {
           return x == null
         }
       use: |-
-        assertTrue( foo(undefined) )
+        arktest.assertTrue( foo(undefined) )

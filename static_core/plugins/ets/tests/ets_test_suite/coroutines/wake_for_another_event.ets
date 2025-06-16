@@ -31,7 +31,7 @@ function main() {
     let p2 = foo();
 
     let p3 = p1.then<Number>((value: String): Number => {
-        assertEQ(value, "Panda");
+        arktest.assertEQ(value, "Panda");
         return 42;
     });
 
@@ -40,5 +40,5 @@ function main() {
     });
 
     let value = await p3;
-    assertEQ(value, 42);
+    arktest.assertEQ(value, 42);
 }

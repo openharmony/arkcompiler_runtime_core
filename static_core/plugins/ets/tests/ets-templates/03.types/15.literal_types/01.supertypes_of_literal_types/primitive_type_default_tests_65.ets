@@ -27,5 +27,5 @@ function concatenateWithResult() {
 
 function main(): void {
     const result = concatenateWithResult();
-    assertEQ(result, "final result");
+    arktest.assertEQ(result, "final result");
 }

@@ -27,6 +27,6 @@ export namespace Transit1.B {
 }
 
 function main() {
-    assertEQ(Transit1.B.variable1, 1)
-    assertEQ(Transit1.foo(), "A foo")
+    arktest.assertEQ(Transit1.B.variable1, 1)
+    arktest.assertEQ(Transit1.foo(), "A foo")
 }

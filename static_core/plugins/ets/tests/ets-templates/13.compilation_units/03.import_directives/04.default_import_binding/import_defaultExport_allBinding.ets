@@ -23,11 +23,11 @@ import a,* as Single from "./export_default/single_export.ets";
 import a2,* as Selective from "./export_default/selective_export.ets";
 
 function main(){
-    assertEQ(a,100)
-    assertEQ(Single.b,10000)
-    assertEQ(Single.c,"export_string")
+    arktest.assertEQ(a,100)
+    arktest.assertEQ(Single.b,10000)
+    arktest.assertEQ(Single.c,"export_string")
 
-    assertEQ(a2,100)
-    assertEQ(Selective.b,10000)
-    assertEQ(Selective.c,"export_string")
+    arktest.assertEQ(a2,100)
+    arktest.assertEQ(Selective.b,10000)
+    arktest.assertEQ(Selective.c,"export_string")
 }

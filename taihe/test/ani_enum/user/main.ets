@@ -20,129 +20,129 @@ loadLibrary("ani_enum");
 function test_nextEnum_with_color() {
     const color = EnumTest.Color.GREEN;
     const nextColor = EnumTest.nextEnum(color);
-    assertEQ(nextColor, EnumTest.Color.BLUE)
+    arktest.assertEQ(nextColor, EnumTest.Color.BLUE)
 }
 
 function test_getValueOfEnum() {
     let color = EnumTest.Color.GREEN;
     let value = EnumTest.getValueOfEnum(color);
-    assertEQ(value, "Green");
+    arktest.assertEQ(value, "Green");
 }
 
 function test_getValueOfEnumWeekday() {
     let day = EnumTest.Weekday.WEDNESDAY;
     let value = EnumTest.getValueOfEnumWeekday(day);
-    assertEQ(value, 3);
+    arktest.assertEQ(value, 3);
 }
 
 function test_nextEnumWeekday() {
     let day = EnumTest.Weekday.WEDNESDAY;
     let nextDay = EnumTest.nextEnumWeekday(day);
-    assertEQ(nextDay, EnumTest.Weekday.THURSDAY);
+    arktest.assertEQ(nextDay, EnumTest.Weekday.THURSDAY);
 }
 
 function test_nextEnum() {
     const color = EnumTest.Color.BLUE;
     const nextColor = EnumTest.nextEnum(color);
-    assertEQ(nextColor, EnumTest.Color.RED);
+    arktest.assertEQ(nextColor, EnumTest.Color.RED);
 }
 
 function test_nextEnum_with_i8() {
     const first = EnumTest.NumTypeI8.ONE;
     const next = EnumTest.nextEnumI8(first);
-    assertEQ(next, EnumTest.NumTypeI8.TWO)
+    arktest.assertEQ(next, EnumTest.NumTypeI8.TWO)
 }
 
 function test_nextEnum_with_i16() {
     const first = EnumTest.NumTypeI16.ONE;
     const next = EnumTest.nextEnumI16(first);
-    assertEQ(next, EnumTest.NumTypeI16.TWO)
+    arktest.assertEQ(next, EnumTest.NumTypeI16.TWO)
 }
 
 function test_nextEnum_with_i32() {
     const first = EnumTest.NumTypeI32.ONE;
     const next = EnumTest.nextEnumI32(first);
-    assertEQ(next, EnumTest.NumTypeI32.TWO)
+    arktest.assertEQ(next, EnumTest.NumTypeI32.TWO)
 }
 
 function test_nextEnum_with_i64() {
     const first = EnumTest.NumTypeI64.ONE;
     const next = EnumTest.nextEnumI64(first);
-    assertEQ(next, EnumTest.NumTypeI64.TWO)
+    arktest.assertEQ(next, EnumTest.NumTypeI64.TWO)
 }
 
 function test_nextEnum_with_string() {
     const first = EnumTest.EnumString.ONE;
     const next = EnumTest.nextEnumString(first);
-    assertEQ(next, EnumTest.EnumString.TWO)
+    arktest.assertEQ(next, EnumTest.EnumString.TWO)
 }
 
 function test_nextEnum_with_const_i8() {
     const first = EnumTest.FLAG_I8_TWO;
-    assertEQ(first, 0 as byte)
+    arktest.assertEQ(first, 0 as byte)
 }
 
 function test_nextEnum_with_const_i16() {
     const first = EnumTest.FLAG_I16_TWO;
-    assertEQ(first, 0 as short)
+    arktest.assertEQ(first, 0 as short)
 }
 
 function test_nextEnum_with_const_i32() {
     const first = EnumTest.FLAG_I32_TWO;
-    assertEQ(first, 0)
+    arktest.assertEQ(first, 0)
 }
 
 function test_nextEnum_with_const_i64() {
     const first = EnumTest.FLAG_I64_TWO;
-    assertEQ(first, 0 as long)
+    arktest.assertEQ(first, 0 as long)
 }
 
 function test_nextEnum_with_const_f32() {
     const first = EnumTest.FLAG_F32_A;
-    assertEQ(first, 10.0 as float)
+    arktest.assertEQ(first, 10.0 as float)
 }
 
 function test_nextEnum_with_const_f64() {
     const first = EnumTest.FLAG_F64_A;
-    assertEQ(first, 1.0 as double)
+    arktest.assertEQ(first, 1.0 as double)
 }
 
 function test_nextEnum_with_const_string() {
     const first = EnumTest.FLAG_STRING_ONE;
-    assertEQ(first, "hello")
+    arktest.assertEQ(first, "hello")
 }
 
 function test_fromValueToEnum() {
     const first = EnumTest.fromValueToEnum("Red");
-    assertEQ(first, EnumTest.Color.RED);
+    arktest.assertEQ(first, EnumTest.Color.RED);
     const second = EnumTest.fromValueToEnum("Green");
-    assertEQ(second, EnumTest.Color.GREEN);
+    arktest.assertEQ(second, EnumTest.Color.GREEN);
     const third = EnumTest.fromValueToEnum("Blue");
-    assertEQ(third, EnumTest.Color.BLUE);
+    arktest.assertEQ(third, EnumTest.Color.BLUE);
     let errCode: number = 0;
     try {
         EnumTest.fromValueToEnum("Yellow");
     } catch (e: BusinessError) {
         errCode = e.code;
     }
-    assertEQ(errCode, 1);
+    arktest.assertEQ(errCode, 1);
 }
 
 function test_fromValueToEnumWeekday() {
     const first = EnumTest.fromValueToEnumWeekday(0);
-    assertEQ(first, EnumTest.Weekday.SUNDAY);
+    arktest.assertEQ(first, EnumTest.Weekday.SUNDAY);
     let errCode: number = 0;
     try {
         EnumTest.fromValueToEnumWeekday(8);
     } catch (e: BusinessError) {
         errCode = e.code;
     }
-    assertEQ(errCode, 1);
+    arktest.assertEQ(errCode, 1);
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("EnumTest Tests");
+    const suite = new arktest.ArkTestsuite("EnumTest Tests");
 
     suite.addTest("test nextEnum with color", test_nextEnum_with_color);
 

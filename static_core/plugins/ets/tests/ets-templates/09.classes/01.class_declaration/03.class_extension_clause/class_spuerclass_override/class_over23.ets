@@ -32,7 +32,7 @@ class Child extends Parent {
 function main(): void {
   const child = new Child();
   console.log(child.greet("Default Message"));
-  assertEQ(
+  arktest.assertEQ(
     child.greet("Test Message"),
     "Hello from Parent with message: Test Message and Hello from Child"
   );

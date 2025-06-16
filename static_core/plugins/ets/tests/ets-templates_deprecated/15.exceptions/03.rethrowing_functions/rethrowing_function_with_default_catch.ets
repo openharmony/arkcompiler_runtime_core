@@ -37,5 +37,5 @@ function main(): void {
   catch() {
     y = 5;
   }
-  assertEQ( y, 5 );
+  arktest.assertEQ( y, 5 );
 }

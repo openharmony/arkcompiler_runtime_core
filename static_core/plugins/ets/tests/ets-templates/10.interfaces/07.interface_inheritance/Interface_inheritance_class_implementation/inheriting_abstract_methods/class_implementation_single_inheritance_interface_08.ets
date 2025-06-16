@@ -39,5 +39,5 @@ class Eagle extends AbstractFlyingBird {
 function main(): void {
   let eagle = new Eagle();
   let result = eagle.speak();
-  assertEQ(result, "Eagle screeches.");
+  arktest.assertEQ(result, "Eagle screeches.");
 }

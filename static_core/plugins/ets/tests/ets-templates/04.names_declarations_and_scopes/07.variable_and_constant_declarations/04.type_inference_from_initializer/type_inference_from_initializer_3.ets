@@ -19,5 +19,5 @@ desc: Variable declaration with string literal.
 
 function main(): void {
   let cond: boolean = true;
-  assertTrue(cond == true);
+  arktest.assertTrue(cond == true);
 }

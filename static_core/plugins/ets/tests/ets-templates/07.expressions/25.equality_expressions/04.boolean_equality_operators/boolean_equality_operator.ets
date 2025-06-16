@@ -21,7 +21,7 @@ params: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}
 ---*/
 
 function main(): void {
-  assertEQ( ({{eq.left}} {{eq.op}} {{eq.right}}), {{eq.result}} );
+  arktest.assertEQ( ({{eq.left}} {{eq.op}} {{eq.right}}), {{eq.result}} );
 }
 
 {% endfor %}

@@ -22,9 +22,9 @@ cases:
           final class F extends A implements I {}
       use: |-
           let f: F = new F()
-          assertTrue( f instanceof F && f instanceof A && f instanceof I && f.fld == '' )
+          arktest.assertTrue( f instanceof F && f instanceof A && f instanceof I && f.fld == '' )
           f = { fld: 'ABC' }
-          assertEQ( f.fld, 'ABC' )
+          arktest.assertEQ( f.fld, 'ABC' )
 
     # double final
     - tags: 'compile-only, negative'
@@ -74,7 +74,7 @@ cases:
           final class F<T extends I> extends A<T> {}
       use: |-
           let f: F<I> = new F<I>()
-          assertTrue( f instanceof F )
+          arktest.assertTrue( f instanceof F )
 
     # cannot extend final class, with type parameters
     - tags: 'compile-only, negative'

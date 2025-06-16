@@ -86,6 +86,6 @@ function foo(a: FixedArray<Object>): int {
 
 function main(): void {
   let v: {{c.type}} = {{c.val}};
-  assertEQ(foo(v), {{c.res}})
+  arktest.assertEQ(foo(v), {{c.res}})
 }
 {% endfor %}

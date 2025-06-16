@@ -25,7 +25,7 @@ async function functionWithEmptyArray(): Promise<string> {
 
 async function startTest() {
     const result = await functionWithEmptyArray();
-    assertEQ(result, "Empty array results: 0");
+    arktest.assertEQ(result, "Empty array results: 0");
 }
 
 function main(): void {

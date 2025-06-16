@@ -19,14 +19,14 @@ cases:
           import { A } from './pkg_pub_1';
       use: |-
           // package module, positive case with public method
-          assertEQ( new A().foo(42), 84 )
+          arktest.assertEQ( new A().foo(42), 84 )
 
     - files: './pkg_pub_2/file_B.ets'
       decl: |-
           import { B } from './pkg_pub_2';
       use: |-
           // package module, positive case with public method, from subclass
-          assertEQ( new B().foo(42), 126 )
+          arktest.assertEQ( new B().foo(42), 126 )
 
     # protected access modifier
     - files: './pkg_prot_1/file_A.ets'
@@ -35,14 +35,14 @@ cases:
           import { A } from './pkg_prot_1';
       use: |-
           // package module, negative case with protected method
-          assertEQ( new A().foo(42), 84 )
+          arktest.assertEQ( new A().foo(42), 84 )
 
     - files: './pkg_prot_2/file_B.ets'
       decl: |-
           import { B } from './pkg_prot_2';
       use: |-
           // package module, positive case with protected method, from subclass
-          assertEQ( new B().foo(42), 126 )
+          arktest.assertEQ( new B().foo(42), 126 )
 
     # private access modifier
     - files: './pkg_priv_1/file_A.ets'
@@ -51,7 +51,7 @@ cases:
           import { A } from './pkg_priv_1';
       use: |-
           // package module, negative case with private method
-          assertEQ( new A().foo(42), 84 )
+          arktest.assertEQ( new A().foo(42), 84 )
 
     - files: './pkg_priv_2/file_B.ets'
       tags: 'compile-only, negative'
@@ -59,4 +59,4 @@ cases:
           import { B } from './pkg_priv_2';
       use: |-
           // package module, negative case with private method, from subclass
-          assertEQ( new B().foo(42), 126 )
+          arktest.assertEQ( new B().foo(42), 126 )

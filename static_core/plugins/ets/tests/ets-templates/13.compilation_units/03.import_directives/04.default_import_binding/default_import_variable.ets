@@ -22,5 +22,5 @@ files:
 import test_var from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
 
 function main(): void {
-    assertEQ(test_var, "default_variable");
+    arktest.assertEQ(test_var, "default_variable");
 }

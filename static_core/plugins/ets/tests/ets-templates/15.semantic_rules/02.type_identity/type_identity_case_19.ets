@@ -26,5 +26,5 @@ function processValue(value: MyTypeAlias): MyTypeAlias {
 function main(): void {
   let result = processValue("Hello");
 
-  assertEQ(result, "Hello");
+  arktest.assertEQ(result, "Hello");
 }

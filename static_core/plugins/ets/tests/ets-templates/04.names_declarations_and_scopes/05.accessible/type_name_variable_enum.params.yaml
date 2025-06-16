@@ -18,5 +18,5 @@ cases:
     check: |-
         function main() {
             let a: T = Colors.Blue;
-            assertEQ(foo(a), 23);
+            arktest.assertEQ(foo(a), 23);
         }

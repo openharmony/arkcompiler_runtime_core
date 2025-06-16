@@ -39,5 +39,5 @@ class DerivedClass extends BaseClass implements EmptyInterface {
 
 function main(): void {
   const derivedInstance = new DerivedClass("John");
-  assertEQ(derivedInstance.name, "John");
+  arktest.assertEQ(derivedInstance.name, "John");
 }

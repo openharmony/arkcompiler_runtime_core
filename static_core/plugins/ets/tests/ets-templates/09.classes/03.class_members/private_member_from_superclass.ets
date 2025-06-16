@@ -34,7 +34,7 @@ final class B extends A {
 function main(): void {
     let x: B = new B();
 
-    assertEQ( x.fee(), {{cm.result}} );
+    arktest.assertEQ( x.fee(), {{cm.result}} );
 }
 
 {% endfor %}

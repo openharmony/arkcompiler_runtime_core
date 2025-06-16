@@ -22,6 +22,6 @@ tags: [compile-only, negative]
 import { default as ns, foo } from './ambient04/file.d.ets'
 
 function main() {
-    assertEQ(ns.foo(), 142)
-    assertEQ(foo(), 142)
+    arktest.assertEQ(ns.foo(), 142)
+    arktest.assertEQ(foo(), 142)
 }

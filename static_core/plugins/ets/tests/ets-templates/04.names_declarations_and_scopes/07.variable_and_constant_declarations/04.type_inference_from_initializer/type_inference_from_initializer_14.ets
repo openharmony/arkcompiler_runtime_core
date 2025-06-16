@@ -19,7 +19,7 @@ desc: Variable declaration with readonly array.
 
 function main(): void {
     let readonlyArr: readonly number[] = [1, 2, 3];
-    assertEQ(readonlyArr[0], 1);
-    assertEQ(readonlyArr[1], 2);
-    assertEQ(readonlyArr[2], 3);
+    arktest.assertEQ(readonlyArr[0], 1);
+    arktest.assertEQ(readonlyArr[1], 2);
+    arktest.assertEQ(readonlyArr[2], 3);
 }

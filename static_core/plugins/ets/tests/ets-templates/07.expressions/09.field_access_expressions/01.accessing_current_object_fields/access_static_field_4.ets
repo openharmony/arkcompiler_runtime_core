@@ -31,10 +31,10 @@ class A {
 
 function main(): void {
   if( m == 0) {
-    assertTrue( A.a == 0 )
+    arktest.assertTrue( A.a == 0 )
     m++;
   }
   let i: A = new A();
-  assertTrue( A.a == 1 )
-  assertTrue( m == 1 )
+  arktest.assertTrue( A.a == 1 )
+  arktest.assertTrue( m == 1 )
 }

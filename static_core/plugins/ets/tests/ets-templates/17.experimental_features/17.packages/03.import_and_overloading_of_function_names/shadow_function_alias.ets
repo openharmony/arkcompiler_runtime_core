@@ -23,7 +23,7 @@ tags: [compile-only, negative]
 import {max as mymax} from "std/math";
 
 function mymax(v: double, u: double): double {
-    assertTrue( false )
+    arktest.assertTrue( false )
     return v > u ? v : u;
 }
 

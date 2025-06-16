@@ -21,5 +21,5 @@ enum Color {Red, Green, Blue}
 
 function main(): void {
   let c = Color.Green;
-  assertTrue( c.getName() == "Green" );
+  arktest.assertTrue( c.getName() == "Green" );
 }

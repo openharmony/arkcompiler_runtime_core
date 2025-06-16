@@ -29,6 +29,6 @@ class A {
 
 function main() {
     d = new A().fld
-    assertEQ(d, {{c.expr}})
+    arktest.assertEQ(d, {{c.expr}})
 }
 {%- endfor %}

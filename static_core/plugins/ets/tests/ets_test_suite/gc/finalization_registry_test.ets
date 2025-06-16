@@ -26,7 +26,7 @@ function doFullGC() {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
-        assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected exception during GC");
     }
 }
 
@@ -37,7 +37,7 @@ function callback(string: String): void {
         removed_object_callbacks[2] = true;
     } else {
         // Must be unreachable
-        assertTrue(false, "Calling unexpected callback: " + string);
+        arktest.assertTrue(false, "Calling unexpected callback: " + string);
     }
 }
 
@@ -75,13 +75,13 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
     // and check that we don't call object2 callback
     unusedRegistry = null;
     registry!.unregister(object2_token);
-    assertNE(object2, null, "Object 2 is alive");
+    arktest.assertNE(object2, null, "Object 2 is alive");
     object2 = null;
     doFullGC();
 
     // Clear objects and check correct callback calls:
-    assertNE(object1, null, "Object 1 is alive");
-    assertNE(object3, null, "Object 3 is alive");
+    arktest.assertNE(object1, null, "Object 1 is alive");
+    arktest.assertNE(object3, null, "Object 3 is alive");
     object1 = null;
     object3 = null;
     doFullGC();
@@ -121,8 +121,8 @@ function ctorTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    assertTrue(is_empty, "The callback with empty ctor was not called");
-    assertTrue(is_param, "The callback with parameters ctor was not called");
+    arktest.assertTrue(is_empty, "The callback with empty ctor was not called");
+    arktest.assertTrue(is_param, "The callback with parameters ctor was not called");
 
 }
 //==================== GetSize Tests
@@ -130,7 +130,7 @@ function ctorTests() {
 function getSizeTests(): void {
 
     let finreg = new FinalizationRegistry<String>((string: String) => { console.log("Size callback"); });
-    assertEQ(0, finreg!.getSize(), "Start size of finreg is not empty");
+    arktest.assertEQ(0, finreg!.getSize(), "Start size of finreg is not empty");
 
     let o1 = new Object();
     let o2 = new Object();
@@ -140,19 +140,19 @@ function getSizeTests(): void {
     finreg!.register(o2!, "second_object", o2!);
 
     //add two objects - size must be size == 2
-    assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+    arktest.assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
     //add for  objects with same token - size must be size == 4 + 2
     finreg!.register(new Object, "first_dummy", rem_token);
     finreg!.register(new Object, "second_dummy", rem_token);
 
-    assertEQ(finreg!.getSize(), 2 + 2, "finalizationGetSizeTest: size is invalid");
+    arktest.assertEQ(finreg!.getSize(), 2 + 2, "finalizationGetSizeTest: size is invalid");
 
     finreg!.unregister(rem_token);
-    assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+    arktest.assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
 
     finreg!.unregister(o2!);
     finreg!.unregister(o1!);
-    assertEQ(0, finreg.getSize(), "finalizationGetSizeTest: Size is invalid");
+    arktest.assertEQ(0, finreg.getSize(), "finalizationGetSizeTest: Size is invalid");
 
 }
 //=========================== Unregister tests ====================================
@@ -217,7 +217,7 @@ function unregisterTests() {
             done_callbacks[1] = true;
         }
         else {
-            assertTrue(false, "This code not must be called ");
+            arktest.assertTrue(false, "This code not must be called ");
         }
     });
 
@@ -225,8 +225,8 @@ function unregisterTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    assertTrue(done_callbacks[0], "Callback first must  called! ");
-    assertFalse(done_callbacks[1], "Callback second should not  be called! ");
+    arktest.assertTrue(done_callbacks[0], "Callback first must  called! ");
+    arktest.assertFalse(done_callbacks[1], "Callback second should not  be called! ");
 
     tokenUse = new Object();
     tokenUnuse1 = new Object();
@@ -242,7 +242,7 @@ function unregisterTests() {
     doFullGC();
     Coroutine.Schedule();
 
-    assertEQ(4, counterUnreg, "Counter for calling of unregister is not valid");
+    arktest.assertEQ(4, counterUnreg, "Counter for calling of unregister is not valid");
 
 }
 
@@ -260,11 +260,11 @@ function main(): void {
     Coroutine.Schedule()
 
     // Check that all callbacks have been called correctly.
-    assertTrue(removed_object_callbacks[0], "First callback hasn't been called");
-    assertFalse(removed_object_callbacks[1], "Second callback has been called");
-    assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
-    assertTrue(removed_object_callbacks[3], "Fouth callback hasn't been called");
-    assertNE(registry, null, "Instance still alive");
+    arktest.assertTrue(removed_object_callbacks[0], "First callback hasn't been called");
+    arktest.assertFalse(removed_object_callbacks[1], "Second callback has been called");
+    arktest.assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
+    arktest.assertTrue(removed_object_callbacks[3], "Fouth callback hasn't been called");
+    arktest.assertNE(registry, null, "Instance still alive");
 
     ctorTests();
     getSizeTests();

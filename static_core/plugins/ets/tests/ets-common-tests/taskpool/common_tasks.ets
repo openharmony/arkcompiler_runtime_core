@@ -116,31 +116,31 @@ function taskExecuteDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testDelayFunc);
-        assertEQ(res1, "Concurrent function failed");
+        arktest.assertEQ(res1, "Concurrent function failed");
         let task2 = new taskpool.Task(longFunc, 50);
         expectError(() => {
             await taskpool.executeDelayed(-100.0, task2);
         }, new Error("taskpool:: The delayTime is less than zero"));
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
 let verifyCount = 0;
 function verifySendDataRes(a:int):void{
-    assertEQ(a, 10)
+    arktest.assertEQ(a, 10)
     verifyCount++;
 }
 
 function verifySendDataResWithRestParameter(...args:FixedArray<NullishType>) {
     let arg1 = args[0] as Array<int>;
     let arg2 = args[1] as Array<string>;
-    assertEQ(arg1[0], 1);
-    assertEQ(arg1[1], 2);
-    assertEQ(arg2[0], "hello");
-    assertEQ(arg2[1], "world");
+    arktest.assertEQ(arg1[0], 1);
+    arktest.assertEQ(arg1[1], 2);
+    arktest.assertEQ(arg2[0], "hello");
+    arktest.assertEQ(arg2[1], "world");
 }
 
 function testOnReceiveDataRestParameter():void {
@@ -162,7 +162,7 @@ function taskOnReceiveData():void {
     });
     task.onReceiveData(verifySendDataRes);
     await taskpool.execute(task);
-    assertEQ(verifyCount, 4);
+    arktest.assertEQ(verifyCount, 4);
 }
 
 function clearCount():void {
@@ -183,7 +183,7 @@ function taskSendData():void {
         verifyCount++
     });
     await taskpool.execute(task);
-    assertEQ(verifyCount, 5);
+    arktest.assertEQ(verifyCount, 5);
 }
 
 function taskExecutePeriodicallyTest(): void {
@@ -192,7 +192,7 @@ function taskExecutePeriodicallyTest(): void {
         taskpool.executePeriodically(-100.0, task1);
     }, new Error("taskpool:: The period value is less than zero"));
     let res = await taskpool.execute(task1);
-    assertEQ(res, "abc");
+    arktest.assertEQ(res, "abc");
     expectError(() => {
         taskpool.executePeriodically(100.0, task1);
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
@@ -218,7 +218,7 @@ function testTaskpoolInfo() {
     // When taskpool using launch we do not have default worker for it
     // So the behavior is little bit different with taskpool using EAWorker
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
-        assertNE(emptyThreadInfo.threadInfos.length, 0);
+        arktest.assertNE(emptyThreadInfo.threadInfos.length, 0);
     }
     let funcForTask = (): string => {
         isRunTask.fire();
@@ -229,7 +229,7 @@ function testTaskpoolInfo() {
     let info1 = taskpool.getTaskPoolInfo();
     // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
     if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
-        assertNE(info1.threadInfos.length, 0);
+        arktest.assertNE(info1.threadInfos.length, 0);
     }
     let p = taskpool.execute(task, taskpool.Priority.HIGH);
     // wait for task started
@@ -238,19 +238,19 @@ function testTaskpoolInfo() {
     // Notify to continue task
     flagForTask.fire();
     // Check current priority of the worker
-    assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
-    assertEQ(info2.taskInfos.length, 1);
-    assertNE(info2.threadInfos.length, 0);
+    arktest.assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
+    arktest.assertEQ(info2.taskInfos.length, 1);
+    arktest.assertNE(info2.threadInfos.length, 0);
     let isNonEmptyWorker: boolean = false;
     for (let threadInfo of info2.threadInfos) {
-        assertLT(0, threadInfo.tid);
+        arktest.assertLT(0, threadInfo.tid);
         isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
     }
-    assertEQ(isNonEmptyWorker, true);
+    arktest.assertEQ(isNonEmptyWorker, true);
     // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-    assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
-    assertEQ(info2.taskInfos[0].name, "task_name");
-    assertEQ(await p, "result");
+    arktest.assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    arktest.assertEQ(info2.taskInfos[0].name, "task_name");
+    arktest.assertEQ(await p, "result");
 }
 
 function returnNumber(): int {
@@ -261,7 +261,7 @@ async function executeNestedTask():Promise<int> {
     let count = 0; 
     for(let a = 0; a < 10; a++) {
         let res = await taskpool.execute(returnNumber);
-        assertEQ(res, 100);
+        arktest.assertEQ(res, 100);
         count++;
     }
     return count
@@ -269,12 +269,12 @@ async function executeNestedTask():Promise<int> {
 
 function exceedContinueTaskTest() {
     let res = await taskpool.execute(executeNestedTask);
-    assertEQ(res, 10)
+    arktest.assertEQ(res, 10)
 }
 
 function main(): int {
-    let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
-    let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
+    let commonTaskSuite = new arktest.ArkTestsuite("taskpool.CommonTask");
+    let commonTaskSuiteDisabled = new arktest.ArkTestsuite("taskpool.CommonTask.DISABLED");
     commonTaskSuite.addTest("GetTaskpoolInfoTest", testTaskpoolInfo);
     commonTaskSuite.addTest("ExceedContinueTaskCountTest", exceedContinueTaskTest);
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
@@ -285,13 +285,13 @@ function main(): int {
         // Task with lambda
         let lambdaTask = new taskpool.Task(Sum);
         let result = await taskpool.execute(lambdaTask);
-        assertEQ(result, 30);
-        assertEQ(lambdaTask.isDone(), true);
+        arktest.assertEQ(result, 30);
+        arktest.assertEQ(lambdaTask.isDone(), true);
         // Task with function
         let funcTask = new taskpool.Task(returnAbc);
         let res = await taskpool.execute(funcTask);
-        assertEQ(res, "abc");
-        assertEQ(funcTask.isDone(), true);
+        arktest.assertEQ(res, "abc");
+        arktest.assertEQ(funcTask.isDone(), true);
         // Disallow execute one task several times
         expectError(() => {
             taskpool.execute(funcTask);
@@ -299,12 +299,12 @@ function main(): int {
         // Tasks with params
         let task1 = new taskpool.Task(sum, 10, 20);
         let res1 = await taskpool.execute(task1);
-        assertEQ(res1, 30);
-        assertEQ(task1.isDone(), true);
+        arktest.assertEQ(res1, 30);
+        arktest.assertEQ(task1.isDone(), true);
         let task2 = new taskpool.Task(max, 80, 60);
         let res2 = await taskpool.execute(task2);
-        assertEQ(res2, 80);
-        assertEQ(task2.isDone(), true);
+        arktest.assertEQ(res2, 80);
+        arktest.assertEQ(task2.isDone(), true);
     });
     commonTaskSuite.addTest("CallbackTest", (): void throws =>
     {
@@ -327,11 +327,11 @@ function main(): int {
         task1.onExecutionSucceeded(onExecutionSucceededCallback);
         task1.onExecutionFailed(onExecutionFailedCallback);
         let res1 = await taskpool.execute(task1);
-        assertEQ(res1, "abc");
-        assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
-        assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
-        assertEQ(onExecutionSucceededStr, onExecutionSucceededExpectedStr);
-        assertEQ(onExecutionFailedStr, "");
+        arktest.assertEQ(res1, "abc");
+        arktest.assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
+        arktest.assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
+        arktest.assertEQ(onExecutionSucceededStr, onExecutionSucceededExpectedStr);
+        arktest.assertEQ(onExecutionFailedStr, "");
         onEnqueuedStr = "";
         onStartExecutionStr = "";
         onExecutionSucceededStr = "";
@@ -342,11 +342,11 @@ function main(): int {
         task2.onExecutionSucceeded(onExecutionSucceededCallback);
         task2.onExecutionFailed(onExecutionFailedCallback);
         let res2 = await taskpool.execute(task2);
-        assertEQ(res2, 30);
-        assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
-        assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
-        assertEQ(onExecutionSucceededStr, onExecutionSucceededExpectedStr);
-        assertEQ(onExecutionFailedStr, "");
+        arktest.assertEQ(res2, 30);
+        arktest.assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
+        arktest.assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
+        arktest.assertEQ(onExecutionSucceededStr, onExecutionSucceededExpectedStr);
+        arktest.assertEQ(onExecutionFailedStr, "");
         // Failed task
         onEnqueuedStr = "";
         onStartExecutionStr = "";
@@ -358,10 +358,10 @@ function main(): int {
         failedTask.onExecutionFailed(onExecutionFailedCallback);
         expectError(() => { await taskpool.execute(failedTask) },
                     new Error("Concurrent function failed"));
-        assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
-        assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
-        assertEQ(onExecutionSucceededStr, "");
-        assertEQ(onExecutionFailedStr, onExecutionFailedExpectedStr);
+        arktest.assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
+        arktest.assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
+        arktest.assertEQ(onExecutionSucceededStr, "");
+        arktest.assertEQ(onExecutionFailedStr, onExecutionFailedExpectedStr);
         // Add callbacks for executed task
         let executedTask = new taskpool.Task(returnAbc);
         let expectedCallbackError = new Error("taskpool:: The executed task does not support the registration of listeners.");
@@ -373,11 +373,11 @@ function main(): int {
     });
     commonTaskSuite.addTest("IsCancelTest", (): void throws =>
     {
-        assertEQ(taskpool.Task.isCanceled(), false);
+        arktest.assertEQ(taskpool.Task.isCanceled(), false);
         let t = new taskpool.Task(returnAbc);
         let res = await taskpool.execute(t);
-        assertEQ(res, "abc");
-        assertEQ(taskpool.Task.isCanceled(), false);
+        arktest.assertEQ(res, "abc");
+        arktest.assertEQ(taskpool.Task.isCanceled(), false);
         // Check canceling of exeuting task
         // CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN); 
         let isCanceled = new Event();
@@ -393,12 +393,12 @@ function main(): int {
         let task = new taskpool.Task(funcForTask);
         let p = taskpool.execute(task);
         isRunning.wait();
-        assertEQ(task.isDone(), false);
+        arktest.assertEQ(task.isDone(), false);
         taskpool.cancel(task);
         waitForCancel.fire();
         let wasCanceled = isCanceled.wait();
         // Check isCanceled from taskpool
-        assertEQ(wasCanceled, true);
+        arktest.assertEQ(wasCanceled, true);
         expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
     });
     commonTaskSuite.addTest("CancelNonExecutingTaskTest", (): void throws =>
@@ -433,7 +433,7 @@ function main(): int {
         try {
             taskpool.cancel(task1);
         } catch(e: Error) {
-            assertEQ(e.message, "taskpool:: task is not executed or has been executed");
+            arktest.assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
         expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
@@ -455,13 +455,13 @@ function main(): int {
         try {
             taskpool.cancel(task2);
         } catch(e: Error) {
-            assertEQ(e.message, "taskpool:: task is not executed or has been executed");
+            arktest.assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
         isExecuted.wait();
-        assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
         // The canceled task result returns through the catch branch, not the then branch.
-        assertEQ(val, 2);
+        arktest.assertEQ(val, 2);
     });
     commonTaskSuite.addTest("CheckIsDoneAndCancelTaskTest", (): void throws =>
     {
@@ -487,7 +487,7 @@ function main(): int {
         let p1 = taskpool.execute(task1);
         while (!isRunning.get()) {}
         // Cancel the executing task will not throw an error.
-        expectNoThrow(() => {
+        arktest.expectNoThrow(() => {
             if (!task1.isDone()) {
                 taskpool.cancel(task1);
             } else {
@@ -496,7 +496,7 @@ function main(): int {
         });
         waitCancel.set(false);
         while (isRunning.get()) {}
-        assertEQ(isCanceled.get(), true);
+        arktest.assertEQ(isCanceled.get(), true);
         expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
         let task2 = new taskpool.Task(testCancelFunc, 100);
         expectError(() => {
@@ -531,12 +531,12 @@ function main(): int {
         let p2 = taskpool.execute(task2);
         let p3 = taskpool.execute(task3);
         let res2 = await p2;
-        assertEQ(res2, "32");
+        arktest.assertEQ(res2, "32");
         let res3 = await p3;
-        assertEQ(res3, "3");
+        arktest.assertEQ(res3, "3");
         let res1 = await p1;
-        assertEQ(res1, "321");
-        assertEQ(resultStr, "321");
+        arktest.assertEQ(res1, "321");
+        arktest.assertEQ(resultStr, "321");
         // Empty dependencies
         expectError(() => {
             let task = new taskpool.Task(returnAbc);
@@ -574,14 +574,14 @@ function main(): int {
         let p2 = taskpool.execute(task2);
         let p3 = taskpool.execute(task3);
         let res1 = await p1;
-        assertEQ(res1, "1");
+        arktest.assertEQ(res1, "1");
         let res2 = await p2;
-        assertEQ(res2, 222);
+        arktest.assertEQ(res2, 222);
         let res3 = await p3;
-        assertEQ(res3, "Task3");
-        assertEQ(task1.isDone(), true);
-        assertEQ(task2.isDone(), true);
-        assertEQ(task3.isDone(), true);
+        arktest.assertEQ(res3, "Task3");
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
         let task4 = new taskpool.Task(func3, 100);
         let task5 = new taskpool.Task(func3, 200);
         let task6 = new taskpool.Task(func3, 100);
@@ -593,9 +593,9 @@ function main(): int {
         taskpool.execute(task6);
         taskpool.execute(task7);
         await p4;
-        assertEQ(task5.isDone(), true);
-        assertEQ(task6.isDone(), true);
-        assertEQ(task7.isDone(), true);
+        arktest.assertEQ(task5.isDone(), true);
+        arktest.assertEQ(task6.isDone(), true);
+        arktest.assertEQ(task7.isDone(), true);
     });
     commonTaskSuite.addTest("CircularDependencyTest", (): void throws =>
     {
@@ -606,19 +606,19 @@ function main(): int {
         let task5 = new taskpool.Task(returnAbc);
         let task6 = new taskpool.Task(returnAbc);
         let expectedError = new Error("taskpool:: There is a circular dependency");
-        expectNoThrow(() => {
+        arktest.expectNoThrow(() => {
             task1.addDependency(task2);
             task2.addDependency(task3);
             task3.addDependency(task4);
             task4.addDependency(task5);
             task5.addDependency(task6);
         });
-        expectError(() => {
+        arktest.expectError(() => {
             // circular dependency
             task6.addDependency(task1);
         }, expectedError);
-        expectError(() => { task1.addDependency(task1) }, expectedError);
-        expectError(() => { task1.removeDependency(task3) }, new Error("taskpool:: The dependency does not exist"));
+        arktest.expectError(() => { task1.addDependency(task1) }, expectedError);
+        arktest.expectError(() => { task1.removeDependency(task3) }, new Error("taskpool:: The dependency does not exist"));
     });
     commonTaskSuite.addTest("DependencyExecutedTaskTest", (): void throws =>
     {
@@ -626,7 +626,7 @@ function main(): int {
         let task2 = new taskpool.Task(sum, 10, 20);
         expectError(() => { task1.removeDependency(task2) }, new Error("taskpool:: task has no dependency"));
         let res1 = await taskpool.execute(task2);
-        assertEQ(res1, 30);
+        arktest.assertEQ(res1, 30);
         expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
         expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
         let task3 = new taskpool.Task(returnAbc);
@@ -634,11 +634,11 @@ function main(): int {
         let expectedAgainExecuteError = new Error("taskpool:: executedTask with dependency cannot execute again");
         task1.addDependency(task3);
         let res2 = await taskpool.execute(task3);
-        assertEQ(res2, "abc");
+        arktest.assertEQ(res2, "abc");
         expectError(() => { task1.removeDependency(task3); }, new Error("taskpool:: cannot removeDependency on a dependent and executed task"));
         expectError(() => { task1.removeDependency(task4); }, new Error("taskpool:: task has no dependency"));
         let res3 = await taskpool.execute(task1);
-        assertEQ(res3, "abc");
+        arktest.assertEQ(res3, "abc");
         expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
         expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
         // Try to remove dependency after execute
@@ -670,12 +670,12 @@ function main(): int {
         let p2 = taskpool.execute(t2);
         let res1 = await p1;
         let res2 = await p2;
-        assertEQ(res1, "abc");
-        assertEQ(res2, "abc");
-        assertEQ(res, 20);
+        arktest.assertEQ(res1, "abc");
+        arktest.assertEQ(res2, "abc");
+        arktest.assertEQ(res, 20);
         let r = await taskpool.execute(t3);
-        assertEQ(r, "abc");
-        assertEQ(res, 30);
+        arktest.assertEQ(r, "abc");
+        arktest.assertEQ(res, 30);
     });
     commonTaskSuite.addTest("SendDataAndCancelTest", () =>
     {
@@ -710,12 +710,12 @@ function main(): int {
         try {
             taskpool.cancel(task);
         } catch(e: Error) {
-            assertEQ(e.message, "taskpool:: task is not executed or has been executed");
+            arktest.assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
         expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
         // When the task is canceled, recvCallback will no longer be executed.
-        assertEQ(value, 0);
+        arktest.assertEQ(value, 0);
     });
     commonTaskSuite.addTest("TasksWithDifferentParamsTest", () =>
     {
@@ -749,16 +749,16 @@ function main(): int {
         let res3 = await taskpool.execute(task3);
         let res4 = await taskpool.execute(task4);
         let res5 = await taskpool.execute(task5);
-        assertEQ(res1, "testWithZeroParam");
-        assertEQ(res2, 30);
-        assertEQ(res3, "testWithThreeParams res: 30");
-        assertEQ(res4, "TEST res: 6");
-        assertEQ(res5, 16.0);
-        assertEQ(task1.isDone(), true);
-        assertEQ(task2.isDone(), true);
-        assertEQ(task3.isDone(), true);
-        assertEQ(task4.isDone(), true);
-        assertEQ(task5.isDone(), true);
+        arktest.assertEQ(res1, "testWithZeroParam");
+        arktest.assertEQ(res2, 30);
+        arktest.assertEQ(res3, "testWithThreeParams res: 30");
+        arktest.assertEQ(res4, "TEST res: 6");
+        arktest.assertEQ(res5, 16.0);
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
+        arktest.assertEQ(task4.isDone(), true);
+        arktest.assertEQ(task5.isDone(), true);
     });
     commonTaskSuite.addTest("TaskPoolInTaskPoolTest", () =>
     {
@@ -775,14 +775,14 @@ function main(): int {
         let outerFunc = (): string => {
             let innerTask = new taskpool.Task(innerFunc, 10);
             let innerRes = await taskpool.execute(innerTask);
-            assertEQ(innerRes, 20);
+            arktest.assertEQ(innerRes, 20);
             res += 20;
             return "";
         };
         let task = new taskpool.Task(outerFunc);
         await taskpool.execute(task);
-        assertEQ(res, 30);
-        assertEQ(task.isDone(), true);
+        arktest.assertEQ(res, 30);
+        arktest.assertEQ(task.isDone(), true);
     });
     commonTaskSuite.addTest("TasksExecutionTest", () =>
     {
@@ -805,28 +805,28 @@ function main(): int {
             })
         }
         allExecuted.wait();
-        assertEQ(taskArray[0].isDone(), true);
-        assertEQ(taskArray[5].isDone(), true);
-        assertEQ(num, count);
+        arktest.assertEQ(taskArray[0].isDone(), true);
+        arktest.assertEQ(taskArray[5].isDone(), true);
+        arktest.assertEQ(num, count);
     });
     commonTaskSuite.addTest("TaskDurationTest", () =>
     {
         let task1 = new taskpool.Task(longFunc, 200);
-        assertEQ(task1.ioDuration, 0);
-        assertEQ(task1.cpuDuration, 0);
-        assertEQ(task1.totalDuration, 0);
+        arktest.assertEQ(task1.ioDuration, 0);
+        arktest.assertEQ(task1.cpuDuration, 0);
+        arktest.assertEQ(task1.totalDuration, 0);
         let res1 = await taskpool.execute(task1);
-        assertEQ(res1, "success");
-        assertNE(task1.cpuDuration, 0);
-        assertNE(task1.totalDuration, 0);
+        arktest.assertEQ(res1, "success");
+        arktest.assertNE(task1.cpuDuration, 0);
+        arktest.assertNE(task1.totalDuration, 0);
         let task2 = new taskpool.Task(longFunc, 1000);
-        assertEQ(task2.ioDuration, 0);
-        assertEQ(task2.cpuDuration, 0);
-        assertEQ(task2.totalDuration, 0);
+        arktest.assertEQ(task2.ioDuration, 0);
+        arktest.assertEQ(task2.cpuDuration, 0);
+        arktest.assertEQ(task2.totalDuration, 0);
         let res2 = await taskpool.execute(task2);
-        assertEQ(res2, "success");
-        assertNE(task2.cpuDuration, 0);
-        assertNE(task2.totalDuration, 0);
+        arktest.assertEQ(res2, "success");
+        arktest.assertNE(task2.cpuDuration, 0);
+        arktest.assertNE(task2.totalDuration, 0);
     });
     commonTaskSuite.addTest("TaskExecuteDelayedTest", taskExecuteDelayedTest);
     commonTaskSuite.addTest("TaskExecutePeriodicallyTest", taskExecutePeriodicallyTest);

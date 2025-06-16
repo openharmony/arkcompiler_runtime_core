@@ -23,7 +23,7 @@ let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
 let queueIntPopN: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueueAddTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueAddTest");
 
     ArrayBlockingQueueTestsuite.addTest("AddTestInt001", () =>
     {
@@ -31,7 +31,7 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntAdd.add(i);
         }
-        assertEQ(queueIntAdd.getEnd(), elementsNum - 1);
+        arktest.assertEQ(queueIntAdd.getEnd(), elementsNum - 1);
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestStr002", () =>
     {
@@ -40,7 +40,7 @@ function main(): int {
             queueStrAdd.add("test");
         }
         queueStrAdd.add("teststring");
-        assertEQ(queueStrAdd.getEnd(), "teststring");
+        arktest.assertEQ(queueStrAdd.getEnd(), "teststring");
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestInt006", () =>
     {
@@ -55,7 +55,7 @@ function main(): int {
         p2.Await();
         p3.Await();
         p4.Await();
-        assertFalse(queueIntPopN.isEmpty());
+        arktest.assertFalse(queueIntPopN.isEmpty());
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestInt007", () =>
     {
@@ -67,7 +67,7 @@ function main(): int {
         }
         let p1 = launch<void, () => void>(queueIntFrontF1data);
         p1.Await();
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.size, elementsNum);
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestInt008", () =>
     {
@@ -79,7 +79,7 @@ function main(): int {
         }
         let p1 = launch<void, () => void>(queueIntBackB1data);
         p1.Await();
-        assertFalse(queueInt.isEmpty());
+        arktest.assertFalse(queueInt.isEmpty());
     });
 
     return ArrayBlockingQueueTestsuite.run();

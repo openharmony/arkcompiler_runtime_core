@@ -28,5 +28,5 @@ enum Status {
 
 function main(): void {
   let numericValue: number = 1;
-  assertTrue(numericValue == Status.Approved);
+  arktest.assertTrue(numericValue == Status.Approved);
 }

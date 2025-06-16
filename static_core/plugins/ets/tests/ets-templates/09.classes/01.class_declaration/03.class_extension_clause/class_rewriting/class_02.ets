@@ -33,5 +33,5 @@ function main(): void {
   let myDog = new Dog();
   let sound = myDog.speak();
 
-  assertEQ(sound, 20);
+  arktest.assertEQ(sound, 20);
 }

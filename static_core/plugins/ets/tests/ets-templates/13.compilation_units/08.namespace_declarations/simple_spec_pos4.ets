@@ -24,5 +24,5 @@ files:
 import {Space1 as mySpace} from "./simple_spec4_3.ets";
 
 function main() {
-    assertEQ("Space1", "Space1")
+    arktest.assertEQ("Space1", "Space1")
 }

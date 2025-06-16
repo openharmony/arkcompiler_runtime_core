@@ -56,7 +56,7 @@ class Derived extends Base {
 
 function main() {
     new Derived().foo({{c.call}});
-    assertEQ( res, {{c.res}} );
+    arktest.assertEQ( res, {{c.res}} );
 }
 
 {%- endfor %}

@@ -30,5 +30,5 @@ function processValue(value: MyEnum): MyEnum {
 function main(): void {
   let result = processValue(MyEnum.A);
 
-  assertEQ(result, MyEnum.A);
+  arktest.assertEQ(result, MyEnum.A);
 }

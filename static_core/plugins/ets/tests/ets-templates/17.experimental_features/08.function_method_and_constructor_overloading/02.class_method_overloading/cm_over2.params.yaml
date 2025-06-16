@@ -55,14 +55,14 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
-          assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
-          assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
-          assertEQ( a.meth(new Float(3.14f)), Float.MAX_VALUE )
-          assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
-          assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
-          assertEQ( a.meth(false), false )
-          assertEQ( a.meth(3.14), Double.MIN_VALUE )
+          arktest.assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
+          arktest.assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
+          arktest.assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
+          arktest.assertEQ( a.meth(new Float(3.14f)), Float.MAX_VALUE )
+          arktest.assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
+          arktest.assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
+          arktest.assertEQ( a.meth(false), false )
+          arktest.assertEQ( a.meth(3.14), Double.MIN_VALUE )
 
     - decl: |-
           // arrays of primitives and boxed, different return types
@@ -89,24 +89,24 @@ cases:
       use: |-
           let a: A = new A()
           try {
-              assertEQ( a.meth([new Byte(-1 as byte)]), Byte.MAX_VALUE )
-              assertEQ( a.meth([new Short(-1 as short)]), Short.MAX_VALUE )
-              assertEQ( a.meth([new Int(-1 as int)]), Int.MAX_VALUE )
-              assertEQ( a.meth([new Long(-1 as long)]), Long.MAX_VALUE )
-              assertEQ( a.meth([new Char(c'A')]), Char.MAX_VALUE )
-              assertEQ( a.meth([new Boolean(false)]), true )
-              assertEQ( a.meth([new Float(3.14 as float)]), Float.MAX_VALUE )
-              assertEQ( a.meth([new Double(3.14)]), Double.MAX_VALUE )
-              assertEQ( a.meth([-1 as long]), Long.MIN_VALUE )
-              assertEQ( a.meth([-1 as int]), Int.MIN_VALUE )
-              assertEQ( a.meth([-1 as short]), Short.MIN_VALUE )
-              assertEQ( a.meth([-1 as byte]), Byte.MIN_VALUE )
-              assertEQ( a.meth([c'A']), Char.MIN_VALUE )
-              assertEQ( a.meth([false]), false )
-              assertEQ( a.meth([3.14]), Double.MIN_VALUE )
-              assertEQ( a.meth([3.14 as float]), Float.MIN_VALUE )
+              arktest.assertEQ( a.meth([new Byte(-1 as byte)]), Byte.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Short(-1 as short)]), Short.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Int(-1 as int)]), Int.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Long(-1 as long)]), Long.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Char(c'A')]), Char.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Boolean(false)]), true )
+              arktest.assertEQ( a.meth([new Float(3.14 as float)]), Float.MAX_VALUE )
+              arktest.assertEQ( a.meth([new Double(3.14)]), Double.MAX_VALUE )
+              arktest.assertEQ( a.meth([-1 as long]), Long.MIN_VALUE )
+              arktest.assertEQ( a.meth([-1 as int]), Int.MIN_VALUE )
+              arktest.assertEQ( a.meth([-1 as short]), Short.MIN_VALUE )
+              arktest.assertEQ( a.meth([-1 as byte]), Byte.MIN_VALUE )
+              arktest.assertEQ( a.meth([c'A']), Char.MIN_VALUE )
+              arktest.assertEQ( a.meth([false]), false )
+              arktest.assertEQ( a.meth([3.14]), Double.MIN_VALUE )
+              arktest.assertEQ( a.meth([3.14 as float]), Float.MIN_VALUE )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
@@ -125,10 +125,10 @@ cases:
           let a: A = new A()
           try {
               a.meth(Color.Red)
-              assertEQ( a.meth(Size.L), "Size" )
-              assertEQ( a.meth(Status.ready), Size.L )
+              arktest.assertEQ( a.meth(Size.L), "Size" )
+              arktest.assertEQ( a.meth(Status.ready), Size.L )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
@@ -146,15 +146,15 @@ cases:
           let a: A = new A()
           try {
               let t: T = [3.14, "abc"]
-              assertEQ( a.meth(t), 33 )
+              arktest.assertEQ( a.meth(t), 33 )
               let r: R = [3.14, false]
-              assertEQ( a.meth(r), "R" )
+              arktest.assertEQ( a.meth(r), "R" )
               t = [42.0, "xyz"]
-              assertEQ( a.meth(t), 33 )
+              arktest.assertEQ( a.meth(t), 33 )
               r = [42.0, true]
-              assertEQ( a.meth(r), "R" )
+              arktest.assertEQ( a.meth(r), "R" )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
@@ -178,13 +178,13 @@ cases:
           let a: A = new A()
           try {
               let u: U = "3.14"
-              assertEQ( a.meth(u), 333 )
+              arktest.assertEQ( a.meth(u), 333 )
               let v: V = new Boolean(true)
-              assertEQ( a.meth(v), 1.0 )
+              arktest.assertEQ( a.meth(v), 1.0 )
               v = new Double(1.5)
-              assertEQ( a.meth(v), 1.0 )
+              arktest.assertEQ( a.meth(v), 1.0 )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
@@ -213,10 +213,10 @@ cases:
       use: |-
           let a: A = new A()
           try {
-              assertEQ( a.meth(fff), "FF" )
-              assertEQ( a.meth(eee), 12 )
+              arktest.assertEQ( a.meth(fff), "FF" )
+              arktest.assertEQ( a.meth(eee), 12 )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
@@ -238,19 +238,19 @@ cases:
           let a: A = new A()
           try {
               let s: S = "ABC"
-              assertEQ( a.meth(s), ex )
+              arktest.assertEQ( a.meth(s), ex )
               let sn: SN = "ABC"
-              assertEQ( a.meth(sn), "SN" )
+              arktest.assertEQ( a.meth(sn), "SN" )
               let su: SU = "ABC"
-              assertEQ( a.meth(su), 1.0 )
+              arktest.assertEQ( a.meth(su), 1.0 )
               let snu: SNU = "ABC"
-              assertEQ( a.meth(snu), true )
+              arktest.assertEQ( a.meth(snu), true )
               sn = null
-              assertEQ( a.meth(sn), "SN" )
+              arktest.assertEQ( a.meth(sn), "SN" )
               su = undefined
-              assertEQ( a.meth(su), 1.0 )
+              arktest.assertEQ( a.meth(su), 1.0 )
               snu = undefined
-              assertEQ( a.meth(snu), true )
+              arktest.assertEQ( a.meth(snu), true )
           } catch (e) {
-              assertTrue( false, "Unexpected error" )
+              arktest.assertTrue( false, "Unexpected error" )
           }

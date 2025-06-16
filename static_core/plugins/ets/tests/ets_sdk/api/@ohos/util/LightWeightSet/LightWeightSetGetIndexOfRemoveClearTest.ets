@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet GetIndexOf Remove Clear API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet GetIndexOf Remove Clear API tests")
 
     suite.addTest("LightWeightSet getIndexOf data return index",
         testGetIndexOfExistingData)
@@ -53,9 +53,9 @@ function testGetIndexOfExistingData() {
     lightWeightSet.add("bb");
     let result = lightWeightSet.getIndexOf("aa");
     let result1 = lightWeightSet.getIndexOf("bb");
-    assertEQ(result, 0, "The lightWeightSet should return the correct index for the value");
-    assertEQ(result1, 1, "The lightWeightSet should return the correct index for the value");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, 0, "The lightWeightSet should return the correct index for the value");
+    arktest.assertEQ(result1, 1, "The lightWeightSet should return the correct index for the value");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetIndexOfNonExistingData() {
@@ -63,15 +63,15 @@ function testGetIndexOfNonExistingData() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getIndexOf("cc");
-    assertEQ(result, -3, "The lightWeightSet should return -3 that indicates where the key should be inserted");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, -3, "The lightWeightSet should return -3 that indicates where the key should be inserted");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetIndexOfDataInEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.getIndexOf("aa");
-    assertEQ(result, -1, "The lightWeightSet should return -1 for a value in an empty set");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, -1, "The lightWeightSet should return -1 for a value in an empty set");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testGetIndexOfComplexData() {
@@ -85,8 +85,8 @@ function testGetIndexOfComplexData() {
     };
     lightWeightSet.add(a);
     let result = lightWeightSet.getIndexOf(a);
-    assertEQ(result, 0, "The lightWeightSet should return 0 for a value");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, 0, "The lightWeightSet should return 0 for a value");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testGetIndexOfEmptyStringData() {
@@ -94,31 +94,31 @@ function testGetIndexOfEmptyStringData() {
     let age = ''
     lightWeightSet.add(age);
     let result = lightWeightSet.getIndexOf(age);
-    assertEQ(result, 0, "The lightWeightSet should return 0 for a value");
-    assertEQ(lightWeightSet.length, 1, "LightWeightSet length should be 1");
+    arktest.assertEQ(result, 0, "The lightWeightSet should return 0 for a value");
+    arktest.assertEQ(lightWeightSet.length, 1, "LightWeightSet length should be 1");
 }
 
 function testRemoveExistingValue() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     let result = lightWeightSet.remove("aa");
-    assertEQ(result, "aa", "The lightWeightSet should remove the value and return it");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, "aa", "The lightWeightSet should remove the value and return it");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testRemoveNonExistingValue() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     let result = lightWeightSet.remove("bb");
-    assertEQ(result, undefined, "The lightWeightSet should return undefined for a value that is not set");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, undefined, "The lightWeightSet should return undefined for a value that is not set");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testRemoveValueFromEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.remove("aa");
-    assertEQ(result, undefined, "The lightWeightSet should return undefined for a value in an empty set");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, undefined, "The lightWeightSet should return undefined for a value in an empty set");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testRemoveMaxValue() {
@@ -126,8 +126,8 @@ function testRemoveMaxValue() {
     const MY_MAX = 1024000;
     lightWeightSet.add(MY_MAX);
     let result = lightWeightSet.remove(MY_MAX);
-    assertEQ(result, MY_MAX, "The lightWeightSet should return MY_MAX");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, MY_MAX, "The lightWeightSet should return MY_MAX");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testClearData() {
@@ -135,12 +135,12 @@ function testClearData() {
     lightWeightSet.add("aa");
     let result = lightWeightSet.isEmpty();
     lightWeightSet.clear();
-    assertEQ(result, false, "The lightWeightSet should not be empty");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, false, "The lightWeightSet should not be empty");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testClearEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.clear();
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }

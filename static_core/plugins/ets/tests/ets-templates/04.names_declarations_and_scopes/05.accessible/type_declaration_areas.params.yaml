@@ -22,14 +22,14 @@ cases:
       }
 
       function main() {
-          assertTrue(checked);
+          arktest.assertTrue(checked);
       }
 
   - decl: |-
       function main() {
           type A = int;
           let a: A = -3;
-          assertEQ(a, -3);
+          arktest.assertEQ(a, -3);
       }
 
   - decl: |-
@@ -38,10 +38,10 @@ cases:
           for(let i: int = 0; i<1; i++) {
               type B = String;
               let a: B = "";
-              assertTrue( a instanceof String)
+              arktest.assertTrue( a instanceof String)
           }
           let a: B = new Int();
-          assertTrue( a instanceof Int)
+          arktest.assertTrue( a instanceof Int)
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
           return a;
       }
       function main() {
-          assertEQ(foo(3), 4);
+          arktest.assertEQ(foo(3), 4);
       }
 
   - decl: |-
@@ -59,9 +59,9 @@ cases:
           try {
               type B = String;
               let a: B = "";
-              assertTrue(a instanceof String)
+              arktest.assertTrue(a instanceof String)
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
       }
 
@@ -70,7 +70,7 @@ cases:
           for(let i: int = 0; i<1; i++) {
               type B = String;
               let a: B = "";
-              assertTrue(a instanceof String)
+              arktest.assertTrue(a instanceof String)
           }
       }
 
@@ -80,7 +80,7 @@ cases:
           type B = string;
           for(let i: A = 0; i<1; i++) {
               let a: B = "";
-              assertTrue(a instanceof string)
+              arktest.assertTrue(a instanceof string)
           }
       }
 
@@ -89,7 +89,7 @@ cases:
           while(1) {
               type B = Float;
               let a: B = new Float();
-              assertTrue(a instanceof Float)
+              arktest.assertTrue(a instanceof Float)
               break;
           }
       }
@@ -99,7 +99,7 @@ cases:
           do {
               type B = Float;
               let a: B = new Float();
-              assertTrue(a instanceof B)
+              arktest.assertTrue(a instanceof B)
           } while(0)
       }
 
@@ -109,10 +109,10 @@ cases:
           do {
               type B = String;
               let a: B = "";
-              assertTrue(a instanceof String)
+              arktest.assertTrue(a instanceof String)
           } while(0)
           let a: B = new Int();
-          assertTrue(a instanceof Int)
+          arktest.assertTrue(a instanceof Int)
       }
 
   - decl: |-
@@ -121,10 +121,10 @@ cases:
               case 1:
                   type B = String;
                   let a: B = "";
-                  assertTrue(a instanceof String);
+                  arktest.assertTrue(a instanceof String);
                   break;
               default:
-                  assertTrue(false);
+                  arktest.assertTrue(false);
           }
       }
 
@@ -134,17 +134,17 @@ cases:
           switch (2) {
               case 1:
                   type B = String;
-                  assertTrue(false)
+                  arktest.assertTrue(false)
                   break;
               case 2:
                   let a: B = "";
-                  assertTrue(a instanceof String)
+                  arktest.assertTrue(a instanceof String)
                   break;
               default:
-                  assertTrue(false);
+                  arktest.assertTrue(false);
           }
           let q: B = 0;
-          assertTrue(q instanceof Int)
+          arktest.assertTrue(q instanceof Int)
       }
 
   - decl: |-
@@ -153,15 +153,15 @@ cases:
           switch (2) {
               case 1: {
                   type B = String;
-                  assertTrue(false)
+                  arktest.assertTrue(false)
                   break;
                 }
               case 2: {
                   let a: B = 1;
-                  assertTrue(a instanceof Int)
+                  arktest.assertTrue(a instanceof Int)
                   break;
                 }
               default:
-                  assertTrue(false);
+                  arktest.assertTrue(false);
           }
       }

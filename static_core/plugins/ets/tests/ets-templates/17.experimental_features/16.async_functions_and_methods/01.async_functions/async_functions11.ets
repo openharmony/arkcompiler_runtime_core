@@ -24,7 +24,7 @@ async function resolveImmediately(): Promise<string> {
 
 async function startTest() {
   const result = await resolveImmediately();
-  assertEQ(result, "Resolved immediately");
+  arktest.assertEQ(result, "Resolved immediately");
 }
 
 function main(): void {

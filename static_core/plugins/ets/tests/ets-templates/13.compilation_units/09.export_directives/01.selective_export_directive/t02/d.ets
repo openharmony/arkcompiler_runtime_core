@@ -22,5 +22,5 @@ import A from "./c"
 
 function main() {
     let a = new A
-    assertTrue(a instanceof A)
+    arktest.assertTrue(a instanceof A)
 }

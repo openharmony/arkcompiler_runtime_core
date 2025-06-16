@@ -30,5 +30,5 @@ export namespace Space1 {
 }
 
  function main() {
-     assertEQ(Space1.foo(), "Local Space1")
+     arktest.assertEQ(Space1.foo(), "Local Space1")
  }

@@ -28,5 +28,5 @@ function main(): void {
   let b: B = new B()
 
   let a = b as A
-  assertTrue( a instanceof A )
+  arktest.assertTrue( a instanceof A )
 }

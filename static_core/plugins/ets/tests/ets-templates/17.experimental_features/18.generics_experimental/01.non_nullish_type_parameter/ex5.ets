@@ -29,5 +29,5 @@ class A<T extends IMyInterface | undefined | null> {
 function main() {
     let a = new A<IMyInterface>
     let result: IMyInterface = a.foo({})
-    assertNE(result, null);
+    arktest.assertNE(result, null);
 }

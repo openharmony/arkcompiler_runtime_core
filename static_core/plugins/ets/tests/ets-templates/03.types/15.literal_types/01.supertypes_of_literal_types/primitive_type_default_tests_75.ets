@@ -33,5 +33,5 @@ function nestedConditionTest() {
 
 function main(): void {
     const result = nestedConditionTest();
-    assertEQ(result, "Outer true, inner false");
+    arktest.assertEQ(result, "Outer true, inner false");
 }

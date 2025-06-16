@@ -26,6 +26,6 @@ function main() {
 
   let res = "" + {% for v in c['val'] %}p{{loop.index}}{{" + " if not loop.last}}{% endfor %};
   let expected = {% for v in c['val'] %}{{v[2]}}{{" + " if not loop.last}}{% endfor %};
-  assertEQ( res, expected )
+  arktest.assertEQ( res, expected )
 }
 {% endfor %}

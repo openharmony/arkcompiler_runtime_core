@@ -61,7 +61,7 @@ cases:
           try {
               type B = String;
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
           let a: B;
       }
@@ -97,7 +97,7 @@ cases:
                   type B = String;
                   break;
               default:
-                  assertTrue(false);
+                  arktest.assertTrue(false);
           }
           let a: B;
       }

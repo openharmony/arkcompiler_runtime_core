@@ -34,6 +34,6 @@ function main(): void {
   let childInstance = new ChildClass();
   let tmp1 = childInstance.PARENT_letANT;
   let tmp2 = childInstance.CHILD_letANT;
-  assertEQ(tmp1, "Parent letant Value");
-  assertEQ(tmp2, "Child letant Value");
+  arktest.assertEQ(tmp1, "Parent letant Value");
+  arktest.assertEQ(tmp2, "Child letant Value");
 }

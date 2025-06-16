@@ -21,5 +21,5 @@ function main(): void {
     type A = "1" | string;
 
     let a: A = "test";
-    assertEQ(typeof a, "string");
+    arktest.assertEQ(typeof a, "string");
 }

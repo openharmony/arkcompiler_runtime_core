@@ -23,7 +23,7 @@ function main(): void {
         const a: byte = 1
 	    const b: byte = 0
 	    const result: byte = a / b
-	    assertTrue(false)
+	    arktest.assertTrue(false)
     } catch (e: ArithmeticError) {
     }
 }

@@ -21,6 +21,6 @@ function_decls:
               return ">>>" + a + b;
           }
       call: |-
-          assertEQ( foo(), ">>>undefinedundefined" )
-          assertEQ( foo("X"), ">>>Xundefined" )
-          assertEQ( foo("A", "B"), ">>>AB" )
+          arktest.assertEQ( foo(), ">>>undefinedundefined" )
+          arktest.assertEQ( foo("X"), ">>>Xundefined" )
+          arktest.assertEQ( foo("A", "B"), ">>>AB" )

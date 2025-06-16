@@ -20,7 +20,7 @@ desc: Package initialization and function entry verification.
 class P {
   static isInit: number = 1;
   static mainTest() {
-    assertTrue(P.isInit === 1);
+    arktest.assertTrue(P.isInit === 1);
   }
 }
 

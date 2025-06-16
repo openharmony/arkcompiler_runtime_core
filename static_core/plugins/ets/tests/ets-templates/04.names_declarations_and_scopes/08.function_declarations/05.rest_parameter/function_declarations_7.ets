@@ -24,5 +24,5 @@ export function logValues(values: (number | string)[]): (number | string)[] {
 function main(): void {
     let tmp: (number | string)[]=[1, "1"];
     let tmp1 = logValues(tmp);
-    assertEQ(tmp1[0], 1);
+    arktest.assertEQ(tmp1[0], 1);
 }

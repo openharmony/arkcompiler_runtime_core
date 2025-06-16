@@ -22,5 +22,5 @@ class A {}
 function main(): void {
     let a: A = new A();
     let b: A = a;
-    assertTrue( a == b)
+    arktest.assertTrue( a == b)
 }

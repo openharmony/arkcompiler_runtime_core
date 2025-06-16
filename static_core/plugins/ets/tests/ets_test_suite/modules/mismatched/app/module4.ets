@@ -23,7 +23,7 @@ import { Ability } from "@spawn/ability";
 
 class MainAbility implements Ability {
     override invoke() {
-        assertTrue(isFinal());
+        arktest.assertTrue(isFinal());
         new ExtendsFinal();
     }
 }

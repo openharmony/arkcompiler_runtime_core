@@ -19,11 +19,11 @@ function main() {
     let arr = new Int8Array(buf, 0, 1);
 
     Atomics.store(arr, 0, 10);
-    assertEQ(Atomics.load(arr, 0), 10)
+    arktest.assertEQ(Atomics.load(arr, 0), 10)
 
     // isLockFree testing
-    assertTrue(Atomics.isLockFree(1) && Atomics.isLockFree(2))
-    assertTrue(Atomics.isLockFree(4) && Atomics.isLockFree(8))
-    assertTrue(!Atomics.isLockFree(3) && !Atomics.isLockFree(5))
-    assertTrue(!Atomics.isLockFree(6) && !Atomics.isLockFree(7))
+    arktest.assertTrue(Atomics.isLockFree(1) && Atomics.isLockFree(2))
+    arktest.assertTrue(Atomics.isLockFree(4) && Atomics.isLockFree(8))
+    arktest.assertTrue(!Atomics.isLockFree(3) && !Atomics.isLockFree(5))
+    arktest.assertTrue(!Atomics.isLockFree(6) && !Atomics.isLockFree(7))
 }

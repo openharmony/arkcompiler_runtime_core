@@ -62,10 +62,10 @@ function testDelayFunc(): NullishType {
 function executeDelayedTest(): void {
     try {
         let res = await launchImpl(testDelayFunc);
-        assertEQ(res, 400);
+        arktest.assertEQ(res, 400);
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     let task = new taskpool.Task(max, 10, 15);
     let g = new taskpool.TaskGroup();
@@ -97,10 +97,10 @@ function executePeriodicallyTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res1 = await launchImpl(testPeriodFunc);
-        assertEQ(res1, "success");
+        arktest.assertEQ(res1, "success");
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof NullPointerError, true);
+        arktest.assertEQ(e instanceof NullPointerError, true);
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -120,7 +120,7 @@ function groupTaskExecuteRepeat(): void {
     group.addTask(task);
 
     let a = await taskpool.execute(group);
-    assertEQ(a[0], 400);
+    arktest.assertEQ(a[0], 400);
     expectError(() => {
         taskpool.execute(group);
     }, new Error("taskpool:: groupTask has been executed"));
@@ -149,11 +149,11 @@ function taskGroupNestedTaskTest(): void {
 }
 
 function main(): int {
-    let taskGroupTestsuite = new ArkTestsuite("taskpool.TaskGroup");
+    let taskGroupTestsuite = new arktest.ArkTestsuite("taskpool.TaskGroup");
     taskGroupTestsuite.addTest("RunOneGroupTest", () =>
     {
         let g2 = new taskpool.TaskGroup("g2");
-        assertEQ(g2.name, "g2");
+        arktest.assertEQ(g2.name, "g2");
         let t1 = new taskpool.Task(returnAbc);
         let t2 = new taskpool.Task(returnDef);
         // tasks with params
@@ -164,16 +164,16 @@ function main(): int {
         g2.addTask(t3);
         g2.addTask(t4);
         let res2 = await taskpool.execute(g2);
-        assertEQ(res2[0], "abc");
-        assertEQ(res2[1], "def");
-        assertEQ(res2[2], 30);
-        assertEQ(res2[3], 80);
-        assertEQ(g2.name, "g2");
+        arktest.assertEQ(res2[0], "abc");
+        arktest.assertEQ(res2[1], "def");
+        arktest.assertEQ(res2[2], 30);
+        arktest.assertEQ(res2[3], 80);
+        arktest.assertEQ(g2.name, "g2");
         // Run group without tasks
         let g0 = new taskpool.TaskGroup("g0");
         let res0 = await taskpool.execute(g0);
-        assertEQ(res0.length, 0);
-        assertEQ(g0.name, "g0");
+        arktest.assertEQ(res0.length, 0);
+        arktest.assertEQ(g0.name, "g0");
     });
     taskGroupTestsuite.addTest("RunSeveralGroupsTest", () =>
     {
@@ -205,20 +205,20 @@ function main(): int {
         let res3 = await p3;
         let res2 = await p2;
         // Asserts for group 1
-        assertEQ(res1[0], "abc");
-        assertEQ(res1[1], "def");
-        assertEQ(res1[2], "abc");
-        assertEQ(res1[3], 30);
-        assertEQ(t1.isDone(), true);
-        assertEQ(t2.isDone(), true);
+        arktest.assertEQ(res1[0], "abc");
+        arktest.assertEQ(res1[1], "def");
+        arktest.assertEQ(res1[2], "abc");
+        arktest.assertEQ(res1[3], 30);
+        arktest.assertEQ(t1.isDone(), true);
+        arktest.assertEQ(t2.isDone(), true);
         // Asserts for group 2
-        assertEQ(res2[0], "def");
-        assertEQ(res2[1], "abc");
-        assertEQ(res2[2], 80);
+        arktest.assertEQ(res2[0], "def");
+        arktest.assertEQ(res2[1], "abc");
+        arktest.assertEQ(res2[2], 80);
         // Asserts for group 3
-        assertEQ(res3[0], "abc");
-        assertEQ(res3[1], "def");
-        assertEQ(res3[2], 160);
+        arktest.assertEQ(res3[0], "abc");
+        arktest.assertEQ(res3[1], "def");
+        arktest.assertEQ(res3[2], 160);
     });
     taskGroupTestsuite.addTest("CancelNonStartedGroupTest", (): void throws =>
     {
@@ -239,7 +239,7 @@ function main(): int {
         try {
             taskpool.cancel(g);
         } catch(e: Error) {
-            assertEQ(e.message, "taskpool:: taskGroup is not executed or has been executed");
+            arktest.assertEQ(e.message, "taskpool:: taskGroup is not executed or has been executed");
             return;
         }
         expectError(() => { await p }, new Error("taskpool:: taskGroup has been canceled"));
@@ -269,9 +269,9 @@ function main(): int {
                 taskpool.cancel(g);
             }, new Error("taskpool:: taskGroup is not executed or has been executed"));
             result = res as int[];
-            assertEQ(result[0], 160);
-            assertEQ(result[1], 80);
-            assertEQ(result[2], 30);
+            arktest.assertEQ(result[0], 160);
+            arktest.assertEQ(result[1], 80);
+            arktest.assertEQ(result[2], 30);
         });
     });
     taskGroupTestsuite.addTest("AddExecutedTaskTest", (): void throws =>
@@ -368,15 +368,15 @@ function main(): int {
         expectError(() => { taskGroup.addTask(longTask) },
                     new Error("taskpool:: The interface does not support the long task"));
         let res = await taskpool.execute(taskGroup);
-        assertEQ(res[0], "testWithZeroParam");
-        assertEQ(res[1], 30);
-        assertEQ(res[2], "testWithThreeParams res: 30");
-        assertEQ(res[3], "TEST res: 6");
-        assertEQ(task1.isDone(), true);
-        assertEQ(task2.isDone(), true);
-        assertEQ(task3.isDone(), true);
-        assertEQ(task4.isDone(), true);
-        assertEQ(longTask.isDone(), false);
+        arktest.assertEQ(res[0], "testWithZeroParam");
+        arktest.assertEQ(res[1], 30);
+        arktest.assertEQ(res[2], "testWithThreeParams res: 30");
+        arktest.assertEQ(res[3], "TEST res: 6");
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
+        arktest.assertEQ(task4.isDone(), true);
+        arktest.assertEQ(longTask.isDone(), false);
     });
     taskGroupTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
     taskGroupTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);

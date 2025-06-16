@@ -46,5 +46,5 @@ function main(): void {
   const syncResult = child.fetchDataSync();
 
   child.fetchDataAsync().then((data: string) => console.log(data));
-  assertEQ(syncResult, "Sync Data")
+  arktest.assertEQ(syncResult, "Sync Data")
 }

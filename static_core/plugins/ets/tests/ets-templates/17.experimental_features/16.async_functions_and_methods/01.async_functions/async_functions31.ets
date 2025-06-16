@@ -25,7 +25,7 @@ async function startTest() {
     const result = await functionWithAsyncFunctionAsParam(async () => {
         return "Resolved from async function!";
     });
-    assertEQ(result, "Resolved from async function!");
+    arktest.assertEQ(result, "Resolved from async function!");
 }
 
 function main(): void {

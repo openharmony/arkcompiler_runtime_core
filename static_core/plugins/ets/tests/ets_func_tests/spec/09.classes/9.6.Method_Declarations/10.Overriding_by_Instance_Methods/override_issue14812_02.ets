@@ -41,5 +41,5 @@ class D<T> implements C<T> {
 
 function main(): void {
     let b: A<string> = new D<string>("world")
-    assertEQ( b[1], "hello world")
+    arktest.assertEQ( b[1], "hello world")
 }

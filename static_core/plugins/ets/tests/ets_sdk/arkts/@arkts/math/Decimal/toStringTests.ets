@@ -17,7 +17,7 @@ import { Decimal } from "@arkts.math.Decimal";
 
 function t(expected: string, n: number | string) {
     let result = new Decimal(n).toString()
-    assertEQ(expected, result, `Decimal(${n}).toString(), actual:${result} is not equal to ${expected}`);
+    arktest.assertEQ(expected, result, `Decimal(${n}).toString(), actual:${result} is not equal to ${expected}`);
 }
 
 function testToStringDefault() {
@@ -400,7 +400,7 @@ function config() {
 }
 
 function main() {
-    const suite = new ArkTestsuite("Decimal toString API tests");
+    const suite = new arktest.ArkTestsuite("Decimal toString API tests");
     suite.addTest("Decimal toString use default", testToStringDefault);
     suite.addTest("Decimal toString toExpNeg and toExpPos is 0", testToStringZeroExp);
     config();

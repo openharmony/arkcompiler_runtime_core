@@ -28,5 +28,5 @@ namespace SubNamespace {
 }
 
 function main(): void {
-    assertEQ(SubNamespace.VALUE, "ValueNested");
+    arktest.assertEQ(SubNamespace.VALUE, "ValueNested");
 }

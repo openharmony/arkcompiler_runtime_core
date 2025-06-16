@@ -36,8 +36,8 @@ interface I {
 class D implements I {}
 
 function main(): void {
-    assertEQ( x, 1 )
-    assertEQ( new C().y, 2 )
-    assertEQ( new D().z(), 3 )
-    assertEQ( foo(), 0 )
+    arktest.assertEQ( x, 1 )
+    arktest.assertEQ( new C().y, 2 )
+    arktest.assertEQ( new D().z(), 3 )
+    arktest.assertEQ( foo(), 0 )
 }

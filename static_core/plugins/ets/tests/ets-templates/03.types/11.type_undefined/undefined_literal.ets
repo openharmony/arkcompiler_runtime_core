@@ -19,5 +19,5 @@ desc: The only value of type undefined is represented by the keyword undefined.
 
 function main(): void {
     let i: undefined = undefined;
-    assertTrue( i === undefined )
+    arktest.assertTrue( i === undefined )
 }

@@ -16,7 +16,7 @@
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueueIsEmptyTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueIsEmptyTest");
 
     LinkedBlockingQueueTestsuite.addTest("IsEmptyStressTest006", () =>
     {
@@ -25,13 +25,13 @@ function main(): int {
             queueInt.add(i);
         }
         for (let i = 0; i < stressNum; i++) {
-            assertEQ(queueInt.isEmpty(), false);
+            arktest.assertEQ(queueInt.isEmpty(), false);
         }
         for (let i = 0; i < stressNum; i++) {
             queueInt.pop();
         }
         for (let i = 0; i < stressNum; i++) {
-            assertEQ(queueInt.isEmpty(), true);
+            arktest.assertEQ(queueInt.isEmpty(), true);
         }
     });
 

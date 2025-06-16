@@ -24,5 +24,5 @@ function findMinimumValue(arr: number[]) {
 function main(): void {
     const input = [5, 3, 7];
     const result = findMinimumValue(input);
-    assertEQ(result, 3);
+    arktest.assertEQ(result, 3);
 }

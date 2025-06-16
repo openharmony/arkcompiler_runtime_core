@@ -32,7 +32,7 @@ class C implements I2 {
 
 function main() {
     let c: C = new C();
-    assertEQ( c.foo(), 1)
-    assertEQ( c.bar(), "Yahoo")
+    arktest.assertEQ( c.foo(), 1)
+    arktest.assertEQ( c.bar(), "Yahoo")
 
 }

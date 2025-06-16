@@ -19,7 +19,7 @@ function t(a: string, b: string, pr: number, rm: number, expected: string) {
     Decimal.precision = pr;
     Decimal.rounding = rm;
     let v = Decimal.hypot(a, b).valueOf()
-    assertEQ(expected, v, `Decimal.hypot(${a}, ${b}).valueOf(), actual: ${v} is not equal to ${expected}`);
+    arktest.assertEQ(expected, v, `Decimal.hypot(${a}, ${b}).valueOf(), actual: ${v} is not equal to ${expected}`);
 }
 
 function testHypot() {
@@ -97,7 +97,7 @@ function config() {
 }
 
 function main() {
-    const suite = new ArkTestsuite("Decimal hypot API tests");
+    const suite = new arktest.ArkTestsuite("Decimal hypot API tests");
     suite.addTest("Decimal hypot", testHypot);
     config();
     return suite.run();

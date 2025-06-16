@@ -36,5 +36,5 @@ class B extends A {
 
 function main(): void {
   let test: B = new B();
-  assertEQ(test._publicVar, 'Multi-level inheritance');
+  arktest.assertEQ(test._publicVar, 'Multi-level inheritance');
 }

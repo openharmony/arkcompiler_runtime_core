@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     // NOTE (ilyakorobkov): when #25239 will be fixed, remove these tests from /test-lists/ets-func-tests/ets-func-tests-ignored.txt
     suite.addTest("testSupportedLocalesOf0001", testSupportedLocalesOf0001);
@@ -27,27 +27,27 @@ function main(): int {
 function testSupportedLocalesOf0001() {
     let locales: string = 'de-ID';
     let result = Intl.NumberFormat.supportedLocalesOf(locales);
-    assertEQ(result.toString(), ["de-ID"].toString());
-    assertTrue(Array.isArray(result));
+    arktest.assertEQ(result.toString(), ["de-ID"].toString());
+    arktest.assertTrue(Array.isArray(result));
 }
 
 function testSupportedLocalesOf0005() {
     let locales: string[] = ['id-u-co-pinyin'];
     let result = Intl.NumberFormat.supportedLocalesOf(locales);
-    assertEQ(result.toString(), 'id-u-co-pinyin');
-    assertTrue(Array.isArray(result));
+    arktest.assertEQ(result.toString(), 'id-u-co-pinyin');
+    arktest.assertTrue(Array.isArray(result));
 }
 
 function testSupportedLocalesOf0006() {
     let locales: string[] = ['id-u-co-pinyin', 'de-ID', 'en-US'];
     let result = Intl.NumberFormat.supportedLocalesOf(locales);
-    assertEQ(result.join(','), ['id-u-co-pinyin', 'de-ID', 'en-US'].toString());
-    assertTrue(Array.isArray(result));
+    arktest.assertEQ(result.join(','), ['id-u-co-pinyin', 'de-ID', 'en-US'].toString());
+    arktest.assertTrue(Array.isArray(result));
 }
 
 function testSupportedLocalesOf0008() {
     let locales: string[] = ['ban', 'id-u-co-pinyin', 'de-ID', 'en-US'];
     let result = Intl.NumberFormat.supportedLocalesOf(locales);
-    assertEQ(result.join(','), ['id-u-co-pinyin', 'de-ID', 'en-US'].toString());
-    assertTrue(Array.isArray(result));
+    arktest.assertEQ(result.join(','), ['id-u-co-pinyin', 'de-ID', 'en-US'].toString());
+    arktest.assertTrue(Array.isArray(result));
 }

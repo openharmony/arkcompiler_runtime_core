@@ -39,8 +39,8 @@ class B implements Vehicle {
 
 function main(): void {
     let a: A = new A()
-    assertEQ( a.getHorsePower(5, 5), 5 )
+    arktest.assertEQ( a.getHorsePower(5, 5), 5 )
 
     let b: B = new B()
-    assertEQ( b.getHorsePower(5, 5), 25 )
+    arktest.assertEQ( b.getHorsePower(5, 5), 25 )
 }

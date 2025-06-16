@@ -21,8 +21,8 @@ function main(): void {
     let a = 0.1;
     let b = -log(0);
     let c = log(0);
-    assertNE( a, b )
-    assertNE( b, a )
-    assertNE( a, c )
-    assertNE( c, a )
+    arktest.assertNE( a, b )
+    arktest.assertNE( b, a )
+    arktest.assertNE( a, c )
+    arktest.assertNE( c, a )
 }

@@ -98,11 +98,11 @@ function main() {
     let a = new Int(123);
     let b = new Int(123);
 
-    assertTrue(!equals_dce(a, b));
-    assertTrue(equals_cse(a, b));
-    assertTrue(equals_same_inputs(a));
-    assertTrue(equals_null(null) && equals_null(undefined) && !equals_null(a));
-    assertTrue(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
-    assertTrue(equals_null_undefined());
-    assertTrue(!equals_reftyped_input());
+    arktest.assertTrue(!equals_dce(a, b));
+    arktest.assertTrue(equals_cse(a, b));
+    arktest.assertTrue(equals_same_inputs(a));
+    arktest.assertTrue(equals_null(null) && equals_null(undefined) && !equals_null(a));
+    arktest.assertTrue(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
+    arktest.assertTrue(equals_null_undefined());
+    arktest.assertTrue(!equals_reftyped_input());
 }

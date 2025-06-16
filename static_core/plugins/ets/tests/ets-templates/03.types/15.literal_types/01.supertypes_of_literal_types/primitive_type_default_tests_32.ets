@@ -21,5 +21,5 @@ let numComp: number = 10;
 let comparisonResult = numComp > 5;
 
 function main(): void {
-    assertEQ(comparisonResult, true);
+    arktest.assertEQ(comparisonResult, true);
 }

@@ -21,5 +21,5 @@ function main(): void {
   let a: int = 10;
   let b: int = a--;
 
-  assertTrue(a == 9);
+  arktest.assertTrue(a == 9);
 }

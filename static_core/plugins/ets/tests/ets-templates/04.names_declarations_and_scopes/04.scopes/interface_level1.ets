@@ -41,14 +41,14 @@ class C implements I {
 function main(): void {
     let c: C = new C()
 
-    assertEQ( c.foo(), 100 )
+    arktest.assertEQ( c.foo(), 100 )
     c.fld = 2
-    assertEQ( c.foo(), 102 )
+    arktest.assertEQ( c.foo(), 102 )
 
-    assertEQ( c.bar(), 104 )
+    arktest.assertEQ( c.bar(), 104 )
     c.fld = 4
-    assertEQ( c.bar(), 106 )
+    arktest.assertEQ( c.bar(), 106 )
 
     // module level scope is not affected
-    assertEQ( x, -10 )
+    arktest.assertEQ( x, -10 )
 }

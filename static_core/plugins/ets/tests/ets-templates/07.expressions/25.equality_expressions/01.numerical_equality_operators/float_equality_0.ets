@@ -20,6 +20,6 @@ desc: Floating number equality
 function main(): void {
     let a = 0.1;
     let b = sqrt(-1);
-    assertNE( a,  b )
-    assertNE( b , a )
+    arktest.assertNE( a,  b )
+    arktest.assertNE( b , a )
 }

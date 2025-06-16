@@ -29,6 +29,6 @@ function main() {
     let tuple: {{c.type}} = [{{c.data}}]
     let obj: Object = tuple
     let target: {{c.type}} = convertObject(obj)
-    assertEQ(target[1], {{c.expected}})
+    arktest.assertEQ(target[1], {{c.expected}})
 }
 {% endfor %}

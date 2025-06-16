@@ -25,6 +25,6 @@ function main() {
   let v: {{c.type}} = {{c.val}};
   let arr: {{c.type}}[] = new {{c.type}}[{{c.len}} + 1];
   arr[v] = v;
-  assertEQ(arr[v], {{c.len}})
+  arktest.assertEQ(arr[v], {{c.len}})
 }
 {% endfor %}

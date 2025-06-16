@@ -40,7 +40,7 @@ function main() {
     const sci = new StateContextImpl
 
     sci.attach()
-    assertEQ(12, data)
+    arktest.assertEQ(12, data)
     sci.attach(() => { data = 0})
-    assertEQ(0, data)
+    arktest.assertEQ(0, data)
 }

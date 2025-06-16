@@ -22,6 +22,6 @@ params: {{ni.x}} * {{ni.y}} == {{ni.result}}
 
 function main(): void {
   let res = {{ni.x}} * {{ni.y}};
-  assertTrue( Double.isNaN(res) );
+  arktest.assertTrue( Double.isNaN(res) );
 }
 {% endfor %}

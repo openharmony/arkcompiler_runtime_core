@@ -25,5 +25,5 @@ class StaticMethodClass {
 
 function main(): void {
     const result = StaticMethodClass.square(4);
-    assertEQ(result, 16);
+    arktest.assertEQ(result, 16);
 }

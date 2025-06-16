@@ -29,7 +29,7 @@ function main() : int {
     }
 
     for (let index = 0; index < strangeArray.length; i++) {
-        assertEQ(initialArray[index], strangeArray[index])
+        arktest.assertEQ(initialArray[index], strangeArray[index])
     }
 
     return 0;

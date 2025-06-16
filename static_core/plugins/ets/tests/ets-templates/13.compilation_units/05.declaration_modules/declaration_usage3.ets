@@ -29,5 +29,5 @@ function main() {
     myPerson.getName();
     myPerson.getAge();
     let default_myPerson = dm.Person.createDefault();
-    assertEQ(default_myPerson, 'function');
+    arktest.assertEQ(default_myPerson, 'function');
 }

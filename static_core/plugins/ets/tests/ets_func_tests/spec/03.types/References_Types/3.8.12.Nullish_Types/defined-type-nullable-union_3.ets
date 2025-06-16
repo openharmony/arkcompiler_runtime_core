@@ -23,9 +23,9 @@ type NullableSupplier = (() => int) | null;
 
 function main(): void{
     let ss: NullableSupplier = null;
-    assertTrue( ss === null)
+    arktest.assertTrue( ss === null)
     ss = (): int => { return 42; }
     let rs: int = ss!();
-    assertEQ( rs, 42)
+    arktest.assertEQ( rs, 42)
 
 }

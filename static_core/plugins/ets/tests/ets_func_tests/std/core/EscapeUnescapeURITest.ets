@@ -127,33 +127,33 @@ function testInverse(s1: string): int {
 }
 
 function testURIComponentWellFormedStr001(): int {
-    assertEQ(encodeURIComponent("\ude52".toWellFormed()), "%EF%BF%BD")
+    arktest.assertEQ(encodeURIComponent("\ude52".toWellFormed()), "%EF%BF%BD")
     return 0
 }
 
 function testURIComponentWellFormedStr002(): int {
-    assertEQ(encodeURIComponent("\ud83d\ude0a".toWellFormed()), "%F0%9F%98%8A")
+    arktest.assertEQ(encodeURIComponent("\ud83d\ude0a".toWellFormed()), "%F0%9F%98%8A")
     return 0
 }
 
 function testURIComponentWellFormedStr003(): int {
-    assertEQ(encodeURIComponent("\ud83d\ude0a\u5927\ude0a".toWellFormed()), "%F0%9F%98%8A%E5%A4%A7%EF%BF%BD")
+    arktest.assertEQ(encodeURIComponent("\ud83d\ude0a\u5927\ude0a".toWellFormed()), "%F0%9F%98%8A%E5%A4%A7%EF%BF%BD")
     return 0
 }
 
 function testURIComponentWellFormedStr004(): int {
-    assertEQ(encodeURIComponent("test\u6d4b\u8bd5".toWellFormed()), "test%E6%B5%8B%E8%AF%95")
-    assertEQ(encodeURIComponent("test\ude01test".toWellFormed()), "test%EF%BF%BDtest")
-    assertEQ(encodeURIComponent("\ud83d".toWellFormed()), "%EF%BF%BD")
-    assertEQ(encodeURIComponent("\ude25".toWellFormed()), "%EF%BF%BD")
-    assertEQ("\u6d4b\u8bd5".toWellFormed(), "测试")
-    assertEQ("ABC".toWellFormed(), "ABC")
-    assertEQ("\uD83D\uDE00".toWellFormed(), "😀")
-    assertEQ("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed(), "🌈🌬️👩🏻‍🏭💅🏿")
-    assertEQ("A\u3042あ".toWellFormed(), "Aああ")
-    assertEQ(encodeURIComponent("\ude25😀".toWellFormed()), "%EF%BF%BD%F0%9F%98%80")
-    assertEQ(encodeURIComponent("\uD800\uDBFF".toWellFormed()), "%EF%BF%BD%EF%BF%BD")
-    assertEQ(encodeURIComponent("\uDBFF\u0041".toWellFormed()), "%EF%BF%BDA")
-    assertEQ(encodeURIComponent("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed()), "%F0%9F%8C%88%F0%9F%8C%AC%EF%B8%8F%F0%9F%91%A9%F0%9F%8F%BB%E2%80%8D%F0%9F%8F%AD%F0%9F%92%85%F0%9F%8F%BF")
+    arktest.assertEQ(encodeURIComponent("test\u6d4b\u8bd5".toWellFormed()), "test%E6%B5%8B%E8%AF%95")
+    arktest.assertEQ(encodeURIComponent("test\ude01test".toWellFormed()), "test%EF%BF%BDtest")
+    arktest.assertEQ(encodeURIComponent("\ud83d".toWellFormed()), "%EF%BF%BD")
+    arktest.assertEQ(encodeURIComponent("\ude25".toWellFormed()), "%EF%BF%BD")
+    arktest.assertEQ("\u6d4b\u8bd5".toWellFormed(), "测试")
+    arktest.assertEQ("ABC".toWellFormed(), "ABC")
+    arktest.assertEQ("\uD83D\uDE00".toWellFormed(), "😀")
+    arktest.assertEQ("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed(), "🌈🌬️👩🏻‍🏭💅🏿")
+    arktest.assertEQ("A\u3042あ".toWellFormed(), "Aああ")
+    arktest.assertEQ(encodeURIComponent("\ude25😀".toWellFormed()), "%EF%BF%BD%F0%9F%98%80")
+    arktest.assertEQ(encodeURIComponent("\uD800\uDBFF".toWellFormed()), "%EF%BF%BD%EF%BF%BD")
+    arktest.assertEQ(encodeURIComponent("\uDBFF\u0041".toWellFormed()), "%EF%BF%BDA")
+    arktest.assertEQ(encodeURIComponent("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed()), "%F0%9F%8C%88%F0%9F%8C%AC%EF%B8%8F%F0%9F%91%A9%F0%9F%8F%BB%E2%80%8D%F0%9F%8F%AD%F0%9F%92%85%F0%9F%8F%BF")
     return 0
 }

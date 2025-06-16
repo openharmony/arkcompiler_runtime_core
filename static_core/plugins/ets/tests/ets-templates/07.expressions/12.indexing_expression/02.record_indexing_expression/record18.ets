@@ -26,5 +26,5 @@ function setValue(key: string, value: number) {
 function main(): void {
   setValue("key1", 10);
   setValue("key2", 20);
-  assertEQ(dynamicKeyRecord["key3"], undefined);
+  arktest.assertEQ(dynamicKeyRecord["key3"], undefined);
 }

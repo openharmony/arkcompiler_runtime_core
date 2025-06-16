@@ -38,5 +38,5 @@ class Foo implements I {
 
 function main(): void {
   let foo = new Foo("any_string");
-  assertEQ( foo.toString(), "inside Foo")
+  arktest.assertEQ( foo.toString(), "inside Foo")
 }

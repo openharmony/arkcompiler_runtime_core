@@ -39,8 +39,8 @@ class D {
 
 function main(): void {
     let x = 4;
-    assertEQ( new C().foo(), 1 )
-    assertEQ( new D().foo(), 2 )
-    assertEQ( foo(), 3 )
-    assertEQ( x, 4 )
+    arktest.assertEQ( new C().foo(), 1 )
+    arktest.assertEQ( new D().foo(), 2 )
+    arktest.assertEQ( foo(), 3 )
+    arktest.assertEQ( x, 4 )
 }

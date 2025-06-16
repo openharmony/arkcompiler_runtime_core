@@ -25,5 +25,5 @@ function main(): void {
     'key3': 4,
   }
   myRecord['key2'] = 6;
-  assertEQ(myRecord['key2'], 6);
+  arktest.assertEQ(myRecord['key2'], 6);
 }

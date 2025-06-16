@@ -19,8 +19,8 @@ desc: The result of === at runtime is true if both operand values are null
 
 
 function main(): void {
-  assertTrue( (null === null) == true )
-  assertTrue( (null == null) == true )
-  assertTrue( (null !== null) == false )
-  assertTrue( (null != null) == false )
+  arktest.assertTrue( (null === null) == true )
+  arktest.assertTrue( (null == null) == true )
+  arktest.assertTrue( (null !== null) == false )
+  arktest.assertTrue( (null != null) == false )
 }

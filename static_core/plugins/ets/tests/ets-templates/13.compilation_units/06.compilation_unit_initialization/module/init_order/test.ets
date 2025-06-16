@@ -27,6 +27,6 @@ import {i} from "./module.ets";
 import {j} from "./module.ets";
 
 function main() {
-  assertEQ(i, 1.0, i + " != 1.0");
-  assertEQ(j, 3.0, j + " != 3.0");
+  arktest.assertEQ(i, 1.0, i + " != 1.0");
+  arktest.assertEQ(j, 3.0, j + " != 3.0");
 }

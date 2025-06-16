@@ -31,7 +31,7 @@ class MethodWithDelay {
 async function startTest() {
     const example = new MethodWithDelay();
     const result = await example.methodWithDelay();
-    assertEQ(result, "Resolved after 100 ms")
+    arktest.assertEQ(result, "Resolved after 100 ms")
 }
 
 function main(): void {

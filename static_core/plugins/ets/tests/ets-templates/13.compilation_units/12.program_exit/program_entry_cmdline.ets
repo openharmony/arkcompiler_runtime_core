@@ -18,8 +18,8 @@ desc: Testing of the top-level export function with command-line arguments.
 ---*/
 
 export function entry(cmdLine: string[]) {
-    assertEQ(cmdLine[0], "madir abc");
-    assertEQ(cmdLine[1], "rm -t abc");
+    arktest.assertEQ(cmdLine[0], "madir abc");
+    arktest.assertEQ(cmdLine[1], "rm -t abc");
 }
 
 function main(): void {

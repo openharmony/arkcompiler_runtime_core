@@ -28,9 +28,9 @@ class Child extends Parent {}
 function main(): void {
     let parent = new Parent();
     let parentValue: char = parent.getValue();
-    assertEQ(parentValue, 100);
+    arktest.assertEQ(parentValue, 100);
 
     let child = new Child();
     let childValue: char = child.getValue();
-    assertEQ(childValue, 100);
+    arktest.assertEQ(childValue, 100);
 }

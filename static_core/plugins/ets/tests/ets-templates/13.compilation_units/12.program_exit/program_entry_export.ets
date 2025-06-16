@@ -23,5 +23,5 @@ export function entry(): number {
 
 function main(): void {
     let a: number = entry();
-    assertEQ(a, 10);
+    arktest.assertEQ(a, 10);
 }

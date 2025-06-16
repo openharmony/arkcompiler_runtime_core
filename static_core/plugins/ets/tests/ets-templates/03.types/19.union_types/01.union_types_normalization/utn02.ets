@@ -23,8 +23,8 @@ function main(): void {
     type C = A | B;
 
     let a: C = 10;
-    assertEQ(typeof a, "number");
+    arktest.assertEQ(typeof a, "number");
 
     let b: C = "hello";
-    assertEQ(typeof b, "string");
+    arktest.assertEQ(typeof b, "string");
 }

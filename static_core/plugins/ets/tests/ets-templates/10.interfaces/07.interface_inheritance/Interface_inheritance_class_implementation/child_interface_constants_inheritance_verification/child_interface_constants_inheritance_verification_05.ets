@@ -27,5 +27,5 @@ class SingleNumericConstantChild implements SingleNumericConstantInterface {
 
 function main(): void {
   const instance = new SingleNumericConstantChild();
-  assertEQ(instance.CONST, 1)
+  arktest.assertEQ(instance.CONST, 1)
 }

@@ -16,7 +16,7 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList removeFirstFound with an unique element", testRemoveFirstFoundUniqueElement);
     suite.addTest("LinkedList removeFirstFound with an inexistent element", testRemoveFirstFoundInexistentElement);
@@ -53,52 +53,52 @@ class TestData {
 function testRemoveFirstFoundUniqueElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertTrue(linkedList.removeFirstFound(TestData.testNumber1), "First found element 1 should be removed");
+    arktest.assertTrue(linkedList.removeFirstFound(TestData.testNumber1), "First found element 1 should be removed");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveFirstFoundInexistentElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertFalse(linkedList.removeFirstFound(TestData.testNumber6), "Element 6 is inexistent");
+    arktest.assertFalse(linkedList.removeFirstFound(TestData.testNumber6), "Element 6 is inexistent");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length, "LinkedList length should should not change");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length, "LinkedList length should should not change");
 }
 
 function testRemoveFirstFoundRepeatedElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertTrue(linkedList.removeFirstFound(TestData.testNumber2), "First found element 2 should be removed");
-    assertEQ(linkedList.get(0), TestData.testNumber1, "First element should be 1");
+    arktest.assertTrue(linkedList.removeFirstFound(TestData.testNumber2), "First found element 2 should be removed");
+    arktest.assertEQ(linkedList.get(0), TestData.testNumber1, "First element should be 1");
     for (let i: number = TestData.testNumber1; i < linkedList.length - TestData.testNumber1; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveLastFoundUniqueElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertTrue(linkedList.removeLastFound(TestData.testNumber1), "Last found element 1 should be removed");
+    arktest.assertTrue(linkedList.removeLastFound(TestData.testNumber1), "Last found element 1 should be removed");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }
 
 function testRemoveLastFoundInexistentElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertFalse(linkedList.removeLastFound(TestData.testNumber6), "Element 6 is inexistent");
+    arktest.assertFalse(linkedList.removeLastFound(TestData.testNumber6), "Element 6 is inexistent");
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
     }
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length, "LinkedList length should should not change");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length, "LinkedList length should should not change");
 }
 
 function testRemoveLastFoundAddGetLastIndexOf() {
@@ -110,18 +110,18 @@ function testRemoveLastFoundAddGetLastIndexOf() {
     linkedList.add(TestData.testNumber2);
     let index3 = linkedList.getLastIndexOf(TestData.testNumber2);
     linkedList.add(TestData.testNumber3);
-    assertTrue(index1 !== index2 && index2 !== index3, "The index is not the same");
+    arktest.assertTrue(index1 !== index2 && index2 !== index3, "The index is not the same");
     linkedList.removeLastFound(TestData.testNumber2);
-    assertEQ(linkedList.getLastIndexOf(TestData.testNumber2), index2, "The index should be index2");
+    arktest.assertEQ(linkedList.getLastIndexOf(TestData.testNumber2), index2, "The index should be index2");
 }
 
 function testRemoveLastFoundRepeatedElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber3);
-    assertTrue(linkedList.removeLastFound(TestData.testNumber2), "Last found element 2 should be removed");
+    arktest.assertTrue(linkedList.removeLastFound(TestData.testNumber2), "Last found element 2 should be removed");
     for (let i: number = 0; i < linkedList.length - TestData.testNumber1; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber3[i], "Element should match");
     }
-    assertEQ(linkedList.get(TestData.testNumber3), TestData.testNumber3, "Last element should be 3");
-    assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
+    arktest.assertEQ(linkedList.get(TestData.testNumber3), TestData.testNumber3, "Last element should be 3");
+    arktest.assertEQ(linkedList.length, TestData.arrayForNumber3.length - TestData.testNumber1, "LinkedList length should - 1");
 }

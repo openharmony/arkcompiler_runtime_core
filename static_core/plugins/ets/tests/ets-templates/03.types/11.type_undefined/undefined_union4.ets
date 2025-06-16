@@ -22,5 +22,5 @@ function foo(...args: (int|undefined)[] ): undefined {
 }
 
 function main(): void {
-  assertTrue(foo(undefined, undefined) === undefined)
+  arktest.assertTrue(foo(undefined, undefined) === undefined)
 }

@@ -30,25 +30,25 @@ import {TPL} from "./modules/function_export_all.ets"
 function main(): void {
     let tpl: TPL = [new Number(), new String()];
 
-    assertEQ( foo(true), 2 );
-    assertEQ( foo(new Boolean()), 2 );
-    assertEQ( foo(c'A'), 4 );
-    assertEQ( foo(new Char()), 4 );
-    assertEQ( foo(1 as short), 6 );
-    assertEQ( foo(new Short()), 6 );
-    assertEQ( foo(1 as int), 8 );
-    assertEQ( foo(new Int()), 8 );
-    assertEQ( foo(1 as long), 10 );
-    assertEQ( foo(new Long()), 10 );
-    assertEQ( foo(1.1 as float), 12 );
-    assertEQ( foo(new Float()), 12 );
-    assertEQ( foo(1.2 as double), 14 );
-    assertEQ( foo(new Number()), 14 );
-    assertEQ( foo("knock-knock"), 16 );
-    assertEQ( foo(new Object()), 17 );
-    assertEQ( foo(new number[2]), 18 );
-    assertEQ( foo(tpl), 19 );
-    assertEQ( foo<Number, String>(new Number(), new String()), 20 );
-    assertEQ( foo( () => { return false; } ), 21 );
-    assertEQ( foo(1, 1.2, "who`s there?" ), 22 );
+    arktest.assertEQ( foo(true), 2 );
+    arktest.assertEQ( foo(new Boolean()), 2 );
+    arktest.assertEQ( foo(c'A'), 4 );
+    arktest.assertEQ( foo(new Char()), 4 );
+    arktest.assertEQ( foo(1 as short), 6 );
+    arktest.assertEQ( foo(new Short()), 6 );
+    arktest.assertEQ( foo(1 as int), 8 );
+    arktest.assertEQ( foo(new Int()), 8 );
+    arktest.assertEQ( foo(1 as long), 10 );
+    arktest.assertEQ( foo(new Long()), 10 );
+    arktest.assertEQ( foo(1.1 as float), 12 );
+    arktest.assertEQ( foo(new Float()), 12 );
+    arktest.assertEQ( foo(1.2 as double), 14 );
+    arktest.assertEQ( foo(new Number()), 14 );
+    arktest.assertEQ( foo("knock-knock"), 16 );
+    arktest.assertEQ( foo(new Object()), 17 );
+    arktest.assertEQ( foo(new number[2]), 18 );
+    arktest.assertEQ( foo(tpl), 19 );
+    arktest.assertEQ( foo<Number, String>(new Number(), new String()), 20 );
+    arktest.assertEQ( foo( () => { return false; } ), 21 );
+    arktest.assertEQ( foo(1, 1.2, "who`s there?" ), 22 );
 }

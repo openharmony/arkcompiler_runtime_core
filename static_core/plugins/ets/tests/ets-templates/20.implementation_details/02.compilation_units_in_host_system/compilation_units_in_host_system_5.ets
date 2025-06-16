@@ -24,6 +24,6 @@ import {sum} from "./pkg3/compilation_units_in_host_system_export2.ets"
 import {sum as sum0} from "./pkg3/pkg4/compilation_units_in_host_system_export4.ets"
 
 function main(): void {
-    assertEQ(sum(1, 2), 3);
-    assertEQ(sum0(1, 2), 3);
+    arktest.assertEQ(sum(1, 2), 3);
+    arktest.assertEQ(sum0(1, 2), 3);
 }

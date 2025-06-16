@@ -24,5 +24,5 @@ const flag = false
 
 function main(): void {
     let map = flag ? new Map<int, Set<Object>>() : undefined;
-    assertEQ( map, undefined)
+    arktest.assertEQ( map, undefined)
 }

@@ -64,23 +64,23 @@ function main() : void {
   let s2 : Student = new Student("Klara", 18, "an excellent student");
   let s3 : Student = new Student("Klara", 18,  new Teacher("Anna"));
 
-  assertEQ( s0.name, "Klara")
-  assertEQ( s0.age, 18)
-  assertEQ( s0.desc, "an excellent student")
-  assertEQ( s0.teacher?.name, "Anna")
+  arktest.assertEQ( s0.name, "Klara")
+  arktest.assertEQ( s0.age, 18)
+  arktest.assertEQ( s0.desc, "an excellent student")
+  arktest.assertEQ( s0.teacher?.name, "Anna")
 
-  assertEQ( s1.name, "Klara")
-  assertEQ( s1.age, 18)
-  assertEQ( s1.desc, undefined)
-  assertTrue( s1.teacher?.name ==undefined)
+  arktest.assertEQ( s1.name, "Klara")
+  arktest.assertEQ( s1.age, 18)
+  arktest.assertEQ( s1.desc, undefined)
+  arktest.assertTrue( s1.teacher?.name ==undefined)
 
-  assertEQ( s2.name, "Klara")
-  assertEQ( s2.age, 18)
-  assertEQ( s2.desc, "an excellent student")
-  assertEQ( s2.teacher?.name, undefined)
+  arktest.assertEQ( s2.name, "Klara")
+  arktest.assertEQ( s2.age, 18)
+  arktest.assertEQ( s2.desc, "an excellent student")
+  arktest.assertEQ( s2.teacher?.name, undefined)
 
-  assertEQ( s3.name, "Klara")
-  assertEQ( s3.age, 18)
-  assertEQ( s3.desc, undefined)
-  assertEQ( s3.teacher?.name, "Anna")
+  arktest.assertEQ( s3.name, "Klara")
+  arktest.assertEQ( s3.age, 18)
+  arktest.assertEQ( s3.desc, undefined)
+  arktest.assertEQ( s3.teacher?.name, "Anna")
 }

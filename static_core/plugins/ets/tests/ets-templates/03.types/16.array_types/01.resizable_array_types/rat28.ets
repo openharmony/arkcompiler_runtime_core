@@ -20,5 +20,5 @@ desc: Test the type of the third element in the joint array((number | string | b
 function main(): void {
   let arr: (number | string | boolean)[] = [1, "test", false];
 
-  assertEQ(typeof arr[2], "boolean");
+  arktest.assertEQ(typeof arr[2], "boolean");
 }

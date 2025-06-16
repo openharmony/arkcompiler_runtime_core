@@ -31,7 +31,7 @@ class MethodWithAllSettled {
 async function startTest() {
     const example = new MethodWithAllSettled();
     const result = await example.methodWithAllSettled();
-    assertEQ(result, '[{"status":"fulfilled","value":"Resolved!"},{"status":"rejected","reason":{}}]');
+    arktest.assertEQ(result, '[{"status":"fulfilled","value":"Resolved!"},{"status":"rejected","reason":{}}]');
 }
 
 function main(): void {

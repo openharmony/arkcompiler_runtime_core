@@ -49,7 +49,7 @@ function dateFormatWithLocaleAndOptions(): void {
         const date = formatResult[0]
         const formattedDate = formatResult[3]
 
-        assertEQ(formattedDate, dateFormat.format(date), `failed result index: ${index}`)
+        arktest.assertEQ(formattedDate, dateFormat.format(date), `failed result index: ${index}`)
     })
 }
 
@@ -60,16 +60,16 @@ function dateFormatWithDefaultLocale(): void {
     const dateStr = defaultLocaleFormat.format(date)
 
     // system locale dependent, so just checking that something returned
-    assertTrue(dateStr != null)
+    arktest.assertTrue(dateStr != null)
 
     const undefLocaleFormat = new Intl.DateTimeFormat(undefined)
-    assertEQ(dateStr, undefLocaleFormat.format(date))
+    arktest.assertEQ(dateStr, undefLocaleFormat.format(date))
 }
 
 function dateFormatWithCustomLocaleAndDefaultOptions(): void {
     const undefOptionsFormat = new Intl.DateTimeFormat("ru-RU", undefined)
 
-    assertEQ(undefOptionsFormat.format(new Date("2021-04-04")), "04.04.2021")
+    arktest.assertEQ(undefOptionsFormat.format(new Date("2021-04-04")), "04.04.2021")
 }
 
 function dateFormatWithInvalidTimeZone(): void {
@@ -87,7 +87,7 @@ function dateFormatWithoutParameters(): void {
 
     const expected = formatter.format(Date.now())
     const actual = formatter.format()
-    assertEQ(expected, actual)
+    arktest.assertEQ(expected, actual)
 }
 
 function testConsoleLogNegativeDate() {
@@ -101,7 +101,7 @@ function testConsoleLogNegativeDate() {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat API date + time format tests")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat API date + time format tests")
 
     suite.addTest("date format with custom locale and options", dateFormatWithLocaleAndOptions)
     suite.addTest("date format with default locale", dateFormatWithDefaultLocale)

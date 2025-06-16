@@ -27,7 +27,7 @@ class MethodReturnDouble {
 function startTest() {
     const example = new MethodReturnDouble();
     const result = await example.methodReturnDouble();
-    assertEQ(result, 10.0);
+    arktest.assertEQ(result, 10.0);
 }
 
 function main(): void {

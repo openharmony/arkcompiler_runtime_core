@@ -23,5 +23,5 @@ function testStringLiteral(str: "typeTest") {
 
 function main(): void {
     const result = testStringLiteral("typeTest");
-    assertEQ(result, "typeTest");
+    arktest.assertEQ(result, "typeTest");
 }

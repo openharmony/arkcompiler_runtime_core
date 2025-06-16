@@ -32,8 +32,8 @@ async function startTest() {
     const example = new MethodWithCondition();
     const result = await example.methodWithCondition(true);
     const result1 = await example.methodWithCondition(false);
-    assertEQ(result, "Flag is true!");
-    assertEQ(result1, "Flag is false!");
+    arktest.assertEQ(result, "Flag is true!");
+    arktest.assertEQ(result1, "Flag is false!");
 }
 
 function main(): void {

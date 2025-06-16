@@ -36,8 +36,8 @@ class Tesla extends Car {
 
 function main(): void {
     const tesla = new Tesla();
-    assertEQ(tesla.wheels, 4);
-    assertEQ(tesla instanceof Tesla, true);
-    assertEQ(tesla instanceof Car, true);
-    assertEQ(tesla instanceof Vehicle, true);
+    arktest.assertEQ(tesla.wheels, 4);
+    arktest.assertEQ(tesla instanceof Tesla, true);
+    arktest.assertEQ(tesla instanceof Car, true);
+    arktest.assertEQ(tesla instanceof Vehicle, true);
 }

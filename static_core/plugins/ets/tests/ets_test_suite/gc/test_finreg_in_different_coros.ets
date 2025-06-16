@@ -23,7 +23,7 @@ function doFullGC(): void {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
-        assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected exception during GC");
     }
 }
 
@@ -69,13 +69,13 @@ function testFinRegOnMainAndDiffCoro() {
     }, true);
     runGCInDiffThreads();
     while(!result_finreg_not_main) {}
-    assertEQ(result_finreg_not_main, 1);
+    arktest.assertEQ(result_finreg_not_main, 1);
     // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
     // if main coro is executed first, the test will return false
     while(!result_finreg_main) {
         Coroutine.Schedule();
     }
-    assertEQ(result_finreg_main, 1);
+    arktest.assertEQ(result_finreg_main, 1);
 }
 
 function main(): void {

@@ -32,13 +32,13 @@ function main() {
     let b1: Byte = n.toByte();
     let b2: Byte = Double.toByte(4294967296.0)
 
-    assertEQ(i1, i2)
-    assertEQ(Int.MAX_VALUE, i2, "Ints compare") //the result is the largest representable value of the target type.
+    arktest.assertEQ(i1, i2)
+    arktest.assertEQ(Int.MAX_VALUE, i2, "Ints compare") //the result is the largest representable value of the target type.
 
-    assertEQ(s1, s2)
-    assertEQ(-1, s2, "Shorts compare") //discards all bits except the N lowest ones, where N is the number of bits used to represent type
+    arktest.assertEQ(s1, s2)
+    arktest.assertEQ(-1, s2, "Shorts compare") //discards all bits except the N lowest ones, where N is the number of bits used to represent type
 
-    assertEQ(b1, b2)
-    assertEQ(-1, b2, "Bytes compare") //discards all bits except the N lowest ones, where N is the number of bits used to represent type
+    arktest.assertEQ(b1, b2)
+    arktest.assertEQ(-1, b2, "Bytes compare") //discards all bits except the N lowest ones, where N is the number of bits used to represent type
 
 }

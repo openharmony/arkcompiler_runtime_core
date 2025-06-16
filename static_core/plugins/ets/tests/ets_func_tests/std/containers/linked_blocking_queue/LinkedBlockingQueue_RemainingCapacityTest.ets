@@ -18,32 +18,32 @@ const testNum: int = 20;
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueueRemainingCapacityTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueRemainingCapacityTest");
 
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest001", () =>
     {
         let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
         for (let i = 0; i < 5; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
-        assertEQ(queueInt.isEmpty(), false);
-        assertEQ(queueInt.size, 5);
-        assertEQ(queueInt.remainingCapacity(), 5);
-        assertEQ(queueInt.add(testNum), true);
-        assertEQ(queueInt.size, 6);
-        assertEQ(queueInt.remainingCapacity(), 4);
+        arktest.assertEQ(queueInt.isEmpty(), false);
+        arktest.assertEQ(queueInt.size, 5);
+        arktest.assertEQ(queueInt.remainingCapacity(), 5);
+        arktest.assertEQ(queueInt.add(testNum), true);
+        arktest.assertEQ(queueInt.size, 6);
+        arktest.assertEQ(queueInt.remainingCapacity(), 4);
     });
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest006", () =>
     {
         let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < 10; i++) {
-            assertEQ(queueInt.remainingCapacity(), stressNum - i);
+            arktest.assertEQ(queueInt.remainingCapacity(), stressNum - i);
             queueInt.add(i);
         }
         for (let i = 10; i < 20; i++) {
             queueInt.push(i);
         }
-        assertEQ(queueInt.remainingCapacity(), stressNum - 20);
+        arktest.assertEQ(queueInt.remainingCapacity(), stressNum - 20);
     });
     LinkedBlockingQueueTestsuite.addTest("RemainingCapacityStressTest009", () =>
     {
@@ -52,9 +52,9 @@ function main(): int {
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
             j--;
-            assertEQ(queueInt.remainingCapacity(), j);
+            arktest.assertEQ(queueInt.remainingCapacity(), j);
         }
-        assertEQ(queueInt.size, stressNum);
+        arktest.assertEQ(queueInt.size, stressNum);
     });
 
     return LinkedBlockingQueueTestsuite.run();

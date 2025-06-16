@@ -22,18 +22,18 @@ let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six",
 let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentSetKeysTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetKeysTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("KeysTest001", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrValues[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let iterKeys: IterableIterator<string> = ConcurrentSetTest.keys();
         flag = 0;
         for (let i: int = 0; i < 10; i++) {
@@ -41,69 +41,69 @@ function main(): int {
                 flag++;
             }
         }
-        assertEQ(flag, 0);
-        assertEQ(iterKeys.next().value, undefined);
+        arktest.assertEQ(flag, 0);
+        arktest.assertEQ(iterKeys.next().value, undefined);
     });
     ConcurrentSetTestsuite.addTest("KeysTest002", () =>
     {
         let ConcurrentSetTestNull: ConcurrentSet<string> = new ConcurrentSet<string>();
         let res = ConcurrentSetTestNull.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         let iterKey: IterableIterator<string> = ConcurrentSetTestNull.keys();
-        assertEQ(iterKey.next().value, undefined);
+        arktest.assertEQ(iterKey.next().value, undefined);
     });
     // Multiple Threads Test
     ConcurrentSetTestsuite.addTest("Keys&AddTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch<void, () => void>(addBack);
         let p2 = launch<void, () => void>(keysAll);
         p1.Await();
         p2.Await();
-        assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("Key&DeteleTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>(keysAll);
         p1.Await();
         p2.Await();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("Key&DeteleTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         deleteAll();
         keysAll();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("Key&ClearTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch<void, () => void>(keysAll);
         let p2 = launch<void, () => void>(clearTest);
         p1.Await();
         p2.Await();
-        assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
     ConcurrentSetTestsuite.addTest("Key&ClearTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         let p = launch<void, () => void>(keysAll);
         clearTest();
         p.Await();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
 
     return ConcurrentSetTestsuite.run();

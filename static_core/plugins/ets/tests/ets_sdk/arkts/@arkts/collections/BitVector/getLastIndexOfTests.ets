@@ -127,7 +127,7 @@ function BitVector_getLastIndexOf_Func_006() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i >= 32 ? 1 : 0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
     arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
     arktest.assertEQ(bitVector.getLastIndexOf(0, 0, 64), 31, "Last index of 0 should be 31");
@@ -140,7 +140,7 @@ function BitVector_getLastIndexOf_Func_007() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i >= 32 ? 1 : 0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
     arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
     arktest.assertEQ(bitVector.getLastIndexOf(0, 10, bitVectorLength + 10), 41, "Last index of 0 should be 41");

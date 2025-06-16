@@ -27,7 +27,7 @@ function main(): void {
   let c: int[] = [1, 2, 4];
   let d: int[] = [1, 2, 3, 4];
   let e: int[]|null = null;
-  assertEQ( ({{eq.left}} {{eq.op}} {{eq.right}}), {{eq.result}} )
+  arktest.assertEQ( ({{eq.left}} {{eq.op}} {{eq.right}}), {{eq.result}} )
 }
 
 {% endfor %}

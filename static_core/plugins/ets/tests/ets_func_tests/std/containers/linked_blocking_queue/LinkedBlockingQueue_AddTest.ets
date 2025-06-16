@@ -24,27 +24,27 @@ let mQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsN
 let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueueAddTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueAddTest");
 
     LinkedBlockingQueueTestsuite.addTest("AddTest001", () =>
     {
         let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
-        assertEQ(queueInt.isEmpty(), false);
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.isEmpty(), false);
+        arktest.assertEQ(queueInt.size, elementsNum);
     });
     LinkedBlockingQueueTestsuite.addTest("AddTest002", () =>
     {
         let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
-        assertEQ(queueInt.isEmpty(), false);
-        assertEQ(queueInt.size, elementsNum);
-        assertEQ(queueInt.add(testNum), false);
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.isEmpty(), false);
+        arktest.assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.add(testNum), false);
+        arktest.assertEQ(queueInt.size, elementsNum);
     });
     LinkedBlockingQueueTestsuite.addTest("ThreadsAddTest001", () =>
     {
@@ -58,7 +58,7 @@ function main(): int {
         for (let i: int = 0; i < 5; i++) {
             jobs[i].Await();
         }
-        assertEQ(mQueueInt.getFirst(), testNum);
+        arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });
     LinkedBlockingQueueTestsuite.addTest("TheadsAddAndPopTest001", () =>
     {
@@ -74,7 +74,7 @@ function main(): int {
         for (let i: int = 0; i < 6; i++) {
             jobs[i].Await();
         }
-        assertTrue(mQueueInt.size <= 3);
+        arktest.assertTrue(mQueueInt.size <= 3);
     });
     LinkedBlockingQueueTestsuite.addTest("TheadsAddAndGetFirstTest003", () =>
     {
@@ -92,7 +92,7 @@ function main(): int {
         for (let i: int = 0; i < 10; i++) {
             jobs[i].Await();
         }
-        assertEQ(mQueueInt.getFirst(), testNum);
+        arktest.assertEQ(mQueueInt.getFirst(), testNum);
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPopAndRemainingCapacityTest001", () =>
     {
@@ -100,21 +100,21 @@ function main(): int {
             mQueueInt.pop();
         }
         let res = queueCapacityData();
-        assertEQ(res, elementsNum);
+        arktest.assertEQ(res, elementsNum);
         for (let i = 0; i < 5; i++) {
             queueAddData();
         }
         res = queueRemainingCapacityData();
-        assertEQ(res, elementsNum - 5);
+        arktest.assertEQ(res, elementsNum - 5);
         queuePushData();
-        assertEQ(mQueueInt.size, 6);
-        assertEQ(mQueueInt.getFirst(), testNum);
+        arktest.assertEQ(mQueueInt.size, 6);
+        arktest.assertEQ(mQueueInt.getFirst(), testNum);
         for (let i = 0; i < 2; i++) {
             queuePopData();
         }
-        assertEQ(mQueueInt.size, 4);
+        arktest.assertEQ(mQueueInt.size, 4);
         queuePollData();
-        assertEQ(mQueueInt.size, 3);
+        arktest.assertEQ(mQueueInt.size, 3);
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndPopTest002", () =>
     {
@@ -126,7 +126,7 @@ function main(): int {
             queueInt.push(i);
         }
         for (let i = 0; i < 20; i++) {
-            assertEQ(queueInt.size, 20 - i);
+            arktest.assertEQ(queueInt.size, 20 - i);
             if (!queueInt.isEmpty()) {
                 queueInt.pop();
             }
@@ -142,8 +142,8 @@ function main(): int {
             queueInt.push(i);
         }
         for (let i = 0; i < 20; i++) {
-            assertEQ(queueInt.size, 20 - i);
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.size, 20 - i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndGetFirstAndPollTest004", () =>
@@ -156,8 +156,8 @@ function main(): int {
             queueInt.push(i);
         }
         for (let i = 0; i < 20; i++) {
-            assertEQ(queueInt.getFirst(), i);
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.getFirst(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndGetFirstAndIsEnTest005", () =>
@@ -170,11 +170,11 @@ function main(): int {
             queueInt.push(i);
         }
         for (let i = 0; i < 20; i++) {
-            assertEQ(queueInt.getFirst(), i);
-            assertEQ(queueInt.isEmpty(), false);
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.getFirst(), i);
+            arktest.assertEQ(queueInt.isEmpty(), false);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.isEmpty(), true);
+        arktest.assertEQ(queueInt.isEmpty(), true);
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPopAndPollTest012", () =>
     {
@@ -182,18 +182,18 @@ function main(): int {
         for (let i = 0; i < 20; i++) {
             queueInt.add(i);
         }
-        assertEQ(queueInt.isEmpty(), false);
-        assertEQ(queueInt.getFirst(), 0);
+        arktest.assertEQ(queueInt.isEmpty(), false);
+        arktest.assertEQ(queueInt.getFirst(), 0);
         for (let i = 0; i < 10; i++) {
             if (!queueInt.isEmpty()) {
                 queueInt.pop();
             }
         }
-        assertEQ(queueInt.getFirst(), 10);
+        arktest.assertEQ(queueInt.getFirst(), 10);
         for (let i = 0; i < 10; i++) {
             queueInt.poll();
         }
-        assertEQ(queueInt.isEmpty(), true);
+        arktest.assertEQ(queueInt.isEmpty(), true);
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPopAndPollAndGetSizeTest014", () =>
     {
@@ -202,16 +202,16 @@ function main(): int {
             queueInt.add(i);
         }
         for (let i = 0; i < 10; i++) {
-            assertEQ(queueInt.size, 20 - i);
+            arktest.assertEQ(queueInt.size, 20 - i);
             if (!queueInt.isEmpty()) {
                 queueInt.pop();
             }
         }
         for (let i = 0; i < 10; i++) {
-            assertEQ(queueInt.size, 10 - i);
+            arktest.assertEQ(queueInt.size, 10 - i);
             queueInt.poll();
         }
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.size, 0);
     });
     LinkedBlockingQueueTestsuite.addTest("AddStressTest001", () =>
     {
@@ -219,7 +219,7 @@ function main(): int {
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }
-        assertEQ(queueInt.size, stressNum);
+        arktest.assertEQ(queueInt.size, stressNum);
     });
 
     return LinkedBlockingQueueTestsuite.run();

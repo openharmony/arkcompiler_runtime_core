@@ -22,8 +22,8 @@ import { Letter } from "./enum_export"
 function main() {
     let letter: Letter = Letter.A
     if (letter == Letter.A) {
-        assertTrue(true);
+        arktest.assertTrue(true);
     } else {
-        assertTrue(false);
+        arktest.assertTrue(false);
     }
 }

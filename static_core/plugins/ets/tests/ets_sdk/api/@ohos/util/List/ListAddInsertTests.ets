@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List add elements of multiple types to the container", testAddMultipleTypes);
     suite.addTest("List add special characters to the container", testAddSpecialCharacters);
@@ -60,20 +60,20 @@ function testAddMultipleTypes() {
     list.add(TestData.testObject1);
     list.add(undefined);
 
-    assertEQ(list.length, TestData.testNumber6, "List length should be 6");
-    assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
-    assertEQ(list.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
-    assertEQ(list.get(TestData.testNumber2), true, "Element at index 2 should match");
-    assertEQ(list.get(TestData.testNumber3), null, "Element at index 3 should match");
-    assertEQ(list.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
-    assertEQ(list.get(TestData.testNumber5), undefined, "Element at index 5 should match");
+    arktest.assertEQ(list.length, TestData.testNumber6, "List length should be 6");
+    arktest.assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
+    arktest.assertEQ(list.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
+    arktest.assertEQ(list.get(TestData.testNumber2), true, "Element at index 2 should match");
+    arktest.assertEQ(list.get(TestData.testNumber3), null, "Element at index 3 should match");
+    arktest.assertEQ(list.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
+    arktest.assertEQ(list.get(TestData.testNumber5), undefined, "Element at index 5 should match");
 }
 
 function testAddSpecialCharacters() {
     let list = new List<string>();
     list.add(TestData.testString2);
-    assertEQ(list.get(0), TestData.testString2, "Add successful");
-    assertEQ(list.length, TestData.testNumber1, "List length should be 1");
+    arktest.assertEQ(list.get(0), TestData.testString2, "Add successful");
+    arktest.assertEQ(list.length, TestData.testNumber1, "List length should be 1");
 }
 
 function testInsertWithinRange() {
@@ -87,15 +87,15 @@ function testInsertWithinRange() {
     list.insert(TestData.testObject1, TestData.testNumber5);
     list.insert(undefined, TestData.testNumber6);
 
-    assertEQ(list.length, TestData.testNumber8, "List length should be 8");
-    assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
-    assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 6 should match");
-    assertEQ(list.get(TestData.testNumber2), TestData.testString1, "Element at index 1 should match");
-    assertEQ(list.get(TestData.testNumber3), true, "Element at index 2 should match");
-    assertEQ(list.get(TestData.testNumber4), null, "Element at index 3 should match");
-    assertEQ(list.get(TestData.testNumber5), TestData.testObject1, "Element at index 4 should match");
-    assertEQ(list.get(TestData.testNumber6), undefined, "Element at index 5 should match");
-    assertEQ(list.get(TestData.testNumber7), TestData.testNumber2, "Element at index 7 should match");
+    arktest.assertEQ(list.length, TestData.testNumber8, "List length should be 8");
+    arktest.assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
+    arktest.assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 6 should match");
+    arktest.assertEQ(list.get(TestData.testNumber2), TestData.testString1, "Element at index 1 should match");
+    arktest.assertEQ(list.get(TestData.testNumber3), true, "Element at index 2 should match");
+    arktest.assertEQ(list.get(TestData.testNumber4), null, "Element at index 3 should match");
+    arktest.assertEQ(list.get(TestData.testNumber5), TestData.testObject1, "Element at index 4 should match");
+    arktest.assertEQ(list.get(TestData.testNumber6), undefined, "Element at index 5 should match");
+    arktest.assertEQ(list.get(TestData.testNumber7), TestData.testNumber2, "Element at index 7 should match");
 }
 
 function testInsertAtBoundary() {
@@ -105,20 +105,20 @@ function testInsertAtBoundary() {
     list.insert(0, 0);
 
     for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(list.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
+        arktest.assertEQ(list.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    assertEQ(list.get(0), 0, "Element should be 0");
-    assertEQ(list.get(list.length - TestData.testNumber1), 0, "Element should be 0");
-    assertEQ(list.length, TestData.arrayForNumber1.length + TestData.testNumber2, "List length should + 2");
+    arktest.assertEQ(list.get(0), 0, "Element should be 0");
+    arktest.assertEQ(list.get(list.length - TestData.testNumber1), 0, "Element should be 0");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length + TestData.testNumber2, "List length should + 2");
 }
 
 function testInsertGetIndexOfRemoveByIndexHas() {
     let list = new List<number | string>();
     list.insert(TestData.testString2, 0);
     let index = list.getIndexOf(TestData.testString2);
-    assertEQ(index, 0, "The index of the first element should be 0");
+    arktest.assertEQ(index, 0, "The index of the first element should be 0");
     list.removeByIndex(index);
-    assertFalse(list.has(TestData.testString2), "The element should be removed");
+    arktest.assertFalse(list.has(TestData.testString2), "The element should be removed");
 }
 
 function testInsertIndexGreaterThanLength() {
@@ -127,12 +127,12 @@ function testInsertIndexGreaterThanLength() {
     try {
         list.insert(TestData.testNumber1, TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function testInsertIndexLessThanZero() {
@@ -141,12 +141,12 @@ function testInsertIndexLessThanZero() {
     try {
         list.insert(-TestData.testNumber1, TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function initializeList(list: List<number>, sourceArray: Array<number>) {

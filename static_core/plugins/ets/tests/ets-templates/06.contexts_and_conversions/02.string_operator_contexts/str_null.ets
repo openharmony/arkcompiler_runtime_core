@@ -27,6 +27,6 @@ params: 'null'
 function main() {
   let src: {{t.type}} = {{t.val}};
   let dst: string = "" + src;
-  assertEQ( dst, "null" )
+  arktest.assertEQ( dst, "null" )
 }
 {% endfor %}

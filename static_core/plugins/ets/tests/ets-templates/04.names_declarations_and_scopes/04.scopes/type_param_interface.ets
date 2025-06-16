@@ -52,11 +52,11 @@ class C<T extends Number> implements I<T> {
 
 function main(): void {
     let c: C<Number> = new C<Number>( 1 );
-    assertEQ( c.f, 1)
-    assertEQ( c.foo(3.0), 3.0 )
-    assertEQ( c.bar(4.0), 4.0 )
-    assertEQ( c.jay(), 3.0 )
+    arktest.assertEQ( c.f, 1)
+    arktest.assertEQ( c.foo(3.0), 3.0 )
+    arktest.assertEQ( c.bar(4.0), 4.0 )
+    arktest.assertEQ( c.jay(), 3.0 )
 
     // module level scope is not affected
-    assertEQ( T, "str" )
+    arktest.assertEQ( T, "str" )
 }

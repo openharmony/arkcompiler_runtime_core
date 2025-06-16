@@ -31,9 +31,9 @@ function main(): void {
     ct.field = ["12", "24"];
 
     let getme = ct.get();
-    assertTrue( getme instanceof Object)
+    arktest.assertTrue( getme instanceof Object)
 
-    assertEQ( getme[0], "12")
-    assertEQ( getme[1], "24")
+    arktest.assertEQ( getme[0], "12")
+    arktest.assertEQ( getme[1], "24")
 
 }

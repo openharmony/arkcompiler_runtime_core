@@ -15,12 +15,12 @@
 
 function main() {
     let value = await Promise.resolve(42);
-    assertEQ(value, 42, "Awaited value of resolved promise is different\
+    arktest.assertEQ(value, 42, "Awaited value of resolved promise is different\
                           from the expected value. Actual value: " + value);
     try {
         await Promise.reject(new Error("Panda"));
     } catch (err: Error) {
-        assertTrue(err.toString().contains("Panda", 0), "Awaited value of rejected promise is different\
+        arktest.assertTrue(err.toString().contains("Panda", 0), "Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: " + err);
     }
 }

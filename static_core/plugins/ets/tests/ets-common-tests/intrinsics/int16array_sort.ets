@@ -21,8 +21,8 @@ const SORTED_UNALIGNED = [-32768,-1,0,1,2,3,4,7,10,45,88,99,127,32767];
 const SINGLE = [88];
 
 function fillBuffer(buf: ArrayBuffer): void {
-    assertEQ(Short.BYTE_SIZE, Int16Array.BYTES_PER_ELEMENT);
-    assertEQ(Short.BYTE_SIZE, 2);
+    arktest.assertEQ(Short.BYTE_SIZE, Int16Array.BYTES_PER_ELEMENT);
+    arktest.assertEQ(Short.BYTE_SIZE, 2);
     for (let i = 0; i < AB_SIZE; ++i) {
         if ((i % Short.BYTE_SIZE) == 0) {
             let v: short = UNSORTED[i / 2] as short;
@@ -39,13 +39,13 @@ function fillBuffer(buf: ArrayBuffer): void {
 
 function checkSorted(a: Int16Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
-        assertEQ(a[i], SORTED[i]);
+        arktest.assertEQ(a[i], SORTED[i]);
     }
 }
 
 function checkSortedUnaligned(a: Int16Array): void {
     for (let i = 0; i < ARRAY_SIZE - 1; ++i) {
-        assertEQ(a[i], SORTED_UNALIGNED[i]);
+        arktest.assertEQ(a[i], SORTED_UNALIGNED[i]);
     }
 }
 
@@ -57,7 +57,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: Int16Array = new Int16Array(SINGLE);
     single.sort();
-    assertEQ(single[0], SINGLE[0]);
+    arktest.assertEQ(single[0], SINGLE[0]);
 }
 
 function sortNormal(): void {
@@ -77,8 +77,8 @@ function sortUnaligned(): void {
 }
 
 function main(): int {
-    assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite('Int16Array.sort() tests')
+    arktest.assertEQ(UNSORTED.length, SORTED.length);
+    const suite = new arktest.ArkTestsuite('Int16Array.sort() tests')
     suite.addTest('sort an empty Int16Array', sortEmpty)
     suite.addTest('sort a single-element Int16Array', sortSingle)
     suite.addTest('sort a normal Int16Array', sortNormal)

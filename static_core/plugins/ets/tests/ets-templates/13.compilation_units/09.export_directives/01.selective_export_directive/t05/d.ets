@@ -25,5 +25,5 @@ import {describe} from "./c"
 
 function main() {
     let a = new describe()
-    assertTrue(a instanceof describe)
+    arktest.assertTrue(a instanceof describe)
 }

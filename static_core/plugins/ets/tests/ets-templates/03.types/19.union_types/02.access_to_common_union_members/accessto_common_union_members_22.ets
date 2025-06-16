@@ -33,6 +33,6 @@ class B {
 
 function main(): void {
   let account: A | B = new A();
-  assertTrue(account.tmp === 1);
+  arktest.assertTrue(account.tmp === 1);
   account.foo();
 }

@@ -32,10 +32,10 @@ type UTA = UT[]
 function main() {
 {%- for t in c['values'] %}
     let d{{loop.index}}: ({{c.to_type}})[] = [s{{loop.index}}, s{{loop.index}}]
-    assertTrue( d{{loop.index}}[1] {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( d{{loop.index}}[1] {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 
     let e{{loop.index}}: UTA = [s{{loop.index}}, s{{loop.index}}, s{{loop.index}}]
-    assertTrue( e{{loop.index}}[2] {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( e{{loop.index}}[2] {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 
 {% endfor %}
 }

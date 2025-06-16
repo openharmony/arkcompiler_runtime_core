@@ -19,15 +19,15 @@ desc: The bitwise operators with type boolean.
 
 function main(): void {
 
-  assertTrue(true & true)
-  assertTrue(true | true)
-  assertFalse(true ^ true)
+  arktest.assertTrue(true & true)
+  arktest.assertTrue(true | true)
+  arktest.assertFalse(true ^ true)
 
-  assertFalse(true & false)
-  assertTrue(true | false)
-  assertTrue(true ^ false)
+  arktest.assertFalse(true & false)
+  arktest.assertTrue(true | false)
+  arktest.assertTrue(true ^ false)
 
-  assertFalse(false & false)
-  assertFalse(false | false)
-  assertFalse(false ^ false)
+  arktest.assertFalse(false & false)
+  arktest.assertFalse(false | false)
+  arktest.assertFalse(false ^ false)
 }

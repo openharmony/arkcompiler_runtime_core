@@ -25,5 +25,5 @@ function main(): void {
     const bool1 = true;
     const bool2 = false;
     const result = performAndOperation(bool1, bool2);
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }

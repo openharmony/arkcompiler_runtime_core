@@ -22,5 +22,5 @@ class A {}
 
 function main(): void {
   let a = new A();
-  assertTrue( a instanceof String )
+  arktest.assertTrue( a instanceof String )
 }

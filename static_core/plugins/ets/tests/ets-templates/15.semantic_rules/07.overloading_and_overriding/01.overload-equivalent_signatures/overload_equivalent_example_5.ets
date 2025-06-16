@@ -41,5 +41,5 @@ class A<T> {
 
 function main(): void {
   new A<Number>().foo(1);
-  assertTrue(res == 2);
+  arktest.assertTrue(res == 2);
 }

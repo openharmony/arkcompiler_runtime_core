@@ -22,7 +22,7 @@ function main() {
 
     let j = 0;
     for (let i = 0; i < s.length; i++) {
-        assertTrue( s.charAt(i) == j )
+        arktest.assertTrue( s.charAt(i) == j )
         j += 1001
     }
 }

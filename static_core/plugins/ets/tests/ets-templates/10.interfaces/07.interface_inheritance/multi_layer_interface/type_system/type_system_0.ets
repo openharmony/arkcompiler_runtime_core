@@ -45,7 +45,7 @@ class D implements C {
 
 function main(): void {
     const d: C = new D();
-    assertEQ(d.methodA(), "A");
-    assertEQ(d.methodB(), "B");
-    assertEQ(d.methodC(), "C");
+    arktest.assertEQ(d.methodA(), "A");
+    arktest.assertEQ(d.methodB(), "B");
+    arktest.assertEQ(d.methodC(), "C");
 }

@@ -21,5 +21,5 @@ function main(): void {
     let tmp: string = "hello";
     let tmp1: "world" = "world";
     let result: string = tmp + tmp1;
-    assertTrue(typeof result === 'string');
+    arktest.assertTrue(typeof result === 'string');
 }

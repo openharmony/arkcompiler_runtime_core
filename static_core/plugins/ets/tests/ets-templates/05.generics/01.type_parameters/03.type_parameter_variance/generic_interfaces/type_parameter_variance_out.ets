@@ -31,7 +31,7 @@ class A<out T> implements I<T> {
 function main(): void {
   let arg: {{c.type}} = {{c.value}}
   let a: I<{{c.type}}> = new A<{{c.type}}>()
-  assertEQ(a.f(), arg)
+  arktest.assertEQ(a.f(), arg)
 }
 
 {% endfor %}

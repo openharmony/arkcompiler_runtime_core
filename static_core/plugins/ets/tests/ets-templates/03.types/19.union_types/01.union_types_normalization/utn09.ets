@@ -19,5 +19,5 @@ desc: Test creating a joint type array((string | boolean)[]).
 
 function main(): void {
     let arr: (string | boolean)[] = ["test", true];
-    assertEQ(arr.length, 2);
+    arktest.assertEQ(arr.length, 2);
 }

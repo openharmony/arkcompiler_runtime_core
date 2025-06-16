@@ -35,12 +35,12 @@ function main(): void {
 
   const obj3: EmptyInterface = {};
 
-  assertEQ(obj1.name, "Bob");
-  assertEQ(obj1.age, undefined);
+  arktest.assertEQ(obj1.name, "Bob");
+  arktest.assertEQ(obj1.age, undefined);
 
-  assertEQ(obj2.name, undefined);
-  assertEQ(obj2.age, 30);
+  arktest.assertEQ(obj2.name, undefined);
+  arktest.assertEQ(obj2.age, 30);
 
-  assertEQ(obj3.name, undefined);
-  assertEQ(obj3.age, undefined);
+  arktest.assertEQ(obj3.name, undefined);
+  arktest.assertEQ(obj3.age, undefined);
 }

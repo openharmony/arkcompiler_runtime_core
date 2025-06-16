@@ -23,5 +23,5 @@ function foo<T, U = string>(a: T, b: U) {
 }
 
 function main() {
-    assertEQ(foo(1,"s"), 1)
+    arktest.assertEQ(foo(1,"s"), 1)
 }

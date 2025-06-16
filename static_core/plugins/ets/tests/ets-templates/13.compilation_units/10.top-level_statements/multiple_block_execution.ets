@@ -20,11 +20,11 @@ tags:
 ---*/
 
 function pass(): void {
-  assertTrue( true )
+  arktest.assertTrue( true )
 }
 
 function fail(): void {
-  assertTrue( false )
+  arktest.assertTrue( false )
 }
 
 {

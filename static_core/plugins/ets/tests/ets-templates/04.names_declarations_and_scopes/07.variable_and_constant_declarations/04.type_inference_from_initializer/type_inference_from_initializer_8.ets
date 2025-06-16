@@ -19,5 +19,5 @@ desc: Variable declaration with null and undefined.
 
 function main(): void {
     let arr = [null, undefined];
-    assertTrue(arr.length == 2);
+    arktest.assertTrue(arr.length == 2);
 }

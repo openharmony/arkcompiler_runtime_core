@@ -21,7 +21,7 @@ desc: check bitwise OR of two long integers
 function main(): void {
     const a: long = {{v.left}}
     const b: long = {{v.right}}
-    assertEQ( (a | b), {{v.result}} )
+    arktest.assertEQ( (a | b), {{v.result}} )
 }
 
 {% endfor %}

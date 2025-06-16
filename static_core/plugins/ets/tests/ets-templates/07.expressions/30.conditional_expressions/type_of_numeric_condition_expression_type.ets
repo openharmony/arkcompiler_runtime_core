@@ -21,7 +21,7 @@ desc: Type of a numeric conditional expression
 
 function main(): void {
   let x = {{operand.first}} ? {{operand.second}} : {{operand.third}};
-  assertTrue( {{operand.check}} )
+  arktest.assertTrue( {{operand.check}} )
 }
 
 {% endfor %}

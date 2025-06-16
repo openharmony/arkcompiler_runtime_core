@@ -41,6 +41,6 @@ function main(): void {
   let ostrich = new Ostrich();
   const speakOutput = ostrich.speak();
   const moveOutput = ostrich.move();
-  assertEQ(speakOutput, "Ostrich booms.");
-  assertEQ(moveOutput, "Bird is flying.");
+  arktest.assertEQ(speakOutput, "Ostrich booms.");
+  arktest.assertEQ(moveOutput, "Bird is flying.");
 }

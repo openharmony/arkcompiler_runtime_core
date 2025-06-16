@@ -30,16 +30,16 @@ async function returnRejectingPromise(): Promise<void> {
 function main() {
     try {
         await returnRejectedPromise();
-        assertTrue(false, 'Awaited a reject Promise should throw the reason.');
+        arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
     } catch (err: Error) {
-        assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
+        arktest.assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: ' + err);
     }
     try {
         await returnRejectingPromise();
-        assertTrue(false, 'Awaited a reject Promise should throw the reason.');
+        arktest.assertTrue(false, 'Awaited a reject Promise should throw the reason.');
     } catch (err: Error) {
-        assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
+        arktest.assertTrue(err.toString().contains('Reject', 0), 'Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: ' + err);
     }
 }

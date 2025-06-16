@@ -33,5 +33,5 @@ class A {
 function main(): void {
   let a: A = new A();
   a.method2();
-  assertTrue( a.res == 1 );
+  arktest.assertTrue( a.res == 1 );
 }

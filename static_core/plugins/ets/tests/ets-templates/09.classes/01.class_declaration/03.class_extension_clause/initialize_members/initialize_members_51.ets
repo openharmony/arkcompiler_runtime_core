@@ -32,5 +32,5 @@ class Child extends Parent {
 function main(): void {
   let child = new Child();
   let x: number = child.getProtectedValueFromChild();
-  assertEQ(x, 100);
+  arktest.assertEQ(x, 100);
 }

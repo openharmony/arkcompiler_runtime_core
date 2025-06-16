@@ -20,5 +20,5 @@ desc: Convert to number-negativeInfinity type.
 function main(): void {
   let negativeInfinity: number = -Infinity;
   const obj1: object = negativeInfinity;
-  assertTrue(obj1 == negativeInfinity);
+  arktest.assertTrue(obj1 == negativeInfinity);
 }

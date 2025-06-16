@@ -22,9 +22,9 @@ function main(): void {
   let i: int|undefined = undefined;
   switch (i) {
     case undefined:
-      assertTrue(true)
+      arktest.assertTrue(true)
       break;
     default:
-      assertTrue(false)
+      arktest.assertTrue(false)
   }
 }

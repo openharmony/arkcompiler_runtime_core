@@ -20,9 +20,9 @@ desc: Different Namespaces in common file
 package pack1
 
 function main() {
-    assertEQ(A.goo(), "A.goo")
-    assertEQ(A.C.moo(), "A.C.moo")
-    assertEQ(A.foo(), "A.foo")
-    assertEQ(A.C.too(), "A.C.too")
-    assertEQ(B.D.too(), "B.D.too")
+    arktest.assertEQ(A.goo(), "A.goo")
+    arktest.assertEQ(A.C.moo(), "A.C.moo")
+    arktest.assertEQ(A.foo(), "A.foo")
+    arktest.assertEQ(A.C.too(), "A.C.too")
+    arktest.assertEQ(B.D.too(), "B.D.too")
 }

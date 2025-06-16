@@ -21,8 +21,8 @@ desc: check postfix increment for byte operand
 function main(): void {
   let value: byte = {{v.value}}
   let result: byte = value++
-  assertEQ( value, {{v.result}} )
-  assertEQ( result, {{v.value}} )
+  arktest.assertEQ( value, {{v.result}} )
+  arktest.assertEQ( result, {{v.value}} )
 }
 
 {% endfor %}

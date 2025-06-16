@@ -23,6 +23,6 @@ tags: []
 function main() {
     let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
     SyntaxFormTwo.length = 2;
-    assertEQ(2, SyntaxFormTwo.length);
+    arktest.assertEQ(2, SyntaxFormTwo.length);
 
 }

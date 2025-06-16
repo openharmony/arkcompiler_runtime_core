@@ -39,8 +39,8 @@ function main(): void {
   const instance = new ImplementClass();
 
   const parentResult = instance.parentMethod();
-  assertEQ(parentResult, 'This is the parent method');
+  arktest.assertEQ(parentResult, 'This is the parent method');
 
   const childResult = instance.childMethod();
-  assertEQ(childResult, 123);
+  arktest.assertEQ(childResult, 123);
 }

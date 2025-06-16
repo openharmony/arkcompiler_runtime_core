@@ -31,6 +31,6 @@ function incPost(p: char): char {
 function main() {
     const v1 = {{v.v1}}
 
-    assertEQ(({{v.exp}}), {{v.res}})
+    arktest.assertEQ(({{v.exp}}), {{v.res}})
 }
 {%- endfor %}

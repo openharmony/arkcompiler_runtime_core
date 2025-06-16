@@ -17,7 +17,7 @@ import {util} from "@ohos.util";
 import {BusinessError} from "@ohos.base";
 
 function main() {
-    const suite = new ArkTestsuite("CommonUtil RationalNumber Compare GetCommonFactor API tests");
+    const suite = new arktest.ArkTestsuite("CommonUtil RationalNumber Compare GetCommonFactor API tests");
 
     suite.addTest("Compares two RationalNumber objects (2/1 and 3/4) and verifies the result.", testCompare001)
     suite.addTest("Compares two RationalNumber objects (2/1 and 0/0) and verifies the result.", testCompare002)
@@ -52,7 +52,7 @@ function testCompare001() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(3, 4);
     let res = pro.compare(proc);
-    assertEQ(res, 1, "The comparison result should be 1");
+    arktest.assertEQ(res, 1, "The comparison result should be 1");
 }
 
 /**
@@ -67,7 +67,7 @@ function testCompare002() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(0, 0);
     let res = pro.compare(proc);
-    assertEQ(res, -1, "The comparison result should be -1");
+    arktest.assertEQ(res, -1, "The comparison result should be -1");
 }
 
 /**
@@ -82,7 +82,7 @@ function testCompare003() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(8, 3);
     let res = pro.compare(proc);
-    assertEQ(res, -1, "The comparison result should be -1");
+    arktest.assertEQ(res, -1, "The comparison result should be -1");
 }
 
 /**
@@ -97,7 +97,7 @@ function testCompare004() {
     let pro = util.RationalNumber.parseRationalNumber(2, 1);
     let proc = util.RationalNumber.parseRationalNumber(2, 1);
     let res = pro.compare(proc);
-    assertEQ(res, 0, "The comparison result should be 0");
+    arktest.assertEQ(res, 0, "The comparison result should be 0");
 }
 
 /**
@@ -112,7 +112,7 @@ function testCompare005() {
     let pro = util.RationalNumber.parseRationalNumber(0, 0);
     let proc = util.RationalNumber.parseRationalNumber(2, 1);
     let res = pro.compare(proc);
-    assertEQ(res, 1, "The comparison result should be 1");
+    arktest.assertEQ(res, 1, "The comparison result should be 1");
 }
 
 /**
@@ -125,7 +125,7 @@ function testCompare005() {
  */
 function testGetCommonFactor001() {
     let res = util.RationalNumber.getCommonFactor(4, 8);
-    assertEQ(res, 4, "The greatest common divisor of 4 and 8 should be 4");
+    arktest.assertEQ(res, 4, "The greatest common divisor of 4 and 8 should be 4");
 }
 
 /**
@@ -138,7 +138,7 @@ function testGetCommonFactor001() {
  */
 function testGetCommonFactor002() {
     let res = util.RationalNumber.getCommonFactor(10, 15);
-    assertEQ(res, 5, "The greatest common divisor of 10 and 15 should be 5");
+    arktest.assertEQ(res, 5, "The greatest common divisor of 10 and 15 should be 5");
 }
 
 /**
@@ -151,7 +151,7 @@ function testGetCommonFactor002() {
  */
 function testGetCommonFactor003() {
     let res = util.RationalNumber.getCommonFactor(8, 4);
-    assertEQ(res, 4, "The greatest common divisor of 8 and 4 should be 4");
+    arktest.assertEQ(res, 4, "The greatest common divisor of 8 and 4 should be 4");
 }
 
 /**
@@ -164,7 +164,7 @@ function testGetCommonFactor003() {
  */
 function testGetCommonFactor004() {
     let res = util.RationalNumber.getCommonFactor(8, 16);
-    assertEQ(res, 8, "The greatest common divisor of 8 and 16 should be 8");
+    arktest.assertEQ(res, 8, "The greatest common divisor of 8 and 16 should be 8");
 }
 
 /**
@@ -177,7 +177,7 @@ function testGetCommonFactor004() {
  */
 function testGetCommonFactor005() {
     let res = util.RationalNumber.getCommonFactor(2, 16);
-    assertEQ(res, 2, "The greatest common divisor of 2 and 16 should be 2");
+    arktest.assertEQ(res, 2, "The greatest common divisor of 2 and 16 should be 2");
 }
 
 /**
@@ -190,7 +190,7 @@ function testGetCommonFactor005() {
  */
 function testGetCommonFactor006() {
     let result = util.RationalNumber.getCommonFactor(4, 6);
-    assertEQ(result, 2, "The greatest common divisor of 4 and 6 should be 2");
+    arktest.assertEQ(result, 2, "The greatest common divisor of 4 and 6 should be 2");
 }
 
 /**
@@ -203,7 +203,7 @@ function testGetCommonFactor006() {
  */
 function testGetCommonFactor007() {
     let result = util.RationalNumber.getCommonFactor(1, 6);
-    assertEQ(result, 1, "The greatest common divisor of 1 and 6 should be 1");
+    arktest.assertEQ(result, 1, "The greatest common divisor of 1 and 6 should be 1");
 }
 
 /**
@@ -219,7 +219,7 @@ function testGetCommonFactor008() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The Parameter cannot be zero") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 6) }, exceptionCheck);
+    arktest.expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 6) }, exceptionCheck);
 }
 
 /**
@@ -235,5 +235,5 @@ function testGetCommonFactor009() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The Parameter cannot be zero") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 0) }, exceptionCheck);
+    arktest.expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 0) }, exceptionCheck);
 }

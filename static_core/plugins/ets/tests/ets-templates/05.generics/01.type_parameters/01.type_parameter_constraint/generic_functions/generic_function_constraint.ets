@@ -27,6 +27,6 @@ params: >
 
 function foo<X extends {{c.type}}>(p: X): X { return p };
 function main(): void {
-  assertEQ( foo<{{c.use}}>({{c.p}}), {{c.p}} )
+  arktest.assertEQ( foo<{{c.use}}>({{c.p}}), {{c.p}} )
 }
 {% endfor %}

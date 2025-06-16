@@ -39,6 +39,6 @@ function main(): void {
   const fm = new FileManager();
   const result = fm.read(true)
   const result1 = fm.write(false);
-  assertEQ(result, true);
-  assertEQ(result1, false);
+  arktest.assertEQ(result, true);
+  arktest.assertEQ(result1, false);
 }

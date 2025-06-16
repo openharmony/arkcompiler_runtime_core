@@ -24,5 +24,5 @@ function main(): void {
     let a: Margin = 5
     let b: Margin = 6
     let c: Margin = (a as number) * b
-    assertEQ( c, 30)
+    arktest.assertEQ( c, 30)
 }

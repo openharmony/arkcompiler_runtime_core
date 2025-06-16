@@ -24,7 +24,7 @@ async function nestedPromise(): Promise<Promise<string>> {
 
 async function startTest() {
     const result = await nestedPromise();
-    assertEQ(result, "Nested promise result");
+    arktest.assertEQ(result, "Nested promise result");
 }
 
 function main(): void {

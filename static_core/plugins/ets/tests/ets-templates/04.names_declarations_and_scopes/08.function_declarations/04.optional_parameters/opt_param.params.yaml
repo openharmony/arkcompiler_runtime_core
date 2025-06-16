@@ -20,20 +20,20 @@ cases:
               return x + y;
           }
       call: |-
-          assertEQ( pair(1.0, 2.0), 3.0 )
-          assertEQ( pair(1.0), 8.0 )
+          arktest.assertEQ( pair(1.0, 2.0), 3.0 )
+          arktest.assertEQ( pair(1.0), 8.0 )
 
     - decl: |-
           // check primitive defaults
           function foo(a: byte = 1, b: short = 2, c: int = 3, d: long = 4, e: float = 5.0, f: double = 6.0, g: boolean = true, h: char = c'W') {
-              assertEQ( a, 1 )
-              assertEQ( b, 2 )
-              assertEQ( c, 3 )
-              assertEQ( d, 4 )
-              assertEQ( e, 5.0 )
-              assertEQ( f, 6.0 )
-              assertTrue( g )
-              assertEQ( h, c'W' )
+              arktest.assertEQ( a, 1 )
+              arktest.assertEQ( b, 2 )
+              arktest.assertEQ( c, 3 )
+              arktest.assertEQ( d, 4 )
+              arktest.assertEQ( e, 5.0 )
+              arktest.assertEQ( f, 6.0 )
+              arktest.assertTrue( g )
+              arktest.assertEQ( h, c'W' )
           }
       call: foo()
 
@@ -43,15 +43,15 @@ cases:
               return a + b + c
           }
       call: |-
-          assertEQ( foo(11, 12, 13), 36 )
-          assertEQ( foo(11), 16 )
-          assertEQ( foo(), 6 )
+          arktest.assertEQ( foo(11, 12, 13), 36 )
+          arktest.assertEQ( foo(11), 16 )
+          arktest.assertEQ( foo(), 6 )
 
     - decl: |-
           // expression as default value
           let z = 9, y = 8, x = 7
           function foo(a: int = z + y * x) {
-              assertEQ( a, 65 )
+              arktest.assertEQ( a, 65 )
           }
       call: foo()
 
@@ -59,9 +59,9 @@ cases:
           // expressions as default values
           let z: Object[] = [new Boolean(true)], y = "string", x: Object|null = null
           function foo(a: Object = z, b: string[] = [y], c: Object|null = x) {
-              assertTrue( a === z )
-              assertTrue( b.length == 1 && b[0] == "string" )
-              assertTrue( c === null )
+              arktest.assertTrue( a === z )
+              arktest.assertTrue( b.length == 1 && b[0] == "string" )
+              arktest.assertTrue( c === null )
           }
       call: foo()
 
@@ -85,8 +85,8 @@ cases:
               return a;
           }
       call: |-
-          assertEQ( foo(3.0), 3.0 )
-          assertEQ( counter, 0 )
+          arktest.assertEQ( foo(3.0), 3.0 )
+          arktest.assertEQ( counter, 0 )
 
     - decl: |-
           // check that expression is computed if argument is not provided
@@ -108,8 +108,8 @@ cases:
               return a;
           }
       call: |-
-          assertEQ( foo(), 75.0 )
-          assertTrue( counter > 0 )
+          arktest.assertEQ( foo(), 75.0 )
+          arktest.assertTrue( counter > 0 )
 
     - decl: |-
           // IIFE as default value
@@ -117,8 +117,8 @@ cases:
               return a;
           }
       call: |-
-          assertEQ( foo(33.0), 33.0 )
-          assertEQ( foo(), 84.0 )
+          arktest.assertEQ( foo(33.0), 33.0 )
+          arktest.assertEQ( foo(), 84.0 )
 
     # optional with null
     - decl: |-
@@ -127,10 +127,10 @@ cases:
               return a + b!
           }
       call: |-
-          assertEQ( foo(1, 2), 3 )
+          arktest.assertEQ( foo(1, 2), 3 )
           try {
               foo(1)
-              assertTrue( false )
+              arktest.assertTrue( false )
           } catch (e: NullPointerError) {
               // expected
           }
@@ -143,7 +143,7 @@ cases:
     - decl: |-
           // check type of argument with default
           function foo(a?: Object) {
-              assertTrue( a instanceof Object|undefined )
+              arktest.assertTrue( a instanceof Object|undefined )
           }
       call: |-
           foo(new Object())
@@ -152,7 +152,7 @@ cases:
     - decl: |-
           // check type of argument with default
           function foo(a: Object|null = null) {
-              assertTrue( a instanceof Object|null )
+              arktest.assertTrue( a instanceof Object|null )
           }
       call: |-
           foo(new Object())
@@ -163,10 +163,10 @@ cases:
           // check that argument with undefined-default can be assigned a not undefined value
           type f = (p: number) => number[]
           function foo(a?: f) {
-              assertTrue( a === undefined )
+              arktest.assertTrue( a === undefined )
               a = (t: number): number[] => { return [t]; }
               let x = a!(42.0)
-              assertTrue( x instanceof number[] && x[0] == 42.0 )
+              arktest.assertTrue( x instanceof number[] && x[0] == 42.0 )
           }
       call: foo()
 
@@ -175,9 +175,9 @@ cases:
           type f = (p: number) => number[]
           function foo(a?: f) {
               let x = a!(42.0)
-              assertTrue( x instanceof number[] && x[0] == 42.0 )
+              arktest.assertTrue( x instanceof number[] && x[0] == 42.0 )
               a = undefined
-              assertTrue( a === undefined )
+              arktest.assertTrue( a === undefined )
           }
       call: |-
           foo((t: number): number[] => { return [t]; })
@@ -185,9 +185,9 @@ cases:
     - decl: |-
           // check that argument with undefined-default optional can be assigned an undefined value
           function foo(s?: string) {
-              assertEQ( s, 'abc' )
+              arktest.assertEQ( s, 'abc' )
               s = undefined
-              assertTrue( s === undefined )
+              arktest.assertTrue( s === undefined )
           }
       call: foo('abc')
 
@@ -197,10 +197,10 @@ cases:
               return s === null ? 'null' : s
           }
       call: |-
-          assertEQ( foo(''), '' )
-          assertEQ( foo('abc'), 'abc' )
-          assertEQ( foo(), undefined )
-          assertEQ( foo(null), 'null' )
+          arktest.assertEQ( foo(''), '' )
+          arktest.assertEQ( foo('abc'), 'abc' )
+          arktest.assertEQ( foo(), undefined )
+          arktest.assertEQ( foo(null), 'null' )
 
     # mixed optionality
     - decl: |-
@@ -208,9 +208,9 @@ cases:
               return a + b + (c === undefined ? 'undefined' : c) + d
           }
       call: |-
-          assertEQ( foo(''), 'anundefineding' )
-          assertEQ( foo('c', 'lean', ''), 'cleaning' )
-          assertEQ( foo('ark', ' ', 'compile', 'r'), 'ark compiler' )
+          arktest.assertEQ( foo(''), 'anundefineding' )
+          arktest.assertEQ( foo('c', 'lean', ''), 'cleaning' )
+          arktest.assertEQ( foo('ark', ' ', 'compile', 'r'), 'ark compiler' )
           // TODO: function call with empty placeholders for optional parameters are not supported yet
           //assertEQ( foo('underst', , 'd'), 'understanding' )
 
@@ -219,24 +219,24 @@ cases:
               return p === undefined ? 0 : 2 * p;
           }
       call: |-
-          assertEQ( foo(), 0 )
-          assertEQ( foo(1), 2 )
+          arktest.assertEQ( foo(), 0 )
+          arktest.assertEQ( foo(1), 2 )
 
     - decl: |-
           function foo(i: int, j: int, k?: boolean): boolean {
               return !k;
           }
       call: |-
-         assertEQ( foo(1, 2), true )
-          assertEQ( foo(2, 1, true), false )
+         arktest.assertEQ( foo(1, 2), true )
+          arktest.assertEQ( foo(2, 1, true), false )
 
     - decl: |-
           function foo(e?: string): string | undefined {
               return e
           }
       call: |-
-         assertEQ( foo(), undefined )
-          assertEQ( foo('test'), 'test')
+         arktest.assertEQ( foo(), undefined )
+          arktest.assertEQ( foo('test'), 'test')
 
     - decl: |-
           enum Color {Red, Green, Blue}

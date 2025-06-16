@@ -28,8 +28,8 @@ async function testAsync2(): Promise<string> {
 
 async function startTest() {
     const res = await Promise.all([testAsync1(), testAsync2()]);
-    assertEQ(res[0] === "testAsync1", true);
-    assertEQ(res[1] === "testAsync2", true);
+    arktest.assertEQ(res[0] === "testAsync1", true);
+    arktest.assertEQ(res[1] === "testAsync2", true);
 }
 
 function main(): void {

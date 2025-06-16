@@ -40,16 +40,16 @@ function main(): void {
     B.y = 10
     B.setX(5)
 
-    assertEQ( A.x, 5 )
+    arktest.assertEQ( A.x, 5 )
 
-    assertEQ( B.getX(), 5 )
-    assertEQ( B.y, 10 )
+    arktest.assertEQ( B.getX(), 5 )
+    arktest.assertEQ( B.y, 10 )
 
     B.y++
     A.x++
 
-    assertEQ( A.x, 6 )
+    arktest.assertEQ( A.x, 6 )
 
-    assertEQ( B.getX(), 6 )
-    assertEQ( B.y, 11 )
+    arktest.assertEQ( B.getX(), 6 )
+    arktest.assertEQ( B.y, 11 )
 }

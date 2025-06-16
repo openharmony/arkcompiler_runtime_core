@@ -22,5 +22,5 @@ function main(): void {
   let b: string = "def";
   let c: string = a + b;
 
-  assertTrue( c == "abcdef")
+  arktest.assertTrue( c == "abcdef")
 }

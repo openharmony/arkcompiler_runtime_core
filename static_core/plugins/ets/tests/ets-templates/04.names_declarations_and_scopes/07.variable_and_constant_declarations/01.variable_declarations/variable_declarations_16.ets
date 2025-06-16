@@ -26,5 +26,5 @@ function main(): void {
   if (isUndefined(tmp)) {
     tmp = 10;
   }
-  assertTrue(tmp == 10);
+  arktest.assertTrue(tmp == 10);
 }

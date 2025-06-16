@@ -21,5 +21,5 @@ type UNDEFINED = undefined;
 
 function main(): void {
   let a: UNDEFINED;
-  assertTrue( a == undefined )
+  arktest.assertTrue( a == undefined )
 }

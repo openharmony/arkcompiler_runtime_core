@@ -60,15 +60,15 @@ function test_array_int_join() {
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
     let arrayMaxStr2 =arrayMax.join("test");
-    assertTrue(arrayEmptyStr.isEmpty());
-    assertTrue(arrayEmptyStr1.isEmpty());
-    assertTrue(arrayEmptyStr2.isEmpty());
-    assertEQ(arrayIntStr,  arrayIntStrRes);
-    assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    assertEQ(arrayMaxStr,  arrayIntMaxStrRes);
-    assertEQ(arrayMaxStr1,  arrayIntMaxStrRes1);
-    assertEQ(arrayMaxStr2,  arrayIntMaxStrRes2);
+    arktest.assertTrue(arrayEmptyStr.isEmpty());
+    arktest.assertTrue(arrayEmptyStr1.isEmpty());
+    arktest.assertTrue(arrayEmptyStr2.isEmpty());
+    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr,  arrayIntMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1,  arrayIntMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2,  arrayIntMaxStrRes2);
 }
 
 //! CHECKER       ArrayLong join
@@ -90,15 +90,15 @@ function test_array_long_join() {
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
     let arrayMaxStr2 =arrayMax.join("test");
-    assertTrue(arrayEmptyStr.isEmpty());
-    assertTrue(arrayEmptyStr1.isEmpty());
-    assertTrue(arrayEmptyStr2.isEmpty());
-    assertEQ(arrayIntStr,  arrayIntStrRes);
-    assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    assertEQ(arrayMaxStr,  arrayLongMaxStrRes);
-    assertEQ(arrayMaxStr1,  arrayLongMaxStrRes1);
-    assertEQ(arrayMaxStr2,  arrayLongMaxStrRes2);
+    arktest.assertTrue(arrayEmptyStr.isEmpty());
+    arktest.assertTrue(arrayEmptyStr1.isEmpty());
+    arktest.assertTrue(arrayEmptyStr2.isEmpty());
+    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr,  arrayLongMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1,  arrayLongMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2,  arrayLongMaxStrRes2);
 }
 
 //! CHECKER       ArrayShort join
@@ -120,15 +120,15 @@ function test_array_short_join() {
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
     let arrayMaxStr2 =arrayMax.join("test");
-    assertTrue(arrayEmptyStr.isEmpty());
-    assertTrue(arrayEmptyStr1.isEmpty());
-    assertTrue(arrayEmptyStr2.isEmpty());
-    assertEQ(arrayIntStr,  arrayIntStrRes);
-    assertEQ(arrayIntStr1,  arrayIntStrRes1);
-    assertEQ(arrayIntStr2,  arrayIntStrRes2);
-    assertEQ(arrayMaxStr,  arrayShortMaxStrRes);
-    assertEQ(arrayMaxStr1,  arrayShortMaxStrRes1);
-    assertEQ(arrayMaxStr2,  arrayShortMaxStrRes2);
+    arktest.assertTrue(arrayEmptyStr.isEmpty());
+    arktest.assertTrue(arrayEmptyStr1.isEmpty());
+    arktest.assertTrue(arrayEmptyStr2.isEmpty());
+    arktest.assertEQ(arrayIntStr,  arrayIntStrRes);
+    arktest.assertEQ(arrayIntStr1,  arrayIntStrRes1);
+    arktest.assertEQ(arrayIntStr2,  arrayIntStrRes2);
+    arktest.assertEQ(arrayMaxStr,  arrayShortMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1,  arrayShortMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2,  arrayShortMaxStrRes2);
 }
 
 //! CHECKER       ArrayDouble join
@@ -146,12 +146,12 @@ function test_array_double_join() {
     let arrayMaxStr = arrayMax.join();
     let arrayMaxStr1 = arrayMax.join("|");
     let arrayMaxStr2 =arrayMax.join("test");
-    assertTrue(arrayEmptyStr.isEmpty());
-    assertTrue(arrayEmptyStr1.isEmpty());
-    assertTrue(arrayEmptyStr2.isEmpty());
-    assertEQ(arrayMaxStr, arrayDoubleMaxStrRes);
-    assertEQ(arrayMaxStr1, arrayDoubleMaxStrRes1);
-    assertEQ(arrayMaxStr2, arrayDoubleMaxStrRes2);
+    arktest.assertTrue(arrayEmptyStr.isEmpty());
+    arktest.assertTrue(arrayEmptyStr1.isEmpty());
+    arktest.assertTrue(arrayEmptyStr2.isEmpty());
+    arktest.assertEQ(arrayMaxStr, arrayDoubleMaxStrRes);
+    arktest.assertEQ(arrayMaxStr1, arrayDoubleMaxStrRes1);
+    arktest.assertEQ(arrayMaxStr2, arrayDoubleMaxStrRes2);
 }
 
 //! CHECKER       ArrayString join
@@ -171,9 +171,9 @@ function test_array_string_join() {
     let arrayStr2 = arrayString.join("|");
     let arrayStr3 =arrayString.join("test");
     let arrayStr4 =arrayString.join("Ω");
-    assertEQ(arrayStr, arrayStrRes);
-    assertEQ(arrayStr1, arrayStrRes1);
-    assertEQ(arrayStr2, arrayStrRes2);
-    assertEQ(arrayStr3, arrayStrRes3);
-    assertEQ(arrayStr4, arrayStrRes4);
+    arktest.assertEQ(arrayStr, arrayStrRes);
+    arktest.assertEQ(arrayStr1, arrayStrRes1);
+    arktest.assertEQ(arrayStr2, arrayStrRes2);
+    arktest.assertEQ(arrayStr3, arrayStrRes3);
+    arktest.assertEQ(arrayStr4, arrayStrRes4);
 }

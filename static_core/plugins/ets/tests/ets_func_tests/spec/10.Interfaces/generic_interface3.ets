@@ -30,7 +30,7 @@ class Interface1Impl<T> implements Interface1<T> {
 }
 
 function callLambda(): void {
-    const a: () => void = () => { assertEQ(new Interface1Impl<void>().method1(), true); }
+    const a: () => void = () => { arktest.assertEQ(new Interface1Impl<void>().method1(), true); }
 }
 
 function main(): void {

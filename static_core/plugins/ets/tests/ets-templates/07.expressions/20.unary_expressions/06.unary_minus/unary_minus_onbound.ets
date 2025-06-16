@@ -22,7 +22,7 @@ params: {{onb.type}} {{onb.origin}} => {{onb.dest}}
 
 function main(): void {
   let a: {{onb.type}} = {{onb.origin}};
-  assertEQ(-a, {{onb.dest}});
+  arktest.assertEQ(-a, {{onb.dest}});
 }
 
 {% endfor %}

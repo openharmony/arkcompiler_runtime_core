@@ -37,5 +37,5 @@ class Person {
 
 function main(): void {
   const bob = new Person("Bob");
-  assertEQ(bob.address?.city, undefined);
+  arktest.assertEQ(bob.address?.city, undefined);
 }

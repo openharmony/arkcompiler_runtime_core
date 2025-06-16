@@ -35,5 +35,5 @@ const obj: CombinedInterface = {
 };
 
 function main(): void {
-  assertEQ(obj.status, "Active");
+  arktest.assertEQ(obj.status, "Active");
 }

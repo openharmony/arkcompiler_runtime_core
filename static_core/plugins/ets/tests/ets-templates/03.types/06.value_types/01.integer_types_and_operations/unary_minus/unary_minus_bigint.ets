@@ -20,7 +20,7 @@ desc: check unary minus operation for bigint operand
 
 function main(): void {
   const value: bigint = {{v.value}}
-  assertEQ( -(value), {{v.result}})
+  arktest.assertEQ( -(value), {{v.result}})
 }
 
 {% endfor %}

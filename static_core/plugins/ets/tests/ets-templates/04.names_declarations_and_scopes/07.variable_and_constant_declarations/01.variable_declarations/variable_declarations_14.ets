@@ -21,7 +21,7 @@ function main(): void {
   let tmp = 10;
   let tmp1 = "hello";
   let tmp2 = true;
-  assertTrue(tmp == 10);
-  assertTrue(tmp1 == "hello");
-  assertTrue(tmp2 == true);
+  arktest.assertTrue(tmp == 10);
+  arktest.assertTrue(tmp1 == "hello");
+  arktest.assertTrue(tmp2 == true);
 }

@@ -39,7 +39,7 @@ class A implements J {}
 
 function main(): void {
   let a: A = new A();
-  assertTrue(a.foo(1) == 2.1);
+  arktest.assertTrue(a.foo(1) == 2.1);
   a.foo(1 as byte);
-  assertTrue(res == 1);
+  arktest.assertTrue(res == 1);
 }

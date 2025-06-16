@@ -20,5 +20,5 @@ desc: Variable declaration with object literal.
 function main(): void {
   let cond: boolean = true;
   let tmp = cond ? 1 : "one";
-  assertEQ(tmp, 1);
+  arktest.assertEQ(tmp, 1);
 }

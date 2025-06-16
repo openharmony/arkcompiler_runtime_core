@@ -28,7 +28,7 @@ function foo(y: string): void {
 
 function main(): void {
   foo(1);
-  assertTrue(res == 1);
+  arktest.assertTrue(res == 1);
   foo("some string");
-  assertTrue(res == 2);
+  arktest.assertTrue(res == 2);
 }

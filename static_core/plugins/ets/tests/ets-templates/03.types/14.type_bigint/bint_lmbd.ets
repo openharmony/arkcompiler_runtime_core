@@ -23,7 +23,7 @@ desc: >-
 function main() {
 {%- for t in c['values'] %}
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    assertTrue( ((p: bigint): bigint => { return p + 1n })(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
+    arktest.assertTrue( ((p: bigint): bigint => { return p + 1n })(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
 {%- endfor %}
 }
 {%- endfor %}

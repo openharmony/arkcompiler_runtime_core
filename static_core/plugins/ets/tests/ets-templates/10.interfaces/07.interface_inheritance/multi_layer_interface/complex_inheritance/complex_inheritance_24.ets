@@ -36,5 +36,5 @@ class Student extends Person {
 function main(): void {
     const student = new Student("Alice");
     student.name = "Bob";
-    assertEQ(student.name, "Bob");
+    arktest.assertEQ(student.name, "Bob");
 }

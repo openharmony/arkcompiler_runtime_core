@@ -59,7 +59,7 @@ function test_void_input_void_output() {
 function test_int_input_void_output() {
     let foo = FuncTest.makeFoo();
     foo.test_cb_i((a) => {
-        assertEQ(a, 1);
+        arktest.assertEQ(a, 1);
     });
 }
 
@@ -67,7 +67,7 @@ function test_string_boolean_input() {
     let foo = FuncTest.makeFoo();
     foo.test_cb_s((a, b) => {
         if (b) {
-            assertEQ(a, "hello");
+            arktest.assertEQ(a, "hello");
         }
     });
 }
@@ -77,7 +77,7 @@ function test_string_return_value() {
     let result = foo.test_cb_rs((a) => {
         return a * 2;
     });
-    assertEQ(result, "888");
+    arktest.assertEQ(result, "888");
 }
 
 function test_from_callback() {
@@ -98,40 +98,40 @@ function test_from_callback() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(res, 30);
+    arktest.assertEQ(res, 30);
 }
 
 function test_static_func_add() {
     const result = FuncTest.FooCls.static_func_add(20, 10);
-    assertEQ(result, 30);
+    arktest.assertEQ(result, 30);
 }
 
 function test_static_func_sub() {
     const result = FuncTest.FooCls.static_func_sub(20, 10);
-    assertEQ(result, 10);
+    arktest.assertEQ(result, 10);
 }
 
 function test_static_property() {
-    assertEQ(FuncTest.FooCls.static_property, 0);
+    arktest.assertEQ(FuncTest.FooCls.static_property, 0);
     FuncTest.FooCls.static_property = 123;
-    assertEQ(FuncTest.FooCls.static_property, 123);
+    arktest.assertEQ(FuncTest.FooCls.static_property, 123);
 }
 
 function test_new_class() {
     let test = new FuncTest.FooCls("hello");
     console.log("test_new_class test is:", test.get());
-    assertEQ(test.get(), "zhangsan");
+    arktest.assertEQ(test.get(), "zhangsan");
 }
 
 function test_new_class_with_two_args() {
     let test = new FuncTest.FooCls("hello", "test");
     console.log("test_new_class_with_two_args test is:", test.get());
-    assertEQ(test.get(), "zhangsan");
+    arktest.assertEQ(test.get(), "zhangsan");
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("FuncTest Test");
+    const suite = new arktest.ArkTestsuite("FuncTest Test");
 
     suite.addTest("test func no input no output", test_func_no_input_no_output);
     suite.addTest(

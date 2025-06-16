@@ -23,7 +23,7 @@ function foo{{c}}
 
 function main() {
     const f = foo
-    assertEQ(f, foo)
+    arktest.assertEQ(f, foo)
 }
 
 {% endfor %}

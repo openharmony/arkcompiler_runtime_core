@@ -23,6 +23,6 @@ function main(): void {
 
   array1.length = 3;
   let a: number = array1.length;
-  assertTrue(a === 5)
-  assertNEQ(a, 3)
+  arktest.assertTrue(a === 5)
+  arktest.assertNEQ(a, 3)
 }

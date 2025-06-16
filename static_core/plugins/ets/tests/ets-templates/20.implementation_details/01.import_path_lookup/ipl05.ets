@@ -22,5 +22,5 @@ files:
 import {TEST_LIST} from './test_file_03.ets';
 
 function main(): void {
-  assertTrue(TEST_LIST[2] === 0x03);
+  arktest.assertTrue(TEST_LIST[2] === 0x03);
 }

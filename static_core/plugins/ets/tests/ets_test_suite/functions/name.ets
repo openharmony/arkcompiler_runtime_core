@@ -46,22 +46,22 @@ function main() {
     let b: B = new C()
     let def = true ? () => { } : null
 
-    assertEQ(foo.name, 'foo')
-    assertEQ(x.name, 'x')
-    assertEQ(a.bar.name, 'bar')
-    assertEQ(a.lambda.name, 'lambda')
-    assertEQ(A.staticBar.name, 'staticBar')
-    assertEQ(b.buzz.name, 'buzz')
-    assertEQ(def?.name, 'def')
+    arktest.assertEQ(foo.name, 'foo')
+    arktest.assertEQ(x.name, 'x')
+    arktest.assertEQ(a.bar.name, 'bar')
+    arktest.assertEQ(a.lambda.name, 'lambda')
+    arktest.assertEQ(A.staticBar.name, 'staticBar')
+    arktest.assertEQ(b.buzz.name, 'buzz')
+    arktest.assertEQ(def?.name, 'def')
 
-    assertEQ(returnFunctionName(foo), 'foo')
-    assertEQ(returnFunctionName(x), 'x')
-    assertEQ(returnFunctionName(a.bar), 'bar')
-    assertEQ(returnFunctionName(a.lambda), 'lambda')
-    assertEQ(returnFunctionName(A.staticBar), 'staticBar')
-    assertEQ(returnFunctionName(b.buzz), 'buzz')
-    assertEQ(returnFunctionName(() => 1), '')
+    arktest.assertEQ(returnFunctionName(foo), 'foo')
+    arktest.assertEQ(returnFunctionName(x), 'x')
+    arktest.assertEQ(returnFunctionName(a.bar), 'bar')
+    arktest.assertEQ(returnFunctionName(a.lambda), 'lambda')
+    arktest.assertEQ(returnFunctionName(A.staticBar), 'staticBar')
+    arktest.assertEQ(returnFunctionName(b.buzz), 'buzz')
+    arktest.assertEQ(returnFunctionName(() => 1), '')
     if (def) {
-        assertEQ(returnFunctionName(def), 'def')
+        arktest.assertEQ(returnFunctionName(def), 'def')
     }
 }

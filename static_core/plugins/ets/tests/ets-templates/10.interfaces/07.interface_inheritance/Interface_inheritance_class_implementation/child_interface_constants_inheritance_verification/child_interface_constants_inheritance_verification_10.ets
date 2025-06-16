@@ -32,6 +32,6 @@ class MultiLevelChild implements ParentInterface {
 
 function main(): void {
   const instance = new MultiLevelChild();
-  assertEQ(instance.GRAND_CONST, 3);
-  assertEQ(instance.PARENT_CONST, "level");
+  arktest.assertEQ(instance.GRAND_CONST, 3);
+  arktest.assertEQ(instance.PARENT_CONST, "level");
 }

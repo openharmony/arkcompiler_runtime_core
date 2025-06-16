@@ -30,7 +30,7 @@ function getName(): String {
 }
 
 function getAge(): int {
-  assertEQ( res, 1 )
+  arktest.assertEQ( res, 1 )
   res = 2;
   return 18;
 }
@@ -39,5 +39,5 @@ function main(): void {
   res = 0;
   let person: Person = {name: getName(), age: getAge()};
 
-  assertEQ( res, 2 )
+  arktest.assertEQ( res, 2 )
 }

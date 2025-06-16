@@ -40,5 +40,5 @@ function main(): void {
     }
 
     exec();
-    assertEQ(result, 0);
+    arktest.assertEQ(result, 0);
 }

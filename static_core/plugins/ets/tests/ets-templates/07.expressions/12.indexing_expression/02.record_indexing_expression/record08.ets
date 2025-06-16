@@ -32,5 +32,5 @@ function bar(n: number): string {
 
 function main(): void {
   let x = bar(3);
-  assertEQ(x, "no");
+  arktest.assertEQ(x, "no");
 }

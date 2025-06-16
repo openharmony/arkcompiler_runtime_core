@@ -36,8 +36,8 @@ class MethodReturnObject {
 async function startTest() {
   const example = new MethodReturnObject();
   const result = await example.methodReturnObject();
-  assertEQ(result.name === "Alice", true);
-  assertEQ(result.age === 25, true);
+  arktest.assertEQ(result.name === "Alice", true);
+  arktest.assertEQ(result.age === 25, true);
 }
 
 function main(): void {

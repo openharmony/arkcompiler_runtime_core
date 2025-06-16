@@ -24,5 +24,5 @@ type Margin = number | string
 function main(): void {
     let a2: number = 5.5
     let b2: Margin = a2 as Margin
-    assertEQ( b2, 5.5)
+    arktest.assertEQ( b2, 5.5)
 }

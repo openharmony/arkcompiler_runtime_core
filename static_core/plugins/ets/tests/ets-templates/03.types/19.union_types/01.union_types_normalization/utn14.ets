@@ -21,5 +21,5 @@ function main(): void {
     type A = boolean | boolean;
     let a: A = true;
 
-    assertTrue(typeof a === "boolean");
+    arktest.assertTrue(typeof a === "boolean");
 }

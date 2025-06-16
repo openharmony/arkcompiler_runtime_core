@@ -25,5 +25,5 @@ class C extends AC {}
 
 function main(): void {
     let a = new C();
-    assertTrue(a instanceof AC);
+    arktest.assertTrue(a instanceof AC);
 }

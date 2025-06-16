@@ -27,5 +27,5 @@ class ErrorConstantChild implements ErrorConstantInterface {
 
 function main(): void {
   const instance = new ErrorConstantChild();
-  assertEQ(instance.CONST.message, 'Test error');
+  arktest.assertEQ(instance.CONST.message, 'Test error');
 }

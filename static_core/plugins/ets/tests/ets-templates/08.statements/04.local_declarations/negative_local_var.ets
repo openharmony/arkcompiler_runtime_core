@@ -21,7 +21,7 @@ tags: [negative, compile-only]
 function main(): void {
   {
     let a: int = 0;
-    assertEQ(a, 0)
+    arktest.assertEQ(a, 0)
   }
-  assertEQ(a, 0)
+  arktest.assertEQ(a, 0)
 }

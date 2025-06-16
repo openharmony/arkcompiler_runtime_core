@@ -31,6 +31,6 @@ class Child extends Parent implements G {
 }
 
 function main(): void {
-    assertEQ(Child.MESSAGE, "Hello from Child");
-    assertEQ(new Child().MESSAGE, "Hello from interface");
+    arktest.assertEQ(Child.MESSAGE, "Hello from Child");
+    arktest.assertEQ(new Child().MESSAGE, "Hello from interface");
 }

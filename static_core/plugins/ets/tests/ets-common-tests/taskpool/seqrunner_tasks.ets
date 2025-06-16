@@ -59,10 +59,10 @@ function executeDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res = await launchImpl(testDelayFunc);
-        assertEQ(res, 90);
+        arktest.assertEQ(res, 90);
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof StackOverflowError, true);
+        arktest.assertEQ(e instanceof StackOverflowError, true);
     }
     let runner = new taskpool.SequenceRunner();
     let task = new taskpool.Task(sum, 25, 35);
@@ -83,10 +83,10 @@ function executePeriodicallyTest(): void {
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
     try {
         let res2 = await launchImpl(testPeriodFunc);
-        assertEQ(res2, "success");
+        arktest.assertEQ(res2, "success");
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof LinkerUnresolvedClassError, true);
+        arktest.assertEQ(e instanceof LinkerUnresolvedClassError, true);
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
@@ -110,7 +110,7 @@ function testPeriodFunc(): NullishType {
 }
 
 function main(): int {
-    let seqRunnerSuite = new ArkTestsuite("taskpool.SequenceRunner");
+    let seqRunnerSuite = new arktest.ArkTestsuite("taskpool.SequenceRunner");
     seqRunnerSuite.addTest("OrderTest", () =>
     {
         let resultStr: string = "";
@@ -134,19 +134,19 @@ function main(): int {
         let p2 = runner.execute(task2);
         let p3 = runner.execute(task3);
         let res2 = await p2;
-        assertEQ(res2, "12");
+        arktest.assertEQ(res2, "12");
         let res3 = await p3;
-        assertEQ(res3, "123");
+        arktest.assertEQ(res3, "123");
         let res1 = await p1;
-        assertEQ(res1, "1");
-        assertEQ(resultStr, "123");
-        assertEQ(task1.isDone(), true);
-        assertEQ(task2.isDone(), true);
-        assertEQ(task3.isDone(), true);
+        arktest.assertEQ(res1, "1");
+        arktest.assertEQ(resultStr, "123");
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
         // Execute LongTask
         let longTask = new taskpool.LongTask(returnAbc);
         let res = await runner.execute(longTask);
-        assertEQ(res, "abc");
+        arktest.assertEQ(res, "abc");
     });
     seqRunnerSuite.addTest("ExecuteCommonTest", (): void throws => 
     {
@@ -184,10 +184,10 @@ function main(): int {
         // tasks with params
         let t1 = new taskpool.Task(sum, 10, 20);
         let res1 = await runner.execute(t1);
-        assertEQ(res1, 30);
+        arktest.assertEQ(res1, 30);
         let t2 = new taskpool.Task(max, 80, 30);
         let res2 = await runner.execute(t2);
-        assertEQ(res2, 80);
+        arktest.assertEQ(res2, 80);
     });
     seqRunnerSuite.addTest("CancelExecutingTaskTest", (): void throws =>
     {
@@ -197,7 +197,7 @@ function main(): int {
         try {
             taskpool.cancel(task);
         } catch(e: Error) {
-            assertEQ(e.message, "taskpool:: sequenceRunner task has been executed");
+            arktest.assertEQ(e.message, "taskpool:: sequenceRunner task has been executed");
             return;
         }
         expectError(() => { let res = await p; }, new Error("taskpool:: sequenceRunner task has been canceled"));
@@ -213,10 +213,10 @@ function main(): int {
         // tasks with params
         let t1 = new taskpool.Task(sum, 10, 20);
         let res1 = await runner.execute(t1);
-        assertEQ(res1, 30);
+        arktest.assertEQ(res1, 30);
         let t2 = new taskpool.Task(max, 80, 30);
         let res2 = await runner.execute(t2);
-        assertEQ(res2, 80);
+        arktest.assertEQ(res2, 80);
     });
     seqRunnerSuite.addTest("AddDependentTaskTest", (): void throws =>
     {
@@ -275,16 +275,16 @@ function main(): int {
         let res3 = await runner.execute(task3);
         let res4 = await runner.execute(task4);
         let res5 = await runner.execute(longTask);
-        assertEQ(res1, "testWithZeroParam");
-        assertEQ(res2, 50);
-        assertEQ(res3, "testWithThreeParams res: 30");
-        assertEQ(res4, "TEST res: 6");
-        assertEQ(res5, 30);
-        assertEQ(task1.isDone(), true);
-        assertEQ(task2.isDone(), true);
-        assertEQ(task3.isDone(), true);
-        assertEQ(task4.isDone(), true);
-        assertEQ(longTask.isDone(), true);
+        arktest.assertEQ(res1, "testWithZeroParam");
+        arktest.assertEQ(res2, 50);
+        arktest.assertEQ(res3, "testWithThreeParams res: 30");
+        arktest.assertEQ(res4, "TEST res: 6");
+        arktest.assertEQ(res5, 30);
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
+        arktest.assertEQ(task4.isDone(), true);
+        arktest.assertEQ(longTask.isDone(), true);
     });
     seqRunnerSuite.addTest("ExecuteDelayedTest", executeDelayedTest);
     seqRunnerSuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);

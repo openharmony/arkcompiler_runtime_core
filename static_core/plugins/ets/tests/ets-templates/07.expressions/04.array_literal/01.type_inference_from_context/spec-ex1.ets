@@ -34,7 +34,7 @@ type Matrix = number[][]
 function main() {
     let a: number[] = [1, 2, 3] // ok, variable type is used
     a = [4, 5] // ok, variable type is used
-    assertEQ( min([1., 3.14, 0.99]), 0.99 ); // ok, parameter type is used
+    arktest.assertEQ( min([1., 3.14, 0.99]), 0.99 ); // ok, parameter type is used
 
     let m: Matrix = [[1, 2], [3, 4], [5, 6]]
     let value: number = 2

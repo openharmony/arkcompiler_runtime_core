@@ -20,6 +20,6 @@ desc: Constant declaration with string literal.
 function main(): void {
   let tmp = 1;
   const tmp1 = 1;
-  assertEQ(tmp, 1);
-  assertEQ(tmp1, 1);
+  arktest.assertEQ(tmp, 1);
+  arktest.assertEQ(tmp1, 1);
 }

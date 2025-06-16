@@ -51,6 +51,6 @@ class B extends A<string> implements G<string> {
 
 function main(): void {
     const b: A<string> | G<string> = new B("World");
-    assertEQ((b as A<string>).getValue(), "World");
-    assertEQ((b as G<string>).greet(), "Hello, World");
+    arktest.assertEQ((b as A<string>).getValue(), "World");
+    arktest.assertEQ((b as G<string>).greet(), "Hello, World");
 }

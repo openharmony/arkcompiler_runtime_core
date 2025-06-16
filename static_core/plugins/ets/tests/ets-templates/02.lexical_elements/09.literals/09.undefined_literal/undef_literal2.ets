@@ -20,5 +20,5 @@ tags: [compile-only, negative]
 
 function main() {
     let x: Object = undefined; // CTE: x is not of a nullish type
-    assertTrue( x === undefined )
+    arktest.assertTrue( x === undefined )
 }

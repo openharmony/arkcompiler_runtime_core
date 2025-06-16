@@ -32,7 +32,7 @@ class Extender extends Base {
 function main(): void {
     let a = new Extender();
 
-    assertEQ( (a as Base).field, 20)  // Access to static members via instance is prohibited (see 9.5.1 and 7.10.3)
-    assertEQ( Extender.field, 10)
+    arktest.assertEQ( (a as Base).field, 20)  // Access to static members via instance is prohibited (see 9.5.1 and 7.10.3)
+    arktest.assertEQ( Extender.field, 10)
 
 }

@@ -34,6 +34,6 @@ function __noinline__while(a: int): int
 }
 
 function main(): int {
-    assertEQ(__noinline__while(6), 7)
+    arktest.assertEQ(__noinline__while(6), 7)
     return 0;
 }

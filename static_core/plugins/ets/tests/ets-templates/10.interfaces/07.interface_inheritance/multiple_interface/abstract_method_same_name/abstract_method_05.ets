@@ -48,8 +48,8 @@ function main(): void {
   const value = child.getValue();
 
   if (typeof value === "string") {
-    assertEQ(value, "Hello");
+    arktest.assertEQ(value, "Hello");
   } else {
-    assertEQ(value, 42);
+    arktest.assertEQ(value, 42);
   }
 }

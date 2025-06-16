@@ -20,10 +20,10 @@ class StepSequence {
     }
 
     checkOrder() {
-        assertEQ(this.sequence.length, this.numCheckpoints,
+        arktest.assertEQ(this.sequence.length, this.numCheckpoints,
                  "Test failed. Expected " + this.numCheckpoints + " checkpoints, but got " + this.sequence.length);
         for (let step = 0; step < this.sequence.length; ++step) {
-            assertEQ(step, this.sequence[step], `Failed at step: ${step}. Got ${this.sequence[step]}`);
+            arktest.assertEQ(step, this.sequence[step], `Failed at step: ${step}. Got ${this.sequence[step]}`);
         }
     }
 

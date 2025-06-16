@@ -23,6 +23,6 @@ params: '{{lit}}'
 
 function main() {
     let x = {{lit}};
-    assertEQ(x, {{lit}})
+    arktest.assertEQ(x, {{lit}})
 }
 {% endfor %}

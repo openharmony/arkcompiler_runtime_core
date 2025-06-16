@@ -24,6 +24,6 @@ function xgc(): void {
     try {
         GC.waitForFinishGC(JSRuntime.xgc());
     } catch(e) {
-        assertTrue(false, "Unexpected exception during XGC");
+        arktest.assertTrue(false, "Unexpected exception during XGC");
     }
 }

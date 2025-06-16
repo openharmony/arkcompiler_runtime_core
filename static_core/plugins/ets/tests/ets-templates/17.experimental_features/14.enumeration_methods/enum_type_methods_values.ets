@@ -30,8 +30,8 @@ function f(a: Object): int {
 
 function main(): void {
   let colors = Color.values();
-  assertEQ(colors[0], Color.Red);
-  assertEQ(colors[1], Color.Green);
-  assertEQ(colors[2], Color.blue);
-  assertEQ(f(colors), 3);
+  arktest.assertEQ(colors[0], Color.Red);
+  arktest.assertEQ(colors[1], Color.Green);
+  arktest.assertEQ(colors[2], Color.blue);
+  arktest.assertEQ(f(colors), 3);
 }

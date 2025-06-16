@@ -53,6 +53,6 @@ function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }

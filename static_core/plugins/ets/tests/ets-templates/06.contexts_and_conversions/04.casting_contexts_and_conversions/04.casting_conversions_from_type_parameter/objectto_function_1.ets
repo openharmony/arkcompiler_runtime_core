@@ -20,5 +20,5 @@ desc: Convert to obj-function type.
 function main(): void {
   let add: (a: number, b: number) => number = (a, b) => a + b;
   const obj1: object = add;
-  assertTrue(obj1 == add);
+  arktest.assertTrue(obj1 == add);
 }

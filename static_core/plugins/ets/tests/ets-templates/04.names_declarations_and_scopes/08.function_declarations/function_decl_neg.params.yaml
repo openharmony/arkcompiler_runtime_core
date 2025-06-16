@@ -48,7 +48,7 @@ function_decls:
           }
       call: |-
           let f: BarType[] = foo();
-          assertTrue( f instanceof BarType[] && f.length == 1 )
+          arktest.assertTrue( f instanceof BarType[] && f.length == 1 )
 
     # no params, return enum array
     - decl: |-
@@ -60,4 +60,4 @@ function_decls:
           }
       call: |-
           let arr: Color[] = foo();
-          assertTrue( arr instanceof Color[] && arr.length == 1 && arr[0] == Color.Red )
+          arktest.assertTrue( arr instanceof Color[] && arr.length == 1 && arr[0] == Color.Red )

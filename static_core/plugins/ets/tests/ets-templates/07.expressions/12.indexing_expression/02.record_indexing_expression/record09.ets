@@ -28,5 +28,5 @@ function getValue(key: string): number | undefined {
 }
 
 function main(): void {
-  assertEQ(getValue("a"), 1);
+  arktest.assertEQ(getValue("a"), 1);
 }

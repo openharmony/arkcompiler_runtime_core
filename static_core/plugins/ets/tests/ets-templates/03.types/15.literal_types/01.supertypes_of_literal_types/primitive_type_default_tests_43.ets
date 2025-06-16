@@ -23,5 +23,5 @@ function checkBool(value: boolean) {
 
 function main(): void {
     const result = checkBool(true);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }

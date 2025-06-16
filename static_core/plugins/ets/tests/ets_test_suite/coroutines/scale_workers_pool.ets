@@ -20,9 +20,9 @@ function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     let workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
     CoroutineExtras.scaleWorkersPool(-1);
-    assertNE(mainId, workerId);
+    arktest.assertNE(mainId, workerId);
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
-    assertEQ(mainId, workerId);
+    arktest.assertEQ(mainId, workerId);
 }

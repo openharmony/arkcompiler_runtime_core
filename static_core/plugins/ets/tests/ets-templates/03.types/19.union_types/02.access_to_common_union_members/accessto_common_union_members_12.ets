@@ -34,5 +34,5 @@ class B {
 function main(): void {
     let account: A | B = new B();
     let str = account.tmp1;
-    assertTrue(str === 'dd');
+    arktest.assertTrue(str === 'dd');
 }

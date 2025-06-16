@@ -55,17 +55,17 @@ class D extends C {
 function main(): void {
     let d: D = new D()
 
-    assertEQ( d.get(), 10 )
-    assertEQ( d.getSuper(), 100 )
+    arktest.assertEQ( d.get(), 10 )
+    arktest.assertEQ( d.getSuper(), 100 )
 
     d.put(42)
-    assertEQ( d.get(), 42 )
-    assertEQ( d.getSuper(), 100 )
+    arktest.assertEQ( d.get(), 42 )
+    arktest.assertEQ( d.getSuper(), 100 )
 
     d.putSuper(22)
-    assertEQ( d.get(), 42 )
-    assertEQ( d.getSuper(), 22 )
+    arktest.assertEQ( d.get(), 42 )
+    arktest.assertEQ( d.getSuper(), 22 )
 
     // module level scope is not affected
-    assertEQ( x, -10 )
+    arktest.assertEQ( x, -10 )
 }

@@ -35,7 +35,7 @@ function main(): int {
   try {
       a = { name: "Bob", age: foo(a) } as A
   } catch (e: NullPointerError) {
-      assertTrue( a == null );
+      arktest.assertTrue( a == null );
       return 0;
   }
   return 1;

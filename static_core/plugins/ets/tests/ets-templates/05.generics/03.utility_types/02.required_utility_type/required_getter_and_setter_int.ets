@@ -28,5 +28,5 @@ interface I {
 function main() {
   let a: Required<I> = {i: 1.9}
   a.i = 1.9
-  assertEQ( a.i, 1.9 )
+  arktest.assertEQ( a.i, 1.9 )
 }

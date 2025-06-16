@@ -43,5 +43,5 @@ class B {}
     let x: Derived = new Derived();
     x.foo = new A();
 
-    assertEQ(2, cc)
+    arktest.assertEQ(2, cc)
  }

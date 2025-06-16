@@ -333,19 +333,19 @@ function test_xor_chain_long(param: long): long {
  
 function main() {
     let param: int = 42;
-    assertEQ(test_xor_chain_optimization_const1(param), param);
-    assertEQ(test_xor_chain_optimization_const2(param), param);
-    assertEQ(test_xor_chain_optimization_const3(param), param);
-    assertEQ(test_xor_chain_no_optimization_diff_const(param), param ^ 0x12345678 ^ 0x87654321);
-    assertEQ(test_xor_chain_no_optimization_multi_users(param), (param ^ 0x12345678 ^ 0x12345678) + ((param ^ 0x12345678) + 1));
+    arktest.assertEQ(test_xor_chain_optimization_const1(param), param);
+    arktest.assertEQ(test_xor_chain_optimization_const2(param), param);
+    arktest.assertEQ(test_xor_chain_optimization_const3(param), param);
+    arktest.assertEQ(test_xor_chain_no_optimization_diff_const(param), param ^ 0x12345678 ^ 0x87654321);
+    arktest.assertEQ(test_xor_chain_no_optimization_multi_users(param), (param ^ 0x12345678 ^ 0x12345678) + ((param ^ 0x12345678) + 1));
     let byteParam: byte = 42 as byte;
-    assertEQ(test_xor_chain_byte(byteParam), byteParam);
+    arktest.assertEQ(test_xor_chain_byte(byteParam), byteParam);
     let shortParam: short = 4242 as short;
-    assertEQ(test_xor_chain_short(shortParam), shortParam);
+    arktest.assertEQ(test_xor_chain_short(shortParam), shortParam);
     let intParam: int = 424242 as int;
-    assertEQ(test_xor_chain_int(intParam), intParam);
+    arktest.assertEQ(test_xor_chain_int(intParam), intParam);
     let longParam: long = 424242424242 as long;
-    assertEQ(test_xor_chain_long(longParam), longParam);
+    arktest.assertEQ(test_xor_chain_long(longParam), longParam);
 
     return 0;
 }

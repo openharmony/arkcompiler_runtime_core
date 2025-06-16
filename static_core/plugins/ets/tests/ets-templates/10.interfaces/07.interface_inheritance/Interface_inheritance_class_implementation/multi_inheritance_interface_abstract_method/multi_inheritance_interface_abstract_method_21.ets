@@ -51,8 +51,8 @@ function main(): void {
   const result1 = bird.age();
   const result2 = bird.num1();
   const result3 = bird.age1();
-  assertEQ(result, true);
-  assertEQ(result1, false);
-  assertEQ(result2, false);
-  assertEQ(result3, true);
+  arktest.assertEQ(result, true);
+  arktest.assertEQ(result1, false);
+  arktest.assertEQ(result2, false);
+  arktest.assertEQ(result3, true);
 }

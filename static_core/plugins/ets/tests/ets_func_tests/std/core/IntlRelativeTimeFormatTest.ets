@@ -26,7 +26,7 @@ function main() throws {
 function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, expected: string, options?: Intl.RelativeTimeFormatOptions) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testFormat() {
@@ -83,26 +83,26 @@ function testResolvedOptions() {
         const format = new Intl.RelativeTimeFormat("en")
         const result = format.resolvedOptions()
         console.log(result)
-        assertEQ(result.style, "long")
-        assertEQ(result.numeric, "always")
-        assertEQ(result.numberingSystem, "latn")
+        arktest.assertEQ(result.style, "long")
+        arktest.assertEQ(result.numeric, "always")
+        arktest.assertEQ(result.numberingSystem, "latn")
     }
     {
         const format = new Intl.RelativeTimeFormat("en", { style: "short" } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        assertEQ(result.style, "short")
+        arktest.assertEQ(result.style, "short")
     }
     {
         const format = new Intl.RelativeTimeFormat("en", { numeric: "always" } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        assertEQ(result.numeric, "always")
+        arktest.assertEQ(result.numeric, "always")
     }
 }
 
 function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier, value: number, unit: Intl.RelativeTimeFormatUnit, options: Intl.RelativeTimeFormatOptions, expected: string) {
     const format = new Intl.RelativeTimeFormat(locale, options)
     const result = format.format(value, unit)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testSelectWithOptions() {
@@ -116,19 +116,19 @@ function testSelectWithOptions() {
 
 function runSupportedLocalesStringTest(locales: string, options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
-    assertEQ(result.length, expected.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {
         const isEq = result[i].includes(expected[i])
-        assertTrue(isEq);
+        arktest.assertTrue(isEq);
     }
 }
 
 function runSupportedLocalesArrayTest(locales: string[], options: Intl.RelativeTimeFormatOptions | undefined, expected: string[]) {
     const result = Intl.RelativeTimeFormat.supportedLocalesOf(locales, options)
-    assertEQ(result.length, expected.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i: int = 0; i < result.length; i++) {
         const isEq = result[i].includes(expected[i])
-        assertTrue(isEq);
+        arktest.assertTrue(isEq);
     }
 }
 

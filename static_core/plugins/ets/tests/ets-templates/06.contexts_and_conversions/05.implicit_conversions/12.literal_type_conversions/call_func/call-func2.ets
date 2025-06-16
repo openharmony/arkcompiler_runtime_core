@@ -27,7 +27,7 @@ function foo(p: {{c.to_type}}) { d = p }
 {%- for v in c['values'] %}
 function cvt{{loop.index}}(p: {{v.type}}) {
     foo(p)
-    assertEQ(d, {{v.val or v.expr}})
+    arktest.assertEQ(d, {{v.val or v.expr}})
 }
 {%- endfor %}
 

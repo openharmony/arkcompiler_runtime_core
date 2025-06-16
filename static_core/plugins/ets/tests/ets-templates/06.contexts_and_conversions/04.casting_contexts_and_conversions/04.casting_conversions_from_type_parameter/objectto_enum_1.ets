@@ -27,5 +27,5 @@ let favoriteColor: Color = Color.Red;
  
 function main(): void {
   const obj1: object = favoriteColor;
-  assertTrue(obj1 === Color.Red);
+  arktest.assertTrue(obj1 === Color.Red);
 }

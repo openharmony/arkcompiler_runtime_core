@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-   const suite = new ArkTestsuite("String API test for SDK");
+   const suite = new arktest.ArkTestsuite("String API test for SDK");
    suite.addTest("String.padEnd() fills in the correct characters when str is empty", testStringPadEnd);
    suite.addTest("String.padStart() fills in the correct characters when str is empty", testStringPadEnd);
    return suite.run()
@@ -31,11 +31,11 @@ class TestData {
 function testStringPadEnd() {
    let str = TestData.str;
    let a = str.padEnd(TestData.padend_length, '')
-   assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
+   arktest.assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
 }
 
 function testStringPadStart() {
    let str = TestData.str;
    let a = str.padStart(TestData.padstart_length, '')
-   assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
+   arktest.assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
 }

@@ -19,24 +19,24 @@ const stressNum: int = 100;
 let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueuePollTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePollTest");
 
     LinkedBlockingQueueTestsuite.addTest("PollTest001", () =>
     {
         let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.size, elementsNum);
         for (let i = 0; i < 5; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 5);
+        arktest.assertEQ(queueInt.size, 5);
         for (let i = 5; i < 10; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 0);
-        assertEQ(queueInt.poll(), null);
+        arktest.assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.poll(), null);
     });
     LinkedBlockingQueueTestsuite.addTest("PollStressTest004", () =>
     {
@@ -45,9 +45,9 @@ function main(): int {
             queueInt.add(i);
         }
         for (let i = 0; i < stressNum; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.size, 0);
     });
 
     return LinkedBlockingQueueTestsuite.run();

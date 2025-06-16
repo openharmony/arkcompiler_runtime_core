@@ -27,6 +27,6 @@ function main() {
     const v3 = {{v.exp}}
 
     a[0] = v3.toChar()
-    assertEQ(a[0], {{v.r}})
+    arktest.assertEQ(a[0], {{v.r}})
 }
 {%- endfor %}

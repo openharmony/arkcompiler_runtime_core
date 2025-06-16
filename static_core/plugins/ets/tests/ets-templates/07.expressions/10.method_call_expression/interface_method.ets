@@ -28,5 +28,5 @@ class B implements A {}
 
 function main(): void {
     let instance: A = new B();
-    assertTrue( instance.bar(3) == 6 )
+    arktest.assertTrue( instance.bar(3) == 6 )
 }

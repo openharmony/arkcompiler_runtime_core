@@ -28,8 +28,8 @@ cases:
       }
     use: |-
       let i: Derived = new Derived()
-      assertEQ( i.foo("some str"), 2 )
-      assertEQ( i.foo(new String("some str")), 2 )
+      arktest.assertEQ( i.foo("some str"), 2 )
+      arktest.assertEQ( i.foo(new String("some str")), 2 )
 
   - tags: negative, compile-only
     doc: |-
@@ -62,8 +62,8 @@ cases:
       }
     use: |-
       let i: Derived = new Derived()
-      assertEQ( i.foo("some str"), 1 )
-      assertEQ( i.foo(2), 2 )
+      arktest.assertEQ( i.foo("some str"), 1 )
+      arktest.assertEQ( i.foo(2), 2 )
 
   - doc: |-
       String > literal string type (contravariant). Contravariant parameter -> overriding is used.
@@ -80,5 +80,5 @@ cases:
       }
     use: |-
       let i: Derived = new Derived()
-      assertEQ( i.foo("some str"), 2 )
-      assertEQ( i.foo(new String("another str")), 2 )
+      arktest.assertEQ( i.foo("some str"), 2 )
+      arktest.assertEQ( i.foo(new String("another str")), 2 )

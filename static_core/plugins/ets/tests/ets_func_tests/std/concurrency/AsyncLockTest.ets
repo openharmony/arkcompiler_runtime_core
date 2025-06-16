@@ -132,24 +132,24 @@ function asyncLockExclusiveModeTest(): int {
     return result;
 }
 
-let asyncLockAppTestsuite = new ArkTestsuite("asyncLockAppTestsuite");
+let asyncLockAppTestsuite = new arktest.ArkTestsuite("asyncLockAppTestsuite");
 
 asyncLockAppTestsuite.addTest("sequentialLockUnlocked", () => {
-    assertTrue(sequentialLockUnlocked());
+     arktest.assertTrue(sequentialLockUnlocked());
 });
 
 asyncLockAppTestsuite.addTest("disarmTimeoutTest", () => {
-    assertTrue(disarmTimeoutTest());
+     arktest.assertTrue(disarmTimeoutTest());
 });
 
 async function applyLockJob(lockName: string, mode: AsyncLockMode, tidBuf: Uint32Array, tid: number): Promise<void> {
     let lock = AsyncLock.request(lockName);
     lock.lockAsync<void>(async () => {
         let old = Atomics.compareExchange(tidBuf, 0, 0, tid);
-        assertEQ(old, 0, "Expected 0, but was: " + old);
+         arktest.assertEQ(old, 0, "Expected 0, but was: " + old);
         await new Promise<void>((resolve: () => void): void => {setTimeout(resolve, 100)});
         old = Atomics.compareExchange(tidBuf, 0, tid, 0);
-        assertEQ(old, tid, "Expected old=" + tid + ", but was: " + old);
+         arktest.assertEQ(old, tid, "Expected old=" + tid + ", but was: " + old);
     }, mode);
 }
 
@@ -172,7 +172,7 @@ function check_negative<T>(p: Promise<T>, currentTest: string): boolean {
 }
 
 function swapChanged(buf: Uint32Array, oldVal: number, newVal: number) {
-    assertEQ(buf[0], oldVal, "Test failed");
+     arktest.assertEQ(buf[0], oldVal, "Test failed");
     buf[0] = newVal;
 }
 
@@ -186,13 +186,13 @@ function queryTest2() {
 
     let p = lock.lockAsync<void>(async () => {
         let states: AsyncLockState[] = AsyncLock.queryAll();
-        assertNE(states.length, 0, 'Test failed: expected at least 1 state, but was ' + states.length);
+         arktest.assertNE(states.length, 0, 'Test failed: expected at least 1 state, but was ' + states.length);
         let state = AsyncLock.query(lock.name);
         let pending: AsyncLockInfo[] = state.pending;
-        assertEQ(pending.length, 0, 'Test failed: expected pending.length=0, but was ' + pending.length);
+         arktest.assertEQ(pending.length, 0, 'Test failed: expected pending.length=0, but was ' + pending.length);
         let held: AsyncLockInfo[] = state.held;
-        assertEQ(held.length, 1, 'Test failed: expected held.length=1, but was ' + held.length);
-        assertNE(held[0].name, lockName, 'Test failed');
+         arktest.assertEQ(held.length, 1, 'Test failed: expected held.length=1, but was ' + held.length);
+         arktest.assertNE(held[0].name, lockName, 'Test failed');
     }, AsyncLockMode.EXCLUSIVE);
     return p;
 }
@@ -212,7 +212,7 @@ function abortTest() {
             throw new Error('Test failed. Promise is fulfilled.')
         },
         (err: string): void => {
-            assertEQ(err, "Aborted", 'Test failed. Wrong error value.');
+             arktest.assertEQ(err, "Aborted", 'Test failed. Wrong error value.');
     }
     );
     return check(p1, "abortTest");
@@ -337,7 +337,7 @@ async function waitForLockBody() {
     await lock.lockAsync<void>(async () => {
         swapChanged(flagBuf, 0, 1);
     }, AsyncLockMode.EXCLUSIVE);
-    assertEQ(flagBuf[0], 1, "Test failed");
+     arktest.assertEQ(flagBuf[0], 1, "Test failed");
 }
 
 function waitForLock() {
@@ -352,7 +352,7 @@ function dontWaitForLock() {
     let p = lock.lockAsync<void>(async () => {
         swapChanged(flagBuf, 0, 1)
     }, AsyncLockMode.EXCLUSIVE);
-    assertEQ(flagBuf[0], 0, "Test failed");
+     arktest.assertEQ(flagBuf[0], 0, "Test failed");
     return check(p, "dontWaitForLock");
 }
 
@@ -595,7 +595,7 @@ async function mainExecutor(index: number, flagBuf: Uint32Array, timeout: number
     let lock: AsyncLock = AsyncLock.request("doubleExitSharedLock");
     await lock.lockAsync(async () => {
         flagBuf[index] = 1;
-        assertEQ(flagBuf[2], 0, "Unexpected set flag at 2");
+         arktest.assertEQ(flagBuf[2], 0, "Unexpected set flag at 2");
         await new Promise<void>((resolve: () => void): void => setTimeout(resolve, timeout as int));
         flagBuf[index] = 0;
     }, AsyncLockMode.SHARED);
@@ -605,8 +605,8 @@ async function taskExecutor(flagBuf: Uint32Array, timeout: number) {
     let lock: AsyncLock = AsyncLock.request("doubleExitSharedLock");
     await lock.lockAsync(async () => {
         flagBuf[2] = 1;
-        assertEQ(flagBuf[0], 0, "Unexpected set flag at 0");
-        assertEQ(flagBuf[1], 0, "Unexpected set flag at 1");
+         arktest.assertEQ(flagBuf[0], 0, "Unexpected set flag at 0");
+         arktest.assertEQ(flagBuf[1], 0, "Unexpected set flag at 1");
         await new Promise<void>((resolve: () => void): void => setTimeout(resolve, timeout as int));
         flagBuf[2] = 0;
     }, AsyncLockMode.EXCLUSIVE);
@@ -627,7 +627,7 @@ function doubleExitSharedLock() {
 }
 
 function main(): int {
-    let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
+    let asyncLockTestsuite = new arktest.ArkTestsuite("asyncLockTestsuite");
 
     asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
         let failures = 0;
@@ -637,7 +637,7 @@ function main(): int {
         failures += asyncLockExclusiveModeTest();
         failures += asyncLockQueryNonexistentNameTest();
 
-        assertEQ(failures, 0);
+        arktest.assertEQ(failures, 0);
     });
 
     let summ = 0;

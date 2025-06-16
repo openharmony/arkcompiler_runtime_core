@@ -38,8 +38,8 @@ async function startTest() {
     try {
     let result1 = await coroutine();
     let result2 = await coroutineOther();
-    assertEQ(result1, 10);
-    assertEQ(result2, 20);
+    arktest.assertEQ(result1, 10);
+    arktest.assertEQ(result2, 20);
   } catch (error) {
   }
 }

@@ -23,7 +23,7 @@ const SINGLE = [88.0];
 
 function checkSorted(a: Float64Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
-        assertEQ(a[i], SORTED[i]);
+        arktest.assertEQ(a[i], SORTED[i]);
     }
 }
 
@@ -34,7 +34,7 @@ function checkSortedWithNaN(a: Float64Array): void {
                 continue;
             }
         }
-        assertEQ(a[i], SORTED_WITH_NAN[i] as double);
+        arktest.assertEQ(a[i], SORTED_WITH_NAN[i] as double);
     }
 }
 
@@ -46,7 +46,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: Float64Array = new Float64Array(SINGLE);
     single.sort();
-    assertEQ(single[0], SINGLE[0]);
+    arktest.assertEQ(single[0], SINGLE[0]);
 }
 
 function sortNormal(): void {
@@ -62,8 +62,8 @@ function sortWithNaN(): void {
 }
 
 function main(): int {
-    assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite('Float64Array.sort() tests')
+    arktest.assertEQ(UNSORTED.length, SORTED.length);
+    const suite = new arktest.ArkTestsuite('Float64Array.sort() tests')
     suite.addTest('sort an empty Float64Array', sortEmpty)
     suite.addTest('sort a single-element Float64Array', sortSingle)
     suite.addTest('sort a normal Float64Array', sortNormal)

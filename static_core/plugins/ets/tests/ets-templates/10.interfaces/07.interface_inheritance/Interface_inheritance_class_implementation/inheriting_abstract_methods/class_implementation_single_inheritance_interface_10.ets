@@ -35,5 +35,5 @@ class Dog implements IAnimal {
 function main(): void {
   let dog = new Dog();
   let result = dog.speak();
-  assertEQ(result, "speaking.");
+  arktest.assertEQ(result, "speaking.");
 }

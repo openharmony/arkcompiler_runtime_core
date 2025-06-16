@@ -23,7 +23,7 @@ desc: A variable declaration introduces a named variable and optionally assigns 
 
 function main(): void {
     {{vd.use}}
-    assertTrue( {{vd.assert}} )
+    arktest.assertTrue( {{vd.assert}} )
 }
 
 {% endfor %}

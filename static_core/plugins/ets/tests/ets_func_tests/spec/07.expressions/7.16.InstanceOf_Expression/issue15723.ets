@@ -25,5 +25,5 @@ function main(): void {
 
     let fd: VF = () => 1;
 
-    assertTrue( fd instanceof VF)
+    arktest.assertTrue( fd instanceof VF)
 }

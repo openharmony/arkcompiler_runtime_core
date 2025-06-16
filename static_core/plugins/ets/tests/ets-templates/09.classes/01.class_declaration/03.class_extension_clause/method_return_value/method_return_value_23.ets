@@ -38,15 +38,15 @@ class Child extends Parent {}
 function main(): void {
     let parent = new Parent();
     let obj1: Person = parent.createGenericObject();
-    assertEQ(obj1.name, "John");
-    assertEQ(obj1.age, 30);
-    assertEQ(obj1.hobbies[0], "reading");
-    assertEQ(obj1.hobbies[1], "swimming");
+    arktest.assertEQ(obj1.name, "John");
+    arktest.assertEQ(obj1.age, 30);
+    arktest.assertEQ(obj1.hobbies[0], "reading");
+    arktest.assertEQ(obj1.hobbies[1], "swimming");
 
     let child = new Child();
     let obj2: Person = child.createGenericObject();
-    assertEQ(obj2.name, "John");
-    assertEQ(obj2.age, 30);
-    assertEQ(obj2.hobbies[0], "reading");
-    assertEQ(obj2.hobbies[1], "swimming");
+    arktest.assertEQ(obj2.name, "John");
+    arktest.assertEQ(obj2.age, 30);
+    arktest.assertEQ(obj2.hobbies[0], "reading");
+    arktest.assertEQ(obj2.hobbies[1], "swimming");
 }

@@ -30,13 +30,13 @@ let aa: A[] = [a, a]
 function main() {
     let obj: Object = aa as Object
     let ab = obj as Array<B>
-    assertEQ(aa[0], aa[1])
+    arktest.assertEQ(aa[0], aa[1])
 
     ab[0] = b
-    assertEQ(ab[0], b)
-    assertNE(ab[0], aa[1])
+    arktest.assertEQ(ab[0], b)
+    arktest.assertNE(ab[0], aa[1])
 
     aa[0] = a
-    assertEQ(aa[0], a)
-    assertEQ(aa[0], aa[1])
+    arktest.assertEQ(aa[0], a)
+    arktest.assertEQ(aa[0], aa[1])
 }

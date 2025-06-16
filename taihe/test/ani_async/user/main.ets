@@ -26,7 +26,7 @@ function testSyncAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(res, 3, "addSync should correctly add 1 + 2");
+        arktest.assertEQ(res, 3, "addSync should correctly add 1 + 2");
     }
     {
         let res: int;
@@ -36,8 +36,8 @@ function testSyncAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(err.code, 1, "addSync should throw an error");
-        assertEQ(
+        arktest.assertEQ(err.code, 1, "addSync should throw an error");
+        arktest.assertEQ(
             err.message, "some error happen in add impl",
             "addSync should throw an error when first parameter is 0");
     }
@@ -62,7 +62,7 @@ function testAsyncAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(res, 30, "add callback should receive 10 + 20 = 30");
+        arktest.assertEQ(res, 30, "add callback should receive 10 + 20 = 30");
     }
     {
         let promise = new Promise<int>((resolve, reject) => {
@@ -81,8 +81,8 @@ function testAsyncAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(err.code, 1, "add callback should receive an err");
-        assertEQ(
+        arktest.assertEQ(err.code, 1, "add callback should receive an err");
+        arktest.assertEQ(
             err.message, "some error happen in add impl",
             "add callback should receive an err when first parameter is 0");
     }
@@ -98,7 +98,7 @@ function testPromiseAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(res, 3, "add promise should correctly add 1 + 2");
+        arktest.assertEQ(res, 3, "add promise should correctly add 1 + 2");
     }
     {
         let res: int;
@@ -108,8 +108,8 @@ function testPromiseAdd() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(err.code, 1, "add promise should throw an error");
-        assertEQ(
+        arktest.assertEQ(err.code, 1, "add promise should throw an error");
+        arktest.assertEQ(
             err.message, "some error happen in add impl",
             "add promise should throw an error when first parameter is 0");
     }
@@ -118,10 +118,10 @@ function testPromiseAdd() {
 
 function testIBase() {
     const ibase = async_test.getIBase();
-    assertEQ(ibase.get(), "My IBase", "IBase.get() should return 'My IBase'");
+    arktest.assertEQ(ibase.get(), "My IBase", "IBase.get() should return 'My IBase'");
 
     await ibase.setPromise("interface async set");
-    assertEQ(
+    arktest.assertEQ(
         await ibase.getPromise(), "interface async set",
         "getPromise should resolve with the value set in setAsync");
 }
@@ -141,16 +141,16 @@ function testStructMethods() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(err.code, 1, "fromStruct should throw an error");
-        assertEQ(
+        arktest.assertEQ(err.code, 1, "fromStruct should throw an error");
+        arktest.assertEQ(
             err.message, "some error happen in fromStructSync_impl",
             "fromStruct should throw an error when c is 0");
     }
 
     let data: async_test.Data = await async_test.toStruct("aaa", "bbb", 1);
-    assertEQ(data.a, "aaa", "Data.a should be 'aaa'");
-    assertEQ(data.b, "bbb", "Data.b should be 'bbb'");
-    assertEQ(data.c, 1, "Data.c should be 1");
+    arktest.assertEQ(data.a, "aaa", "Data.a should be 'aaa'");
+    arktest.assertEQ(data.b, "bbb", "Data.b should be 'bbb'");
+    arktest.assertEQ(data.c, 1, "Data.c should be 1");
 
     {
         let err: BusinessError = new BusinessError();
@@ -159,15 +159,15 @@ function testStructMethods() {
         } catch (e) {
             err = e as BusinessError;
         }
-        assertEQ(err.code, 1, "toStruct should throw an error");
-        assertEQ(
+        arktest.assertEQ(err.code, 1, "toStruct should throw an error");
+        arktest.assertEQ(
             err.message, "some error happen in toStructSync_impl",
             "toStruct should throw an error when c is 0");
     }
 }
 
 function main() {
-    const suite = new ArkTestsuite("Async Test Suite");
+    const suite = new arktest.ArkTestsuite("Async Test Suite");
 
     suite.addTest("Sync Add Tests", testSyncAdd);
     suite.addTest("Async Add Tests", testAsyncAdd);

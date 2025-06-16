@@ -33,5 +33,5 @@ class B extends A{
 function main(): void {
     let instance: B = new B();
 
-    assertEQ( instance.getX(), 0 );
+    arktest.assertEQ( instance.getX(), 0 );
 }

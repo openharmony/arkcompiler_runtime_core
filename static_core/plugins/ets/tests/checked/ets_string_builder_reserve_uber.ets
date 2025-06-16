@@ -116,6 +116,6 @@ function uber_reserve38(cond: boolean) : string
 }
 
 function main() : void {
-    assertEQ(uber_reserve38(false), "null-0000-111-210111213142-31224577891212123-494-null", "Wrong result at uber_reserve38")
-    assertEQ(uber_reserve38(true), "null-0000-111-210111213142-31224577891212123-4512569104-null", "Wrong result at uber_reserve38")
+    arktest.assertEQ(uber_reserve38(false), "null-0000-111-210111213142-31224577891212123-494-null", "Wrong result at uber_reserve38")
+    arktest.assertEQ(uber_reserve38(true), "null-0000-111-210111213142-31224577891212123-4512569104-null", "Wrong result at uber_reserve38")
 }

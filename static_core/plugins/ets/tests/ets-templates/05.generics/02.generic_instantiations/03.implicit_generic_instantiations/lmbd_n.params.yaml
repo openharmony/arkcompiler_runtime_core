@@ -14,17 +14,17 @@
 ---
 cases:
     - use: |-
-          assertTrue((<T> (p: T, q: T): T => p ?? q)("a", "b") == "a")
+          arktest.assertTrue((<T> (p: T, q: T): T => p ?? q)("a", "b") == "a")
     - use: |-
-          assertTrue((<T> (p: T, q: T): T => p ?? q)(null, 1) === 1)
-    - use: |-
-          let a = 42
-          assertTrue((<T> (p: T, q: T): T => p ?? q)(a, new Object()) == 42)
+          arktest.assertTrue((<T> (p: T, q: T): T => p ?? q)(null, 1) === 1)
     - use: |-
           let a = 42
-          let b = "abc"
-          assertTrue((<T> (p: T, q: T): T => p ?? q)(a, b) instanceof String)
+          arktest.assertTrue((<T> (p: T, q: T): T => p ?? q)(a, new Object()) == 42)
     - use: |-
           let a = 42
           let b = "abc"
-          assertTrue((<T> (p: T, q: T): T => p ?? q)(b, a) instanceof String)
+          arktest.assertTrue((<T> (p: T, q: T): T => p ?? q)(a, b) instanceof String)
+    - use: |-
+          let a = 42
+          let b = "abc"
+          arktest.assertTrue((<T> (p: T, q: T): T => p ?? q)(b, a) instanceof String)

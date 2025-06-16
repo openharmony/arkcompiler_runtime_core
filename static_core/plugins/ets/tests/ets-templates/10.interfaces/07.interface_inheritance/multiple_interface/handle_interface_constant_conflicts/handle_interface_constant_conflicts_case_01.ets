@@ -27,5 +27,5 @@ class TestClass implements InterfaceA {
 
 function main(): void {
     const test = new TestClass();
-    assertEQ(test.CONSTANT, 42);
+    arktest.assertEQ(test.CONSTANT, 42);
 }

@@ -25,5 +25,5 @@ class A<T> {
 
 function main(): void {
   let i: A<undefined> = new A<undefined>;
-  assertTrue( i.foo() == 1 )
+  arktest.assertTrue( i.foo() == 1 )
 }

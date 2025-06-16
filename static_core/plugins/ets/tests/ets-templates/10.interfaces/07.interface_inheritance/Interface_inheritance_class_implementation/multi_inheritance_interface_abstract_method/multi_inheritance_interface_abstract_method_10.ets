@@ -51,8 +51,8 @@ function main(): void {
   const result1 = util.subtract(4, 4);
   const result2 = util.reverse('hello');
   const result3 = util.capitalize('world');
-  assertEQ(result, 6);
-  assertEQ(result1, 0);
-  assertEQ(result2, "hello");
-  assertEQ(result3, 'world');
+  arktest.assertEQ(result, 6);
+  arktest.assertEQ(result1, 0);
+  arktest.assertEQ(result2, "hello");
+  arktest.assertEQ(result3, 'world');
 }

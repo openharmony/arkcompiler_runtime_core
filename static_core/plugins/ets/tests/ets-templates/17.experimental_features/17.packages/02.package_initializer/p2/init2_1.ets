@@ -36,6 +36,6 @@ static {
 }
 
 function main() {
-    assertEQ(var1, 5)
-    assertEQ(pi, 3.14159)
+    arktest.assertEQ(var1, 5)
+    arktest.assertEQ(pi, 3.14159)
 }

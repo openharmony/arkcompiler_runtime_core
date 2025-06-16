@@ -28,7 +28,7 @@ function main(): void {
   let t2 = new Test2();
   let t3 = new Test3();
 
-  assertTrue( t1 instanceof Test1)
-  assertTrue( t2 instanceof Test2)
-  assertTrue( t3 instanceof Test3)
+  arktest.assertTrue( t1 instanceof Test1)
+  arktest.assertTrue( t2 instanceof Test2)
+  arktest.assertTrue( t3 instanceof Test3)
 }

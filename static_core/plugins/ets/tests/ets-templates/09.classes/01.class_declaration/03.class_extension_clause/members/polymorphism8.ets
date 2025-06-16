@@ -49,5 +49,5 @@ class Eagle extends Bird2 {
 
 function main(): void {
     const animal: Animal = new Eagle("Sky");
-    assertEQ("Eagle is flying", (animal as Eagle).fly());
+    arktest.assertEQ("Eagle is flying", (animal as Eagle).fly());
 }

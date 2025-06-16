@@ -432,18 +432,18 @@ function toString11(str: String): String {
 }
 
 function main(): int {
-    assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
-    assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
-    assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
-    assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
-    assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
-    assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
-    assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
-    assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
-    assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
-    assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
-    assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
-    assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
+    arktest.assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
+    arktest.assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
+    arktest.assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
+    arktest.assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
+    arktest.assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
+    arktest.assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
+    arktest.assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
+    arktest.assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
+    arktest.assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
+    arktest.assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
+    arktest.assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
+    arktest.assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
     return 0;
 }
 

@@ -20,5 +20,5 @@ desc: Convert to number-octal type.
 function main(): void {
   let octal: number = 0o12; // 10
   const obj1: object = octal;
-  assertTrue(obj1 == octal);
+  arktest.assertTrue(obj1 == octal);
 }

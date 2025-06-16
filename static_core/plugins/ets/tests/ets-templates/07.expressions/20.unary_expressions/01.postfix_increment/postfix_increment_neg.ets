@@ -20,5 +20,5 @@ tags: [negative, compile-only]
 
 function main(): void {
   let c = "110"
-  assertEQ(c++, "110", "If postix increment expression completes abruptly then no incrementation occurs.")
+  arktest.assertEQ(c++, "110", "If postix increment expression completes abruptly then no incrementation occurs.")
 }

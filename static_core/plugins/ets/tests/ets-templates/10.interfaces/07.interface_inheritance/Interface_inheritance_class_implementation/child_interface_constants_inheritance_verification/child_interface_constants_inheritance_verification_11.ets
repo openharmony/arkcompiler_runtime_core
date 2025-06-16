@@ -27,5 +27,5 @@ class EmptyArrayConstantChild implements EmptyArrayConstantInterface {
 
 function main(): void {
   const instance = new EmptyArrayConstantChild();
-  assertEQ(instance.CONST.length, 0);
+  arktest.assertEQ(instance.CONST.length, 0);
 }

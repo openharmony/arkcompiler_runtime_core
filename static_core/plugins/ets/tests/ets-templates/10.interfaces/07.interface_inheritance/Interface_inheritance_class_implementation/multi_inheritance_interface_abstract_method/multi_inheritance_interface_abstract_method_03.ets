@@ -49,6 +49,6 @@ function main(): void {
   const circle = new Circle(5, 'red');
   const result = circle.getArea();
   const result1 = circle.getColor();
-  assertEQ(result, 78.53981633974483);
-  assertEQ(result1, "red");
+  arktest.assertEQ(result, 78.53981633974483);
+  arktest.assertEQ(result1, "red");
 }

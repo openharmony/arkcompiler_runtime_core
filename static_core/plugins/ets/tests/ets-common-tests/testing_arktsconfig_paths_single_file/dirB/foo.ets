@@ -21,6 +21,6 @@
 
 export class BObj {
     static foo(){
-        assertEQ(1, 1)
+        arktest.assertEQ(1, 1)
     }
 }

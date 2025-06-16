@@ -22,5 +22,5 @@ files:
 import DefaultExportedFunc from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
-    assertEQ(DefaultExportedFunc(41), 42);
+    arktest.assertEQ(DefaultExportedFunc(41), 42);
 }

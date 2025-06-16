@@ -28,5 +28,5 @@ namespace NS15 {
 }
 
 function main() {
-    assertEQ(NS15.foo2(), "Foo1")
+    arktest.assertEQ(NS15.foo2(), "Foo1")
 }

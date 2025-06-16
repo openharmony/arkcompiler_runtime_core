@@ -20,6 +20,6 @@
 import { default as ns } from './file.d.ets'
 
 function main() {
-    assertEQ(ns.foo(), 142)
+    arktest.assertEQ(ns.foo(), 142)
 }
 

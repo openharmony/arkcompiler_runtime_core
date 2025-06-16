@@ -27,6 +27,6 @@ class A {
 }
 
 function main() {
-    assertEQ( (A.b ? A.v1 : A.v2), A.r )
+    arktest.assertEQ( (A.b ? A.v1 : A.v2), A.r )
 }
 {%- endfor %}

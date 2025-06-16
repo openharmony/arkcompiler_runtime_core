@@ -19,16 +19,16 @@ import { Job } from "std/core"
 let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentDeletePressureTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentDeletePressureTest");
 
     ConcurrentSetTestsuite.addTest("deletePressureTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         for (let i: int = 0; i < 100; i++) {
             addMore(i);
         }
-        assertEQ(ConcurrentSetTestOne.size, 100);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 100);
         let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < 100; i++) {
             jobs[i] = launch<void, (i: int) => void>(deleteMore, i);
@@ -36,7 +36,7 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
 
     return ConcurrentSetTestsuite.run();

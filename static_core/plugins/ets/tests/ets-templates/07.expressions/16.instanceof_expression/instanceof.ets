@@ -27,7 +27,7 @@ function main(): void {
   let b = new B;
   let с : Object | null = null;
 
-  assertTrue( {{io.negation}}({{io.left}} instanceof {{io.right}}) )
+  arktest.assertTrue( {{io.negation}}({{io.left}} instanceof {{io.right}}) )
 }
 
 {% endfor %}

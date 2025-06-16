@@ -54,9 +54,9 @@ function main(): void {
   let b = new Base<Number, String>();
   let c: TPL = [ false, 1.2];
   b.foo({{c.call}}); // base instance method call
-  assertTrue(res == 100 + {{c.res}});
+  arktest.assertTrue(res == 100 + {{c.res}});
   a.foo({{c.call}}); // derived instance method call
-  assertTrue(res == 200 + {{c.res}});
+  arktest.assertTrue(res == 200 + {{c.res}});
 }
 
 {% endfor %}

@@ -60,10 +60,10 @@ function fooC(i: Partial<C>) {
 
 function main() {
   z = 0;
-  assertTrue( fooC( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
-  assertTrue( fooI( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
+  arktest.assertTrue( fooC( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( z == 0 );
+  arktest.assertTrue( fooI( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( z == 0 );
 }
 
 {% endfor %}

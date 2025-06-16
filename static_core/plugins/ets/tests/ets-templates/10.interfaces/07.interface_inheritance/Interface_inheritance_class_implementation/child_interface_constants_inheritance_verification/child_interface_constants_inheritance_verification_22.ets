@@ -27,6 +27,6 @@ class NestedArrayConstantChild implements NestedArrayConstantInterface {
 
 function main(): void {
   const instance = new NestedArrayConstantChild();
-  assertEQ(instance.CONST[0][0], 1);
-  assertEQ(instance.CONST[1][1], 4);
+  arktest.assertEQ(instance.CONST[0][0], 1);
+  arktest.assertEQ(instance.CONST[1][1], 4);
 }

@@ -33,5 +33,5 @@ class Derived2 extends Base {
 function main(): void {
     let account: Derived1 | Derived2 | Base= new Base();
     let num = account.tmp;
-    assertTrue(num === 1);
+    arktest.assertTrue(num === 1);
 }

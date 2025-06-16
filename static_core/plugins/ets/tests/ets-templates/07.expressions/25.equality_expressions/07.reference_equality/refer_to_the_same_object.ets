@@ -22,8 +22,8 @@ class A {}
 function main(): void {
   let a: A = new A();
   let b: A = a;
-  assertTrue( (a !== a) == false )
-  assertTrue( (a !== b) == false )
-  assertTrue( (a === a) == true )
-  assertTrue( (a === b) == true )
+  arktest.assertTrue( (a !== a) == false )
+  arktest.assertTrue( (a !== b) == false )
+  arktest.assertTrue( (a === a) == true )
+  arktest.assertTrue( (a === b) == true )
 }			

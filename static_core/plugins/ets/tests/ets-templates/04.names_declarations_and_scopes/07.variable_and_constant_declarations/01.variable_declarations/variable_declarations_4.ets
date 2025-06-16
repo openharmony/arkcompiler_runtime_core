@@ -20,7 +20,7 @@ desc: Variable declaration with readonly array type.
 function main(): void {
   let tmp: number = 6, tmp2 = 1;
   let tmp1: string = "hello";
-  assertTrue(tmp == 6);
-  assertTrue(tmp2 == 1);
-  assertTrue(tmp1 == "hello");
+  arktest.assertTrue(tmp == 6);
+  arktest.assertTrue(tmp2 == 1);
+  arktest.assertTrue(tmp1 == "hello");
 }

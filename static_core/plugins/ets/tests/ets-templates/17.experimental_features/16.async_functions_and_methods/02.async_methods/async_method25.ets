@@ -30,7 +30,7 @@ class MethodNestedAsync {
 async function startTest() {
     const example = new MethodNestedAsync();
     const result = await example.methodNestedAsync();
-    assertEQ(result, "Nested async!");
+    arktest.assertEQ(result, "Nested async!");
 }
 
 function main(): void {

@@ -24,5 +24,5 @@ tags:
 import {default as TestFunc} from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
-    assertEQ(TestFunc(42), 43);
+    arktest.assertEQ(TestFunc(42), 43);
 }

@@ -31,5 +31,5 @@ interface C {
 function main(): void {
   let a: A = new A();
 
-  assertEQ( a.foo(), 5 );
+  arktest.assertEQ( a.foo(), 5 );
 }

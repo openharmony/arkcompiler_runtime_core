@@ -19,5 +19,5 @@ desc: Variable declaration with union of different types.
 
 function main(): void {
   const cond: boolean = true;
-  assertTrue(cond == true);
+  arktest.assertTrue(cond == true);
 }

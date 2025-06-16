@@ -23,6 +23,6 @@ let optionalRecord: Record<string, string> = {
 };
 
 function main(): void {
-  assertEQ(optionalRecord["name"], "Alice");
-  assertEQ(optionalRecord["age"], "30");
+  arktest.assertEQ(optionalRecord["name"], "Alice");
+  arktest.assertEQ(optionalRecord["age"], "30");
 }

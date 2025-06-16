@@ -24,7 +24,7 @@ function main() : int {
         x.push("Uups")
     }
 
-    assertEQ( x.length, 10)
+    arktest.assertEQ( x.length, 10)
     x.length = 5
     try {
         x[7] = "Bye";

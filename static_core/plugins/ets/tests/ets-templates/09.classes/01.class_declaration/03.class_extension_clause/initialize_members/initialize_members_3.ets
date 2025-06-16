@@ -35,5 +35,5 @@ function main(): void {
   const y : number[] = [1, 2, 3];
   let child = new Child(y);
   let x: number[] = child.constructorPublicVar;
-  assertEQ(x[0], 1);
+  arktest.assertEQ(x[0], 1);
 }

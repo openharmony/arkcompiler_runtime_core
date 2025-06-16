@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap ForEach Keys Values API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap ForEach Keys Values API tests")
 
     suite.addTest("LightWeightMap forEach the lightWeightMap with no reference",
         testForEachNoReference)
@@ -49,7 +49,7 @@ function testForEachNoReference() {
     lightWeightMap.forEach(() => {
         count++;
     });
-    assertEQ(count, 2, "The lightWeightMap forEach should iterate over all elements");
+    arktest.assertEQ(count, 2, "The lightWeightMap forEach should iterate over all elements");
 }
 
 function testForEachValueReference() {
@@ -59,7 +59,7 @@ function testForEachValueReference() {
     let flag: boolean = false;
     lightWeightMap.forEach((value: number) => {
         flag = lightWeightMap.hasValue(value);
-        assertEQ(flag, true, "The lightWeightMap forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The lightWeightMap forEach should iterate over all values");
     });
 }
 
@@ -72,8 +72,8 @@ function testForEachKeyValueReference() {
     lightWeightMap.forEach((value: number, key: string) => {
         flag1 = lightWeightMap.hasValue(value);
         flag2 = lightWeightMap.hasKey(key);
-        assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all values");
-        assertEQ(flag2, true, "The lightWeightMap forEach should iterate over all keys");
+        arktest.assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all values");
+        arktest.assertEQ(flag2, true, "The lightWeightMap forEach should iterate over all keys");
     });
 }
 
@@ -86,8 +86,8 @@ function testForEachThreeReferences() {
     lightWeightMap.forEach((value: number, key: string, lightWeightMap: LightWeightMap<string, number>) => {
         flag1 = lightWeightMap.hasValue(value);
         flag2 = lightWeightMap.hasKey(key);
-        assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all elements with three references");
-        assertEQ(flag2, true, "The lightWeightMap forEach should iterate over all elements with three references");
+        arktest.assertEQ(flag1, true, "The lightWeightMap forEach should iterate over all elements with three references");
+        arktest.assertEQ(flag2, true, "The lightWeightMap forEach should iterate over all elements with three references");
     });
 }
 
@@ -96,17 +96,17 @@ function testKeysIterator() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let iteratorSetValues = lightWeightMap.keys();
-    assertEQ(iteratorSetValues.next().value, "gull", "The lightWeightMap keys iterator should return the correct key");
-    assertEQ(iteratorSetValues.next().value, "sparrow",
+    arktest.assertEQ(iteratorSetValues.next().value, "gull", "The lightWeightMap keys iterator should return the correct key");
+    arktest.assertEQ(iteratorSetValues.next().value, "sparrow",
         "The lightWeightMap keys iterator should return the correct key");
-    assertEQ(iteratorSetValues.next().value, undefined,
+    arktest.assertEQ(iteratorSetValues.next().value, undefined,
         "The lightWeightMap keys iterator should return undefined at the end");
 }
 
 function testKeysIteratorWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.keys();
-    assertEQ(iteratorSetValues.next().value, undefined,
+    arktest.assertEQ(iteratorSetValues.next().value, undefined,
         "The lightWeightMap keys iterator should return undefined for an empty map");
 }
 
@@ -115,15 +115,15 @@ function testValuesIterator() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 357);
     let iteratorSetValues = lightWeightMap.values();
-    assertEQ(iteratorSetValues.next().value, 357, "The lightWeightMap values iterator should return the correct value");
-    assertEQ(iteratorSetValues.next().value, 123, "The lightWeightMap values iterator should return the correct value");
-    assertEQ(iteratorSetValues.next().value, undefined,
+    arktest.assertEQ(iteratorSetValues.next().value, 357, "The lightWeightMap values iterator should return the correct value");
+    arktest.assertEQ(iteratorSetValues.next().value, 123, "The lightWeightMap values iterator should return the correct value");
+    arktest.assertEQ(iteratorSetValues.next().value, undefined,
         "The lightWeightMap values iterator should return undefined at the end");
 }
 
 function testValuesIteratorWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.values();
-    assertEQ(iteratorSetValues.next().value, undefined,
+    arktest.assertEQ(iteratorSetValues.next().value, undefined,
         "The lightWeightMap values iterator should return undefined for an empty map");
 }

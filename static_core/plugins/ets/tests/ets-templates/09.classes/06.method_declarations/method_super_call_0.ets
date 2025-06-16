@@ -47,5 +47,5 @@ class FilledRectangle extends Rectangle {
 function main(): void {
   let instance: FilledRectangle = new FilledRectangle(5, 5, "color");
 
-  assertEQ( instance.draw(), true );
+  arktest.assertEQ( instance.draw(), true );
 }

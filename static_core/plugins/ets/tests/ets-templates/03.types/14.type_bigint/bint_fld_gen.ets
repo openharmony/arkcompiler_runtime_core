@@ -30,7 +30,7 @@ function main() {
     let a: A<bigint> = new A<bigint>()
 {%- for t in c['values'] %}
     a.fld = new BigInt({{t.expr|safe}})
-    assertTrue( a.meth() == {{t.val}})
+    arktest.assertTrue( a.meth() == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

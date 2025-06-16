@@ -29,7 +29,7 @@ async function startTest() {
     try {
         await example.methodReturnReject();
     } catch (error) {
-        assertEQ(error as string, "Rejected!");
+        arktest.assertEQ(error as string, "Rejected!");
     }
 }
 

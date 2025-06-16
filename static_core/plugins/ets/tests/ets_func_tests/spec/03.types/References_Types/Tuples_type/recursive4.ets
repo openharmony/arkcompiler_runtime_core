@@ -26,5 +26,5 @@ type Two = [One|undefined, string]
 function main(): void {
     let t: Two = [undefined, "Test"];
 
-    assertEQ( t[0], undefined)
+    arktest.assertEQ( t[0], undefined)
 }

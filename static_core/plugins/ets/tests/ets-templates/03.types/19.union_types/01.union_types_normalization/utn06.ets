@@ -19,5 +19,5 @@ desc: Test creating a joint type array((number | string)[]).
 
 function main(): void {
     let arr: (number | string)[] = [1, "two", 3, "four"];
-    assertEQ(arr.length, 4);
+    arktest.assertEQ(arr.length, 4);
 }

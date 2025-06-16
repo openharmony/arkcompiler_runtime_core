@@ -28,7 +28,7 @@ cases:
       }
     call: |-
       new Derived<Object>().foo(new Derived<Object>())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself parameter
 
   - tags: 'negative, compile-only'
@@ -60,7 +60,7 @@ cases:
       }
     call: |-
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter
 
   - base: |-
@@ -77,9 +77,9 @@ cases:
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter (contravariant)
 
   - base: |-
@@ -96,9 +96,9 @@ cases:
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter (invariant)
 
   - tags: 'negative, compile-only'
@@ -137,13 +137,13 @@ cases:
       }
     call: |-
       new Derived().foo(new A)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new B)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new C)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new D)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter (contravariance)
 
   - tags: 'negative, compile-only'
@@ -182,7 +182,7 @@ cases:
       }
     call: |-
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself return value
 
   - base: |-
@@ -201,7 +201,7 @@ cases:
       }
     call: |-
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself return value
 
   - base: |-
@@ -220,7 +220,7 @@ cases:
       }
     call: |-
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible return value (contravariance)
 
   - tags: 'negative, compile-only'

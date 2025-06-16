@@ -23,5 +23,5 @@ import {MathUtils} from './named_reference_export5.ets';
 
 function main(): void {
   const result = MathUtils.sum(2, 3);
-  assertEQ(result, 5);
+  arktest.assertEQ(result, 5);
 }

@@ -22,7 +22,7 @@ params: {{i.type}}, {{i.value}}
 
 function main(): void {
   let x: {{i.type}};
-  assertTrue(x == {{i.value}});
+  arktest.assertTrue(x == {{i.value}});
 }
 
 {% endfor %}

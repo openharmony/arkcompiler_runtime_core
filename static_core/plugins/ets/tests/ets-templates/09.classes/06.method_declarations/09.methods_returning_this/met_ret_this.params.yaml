@@ -26,7 +26,7 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from extension function and overloaded method
@@ -46,8 +46,8 @@ cases:
           }
       use: |-
           let a: A = { fld: 1 }
-          assertEQ(a.foo().foo(10).foo(), a)
-          assertEQ(a.fld, 13)
+          arktest.assertEQ(a.foo().foo(10).foo(), a)
+          arktest.assertEQ(a.fld, 13)
 
     - decl: |-
           // return 'this' from instance method in generic class
@@ -62,7 +62,7 @@ cases:
           }
       use: |-
           let a = new A<Error>
-          assertEQ(a.foo(new Error).foo(new Error), a)
+          arktest.assertEQ(a.foo(new Error).foo(new Error), a)
 
     - decl: |-
           // return 'this' from generic method
@@ -86,8 +86,8 @@ cases:
           class Er extends Error {}
       use: |-
           let a = new A
-          assertEQ(a.foo<Er>(new Er).bar<Number>(11.0), a)
-          assertEQ(a.fld, 11.0)
+          arktest.assertEQ(a.foo<Er>(new Er).bar<Number>(11.0), a)
+          arktest.assertEQ(a.fld, 11.0)
 
     - decl: |-
           // return 'this' from function with receiver
@@ -103,7 +103,7 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from final method
@@ -118,7 +118,7 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass
@@ -135,9 +135,9 @@ cases:
           class A extends Super {}
       use: |-
           let s: Super = new A
-          assertEQ(s.foo().foo(), s)
+          arktest.assertEQ(s.foo().foo(), s)
           let a: A = new A
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass
@@ -156,8 +156,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().foo(), s)
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(s.foo().foo(), s)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass with field overridden
@@ -175,8 +175,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().fld, 1)
-          assertEQ(a.foo().fld, 1)
+          arktest.assertEQ(s.foo().fld, 1)
+          arktest.assertEQ(a.foo().fld, 1)
 
     - decl: |-
           // return 'this' from superclass with method overridden
@@ -202,8 +202,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().bar(), "A")
-          assertEQ(a.foo().bar(), "A")
+          arktest.assertEQ(s.foo().bar(), "A")
+          arktest.assertEQ(a.foo().bar(), "A")
 
     - decl: |-
           // return 'this' from superclass from function with receiver
@@ -223,8 +223,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().foo(), s)
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(s.foo().foo(), s)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass with overriding
@@ -250,8 +250,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().foo(), s)
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(s.foo().foo(), s)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass with overriding abstract method
@@ -272,8 +272,8 @@ cases:
           let s: Super = new A
           let a: A = new A
       use: |-
-          assertEQ(s.foo().foo(), s)
-          assertEQ(a.foo().foo(), a)
+          arktest.assertEQ(s.foo().foo(), s)
+          arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
           // return 'this' from superclass with different methods
@@ -299,8 +299,8 @@ cases:
       use: |-
           let s: Super = new A
           let a: A = new A
-          assertEQ(s.foo().bar().foo().bar(), s)
-          assertEQ(a.foo().bar().foo().bar(), a)
+          arktest.assertEQ(s.foo().bar().foo().bar(), s)
+          arktest.assertEQ(a.foo().bar().foo().bar(), a)
 
     - decl: |-
           // return 'this' from superclass with different functions with receiver
@@ -327,8 +327,8 @@ cases:
           let a: A = new A
           let s: Super = new A
       use: |-
-          assertEQ((s.foo() as A).bar(), s)
-          assertEQ(a.bar().foo(), a)
+          arktest.assertEQ((s.foo() as A).bar(), s)
+          arktest.assertEQ(a.bar().foo(), a)
 
     - decl: |-
           // return 'this' from interface
@@ -348,7 +348,7 @@ cases:
 
           let i: I = new A
       use: |-
-          assertEQ(i.foo().foo(), i)
+          arktest.assertEQ(i.foo().foo(), i)
 
     - decl: |-
           // return 'this' from default interface method
@@ -368,7 +368,7 @@ cases:
 
           let i: I = new A
       use: |-
-          assertEQ(i.foo().foo(), i)
+          arktest.assertEQ(i.foo().foo(), i)
 
     - decl: |-
           // call method returning 'this' from constructor
@@ -387,7 +387,7 @@ cases:
 
           let a = new A
       use: |-
-          assertEQ(a.fld, 1)
+          arktest.assertEQ(a.fld, 1)
 
     - decl: |-
           // call function returning 'this' from constructor
@@ -407,7 +407,7 @@ cases:
 
           let a = new A
       use: |-
-          assertEQ(a.fld, 1)
+          arktest.assertEQ(a.fld, 1)
 
     - decl: |-
           // calling method returning 'this' from throw statement
@@ -431,11 +431,11 @@ cases:
                   throw a.foo(1).foo(2).foo(3)
               }
           } catch (e: A) {
-              assertEQ(e.message, 'Error in main')
-              assertEQ(e.fld, 7)
+              arktest.assertEQ(e.message, 'Error in main')
+              arktest.assertEQ(e.fld, 7)
               return
           }
-          assertTrue(false, 'Expected error not thrown')
+          arktest.assertTrue(false, 'Expected error not thrown')
 
     - decl: |-
           // calling extension function returning 'this' from throw statement
@@ -460,11 +460,11 @@ cases:
                   throw a.foo(1).foo(2).foo(3)
               }
           } catch (e: A) {
-              assertEQ(e.message, 'Error in main')
-              assertEQ(e.fld, 7)
+              arktest.assertEQ(e.message, 'Error in main')
+              arktest.assertEQ(e.fld, 7)
               return
           }
-          assertTrue(false, 'Expected error not thrown')
+          arktest.assertTrue(false, 'Expected error not thrown')
 
     - decl: |-
           // calling method returning 'this' from throw statement
@@ -488,11 +488,11 @@ cases:
                   throw a.foo(0).foo(1).foo(2)
               }
           } catch (e: A) {
-              assertEQ(e.message, 'Error in A')
-              assertEQ(e.fld, 0)
+              arktest.assertEQ(e.message, 'Error in A')
+              arktest.assertEQ(e.fld, 0)
               return
           }
-          assertTrue(false, 'Expected error not thrown')
+          arktest.assertTrue(false, 'Expected error not thrown')
 
     - decl: |-
           // calling extension function returning 'this' from throw statement
@@ -517,11 +517,11 @@ cases:
                   throw a.foo(0).foo(1).foo(2)
               }
           } catch (e: A) {
-              assertEQ(e.message, 'Error in A')
-              assertEQ(e.fld, 0)
+              arktest.assertEQ(e.message, 'Error in A')
+              arktest.assertEQ(e.fld, 0)
               return
           }
-          assertTrue(false, 'Expected error not thrown')
+          arktest.assertTrue(false, 'Expected error not thrown')
 
     - decl: |-
           // calling method returning 'this' from coroutine
@@ -543,8 +543,8 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ((a.bar().Await()), a)
-          assertEQ(a.fld, 3)
+          arktest.assertEQ((a.bar().Await()), a)
+          arktest.assertEQ(a.fld, 3)
 
     - decl: |-
           // calling extension function returning 'this' from coroutine
@@ -564,8 +564,8 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ((await a.bar()), a)
-          assertEQ(a.fld, 3)
+          arktest.assertEQ((await a.bar()), a)
+          arktest.assertEQ(a.fld, 3)
 
     - decl: |-
           // calling async method returning 'this'
@@ -581,5 +581,5 @@ cases:
           }
       use: |-
           let a = new A
-          assertEQ((await (await a.foo()).foo()), a)
-          assertEQ(a.fld, 2)
+          arktest.assertEQ((await (await a.foo()).foo()), a)
+          arktest.assertEQ(a.fld, 2)

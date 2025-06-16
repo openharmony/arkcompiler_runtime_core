@@ -19,7 +19,7 @@ const MAX_DIGITS = 1e9;
 const EXP_LIMIT = 9e15;
 
 function main(): int {
-    const suite = new ArkTestsuite("Decimal set API tests");
+    const suite = new arktest.ArkTestsuite("Decimal set API tests");
 
     suite.addTest("Decimal set by get", testSetByGet);
     suite.addTest("Decimal set with precision", testWithPrecision);

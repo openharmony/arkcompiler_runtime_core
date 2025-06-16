@@ -22,5 +22,5 @@ function callbackHandler(callback: (msg: string) => void): void {
 }
 
 callbackHandler((msg) => {
-  assertEQ(msg, 'Hello from callback');
+  arktest.assertEQ(msg, 'Hello from callback');
 });

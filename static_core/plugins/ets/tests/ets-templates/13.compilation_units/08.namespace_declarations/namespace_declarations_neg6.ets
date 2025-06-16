@@ -34,5 +34,5 @@ class myClass {
 
 function main() {
     let NS2: myClass = new myClass("New message")
-    assertEQ(NS2.sayHello(),"Test should fail")
+    arktest.assertEQ(NS2.sayHello(),"Test should fail")
 }

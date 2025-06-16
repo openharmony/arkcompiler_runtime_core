@@ -23,7 +23,7 @@ interface I<T> {
 
 function main(): void {
     let instance: I<Boolean> = {value: undefined}
-    assertEQ(instance.value, undefined)
+    arktest.assertEQ(instance.value, undefined)
     instance = {value: true}
-    assertEQ(instance.value, true)
+    arktest.assertEQ(instance.value, true)
 }

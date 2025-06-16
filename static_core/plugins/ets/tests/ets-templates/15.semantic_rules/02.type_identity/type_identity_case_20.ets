@@ -27,5 +27,5 @@ function main(): void {
   let func: StringReturn = getString();
   let result = func();
 
-  assertEQ(result, "Hello");
+  arktest.assertEQ(result, "Hello");
 }

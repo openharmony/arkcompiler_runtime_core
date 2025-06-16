@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet RemoveAt API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet RemoveAt API tests")
 
     suite.addTest("LightWeightSet removeAt data by index", testRemoveAtValidIndex)
     suite.addTest("LightWeightSet removeAt data by boundary index", testRemoveAtBoundaryIndex)
@@ -38,8 +38,8 @@ function testRemoveAtValidIndex() {
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
     let result = lightWeightSet.removeAt(1);
-    assertEQ(result, true, "The lightWeightSet should remove the value at the specified index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the specified index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testRemoveAtBoundaryIndex() {
@@ -48,8 +48,8 @@ function testRemoveAtBoundaryIndex() {
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
     let result = lightWeightSet.removeAt(0);
-    assertEQ(result, true, "The lightWeightSet should remove the value at the boundary index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the boundary index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testRemoveAtLeftExceededIndex() {
@@ -57,8 +57,8 @@ function testRemoveAtLeftExceededIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(-2);
-    assertEQ(result, false, "The lightWeightSet should not remove the value at an out-of-range index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, false, "The lightWeightSet should not remove the value at an out-of-range index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testRemoveAtRightExceededIndex() {
@@ -66,8 +66,8 @@ function testRemoveAtRightExceededIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(2);
-    assertEQ(result, false, "The lightWeightSet should not remove the value at an out-of-range index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, false, "The lightWeightSet should not remove the value at an out-of-range index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testRemoveAtIndexOfEmptySet() {
@@ -75,7 +75,7 @@ function testRemoveAtIndexOfEmptySet() {
     try {
         lightWeightSet.removeAt(4);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+        arktest.assertEQ(err.message, "The value of index is out of range.");
     }
 }
 
@@ -84,8 +84,8 @@ function testRemoveAtLeftFloatIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(Math.floor(1.2));
-    assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testRemoveAtRightFloatIndex() {
@@ -93,6 +93,6 @@ function testRemoveAtRightFloatIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.removeAt(Math.floor(1.8));
-    assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, true, "The lightWeightSet should remove the value at the floored index");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }

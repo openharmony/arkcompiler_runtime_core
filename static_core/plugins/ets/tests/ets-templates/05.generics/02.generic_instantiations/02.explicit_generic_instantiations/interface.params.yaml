@@ -22,8 +22,8 @@ cases:
         }
       use: |-
         let i: I<number, string> = {a: 1, b: "abc"}
-        assertEQ(typeof i.a, 'number')
-        assertEQ(typeof i.b, 'string')
+        arktest.assertEQ(typeof i.a, 'number')
+        arktest.assertEQ(typeof i.b, 'string')
     #case 1
     - decl: |-
         interface I<T, U> {
@@ -31,9 +31,9 @@ cases:
         }
       use: |-
         let i: I<number, string> = {a: [1, "abc"]}
-        assertEQ(typeof i.a, 'object')
-        assertEQ(typeof i.a[0], 'number')
-        assertEQ(typeof i.a[1], 'string')
+        arktest.assertEQ(typeof i.a, 'object')
+        arktest.assertEQ(typeof i.a[0], 'number')
+        arktest.assertEQ(typeof i.a[1], 'string')
     #case 2
     - decl: |-
         interface A<T>{
@@ -45,5 +45,5 @@ cases:
         }
       use: |-
         let i: B<number, string> = {a: 1, b: "abc"}
-        assertEQ(typeof i.a, 'number')
-        assertEQ(typeof i.b, 'string')
+        arktest.assertEQ(typeof i.a, 'number')
+        arktest.assertEQ(typeof i.b, 'string')

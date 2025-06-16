@@ -33,5 +33,5 @@ function increment(n: int): void {
 function main(): void {
   let a = new A(1)
   increment($$a.n)
-  assertEQ(a.n,  2)
+  arktest.assertEQ(a.n,  2)
 }

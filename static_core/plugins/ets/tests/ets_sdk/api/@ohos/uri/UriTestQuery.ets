@@ -17,49 +17,49 @@ import { uri } from "@ohos.uri"
 function testUriClearQuery001() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.clearQuery();
-  assertEQ(newRoute.toString(), "https://www.test.com");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com");
 }
 
 function testUriClearQuery002() {
   let route = new uri.URI('https://www.test.com?param1=value1');
   let newRoute = route.clearQuery();
-  assertEQ(newRoute.toString(), "https://www.test.com");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com");
 }
 
 function testUriClearQuery003() {
   let route = new uri.URI('https://www.test.com?param1=value1%');
   let newRoute = route.clearQuery();
-  assertEQ(newRoute.toString(), "https://www.test.com");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com");
 }
 
 function testUriClearQuery004() {
   let route = new uri.URI('https://www.test.com?param1=value1&param1=value2');
   let newRoute = route.clearQuery();
-  assertEQ(newRoute.toString(), "https://www.test.com");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com");
 }
 
 function testUriUriEncodedQuery001() {
   let route = new uri.URI('https://www.test.com/search?query=name&query=my');
-  assertEQ(route.encodedQuery, "query=name&query=my");
+  arktest.assertEQ(route.encodedQuery, "query=name&query=my");
 }
 
 function testUriUriEncodedQuery002() {
   let route = new uri.URI('https://www.test.com/search?');
-  assertEQ(route.encodedQuery, null);
+  arktest.assertEQ(route.encodedQuery, null);
 }
 
 function testUriUriEncodedQuery003() {
   let route = new uri.URI('https://www.test.com/');
-  assertEQ(route.encodedQuery, null);
+  arktest.assertEQ(route.encodedQuery, null);
 }
 
 function testUriUriEncodedQuery004() {
   let route = new uri.URI('https://www.test.com/search?query=my%20test');
-  assertEQ(route.encodedQuery, "query=my%20test");
+  arktest.assertEQ(route.encodedQuery, "query=my%20test");
 }
 
 function main(): int {
-  let suite = new ArkTestsuite("URI XTS tests");
+  let suite = new arktest.ArkTestsuite("URI XTS tests");
 
 
   suite.addTest("testUriClearQuery001", testUriClearQuery001);

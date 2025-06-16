@@ -26,5 +26,5 @@ class TestClass1 {
 function main(): void {
     const obj = new TestClass1();
     const result = obj.testMethod("abc");
-    assertEQ(result, "abc");
+    arktest.assertEQ(result, "abc");
 }

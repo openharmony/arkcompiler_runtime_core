@@ -21,5 +21,5 @@ function main(): void {
   let array1: number[] = [0, 1, 2, 3];
 
   let a: number = array1.length;
-  assertEQ(a, 4);
+  arktest.assertEQ(a, 4);
 }

@@ -60,16 +60,16 @@ function Handler(obj: Object): void {
     if (current == kTotal) {
         event.Fire();
     } else {
-        assertTrue(current < kTotal, "More rejections that expected");
+        arktest.assertTrue(current < kTotal, "More rejections that expected");
     }
 }
 
 function main(): void {
     StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        assertTrue(false, "Job handler didn't switch");
+        arktest.assertTrue(false, "Job handler didn't switch");
     });
     StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
-        assertTrue(false, "Promise handler didn't switch");
+        arktest.assertTrue(false, "Promise handler didn't switch");
     });
 
     StdProcess.on("unhandledJobRejection", Handler);

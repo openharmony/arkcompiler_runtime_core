@@ -45,7 +45,7 @@ function main() {
   let a = new Base();
   let b = new Derived();
   a.foo(b)
-  assertEQ( res, 1 )
+  arktest.assertEQ( res, 1 )
   b.foo(a)
-  assertEQ( res, 2 )
+  arktest.assertEQ( res, 2 )
 }

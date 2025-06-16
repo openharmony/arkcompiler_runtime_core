@@ -22,5 +22,5 @@ files:
 import { CONSTANT_A as CONSTANT_A_MODULE_A } from "./moduleA.ets";
 
 function main(): void {
-    assertEQ(CONSTANT_A_MODULE_A, "ValueA");
+    arktest.assertEQ(CONSTANT_A_MODULE_A, "ValueA");
 }

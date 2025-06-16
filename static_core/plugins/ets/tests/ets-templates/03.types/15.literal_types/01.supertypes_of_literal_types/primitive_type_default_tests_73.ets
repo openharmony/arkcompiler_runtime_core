@@ -25,5 +25,5 @@ function main(): void {
     const num1 = 17;
     const num2 = 5;
     const result = calculateRemainder(num1, num2);
-    assertEQ(result, 2);
+    arktest.assertEQ(result, 2);
 }

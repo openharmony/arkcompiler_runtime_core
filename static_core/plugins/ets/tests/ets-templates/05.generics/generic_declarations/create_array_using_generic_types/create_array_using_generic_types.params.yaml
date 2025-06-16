@@ -115,22 +115,22 @@ cases_two:
     desc: Instantiated array T[] with number[] type.
     values: "[0, 1, 2], [3, 4, 5], [6, 7, 8]"
     expected: |-
-      assertEQ(tmpArray[0][0], 0);
-      assertEQ(tmpArray[2][2], 8);
+      arktest.assertEQ(tmpArray[0][0], 0);
+      arktest.assertEQ(tmpArray[2][2], 8);
 
   - type: "[number, string, boolean]"
     desc: Instantiated array T[] with tuple type.
     values: "[0, \"a\", false], [0, \"a\", false]"
     expected: |-
-      assertEQ(tmpArray[0][0], 0);
-      assertEQ(tmpArray[1][2], false);
+      arktest.assertEQ(tmpArray[0][0], 0);
+      arktest.assertEQ(tmpArray[1][2], false);
 
   - type: (() => int)
     desc: Instantiated array T[] with function type.
     values: "() => { return 1; },() => { return 2; }"
     expected: |-
-      assertEQ(tmpArray[0](), 1);
-      assertEQ(tmpArray[1](), 2);
+      arktest.assertEQ(tmpArray[0](), 1);
+      arktest.assertEQ(tmpArray[1](), 2);
 
   - decl: |-
       class Animal {
@@ -144,5 +144,5 @@ cases_two:
     values: |-
       new Animal("Dog"), new Animal("Cat")
     expected: |-
-      assertEQ(tmpArray[0].name, "Dog");
-      assertEQ(tmpArray[1].name, "Cat");
+      arktest.assertEQ(tmpArray[0].name, "Dog");
+      arktest.assertEQ(tmpArray[1].name, "Cat");

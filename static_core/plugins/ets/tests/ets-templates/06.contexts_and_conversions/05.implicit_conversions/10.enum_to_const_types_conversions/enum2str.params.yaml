@@ -19,23 +19,23 @@ cases:
       use: |-
           // assignment-like context, variable declaration
           let v1: string = Color.Red
-          assertEQ(v1, "r")
+          arktest.assertEQ(v1, "r")
 
           let v2: string = Color.Green + Color.Blue
-          assertEQ(v2, "gb")
+          arktest.assertEQ(v2, "gb")
 
           let v3: string = s + Color.Blue + "X"
-          assertEQ(v3, "ZbX")
+          arktest.assertEQ(v3, "ZbX")
 
           // assignment-like context, constant declaration
           const c1: string = Color.Red
-          assertEQ(c1, "r")
+          arktest.assertEQ(c1, "r")
 
           const c2: string = Color.Green + Color.Blue
-          assertEQ(c2, "gb")
+          arktest.assertEQ(c2, "gb")
 
           const c3: string = s + Color.Blue + "X"
-          assertEQ(c3, "ZbX")
+          arktest.assertEQ(c3, "ZbX")
 
     - decl: |-
           let s: string = "Z"
@@ -43,13 +43,13 @@ cases:
       use: |-
           // assignment-like context, variable assignment
           v = Color.Red
-          assertEQ(v, "r")
+          arktest.assertEQ(v, "r")
 
           v = Color.Green + Color.Blue
-          assertEQ(v, "gb")
+          arktest.assertEQ(v, "gb")
 
           v = s + Color.Blue + "X"
-          assertEQ(v, "ZbX")
+          arktest.assertEQ(v, "ZbX")
 
     - decl: |-
           let s: string = "Z"
@@ -61,9 +61,9 @@ cases:
       use: |-
           // assignment-like context, field declaration
           let a: A = new A()
-          assertEQ(a.fld1, "r")
-          assertEQ(a.fld2, "bg")
-          assertEQ(a.fld3, "ZgX")
+          arktest.assertEQ(a.fld1, "r")
+          arktest.assertEQ(a.fld2, "bg")
+          arktest.assertEQ(a.fld3, "ZgX")
 
     - decl: |-
           let s: string = "Z"
@@ -78,9 +78,9 @@ cases:
           a.fld1 = Color.Red
           a.fld2 = Color.Blue + Color.Green
           a.fld3 = s + Color.Green + "X"
-          assertEQ(a.fld1, "r")
-          assertEQ(a.fld2, "bg")
-          assertEQ(a.fld3, "ZgX")
+          arktest.assertEQ(a.fld1, "r")
+          arktest.assertEQ(a.fld2, "bg")
+          arktest.assertEQ(a.fld3, "ZgX")
 
     - decl: |-
           let s: string = "Z"
@@ -89,9 +89,9 @@ cases:
           }
       use: |-
           // call context, function
-          assertEQ(foo(Color.Red), "r!")
-          assertEQ(foo(Color.Green + Color.Blue), "gb!")
-          assertEQ(foo(s + Color.Blue + "X"), "ZbX!")
+          arktest.assertEQ(foo(Color.Red), "r!")
+          arktest.assertEQ(foo(Color.Green + Color.Blue), "gb!")
+          arktest.assertEQ(foo(s + Color.Blue + "X"), "ZbX!")
 
     - decl: |-
           let s: string = "Z"
@@ -103,9 +103,9 @@ cases:
       use: |-
           // call context, method
           let a: A = new A()
-          assertEQ(a.meth(Color.Red), "r!")
-          assertEQ(a.meth(Color.Green + Color.Blue), "gb!")
-          assertEQ(a.meth(s + Color.Blue + "X"), "ZbX!")
+          arktest.assertEQ(a.meth(Color.Red), "r!")
+          arktest.assertEQ(a.meth(Color.Green + Color.Blue), "gb!")
+          arktest.assertEQ(a.meth(s + Color.Blue + "X"), "ZbX!")
 
     - decl: |-
           let s: string = "Z"
@@ -117,17 +117,17 @@ cases:
           }
       use: |-
           // call context, constructor
-          assertEQ(new A(Color.Red).fld, "r")
-          assertEQ(new A(Color.Green + Color.Blue).fld, "gb")
-          assertEQ(new A(s + Color.Blue + "X").fld, "ZbX")
+          arktest.assertEQ(new A(Color.Red).fld, "r")
+          arktest.assertEQ(new A(Color.Green + Color.Blue).fld, "gb")
+          arktest.assertEQ(new A(s + Color.Blue + "X").fld, "ZbX")
 
     - decl: |-
           let s: string = "Z"
       use: |-
           // call context, lambda
-          assertEQ(((p: string): string => { return p + "!" })(Color.Red), "r!")
-          assertEQ(((p: string): string => { return p + "!" })(Color.Green + Color.Blue), "gb!")
-          assertEQ(((p: string): string => { return p + "!" })(s + Color.Blue + "X"), "ZbX!")
+          arktest.assertEQ(((p: string): string => { return p + "!" })(Color.Red), "r!")
+          arktest.assertEQ(((p: string): string => { return p + "!" })(Color.Green + Color.Blue), "gb!")
+          arktest.assertEQ(((p: string): string => { return p + "!" })(s + Color.Blue + "X"), "ZbX!")
 
     - decl: |-
           let s: string = "Z"
@@ -137,18 +137,18 @@ cases:
       use: |-
           // composite object
           let a: A = { fld: Color.Red }
-          assertEQ(a.fld, "r")
+          arktest.assertEQ(a.fld, "r")
           a = { fld: Color.Blue + Color.Green }
-          assertEQ(a.fld, "bg")
+          arktest.assertEQ(a.fld, "bg")
           a = { fld: s + Color.Blue + "!" }
-          assertEQ(a.fld, "Zb!")
+          arktest.assertEQ(a.fld, "Zb!")
 
     - decl: |-
           let s: string = "Z"
       use: |-
           // composite array
           let v: string[] = [ Color.Red ]
-          assertEQ(v[0], "r")
+          arktest.assertEQ(v[0], "r")
           v = [ Color.Green + Color.Blue, Color.Blue + s + "!" ]
-          assertEQ(v[0], "gb")
-          assertEQ(v[1], "bZ!")
+          arktest.assertEQ(v[0], "gb")
+          arktest.assertEQ(v[1], "bZ!")

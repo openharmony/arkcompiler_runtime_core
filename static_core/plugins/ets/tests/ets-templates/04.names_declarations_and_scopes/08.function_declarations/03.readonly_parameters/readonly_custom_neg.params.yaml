@@ -99,8 +99,8 @@ cases:
         let arr: number[] = [1.9, 2.7];
         let arr2: number[] = foo(arr);
         arr[0] = 1;
-        assertTrue(arr2[0] == 1);
-        assertTrue(arr == arr2);
+        arktest.assertTrue(arr2[0] == 1);
+        arktest.assertTrue(arr == arr2);
 
   # readonly parameter is of predefined type
     - decl: |-
@@ -111,8 +111,8 @@ cases:
         let arr: tarr = [1.9, 2.7];
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assertTrue(arr2[0] == 1);
-        assertTrue(arr == arr2);
+        arktest.assertTrue(arr2[0] == 1);
+        arktest.assertTrue(arr == arr2);
 
     - decl: |-
         type tarr = Array<number>;
@@ -122,8 +122,8 @@ cases:
         let arr: tarr = new Array<number>(2);
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assertTrue(arr2[0] == 1);
-        assertTrue(arr == arr2);
+        arktest.assertTrue(arr2[0] == 1);
+        arktest.assertTrue(arr == arr2);
 
     - decl: |-
         type tarr = [int, number];
@@ -133,19 +133,19 @@ cases:
         let arr: tarr = [2, 2.7];
         let arr2: tarr = foo(arr);
         arr[0] = 1;
-        assertTrue(arr2[0] == 1);
-        assertTrue(arr == arr2);
+        arktest.assertTrue(arr2[0] == 1);
+        arktest.assertTrue(arr == arr2);
  
   # readonly parameter along with the optional key
     - decl: |-
         function foo(array?: readonly number[]) {
-            assertTrue(array[0] == 2)
+            arktest.assertTrue(array[0] == 2)
         }
         foo([2, 3])
 
     - decl: |-
         function foo(array?: readonly Array<number>) {
-            assertTrue(array[0] == 2)
+            arktest.assertTrue(array[0] == 2)
         }
         let arr = new Array<number>(1);
         arr[0] = 2;
@@ -153,7 +153,7 @@ cases:
     
     - decl: |-
         function foo(array?: readonly [string, Number]) {
-            assertTrue(array[1].unboxed() == 2.2)
+            arktest.assertTrue(array[1].unboxed() == 2.2)
         }
         foo(["str", new Number(2.2)])
 
@@ -163,16 +163,16 @@ cases:
             return array;
         }
         let arr: number[] = foo();
-        assertTrue(arr.length == 2);
-        assertTrue(arr[0] + arr[1] == 3.3);
+        arktest.assertTrue(arr.length == 2);
+        arktest.assertTrue(arr[0] + arr[1] == 3.3);
 
     - decl: |-
         function foo(array?: readonly Array<number> = new Array<number>(1)) {
             return array;
         }
         let arr = foo();
-        assertTrue(arr.length == 1);
-        assertTrue(arr[0] == 0 as number);
+        arktest.assertTrue(arr.length == 1);
+        arktest.assertTrue(arr[0] == 0 as number);
     
     - decl: |-
         type TPL = [string, number]
@@ -180,15 +180,15 @@ cases:
             return array;
         }
         let arr = foo();
-        assertTrue(arr[0] == "str");
-        assertTrue(arr[1] == 2);
+        arktest.assertTrue(arr[0] == "str");
+        arktest.assertTrue(arr[1] == 2);
 
   # multiple readonly values
     - decl: |-
         function foo(a: readonly string[], b: readonly int[]) {
             return b[0]a[0]b[1]a[1];
         }
-        assertTrue(foo(["str1", "str2"], [1, 2]) == "1str12str2");
+        arktest.assertTrue(foo(["str1", "str2"], [1, 2]) == "1str12str2");
 
   # multiple readonly values
     - decl: |-
@@ -198,7 +198,7 @@ cases:
         }
         let a: TPL = [true, "str"];
         let b: int[] = [1, 2];
-        assertTrue(foo(a, b) == "str2");
+        arktest.assertTrue(foo(a, b) == "str2");
 
     - decl: |-
         type TPL = [boolean, string]
@@ -207,7 +207,7 @@ cases:
         }
         let a: TPL = [true, "str"];
         let b: int[] = [1, 2];
-        assertTrue(foo(a, b, a, b) == "str2str1");
+        arktest.assertTrue(foo(a, b, a, b) == "str2str1");
 
     - decl: |-
         type TPL = [boolean, string]
@@ -219,7 +219,7 @@ cases:
         let c: Array<number> = new Array(2);
         c[0] = 3;
         c[1] = 4;
-        assertTrue(foo(a, b, c, a, b, c) == "str24str13");
+        arktest.assertTrue(foo(a, b, c, a, b, c) == "str24str13");
 
   # Mixed readonly and writable parameters
     - decl: |-
@@ -231,7 +231,7 @@ cases:
         let a = new Array<number>(2);
         a[0] = 3;
         a[1] = 4.5;
-        assertTrue(foo([3], a, "str") == "6strstr34.5");
+        arktest.assertTrue(foo([3], a, "str") == "6strstr34.5");
 
   # readonly argument could not be used as read-write.
     # array
@@ -244,7 +244,7 @@ cases:
         }
         function main() {
             let ro: readonly int[] = [1, 2];
-            assertTrue(foo(ro) == 1);
+            arktest.assertTrue(foo(ro) == 1);
         }
 
   # std:Array, not dependent on the place in code
@@ -257,7 +257,7 @@ cases:
         }
         function main() {
             let ro: readonly Array<int> = new Array<int>(1);
-            assertTrue(foo(ro) == 2);
+            arktest.assertTrue(foo(ro) == 2);
         }
 
   # tuple
@@ -271,6 +271,6 @@ cases:
         }
         function main() {
             let ro: readonly TPL = [1.1, "str"];
-            assertTrue(foo(ro) == 1);
+            arktest.assertTrue(foo(ro) == 1);
         }
 

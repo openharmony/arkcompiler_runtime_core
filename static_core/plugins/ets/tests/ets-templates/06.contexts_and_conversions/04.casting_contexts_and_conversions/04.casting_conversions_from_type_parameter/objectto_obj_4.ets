@@ -20,5 +20,5 @@ tags: [compile-only, negative]
 
 function main(): void {
   let temp: object;
-  assertEQ(temp as any, false);
+  arktest.assertEQ(temp as any, false);
 }

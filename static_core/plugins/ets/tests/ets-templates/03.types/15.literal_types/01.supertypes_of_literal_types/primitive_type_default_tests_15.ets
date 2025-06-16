@@ -24,5 +24,5 @@ function testFunc5(u: undefined = undefined) {
 
 function main(): void {
     let result = testFunc5();
-    assertEQ(result, undefined);
+    arktest.assertEQ(result, undefined);
 }

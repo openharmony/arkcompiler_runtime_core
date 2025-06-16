@@ -32,6 +32,6 @@ function foo(value: Long, ...other: Long[]) {
 function main(): void {
     candidate = 0;
     foo(1,2,3);
-    assertEQ(candidate, 1)
+    arktest.assertEQ(candidate, 1)
 }
 

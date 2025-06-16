@@ -45,11 +45,11 @@ function check(): boolean {
 
 function main(): void {
   let c = check() ? a : b;
-  assertEQ(foo(c), 2);
+  arktest.assertEQ(foo(c), 2);
 
   let e = check() ? a : d;
-  assertEQ(foo(e), 2);
+  arktest.assertEQ(foo(e), 2);
 
   let g = check() ? a : f;
-  assertEQ(foo(g), 3);
+  arktest.assertEQ(foo(g), 3);
 }

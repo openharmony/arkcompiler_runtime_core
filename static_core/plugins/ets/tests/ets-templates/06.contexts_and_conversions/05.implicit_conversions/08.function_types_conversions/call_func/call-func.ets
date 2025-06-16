@@ -30,7 +30,7 @@ function zoo{{loop.index}}(p: {{t.type}}): {{t.type}} {
 
 function main() {
 {% for t in c['to'] %}
-    assertTrue( zoo{{loop.index}}(foo){{t.call}} )
+    arktest.assertTrue( zoo{{loop.index}}(foo){{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

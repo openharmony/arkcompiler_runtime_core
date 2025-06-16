@@ -28,7 +28,7 @@ function test () {
   let f1 = (k:int) => { return ++k }
 
   let result = f1(k)
-  assertEQ(result,  11)
+  arktest.assertEQ(result,  11)
 
 }
 

@@ -25,5 +25,5 @@ namespace NamespaceA {
 }
 
 function main(): void {
-    assertEQ(NamespaceA.SubNamespace.VALUE, "ValueSub");
+    arktest.assertEQ(NamespaceA.SubNamespace.VALUE, "ValueSub");
 }

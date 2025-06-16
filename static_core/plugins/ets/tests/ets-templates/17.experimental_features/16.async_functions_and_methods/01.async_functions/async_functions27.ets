@@ -26,7 +26,7 @@ async function startTest() {
     try {
         await functionReturnReject();
     } catch (error) {
-        assertEQ(error as string, "Rejected!")
+        arktest.assertEQ(error as string, "Rejected!")
     }
 }
 

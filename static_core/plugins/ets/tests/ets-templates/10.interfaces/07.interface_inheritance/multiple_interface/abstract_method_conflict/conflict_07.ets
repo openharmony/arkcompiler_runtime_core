@@ -42,6 +42,6 @@ function main(): void {
   const robot = new Robot();
   (robot as Animal).makeSound(); 
   (robot as Machine).makeSound(10);
-  assertEQ(result, "Beep");
-  assertEQ(result1, 11);
+  arktest.assertEQ(result, "Beep");
+  arktest.assertEQ(result1, 11);
 }

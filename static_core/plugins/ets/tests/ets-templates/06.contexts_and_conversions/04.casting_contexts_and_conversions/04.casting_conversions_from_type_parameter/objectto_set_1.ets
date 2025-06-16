@@ -20,5 +20,5 @@ desc: Convert to obj-set type.
 function main(): void {
   let mySet = new Set<number>();
   const obj1: object = mySet;
-  assertTrue(obj1 == mySet);
+  arktest.assertTrue(obj1 == mySet);
 }

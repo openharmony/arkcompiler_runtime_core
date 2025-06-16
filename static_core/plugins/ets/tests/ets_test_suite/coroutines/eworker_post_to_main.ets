@@ -18,13 +18,13 @@
 function main() {
     let job1 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertEQ(runId, mainId);
+        arktest.assertEQ(runId, mainId);
         return runId;
     });
 
     let job2 = EAWorker.postToMain<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertEQ(runId, mainId);
+        arktest.assertEQ(runId, mainId);
         return runId;
     });
 
@@ -38,7 +38,7 @@ function main() {
     let runId2 = job2.Await();
     let runId3 = job3.Await();
 
-    assertEQ(runId1, runId2);
+    arktest.assertEQ(runId1, runId2);
     assertNE(runId1, runId3);
 }
 

@@ -19,5 +19,5 @@ desc: The null literal is of the type null (see The null Type) and is, by defini
 
 function main() {
     let x: null = null;
-    assertTrue( x === null )
+    arktest.assertTrue( x === null )
 }

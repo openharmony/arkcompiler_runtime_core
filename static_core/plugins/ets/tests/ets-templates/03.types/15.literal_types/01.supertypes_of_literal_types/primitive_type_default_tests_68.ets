@@ -25,5 +25,5 @@ function ternaryTest() {
 
 function main(): void {
     const result = ternaryTest();
-    assertEQ(result, "trueValue");
+    arktest.assertEQ(result, "trueValue");
 }

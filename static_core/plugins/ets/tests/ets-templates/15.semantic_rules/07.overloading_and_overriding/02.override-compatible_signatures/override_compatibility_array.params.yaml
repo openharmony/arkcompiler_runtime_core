@@ -24,9 +24,9 @@ cases:
       }
     call: |-
       new Derived().foo([new Base()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo([new Derived()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself parameter
 
   - tags: 'negative, compile-only'
@@ -87,9 +87,9 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().bar()
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself return value
 
   - base: |-
@@ -112,9 +112,9 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().bar()
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible return value (covariance)
 
   - tags: 'negative, compile-only'
@@ -153,9 +153,9 @@ cases:
       }
     call: |-
       new Derived().foo([new Base()])
-      assertEQ( res, 1 )
+      arktest.assertEQ( res, 1 )
       new Derived().foo([new Derived()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter (covariance)
 
   - base: |-
@@ -168,9 +168,9 @@ cases:
       }
     call: |-
       new Derived().foo([new Base()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo([new Derived()])
-      assertEQ( res, 1 )
+      arktest.assertEQ( res, 1 )
     params: override-incompatible parameter (contravariance), not overload-equivalent
 
   - base: |-
@@ -183,7 +183,7 @@ cases:
       }
     call: |-
       new Derived().foo([new Base()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible parameter (covariance)
 
   - base: |-
@@ -196,5 +196,5 @@ cases:
       }
     call: |-
       new Derived().foo([new Base()])
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-incompatible parameter (contravariance), not overload-equivalent

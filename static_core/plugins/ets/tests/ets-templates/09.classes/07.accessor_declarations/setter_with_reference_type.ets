@@ -35,5 +35,5 @@ function main(): void {
   let instance: B = new B();
 
   instance.obj = new A();
-  assertTrue( instance.obj instanceof A );
+  arktest.assertTrue( instance.obj instanceof A );
 }

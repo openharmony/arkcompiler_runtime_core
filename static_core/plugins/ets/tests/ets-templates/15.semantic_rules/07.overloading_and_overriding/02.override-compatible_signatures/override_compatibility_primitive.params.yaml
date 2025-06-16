@@ -24,7 +24,7 @@ cases:
       }
     call: |-
       new Derived().foo(1)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible with itself parameter
 
   - base: |-
@@ -37,9 +37,9 @@ cases:
       }
     call: |-
       new Derived().foo(1 as number)
-      assertEQ( res, 1 )
+      arktest.assertEQ( res, 1 )
       new Derived().foo(1 as long)
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-incompatible parameter, overload-compatible
 
   - tags: 'negative, compile-only'
@@ -66,7 +66,7 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     params: override-compatible return value
 
   - tags: 'negative, compile-only'

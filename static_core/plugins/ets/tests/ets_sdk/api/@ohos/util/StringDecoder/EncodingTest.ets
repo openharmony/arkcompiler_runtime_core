@@ -16,7 +16,7 @@
 import { util } from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("StringDecoder API tests");
+    const suite = new arktest.ArkTestsuite("StringDecoder API tests");
 
     suite.addTest(" Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite003);
     suite.addTest(" Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite004);
@@ -45,7 +45,7 @@ function testwrite003() {
     let decoder = new util.StringDecoder('big5');
     let input = new Uint8Array([167, 65, 166, 110]);
     const decoded = decoder.write(input);
-    assertEQ(decoded, '你好');
+    arktest.assertEQ(decoded, '你好');
 }
 
 /**
@@ -61,7 +61,7 @@ function testwrite004() {
     let decoder = new util.StringDecoder('iso-8859-2');
     let input = new Uint8Array([0X61, 0X62, 0X63]);
     const decoded = decoder.write(input);
-    assertEQ(decoded, 'abc');
+    arktest.assertEQ(decoded, 'abc');
 }
 
 /**
@@ -77,7 +77,7 @@ function testwrite005() {
     let decoder = new util.StringDecoder('koi8-r');
     let input = new Uint8Array([97, 98, 99]);
     const decoded = decoder.write(input);
-    assertEQ(decoded, 'abc');
+    arktest.assertEQ(decoded, 'abc');
 }
 
 /**
@@ -93,7 +93,7 @@ function testwrite006() {
     let decoder = new util.StringDecoder('windows-1250');
     let input = new Uint8Array([0X61, 0X62, 0X63]);
     const decoded = decoder.write(input);
-    assertEQ(decoded, 'abc');
+    arktest.assertEQ(decoded, 'abc');
 }
 
 /**
@@ -108,7 +108,7 @@ function testend001() {
     let decoder = new util.StringDecoder('macintosh');
     let input = new Uint8Array([0X61]);
     const decoded = decoder.end(input);
-    assertEQ(decoded, 'a');
+    arktest.assertEQ(decoded, 'a');
 }
 
 
@@ -136,22 +136,22 @@ function test_Decode_Test_001() {
         if (item === 'utf-16be') {
             let input2 = 'HelloWorld123?HelloWorld123?'
         }
-        assertEQ(decoded1, 'HelloWorld123?')
-        assertEQ(decoded2, 'HelloWorld123?HelloWorld123?')
+        arktest.assertEQ(decoded1, 'HelloWorld123?')
+        arktest.assertEQ(decoded2, 'HelloWorld123?HelloWorld123?')
 
         let input3 = input1.slice(0, 5)
         let input33 = input1.slice(5)
         const decoded3 = decoder.write(input3)
         const decodedend3 = decoder.write(input33)
-        assertEQ(decoded3, 'Hello')
-        assertEQ(decodedend3, 'World123?')
+        arktest.assertEQ(decoded3, 'Hello')
+        arktest.assertEQ(decodedend3, 'World123?')
 
         let input4 = input1.slice(0, 1)
         let input44 = input1.slice(1)
         const decoded4 = decoder.write(input4)
         const decodedend4 = decoder.write(input44)
-        assertEQ(decoded4, 'H')
-        assertEQ(decodedend4, 'elloWorld123?')
+        arktest.assertEQ(decoded4, 'H')
+        arktest.assertEQ(decodedend4, 'elloWorld123?')
     }
 }
 
@@ -168,7 +168,7 @@ function test_Decode_Test_002() {
     let result = that.encodeInto('HelLoWorLd123?')
     let decoder = new util.StringDecoder('utf-16be')
     const decoded1 = decoder.write(result)
-    assertEQ(decoded1, 'HelLoWorLd123?')
+    arktest.assertEQ(decoded1, 'HelLoWorLd123?')
 }
 
 /**
@@ -184,7 +184,7 @@ function test_Decode_Test_003() {
     let result = that.encodeInto('HelLoWorLd123?')
     let decoder = new util.StringDecoder('utf-16le')
     const decoded1 = decoder.write(result)
-    assertEQ(decoded1, 'HelLoWorLd123?')
+    arktest.assertEQ(decoded1, 'HelLoWorLd123?')
 }
 
 /**
@@ -210,18 +210,18 @@ function testArrayScenarios0600() {
         let decoder = new util.StringDecoder(item)
         let decoded1 = decoder.write(uint8Array)
         let urlcode = encodeURI(decoded1)
-        assertEQ(urlcode, '%00%00%00%00%00HelloWorld123?')
+        arktest.assertEQ(urlcode, '%00%00%00%00%00HelloWorld123?')
     }
 
     let decoder1 = new util.StringDecoder('utf-16be')
     let decodedBe = decoder1.write(uint8Array)
     let urlcodeBe = encodeURI(decodedBe)
-    assertEQ(urlcodeBe, '%00%00H%E6%95%AC%E6%B1%AF%E5%9D%AF%E7%89%AC%E6%90%B1%E3%88%B3')
+    arktest.assertEQ(urlcodeBe, '%00%00H%E6%95%AC%E6%B1%AF%E5%9D%AF%E7%89%AC%E6%90%B1%E3%88%B3')
 
     let decoder2 = new util.StringDecoder('utf-16le')
     let decodedLe = decoder2.write(uint8Array)
     let urlcodeLe = encodeURI(decodedLe)
-    assertEQ(urlcodeLe, '%00%00%E4%A0%80%E6%B1%A5%E6%BD%AC%E6%BD%97%E6%B1%B2%E3%85%A4%E3%8C%B2')
+    arktest.assertEQ(urlcodeLe, '%00%00%E4%A0%80%E6%B1%A5%E6%BD%AC%E6%BD%97%E6%B1%B2%E3%85%A4%E3%8C%B2')
 }
 
 /**
@@ -247,16 +247,16 @@ function testArrayScenarios0700() {
         let decoder = new util.StringDecoder(item)
         let decoded1 = decoder.end(uint8Array.slice(14))
         let urlcode = encodeURI(decoded1)
-        assertEQ(urlcode, '%00%00%00%00%00')
+        arktest.assertEQ(urlcode, '%00%00%00%00%00')
     }
 
     let decoder1 = new util.StringDecoder('utf-16be')
     let decodedBe = decoder1.end(uint8Array.slice(14))
     let urlcodeBe = encodeURI(decodedBe)
-    assertEQ(urlcodeBe, '%00%00%EF%BF%BD')
+    arktest.assertEQ(urlcodeBe, '%00%00%EF%BF%BD')
 
     let decoder2 = new util.StringDecoder('utf-16le')
     let decodedLe = decoder2.end(uint8Array.slice(14))
     let urlcodeLe = encodeURI(decodedLe)
-    assertEQ(urlcodeLe, '%00%00%EF%BF%BD')
+    arktest.assertEQ(urlcodeLe, '%00%00%EF%BF%BD')
 }

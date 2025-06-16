@@ -21,6 +21,6 @@ function main() {
     let s: string[] = [ "", '', "\x00", '\u0000', "\u{CAFE}", "\uBABE", '生日快乐!', "С Днём рождения!" ]
 
     for (let i = 0; i < s.length; i++) {
-        assertTrue( s[i] instanceof string , s[i] + " is not a string" )
+        arktest.assertTrue( s[i] instanceof string , s[i] + " is not a string" )
     }
 }

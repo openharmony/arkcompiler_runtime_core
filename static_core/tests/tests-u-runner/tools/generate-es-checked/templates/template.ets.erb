@@ -27,7 +27,7 @@ function __fail(): void {
   console.println("}");
   if (__fail_count >= __max_errors) {
     console.println("terminating after max (" + __max_errors + ") errors");
-    assertTrue(false);
+    arktest.assertTrue(false);
   }
   __fail_count += 1;
 }
@@ -231,5 +231,5 @@ function main(): void {
 % slices.each { |i|
   test<%= i %>();
 % }
-  assertEQ(__fail_count, 0);
+  arktest.assertEQ(__fail_count, 0);
 }

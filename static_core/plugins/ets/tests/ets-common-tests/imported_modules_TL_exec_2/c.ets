@@ -20,5 +20,5 @@
 export let c : int = 0;
 
 {
-    assertEQ(c, 0);
+    arktest.assertEQ(c, 0);
 }

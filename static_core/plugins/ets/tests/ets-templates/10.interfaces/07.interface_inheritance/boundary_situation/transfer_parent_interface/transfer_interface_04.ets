@@ -33,5 +33,5 @@ function main(): void {
   };
   let resule = processCombinedType(combinedItem);
 
-  assertEQ(resule, "Key: exampleKey");
+  arktest.assertEQ(resule, "Key: exampleKey");
 }

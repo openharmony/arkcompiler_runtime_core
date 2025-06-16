@@ -43,7 +43,7 @@ let objectClass = Class.of(new Object())
 function testNewObjSimple() {
     let b = new B()
     let klass1 = Runtime.__getTypeInfo(b)
-    assertEQ(klass1, B.klass)
+    arktest.assertEQ(klass1, B.klass)
 }
 
 function testNewObjPhi(x: boolean) {
@@ -53,7 +53,7 @@ function testNewObjPhi(x: boolean) {
     else
         a = new B()
     let klass1 = Runtime.__getTypeInfo(a)
-    assertTrue(klass1 === undefined)
+    arktest.assertTrue(klass1 === undefined)
 }
 
 function testNewObjStoreLoad() {
@@ -64,9 +64,9 @@ function testNewObjStoreLoad() {
     box.set(new A())
     let klass3 = Runtime.__getTypeInfo(box.get())
 
-    assertEQ(klass1, boxClass)
-    assertEQ(klass2, B.klass)
-    assertEQ(klass3, A.klass)
+    arktest.assertEQ(klass1, boxClass)
+    arktest.assertEQ(klass2, B.klass)
+    arktest.assertEQ(klass3, A.klass)
 }
 
 function __noinline__blackBox(x: Object): boolean {
@@ -83,8 +83,8 @@ function testInvalidateSimple() {
     let klass1 = Runtime.__getTypeInfo(box.get())
     __noinline__blackBox(box)
     let klass2 = Runtime.__getTypeInfo(box.get())
-    assertEQ(klass1, B.klass)
-    assertEQ(klass2, objectClass)
+    arktest.assertEQ(klass1, B.klass)
+    arktest.assertEQ(klass2, objectClass)
 }
 
 function testInvalidateInTriangle(x: boolean) {
@@ -94,7 +94,7 @@ function testInvalidateInTriangle(x: boolean) {
         __noinline__blackBox(box)
     }
     let klass1 = Runtime.__getTypeInfo(box.get())
-    assertEQ(klass1, objectClass)
+    arktest.assertEQ(klass1, objectClass)
 }
 
 function testInvalidateBeforeEdge(x: boolean) {
@@ -109,8 +109,8 @@ function testInvalidateBeforeEdge(x: boolean) {
     if (x) {
         klass2 = Runtime.__getTypeInfo(box.get())
     }
-    assertEQ(klass1, B.klass)
-    assertEQ(klass2, objectClass)
+    arktest.assertEQ(klass1, B.klass)
+    arktest.assertEQ(klass2, objectClass)
 }
 
 let gObj: Object | null = null
@@ -129,8 +129,8 @@ function testEscapeToGObject(x: boolean) {
         let klass1 = Runtime.__getTypeInfo(box.get())
         __noinline__blackBox()
         let klass2 = Runtime.__getTypeInfo(box.get())
-        assertEQ(klass1, B.klass)
-        assertEQ(klass2, objectClass)
+        arktest.assertEQ(klass1, B.klass)
+        arktest.assertEQ(klass2, objectClass)
     }
 }
 
@@ -143,8 +143,8 @@ function testEscapeToGObjectField(x: boolean) {
         let klass1 = Runtime.__getTypeInfo(box.get())
         __noinline__blackBox()
         let klass2 = Runtime.__getTypeInfo(box.get())
-        assertEQ(klass1, B.klass)
-        assertEQ(klass2, objectClass)
+        arktest.assertEQ(klass1, B.klass)
+        arktest.assertEQ(klass2, objectClass)
     }
 }
 
@@ -173,11 +173,11 @@ function testLongEscapeChain() {
     __noinline__blackBox() // h2-h4 are invalidated
     let klass4 = Runtime.__getTypeInfo(h4.obj) // Object
     let klass5 = Runtime.__getTypeInfo(h6.obj) // Holder
-    assertEQ(klass1, Holder.klass)
-    assertEQ(klass2, Holder.klass)
-    assertEQ(klass3, Holder.klass)
-    assertEQ(klass4, objectClass)
-    assertEQ(klass5, Holder.klass)
+    arktest.assertEQ(klass1, Holder.klass)
+    arktest.assertEQ(klass2, Holder.klass)
+    arktest.assertEQ(klass3, Holder.klass)
+    arktest.assertEQ(klass4, objectClass)
+    arktest.assertEQ(klass5, Holder.klass)
 }
 
 function testEscapeChainInTriangle(x: boolean) {
@@ -191,15 +191,15 @@ function testEscapeChainInTriangle(x: boolean) {
         h2.obj = h3
     }
     __noinline__blackBox(h2) // h3, h2, h1 escape and are invalidated
-    assertEQ(Runtime.__getTypeInfo(h2.obj), objectClass)
-    assertEQ(Runtime.__getTypeInfo(h2.obj), objectClass)
+    arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), objectClass)
+    arktest.assertEQ(Runtime.__getTypeInfo(h2.obj), objectClass)
 }
 
 function testLoopPhi() {
     let a = new A()
     __noinline__blackBox(a) // doesn't affect anything
     for (let i = 0; i < 11; i++) {
-        assertEQ(Runtime.__getTypeInfo(a), A.klass)
+        arktest.assertEQ(Runtime.__getTypeInfo(a), A.klass)
         a = new A()
         __noinline__blackBox(a)
     }
@@ -210,7 +210,7 @@ function testLoopLoad() {
     gHolder.obj = a
     for (let i = 0; i < 5; i++) {
         // NOTE: doesn't work optimally, need fix
-        assertEQ(Runtime.__getTypeInfo(gHolder.obj), objectClass)
+        arktest.assertEQ(Runtime.__getTypeInfo(gHolder.obj), objectClass)
         gHolder.obj = new A()
     }
 }
@@ -227,7 +227,7 @@ function testDiamondEscape(x: boolean) {
     // we consider `holder` escaped although it cannot escape on each beanch of `if`
     __noinline__blackBox()
     let klass1 = Runtime.__getTypeInfo(h2.obj)
-    assertEQ(klass1, objectClass)
+    arktest.assertEQ(klass1, objectClass)
 }
 
 function main() {

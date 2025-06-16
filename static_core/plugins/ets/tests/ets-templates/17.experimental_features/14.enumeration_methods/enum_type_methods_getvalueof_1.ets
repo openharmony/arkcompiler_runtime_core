@@ -25,5 +25,5 @@ function main(): void {
   } catch (e) {
     return
   }
-  assertTrue(false, "Error was expected")
+  arktest.assertTrue(false, "Error was expected")
 }

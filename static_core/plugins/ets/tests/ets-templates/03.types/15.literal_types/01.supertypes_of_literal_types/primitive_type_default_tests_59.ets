@@ -24,5 +24,5 @@ function notTest() {
 
 function main(): void {
     const result = notTest();
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }

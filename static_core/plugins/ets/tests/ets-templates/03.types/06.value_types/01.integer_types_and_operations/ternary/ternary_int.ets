@@ -22,7 +22,7 @@ function main(): void {
     const a: int = {{v.condition}}
     const b: int = {{v.ifTrue}}
     const c: int = {{v.ifFalse}}
-    assertEQ( (a ? b : c), {{v.result}})
+    arktest.assertEQ( (a ? b : c), {{v.result}})
 }
 
 {% endfor %}

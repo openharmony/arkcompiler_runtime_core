@@ -26,5 +26,5 @@ function foo(i: int|undefined): boolean {
 }
 
 function main(): void {
-  assertTrue(foo(undefined))
+  arktest.assertTrue(foo(undefined))
 }

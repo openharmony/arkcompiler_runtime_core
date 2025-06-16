@@ -29,5 +29,5 @@ class Float32ArrayConstantChild implements Float32ArrayConstantInterface {
 
 function main(): void {
   const instance = new Float32ArrayConstantChild();
-  assertEQ(instance.CONST, check_value);
+  arktest.assertEQ(instance.CONST, check_value);
 }

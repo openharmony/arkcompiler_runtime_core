@@ -31,5 +31,5 @@ class C implements I {
 function main(): void {
   let instance: C = new C();
 
-  assertTrue( instance.m() == 5 );
+  arktest.assertTrue( instance.m() == 5 );
 }

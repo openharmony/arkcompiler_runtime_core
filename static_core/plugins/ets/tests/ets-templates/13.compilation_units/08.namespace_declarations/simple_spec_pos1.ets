@@ -23,5 +23,5 @@ files:
 import {Space2 as mySpace} from "./namespace_storage"
 
 function main() {
-    assertEQ(mySpace.foo(345), 345);
+    arktest.assertEQ(mySpace.foo(345), 345);
 }

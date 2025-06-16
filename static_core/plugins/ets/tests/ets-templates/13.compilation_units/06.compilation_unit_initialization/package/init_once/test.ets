@@ -27,7 +27,7 @@ import {foo} from "./pkg";
 function main() {
   i++
 
-  assertEQ(i, 1, "i != 1");
-  assertEQ(i + 1, foo(), "i != foo()");
-  assertEQ(i, 2, "i != 2");
+  arktest.assertEQ(i, 1, "i != 1");
+  arktest.assertEQ(i + 1, foo(), "i != foo()");
+  arktest.assertEQ(i, 2, "i != 2");
 }

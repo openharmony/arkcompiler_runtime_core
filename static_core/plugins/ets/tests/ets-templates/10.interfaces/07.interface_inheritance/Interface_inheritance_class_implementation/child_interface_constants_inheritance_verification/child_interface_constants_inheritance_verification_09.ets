@@ -32,6 +32,6 @@ class MultiInterfaceChild implements MultiInterface1, MultiInterface2 {
 
 function main(): void {
   const instance = new MultiInterfaceChild();
-  assertEQ(instance.CONST1, 2);
-  assertEQ(instance.CONST2, "multi")
+  arktest.assertEQ(instance.CONST1, 2);
+  arktest.assertEQ(instance.CONST2, "multi")
 }

@@ -21,88 +21,88 @@ let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six",
 let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentSetHasTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetHasTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("HasTestOne001", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrKeys[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let hasFlag = ConcurrentSetTest.has(1);
-        assertEQ(hasFlag, true);
+        arktest.assertEQ(hasFlag, true);
     });
     ConcurrentSetTestsuite.addTest("HasTestTwo001", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrValues[i]);
         }
-        assertEQ(ConcurrentSetTest.size, 10);
+        arktest.assertEQ(ConcurrentSetTest.size, 10);
         let one: string = "one";
         let hasFlag = ConcurrentSetTest.has(one);
-        assertEQ(hasFlag, true);
+        arktest.assertEQ(hasFlag, true);
     });
     ConcurrentSetTestsuite.addTest("HasTestOne002", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrKeys[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let hasFlag = ConcurrentSetTest.has(20);
-        assertEQ(hasFlag, false);
+        arktest.assertEQ(hasFlag, false);
     });
     ConcurrentSetTestsuite.addTest("HasTestTwo002", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrValues[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let hasFlag = ConcurrentSetTest.has("error");
-        assertEQ(hasFlag, false);
+        arktest.assertEQ(hasFlag, false);
     });
     ConcurrentSetTestsuite.addTest("HasTestOne003", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         let hasFlag = ConcurrentSetTest.has(10);
-        assertEQ(hasFlag, false);
+        arktest.assertEQ(hasFlag, false);
     });
     ConcurrentSetTestsuite.addTest("HasTestTwo003", () =>
     {
         let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         let hasFlag = ConcurrentSetTest.has("two");
-        assertEQ(hasFlag, false);
+        arktest.assertEQ(hasFlag, false);
     });
     // Multiple Threads Test
     ConcurrentSetTestsuite.addTest("Has&ClearTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        assertEQ(ConcurrentSetTestOne.has(3), true);
+        arktest.assertEQ(ConcurrentSetTestOne.has(3), true);
         let p1 = launch<void, (i: int) => void>(hasOne, 0);
         let p2 = launch<void, () => void>(clearTest);
         p1.Await();
         p2.Await();
-        assertEQ(ConcurrentSetTestOne.has(0), false);
+        arktest.assertEQ(ConcurrentSetTestOne.has(0), false);
     });
 
     return ConcurrentSetTestsuite.run();

@@ -20,10 +20,10 @@ desc: Validate that the scope of the parameters is limited to the function.
 let param = "global";
 
 function scopeTest(param: string): void {
-  assertEQ(param, "local");
+  arktest.assertEQ(param, "local");
 }
 
 function main(): void {
   scopeTest("local");
-  assertEQ(param, "global");
+  arktest.assertEQ(param, "global");
 }

@@ -29,39 +29,39 @@ function showOptionalInt_1() {
 function makeOptionalInt() {
     let res = OptTest.makeOptionalInt(true);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function makeOptionalInt_1() {
     let res = OptTest.makeOptionalInt(false);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 function makeOptionalArray() {
     let res = OptTest.makeOptionalArray(true, 5, 3);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function makeOptionalArray_1() {
     let res = OptTest.makeOptionalArray(false, 5, 3);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 function sendReturnResult() {
     let result: OptTest.ReturnResult = {results: ["ab", "cd", "ef"]};
     let res = OptTest.sendReturnResult(result);
     console.log(res)
-    assertTrue(res != undefined);
+    arktest.assertTrue(res != undefined);
 }
 
 function sendReturnResult_1() {
     let result: OptTest.ReturnResult = {results: undefined};
     let res = OptTest.sendReturnResult(result);
     console.log(res)
-    assertTrue(res == undefined);
+    arktest.assertTrue(res == undefined);
 }
 
 // 数值类型测试函数
@@ -189,13 +189,13 @@ function func_showOptionalString(){
     let instance: OptTest.Test = OptTest.getTest();
     let str = "this is string data";
     let result = instance.showOptionalString(str);
-    assertEQ(result, "this is string data");
+    arktest.assertEQ(result, "this is string data");
 }
 
 function func_showOptionalString_1(){
     let instance: OptTest.Test = OptTest.getTest();
     let result = instance.showOptionalString(undefined);
-    assertTrue(result == undefined);
+    arktest.assertTrue(result == undefined);
 }
 
 function func_getTest_setIntData(){
@@ -207,71 +207,71 @@ function func_getTest_property(){
     let instance: OptTest.Test = OptTest.getTest();
     instance.string = "this is string value";
     let res = instance.string;
-    assertEQ(res, "this is string value");
+    arktest.assertEQ(res, "this is string value");
 }
 
 function func_getTest_property_1(){
     let instance: OptTest.Test = OptTest.getTest();
     instance.string = undefined;
     let res = instance.string;
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
 function func_showOptionalInt32(){
     let instance: OptTest.Test = OptTest.getTest();
     let intValue = 12;
     let res = instance.showOptionalInt32(intValue);
-    assertEQ(res, 12);
+    arktest.assertEQ(res, 12);
 }
 
 function func_showOptionalInt32_1(){
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalInt32(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
 function func_showOptionalBool(){
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalBool(true);
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
 function func_showOptionalBool_1(){
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalBool(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
 function func_showOptionalRecord(){
     let instance: OptTest.Test = OptTest.getTest();
     let data: Record<string, boolean> = {"key1": false};
     let res = instance.showOptionalRecord(data) as Record<string, boolean>;
-    assertEQ(res.toString(), data.toString());
+    arktest.assertEQ(res.toString(), data.toString());
 }
 
 function func_showOptionalRecord_1(){
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalRecord(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
 function func_showOptionalStruct(){
     let instance: OptTest.Test = OptTest.getTest();
     let data: OptTest.MyStruct = {param1: 12, param2: "string data"} ;
     let res = instance.showOptionalStruct(data) as OptTest.MyStruct;
-    assertEQ(res.toString(), data.toString());
+    arktest.assertEQ(res.toString(), data.toString());
 }
 
 function func_showOptionalStruct_1(){
     let instance: OptTest.Test = OptTest.getTest();
     let res = instance.showOptionalStruct(undefined);
-    assertEQ(res, undefined);
+    arktest.assertEQ(res, undefined);
 }
 
 function main() {
     console.log("run main ... OptTest ...")
 
-    const suite = new ArkTestsuite("OptTest")
+    const suite = new arktest.ArkTestsuite("OptTest")
     suite.addTest("showOptionalInt", showOptionalInt)
     suite.addTest("showOptionalInt_1", showOptionalInt_1)
     suite.addTest("makeOptionalInt", makeOptionalInt)

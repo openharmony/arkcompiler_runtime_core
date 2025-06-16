@@ -29,5 +29,5 @@ function bar(n: number): string {
 }
 
 function main(): void {
-  assertEQ(bar(3), "no");
+  arktest.assertEQ(bar(3), "no");
 }

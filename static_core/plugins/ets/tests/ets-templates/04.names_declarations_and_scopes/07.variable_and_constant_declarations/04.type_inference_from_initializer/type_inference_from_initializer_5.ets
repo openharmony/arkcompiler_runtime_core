@@ -19,7 +19,7 @@ desc: Constant declaration with literal type.
 
 function main(): void {
   let tmp = null;
-  assertTrue(tmp == null);
+  arktest.assertTrue(tmp == null);
   let tmp1 = undefined;
-  assertTrue(tmp1 == undefined);
+  arktest.assertTrue(tmp1 == undefined);
 }

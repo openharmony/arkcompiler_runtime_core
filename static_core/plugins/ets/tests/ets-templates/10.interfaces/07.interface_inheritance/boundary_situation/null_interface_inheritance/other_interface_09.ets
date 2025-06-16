@@ -35,5 +35,5 @@ function main(): void {
     propB: 42
   } as EmptyInterface;
 
-  assertEQ(obj.propA, "Hello");
+  arktest.assertEQ(obj.propA, "Hello");
 }

@@ -55,7 +55,7 @@ function testTimeFormatWithLocaleAndOptions(): void {
         const actual = formatter.format(testDate)
         const expected = res[3]
         if (actual !== expected) {
-            assertEQ(actual, expected, `unexpected format result for locale: ${locale} and options: ${options}`)
+            arktest.assertEQ(actual, expected, `unexpected format result for locale: ${locale} and options: ${options}`)
         }
     })
 }
@@ -70,7 +70,7 @@ function testTimeFormatWithInvalidFractionalSecondDigitsOption(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat API time format tests")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat API time format tests")
     suite.addTest("time format with custom locale and options", testTimeFormatWithLocaleAndOptions)
     suite.addTest("time format with invalid fractionalSecondDigits", testTimeFormatWithInvalidFractionalSecondDigitsOption)
     return suite.run()

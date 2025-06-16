@@ -38,15 +38,15 @@ function testArrayObjects(arr:Array<TestA>) : Array<TestA> {
 }
 
 function testPrimitive(a:int, b:string, c:boolean, d:double) {
-    assertEQ(a, 1);
-    assertEQ(b, "bbb");
-    assertEQ(c, true);
-    assertEQ(d, 1.0);
+    arktest.assertEQ(a, 1);
+    arktest.assertEQ(b, "bbb");
+    arktest.assertEQ(c, true);
+    arktest.assertEQ(d, 1.0);
 }
 
 function singleObject():void {
     let job = eaw.run<TestA>(tesObject, new TestA());
-    assertEQ(job.Await().a, "bbb");
+    arktest.assertEQ(job.Await().a, "bbb");
 }
 
 function returnArray():void {
@@ -54,10 +54,10 @@ function returnArray():void {
     let a2 = new TestA();
     let job = eaw.run<Array<TestA>>(testReturnArray, a1, a2, "ccc");
     let arr = job.Await();
-    assertEQ(arr[0].a, "bbb");
-    assertEQ(arr[1].a, "ccc");
-    assertEQ(a1.a, "bbb");
-    assertEQ(a2.a, "ccc");
+    arktest.assertEQ(arr[0].a, "bbb");
+    arktest.assertEQ(arr[1].a, "ccc");
+    arktest.assertEQ(a1.a, "bbb");
+    arktest.assertEQ(a2.a, "ccc");
 }
 
 function arrayParameter():void {
@@ -68,11 +68,11 @@ function arrayParameter():void {
     arr.push(a2);
     let job = eaw.run<Array<TestA>>(testArrayObjects, arr);
     let arr2 = job.Await();
-    assertEQ(arr2[0].a, "value1");
-    assertEQ(arr2[1].a, "value2");
-    assertEQ(arr2, arr);
-    assertEQ(a1.a, "value1");
-    assertEQ(a2.a, "value2");
+    arktest.assertEQ(arr2[0].a, "value1");
+    arktest.assertEQ(arr2[1].a, "value2");
+    arktest.assertEQ(arr2, arr);
+    arktest.assertEQ(a1.a, "value1");
+    arktest.assertEQ(a2.a, "value2");
 }
 
 function primitiveParameter() : void {
@@ -82,7 +82,7 @@ function primitiveParameter() : void {
 
 let eaw:EAWorker = new EAWorker();
 function main() {
-    const testSuite = new ArkTestsuite("EAWorkerParameterTest");
+    const testSuite = new arktest.ArkTestsuite("EAWorkerParameterTest");
     testSuite.addTest("singleObject", singleObject);
     testSuite.addTest("returnArray", returnArray);
     testSuite.addTest("arrayParameter", arrayParameter);

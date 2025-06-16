@@ -25,5 +25,5 @@ class StaticMethodClass {
 
 function main(): void {
     const result = StaticMethodClass.staticTestMethod("static test");
-    assertEQ(result, "static test");
+    arktest.assertEQ(result, "static test");
 }

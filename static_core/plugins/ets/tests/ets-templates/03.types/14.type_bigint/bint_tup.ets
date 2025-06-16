@@ -27,7 +27,7 @@ function main() {
     let a: [boolean, {% for t in c['values'] %}bigint{{ ", " if not loop.last }}{% endfor %}] =
         [true, {% for t in c['values'] %}new BigInt(prim{{loop.index}}){{ ", " if not loop.last }}{% endfor %}]
 {%- for t in c['values'] %}
-    assertTrue( a[{{loop.index}}] == {{t.val}})
+    arktest.assertTrue( a[{{loop.index}}] == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

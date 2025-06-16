@@ -28,5 +28,5 @@ function foo(n: number): string | undefined {
 
 function main(): void {
   let x = foo(3);
-  assertEQ(x, undefined);
+  arktest.assertEQ(x, undefined);
 }

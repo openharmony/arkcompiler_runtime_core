@@ -21,5 +21,5 @@ class A {}
 
 function main(): void {
     let a: A = new A();
-    assertTrue( a instanceof A)
+    arktest.assertTrue( a instanceof A)
 }

@@ -40,7 +40,7 @@ async function startTest() {
   const example = new MethodConcurrentExecution();
   const result = await example.methodConcurrentExecution();
   const resTemp = new Array<number | string>("Hello", 42);
-  assertEQ(result === resTemp, true);
+  arktest.assertEQ(result === resTemp, true);
 }
 
 function main(): void {

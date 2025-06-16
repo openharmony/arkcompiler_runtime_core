@@ -21,8 +21,8 @@ desc: check prefix increment for integer operand
 function main(): void {
   let value: int = {{v.value}}
   let result: int = ++value
-  assertEQ( value, {{v.result}})
-  assertEQ( result, {{v.result}})
+  arktest.assertEQ( value, {{v.result}})
+  arktest.assertEQ( result, {{v.result}})
 }
 
 {% endfor %}

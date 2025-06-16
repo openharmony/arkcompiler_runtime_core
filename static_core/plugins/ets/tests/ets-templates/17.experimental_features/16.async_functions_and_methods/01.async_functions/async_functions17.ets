@@ -24,7 +24,7 @@ async function asyncFunctionAsParam(fn: () => Promise<string>): Promise<string> 
 
 async function startTest() {
     const result = await asyncFunctionAsParam(async () => "Function as param result");
-    assertEQ(result, "Function as param result");
+    arktest.assertEQ(result, "Function as param result");
 }
 
 function main(): void {

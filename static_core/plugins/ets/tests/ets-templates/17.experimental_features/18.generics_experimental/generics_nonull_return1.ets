@@ -26,5 +26,5 @@ class A<T> {
 function main(): void {
   let a = new A<null>();
   let result = a.foo(null);
-  assertEQ(result === null, true);
+  arktest.assertEQ(result === null, true);
 }

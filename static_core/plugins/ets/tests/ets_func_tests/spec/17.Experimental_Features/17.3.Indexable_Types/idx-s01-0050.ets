@@ -31,7 +31,7 @@ class Bar {
 function main() {
     let x : Bar = new Bar([1,2,3]);
     try {
-       assertEQ(x[5], 1)
+       arktest.assertEQ(x[5], 1)
     } catch (e) {
         return 0;
     }

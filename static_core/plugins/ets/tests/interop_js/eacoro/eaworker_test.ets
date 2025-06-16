@@ -18,18 +18,18 @@ function RunTasksTest(): void {
     let w = new EAWorker(true);
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     let p2 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     w.join();
     let runId1 = p1.Await();
     let runId2 = p2.Await();
-    assertEQ(runId1, runId2);
+    arktest.assertEQ(runId1, runId2);
 }
 
 function RunTasksWithJsCallTest(): void {
@@ -40,7 +40,7 @@ function RunTasksWithJsCallTest(): void {
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(JSRuntime.getValueDouble(val) as int, 2);
+            arktest.assertEQ(JSRuntime.getValueDouble(val) as int, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");
@@ -54,8 +54,8 @@ function RunTasksWithJsCallTest(): void {
     w.join();
     let result1 = p1.Await();
     let result2 = p2.Await();
-    assertEQ(result1, 0);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 0);
+    arktest.assertEQ(result2, 0);
 }
 
 function RunTasksWithJsAsyncCallTest(): void {
@@ -73,8 +73,8 @@ function RunTasksWithJsAsyncCallTest(): void {
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
-            assertEQ(value, 7);
-            assertEQ(modified, true);
+            arktest.assertEQ(value, 7);
+            arktest.assertEQ(modified, true);
         }
         catch(error) {
             console.log("Value modifications failed");
@@ -87,5 +87,5 @@ function RunTasksWithJsAsyncCallTest(): void {
     let p = w.run<int>(callback);
     w.join();
     let result = p.Await();
-    assertEQ(result, 0);
+    arktest.assertEQ(result, 0);
 }

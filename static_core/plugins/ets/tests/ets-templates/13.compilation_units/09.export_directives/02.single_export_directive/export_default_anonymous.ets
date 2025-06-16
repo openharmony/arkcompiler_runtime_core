@@ -33,18 +33,18 @@ import { default as export_array } from "./export_default_anonymous/export_array
 import { default as export_add_expressions } from "./export_default_anonymous/export_add_expressions.ets";
 
 function main() {
-    assertEQ(export_string, "export_string")
+    arktest.assertEQ(export_string, "export_string")
 
-    assertEQ(export_number, 123456)
+    arktest.assertEQ(export_number, 123456)
 
-    assertEQ(export_newclass.foo(), "export_newclass_A_foo is invoked")
-    assertEQ(export_newclass.field, "export_newclass_A_field")
+    arktest.assertEQ(export_newclass.foo(), "export_newclass_A_foo is invoked")
+    arktest.assertEQ(export_newclass.field, "export_newclass_A_field")
 
-    assertEQ(export_multi_expressions, 110)
+    arktest.assertEQ(export_multi_expressions, 110)
 
-    assertEQ(export_lambda(), "export_lambda is invoked")
+    arktest.assertEQ(export_lambda(), "export_lambda is invoked")
 
-    assertEQ(export_array[0], 1)
+    arktest.assertEQ(export_array[0], 1)
 
-    assertEQ(export_add_expressions, 21)
+    arktest.assertEQ(export_add_expressions, 21)
 }

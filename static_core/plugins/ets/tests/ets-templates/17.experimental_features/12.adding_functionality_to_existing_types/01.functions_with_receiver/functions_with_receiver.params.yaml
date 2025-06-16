@@ -113,10 +113,10 @@ cases:
     use: |
       let a: A = new A()
       let b: B = new B()
-      assertEQ(a.f(), 1)
-      assertEQ(b.f(), 2)
+      arktest.assertEQ(a.f(), 1)
+      arktest.assertEQ(b.f(), 2)
       a = new B()
-      assertEQ(a.f(), 2)
+      arktest.assertEQ(a.f(), 2)
   - decl: |
       class A {}
       class B extends A {}
@@ -125,10 +125,10 @@ cases:
     use: |
       let a: A = new A()
       let b: B = new B()
-      assertEQ(f(a), 1)
-      assertEQ(f(b), 2)
+      arktest.assertEQ(f(a), 1)
+      arktest.assertEQ(f(b), 2)
       a = new B()
-      assertEQ(f(b), 2)
+      arktest.assertEQ(f(b), 2)
   - decl: |
       import {A} from "./a.ets"
       function f(this: A) {}

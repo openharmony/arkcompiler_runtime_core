@@ -66,10 +66,10 @@ function main(): void {
   const result3 = player.record();
   const result4 = player.save();
   const result5 = player.stop();
-  assertEQ(result, 'Media player started.');
-  assertEQ(result1, 'Media is playing.');
-  assertEQ(result2, 'Media is paused.');
-  assertEQ(result3, 'Media is being recorded.');
-  assertEQ(result4, 'Recording saved.');
-  assertEQ(result5, 'Media player stopped.');
+  arktest.assertEQ(result, 'Media player started.');
+  arktest.assertEQ(result1, 'Media is playing.');
+  arktest.assertEQ(result2, 'Media is paused.');
+  arktest.assertEQ(result3, 'Media is being recorded.');
+  arktest.assertEQ(result4, 'Recording saved.');
+  arktest.assertEQ(result5, 'Media player stopped.');
 }

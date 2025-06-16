@@ -23,5 +23,5 @@ function foo<T extends Object|null>(a: T): T {
 
 function main(): void {
     let a: Object|null = foo<null>(null);
-    assertTrue( a === null)
+    arktest.assertTrue( a === null)
 }

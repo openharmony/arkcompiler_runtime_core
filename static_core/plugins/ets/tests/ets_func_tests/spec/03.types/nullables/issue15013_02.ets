@@ -28,5 +28,5 @@ function foo<T>(x: T): TestNullishType {
 
 function main(): void {
   let y = foo(null)
-  assertEQ( y, null)
+  arktest.assertEQ( y, null)
 }

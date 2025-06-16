@@ -57,7 +57,7 @@ function foo(obj: A, cnt: int): int  {
 //! RUN           options: "", entry: "escape_deoptimization.ETSGLOBAL::main"
 
 function __noinline__abort() {
-    assertTrue(false);
+    arktest.assertTrue(false);
 }
 
 // remove dependence from assert in stdlib

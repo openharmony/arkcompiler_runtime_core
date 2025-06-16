@@ -28,6 +28,6 @@ class C {
 function main(): void {
     let x: C = new C()
     x=x.foo().foo().foo().foo().foo().foo().foo().foo().foo().foo()
-    assertEQ(x.b, 11)
+    arktest.assertEQ(x.b, 11)
 }
 

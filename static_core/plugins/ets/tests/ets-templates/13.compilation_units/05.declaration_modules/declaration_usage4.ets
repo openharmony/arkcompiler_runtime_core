@@ -26,5 +26,5 @@ import * as dm from "./declaration_module.ets"
 
 function main() {
     let myZZ = new dm.ZZ();
-    assertEQ(typeof myZZ.fee(), 'function');
+    arktest.assertEQ(typeof myZZ.fee(), 'function');
 }

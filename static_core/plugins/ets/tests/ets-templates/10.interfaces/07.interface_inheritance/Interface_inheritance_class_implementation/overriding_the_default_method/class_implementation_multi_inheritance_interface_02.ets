@@ -41,6 +41,6 @@ class parentClass implements Child {
 
 function main(): void {
   const parent = new parentClass();
-  assertEQ(parent.speak(), "speaking");
-  assertEQ(parent.move(), "moving");
+  arktest.assertEQ(parent.speak(), "speaking");
+  arktest.assertEQ(parent.move(), "moving");
 }

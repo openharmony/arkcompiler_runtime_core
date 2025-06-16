@@ -19,46 +19,46 @@ cases:
     use: |
       let a: A = new A()
       let t: T = (this: A): int => { return 1 }
-      assertEQ(t(a), 1)
+      arktest.assertEQ(t(a), 1)
   - decl: |
       class A {}
       type T = (this: A) => int;
     use: |
       let a: A = new A()
       let t: T = (this: A): int => { return 1 }
-      assertEQ(a.t(), 1)
+      arktest.assertEQ(a.t(), 1)
   - decl: |
       interface I {}
       type T = (this: I) => int;
     use: |
       let i: I = {}
       let t: T = (this: I): int => { return 1 }
-      assertEQ(t(i), 1)
+      arktest.assertEQ(t(i), 1)
   - decl: |
       interface I {}
       type T = (this: I) => int;
     use: |
       let i: I = {}
       let t: T = (this: I): int => { return 1 }
-      assertEQ(i.t(), 1)
+      arktest.assertEQ(i.t(), 1)
   - decl: |
       type T = (this: boolean[]) => boolean
     use: |
       let b: boolean[] = [true, false]
       let t: T = (this: boolean[]): boolean => { return true }
-      assertEQ(t(b), true)
+      arktest.assertEQ(t(b), true)
   - decl: |
       type T = (this: boolean[]) => boolean
     use: |
       let b: boolean[] = [true, false]
       let t: T = (this: boolean[]): boolean => { return true }
-      assertEQ(b.t(), true)
+      arktest.assertEQ(b.t(), true)
   - decl: |
       type T = (this: boolean[]) => boolean
     use: |
       let b: boolean[] = [true, false]
       let t: T = (this: boolean[]): boolean => { return true }
-      assertEQ(b.t(), true)
+      arktest.assertEQ(b.t(), true)
   - decl: |
       class A {}
       type t1 = (this: A) => boolean
@@ -69,9 +69,9 @@ cases:
       let f: t1 = foo
       let b: t2 = bar
       let a: A = new A()
-      assertEQ(b(a), false)
+      arktest.assertEQ(b(a), false)
       b = foo
       f = b
-      assertEQ(b(a), true)
-      assertEQ(f(a), true)
-      assertEQ(a.f(), true)
+      arktest.assertEQ(b(a), true)
+      arktest.assertEQ(f(a), true)
+      arktest.assertEQ(a.f(), true)

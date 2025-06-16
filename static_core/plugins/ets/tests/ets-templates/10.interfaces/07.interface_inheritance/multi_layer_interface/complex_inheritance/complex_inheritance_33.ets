@@ -39,8 +39,8 @@ class Child extends Parent {
 }
 
 function main(): void {
-    assertEQ(GrandParent.GRANDPARENT_CONST, "GrandParent Constant");
-    assertEQ(new GrandParent().INTERFACR_CONST, "GrandParent interface");
-    assertEQ(Parent.PARENT_CONST, "Parent Constant");
-    assertEQ(Child.CHILD_CONST, "Child Constant");
+    arktest.assertEQ(GrandParent.GRANDPARENT_CONST, "GrandParent Constant");
+    arktest.assertEQ(new GrandParent().INTERFACR_CONST, "GrandParent interface");
+    arktest.assertEQ(Parent.PARENT_CONST, "Parent Constant");
+    arktest.assertEQ(Child.CHILD_CONST, "Child Constant");
 }

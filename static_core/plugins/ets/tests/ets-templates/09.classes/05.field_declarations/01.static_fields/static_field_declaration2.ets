@@ -30,13 +30,13 @@ class A {
 }
 
 function main(): void {
-    assertTrue( A.b1 === theInstance )
+    arktest.assertTrue( A.b1 === theInstance )
 
     // two instances created
     let i1: A = new A()
     let i2: A = new A()
 
-    assertTrue( A.b1 === theInstance )
-    assertTrue( i1.b2 !== theInstance )
-    assertTrue( i2.b2 !== theInstance )
+    arktest.assertTrue( A.b1 === theInstance )
+    arktest.assertTrue( i1.b2 !== theInstance )
+    arktest.assertTrue( i2.b2 !== theInstance )
 }

@@ -34,5 +34,5 @@ class OnlyImplementInterface implements MyInterface {
 function main(): void {
   let instanceOfExtend = new OnlyExtendParent();
   let instanceOfImplement = new OnlyImplementInterface();
-  assertNE((instanceOfExtend.SAME_NAME_CONSTANT + ""), instanceOfImplement.SAME_NAME_CONSTANT);
+  arktest.assertNE((instanceOfExtend.SAME_NAME_CONSTANT + ""), instanceOfImplement.SAME_NAME_CONSTANT);
 }

@@ -20,7 +20,7 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 const TypeErrorCodeId: number = 401;
 
 function main() {
-    const suite = new ArkTestsuite("BitVector resize API tests");
+    const suite = new arktest.ArkTestsuite("BitVector resize API tests");
 
     suite.addTest("Resize the bitVector to a smaller length.", BitVector_resize_Func_001);
     suite.addTest("Resize the bitVector to the same length.", BitVector_resize_Func_002);
@@ -51,7 +51,7 @@ function BitVector_resize_Func_001() {
     bitVector.push(1);
     bitVector.push(1);
     bitVector.resize(4);
-    assertEQ(bitVector.length, 4, "BitVector length should be 4 after resizing.");
+    arktest.assertEQ(bitVector.length, 4, "BitVector length should be 4 after resizing.");
 }
 
 /**
@@ -70,11 +70,11 @@ function BitVector_resize_Func_002() {
     bitVector.push(1);
     bitVector.push(1);
     bitVector.resize(5);
-    assertEQ(bitVector[0], 1, "Element at index 0 should be 1.");
-    assertEQ(bitVector[1], 1, "Element at index 1 should be 1.");
-    assertEQ(bitVector[2], 1, "Element at index 2 should be 1.");
-    assertEQ(bitVector[3], 1, "Element at index 3 should be 1.");
-    assertEQ(bitVector[4], 1, "Element at index 4 should be 1.");
+    arktest.assertEQ(bitVector[0], 1, "Element at index 0 should be 1.");
+    arktest.assertEQ(bitVector[1], 1, "Element at index 1 should be 1.");
+    arktest.assertEQ(bitVector[2], 1, "Element at index 2 should be 1.");
+    arktest.assertEQ(bitVector[3], 1, "Element at index 3 should be 1.");
+    arktest.assertEQ(bitVector[4], 1, "Element at index 4 should be 1.");
 }
 
 /**
@@ -93,11 +93,11 @@ function BitVector_resize_Func_003() {
     bitVector.push(1);
     bitVector.push(1);
     bitVector.resize(10);
-    assertEQ(bitVector[5], 0, "Element at index 5 should be 0.");
-    assertEQ(bitVector[6], 0, "Element at index 6 should be 0.");
-    assertEQ(bitVector[7], 0, "Element at index 7 should be 0.");
-    assertEQ(bitVector[8], 0, "Element at index 8 should be 0.");
-    assertEQ(bitVector[9], 0, "Element at index 9 should be 0.");
+    arktest.assertEQ(bitVector[5], 0, "Element at index 5 should be 0.");
+    arktest.assertEQ(bitVector[6], 0, "Element at index 6 should be 0.");
+    arktest.assertEQ(bitVector[7], 0, "Element at index 7 should be 0.");
+    arktest.assertEQ(bitVector[8], 0, "Element at index 8 should be 0.");
+    arktest.assertEQ(bitVector[9], 0, "Element at index 9 should be 0.");
 }
 
 /**
@@ -123,7 +123,7 @@ function BitVector_resize_Func_004() {
             (e as BusinessError).message === `The value of "length" is out of range. It must be >= 0. Received value is: -4` &&
             (e as BusinessError).code === OutOfBoundsErrorCodeId;
     };
-    expectThrow(() => { bitVector.resize(-4); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.resize(-4); }, exceptionCheck);
 }
 
 /**
@@ -149,7 +149,7 @@ function BitVector_resize_Func_005() {
             (e as BusinessError).message === `The type of "size" must be integer. Received value is: 6.1` &&
             (e as BusinessError).code === TypeErrorCodeId;
     };
-    expectThrow(() => { bitVector.resize(6.1); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.resize(6.1); }, exceptionCheck);
 }
 
 /**
@@ -167,7 +167,7 @@ function BitVector_resize_Func_006() {
         bitVector.push(0);
     }
     bitVector.resize(63);
-    assertEQ(bitVector.length, 63, "BitVector length should be 63 after resizing.");
+    arktest.assertEQ(bitVector.length, 63, "BitVector length should be 63 after resizing.");
 }
 
 /**
@@ -185,7 +185,7 @@ function BitVector_resize_Func_007() {
         bitVector.push(0);
     }
     bitVector.resize(64);
-    assertEQ(bitVector.length, 64, "BitVector length should remain 64 after resizing.");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should remain 64 after resizing.");
 }
 
 /**
@@ -204,7 +204,7 @@ function BitVector_resize_Func_008() {
     }
     bitVector.resize(100);
     for (let i = bitVectorLength; i < 100; i++) {
-        assertEQ(bitVector[i], 0, `Element at index ${i} should be 0.`);
+        arktest.assertEQ(bitVector[i], 0, `Element at index ${i} should be 0.`);
     }
 }
 
@@ -222,7 +222,7 @@ function BitVector_resize_Func_009() {
     for (let i = 0; i < bitVectorLength; i++) {
         bitVector.push(0);
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74 initially.");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74 initially.");
     bitVector.resize(64);
-    assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64 after resizing.");
+    arktest.assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64 after resizing.");
 }

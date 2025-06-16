@@ -22,9 +22,9 @@ function testGetRecordValue(): boolean {
   let dayValue = myRecord.getProperty('day');
   let monthValue = myRecord.getProperty('month');
   let yearValue = myRecord.getProperty('year');
-  assertTrue(dayValue.toNumber() === 199999999);
-  assertTrue(monthValue.toString() === 'two');
-  assertTrue(yearValue.toNumber() === 3);
+  arktest.assertTrue(dayValue.toNumber() === 199999999);
+  arktest.assertTrue(monthValue.toString() === 'two');
+  arktest.assertTrue(yearValue.toNumber() === 3);
   return true;
 }
 

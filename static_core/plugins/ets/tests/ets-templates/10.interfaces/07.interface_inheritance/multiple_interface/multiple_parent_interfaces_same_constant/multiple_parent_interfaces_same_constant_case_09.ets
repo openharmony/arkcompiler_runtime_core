@@ -26,5 +26,5 @@ class Parent {
 class Child extends Parent {}
 
 function main(): void {
-    assertEQ(Child.getValue(), "ValueParent");
+    arktest.assertEQ(Child.getValue(), "ValueParent");
 }

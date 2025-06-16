@@ -27,8 +27,8 @@ desc: Type T is not compatible (see Type Compatibility) with Required<T>, and va
 
 function main() {
   let a: Required<A> = {i: 1.9, j: "some str"}
-  assertTrue( a.i == 1.9 )
-  assertTrue( a.j == "some str" )
+  arktest.assertTrue( a.i == 1.9 )
+  arktest.assertTrue( a.j == "some str" )
 }
 
 {% endfor %}

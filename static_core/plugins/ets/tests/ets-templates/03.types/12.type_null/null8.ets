@@ -23,5 +23,5 @@ function f(): Double|null {
 
 function main(): void {
     let a = f();
-    assertTrue( a == null)
+    arktest.assertTrue( a == null)
 }

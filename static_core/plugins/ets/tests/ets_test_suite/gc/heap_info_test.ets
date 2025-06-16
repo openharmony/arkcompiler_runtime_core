@@ -20,7 +20,7 @@ function checkHeapInfo(): void {
     let free_size = GC.getFreeHeapSize();
     let used_size = GC.getUsedHeapSize();
 
-    assertLE(free_size + used_size, reserved_size, "Incorrect heap info statistics");
+    arktest.assertLE(free_size + used_size, reserved_size, "Incorrect heap info statistics");
 }
 
 function main(): void {

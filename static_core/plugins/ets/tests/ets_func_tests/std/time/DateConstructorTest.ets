@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Date")
+    const suite = new arktest.ArkTestsuite("Date")
 
     suite.addTest("Test MS constructor with Long", testIntMsConstructor)
     suite.addTest("Test year and month constructor with Long", testIntYearMonthConstructor)
@@ -68,7 +68,7 @@ const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.9
 function testIntMsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
         let cd = new Date(longYears[i]);
-        assertEQ(Double.toLong(cd.valueOf()), longYears[i])
+        arktest.assertEQ(Double.toLong(cd.valueOf()), longYears[i])
     }
 }
 
@@ -77,7 +77,7 @@ function testIntYearMonthConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i]);
         let utc = Date.UTC(longYears[i], longMonths[i]);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], 1)
     }
 }
@@ -88,7 +88,7 @@ function testIntYearMonthDayConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day);
         let utc = Date.UTC(longYears[i], longMonths[i], day);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], day);
     }
 }
@@ -99,7 +99,7 @@ function testIntYearMonthDayHoursConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i]);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDH(cd, valueLongYears[i], longMonths[i], day, longHours[i]);
     }
 }
@@ -110,7 +110,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
     }
 }
@@ -121,7 +121,7 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHMS(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
     }
 }
@@ -134,7 +134,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
         let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
         let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithLongYMDHMSM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
     }
 }
@@ -142,7 +142,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
 function testDoubleMsConstructor(): void {
     for(let i: int = 0; i < doubleYears.length; i++) {
         let cd = new Date(doubleYears[i]);
-        assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
+        arktest.assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
     }
 }
 
@@ -151,7 +151,7 @@ function testDoubleYearMonthConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i]);
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], 1);
     }
 }
@@ -162,7 +162,7 @@ function testDoubleYearMonthDayConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day));
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], day);
     }
 }
@@ -173,7 +173,7 @@ function testDoubleYearMonthDayHoursConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]));
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDH(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i]);
     }
 }
@@ -184,7 +184,7 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]));
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
     }
 }
@@ -195,7 +195,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): void {
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]));
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
     }
 }
@@ -209,7 +209,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
         let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day),
                 new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]), new Double(millis));
 
-        assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
         checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
     }
 }
@@ -217,7 +217,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
 function testStringConstructor(): void {
     for(let i: int = 0; i < dateString.length; i++) {
         let cd: Date = new Date(dateString[i]);
-        assertEQ(dateString[i], cd.toISOString())
+        arktest.assertEQ(dateString[i], cd.toISOString())
     }
 }
 
@@ -227,7 +227,7 @@ function testDateConstructor(): void {
         let tmp = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
         let cd = new Date(tmp);
 
-        assertEQ(tmp.valueOf(), cd.valueOf())
+        arktest.assertEQ(tmp.valueOf(), cd.valueOf())
         checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
     }
 }
@@ -235,41 +235,41 @@ function testDateConstructor(): void {
 function testNaNConstructor(): void {
     let d1 = new Date(Number.NaN);
     let val = d1.valueOf();
-    assertTrue(isNaN(val));
+    arktest.assertTrue(isNaN(val));
 }
 
 function testStringConstructorLocalTZ(): void {
     const localDateTime = new Date(2024, 1, 19, 8, 0, 0)
     const isoLocalDateTime = new Date("2024-02-19T08:00:00")
-    assertEQ(localDateTime.getTime(), isoLocalDateTime.getTime())
+    arktest.assertEQ(localDateTime.getTime(), isoLocalDateTime.getTime())
 
     const isoLocalDate = new Date("1970-01-01")
-    assertEQ(isoLocalDate.getTime(), 0)
+    arktest.assertEQ(isoLocalDate.getTime(), 0)
 }
 
 function testStringConstructorInvalidArgs(): void {
     const startingSpaceDate = new Date(" 2024-02-19T08:00:00")
-    assertTrue(isNaN(startingSpaceDate.valueOf()))
-    assertTrue(isNaN(startingSpaceDate.getTime()))
+    arktest.assertTrue(isNaN(startingSpaceDate.valueOf()))
+    arktest.assertTrue(isNaN(startingSpaceDate.getTime()))
 
     const trailingSpaceDate = new Date("2024-02-19T08:00:00 ")
-    assertTrue(isNaN(trailingSpaceDate.valueOf()))
-    assertTrue(isNaN(trailingSpaceDate.getTime()))
+    arktest.assertTrue(isNaN(trailingSpaceDate.valueOf()))
+    arktest.assertTrue(isNaN(trailingSpaceDate.getTime()))
 
     const ms4Date = new Date("2024-02-28T00:55:31.1234Z")
-    assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 123), ms4Date.getTime())
+    arktest.assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 123), ms4Date.getTime())
 
     const ms2Date = new Date("2024-02-28T00:55:31.12Z")
-    assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 120), ms2Date.getTime())
+    arktest.assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 120), ms2Date.getTime())
 
     const missingMsDate = new Date("2024-02-28T00:55:31.")
-    assertTrue(isNaN(missingMsDate.valueOf()))
-    assertTrue(isNaN(missingMsDate.getTime()))
+    arktest.assertTrue(isNaN(missingMsDate.valueOf()))
+    arktest.assertTrue(isNaN(missingMsDate.getTime()))
 }
 
 function testStringConstructorExpandedYear(): void {
     const date = new Date("-000001-07-01T00:00Z")
-    assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
+    arktest.assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
 }
 
 //*************************************************************************************************************************************************************
@@ -291,13 +291,13 @@ function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long,
 }
 
 function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): void {
-    assertEQ(cd.getFullYear(), year, "year mismatch")
-    assertEQ(cd.getMonth(), month, "month mismatch")
-    assertEQ(cd.getDate(), day, "day mismatch")
-    assertEQ(cd.getHours(), hour, "hour mismatch")
-    assertEQ(cd.getMinutes(), minutes, "minute mismatch")
-    assertEQ(cd.getSeconds(), seconds, "second mismatch")
-    assertEQ(cd.getMilliseconds(), millis, "ms mismatch")
+    arktest.assertEQ(cd.getFullYear(), year, "year mismatch")
+    arktest.assertEQ(cd.getMonth(), month, "month mismatch")
+    arktest.assertEQ(cd.getDate(), day, "day mismatch")
+    arktest.assertEQ(cd.getHours(), hour, "hour mismatch")
+    arktest.assertEQ(cd.getMinutes(), minutes, "minute mismatch")
+    arktest.assertEQ(cd.getSeconds(), seconds, "second mismatch")
+    arktest.assertEQ(cd.getMilliseconds(), millis, "ms mismatch")
 }
 
 //*************************************************************************************************************************************************************
@@ -319,11 +319,11 @@ function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day:
 }
 
 function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): void {
-    assertEQ(cd.getFullYear(), trunc(year), "truncated year mismatch")
-    assertEQ(cd.getMonth(), trunc(month), "truncated month mismatch")
-    assertEQ(cd.getDate(), trunc(day), "truncated day mismatch")
-    assertEQ(cd.getHours(), trunc(hour), "truncated hour mismatch")
-    assertEQ(cd.getMinutes(), trunc(minutes), "truncated minute mismatch")
-    assertEQ(cd.getSeconds(), trunc(seconds), "truncated second mismatch")
-    assertEQ(cd.getMilliseconds(), trunc(millis), "truncated ms mismatch")
+    arktest.assertEQ(cd.getFullYear(), trunc(year), "truncated year mismatch")
+    arktest.assertEQ(cd.getMonth(), trunc(month), "truncated month mismatch")
+    arktest.assertEQ(cd.getDate(), trunc(day), "truncated day mismatch")
+    arktest.assertEQ(cd.getHours(), trunc(hour), "truncated hour mismatch")
+    arktest.assertEQ(cd.getMinutes(), trunc(minutes), "truncated minute mismatch")
+    arktest.assertEQ(cd.getSeconds(), trunc(seconds), "truncated second mismatch")
+    arktest.assertEQ(cd.getMilliseconds(), trunc(millis), "truncated ms mismatch")
 }

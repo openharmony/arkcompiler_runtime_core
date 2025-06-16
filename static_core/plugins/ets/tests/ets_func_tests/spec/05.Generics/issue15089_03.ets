@@ -21,5 +21,5 @@
 
 function main(): void {
   let x = new Array<String>("str")
-  assertEQ( x[0], "str")
+  arktest.assertEQ( x[0], "str")
 }

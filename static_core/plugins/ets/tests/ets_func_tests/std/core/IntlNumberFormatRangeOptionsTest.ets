@@ -78,14 +78,14 @@ function testNumberFormatFormatRangeWithOptions(): void {
 
         if (result !== expected) {
             const str = JSON.stringify(formatter.resolvedOptions())
-            assertEQ(result, expected, `unexpected format result in #${i} test-case for locale: ${locale} and options: ${str}`)
+            arktest.assertEQ(result, expected, `unexpected format result in #${i} test-case for locale: ${locale} and options: ${str}`)
         }
     })
 }
 
 function main(): int {
     initFormatResults()
-    const suite = new ArkTestsuite("Intl.NumberFormat formatRage NumberFormatOptions")
+    const suite = new arktest.ArkTestsuite("Intl.NumberFormat formatRage NumberFormatOptions")
     suite.addTest("testNumberFormatFormatRangeWithOptions", testNumberFormatFormatRangeWithOptions)
     return suite.run()
 }

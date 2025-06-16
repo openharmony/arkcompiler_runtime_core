@@ -24,5 +24,5 @@ const fetchData = (callback: CallbackFunction) => {
 
 function main(): void {
   const obj1: object = fetchData;
-  assertTrue(obj1 == fetchData);
+  arktest.assertTrue(obj1 == fetchData);
 }

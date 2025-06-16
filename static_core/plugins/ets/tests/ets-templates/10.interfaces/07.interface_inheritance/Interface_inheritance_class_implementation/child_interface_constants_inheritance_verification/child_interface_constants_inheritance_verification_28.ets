@@ -27,5 +27,5 @@ class EvalErrorConstantChild implements EvalErrorConstantInterface {
 
 function main(): void {
   const instance = new EvalErrorConstantChild();
-  assertEQ(instance.CONST.message, 'Eval error');
+  arktest.assertEQ(instance.CONST.message, 'Eval error');
 }

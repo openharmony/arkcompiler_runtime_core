@@ -20,7 +20,7 @@ desc: check unary minus operation for long integer operand
 
 function main(): void {
   const value: long = {{v.value}}
-  assertEQ( -(value), {{v.result}})
+  arktest.assertEQ( -(value), {{v.result}})
 }
 
 {% endfor %}

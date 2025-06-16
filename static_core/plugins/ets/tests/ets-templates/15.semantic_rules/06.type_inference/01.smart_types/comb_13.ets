@@ -48,10 +48,10 @@ function foo(p: number|string|undefined|Error|boolean): number {
 }
 
 function main() {
-    assertTrue(foo("abc") == 1 && str == "a")
-    assertTrue(foo(true) == 2 && !bool)
+    arktest.assertTrue(foo("abc") == 1 && str == "a")
+    arktest.assertTrue(foo(true) == 2 && !bool)
     let e: Error = new Error("xyz")
-    assertTrue(foo(e) == 3 && err == e && str == "xyz")
-    assertTrue(foo(42.0) == 4 && num == 84)
-    assertTrue(foo(undefined) == 5 && a === undefined)
+    arktest.assertTrue(foo(e) == 3 && err == e && str == "xyz")
+    arktest.assertTrue(foo(42.0) == 4 && num == 84)
+    arktest.assertTrue(foo(undefined) == 5 && a === undefined)
 }

@@ -32,6 +32,6 @@ cases:
           }
       use: |-
           let cls = new Cls
-          assertTrue(cls.foo('fld3', 'fld3') == 'fld3fld3')
-          assertTrue(cls.foo('fld1', 'fld5') == 'fld1fld5')
-          assertTrue(cls.foo('fld2', 'fld4') == 'fld2fld4')
+          arktest.assertTrue(cls.foo('fld3', 'fld3') == 'fld3fld3')
+          arktest.assertTrue(cls.foo('fld1', 'fld5') == 'fld1fld5')
+          arktest.assertTrue(cls.foo('fld2', 'fld4') == 'fld2fld4')

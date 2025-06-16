@@ -48,11 +48,11 @@ class TestHumongousStress {
                 GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
             catch (e) {
-                assertTrue( false, "Unexpected exception during GC");
+                arktest.assertTrue( false, "Unexpected exception during GC");
             }
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return maxNumberOfObjects;
     }
@@ -70,7 +70,7 @@ class TestHumongousStress {
             return null;
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return new Object();
     };
@@ -79,7 +79,7 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assertTrue( this.threadsCount > 0 && objPerCoroutine > 0);
+        arktest.assertTrue( this.threadsCount > 0 && objPerCoroutine > 0);
 
         let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
@@ -109,7 +109,7 @@ class TestHumongousStress {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
         catch (e) {
-            assertTrue( false, "Unexpected exception during GC");
+            arktest.assertTrue( false, "Unexpected exception during GC");
         }
     }
 }

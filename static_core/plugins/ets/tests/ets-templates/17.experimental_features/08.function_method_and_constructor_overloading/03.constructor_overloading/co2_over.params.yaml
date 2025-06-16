@@ -83,14 +83,14 @@ cases:
               constructor(p: double) { this.t = "double" }
           }
       use: |-
-          assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
-          assertTrue(new A(new Int(-1 as int)).getType() == "Int")
-          assertTrue(new A(new Char(c'A')).getType() == "Char")
-          assertTrue(new A(new Float(3.14f)).getType() == "Float")
-          assertTrue(new A(-1 as long).getType() == "long")
-          assertTrue(new A(-1 as short).getType() == "short")
-          assertTrue(new A(false).getType() == "boolean")
-          assertTrue(new A(3.14).getType() == "double")
+          arktest.assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
+          arktest.assertTrue(new A(new Int(-1 as int)).getType() == "Int")
+          arktest.assertTrue(new A(new Char(c'A')).getType() == "Char")
+          arktest.assertTrue(new A(new Float(3.14f)).getType() == "Float")
+          arktest.assertTrue(new A(-1 as long).getType() == "long")
+          arktest.assertTrue(new A(-1 as short).getType() == "short")
+          arktest.assertTrue(new A(false).getType() == "boolean")
+          arktest.assertTrue(new A(3.14).getType() == "double")
 
     - decl: |-
           // enums
@@ -111,11 +111,11 @@ cases:
           }
       use: |-
           try {
-              assertTrue(new A(Color.Red).getType() == "Color")
-              assertTrue(new A(Size.L).getType() == "Size")
-              assertTrue(new A(Status.go).getType() == "Status")
+              arktest.assertTrue(new A(Color.Red).getType() == "Color")
+              arktest.assertTrue(new A(Size.L).getType() == "Size")
+              arktest.assertTrue(new A(Status.go).getType() == "Status")
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -135,12 +135,12 @@ cases:
               constructor(p: FixedArray<Double>) { this.t = "Double" }
           }
       use: |-
-          assertTrue(new A([-1 as byte]).getType() == "byte")
-          assertTrue(new A([-1 as int]).getType() == "int")
-          assertTrue(new A([c'A']).getType() == "char")
-          assertTrue(new A([false]).getType() == "boolean")
-          assertTrue(new A([new Double(3.14)]).getType() == "Double")
-          assertTrue(new A(new A[1]).getType() == "A")
+          arktest.assertTrue(new A([-1 as byte]).getType() == "byte")
+          arktest.assertTrue(new A([-1 as int]).getType() == "int")
+          arktest.assertTrue(new A([c'A']).getType() == "char")
+          arktest.assertTrue(new A([false]).getType() == "boolean")
+          arktest.assertTrue(new A([new Double(3.14)]).getType() == "Double")
+          arktest.assertTrue(new A(new A[1]).getType() == "A")
 
     - decl: |-
           // tuples
@@ -161,13 +161,13 @@ cases:
       use: |-
           try {
               let t: T = [3.14, ""]
-              assertTrue(new A(t).getType() == "T")
+              arktest.assertTrue(new A(t).getType() == "T")
               let r: R = [3.14, false]
-              assertTrue(new A(r).getType() == "R")
+              arktest.assertTrue(new A(r).getType() == "R")
               t = [42.0, "xyz"]
-              assertTrue(new A(t).getType() == "T")
+              arktest.assertTrue(new A(t).getType() == "T")
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -189,15 +189,15 @@ cases:
       use: |-
           try {
               let usn: USN = "abc"
-              assertTrue(new A(usn).getType() == "USN")
+              arktest.assertTrue(new A(usn).getType() == "USN")
               usn = 42.0
-              assertTrue(new A(usn).getType() == "USN")
+              arktest.assertTrue(new A(usn).getType() == "USN")
               let usb: USB = new Boolean(true)
-              assertTrue(new A(usb).getType() == "USB")
+              arktest.assertTrue(new A(usb).getType() == "USB")
               usb = "xyz"
-              assertTrue(new A(usb).getType() == "USB")
+              arktest.assertTrue(new A(usb).getType() == "USB")
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -225,10 +225,10 @@ cases:
       use: |-
           try {
               let f: FF = fff
-              assertTrue(new A(f).getType() == "FF")
-              assertTrue(new A(eee).getType() == "EE")
+              arktest.assertTrue(new A(f).getType() == "FF")
+              arktest.assertTrue(new A(eee).getType() == "EE")
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -254,19 +254,19 @@ cases:
       use: |-
           try {
               let s: S = "ABC"
-              assertTrue(new A(s).getType() == "S")
+              arktest.assertTrue(new A(s).getType() == "S")
               let sn: SN = "ABC"
-              assertTrue(new A(sn).getType() == "SN")
+              arktest.assertTrue(new A(sn).getType() == "SN")
               let su: SU = "ABC"
-              assertTrue(new A(su).getType() == "SU")
+              arktest.assertTrue(new A(su).getType() == "SU")
               let snu: SNU = "ABC"
-              assertTrue(new A(snu).getType() == "SNU")
+              arktest.assertTrue(new A(snu).getType() == "SNU")
               sn = null
-              assertTrue(new A(sn).getType() == "SN")
+              arktest.assertTrue(new A(sn).getType() == "SN")
               su = undefined
-              assertTrue(new A(su).getType() == "SU")
+              arktest.assertTrue(new A(su).getType() == "SU")
               snu = undefined
-              assertTrue(new A(snu).getType() == "SNU")
+              arktest.assertTrue(new A(snu).getType() == "SNU")
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }

@@ -59,11 +59,11 @@ cases:
           let v: Byte[] = new Byte[size]
 
           v[0] = new Byte(42 as byte)
-            assertTrue( v[0] instanceof Byte && v[0] == 42 )
+            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
 
     - use: |-
           let size: long = 1 as long  // narrowing dimension conversion
           let v: Byte[] = new Byte[size]
 
           v[0] = new Byte(42 as byte)
-            assertTrue( v[0] instanceof Byte && v[0] == 42 )
+            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )

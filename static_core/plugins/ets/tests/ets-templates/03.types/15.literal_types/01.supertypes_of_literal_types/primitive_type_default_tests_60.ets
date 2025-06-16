@@ -25,5 +25,5 @@ function main(): void {
     const num1 = 3;
     const num2 = 7;
     const result = multiplyNumbers(num1, num2);
-    assertEQ(result, 21);
+    arktest.assertEQ(result, 21);
 }

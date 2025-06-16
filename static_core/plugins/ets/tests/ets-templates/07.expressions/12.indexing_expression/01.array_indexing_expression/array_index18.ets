@@ -20,5 +20,5 @@ tags: [compile-only, negative]
 
 function main(): void {
   let an_array: Array<number> = new Array<number>(1, 2, 3);
-  assertEQ(an_array["1"], 2);
+  arktest.assertEQ(an_array["1"], 2);
 }

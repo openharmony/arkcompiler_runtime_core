@@ -37,6 +37,6 @@ class Athlete implements Runnable, Jumpable {
 
 function main(): void {
     const athlete: Athlete = new Athlete();
-    assertEQ(athlete.run(), "Running!");
-    assertEQ(athlete.jump(), "Jumping!");
+    arktest.assertEQ(athlete.run(), "Running!");
+    arktest.assertEQ(athlete.jump(), "Jumping!");
 }

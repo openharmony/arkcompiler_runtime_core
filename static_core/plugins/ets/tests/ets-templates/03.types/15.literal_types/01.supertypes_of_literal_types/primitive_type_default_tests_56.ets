@@ -23,5 +23,5 @@ function isNegative(num: number) {
 
 function main(): void {
     const result = isNegative(5);
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }

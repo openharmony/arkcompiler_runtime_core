@@ -33,5 +33,5 @@ class ConstructorVarConflictClass implements ConstructorVarConflictInterface {
 
 function main(): void {
   const instance = new ConstructorVarConflictClass(35);
-  assertEQ(instance.CONST, 36);
+  arktest.assertEQ(instance.CONST, 36);
 }

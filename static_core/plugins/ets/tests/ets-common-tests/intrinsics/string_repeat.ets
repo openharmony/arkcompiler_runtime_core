@@ -20,10 +20,10 @@ const Nature: String = '自然界';
 const NatureDup: String = '自然界自然界自然界自然界自然界自然界自然界自然界';
 
 function main(): int {
-    assertEQ(Empty.repeat(0), "")
-    assertEQ(Empty.repeat(1), "")
-    assertEQ(Nature.repeat(0), "")
-    assertEQ(Hello.repeat(0), "")
+    arktest.assertEQ(Empty.repeat(0), "")
+    arktest.assertEQ(Empty.repeat(1), "")
+    arktest.assertEQ(Nature.repeat(0), "")
+    arktest.assertEQ(Hello.repeat(0), "")
     for(let i: int = 1; i < 8; ++i) {
         let hello: String = Hello.repeat(i);
         let nature: String = Nature.repeat(i);

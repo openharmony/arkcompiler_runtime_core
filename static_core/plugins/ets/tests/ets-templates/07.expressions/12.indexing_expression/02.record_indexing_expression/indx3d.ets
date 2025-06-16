@@ -25,5 +25,5 @@ function refNullish(): Record<string, number>|undefined {
 }
 
 function main() {
-    assertTrue(refNullish()?.["magic"] === undefined)
+    arktest.assertTrue(refNullish()?.["magic"] === undefined)
 }

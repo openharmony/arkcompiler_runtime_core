@@ -20,7 +20,7 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 const TypeErrorCodeId: number = 401;
 
 function main() {
-    const suite = new ArkTestsuite("BitVector flipBitByIndex API tests");
+    const suite = new arktest.ArkTestsuite("BitVector flipBitByIndex API tests");
 
     suite.addTest("Verify basic bit flipping functionality in a bit vector.", BitVector_flipBitByIndex_Func_001);
     suite.addTest("Test flipBitByIndex with out of range index value.", BitVector_flipBitByIndex_Func_002);
@@ -51,11 +51,11 @@ function BitVector_flipBitByIndex_Func_001() {
     bitVector.flipBitByIndex(2);
     bitVector.flipBitByIndex(3);
     bitVector.flipBitByIndex(4);
-    assertEQ(bitVector[0], 0, "Bit at index 0 should be flipped to 0");
-    assertEQ(bitVector[1], 0, "Bit at index 1 should be flipped to 0");
-    assertEQ(bitVector[2], 0, "Bit at index 2 should be flipped to 0");
-    assertEQ(bitVector[3], 0, "Bit at index 3 should be flipped to 0");
-    assertEQ(bitVector[4], 1, "Bit at index 4 should be flipped to 1");
+    arktest.assertEQ(bitVector[0], 0, "Bit at index 0 should be flipped to 0");
+    arktest.assertEQ(bitVector[1], 0, "Bit at index 1 should be flipped to 0");
+    arktest.assertEQ(bitVector[2], 0, "Bit at index 2 should be flipped to 0");
+    arktest.assertEQ(bitVector[3], 0, "Bit at index 3 should be flipped to 0");
+    arktest.assertEQ(bitVector[4], 1, "Bit at index 4 should be flipped to 1");
 }
 
 /**
@@ -82,7 +82,7 @@ function BitVector_flipBitByIndex_Func_002() {
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "index" is out of range. It must be >= 0 && <= 7. Received value is: 20`);
     }
-    expectThrow(() => { bitVector.flipBitByIndex(20); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.flipBitByIndex(20); }, exceptionCheck);
 }
 
 /**
@@ -109,7 +109,7 @@ function BitVector_flipBitByIndex_Func_003() {
             ((e as BusinessError).code === TypeErrorCodeId &&
                 (e as BusinessError).message === `The type of "index" must be integer. Received value is: 6.1`);
     }
-    expectThrow(() => { bitVector.flipBitByIndex(6.1); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.flipBitByIndex(6.1); }, exceptionCheck);
 }
 
 /**
@@ -126,13 +126,13 @@ function BitVector_flipBitByIndex_Func_004() {
     for (let i = 0; i < bitVectorLength; i++) {
         if (i >= 32) {
             let res = bitVector.push(1);
-            assertTrue(res, "Push should return true");
+            arktest.assertTrue(res, "Push should return true");
         } else {
             let res = bitVector.push(0);
-            assertTrue(res, "Push should return true");
+            arktest.assertTrue(res, "Push should return true");
         }
     }
-    assertEQ(bitVector.length, 64, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
 
     for (let i = 0; i < bitVectorLength; i++) {
         bitVector.flipBitByIndex(i);
@@ -140,9 +140,9 @@ function BitVector_flipBitByIndex_Func_004() {
 
     for (let i = 0; i < bitVectorLength; i++) {
         if (i >= 32) {
-            assertEQ(bitVector[i], 0, "Bit at index " + i + " should be flipped to 0");
+            arktest.assertEQ(bitVector[i], 0, "Bit at index " + i + " should be flipped to 0");
         } else {
-            assertEQ(bitVector[i], 1, "Bit at index " + i + " should be flipped to 1");
+            arktest.assertEQ(bitVector[i], 1, "Bit at index " + i + " should be flipped to 1");
         }
     }
 }
@@ -161,13 +161,13 @@ function BitVector_flipBitByIndex_Func_005() {
     for (let i = 0; i < bitVectorLength; i++) {
         if (i >= 32) {
             let res = bitVector.push(1);
-            assertTrue(res, "Push should return true");
+            arktest.assertTrue(res, "Push should return true");
         } else {
             let res = bitVector.push(0);
-            assertTrue(res, "Push should return true");
+            arktest.assertTrue(res, "Push should return true");
         }
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
 
     for (let i = 10; i < bitVectorLength + 10; i++) {
         bitVector.flipBitByIndex(i);
@@ -175,9 +175,9 @@ function BitVector_flipBitByIndex_Func_005() {
 
     for (let i = 10; i < bitVectorLength + 10; i++) {
         if (i >= 42) {
-            assertEQ(bitVector[i], 0, "Bit at index " + i + " should be flipped to 0");
+            arktest.assertEQ(bitVector[i], 0, "Bit at index " + i + " should be flipped to 0");
         } else {
-            assertEQ(bitVector[i], 1, "Bit at index " + i + " should be flipped to 1");
+            arktest.assertEQ(bitVector[i], 1, "Bit at index " + i + " should be flipped to 1");
         }
     }
 }

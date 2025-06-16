@@ -36,7 +36,7 @@ final class B extends A {
 function main(): void {
   let instance: B = new B();
 
-  assertEQ( instance.call(), {{member.value}} );
+  arktest.assertEQ( instance.call(), {{member.value}} );
 }
 
 {% endfor %}

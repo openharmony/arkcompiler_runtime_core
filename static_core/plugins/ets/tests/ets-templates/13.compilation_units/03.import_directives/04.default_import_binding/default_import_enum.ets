@@ -22,5 +22,5 @@ files:
 import DefaultExportedEnum from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_enum"
 
 function main(): void {
-    assertEQ(DefaultExportedEnum.Blue.toString(), "1"); // enum method valueOf is not implemented yet
+    arktest.assertEQ(DefaultExportedEnum.Blue.toString(), "1"); // enum method valueOf is not implemented yet
 }

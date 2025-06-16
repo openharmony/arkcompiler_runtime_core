@@ -23,5 +23,5 @@ function main() {
             exceptionWasCaught = true;
         }
     }
-    assertTrue(exceptionWasCaught);
+    arktest.assertTrue(exceptionWasCaught);
 }

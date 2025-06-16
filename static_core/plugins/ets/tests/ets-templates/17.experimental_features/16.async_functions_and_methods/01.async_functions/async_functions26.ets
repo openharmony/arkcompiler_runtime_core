@@ -34,7 +34,7 @@ async function functionReturnNestedObject(): Promise<S> {
 
 async function startTest() {
   const result = await functionReturnNestedObject();
-  assertEQ(result.age, 1);
+  arktest.assertEQ(result.age, 1);
 }
 
 function main(): void {

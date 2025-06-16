@@ -24,7 +24,7 @@ let b{{loop.index}} = new Int({{c['lit']}})
 
 function main(): void {
 {% for c in cases %}
-    assertEQ(v{{loop.index}}, {{c['val']}})
-    assertEQ(b{{loop.index}}.toInt(), {{c['val']}})
+    arktest.assertEQ(v{{loop.index}}, {{c['val']}})
+    arktest.assertEQ(b{{loop.index}}.toInt(), {{c['val']}})
 {% endfor %}
 }

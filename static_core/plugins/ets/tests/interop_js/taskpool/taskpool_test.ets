@@ -20,7 +20,7 @@ function RunTasksWithJsCallTest(): void {
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(JSRuntime.getValueDouble(val) as int, 2);
+            arktest.assertEQ(JSRuntime.getValueDouble(val) as int, 2);
         }
         catch(e: Error) {
             console.log("RunTasksWithJsCallTest failed");
@@ -33,8 +33,8 @@ function RunTasksWithJsCallTest(): void {
     let p2 = taskpool.execute(callback);
     let result1 = await p1;
     let result2 = await p2;
-    assertEQ(result1, 0);
-    assertEQ(result2, 0);
+    arktest.assertEQ(result1, 0);
+    arktest.assertEQ(result2, 0);
 }
 
 function RunTasksWithJsAsyncCallTest(): void {
@@ -54,8 +54,8 @@ function RunTasksWithJsAsyncCallTest(): void {
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
-            assertEQ(value, 7);
-            assertEQ(modified, true);
+            arktest.assertEQ(value, 7);
+            arktest.assertEQ(modified, true);
         }
         catch(error) {
             console.log("Value modifications failed");
@@ -67,7 +67,7 @@ function RunTasksWithJsAsyncCallTest(): void {
 
     let p = taskpool.execute(callback);
     let result = await p;
-    assertEQ(result, 0);
-    assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
+    arktest.assertEQ(result, 0);
+    arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
 }

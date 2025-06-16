@@ -37,7 +37,7 @@
 
  function main(): void {
     let test = new Provider();
-    assertEQ( test.value, 3)
+    arktest.assertEQ( test.value, 3)
     test.value = 4;
-    assertEQ( test.value, 4)
+    arktest.assertEQ( test.value, 4)
  }

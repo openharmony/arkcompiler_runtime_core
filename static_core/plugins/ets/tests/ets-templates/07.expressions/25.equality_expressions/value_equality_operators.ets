@@ -34,7 +34,7 @@ function main(): void {
   let a3: A = {x: 2};
   let b1: B = {y: 1};
 
-  assertTrue( ({{eq.left}} {{eq.op}} {{eq.right}}) == {{eq.result}} )
+  arktest.assertTrue( ({{eq.left}} {{eq.op}} {{eq.right}}) == {{eq.result}} )
 }
 
 {% endfor %}

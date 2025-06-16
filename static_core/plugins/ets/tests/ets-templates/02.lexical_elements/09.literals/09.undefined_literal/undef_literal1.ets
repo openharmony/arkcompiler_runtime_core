@@ -19,5 +19,5 @@ desc: Undefined literal.
 
 function main() {
     let y: Object|undefined = undefined;
-    assertTrue( y === undefined )
+    arktest.assertTrue( y === undefined )
 }

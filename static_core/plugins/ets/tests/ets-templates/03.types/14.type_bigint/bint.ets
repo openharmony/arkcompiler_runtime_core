@@ -27,7 +27,7 @@ let b: bigint
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( (b = new BigInt(prim{{loop.index}})) instanceof bigint && b == {{t.val}})
+    arktest.assertTrue( (b = new BigInt(prim{{loop.index}})) instanceof bigint && b == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

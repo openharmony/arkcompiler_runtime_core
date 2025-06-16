@@ -23,16 +23,16 @@ function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    assertEQ("" + v1 + v2, {{v.r1}})
-    assertEQ(v1 + "" + v2, {{v.r1}})
-    assertEQ((v1 + v2).toChar() + "", {{v.r2}})
+    arktest.assertEQ("" + v1 + v2, {{v.r1}})
+    arktest.assertEQ(v1 + "" + v2, {{v.r1}})
+    arktest.assertEQ((v1 + v2).toChar() + "", {{v.r2}})
 
-    assertEQ("" + {{v.v1}} + v2, {{v.r1}})
-    assertEQ({{v.v1}} + "" + v2, {{v.r1}})
-    assertEQ(({{v.v1}} + v2).toChar() + "", {{v.r2}})
+    arktest.assertEQ("" + {{v.v1}} + v2, {{v.r1}})
+    arktest.assertEQ({{v.v1}} + "" + v2, {{v.r1}})
+    arktest.assertEQ(({{v.v1}} + v2).toChar() + "", {{v.r2}})
 
-    assertEQ("" + {{v.v1}} + {{v.v2}}, {{v.r1}})
-    assertEQ({{v.v1}} + "" + {{v.v2}}, {{v.r1}})
-    assertEQ(({{v.v1}} + {{v.v2}}).toChar() + "", {{v.r2}})
+    arktest.assertEQ("" + {{v.v1}} + {{v.v2}}, {{v.r1}})
+    arktest.assertEQ({{v.v1}} + "" + {{v.v2}}, {{v.r1}})
+    arktest.assertEQ(({{v.v1}} + {{v.v2}}).toChar() + "", {{v.r2}})
 }
 {%- endfor %}

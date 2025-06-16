@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap SetValueAt GetValueAt API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap SetValueAt GetValueAt API tests")
 
     suite.addTest("LightWeightMap setValueAt getValueAt by index",
         testSetValueAtValidIndex)
@@ -48,8 +48,8 @@ function testSetValueAtValidIndex() {
     lightWeightMap.set("test", 456);
     let result1 = lightWeightMap.setValueAt(1, 777);
     let result2 = lightWeightMap.getValueAt(1);
-    assertEQ(result1, true, "The lightWeightMap should set the value at the specified index");
-    assertEQ(result2, 777, "The lightWeightMap should return the correct value at the specified index");
+    arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the specified index");
+    arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the specified index");
 }
 
 function testSetValueAtBoundaryIndex() {
@@ -59,8 +59,8 @@ function testSetValueAtBoundaryIndex() {
     lightWeightMap.set("test", 456);
     let result1 = lightWeightMap.setValueAt(2, 777);
     let result2 = lightWeightMap.getValueAt(2);
-    assertEQ(result1, true, "The lightWeightMap should set the value at the boundary index");
-    assertEQ(result2, 777, "The lightWeightMap should return the correct value at the boundary index");
+    arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the boundary index");
+    arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the boundary index");
 }
 
 function testSetValueAtLeftExceededIndex() {
@@ -72,7 +72,7 @@ function testSetValueAtLeftExceededIndex() {
         lightWeightMap.setValueAt(-1, 777);
         lightWeightMap.getValueAt(-1);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+        arktest.assertEQ(err.message, "The value of index is out of range.");
     }
 }
 
@@ -85,7 +85,7 @@ function testSetValueAtRightExceededIndex() {
         lightWeightMap.setValueAt(6, 777);
         lightWeightMap.getValueAt(6);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+        arktest.assertEQ(err.message, "The value of index is out of range.");
     }
 }
 
@@ -95,7 +95,7 @@ function testSetValueAtIndexOfEmptyMap() {
         lightWeightMap.setValueAt(6, 777);
         lightWeightMap.getValueAt(6);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+        arktest.assertEQ(err.message, "The value of index is out of range.");
     }
 }
 
@@ -106,8 +106,8 @@ function testSetValueAtLeftFloatIndex() {
     lightWeightMap.set("test", 456);
     let result1 = lightWeightMap.setValueAt(Math.floor(1.2), 777);
     let result2 = lightWeightMap.getValueAt(Math.floor(1.2));
-    assertEQ(result1, true, "The lightWeightMap should set the value at the floored left float index");
-    assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored left float index");
+    arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored left float index");
+    arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored left float index");
 }
 
 function testSetValueAtRightFloatIndex() {
@@ -117,8 +117,8 @@ function testSetValueAtRightFloatIndex() {
     lightWeightMap.set("test", 456);
     let result1 = lightWeightMap.setValueAt(Math.floor(1.8), 777);
     let result2 = lightWeightMap.getValueAt(Math.floor(1.8));
-    assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
-    assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored right float index");
+    arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
+    arktest.assertEQ(result2, 777, "The lightWeightMap should return the correct value at the floored right float index");
 }
 
 function testSetValueAtLargeValueAndIndex() {
@@ -128,11 +128,11 @@ function testSetValueAtLargeValueAndIndex() {
     lightWeightMap.set("test", 456);
     let result1 = lightWeightMap.setValueAt(0, Number.MAX_VALUE);
     let result2 = lightWeightMap.getValueAt(0);
-    assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
-    assertEQ(result2, Number.MAX_VALUE, "The lightWeightMap should get the value at the key index");
+    arktest.assertEQ(result1, true, "The lightWeightMap should set the value at the floored right float index");
+    arktest.assertEQ(result2, Number.MAX_VALUE, "The lightWeightMap should get the value at the key index");
     try {
         lightWeightMap.getValueAt(Number.MAX_VALUE);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.")
+        arktest.assertEQ(err.message, "The value of index is out of range.")
     }
 }

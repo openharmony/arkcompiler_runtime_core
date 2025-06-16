@@ -25,5 +25,5 @@ function power(base: number, exponent: number): number {
 }
 
 function main() {
-    assertEQ( 8, power(2, 3)) // both arguments are required in the call
+    arktest.assertEQ( 8, power(2, 3)) // both arguments are required in the call
 }

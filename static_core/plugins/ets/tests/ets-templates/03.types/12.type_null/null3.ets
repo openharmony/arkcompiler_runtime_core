@@ -21,5 +21,5 @@ type NULL = null
 
 function main(): void {
     let a: Object|NULL = null;
-    assertTrue( a === null)
+    arktest.assertTrue( a === null)
 }

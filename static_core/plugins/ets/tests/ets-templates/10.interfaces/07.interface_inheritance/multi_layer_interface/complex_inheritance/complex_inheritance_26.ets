@@ -35,10 +35,10 @@ class GrandChild extends Child implements G {
 }
 
 function main(): void {
-    assertEQ(Parent.numP, 10);
-    assertEQ(Child.strC, '10');
-    assertEQ(GrandChild.boolC, true);
+    arktest.assertEQ(Parent.numP, 10);
+    arktest.assertEQ(Child.strC, '10');
+    arktest.assertEQ(GrandChild.boolC, true);
 
     const g: GrandChild = new GrandChild();
-    assertEQ(g.a, 'a');
+    arktest.assertEQ(g.a, 'a');
 }

@@ -26,5 +26,5 @@ function processValue<T>(value: T): MyGenericType<T> {
 function main(): void {
   let result = processValue<string>("Hello");
 
-  assertEQ(result, "Hello");
+  arktest.assertEQ(result, "Hello");
 }

@@ -24,9 +24,9 @@ function main(): void {
     const v: float = ( {{v.result}} ).toFloat()
     const r: float = a / b
     if (Float.isNaN(v)) {
-        assertTrue(Float.isNaN(r))
+        arktest.assertTrue(Float.isNaN(r))
     } else {
-        assertTrue( r == v )
+        arktest.assertTrue( r == v )
     }
 }
 

@@ -24,6 +24,6 @@ assert: To specify a nullable version of type T, one needs to use T|null as a ty
 function main(): void {
     let x: {{n.type}} = {{n.vals}};
     x[0] = {{n.val}}
-    assertTrue({{n.assert}})
+    arktest.assertTrue({{n.assert}})
 }
 {% endfor %}

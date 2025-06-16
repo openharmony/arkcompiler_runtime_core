@@ -37,7 +37,7 @@ function main(): void {
     const tree: TreeNode = new BinaryTree(1);
     tree.left = new BinaryTree(2);
     tree.right = new BinaryTree(3);
-    assertEQ(tree.value, 1);
-    assertEQ(tree.left?.value, 2);
-    assertEQ(tree.right?.value, 3);
+    arktest.assertEQ(tree.value, 1);
+    arktest.assertEQ(tree.left?.value, 2);
+    arktest.assertEQ(tree.right?.value, 3);
 }

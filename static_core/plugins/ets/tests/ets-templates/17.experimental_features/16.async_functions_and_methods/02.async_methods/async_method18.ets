@@ -37,7 +37,7 @@ class MethodReturnNestedObject {
 async function startTest() {
   const example = new MethodReturnNestedObject();
   const result = await example.methodReturnNestedObject();
-  assertEQ(result.age, 1);
+  arktest.assertEQ(result.age, 1);
 }
 
 function main(): void {

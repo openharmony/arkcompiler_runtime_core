@@ -24,6 +24,6 @@ function main(): void {
 
   if (typeof num === 'number') {
     let account: number = num as number;
-    assertTrue(account === num);
+    arktest.assertTrue(account === num);
   }
 }

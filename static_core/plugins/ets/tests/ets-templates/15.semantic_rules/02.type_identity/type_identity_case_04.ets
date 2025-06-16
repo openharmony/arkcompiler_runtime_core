@@ -27,5 +27,5 @@ function main(): void {
   let greeting: Greeting = getGreeting();
   let result = greeting();
 
-  assertEQ(result, "Hello, World!");
+  arktest.assertEQ(result, "Hello, World!");
 }

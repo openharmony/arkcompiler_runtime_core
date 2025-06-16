@@ -29,7 +29,7 @@ async function coroutine() {
 async function startTest() {
   try {
     let result1 = await coroutine();
-    assertEQ(result1, 10);
+    arktest.assertEQ(result1, 10);
   } catch (error) {
   }
 }

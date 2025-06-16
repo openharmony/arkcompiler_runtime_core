@@ -27,5 +27,5 @@ class BigIntConstantChild implements BigIntConstantInterface {
 
 function main(): void {
   const instance = new BigIntConstantChild();
-  assertEQ(instance.CONST, 12345678901234567890n);
+  arktest.assertEQ(instance.CONST, 12345678901234567890n);
 }

@@ -41,5 +41,5 @@ class SubClass extends MyClass {}
 
 function main(): void {
   const sub = new SubClass();
-  assertTrue(sub.CONSTANT_VALUE.value);
+  arktest.assertTrue(sub.CONSTANT_VALUE.value);
 }

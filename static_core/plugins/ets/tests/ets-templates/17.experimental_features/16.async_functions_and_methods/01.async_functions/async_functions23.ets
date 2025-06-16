@@ -33,8 +33,8 @@ async function functionReturnObject(): Promise<Person> {
 
 async function startTest() {
   const result = await functionReturnObject();
-  assertEQ(result.name === "Alice", true);
-  assertEQ(result.age === 25, true);
+  arktest.assertEQ(result.name === "Alice", true);
+  arktest.assertEQ(result.age === 25, true);
 }
 
 function main(): void {

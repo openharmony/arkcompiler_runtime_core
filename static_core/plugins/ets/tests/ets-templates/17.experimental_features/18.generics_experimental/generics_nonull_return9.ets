@@ -34,5 +34,5 @@ class B<T extends A | null> {
 function main(): void {
     let b = new B<null>();
     let result = b.foo(null);
-    assertEQ(result === null, true);
+    arktest.assertEQ(result === null, true);
 }

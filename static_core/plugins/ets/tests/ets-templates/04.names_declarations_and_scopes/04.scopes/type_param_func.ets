@@ -30,8 +30,8 @@ function foo<T extends Number>(p: T): T {
 }
 
 function main(): void {
-    assertEQ( foo<Number>(new Number(2.0)), 2.0 )
+    arktest.assertEQ( foo<Number>(new Number(2.0)), 2.0 )
 
     // module level scope is not affected
-    assertTrue( T == 1.0 )
+    arktest.assertTrue( T == 1.0 )
 }

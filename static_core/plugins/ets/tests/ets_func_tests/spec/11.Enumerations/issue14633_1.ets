@@ -26,5 +26,5 @@ enum MyEnum {
 const W = new Number(MyEnum.N1.valueOf());
 
 function main(): void {
-    assertEQ( W, 80)
+    arktest.assertEQ( W, 80)
 }

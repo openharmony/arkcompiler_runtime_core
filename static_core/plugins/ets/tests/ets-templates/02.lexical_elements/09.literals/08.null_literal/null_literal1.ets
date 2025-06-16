@@ -19,5 +19,5 @@ desc: Null literal.
 
 function main() {
     let x: Object|null = null;
-    assertTrue( x === null )
+    arktest.assertTrue( x === null )
 }

@@ -17,18 +17,18 @@ cases:
     decl: |-
       let a: Boolean = false;
       let b: Boolean = false;
-      assertTrue((a || b) == false);
+      arktest.assertTrue((a || b) == false);
 
   - doc: Conditional OR for 2x Boolean - false true
     decl: |-
       let a: Boolean = false;
       let b: Boolean = true;
-      assertTrue((a || b) == true);
+      arktest.assertTrue((a || b) == true);
 
   - doc: Conditional OR for 2x Boolean - true unknown
     decl: |-
       let a: Boolean = true;
-      assertTrue((a || fail()) == true);
+      arktest.assertTrue((a || fail()) == true);
 
   - doc: Conditional OR for 4x Boolean - false false false false
     decl: |-
@@ -36,7 +36,7 @@ cases:
       let b: Boolean = false;
       let c: Boolean = false;
       let d: Boolean = false;
-      assertTrue((a || b || c || d) == false)
+      arktest.assertTrue((a || b || c || d) == false)
 
   - doc: Conditional OR for 4x Boolean - false false false true
     decl: |-
@@ -44,23 +44,23 @@ cases:
       let b: Boolean = false;
       let c: Boolean = false;
       let d: Boolean = true;
-      assertTrue((a || b || c || d) == true)
+      arktest.assertTrue((a || b || c || d) == true)
 
   - doc: Conditional OR for 4x Boolean - false false true unknown
     decl: |-
       let a: Boolean = false;
       let b: Boolean = false;
       let c: Boolean = true;
-      assertTrue((a || b || c || fail()) == true)
+      arktest.assertTrue((a || b || c || fail()) == true)
 
   - doc: Conditional OR for 4x Boolean - false true unknown...
     decl: |-
       let a: Boolean = false;
       let b: Boolean = true;
-      assertTrue((a || b || fail() || fail()) == true)
+      arktest.assertTrue((a || b || fail() || fail()) == true)
 
   - doc: Conditional OR for 4x Boolean - true unknown...
     decl: |-
       let a: Boolean = true;
-      assertTrue((a || fail() || fail() || fail()) == true)
+      arktest.assertTrue((a || fail() || fail() || fail()) == true)
 

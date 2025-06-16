@@ -42,7 +42,7 @@ function exclusiveAccess(): void {
             count++;
         }
     });
-    assertTrue(count == workload * coroutinesCount);
+    arktest.assertTrue(count == workload * coroutinesCount);
 }
 
 function objectAllocationsUnderLock() {
@@ -64,7 +64,7 @@ function throwingExceptionUnderLock() {
         spinlockGuard(spinlock, () => { throw new Error(); });
     } catch (e: Error) {
         errorCatched = true;
-        assertTrue(!spinlockIsHeld(spinlock));
+        arktest.assertTrue(!spinlockIsHeld(spinlock));
     }
-    assertTrue(errorCatched);
+    arktest.assertTrue(errorCatched);
 }

@@ -20,5 +20,5 @@ desc: Concatenation of string literal types with ordinary string types.
 function main(): void {
     let tmp: "stringliteral" = "stringliteral";
     let tmp1: string = tmp + tmp;
-    assertTrue(typeof tmp1 === 'string');
+    arktest.assertTrue(typeof tmp1 === 'string');
 }

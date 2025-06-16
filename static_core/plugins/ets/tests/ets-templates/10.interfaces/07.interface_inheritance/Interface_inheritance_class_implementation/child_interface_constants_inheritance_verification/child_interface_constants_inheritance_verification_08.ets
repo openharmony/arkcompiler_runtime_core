@@ -27,6 +27,6 @@ class ArrayConstantChild implements ArrayConstantInterface {
 
 function main(): void {
   const instance = new ArrayConstantChild();
-  assertEQ(instance.CONST.length, 3);
-  assertEQ(instance.CONST[0], 1);
+  arktest.assertEQ(instance.CONST.length, 3);
+  arktest.assertEQ(instance.CONST[0], 1);
 }

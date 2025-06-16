@@ -22,24 +22,24 @@ const stressNum: int = 100;
 let sMTQueueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueuePollTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePollTest");
 
     ArrayBlockingQueueTestsuite.addTest("PollTest001", () =>
     {
         let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(queueInt.add(i), true);
+            arktest.assertEQ(queueInt.add(i), true);
         }
-        assertEQ(queueInt.size, elementsNum);
+        arktest.assertEQ(queueInt.size, elementsNum);
         for (let i = 0; i < 5; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 5);
+        arktest.assertEQ(queueInt.size, 5);
         for (let i = 5; i < 10; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 0);
-        assertEQ(queueInt.poll(), null);
+        arktest.assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.poll(), null);
     });
     ArrayBlockingQueueTestsuite.addTest("PollStressTest004", () =>
     {
@@ -48,9 +48,9 @@ function main(): int {
             queueInt.add(i);
         }
         for (let i = 0; i < stressNum; i++) {
-            assertEQ(queueInt.poll(), i);
+            arktest.assertEQ(queueInt.poll(), i);
         }
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ThreadsPollStressTest003", () =>
     {
@@ -68,7 +68,7 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(sMTQueueInt.size, 0);
+        arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
     return ArrayBlockingQueueTestsuite.run();

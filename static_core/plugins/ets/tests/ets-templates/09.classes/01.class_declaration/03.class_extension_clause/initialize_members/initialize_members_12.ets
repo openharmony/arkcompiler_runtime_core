@@ -33,5 +33,5 @@ class Child extends Parent {
 
 function main(): void {
   const myChild = new Child(3.14);
-  assertEQ(myChild.value, 3.14);
+  arktest.assertEQ(myChild.value, 3.14);
 }

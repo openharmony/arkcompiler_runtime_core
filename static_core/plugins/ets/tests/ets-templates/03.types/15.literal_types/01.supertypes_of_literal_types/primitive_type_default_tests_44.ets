@@ -20,5 +20,5 @@ desc: Type compatibility test for string literal type in union type.
 let strUnion: "one" | "two" = "one";
 
 function main(): void {
-    assertEQ(strUnion, "one");
+    arktest.assertEQ(strUnion, "one");
 }

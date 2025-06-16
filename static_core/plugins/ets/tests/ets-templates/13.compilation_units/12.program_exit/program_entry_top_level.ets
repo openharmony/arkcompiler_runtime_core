@@ -21,8 +21,8 @@ let topLevel: string = "Execute the top-level statements first";
 topLevel += "!";
 
 function main(): void {
-  assertTrue(topLevel === "Execute the top-level statements first!");
+  arktest.assertTrue(topLevel === "Execute the top-level statements first!");
   let lowLevel: string = "Execute the low-level statements after";
   lowLevel += "!";
-  assertTrue(lowLevel === "Execute the low-level statements after!");
+  arktest.assertTrue(lowLevel === "Execute the low-level statements after!");
 }

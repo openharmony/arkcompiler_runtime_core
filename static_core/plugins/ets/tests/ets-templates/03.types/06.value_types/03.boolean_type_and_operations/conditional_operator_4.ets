@@ -18,12 +18,12 @@ desc: The logical operators  with boolean type.
 ---*/
 
 function main(): void {
-  assertTrue(true && true)
-  assertTrue(true || true)
+  arktest.assertTrue(true && true)
+  arktest.assertTrue(true || true)
   
-  assertFalse(true && false)
-  assertTrue(true || false)
+  arktest.assertFalse(true && false)
+  arktest.assertTrue(true || false)
   
-  assertFalse(false && false)
-  assertFalse(false || false)
+  arktest.assertFalse(false && false)
+  arktest.assertFalse(false || false)
 }

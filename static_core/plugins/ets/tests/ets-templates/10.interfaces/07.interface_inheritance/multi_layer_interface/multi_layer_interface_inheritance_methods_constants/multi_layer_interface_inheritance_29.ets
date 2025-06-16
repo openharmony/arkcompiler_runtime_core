@@ -56,8 +56,8 @@ function main(): void {
   const obj: ChildInterface = new ConcreteClass();
 
   let tmp1: Person = obj.grandparentMethod();
-  assertEQ(tmp1.name, "John1");
+  arktest.assertEQ(tmp1.name, "John1");
 
   let tmp2: Person = obj.parentMethod();
-  assertEQ(tmp2.name, "John2");
+  arktest.assertEQ(tmp2.name, "John2");
 }

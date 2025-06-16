@@ -20,6 +20,6 @@ desc: Type compatibility test for an array of string literal types.
 let strLiteralArray: ["a", "b"] = ["a", "b"];
 
 function main(): void {
-    assertEQ(strLiteralArray[0], "a");
-    assertEQ(strLiteralArray[1], "b");
+    arktest.assertEQ(strLiteralArray[0], "a");
+    arktest.assertEQ(strLiteralArray[1], "b");
 }

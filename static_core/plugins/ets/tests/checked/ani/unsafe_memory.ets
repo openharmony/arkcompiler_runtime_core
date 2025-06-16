@@ -247,14 +247,14 @@ function testString() : int {
 function main(): int {
     loadLibrary("checked_test_unsafe_memory");
 
-    assertEQ(testBoolean(), 0, "boolean test failed");
-    assertEQ(testInt8(), 0, "int8 test failed");
-    assertEQ(testInt16(), 0, "int16 test failed");
-    assertEQ(testInt32(), 0, "int32 test failed");
-    assertEQ(testInt64(), 0, "int64 test failed");
-    assertEQ(testFloat64(), 0, "float64 test failed");
-    assertEQ(testFloat32(), 0, "float32 test failed");
-    assertEQ(testString(), 0, "string test failed");
+    arktest.assertEQ(testBoolean(), 0, "boolean test failed");
+    arktest.assertEQ(testInt8(), 0, "int8 test failed");
+    arktest.assertEQ(testInt16(), 0, "int16 test failed");
+    arktest.assertEQ(testInt32(), 0, "int32 test failed");
+    arktest.assertEQ(testInt64(), 0, "int64 test failed");
+    arktest.assertEQ(testFloat64(), 0, "float64 test failed");
+    arktest.assertEQ(testFloat32(), 0, "float32 test failed");
+    arktest.assertEQ(testString(), 0, "string test failed");
 
     return 0;
 }

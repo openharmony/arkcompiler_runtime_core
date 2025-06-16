@@ -32,7 +32,7 @@ function test_ani_graphics3d_scene_createCamera() {
     }
 
     console.log("createCamera is: " + info.fov);
-    assertEQ(info.fov, 5.24 as float);
+    arktest.assertEQ(info.fov, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createCamera_promise() {
@@ -46,7 +46,7 @@ function test_ani_graphics3d_scene_createCamera_promise() {
     }
 
     console.log("createCamera is: " + info.fov);
-    assertEQ(info.fov, 5.24 as float);
+    arktest.assertEQ(info.fov, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createCamera_sync() {
@@ -70,7 +70,7 @@ function test_ani_graphics3d_scene_createCamera_sync() {
     }
 
     console.log("createCamera is: " + info.fov);
-    assertEQ(info.fov, 5.24 as float);
+    arktest.assertEQ(info.fov, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createLight() {
@@ -85,7 +85,7 @@ function test_ani_graphics3d_scene_createLight() {
     }
 
     console.log("createLightPro is: " + info.intensity);
-    assertEQ(info.intensity, 5.24 as float);
+    arktest.assertEQ(info.intensity, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createLight_promise() {
@@ -100,7 +100,7 @@ function test_ani_graphics3d_scene_createLight_promise() {
     }
 
     console.log("createLightPro is: " + info.intensity);
-    assertEQ(info.intensity, 5.24 as float);
+    arktest.assertEQ(info.intensity, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createLight_sync() {
@@ -125,7 +125,7 @@ function test_ani_graphics3d_scene_createLight_sync() {
     }
 
     console.log("createLightPro is: " + info.intensity);
-    assertEQ(info.intensity, 5.24 as float);
+    arktest.assertEQ(info.intensity, 5.24 as float);
 }
 
 function test_ani_graphics3d_scene_createNode() {
@@ -139,7 +139,7 @@ function test_ani_graphics3d_scene_createNode() {
     }
 
     console.log("createNode is: " + info.visible);
-    assertEQ(info.visible, true);
+    arktest.assertEQ(info.visible, true);
 }
 
 function test_ani_graphics3d_scene_createNode_promise() {
@@ -153,7 +153,7 @@ function test_ani_graphics3d_scene_createNode_promise() {
     }
 
     console.log("createNode is: " + info.visible);
-    assertEQ(info.visible, true);
+    arktest.assertEQ(info.visible, true);
 }
 
 function test_ani_graphics3d_scene_createNode_sync() {
@@ -177,7 +177,7 @@ function test_ani_graphics3d_scene_createNode_sync() {
     }
 
     console.log("createNode is: " + info.visible);
-    assertEQ(info.visible, true);
+    arktest.assertEQ(info.visible, true);
 }
 
 function test_ani_graphics3d_scene_createMaterial() {
@@ -192,7 +192,7 @@ function test_ani_graphics3d_scene_createMaterial() {
     }
 
     console.log("createMaterial is: " + info.materialType);
-    assertEQ(info.materialType, 122 as byte);
+    arktest.assertEQ(info.materialType, 122 as byte);
 }
 
 function test_ani_graphics3d_scene_createMaterial_promise() {
@@ -207,7 +207,7 @@ function test_ani_graphics3d_scene_createMaterial_promise() {
     }
 
     console.log("createMaterial is: " + info.materialType);
-    assertEQ(info.materialType, 122 as byte);
+    arktest.assertEQ(info.materialType, 122 as byte);
 }
 
 function test_ani_graphics3d_scene_createMaterial_sync() {
@@ -232,7 +232,7 @@ function test_ani_graphics3d_scene_createMaterial_sync() {
     }
 
     console.log("createMaterial is: " + info.materialType);
-    assertEQ(info.materialType, 122 as byte);
+    arktest.assertEQ(info.materialType, 122 as byte);
 }
 
 function test_ani_graphics3d_scene_createShader() {
@@ -246,7 +246,7 @@ function test_ani_graphics3d_scene_createShader() {
     }
 
     console.log("createShader is: " + info.inputs);
-    assertEQ(info.inputs.size, 1);
+    arktest.assertEQ(info.inputs.size, 1);
 }
 
 function test_ani_graphics3d_scene_createShader_promise() {
@@ -260,7 +260,7 @@ function test_ani_graphics3d_scene_createShader_promise() {
     }
 
     console.log("createShader is: " + info.inputs);
-    assertEQ(info.inputs.size, 1);
+    arktest.assertEQ(info.inputs.size, 1);
 }
 
 function test_ani_graphics3d_scene_createShader_sync() {
@@ -284,7 +284,7 @@ function test_ani_graphics3d_scene_createShader_sync() {
     }
 
     console.log("createShader is: " + info.inputs);
-    assertEQ(info.inputs.size, 1);
+    arktest.assertEQ(info.inputs.size, 1);
 }
 
 function test_ani_graphics3d_scene_createImage() {
@@ -298,7 +298,7 @@ function test_ani_graphics3d_scene_createImage() {
     }
 
     console.log("createImage is: " + info.width);
-    assertEQ(info.width, 800);
+    arktest.assertEQ(info.width, 800);
 }
 
 function test_ani_graphics3d_scene_createImage_promise() {
@@ -312,7 +312,7 @@ function test_ani_graphics3d_scene_createImage_promise() {
     }
 
     console.log("createImage is: " + info);
-    assertEQ(info.height, 600);
+    arktest.assertEQ(info.height, 600);
 }
 
 function test_ani_graphics3d_scene_createImage_sync() {
@@ -336,7 +336,7 @@ function test_ani_graphics3d_scene_createImage_sync() {
     }
 
     console.log("createImage is: " + info);
-    assertEQ(info.height, 600);
+    arktest.assertEQ(info.height, 600);
 }
 
 function test_ani_graphics3d_scene_createEnvironment() {
@@ -350,7 +350,7 @@ function test_ani_graphics3d_scene_createEnvironment() {
     }
 
     console.log("createEnvironment is: " + info);
-    assertEQ(info.backgroundType, 0);
+    arktest.assertEQ(info.backgroundType, 0);
 }
 
 function test_ani_graphics3d_scene_createEnvironment_promise() {
@@ -364,7 +364,7 @@ function test_ani_graphics3d_scene_createEnvironment_promise() {
     }
 
     console.log("createEnvironment is: " + info);
-    assertEQ(info.backgroundType, 0);
+    arktest.assertEQ(info.backgroundType, 0);
 }
 
 function test_ani_graphics3d_scene_createEnvironment_sync() {
@@ -388,12 +388,12 @@ function test_ani_graphics3d_scene_createEnvironment_sync() {
     }
 
     console.log("createEnvironment is: " + info);
-    assertEQ(info.backgroundType, 0);
+    arktest.assertEQ(info.backgroundType, 0);
 }
 
 function main() {
     console.log("############## start ani_graphics3d #############");
-    const suite = new ArkTestsuite("ani_graphics3d Tests");
+    const suite = new arktest.ArkTestsuite("ani_graphics3d Tests");
 
     suite.addTest("test_ani_graphics3d_scene_createCamera", test_ani_graphics3d_scene_createCamera)
     suite.addTest("test_ani_graphics3d_scene_createCamera_promise", test_ani_graphics3d_scene_createCamera_promise)

@@ -28,6 +28,6 @@ function main(): void {
     const testValue: {{c.type}} = {{c.value1}};
     const expected = "You provided: {{c.value2}}";
     const result = processValue(testValue);
-    assertEQ(result, expected);
+    arktest.assertEQ(result, expected);
 }
 {%- endfor %}

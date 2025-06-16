@@ -31,7 +31,7 @@ function main(): void {
     let getter = new Getter();
     let foo: fooLambda<string> = (a: string): void => {
         let str = getter.get<string>(a);
-        assertTrue( str instanceof string)
+        arktest.assertTrue( str instanceof string)
     }
     foo("F");
 }

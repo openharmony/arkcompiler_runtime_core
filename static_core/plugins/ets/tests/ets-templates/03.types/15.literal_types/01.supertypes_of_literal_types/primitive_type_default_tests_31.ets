@@ -23,5 +23,5 @@ function printName(name: string) {
 
 function main(): void {
     const result = printName("example");
-    assertEQ(result, "example");
+    arktest.assertEQ(result, "example");
 }

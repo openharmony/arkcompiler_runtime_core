@@ -20,7 +20,7 @@ const SORTED_UNALIGNED = [0,1,2,3,4,6,7,10,37,45,88,99,127,255 as short];
 const SINGLE = [88];
 
 function fillBuffer(buf: ArrayBuffer): void {
-    assertEQ(Byte.BYTE_SIZE, Uint8ClampedArray.BYTES_PER_ELEMENT);
+    arktest.assertEQ(Byte.BYTE_SIZE, Uint8ClampedArray.BYTES_PER_ELEMENT);
     for (let i = 0; i < ARRAY_SIZE; ++i) {
         buf.set(i, UNSORTED[i].toByte());
     }
@@ -28,13 +28,13 @@ function fillBuffer(buf: ArrayBuffer): void {
 
 function checkSorted(a: Uint8ClampedArray): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
-        assertEQ(a[i], SORTED[i]);
+        arktest.assertEQ(a[i], SORTED[i]);
     }
 }
 
 function checkSortedUnaligned(a: Uint8ClampedArray): void {
     for (let i = 0; i < ARRAY_SIZE - 1; ++i) {
-        assertEQ(a[i], SORTED_UNALIGNED[i]);
+        arktest.assertEQ(a[i], SORTED_UNALIGNED[i]);
     }
 }
 
@@ -46,7 +46,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: Uint8ClampedArray = new Uint8ClampedArray(SINGLE);
     single.sort();
-    assertEQ(single[0], SINGLE[0]);
+    arktest.assertEQ(single[0], SINGLE[0]);
 }
 
 function sortNormal(): void {
@@ -66,8 +66,8 @@ function sortUnaligned(): void {
 }
 
 function main(): int {
-    assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite('Uint8ClampedArray.sort() tests')
+    arktest.assertEQ(UNSORTED.length, SORTED.length);
+    const suite = new arktest.ArkTestsuite('Uint8ClampedArray.sort() tests')
     suite.addTest('sort an empty Uint8ClampedArray', sortEmpty)
     suite.addTest('sort a single-element Uint8ClampedArray', sortSingle)
     suite.addTest('sort a normal Uint8ClampedArray', sortNormal)

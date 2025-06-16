@@ -26,7 +26,7 @@ class B{}
 function main(): void {
   let a = new A()	
   let b = new B()
-  assertTrue( ({{eq.left}} {{eq.op}} {{eq.right}}) == {{eq.result}} )
+  arktest.assertTrue( ({{eq.left}} {{eq.op}} {{eq.right}}) == {{eq.result}} )
 }
 
 {% endfor %}

@@ -27,7 +27,7 @@ class MethodReturnGeneric {
 async function startTest() {
     const example = new MethodReturnGeneric();
     const result = await example.methodReturnGeneric("Generic!");
-    assertEQ(result, "Generic!");
+    arktest.assertEQ(result, "Generic!");
 }
 
 function main(): void {

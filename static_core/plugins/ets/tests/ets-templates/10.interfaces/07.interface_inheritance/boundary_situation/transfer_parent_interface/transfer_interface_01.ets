@@ -37,6 +37,6 @@ class Person implements ParentInterface, EmptyInterface {
 function main(): void {
   const person = new Person("Alice", 30);
 
-  assertEQ(person.name, "Alice");
-  assertEQ(person.age, 30);
+  arktest.assertEQ(person.name, "Alice");
+  arktest.assertEQ(person.age, 30);
 }

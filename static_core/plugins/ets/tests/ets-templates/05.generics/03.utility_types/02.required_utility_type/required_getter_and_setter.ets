@@ -34,7 +34,7 @@ let c: int = 0
 function main() {
   let a: Required<C> = {_i: 1.9}
   {{c}}
-  assertEQ( c, 0 )
+  arktest.assertEQ( c, 0 )
 }
 
 {% endfor %}

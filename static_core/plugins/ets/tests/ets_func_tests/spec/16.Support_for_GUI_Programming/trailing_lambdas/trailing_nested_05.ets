@@ -37,6 +37,6 @@ function main(): void {
             return 3
         }
     }
-    assertEQ( a, 6)
+    arktest.assertEQ( a, 6)
 }
 

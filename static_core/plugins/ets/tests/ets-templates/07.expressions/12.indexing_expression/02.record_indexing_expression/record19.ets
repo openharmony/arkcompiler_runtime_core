@@ -27,5 +27,5 @@ function getConfigValue(key: string, defaultValue: string): string {
 }
 
 function main(): void {
-  assertEQ(getConfigValue("theme", "light"), "dark");
+  arktest.assertEQ(getConfigValue("theme", "light"), "dark");
 }

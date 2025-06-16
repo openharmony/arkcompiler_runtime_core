@@ -28,5 +28,5 @@ function main(): void {
     let arr: Person[] = [new Person(true), new Person(false)];
     let a = arr[1];
 
-    assertEQ(typeof a.name, "boolean");
+    arktest.assertEQ(typeof a.name, "boolean");
 }

@@ -28,6 +28,6 @@ class Person {
 function main(): void {
   const people: Person[] = [new Person("Alice"), new Person("Bob")];
 
-  assertEQ(people[0]?.name, "Alice");
-  assertEQ(people[1]?.name, "Bob");
+  arktest.assertEQ(people[0]?.name, "Alice");
+  arktest.assertEQ(people[1]?.name, "Bob");
 }

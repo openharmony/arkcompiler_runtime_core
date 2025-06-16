@@ -22,6 +22,6 @@ function foo(i: (() => int) | undefined ) {
 }
 
 function main(): void {
-  assertTrue(foo(undefined) == undefined)
-  assertTrue(foo(() => { return 2 } ) == 2)
+  arktest.assertTrue(foo(undefined) == undefined)
+  arktest.assertTrue(foo(() => { return 2 } ) == 2)
 }

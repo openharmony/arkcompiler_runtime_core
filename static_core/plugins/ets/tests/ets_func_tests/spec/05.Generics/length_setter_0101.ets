@@ -24,7 +24,7 @@ function main() : int {
         x.push("Good")
     }
 
-    assertEQ( x.length, 10)
+    arktest.assertEQ( x.length, 10)
     try {
         x.length = -10
     } catch (e) {

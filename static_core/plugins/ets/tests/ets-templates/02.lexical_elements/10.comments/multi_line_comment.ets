@@ -73,9 +73,9 @@ function main(): int {
         /* this is not a comment either */
     `
 
-    // assertTrue() calls:
-    assertTrue( y[0] == 44/*1*/ && y[1] == 55 /*2*/ && x == 0/*3*/ )
-    assertTrue( new C().foo(2) == 4 /*4*/ )
+    // arktest.assertTrue() calls:
+    arktest.assertTrue( y[0] == 44/*1*/ && y[1] == 55 /*2*/ && x == 0/*3*/ )
+    arktest.assertTrue( new C().foo(2) == 4 /*4*/ )
 
     /* // */ return 0;
 }

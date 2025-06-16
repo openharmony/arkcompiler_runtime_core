@@ -19,12 +19,12 @@ function testDateToLocaleString(): void {
     const langTag = "zh-CN"
     const locale = new Intl.Locale(langTag)
 
-    assertEQ(date.toLocaleString(langTag), "2024/2/19 10:00:00")
-    assertEQ(date.toLocaleString(locale), "2024/2/19 10:00:00")
-    assertEQ(date.toLocaleString(), date.toLocaleString(undefined))
+    arktest.assertEQ(date.toLocaleString(langTag), "2024/2/19 10:00:00")
+    arktest.assertEQ(date.toLocaleString(locale), "2024/2/19 10:00:00")
+    arktest.assertEQ(date.toLocaleString(), date.toLocaleString(undefined))
 
     const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" }
-    assertEQ(date.toLocaleString(locale, options), "10:00:00")
+    arktest.assertEQ(date.toLocaleString(locale, options), "10:00:00")
 }
 
 function testDateToLocaleTimeString(): void {
@@ -33,8 +33,8 @@ function testDateToLocaleTimeString(): void {
     const langTag = "zh-CN"
     const locale = new Intl.Locale(langTag)
 
-    assertEQ(date.toLocaleTimeString(langTag), "10:00:00")
-    assertEQ(date.toLocaleTimeString(locale), "10:00:00")
+    arktest.assertEQ(date.toLocaleTimeString(langTag), "10:00:00")
+    arktest.assertEQ(date.toLocaleTimeString(locale), "10:00:00")
 
     const options: Intl.DateTimeFormatOptions = {
         year: "2-digit",
@@ -44,15 +44,15 @@ function testDateToLocaleTimeString(): void {
         minute: "2-digit"
     }
 
-    assertEQ(date.toLocaleTimeString(langTag, options), "24/02/19 10:00")
-    assertEQ(date.toLocaleTimeString(locale, options), "24/02/19 10:00")
-    assertEQ(date.toLocaleTimeString(), date.toLocaleTimeString(undefined))
+    arktest.assertEQ(date.toLocaleTimeString(langTag, options), "24/02/19 10:00")
+    arktest.assertEQ(date.toLocaleTimeString(locale, options), "24/02/19 10:00")
+    arktest.assertEQ(date.toLocaleTimeString(), date.toLocaleTimeString(undefined))
 
-    assertEQ(date.toLocaleTimeString(langTag, { hour: "2-digit", minute: "2-digit" }), "10:00")
-    assertEQ(date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }), "10:00")
+    arktest.assertEQ(date.toLocaleTimeString(langTag, { hour: "2-digit", minute: "2-digit" }), "10:00")
+    arktest.assertEQ(date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }), "10:00")
 
-    assertEQ(date.toLocaleTimeString(langTag, { year: "numeric", month: "2-digit", day: "2-digit" }), "2024/02/19 10:00:00")
-    assertEQ(date.toLocaleTimeString(locale, { year: "numeric", month: "2-digit", day: "2-digit" }), "2024/02/19 10:00:00")
+    arktest.assertEQ(date.toLocaleTimeString(langTag, { year: "numeric", month: "2-digit", day: "2-digit" }), "2024/02/19 10:00:00")
+    arktest.assertEQ(date.toLocaleTimeString(locale, { year: "numeric", month: "2-digit", day: "2-digit" }), "2024/02/19 10:00:00")
 
     const styleOptions: Intl.DateTimeFormatOptions = { dateStyle: "medium" }
     expectError(() => {
@@ -66,17 +66,17 @@ function testDateToLocaleDateString(): void {
     const langTag = "zh-CN"
     const locale = new Intl.Locale(langTag)
 
-    assertEQ(date.toLocaleDateString(langTag), "2024/2/19")
-    assertEQ(date.toLocaleDateString(locale), "2024/2/19")
-    assertEQ(date.toLocaleDateString(), date.toLocaleDateString(undefined))
+    arktest.assertEQ(date.toLocaleDateString(langTag), "2024/2/19")
+    arktest.assertEQ(date.toLocaleDateString(locale), "2024/2/19")
+    arktest.assertEQ(date.toLocaleDateString(), date.toLocaleDateString(undefined))
 
     const timeOptions: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" }
-    assertEQ(date.toLocaleDateString(langTag, timeOptions), "2024/2/19 10:00:00")
-    assertEQ(date.toLocaleDateString(locale, timeOptions), "2024/2/19 10:00:00")
+    arktest.assertEQ(date.toLocaleDateString(langTag, timeOptions), "2024/2/19 10:00:00")
+    arktest.assertEQ(date.toLocaleDateString(locale, timeOptions), "2024/2/19 10:00:00")
 
     const dateOptions: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "2-digit" }
-    assertEQ(date.toLocaleDateString(langTag, dateOptions), "2024年2月19日")
-    assertEQ(date.toLocaleDateString(locale, dateOptions), "2024年2月19日")
+    arktest.assertEQ(date.toLocaleDateString(langTag, dateOptions), "2024年2月19日")
+    arktest.assertEQ(date.toLocaleDateString(locale, dateOptions), "2024年2月19日")
 
     const customOptions: Intl.DateTimeFormatOptions = {
         year: "numeric",
@@ -86,8 +86,8 @@ function testDateToLocaleDateString(): void {
         minute: "2-digit"
     }
 
-    assertEQ(date.toLocaleDateString(langTag, customOptions), "2024年2月19日 10:00")
-    assertEQ(date.toLocaleDateString(locale, customOptions), "2024年2月19日 10:00")
+    arktest.assertEQ(date.toLocaleDateString(langTag, customOptions), "2024年2月19日 10:00")
+    arktest.assertEQ(date.toLocaleDateString(locale, customOptions), "2024年2月19日 10:00")
 
     const timeStyleOptions: Intl.DateTimeFormatOptions = { timeStyle: "medium" }
     expectError(() => {
@@ -96,7 +96,7 @@ function testDateToLocaleDateString(): void {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Date")
+    const suite = new arktest.ArkTestsuite("Date")
     suite.addTest("toLocaleString", testDateToLocaleString)
     suite.addTest("toLocaleTimeString", testDateToLocaleTimeString)
     suite.addTest("toLocaleDateString", testDateToLocaleDateString)

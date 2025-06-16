@@ -24,5 +24,5 @@ function main(): void {
     const str1 = "hello ";
     const str2 = "world";
     const result = concatenateStrings(str1, str2);
-    assertEQ(result, "hello world");
+    arktest.assertEQ(result, "hello world");
 }

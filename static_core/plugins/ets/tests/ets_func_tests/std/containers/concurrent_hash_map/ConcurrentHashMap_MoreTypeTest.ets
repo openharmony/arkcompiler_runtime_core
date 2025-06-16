@@ -24,35 +24,35 @@ function main(): int {
         map.set(arrKeys[i], arrValues[i]);
     }
 
-    let concurrentHashMapTestsuite = new ArkTestsuite("concurrentHashMapMoreTypeTest");
+    let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapMoreTypeTest");
     // K: number, V: boolean
     concurrentHashMapTestsuite.addTest("Number&Boolean_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(i), true);
+            arktest.assertEQ(concurrentHashMap.get(i), true);
             i++;
         }
         for (let i = 1; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(i), false);
+            arktest.assertEQ(concurrentHashMap.get(i), false);
             i++;
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_002", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
             let val = concurrentHashMap.get(i) as boolean;
             if (val) {
@@ -61,67 +61,67 @@ function main(): int {
                 concurrentHashMap.replace(i, true);
             }
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(i), false);
+            arktest.assertEQ(concurrentHashMap.get(i), false);
             i++;
         }
         for (let i = 1; i < 10; i++) {
-            assertEQ(concurrentHashMap.get(i), true);
+            arktest.assertEQ(concurrentHashMap.get(i), true);
             i++;
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_003", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
-            assertTrue(concurrentHashMap.delete(i));
-            assertEQ(concurrentHashMap.size, 9 - i);
+            arktest.assertTrue(concurrentHashMap.delete(i));
+            arktest.assertEQ(concurrentHashMap.size, 9 - i);
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_004", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
             let res = concurrentHashMap.remove(i) as boolean;
-            assertEQ(res, (i % 2) == 0);
+            arktest.assertEQ(res, (i % 2) == 0);
         }
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_005", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         let iter_NB = concurrentHashMap.entries();
         for (let i = 0; i < 10; i++) {
             if ((i % 2) == 0) {
-                assertTrue(iter_NB.next().value![1]);
+                arktest.assertTrue(iter_NB.next().value![1]);
             } else {
-                assertFalse(iter_NB.next().value![1]);
+                arktest.assertFalse(iter_NB.next().value![1]);
             }
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Boolean_006", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, boolean> = new ConcurrentHashMap<number, boolean>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             let tf = (i % 2) == 0;
             concurrentHashMap.set(i, tf);
@@ -129,11 +129,11 @@ function main(): int {
         concurrentHashMap.forEach((val: boolean, key: number, map: ConcurrentHashMap<number, boolean>) =>
         {
             let str = map.toString();
-            assertEQ(str, "0,true,1,false,2,true,3,false,4,true,5,false,6,true,7,false,8,true,9,false");
+            arktest.assertEQ(str, "0,true,1,false,2,true,3,false,4,true,5,false,6,true,7,false,8,true,9,false");
             if (key % 2 == 0) {
-                assertTrue(val);
+                arktest.assertTrue(val);
             } else {
-                assertFalse(val);
+                arktest.assertFalse(val);
             }
         });
     });
@@ -148,7 +148,7 @@ function main(): int {
             }
             hasMapNO.set(i, array);
             let arrGet = hasMapNO.get(i) as Array<string>;
-            assertEQ(array, arrGet);
+            arktest.assertEQ(array, arrGet);
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Object_002", () =>
@@ -166,7 +166,7 @@ function main(): int {
             array[0] = "six";
             hasMapNO.replace(i, array);
             let arrGet = hasMapNO.get(i) as Array<string>;
-            assertEQ(array, arrGet);
+            arktest.assertEQ(array, arrGet);
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Object_003", () =>
@@ -180,8 +180,8 @@ function main(): int {
             hasMapNO.set(i, array);
         }
         for (let i = 0; i < 5; i++) {
-            assertTrue(hasMapNO.delete(i));
-            assertEQ(hasMapNO.size, 4 - i);
+            arktest.assertTrue(hasMapNO.delete(i));
+            arktest.assertEQ(hasMapNO.size, 4 - i);
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Object_004", () =>
@@ -197,9 +197,9 @@ function main(): int {
         for (let i = 0; i < 5; i++) {
             let arrRes = hasMapNO.remove(i) as Array<string>;
             for (let j = 0; j < i + 1; j++) {
-                assertEQ(arrValues[j], arrRes[j]);
+                arktest.assertEQ(arrValues[j], arrRes[j]);
             }
-            assertEQ(hasMapNO.size, 4 - i);
+            arktest.assertEQ(hasMapNO.size, 4 - i);
         }
     });
     concurrentHashMapTestsuite.addTest("Number&Object_005", () =>
@@ -220,10 +220,10 @@ function main(): int {
             }
             let arrIter = iter_NO.next().value![1];
             for (let j = 0; j < i + 1; j++) {
-                assertEQ(array[j], arrIter[j]);
+                arktest.assertEQ(array[j], arrIter[j]);
             }
         }
-        assertEQ(iter_NO.next().value, undefined);
+        arktest.assertEQ(iter_NO.next().value, undefined);
     });
     concurrentHashMapTestsuite.addTest("Number&Object_006", () =>
     {
@@ -237,7 +237,7 @@ function main(): int {
         }
         hasMapNO.forEach((val: Array<string>, key: number, map: ConcurrentHashMap<number, Array<string>>) =>
         {
-            assertEQ(map.get(key), val);
+            arktest.assertEQ(map.get(key), val);
         });
     });
 
@@ -255,7 +255,7 @@ function main(): int {
                 str += ",";
             }
         }
-        assertEQ(iterEntries.next().value, undefined);
+        arktest.assertEQ(iterEntries.next().value, undefined);
     });
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
     {
@@ -271,7 +271,7 @@ function main(): int {
                 str += ",";
             }
         }
-        assertEQ(iterEntries.next().value, undefined);
+        arktest.assertEQ(iterEntries.next().value, undefined);
     });
 
 

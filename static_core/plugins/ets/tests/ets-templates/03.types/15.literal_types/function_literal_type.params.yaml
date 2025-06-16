@@ -36,9 +36,9 @@ cases:
           Use literal type as an argument for the function
       decl: |-
           function foo(i: "some str", j: null, k: undefined) {
-              assertEQ( i, "some str")
-              assertEQ( j, null)
-              assertEQ( k, undefined)
+              arktest.assertEQ( i, "some str")
+              arktest.assertEQ( j, null)
+              arktest.assertEQ( k, undefined)
           }
       use: |-
           foo("some str", null, undefined)
@@ -47,9 +47,9 @@ cases:
           String literal type could substitute its superclass
       decl: |-
           function foo(i: string, j: null, k: undefined) {
-              assertEQ( i, "some str")
-              assertEQ( j, null)
-              assertEQ( k, undefined)
+              arktest.assertEQ( i, "some str")
+              arktest.assertEQ( j, null)
+              arktest.assertEQ( k, undefined)
           }
       use: |-
           foo("some str", null, undefined)
@@ -79,10 +79,10 @@ cases:
           }
       use: |-
         let a: "some str" = "some str"
-        assertEQ( foo_s(a), "some str" )
-        assertTrue( foo_s(a) instanceof "some str" )
-        assertEQ( foo_u(undefined), undefined )
-        assertEQ( foo_n(null), null )
+        arktest.assertEQ( foo_s(a), "some str" )
+        arktest.assertTrue( foo_s(a) instanceof "some str" )
+        arktest.assertEQ( foo_u(undefined), undefined )
+        arktest.assertEQ( foo_n(null), null )
 
     - doc: |-
         Function returns literal type having return type specified.
@@ -98,10 +98,10 @@ cases:
         }
       use: |-
         let a: "some str" = "some str"
-        assertEQ( foo_s(a), "some str" )
-        assertTrue( foo_s(a) instanceof "some str" )
-        assertEQ( foo_u(undefined), undefined )
-        assertEQ( foo_n(null), null )
+        arktest.assertEQ( foo_s(a), "some str" )
+        arktest.assertTrue( foo_s(a) instanceof "some str" )
+        arktest.assertEQ( foo_u(undefined), undefined )
+        arktest.assertEQ( foo_n(null), null )
 
     - tags: |-
           negative, compile-only
@@ -119,8 +119,8 @@ cases:
       decl: |-
           type LITERAL = "some str"
           function foo(i: LITERAL ) {
-              assertEQ( i, "some str" )
-              assertTrue( i instanceof LITERAL )
+              arktest.assertEQ( i, "some str" )
+              arktest.assertTrue( i instanceof LITERAL )
           }
       use: |-
           foo("some str")
@@ -137,9 +137,9 @@ cases:
               return i
           }
       use: |-
-          assertEQ( foo("some str"), "some str" )
-          assertEQ( foo(undefined), undefined )
-          assertEQ( foo(null), null )
+          arktest.assertEQ( foo("some str"), "some str" )
+          arktest.assertEQ( foo(undefined), undefined )
+          arktest.assertEQ( foo(null), null )
 
     - doc: |-
           Use custom union of literal types as an argument for the function. Function return type is specified.
@@ -149,9 +149,9 @@ cases:
               return i
           }
       use: |-
-          assertEQ( foo("some str"), "some str" )
-          assertEQ( foo(undefined), undefined )
-          assertEQ( foo(null), null )
+          arktest.assertEQ( foo("some str"), "some str" )
+          arktest.assertEQ( foo(undefined), undefined )
+          arktest.assertEQ( foo(null), null )
 
     - doc: |-
           Use literal types as an argument for generic function. Function return type is not specified.
@@ -160,9 +160,9 @@ cases:
               return i
           }
       use: |-
-          assertEQ( foo("some str"), "some str" )
-          assertEQ( foo(undefined), undefined )
-          assertEQ( foo(null), null )
+          arktest.assertEQ( foo("some str"), "some str" )
+          arktest.assertEQ( foo(undefined), undefined )
+          arktest.assertEQ( foo(null), null )
 
     - doc: |-
           Use literal types as an argument for generic function. Function return type is specified.
@@ -173,12 +173,12 @@ cases:
           }
       use: |-
           let a: CUSTOM = "some str"
-          assertEQ( foo<CUSTOM>(a), "some str" )
-          assertEQ( foo<"some str">(a), "some str" )
-          assertEQ( foo<"another str">("another str"), "another str" )
-          assertEQ( foo<undefined>(undefined), undefined )
-          assertEQ( foo<null>(null), null )
-          assertEQ( foo<"third str"|null|undefined|"forth str">("forth str"), "forth str" )
+          arktest.assertEQ( foo<CUSTOM>(a), "some str" )
+          arktest.assertEQ( foo<"some str">(a), "some str" )
+          arktest.assertEQ( foo<"another str">("another str"), "another str" )
+          arktest.assertEQ( foo<undefined>(undefined), undefined )
+          arktest.assertEQ( foo<null>(null), null )
+          arktest.assertEQ( foo<"third str"|null|undefined|"forth str">("forth str"), "forth str" )
 
     - doc: |-
           Use literal type as lambda return value
@@ -187,31 +187,31 @@ cases:
           let fooN = (): null => { return null }
           let fooU = (): undefined => { return undefined }
       use: |-
-          assertEQ( fooL(), "literal" )
-          assertEQ( fooU(), undefined )
-          assertEQ( fooN(), null )
+          arktest.assertEQ( fooL(), "literal" )
+          arktest.assertEQ( fooU(), undefined )
+          arktest.assertEQ( fooN(), null )
 
     - doc: |-
           Use literal union type as lambda parameter and return type
       decl: |-
           let foo = (i: "literal"|null|undefined): "literal"|null|undefined => { return i }
       use: |-
-          assertEQ( foo("literal"), "literal" )
-          assertEQ( foo(undefined), undefined )
-          assertEQ( foo(null), null )
+          arktest.assertEQ( foo("literal"), "literal" )
+          arktest.assertEQ( foo(undefined), undefined )
+          arktest.assertEQ( foo(null), null )
 
     - doc: |-
           Use rest parameter with literal type/array of literal type
       decl: |-
           function fooL(i: int, ...j: "some str"[]) {
-              assertEQ(i, j.length)
+              arktest.assertEQ(i, j.length)
               for ( let m of j ) {
-                  assertTrue( m instanceof "some str")
+                  arktest.assertTrue( m instanceof "some str")
               }
           }
           function fooS(...j: string[]) {
               for ( let m of j ) {
-                  assertTrue( m instanceof "some str")
+                  arktest.assertTrue( m instanceof "some str")
               }
           }
       use: |-
@@ -252,10 +252,10 @@ cases:
       decl: |-
           type TPL = ["some str", "another str", undefined, null]
           function foo(...j: TPL) {
-              assertEQ(j[0], "some str")
-              assertEQ(j[1], "another str")
-              assertEQ(j[2], undefined)
-              assertEQ(j[3], null)
+              arktest.assertEQ(j[0], "some str")
+              arktest.assertEQ(j[1], "another str")
+              arktest.assertEQ(j[2], undefined)
+              arktest.assertEQ(j[3], null)
           }
       use: |-
           let a: TPL = [ "some str", "another str", undefined, null ]

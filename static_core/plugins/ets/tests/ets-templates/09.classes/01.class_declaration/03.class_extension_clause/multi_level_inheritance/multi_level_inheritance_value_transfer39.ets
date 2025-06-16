@@ -39,8 +39,8 @@ class C extends B {
   }
 
   test() {
-    assertEQ(this._publicVar, 3);
-    assertEQ(this._protectedVar, 2);
+    arktest.assertEQ(this._publicVar, 3);
+    arktest.assertEQ(this._protectedVar, 2);
   }
 }
 

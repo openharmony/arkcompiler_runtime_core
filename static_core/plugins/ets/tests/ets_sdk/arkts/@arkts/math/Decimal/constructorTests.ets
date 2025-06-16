@@ -17,18 +17,18 @@ import { Decimal } from "@arkts.math.Decimal";
 
 function t(digits: number[], exponent: number, sign: number, n: number | string) {
     let v = new Decimal(n);
-    assertEQ(digits.length, v.d!.length,
+    arktest.assertEQ(digits.length, v.d!.length,
         `Decimal(${n}).d.length, actual:${v.d!.length} is not equal to ${digits.length}`);
     for (let i = 0; i < digits.length; i++) {
-        assertEQ(digits[i], v.d![i], `Decimal(${n}).d, actual:${v.d!} is not equal to ${digits}`);
+        arktest.assertEQ(digits[i], v.d![i], `Decimal(${n}).d, actual:${v.d!} is not equal to ${digits}`);
     }
-    assertEQ(exponent, v.e, `Decimal(${n}).e, actual:${v.e} is not equal to ${exponent}`);
-    assertEQ(sign, v.s, `Decimal(${n}).s, actual:${v.s} is not equal to ${sign}`);
+    arktest.assertEQ(exponent, v.e, `Decimal(${n}).e, actual:${v.e} is not equal to ${exponent}`);
+    arktest.assertEQ(sign, v.s, `Decimal(${n}).s, actual:${v.s} is not equal to ${sign}`);
 }
 
 function t2(expected: string, n: number | string) {
     let v = new Decimal(n).valueOf();
-    assertEQ(expected, v, `Decimal(${n}).valueOf(), actual:${v} is not equal to ${expected}`);
+    arktest.assertEQ(expected, v, `Decimal(${n}).valueOf(), actual:${v} is not equal to ${expected}`);
 }
 
 function config() {
@@ -167,7 +167,7 @@ function testCreateDecimalWithInfinity() {
 }
 
 function main() {
-    const suite = new ArkTestsuite("Decimal Constructor API tests");
+    const suite = new arktest.ArkTestsuite("Decimal Constructor API tests");
     suite.addTest("Decimal constructor with number", testCreateDecimalWithNumber);
     suite.addTest("Decimal constructor with string", testCreateDecimalWithString);
     suite.addTest("Decimal constructor with binary", testCreateDecimalWithBinary);

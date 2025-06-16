@@ -35,8 +35,8 @@ cases:
           let u1: J|I = new A
           let u2: I|J = new B
       use: |-
-          assertTrue(u1.meth() === undefined)
-          assertTrue(u2.meth() === null)
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
 
     - decl: |-
           // interfaces, methods of number type
@@ -59,8 +59,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(''), 42.0)
-          assertEQ(u2.meth(''), 0e0)
+          arktest.assertEQ(u1.meth(''), 42.0)
+          arktest.assertEQ(u2.meth(''), 0e0)
 
     - decl: |-
           // interfaces, methods of bigint type
@@ -83,8 +83,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(0), 42n)
-          assertEQ(u2.meth(''), 33n)
+          arktest.assertEQ(u1.meth(0), 42n)
+          arktest.assertEQ(u2.meth(''), 33n)
 
     - decl: |-
           // interfaces, methods of Integral type
@@ -106,8 +106,8 @@ cases:
           let u2: I|J = new B
       use: |-
           let arr: char[] = [c'A', c'B']
-          assertEQ(u1.meth(arr), 42)
-          assertEQ(u2.meth(arr), 33)
+          arktest.assertEQ(u1.meth(arr), 42)
+          arktest.assertEQ(u2.meth(arr), 33)
 
     - decl: |-
           // interfaces, methods of Error type
@@ -130,8 +130,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(42).message, 'a42')
-          assertEQ(u2.meth('cd').message, 'bcd')
+          arktest.assertEQ(u1.meth(42).message, 'a42')
+          arktest.assertEQ(u2.meth('cd').message, 'bcd')
 
     - decl: |-
           // interfaces, methods of union literal type
@@ -154,8 +154,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(), 'a')
-          assertEQ(u2.meth(), 'b')
+          arktest.assertEQ(u1.meth(), 'a')
+          arktest.assertEQ(u2.meth(), 'b')
 
     - decl: |-
           // interfaces, methods of union type
@@ -178,8 +178,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(new Object()), 42.0)
-          assertEQ(u2.meth(new Object()), null)
+          arktest.assertEQ(u1.meth(new Object()), 42.0)
+          arktest.assertEQ(u2.meth(new Object()), null)
 
     - decl: |-
           // interfaces, methods of array type
@@ -202,8 +202,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth()[0], 'a')
-          assertEQ(u2.meth()[2], 'e')
+          arktest.assertEQ(u1.meth()[0], 'a')
+          arktest.assertEQ(u2.meth()[2], 'e')
 
     - decl: |-
           // interfaces, methods of tuple type
@@ -226,8 +226,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(42, 'a')[0], 43.0)
-          assertEQ(u2.meth(33, 'b')[1], 'bB')
+          arktest.assertEQ(u1.meth(42, 'a')[0], 43.0)
+          arktest.assertEQ(u2.meth(33, 'b')[1], 'bB')
 
     - decl: |-
           // interfaces, methods of Record type
@@ -250,8 +250,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth()['a'], 11.0)
-          assertEQ(u2.meth()['b'], 22.0)
+          arktest.assertEQ(u1.meth()['a'], 11.0)
+          arktest.assertEQ(u2.meth()['b'], 22.0)
 
     - decl: |-
           // interfaces, methods of function type
@@ -275,8 +275,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(2)('abc'), 6.0)
-          assertEQ(u2.meth(3)('abc'), 16.0)
+          arktest.assertEQ(u1.meth(2)('abc'), 6.0)
+          arktest.assertEQ(u2.meth(3)('abc'), 16.0)
 
     - decl: |-
           // interfaces, methods of type parameters
@@ -303,8 +303,8 @@ cases:
           let u1: I<string>|J = new A<string>('a')
           let u2: J|I<string> = new B
       use: |-
-          assertEQ(u1.meth(), 'a')
-          assertEQ(u2.meth(), 'b')
+          arktest.assertEQ(u1.meth(), 'a')
+          arktest.assertEQ(u2.meth(), 'b')
 
     - decl: |-
           // interfaces, methods of enum type
@@ -328,5 +328,5 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.meth(), Color.Green)
-          assertEQ(u2.meth(), Color.Blue)
+          arktest.assertEQ(u1.meth(), Color.Green)
+          arktest.assertEQ(u2.meth(), Color.Blue)

@@ -20,5 +20,5 @@ tags: [negative, compile-only]
 
 function main(): void {
     let myC = 1
-    assertTrue(myC instanceof 1)
+    arktest.assertTrue(myC instanceof 1)
 }

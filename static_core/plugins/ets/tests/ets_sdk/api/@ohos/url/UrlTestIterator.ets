@@ -34,7 +34,7 @@ function testUrlEntries001() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[1], "value1");
+ arktest.assertEQ(arr[1], "value1");
 }
 
 /**
@@ -55,7 +55,7 @@ function testUrlEntries002() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[2], "key2")
+ arktest.assertEQ(arr[2], "key2")
 }
 
 /**
@@ -77,7 +77,7 @@ function testUrlEntries003() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[5], "jk")
+ arktest.assertEQ(arr[5], "jk")
 }
 
 /**
@@ -98,7 +98,7 @@ function testUrlEntries004() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[3], "value2")
+ arktest.assertEQ(arr[3], "value2")
 }
 
 /**
@@ -120,7 +120,7 @@ function testUrlEntries005() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[4], "jss")
+ arktest.assertEQ(arr[4], "jss")
 }
 
 /**
@@ -141,7 +141,7 @@ function testUrlIterator001() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[1], "value1");
+ arktest.assertEQ(arr[1], "value1");
 }
 
 /**
@@ -162,7 +162,7 @@ function testUrlIterator002() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[2], "key2")
+ arktest.assertEQ(arr[2], "key2")
 }
 
 /**
@@ -184,7 +184,7 @@ function testUrlIterator003() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[5], "jk")
+ arktest.assertEQ(arr[5], "jk")
 }
 
 /**
@@ -205,7 +205,7 @@ function testUrlIterator004() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[3], "value2")
+ arktest.assertEQ(arr[3], "value2")
 }
 
 /**
@@ -227,7 +227,7 @@ function testUrlIterator005() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[4], "jss")
+ arktest.assertEQ(arr[4], "jss")
 }
 
 /**
@@ -247,7 +247,7 @@ function testUrlForEach001() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "value1 key1 true");
+ arktest.assertEQ(arr[0], "value1 key1 true");
 }
 
 /**
@@ -267,7 +267,7 @@ function testUrlForEach002() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[1], "value2 key2 true");
+ arktest.assertEQ(arr[1], "value2 key2 true");
 }
 
 /**
@@ -288,7 +288,7 @@ function testUrlForEach003() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[2], "jk foo true");
+ arktest.assertEQ(arr[2], "jk foo true");
 }
 
 /**
@@ -308,7 +308,7 @@ function testUrlForEach004() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[1], "txt jss true");
+ arktest.assertEQ(arr[1], "txt jss true");
 }
 
 /**
@@ -329,7 +329,7 @@ function testUrlForEach005() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "bar foo true");
+ arktest.assertEQ(arr[0], "bar foo true");
 }
 
 /**
@@ -348,12 +348,12 @@ function testUrlForEach006() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "value1 key1 true");
+ arktest.assertEQ(arr[0], "value1 key1 true");
 }
  
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlEntries001", testUrlEntries001);
 	suite.addTest("testUrlEntries002", testUrlEntries002);
 	suite.addTest("testUrlEntries003", testUrlEntries003);

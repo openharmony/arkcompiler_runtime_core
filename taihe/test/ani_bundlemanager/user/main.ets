@@ -32,21 +32,21 @@ function test_bundlemanager_interface_skill_with_actions() {
     let info = skill.actions[0];
 
     console.log("skill.actions is: " + info);
-    assertEQ(info, "SkillImpl::getActions");
+    arktest.assertEQ(info, "SkillImpl::getActions");
 }
 
 function test_bundlemanager_interface_skill_with_entities() {
     let info = skill.entities[0];
 
     console.log("skill.entities is: " + info);
-    assertEQ(info, "SkillImpl::getEntities");
+    arktest.assertEQ(info, "SkillImpl::getEntities");
 }
 
 function test_bundlemanager_interface_skill_with_domainVerify() {
     let info = skill.domainVerify;
 
     console.log("skill.domainVerify is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 let skillUri: skillTest.SkillUri = skillTest.getSkillUri();
@@ -54,70 +54,70 @@ function test_bundlemanager_interface_skilluri_with_scheme() {
     let info = skillUri.scheme;
 
     console.log("skillUri.scheme is: " + info);
-    assertEQ(info, "SkillUriImpl::getScheme");
+    arktest.assertEQ(info, "SkillUriImpl::getScheme");
 }
 
 function test_bundlemanager_interface_skilluri_with_host() {
     let info = skillUri.host;
 
     console.log("skillUri.host is: " + info);
-    assertEQ(info, "SkillUriImpl::getHost");
+    arktest.assertEQ(info, "SkillUriImpl::getHost");
 }
 
 function test_bundlemanager_interface_skilluri_with_port() {
     let info = skillUri.port;
 
     console.log("skillUri.host is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_skilluri_with_path() {
     let info = skillUri.path;
 
     console.log("skillUri.path is: " + info);
-    assertEQ(info, "SkillUriImpl::getPath");
+    arktest.assertEQ(info, "SkillUriImpl::getPath");
 }
 
 function test_bundlemanager_interface_skilluri_with_pathStartWith() {
     let info = skillUri.pathStartWith;
 
     console.log("skillUri.pathStartWith is: " + info);
-    assertEQ(info, "SkillUriImpl::getPathStartWith");
+    arktest.assertEQ(info, "SkillUriImpl::getPathStartWith");
 }
 
 function test_bundlemanager_interface_skilluri_with_pathRegex() {
     let info = skillUri.pathRegex;
 
     console.log("skillUri.pathRegex is: " + info);
-    assertEQ(info, "SkillUriImpl::getPathRegex");
+    arktest.assertEQ(info, "SkillUriImpl::getPathRegex");
 }
 
 function test_bundlemanager_interface_skilluri_with_type() {
     let info = skillUri.type;
 
     console.log("skillUri.type is: " + info);
-    assertEQ(info, "SkillUriImpl::getType");
+    arktest.assertEQ(info, "SkillUriImpl::getType");
 }
 
 function test_bundlemanager_interface_skilluri_with_utd() {
     let info = skillUri.utd;
 
     console.log("skillUri.utd is: " + info);
-    assertEQ(info, "SkillUriImpl::getUtd");
+    arktest.assertEQ(info, "SkillUriImpl::getUtd");
 }
 
 function test_bundlemanager_interface_skilluri_with_maxFileSupported() {
     let info = skillUri.maxFileSupported;
 
     console.log("skillUri.maxFileSupported is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_skilluri_with_linkFeature() {
     let info = skillUri.linkFeature;
 
     console.log("skillUri.linkFeature is: " + info);
-    assertEQ(info, "SkillUriImpl::getLinkFeature");
+    arktest.assertEQ(info, "SkillUriImpl::getLinkFeature");
 }
 
 //Abilityinfo.d.ts
@@ -126,133 +126,133 @@ function test_bundlemanager_interface_abilityinfo_with_bundleName() {
     let info = abiInfo.bundleName;
 
     console.log("abiInfo.bundleName is: " + info);
-    assertEQ(info, "abilityInfoImpl::getBundleName");
+    arktest.assertEQ(info, "abilityInfoImpl::getBundleName");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_moduleName() {
     let info = abiInfo.moduleName;
 
     console.log("abiInfo.moduleName is: " + info);
-    assertEQ(info, "abilityInfoImpl::getModuleName");
+    arktest.assertEQ(info, "abilityInfoImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_name() {
     let info = abiInfo.name;
 
     console.log("abiInfo.name is: " + info);
-    assertEQ(info, "abilityInfoImpl::getName");
+    arktest.assertEQ(info, "abilityInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_label() {
     let info = abiInfo.label;
 
     console.log("abiInfo.label is: " + info);
-    assertEQ(info, "abilityInfoImpl::getLabel");
+    arktest.assertEQ(info, "abilityInfoImpl::getLabel");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_labelId() {
     let info = abiInfo.labelId;
 
     console.log("abiInfo.labelId is: " + info);
-    assertEQ(info, 506 as short);
+    arktest.assertEQ(info, 506 as short);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_description() {
     let info = abiInfo.description;
 
     console.log("abiInfo.description is: " + info);
-    assertEQ(info, "abilityInfoImpl::getDescription");
+    arktest.assertEQ(info, "abilityInfoImpl::getDescription");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_descriptionId() {
     let info = abiInfo.descriptionId;
 
     console.log("abiInfo.descriptionId is: " + info);
-    assertEQ(info, 506 as short);
+    arktest.assertEQ(info, 506 as short);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_icon() {
     let info = abiInfo.icon;
 
     console.log("abiInfo.icon is: " + info);
-    assertEQ(info, "abilityInfoImpl::getIcon");
+    arktest.assertEQ(info, "abilityInfoImpl::getIcon");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_iconId() {
     let info = abiInfo.iconId;
 
     console.log("abiInfo.iconId is: " + info);
-    assertEQ(info, 506 as short);
+    arktest.assertEQ(info, 506 as short);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_process() {
     let info = abiInfo.process;
 
     console.log("abiInfo.process is: " + info);
-    assertEQ(info, "abilityInfoImpl::getProcess");
+    arktest.assertEQ(info, "abilityInfoImpl::getProcess");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_exported() {
     let info = abiInfo.exported;
 
     console.log("abiInfo.exported is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_type() {
     let info = abiInfo.type;
 
     console.log("abiInfo.type is: " + info);
-    assertEQ(info, abiInfo.type);
+    arktest.assertEQ(info, abiInfo.type);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_orientation() {
     let info = abiInfo.orientation;
 
     console.log("abiInfo.orientation is: " + info);
-    assertEQ(info, abiInfo.orientation);
+    arktest.assertEQ(info, abiInfo.orientation);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_launchType() {
     let info = abiInfo.launchType;
 
     console.log("abiInfo.launchType is: " + info);
-    assertEQ(info, abiInfo.launchType);
+    arktest.assertEQ(info, abiInfo.launchType);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_permissions() {
     let info = abiInfo.permissions[0];
 
     console.log("abiInfo.permissions is: " + info);
-    assertEQ(info, "abilityInfoImpl::getPermissions");
+    arktest.assertEQ(info, "abilityInfoImpl::getPermissions");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_readPermission() {
     let info = abiInfo.readPermission;
 
     console.log("abiInfo.readPermission is: " + info);
-    assertEQ(info, "abilityInfoImpl::getReadPermission");
+    arktest.assertEQ(info, "abilityInfoImpl::getReadPermission");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_writePermission() {
     let info = abiInfo.writePermission;
 
     console.log("abiInfo.writePermission is: " + info);
-    assertEQ(info, "abilityInfoImpl::getWritePermission");
+    arktest.assertEQ(info, "abilityInfoImpl::getWritePermission");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_uri() {
     let info = abiInfo.uri;
 
     console.log("abiInfo.uri is: " + info);
-    assertEQ(info, "abilityInfoImpl::getUri");
+    arktest.assertEQ(info, "abilityInfoImpl::getUri");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_deviceTypes() {
     let info = abiInfo.deviceTypes[0];
 
     console.log("abiInfo.deviceTypes is: " + info);
-    assertEQ(info, "abilityInfoImpl::getDeviceTypes");
+    arktest.assertEQ(info, "abilityInfoImpl::getDeviceTypes");
 }
 
 function test_bundlemanager_interface_abilityinfo_with_metadata() {
@@ -265,21 +265,21 @@ function test_bundlemanager_interface_abilityinfo_with_enabled() {
     let info = abiInfo.enabled;
 
     console.log("abiInfo.enabled is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_supportWindowModes() {
     let info = abiInfo.supportWindowModes[0];
 
     console.log("abiInfo.type is: " + info);
-    assertEQ(info, abiInfo.supportWindowModes[0]);
+    arktest.assertEQ(info, abiInfo.supportWindowModes[0]);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_excludeFromDock() {
     let info = abiInfo.excludeFromDock;
 
     console.log("abiInfo.excludeFromDock is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_skills() {
@@ -292,14 +292,14 @@ function test_bundlemanager_interface_abilityinfo_with_appIndex() {
     let info = abiInfo.appIndex;
 
     console.log("abiInfo.appIndex is: " + info);
-    assertEQ(info, 506 as short);
+    arktest.assertEQ(info, 506 as short);
 }
 
 function test_bundlemanager_interface_abilityinfo_with_orientationId() {
     let info = abiInfo.orientationId;
 
     console.log("abiInfo.orientationId is: " + info);
-    assertEQ(info, 506 as short);
+    arktest.assertEQ(info, 506 as short);
 }
 
 //OverlayModuleInfo.d.ts
@@ -308,35 +308,35 @@ function test_bundlemanager_interface_overlaymoduleinfo_with_bundleName() {
     let info = overInfo.bundleName;
 
     console.log("overInfo.bundleName is: " + info);
-    assertEQ(info, "OverlayModuleInfoImpl::getBundleName");
+    arktest.assertEQ(info, "OverlayModuleInfoImpl::getBundleName");
 }
 
 function test_bundlemanager_interface_overlaymoduleinfo_with_moduleName() {
     let info = overInfo.moduleName;
 
     console.log("overInfo.moduleName is: " + info);
-    assertEQ(info, "OverlayModuleInfoImpl::getModuleName");
+    arktest.assertEQ(info, "OverlayModuleInfoImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_overlaymoduleinfo_with_targetModuleName() {
     let info = overInfo.targetModuleName;
 
     console.log("overInfo.targetModuleName is: " + info);
-    assertEQ(info, "OverlayModuleInfoImpl::getTargetModuleName");
+    arktest.assertEQ(info, "OverlayModuleInfoImpl::getTargetModuleName");
 }
 
 function test_bundlemanager_interface_overlaymoduleinfo_with_priority() {
     let info = overInfo.priority;
 
     console.log("overInfo.priority is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_overlaymoduleinfo_with_state() {
     let info = overInfo.state;
 
     console.log("overInfo.state is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 //Metadata.d.ts
@@ -346,7 +346,7 @@ function test_bundlemanager_interface_metadata_with_name() {
     let info = metadata_.name;
 
     console.log("metadata.name is: " + info);
-    assertEQ(info, "bob");
+    arktest.assertEQ(info, "bob");
 }
 
 function test_bundlemanager_interface_metadata_with_value() {
@@ -354,7 +354,7 @@ function test_bundlemanager_interface_metadata_with_value() {
     let info = metadata_.value;
 
     console.log("metadata.value is: " + info);
-    assertEQ(info, "apple");
+    arktest.assertEQ(info, "apple");
 }
 
 function test_bundlemanager_interface_metadata_with_resource() {
@@ -362,14 +362,14 @@ function test_bundlemanager_interface_metadata_with_resource() {
     let info = metadata_.resource;
 
     console.log("metadata.resource is: " + info);
-    assertEQ(info, "food");
+    arktest.assertEQ(info, "food");
 }
 
 function test_bundlemanager_interface_metadata_with_valueId() {
     let info = metadata_.valueId;
 
     console.log("metadata.valueId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 //HapModuleInfo.d.ts
@@ -382,168 +382,168 @@ function test_bundlemanager_interface_hapmoduleinfo_with_name() {
     let info = hapInfo.name;
 
     console.log("hapInfo.name is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getName");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_icon() {
     let info = hapInfo.icon;
 
     console.log("hapInfo.icon is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getIcon");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getIcon");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_iconId() {
     let info = hapInfo.iconId;
 
     console.log("hapInfo.iconId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_label() {
     let info = hapInfo.label;
 
     console.log("hapInfo.label is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getLabel");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getLabel");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_labelId() {
     let info = hapInfo.labelId;
 
     console.log("hapInfo.labelId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_description() {
     let info = hapInfo.description;
 
     console.log("hapInfo.description is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getDescription");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getDescription");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_descriptionId() {
     let info = hapInfo.descriptionId;
 
     console.log("hapInfo.descriptionId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_mainElementName() {
     let info = hapInfo.mainElementName;
 
     console.log("hapInfo.mainElementName is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getMainElementName");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getMainElementName");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_deviceTypes() {
     let info = hapInfo.deviceTypes[0];
 
     console.log("hapInfo.deviceTypes is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getDeviceTypes");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getDeviceTypes");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_installationFree() {
     let info = hapInfo.installationFree;
 
     console.log("hapInfo.installationFree is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_hashValue() {
     let info = hapInfo.hashValue;
 
     console.log("hapInfo.hashValue is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getHashValue");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getHashValue");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_fileContextMenuConfig() {
     let info = hapInfo.fileContextMenuConfig;
 
     console.log("hapInfo.fileContextMenuConfig is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getFileContextMenuConfig");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getFileContextMenuConfig");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_nativeLibraryPath() {
     let info = hapInfo.nativeLibraryPath;
 
     console.log("hapInfo.nativeLibraryPath is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getNativeLibraryPath");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getNativeLibraryPath");
 }
 
 function test_bundlemanager_interface_hapmoduleinfo_with_codePath() {
     let info = hapInfo.codePath;
 
     console.log("hapInfo.codePath is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getCodePath");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getCodePath");
 }
 
 function test_bundlemanager_interface_dependency_with_moduleName() {
     let info = dependency.moduleName;
 
     console.log("dependency.moduleName is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getModuleName");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_dependency_with_bundleName() {
     let info = dependency.bundleName;
 
     console.log("dependency.bundleName is: " + info);
-    assertEQ(info, "HapModuleInfoImpl::getBundleName");
+    arktest.assertEQ(info, "HapModuleInfoImpl::getBundleName");
 }
 
 function test_bundlemanager_interface_dependency_with_versionCode() {
     let info = dependency.versionCode;
 
     console.log("dependency.versionCode is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_preloaditem_with_moduleName() {
     let info = preloadItem.moduleName;
 
     console.log("preloadItem.moduleName is: " + info);
-    assertEQ(info, "PreloadItemImpl::getModuleName");
+    arktest.assertEQ(info, "PreloadItemImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_routerItem_with_name() {
     let info = routerItem.name;
 
     console.log("routerItem.name is: " + info);
-    assertEQ(info, "RouterItemImpl::getName");
+    arktest.assertEQ(info, "RouterItemImpl::getName");
 }
 
 function test_bundlemanager_interface_routerItem_with_pageSourceFile() {
     let info = routerItem.pageSourceFile;
 
     console.log("routerItem.pageSourceFile is: " + info);
-    assertEQ(info, "RouterItemImpl::getPageSourceFile");
+    arktest.assertEQ(info, "RouterItemImpl::getPageSourceFile");
 }
 
 function test_bundlemanager_interface_routerItem_with_buildFunction() {
     let info = routerItem.buildFunction;
 
     console.log("routerItem.buildFunction is: " + info);
-    assertEQ(info, "RouterItemImpl::getBuildFunction");
+    arktest.assertEQ(info, "RouterItemImpl::getBuildFunction");
 }
 
 function test_bundlemanager_interface_routerItem_with_customData() {
     let info = routerItem.customData;
 
     console.log("routerItem.customData is: " + info);
-    assertEQ(info, "RouterItemImpl::getCustomData");
+    arktest.assertEQ(info, "RouterItemImpl::getCustomData");
 }
 
 function test_bundlemanager_interface_dataItem_with_key() {
     let info = dataItem.key;
 
     console.log("dataItem.key is: " + info);
-    assertEQ(info, "DataItemImpl::getKey");
+    arktest.assertEQ(info, "DataItemImpl::getKey");
 }
 
 function test_bundlemanager_interface_dataItem_with_value() {
     let info = dataItem.value;
 
     console.log("dataItem.value is: " + info);
-    assertEQ(info, "DataItemImpl::getValue");
+    arktest.assertEQ(info, "DataItemImpl::getValue");
 }
 
 //ExtensionAbilityInfo.d.ts
@@ -552,91 +552,91 @@ function test_bundlemanager_interface_extensionAbilityInfo_with_bundleName() {
     let info = exAbiInfo.bundleName;
 
     console.log("exAbiInfo.bundleName is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getBundleName");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getBundleName");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_moduleName() {
     let info = exAbiInfo.moduleName;
 
     console.log("exAbiInfo.moduleName is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getModuleName");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_name() {
     let info = exAbiInfo.name;
 
     console.log("exAbiInfo.name is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getName");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_labelId() {
     let info = exAbiInfo.labelId;
 
     console.log("exAbiInfo.labelId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_descriptionId() {
     let info = exAbiInfo.descriptionId;
 
     console.log("abiIexAbiInfonfo.descriptionId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_iconId() {
     let info = exAbiInfo.iconId;
 
     console.log("exAbiInfo.iconId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_exported() {
     let info = exAbiInfo.exported;
 
     console.log("exAbiInfo.exported is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_extensionAbilityTypeName() {
     let info = exAbiInfo.extensionAbilityTypeName;
 
     console.log("exAbiInfo.extensionAbilityTypeName is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_permissions() {
     let info = exAbiInfo.permissions[0];
 
     console.log("exAbiInfo.permissions is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getPermissions");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getPermissions");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_enabled() {
     let info = exAbiInfo.enabled;
 
     console.log("exAbiInfo.enabled is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_readPermission() {
     let info = exAbiInfo.readPermission;
 
     console.log("exAbiInfo.readPermission is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getReadPermission");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getReadPermission");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_writePermission() {
     let info = exAbiInfo.writePermission;
 
     console.log("exAbiInfo.writePermission is: " + info);
-    assertEQ(info, "ExtensionAbilityInfoImpl::getWritePermission");
+    arktest.assertEQ(info, "ExtensionAbilityInfoImpl::getWritePermission");
 }
 
 function test_bundlemanager_interface_extensionAbilityInfo_with_appIndex() {
     let info = exAbiInfo.appIndex;
 
     console.log("exAbiInfo.appIndex is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 //ApplicationInfo.d.ts
@@ -647,182 +647,182 @@ function test_bundlemanager_interface_applicationInfo_with_name() {
     let info = appLicaInfo.name;
 
     console.log("appLicaInfo.name is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getName");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_description() {
     let info = appLicaInfo.description;
 
     console.log("appLicaInfo.description is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getDescription");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getDescription");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_descriptionId() {
     let info = appLicaInfo.descriptionId;
 
     console.log("appLicaInfo.descriptionId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_enabled() {
     let info = appLicaInfo.enabled;
 
     console.log("appLicaInfo.enabled is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_label() {
     let info = appLicaInfo.label;
 
     console.log("appLicaInfo.label is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getLabel");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getLabel");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_labelId() {
     let info = appLicaInfo.labelId;
 
     console.log("appLicaInfo.labelId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_icon() {
     let info = appLicaInfo.icon;
 
     console.log("abiInfo.icon is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getIcon");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getIcon");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_iconId() {
     let info = appLicaInfo.iconId;
 
     console.log("appLicaInfo.iconId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_process() {
     let info = appLicaInfo.process;
 
     console.log("appLicaInfo.process is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getProcess");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getProcess");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_permissions() {
     let info = appLicaInfo.permissions[0];
 
     console.log("appLicaInfo.permissions is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getPermissions");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getPermissions");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_codePath() {
     let info = appLicaInfo.codePath;
 
     console.log("appLicaInfo.codePath is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getCodePath");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getCodePath");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_removable() {
     let info = appLicaInfo.removable;
 
     console.log("appLicaInfo.removable is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_accessTokenId() {
     let info = appLicaInfo.accessTokenId;
 
     console.log("appLicaInfo.accessTokenId is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_uid() {
     let info = appLicaInfo.uid;
 
     console.log("appLicaInfo.uid is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_appDistributionType() {
     let info = appLicaInfo.appDistributionType;
 
     console.log("appLicaInfo.appDistributionType is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getAppDistributionType");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getAppDistributionType");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_appProvisionType() {
     let info = appLicaInfo.appProvisionType;
 
     console.log("appLicaInfo.appProvisionType is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getAppProvisionType");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getAppProvisionType");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_systemApp() {
     let info = appLicaInfo.systemApp;
 
     console.log("appLicaInfo.systemApp is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_debug() {
     let info = appLicaInfo.debug;
 
     console.log("appLicaInfo.debug is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_dataUnclearable() {
     let info = appLicaInfo.dataUnclearable;
 
     console.log("appLicaInfo.dataUnclearable is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_nativeLibraryPath() {
     let info = appLicaInfo.nativeLibraryPath;
 
     console.log("appLicaInfo.nativeLibraryPath is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getNativeLibraryPath");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getNativeLibraryPath");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_appIndex() {
     let info = appLicaInfo.appIndex;
 
     console.log("appLicaInfo.appIndex is: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 function test_bundlemanager_interface_applicationInfo_with_installSource() {
     let info = appLicaInfo.installSource;
 
     console.log("appLicaInfo.installSource is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getInstallSource");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getInstallSource");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_releaseType() {
     let info = appLicaInfo.releaseType;
 
     console.log("appLicaInfo.releaseType is: " + info);
-    assertEQ(info, "ApplicationInfoImpl::getReleaseType");
+    arktest.assertEQ(info, "ApplicationInfoImpl::getReleaseType");
 }
 
 function test_bundlemanager_interface_applicationInfo_with_cloudFileSyncEnabled() {
     let info = appLicaInfo.cloudFileSyncEnabled;
 
     console.log("appLicaInfo.cloudFileSyncEnabled is: " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundlemanager_interface_moduleMetadata_with_moduleName() {
     let info = moudleMData.moduleName;
 
     console.log("moudleMData.moduleName is: " + info);
-    assertEQ(info, "ModuleMetadataImpl::getModuleName");
+    arktest.assertEQ(info, "ModuleMetadataImpl::getModuleName");
 }
 
 function test_bundlemanager_interface_multiAppMode_with_maxCount() {
     let info = multiMode.maxCount;
 
     console.log("multiMode.maxCount: " + info);
-    assertEQ(info, intDig);
+    arktest.assertEQ(info, intDig);
 }
 
 //ElementName.d.ts
@@ -832,7 +832,7 @@ function test_bundlemanager_interface_elementName_with_deviceId() {
     let info = eleName.deviceId;
 
     console.log("eleName.deviceId is: " + info);
-    assertEQ(info, "DI0428");
+    arktest.assertEQ(info, "DI0428");
 }
 
 function test_bundlemanager_interface_elementName_with_bundleName() {
@@ -840,7 +840,7 @@ function test_bundlemanager_interface_elementName_with_bundleName() {
     let info = eleName.bundleName;
 
     console.log("eleName.bundleName is: " + info);
-    assertEQ(info, "BN0428");
+    arktest.assertEQ(info, "BN0428");
 }
 
 function test_bundlemanager_interface_elementName_with_moduleName() {
@@ -848,7 +848,7 @@ function test_bundlemanager_interface_elementName_with_moduleName() {
     let info = eleName.moduleName;
 
     console.log("eleName.moduleName is: " + info);
-    assertEQ(info, "MN0428");
+    arktest.assertEQ(info, "MN0428");
 }
 
 function test_bundlemanager_interface_elementName_with_abilityName() {
@@ -856,7 +856,7 @@ function test_bundlemanager_interface_elementName_with_abilityName() {
     let info = eleName.abilityName;
 
     console.log("eleName.abilityName is: " + info);
-    assertEQ(info, "AN0428");
+    arktest.assertEQ(info, "AN0428");
 }
 
 function test_bundlemanager_interface_elementName_with_uri() {
@@ -864,7 +864,7 @@ function test_bundlemanager_interface_elementName_with_uri() {
     let info = eleName.uri;
 
     console.log("eleName.uri is: " + info);
-    assertEQ(info, "Uri0428");
+    arktest.assertEQ(info, "Uri0428");
 }
 
 function test_bundlemanager_interface_elementName_with_shortName() {
@@ -872,7 +872,7 @@ function test_bundlemanager_interface_elementName_with_shortName() {
     let info = eleName.shortName;
 
     console.log("eleName.shortName is: " + info);
-    assertEQ(info, "SN0428");
+    arktest.assertEQ(info, "SN0428");
 }
 
 //BundleInfo.d.ts
@@ -884,138 +884,138 @@ let appClone: bundleInfo.AppCloneIdentity = bundleInfo.getAppCloneIdentity();
 function test_bundlemanager_interface_bundleinfo_with_name() {
     let info = bundInfo.name;
 
-    assertEQ(info,  "BundleInfoImpl::getName");
+    arktest.assertEQ(info,  "BundleInfoImpl::getName");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_vendor() {
     let info = bundInfo.vendor;
 
-    assertEQ(info,  "BundleInfoImpl::getVendor");
+    arktest.assertEQ(info,  "BundleInfoImpl::getVendor");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_versionCode() {
     let info = bundInfo.versionCode;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_versionName() {
     let info = bundInfo.versionName;
 
-    assertEQ(info,  "BundleInfoImpl::getVersionName");
+    arktest.assertEQ(info,  "BundleInfoImpl::getVersionName");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_minCompatibleVersionCode() {
     let info = bundInfo.minCompatibleVersionCode;
 
-    assertEQ(info,  "BundleInfoImpl::getMinCompatibleVersionCode");
+    arktest.assertEQ(info,  "BundleInfoImpl::getMinCompatibleVersionCode");
 }
 
 function test_bundlemanager_interface_bundleinfo_with_targetVersion() {
     let info = bundInfo.targetVersion;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_installTime() {
     let info = bundInfo.installTime;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_updateTime() {
     let info = bundInfo.updateTime;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function test_bundlemanager_interface_bundleinfo_with_appIndex() {
     let info = bundInfo.appIndex;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function test_bundlemanager_interface_ReqPermissionDetail_with_name() {
     reqDetail.name = "req0428";
     let info = reqDetail.name;
 
-    assertEQ(info, "req0428");
+    arktest.assertEQ(info, "req0428");
 }
 
 function test_bundlemanager_interface_ReqPermissionDetail_with_moduleName() {
     reqDetail.moduleName = "MN04280428";
     let info = reqDetail.moduleName;
 
-    assertEQ(info, "MN04280428");
+    arktest.assertEQ(info, "MN04280428");
 }
 
 function test_bundlemanager_interface_ReqPermissionDetail_with_reason() {
     reqDetail.reason = "reason0428";
     let info = reqDetail.reason;
 
-    assertEQ(info, "reason0428");
+    arktest.assertEQ(info, "reason0428");
 }
 
 function test_bundlemanager_interface_ReqPermissionDetail_with_reasonId() {
     reqDetail.reasonId = 2025;
     let info = reqDetail.reasonId;
 
-    assertEQ(info, 2025);
+    arktest.assertEQ(info, 2025);
 }
 
 function test_bundlemanager_interface_usedScene_with_abilities() {
     used.abilities = ["abilities1", "abilities2", "abilities3"];
     let info = used.abilities[0];
 
-    assertEQ(info, "abilities1");
+    arktest.assertEQ(info, "abilities1");
 }
 
 function test_bundlemanager_interface_usedScene_with_when() {
     used.when = "when0428";
     let info = used.when;
 
-    assertEQ(info, "when0428");
+    arktest.assertEQ(info, "when0428");
 }
 
 function test_bundlemanager_interface_signatureInfo_with_appId() {
     let info = sigInfo.appId;
 
-    assertEQ(info, "SignatureInfoImpl::getAppId");
+    arktest.assertEQ(info, "SignatureInfoImpl::getAppId");
 }
 
 function test_bundlemanager_interface_signatureInfo_with_fingerprint() {
     let info = sigInfo.fingerprint;
 
-    assertEQ(info, "SignatureInfoImpl::getFingerprint");
+    arktest.assertEQ(info, "SignatureInfoImpl::getFingerprint");
 }
 
 function test_bundlemanager_interface_signatureInfo_with_appIdentifier() {
     let info = sigInfo.appIdentifier;
 
-    assertEQ(info, "SignatureInfoImpl::getAppIdentifier");
+    arktest.assertEQ(info, "SignatureInfoImpl::getAppIdentifier");
 }
 
 function test_bundlemanager_interface_signatureInfo_with_certificate() {
     let info = sigInfo.certificate;
 
-    assertEQ(info, "SignatureInfoImpl::getCertificate");
+    arktest.assertEQ(info, "SignatureInfoImpl::getCertificate");
 }
 
 function test_bundlemanager_interface_appCloneIdentity_with_bundleName() {
     let info = appClone.bundleName;
 
-    assertEQ(info, "AppCloneIdentityImpl::getBundleName");
+    arktest.assertEQ(info, "AppCloneIdentityImpl::getBundleName");
 }
 
 function test_bundlemanager_interface_appCloneIdentity_with_appIndex() {
     let info = appClone.appIndex;
 
-    assertEQ(info,  intDig);
+    arktest.assertEQ(info,  intDig);
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("BundleManager Tests");
+    const suite = new arktest.ArkTestsuite("BundleManager Tests");
 
     //Abilityinfo.d.ts
     suite.addTest("test_bundlemanager_interface_abilityinfo_with_bundleName", test_bundlemanager_interface_abilityinfo_with_bundleName);

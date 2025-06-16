@@ -21,7 +21,7 @@ interface Person {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil getHash API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil getHash API tests")
 
     suite.addTest("Get the hash value of an Interface object", testUtilGetHash001)
     suite.addTest("Get the hash value of an array of numbers", testUtilGetHash002)
@@ -45,14 +45,14 @@ function testUtilGetHash001() {
     };
     let result1 = util.getHash(person);
     let result2 = util.getHash(person);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash002() {
     let numbers = [1, 2, 3, 4, 5];
     let result1 = util.getHash(numbers);
     let result2 = util.getHash(numbers);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash003() {
@@ -68,28 +68,28 @@ function testUtilGetHash003() {
     let myCar = new Car("Toyota", "Corolla");
     let result1 = util.getHash(myCar);
     let result2 = util.getHash(myCar);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash004() {
     let now = new Date();
     let result1 = util.getHash(now);
     let result2 = util.getHash(now);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash005() {
     let regex = new RegExp("abc");
     let result1 = util.getHash(regex);
     let result2 = util.getHash(regex);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash006() {
     let mathObject: Math = new Math();
     let result1 = util.getHash(mathObject);
     let result2 = util.getHash(mathObject);
-    assertEQ(result1, result2, "The same object should have the same hash code");
+    arktest.assertEQ(result1, result2, "The same object should have the same hash code");
 }
 
 function testUtilGetHash007() {
@@ -97,7 +97,7 @@ function testUtilGetHash007() {
     let test: string = "test";
     let result1 = util.getHash(mathObject);
     let result2 = util.getHash(test);
-    assertTrue(result1 !== result2, "The different object should have the different hash code");
+    arktest.assertTrue(result1 !== result2, "The different object should have the different hash code");
 }
 
 function testUtilGetHash008() {
@@ -111,7 +111,7 @@ function testUtilGetHash008() {
     };
     let result1 = util.getHash(person);
     let result2 = util.getHash(person1);
-    assertTrue(result1 !== result2, "The different object should have the different hash code");
+    arktest.assertTrue(result1 !== result2, "The different object should have the different hash code");
 }
 
 function testUtilGetHash009() {
@@ -119,7 +119,7 @@ function testUtilGetHash009() {
     let test: string = "test";
     let result1 = util.getHash(data);
     let result2 = util.getHash(test);
-    assertTrue(result1 !== result2, "The different object should have the different hash code");
+    arktest.assertTrue(result1 !== result2, "The different object should have the different hash code");
 }
 
 function testUtilGetHash010() {
@@ -136,7 +136,7 @@ function testUtilGetHash010() {
     let myCar2 = new Car("Toyota", "Corolla");
     let result1 = util.getHash(myCar1);
     let result2 = util.getHash(myCar2);
-    assertNE(result1, result2, "The object should have the different hash code");
+    arktest.assertNE(result1, result2, "The object should have the different hash code");
 }
 
 function testUtilGetHash011() {
@@ -144,5 +144,5 @@ function testUtilGetHash011() {
     let regex2 = new RegExp("abc");
     let result1 = util.getHash(regex1);
     let result2 = util.getHash(regex2);
-    assertNE(result1, result2, "The object should have the different hash code");
+    arktest.assertNE(result1, result2, "The object should have the different hash code");
 }

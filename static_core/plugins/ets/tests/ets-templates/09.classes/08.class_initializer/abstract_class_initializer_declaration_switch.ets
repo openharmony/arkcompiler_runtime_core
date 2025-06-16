@@ -29,5 +29,5 @@ abstract class A {
 }
 
 function main(): void {
-  assertEQ( A.a, 1 );
+  arktest.assertEQ( A.a, 1 );
 }

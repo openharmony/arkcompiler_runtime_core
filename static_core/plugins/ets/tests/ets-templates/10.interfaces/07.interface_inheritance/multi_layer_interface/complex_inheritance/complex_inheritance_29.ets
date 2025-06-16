@@ -58,19 +58,19 @@ class Child extends Parent {
 }
 
 function main(): void {
-    assertEQ(GrandParent.grandParentStaticMethod(), "GrandParent static method");
-    assertEQ(GrandParent.overrideMethod(), "GrandParent override method");
+    arktest.assertEQ(GrandParent.grandParentStaticMethod(), "GrandParent static method");
+    arktest.assertEQ(GrandParent.overrideMethod(), "GrandParent override method");
 
-    assertEQ(Parent.parentStaticMethod(), "Parent static method");
-    assertEQ(Parent.overrideMethod(), "Parent override method");
-    assertEQ(Parent.grandParentStaticMethod(), "GrandParent static method");
+    arktest.assertEQ(Parent.parentStaticMethod(), "Parent static method");
+    arktest.assertEQ(Parent.overrideMethod(), "Parent override method");
+    arktest.assertEQ(Parent.grandParentStaticMethod(), "GrandParent static method");
 
-    assertEQ(Child.childStaticMethod(), "Child static method");
-    assertEQ(Child.overrideMethod(), "Child override method");
-    assertEQ(Child.parentStaticMethod(), "Parent static method");
-    assertEQ(Child.grandParentStaticMethod(), "GrandParent static method");
+    arktest.assertEQ(Child.childStaticMethod(), "Child static method");
+    arktest.assertEQ(Child.overrideMethod(), "Child override method");
+    arktest.assertEQ(Child.parentStaticMethod(), "Parent static method");
+    arktest.assertEQ(Child.grandParentStaticMethod(), "GrandParent static method");
 
-    assertEQ(Child.overrideMethod(), "Child override method");
-    assertEQ(Parent.overrideMethod(), "Parent override method");
-    assertEQ(GrandParent.overrideMethod(), "GrandParent override method");
+    arktest.assertEQ(Child.overrideMethod(), "Child override method");
+    arktest.assertEQ(Parent.overrideMethod(), "Parent override method");
+    arktest.assertEQ(GrandParent.overrideMethod(), "GrandParent override method");
 }

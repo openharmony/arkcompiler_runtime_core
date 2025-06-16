@@ -20,7 +20,7 @@ desc: check unary plus operation for byte operand
 
 function main(): void {
   const v: byte = {{v.value}}
-  assertEQ( +(v), {{v.result}})
+  arktest.assertEQ( +(v), {{v.result}})
 }
 
 {% endfor %}

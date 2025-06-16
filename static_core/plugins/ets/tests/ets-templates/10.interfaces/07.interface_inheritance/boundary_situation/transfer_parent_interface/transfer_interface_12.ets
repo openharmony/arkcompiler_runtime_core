@@ -32,5 +32,5 @@ function main(): void {
     key: "exampleKey",
   };
   
-  assertEQ(combined.key, "exampleKey");
+  arktest.assertEQ(combined.key, "exampleKey");
 }

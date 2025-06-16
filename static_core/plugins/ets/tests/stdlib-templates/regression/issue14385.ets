@@ -23,7 +23,7 @@ tags: []
 
 
 function foo(value: {{.item.type}}[][]): void {
-    assertEQ(value.length, 4);
+    arktest.assertEQ(value.length, 4);
 }
 
 function main(): void {

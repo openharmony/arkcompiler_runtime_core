@@ -46,5 +46,5 @@ class Derived extends Base1 implements IBase2 {
 function main(): void {
   const test = new Derived();
   const result = test.method();
-  assertEQ(result, 1);
+  arktest.assertEQ(result, 1);
 }

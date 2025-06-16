@@ -23,6 +23,6 @@ desc: >-
 {{c.decl}}
 
 function main() {
-    assertTrue( {{c.val}} instanceof {%- if c.type is defined %} {{c.type}} {%- else %} Numeric {%- endif %} [] )
+    arktest.assertTrue( {{c.val}} instanceof {%- if c.type is defined %} {{c.type}} {%- else %} Numeric {%- endif %} [] )
 }
 {% endfor %}

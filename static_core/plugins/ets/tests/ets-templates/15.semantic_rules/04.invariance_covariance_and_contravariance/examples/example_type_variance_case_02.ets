@@ -36,5 +36,5 @@ function main(): void {
   let resultA = a.methodThree(a);
   let resultB = b.methodThree(a);
 
-  assertNE(resultA, resultB);
+  arktest.assertNE(resultA, resultB);
 }

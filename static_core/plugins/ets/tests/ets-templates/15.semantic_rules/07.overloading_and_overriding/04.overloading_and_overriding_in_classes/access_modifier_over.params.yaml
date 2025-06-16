@@ -21,7 +21,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -30,7 +30,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -39,7 +39,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -91,7 +91,7 @@ cases:
       }
     use: |-
       new Derived().internal_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Internal member can be overridden by the internal one only
     tags: negative, compile-only
@@ -120,7 +120,7 @@ cases:
       }
     use: |-
       new Derived().protected_foo(new Number());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     decl: |-
@@ -130,7 +130,7 @@ cases:
       }
     use: |-
       new Derived().get_protected_foo(new Number());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
@@ -190,7 +190,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -198,7 +198,7 @@ cases:
       }
     use: |-
       new Derived().private_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   # not override-compatible
   - tags: negative, compile-only
@@ -223,7 +223,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -232,7 +232,7 @@ cases:
       }
     use: |-
       new Derived().get_protected_foo(new Number());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived<T,S> extends Gen2<T,S> {
@@ -241,7 +241,7 @@ cases:
       }
     use: |-
       new Derived<String, Number>().get_foo(new Number());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -249,7 +249,7 @@ cases:
       }
     use: |-
       new Derived().internal_foo();
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   # not overload-equivalent
   - decl: |-
@@ -259,7 +259,7 @@ cases:
       }
     use: |-
       new Derived().get_foo(new String());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -271,9 +271,9 @@ cases:
     use: |-
       let a = new Derived();
       a.public_foo();
-      assertEQ( res, 1);
+      arktest.assertEQ( res, 1);
       a.public_foo(new Number());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -284,9 +284,9 @@ cases:
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
       a.get_foo("some str");
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -297,9 +297,9 @@ cases:
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
       a.get_foo(new Number(), "some str");
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   # access_modifier_over_34
   - decl: |-
@@ -310,7 +310,7 @@ cases:
     use: |-
       let a = new Derived();
       a.get_foo(1 as number);
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -321,6 +321,6 @@ cases:
     use: |-
       let a = new Derived();
       a.get_foo(new Number());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
       a.get_foo(new Gen2<Number, String>());
-      assertEQ( res, 11);
+      arktest.assertEQ( res, 11);

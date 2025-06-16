@@ -27,6 +27,6 @@ class Uint16ArrayConstantChild implements Uint16ArrayConstantInterface {
 
 function main(): void {
   const instance = new Uint16ArrayConstantChild();
-  assertEQ(instance.CONST[0], 0);
-  assertEQ(instance.CONST[1], 65535);
+  arktest.assertEQ(instance.CONST[0], 0);
+  arktest.assertEQ(instance.CONST[1], 65535);
 }

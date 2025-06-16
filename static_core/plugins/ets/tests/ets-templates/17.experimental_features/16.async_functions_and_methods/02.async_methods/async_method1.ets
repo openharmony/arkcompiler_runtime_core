@@ -27,7 +27,7 @@ class MethodReturnInt {
 function startTest() {
     const example = new MethodReturnInt();
     const result = await example.methodReturnInt();
-    assertEQ(result, 10);
+    arktest.assertEQ(result, 10);
 }
 
 function main(): void {

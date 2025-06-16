@@ -21,5 +21,5 @@ function main(): void {
     let tmp: string = '5';
     let tmp1: string = '10';
     let result = tmp+tmp1
-    assertTrue(result === '510');
+    arktest.assertTrue(result === '510');
 }

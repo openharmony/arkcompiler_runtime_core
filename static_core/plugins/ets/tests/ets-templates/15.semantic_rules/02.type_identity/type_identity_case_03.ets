@@ -27,8 +27,8 @@ function main(): void {
   let arr: UnionArray = [1, "Hello", 2, "World"];
   let result = processArray(arr);
 
-  assertEQ(result[0], 1);
-  assertEQ(result[1], "Hello");
-  assertEQ(result[2], 2);
-  assertEQ(result[3], "World");
+  arktest.assertEQ(result[0], 1);
+  arktest.assertEQ(result[1], "Hello");
+  arktest.assertEQ(result[2], 2);
+  arktest.assertEQ(result[3], "World");
 }

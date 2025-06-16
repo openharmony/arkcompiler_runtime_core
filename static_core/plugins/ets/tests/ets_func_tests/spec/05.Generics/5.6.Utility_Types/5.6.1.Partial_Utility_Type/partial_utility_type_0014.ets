@@ -27,6 +27,6 @@ function f(i: Partial<I>) {
 }
 
 function main(): void {
-  assertEQ(f({}), 0)
-  assertEQ(f({value: 2}), 2)
+  arktest.assertEQ(f({}), 0)
+  arktest.assertEQ(f({value: 2}), 2)
 }

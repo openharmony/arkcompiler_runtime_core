@@ -24,7 +24,7 @@ async function functionReturnNull(): Promise<null> {
 
 async function startTest() {
     const result = await functionReturnNull();
-    assertEQ(result === null, true);
+    arktest.assertEQ(result === null, true);
 }
 
 function main(): void {

@@ -23,5 +23,5 @@ class TestClass3 {
 
 function main(): void {
     const obj = new TestClass3();
-    assertEQ(obj.testProp, true);
+    arktest.assertEQ(obj.testProp, true);
 }

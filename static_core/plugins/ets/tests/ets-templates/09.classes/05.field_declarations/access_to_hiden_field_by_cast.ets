@@ -29,5 +29,5 @@ class B extends A{
 function main(): void {
     let instance: A = new B();
 
-    assertTrue( instance.x );   // Smart type of 'instance' is 'B'!
+    arktest.assertTrue( instance.x );   // Smart type of 'instance' is 'B'!
 }

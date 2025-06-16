@@ -38,5 +38,5 @@ class Dog extends Animal {
 function main(): void {
   let myPet: Animal = new Dog();
   let sound = myPet.speak();
-  assertEQ(sound, 'Woof!');
+  arktest.assertEQ(sound, 'Woof!');
 }

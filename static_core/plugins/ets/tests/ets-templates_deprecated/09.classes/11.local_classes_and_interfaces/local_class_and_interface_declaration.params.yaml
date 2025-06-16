@@ -27,7 +27,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.bar() == 1);
+        arktest.assertTrue(a.bar() == 1);
       }
 
   - decl: |-
@@ -46,7 +46,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.bar() == 2);
+        arktest.assertTrue(a.bar() == 2);
       }
 
   - decl: |-
@@ -67,7 +67,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A(1);
-        assertTrue(a.i == 3);
+        arktest.assertTrue(a.i == 3);
       }
 
   - decl: |-
@@ -83,7 +83,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo() == 2);
+        arktest.assertTrue(foo() == 2);
       }
 
   - decl: |-
@@ -92,7 +92,7 @@ cases:
         class A {
           i: int = 1;
         }
-        assertTrue(new A().i == 1);
+        arktest.assertTrue(new A().i == 1);
       }
 
   - decl: |-
@@ -104,7 +104,7 @@ cases:
         class A implements I {
           i = 1;
         }
-        assertTrue(new A().i == 1);
+        arktest.assertTrue(new A().i == 1);
       }
 
   - decl: |-
@@ -123,7 +123,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo().bar() == 1);
+        arktest.assertTrue(foo().bar() == 1);
       }
 
   - decl: |-
@@ -139,7 +139,7 @@ cases:
     check: |-
       function main() {
         let a = new A();
-        assertTrue(a.foo());
+        arktest.assertTrue(a.foo());
       }
 
   - decl: |-
@@ -152,7 +152,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo());
+        arktest.assertTrue(foo());
       }
 
   - decl: |-
@@ -161,7 +161,7 @@ cases:
         interface I {}
         class B implements I {}
         let b = new B();
-        assertTrue(b instanceof I);
+        arktest.assertTrue(b instanceof I);
       }
 
   - decl: |-
@@ -191,7 +191,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo().bar() == 3);
+        arktest.assertTrue(foo().bar() == 3);
       }
 
   - decl: |-
@@ -222,7 +222,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo().bar() == 3);
+        arktest.assertTrue(foo().bar() == 3);
       }
 
   - decl: |-
@@ -253,7 +253,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(foo().bar() == 3);
+        arktest.assertTrue(foo().bar() == 3);
       }
 
   - decl: |-
@@ -271,7 +271,7 @@ cases:
           interface I {}
           class A implements I {};
           let a: A = new A();
-          assertTrue(a instanceof I);
+          arktest.assertTrue(a instanceof I);
         }
       }
 
@@ -280,9 +280,9 @@ cases:
       function main() {
         try {
           class B {};
-          assertTrue(true);
+          arktest.assertTrue(true);
         } catch(e) {
-          assertTrue(false);
+          arktest.assertTrue(false);
         }
       }
 
@@ -293,9 +293,9 @@ cases:
           interface I {}
           class A implements I {};
           let a: A = new A();
-          assertTrue(a instanceof I);
+          arktest.assertTrue(a instanceof I);
         } catch(e) {
-          assertTrue(false);
+          arktest.assertTrue(false);
         }
       }
 
@@ -310,10 +310,10 @@ cases:
             class A implements I {
               i = 5;
             }
-            assertTrue(new A().i == 5);
+            arktest.assertTrue(new A().i == 5);
             break;
           default:
-            assertTrue(false);
+            arktest.assertTrue(false);
         }
       }
 
@@ -329,7 +329,7 @@ cases:
       }
     check: |-
       function main() {
-        assertTrue(A.bar());
+        arktest.assertTrue(A.bar());
       }
 
   - decl: |-
@@ -349,7 +349,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.foo() == 1);
+        arktest.assertTrue(a.foo() == 1);
       }
 
   - tags: |-

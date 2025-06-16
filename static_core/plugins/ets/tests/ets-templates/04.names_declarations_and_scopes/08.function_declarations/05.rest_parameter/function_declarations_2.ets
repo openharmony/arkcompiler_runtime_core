@@ -23,5 +23,5 @@ function sum(...numbers: number[]): number {
 
 function main(): void {
     const result = sum(1, 2, 3);
-    assertTrue(result == 6);
+    arktest.assertTrue(result == 6);
 }

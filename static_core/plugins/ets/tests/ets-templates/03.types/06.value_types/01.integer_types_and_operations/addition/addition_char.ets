@@ -21,7 +21,7 @@ desc: check addition of two chars
 function main(): void {
     const a: char = {{v.left}}
     const b: char = {{v.right}}
-    assertTrue( (a + b) == {{v.result}} )
+    arktest.assertTrue( (a + b) == {{v.result}} )
 }
 
 {% endfor %}

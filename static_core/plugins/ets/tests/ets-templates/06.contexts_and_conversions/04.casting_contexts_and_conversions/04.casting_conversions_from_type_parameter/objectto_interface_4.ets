@@ -29,5 +29,5 @@ const pair: KeyValuePair<string, number> = {
 
 function main(): void {
   const obj1: object = pair;
-  assertTrue(obj1 == pair);
+  arktest.assertTrue(obj1 == pair);
 }

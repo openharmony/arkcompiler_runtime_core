@@ -47,5 +47,5 @@ class C extends B {
 
 function main(): void {
     const c = new C();
-    assertEQ(c.greet(),  "C:B:A");
+    arktest.assertEQ(c.greet(),  "C:B:A");
 }

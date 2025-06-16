@@ -48,7 +48,7 @@ function main(): void {
   const result = fm.read(1)
   const result1 = fm.write(2, 2);
   const result2 = fm.delete(3);
-  assertEQ(result, 1);
-  assertEQ(result1, 4);
-  assertEQ(result2, 3);
+  arktest.assertEQ(result, 1);
+  arktest.assertEQ(result1, 4);
+  arktest.assertEQ(result2, 3);
 }

@@ -30,5 +30,5 @@ function main(): void {
     id: 42,
   };
     
-  assertEQ(obj.id, 42);
+  arktest.assertEQ(obj.id, 42);
 }

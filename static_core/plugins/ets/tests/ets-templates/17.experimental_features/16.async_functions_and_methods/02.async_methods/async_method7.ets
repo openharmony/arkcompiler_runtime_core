@@ -29,7 +29,7 @@ async function startTest() {
     try {
         await example.methodThrowError();
     } catch (error) {
-        assertEQ(error as string, "Something went wrong!");
+        arktest.assertEQ(error as string, "Something went wrong!");
     }
 }
 

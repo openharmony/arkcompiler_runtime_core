@@ -23,7 +23,7 @@ function main() {
     let arr: Array<String> = [];
     arr.push("")                // Ensure index available
     arr[0] = "Hello"
-    assertEQ(1, arr.length);
-    assertEQ("Hello", arr[0]);
+    arktest.assertEQ(1, arr.length);
+    arktest.assertEQ("Hello", arr[0]);
 
 }

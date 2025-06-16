@@ -22,5 +22,5 @@ desc: >-
 
 function main() {
     let s0: "string literal" = "string" + " " + "literal"
-    assertEQ( s0, "string literal" )
+    arktest.assertEQ( s0, "string literal" )
 }

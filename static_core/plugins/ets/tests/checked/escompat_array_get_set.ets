@@ -124,7 +124,7 @@ function __noinline__testClassCastError(arr: Array<int>, index: int): int {
 function test1(): void {
     const arr = new Array<int>(16);
     arraySet(arr);
-    assertEQ(arrayGet(arr), 20);
+    arktest.assertEQ(arrayGet(arr), 20);
 }
 
 function test2(): void {
@@ -132,11 +132,11 @@ function test2(): void {
     arraySet(arr);
 
     // Exception case #1: index < 0
-    assertEQ(__noinline__testRangeError(arr, -1), CORRECT_EXCEPTION_THROWN);
+    arktest.assertEQ(__noinline__testRangeError(arr, -1), CORRECT_EXCEPTION_THROWN);
 
     // Exception case #2: index >= length
-    assertEQ(__noinline__testRangeError(arr, 16), CORRECT_EXCEPTION_THROWN);
+    arktest.assertEQ(__noinline__testRangeError(arr, 16), CORRECT_EXCEPTION_THROWN);
 
     // Exception case #3: undefined -> Int cast error
-    assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_EXCEPTION_THROWN);
+    arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_EXCEPTION_THROWN);
 }

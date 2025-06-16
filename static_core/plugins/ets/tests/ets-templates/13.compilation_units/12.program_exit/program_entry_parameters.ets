@@ -23,5 +23,5 @@ function foo(): number {
 
 function main(): void {
     let a: number = foo();
-    assertTrue(a === 1);
+    arktest.assertTrue(a === 1);
 }

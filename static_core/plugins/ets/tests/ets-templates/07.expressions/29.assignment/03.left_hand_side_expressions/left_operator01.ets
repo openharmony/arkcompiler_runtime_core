@@ -21,5 +21,5 @@ tags: [compile-only, negative]
 function main(): void {
   let obj: {prop?: {value: number} } = {};
   obj?.prop.value = 90;
-  assertEQ(obj?.prop.value , 90);
+  arktest.assertEQ(obj?.prop.value , 90);
 }

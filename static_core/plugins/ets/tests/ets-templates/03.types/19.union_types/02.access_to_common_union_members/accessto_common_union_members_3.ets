@@ -38,5 +38,5 @@ class B {
 function main(): void {
     let account: A | B = new A();
     let result = account.goo(1);
-    assertTrue(result === 1);
+    arktest.assertTrue(result === 1);
 }

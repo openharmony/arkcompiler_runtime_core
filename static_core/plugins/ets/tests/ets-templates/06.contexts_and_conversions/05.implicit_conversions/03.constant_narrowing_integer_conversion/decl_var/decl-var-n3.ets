@@ -25,7 +25,7 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 function main() {
 {%- for v in c['values'] %}
     let e{{loop.index}}: {{c.to_type}} = c{{loop.index}}
-    assertEQ(e{{loop.index}}, {{v.val}})
+    arktest.assertEQ(e{{loop.index}}, {{v.val}})
 {% endfor %}
 }
 {%- endfor %}

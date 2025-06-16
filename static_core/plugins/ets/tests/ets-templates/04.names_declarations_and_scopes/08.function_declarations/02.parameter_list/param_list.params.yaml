@@ -88,7 +88,7 @@ function_decls:
           }
       call: |-
           let v: Long = foo<Long>(new Long())
-          assertTrue( v instanceof Long)
+          arktest.assertTrue( v instanceof Long)
 
     - decl: |-
           function foo<T, U, V>(a: T, b: U, c: V): V {
@@ -96,7 +96,7 @@ function_decls:
           }
       call: |-
           let v: Object|null = foo<Long, Boolean, Object|null>(new Long(), new Boolean(true), new Object())
-          assertTrue( v instanceof Object)
+          arktest.assertTrue( v instanceof Object)
 
     # T array param, T array return
     - decl: |-
@@ -105,7 +105,7 @@ function_decls:
           }
       call: |-
           let arr: Boolean[] = foo<Boolean>(new Boolean[0])
-          assertTrue( arr instanceof Boolean[] && arr.length == 0 )
+          arktest.assertTrue( arr instanceof Boolean[] && arr.length == 0 )
 
     # mixed type params
     - decl: |-
@@ -114,4 +114,4 @@ function_decls:
           }
       call: |-
           let v: Byte = foo<Byte>(1 as byte, null, Long.MIN_VALUE, new Byte(1 as byte), new Byte(2 as byte))
-          assertTrue( v instanceof Byte && v.unboxed() == 1 )
+          arktest.assertTrue( v instanceof Byte && v.unboxed() == 1 )

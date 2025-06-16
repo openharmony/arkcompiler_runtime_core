@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array API tests for SDK");
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
     suite.addTest("Test Array.map with array length reducing", testmap);
     return suite.run(); 
 }
@@ -35,6 +35,6 @@ class TestData {
 function testmap() {
     TestData.callCnt = 0;
     let resArr = TestData.srcArr.map(TestData.callbackfn);
-    assertEQ(TestData.expected, TestData.callCnt, `Expected: "${TestData.expected}", Actual: "${TestData.callCnt}"`);
-    assertEQ(TestData.expected, TestData.srcArr.length, `Expected: "${TestData.expected}", Actual: "${TestData.srcArr.length}"`);
+    arktest.assertEQ(TestData.expected, TestData.callCnt, `Expected: "${TestData.expected}", Actual: "${TestData.callCnt}"`);
+    arktest.assertEQ(TestData.expected, TestData.srcArr.length, `Expected: "${TestData.expected}", Actual: "${TestData.srcArr.length}"`);
 }

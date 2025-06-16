@@ -43,5 +43,5 @@ class Child extends Parent {
 
 function main(): void {
   const child = new Child();
-  assertEQ(child.callParentFarewell(), "Custom Protected Method from Child! Goodbye from Parent!");
+  arktest.assertEQ(child.callParentFarewell(), "Custom Protected Method from Child! Goodbye from Parent!");
 }

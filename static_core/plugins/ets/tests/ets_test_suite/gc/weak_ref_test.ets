@@ -56,10 +56,10 @@ function FullGCWeakRefsMarkingCheck(): void
     } catch (e) {
         throw new Error("Unexpected exception during GC");
     }
-    assertEQ(wr.deref(), undefined, "Object referent must be collected after Full GC");
-    assertEQ(wrs.deref(), undefined, "String referent must be collected after Full GC");
-    assertNE(reachable_obj, null, "Local object must not be collected");
-    assertNE(wr_with_reachable.deref(), undefined, "deref for weak reference with reachable object " +
+    arktest.assertEQ(wr.deref(), undefined, "Object referent must be collected after Full GC");
+    arktest.assertEQ(wrs.deref(), undefined, "String referent must be collected after Full GC");
+    arktest.assertNE(reachable_obj, null, "Local object must not be collected");
+    arktest.assertNE(wr_with_reachable.deref(), undefined, "deref for weak reference with reachable object " +
     "must return non-undefined value");
 }
 
@@ -75,10 +75,10 @@ function ConcurrentWeakRefsMarkingCheck(): void
     } catch (e) {
         throw new Error("Unexpected exception during GC");
     }
-    assertEQ(wr.deref(), undefined, "Object referent must be collected after native GC cause");
-    assertEQ(wrs.deref(), undefined, "String referent must be collected after native GC cause");
-    assertNE(reachable_obj, null, "Local object must not be collected");
-    assertNE(wr_with_reachable.deref(), undefined, "deref for weak reference with reachable object " +
+    arktest.assertEQ(wr.deref(), undefined, "Object referent must be collected after native GC cause");
+    arktest.assertEQ(wrs.deref(), undefined, "String referent must be collected after native GC cause");
+    arktest.assertNE(reachable_obj, null, "Local object must not be collected");
+    arktest.assertNE(wr_with_reachable.deref(), undefined, "deref for weak reference with reachable object " +
     "must return non-undefined value");
 }
 

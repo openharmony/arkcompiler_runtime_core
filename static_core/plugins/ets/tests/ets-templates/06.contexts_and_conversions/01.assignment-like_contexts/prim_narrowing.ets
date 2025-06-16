@@ -28,7 +28,7 @@ desc: |-
 function main() {
   {%- for t in case['types'] %}
   let src_{{loop.index}}: {{t.stype}} = {{t.src|safe}};
-  assertEQ((src_{{loop.index}}.to{{t.dtype}}()), ({{t.dst|safe}}),  "Assert fails on item {{loop.index}}"  )
+  arktest.assertEQ((src_{{loop.index}}.to{{t.dtype}}()), ({{t.dst|safe}}),  "Assert fails on item {{loop.index}}"  )
   {% endfor %}
 }
 {% endfor %}

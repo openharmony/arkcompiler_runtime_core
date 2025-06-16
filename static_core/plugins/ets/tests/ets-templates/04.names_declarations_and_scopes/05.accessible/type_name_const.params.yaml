@@ -19,7 +19,7 @@ cases:
       const a: T = 0x80 as byte;
     check: |-
       function main() {
-          assertEQ(foo(a), 1);
+          arktest.assertEQ(foo(a), 1);
       }
 
   - decl: |-
@@ -27,7 +27,7 @@ cases:
       const a: T = 0x7FFF as short;
     check: |-
       function main() {
-          assertEQ(foo(a), 2);
+          arktest.assertEQ(foo(a), 2);
       }
 
   - decl: |-
@@ -35,7 +35,7 @@ cases:
       const a: T = 127 as int;
     check: |-
       function main() {
-          assertEQ(foo(a), 3);
+          arktest.assertEQ(foo(a), 3);
       }
 
   - decl: |-
@@ -43,7 +43,7 @@ cases:
       const a: T = 127 as long;
     check: |-
       function main() {
-          assertEQ(foo(a), 4);
+          arktest.assertEQ(foo(a), 4);
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
       const a: T = -0.0 as float;
     check: |-
       function main() {
-          assertEQ(foo(a), 5);
+          arktest.assertEQ(foo(a), 5);
       }
 
   - decl: |-
@@ -59,7 +59,7 @@ cases:
       const a: T = -0.0 as double;
     check: |-
       function main() {
-          assertEQ(foo(a), 6); // double is an alias to number
+          arktest.assertEQ(foo(a), 6); // double is an alias to number
       }
 
   - decl: |-
@@ -67,7 +67,7 @@ cases:
       const a: T = -0.0 as number;
     check: |-
       function main() {
-          assertEQ(foo(a), 6);
+          arktest.assertEQ(foo(a), 6);
       }
 
   - decl: |-
@@ -75,7 +75,7 @@ cases:
       const a: T = c'a';
     check: |-
       function main() {
-          assertEQ(foo(a), 7);
+          arktest.assertEQ(foo(a), 7);
       }
 
   #8
@@ -84,7 +84,7 @@ cases:
       const a: T = true;
     check: |-
       function main() {
-          assertEQ(foo(a), -1);
+          arktest.assertEQ(foo(a), -1);
       }
 
   # Boxed
@@ -93,7 +93,7 @@ cases:
       const a: T = new Byte(0x7F as byte);
     check: |-
       function main() {
-          assertEQ(foo(a), 1);
+          arktest.assertEQ(foo(a), 1);
       }
 
   - decl: |-
@@ -101,7 +101,7 @@ cases:
       const a: T = new Short(2 as short);
     check: |-
       function main() {
-          assertEQ(foo(a), 2);
+          arktest.assertEQ(foo(a), 2);
       }
 
   - decl: |-
@@ -109,7 +109,7 @@ cases:
       const a: T = new Int(3 as int);
     check: |-
       function main() {
-          assertEQ(foo(a), 3);
+          arktest.assertEQ(foo(a), 3);
       }
 
   - decl: |-
@@ -117,7 +117,7 @@ cases:
       const a: T = new Long(4 as long);
     check: |-
       function main() {
-          assertEQ(foo(a), 4);
+          arktest.assertEQ(foo(a), 4);
       }
 
   - decl: |-
@@ -125,7 +125,7 @@ cases:
       const a: T = new Float(0.1 as float);
     check: |-
       function main() {
-          assertEQ(foo(a), 5);
+          arktest.assertEQ(foo(a), 5);
       }
 
   - decl: |-
@@ -133,7 +133,7 @@ cases:
       const a: T = new Double(0.1 as double);
     check: |-
       function main() {
-          assertEQ(foo(a), 6); // Double is an alias to Number
+          arktest.assertEQ(foo(a), 6); // Double is an alias to Number
       }
 
   - decl: |-
@@ -141,7 +141,7 @@ cases:
       const a: T = new Number(0.1 as number);
     check: |-
       function main() {
-          assertEQ(foo(a), 6);
+          arktest.assertEQ(foo(a), 6);
       }
 
   - decl: |-
@@ -149,7 +149,7 @@ cases:
       const a: T = new Char(c'b');
     check: |-
       function main() {
-          assertEQ(foo(a), 7);
+          arktest.assertEQ(foo(a), 7);
       }
 
   - decl: |-
@@ -157,7 +157,7 @@ cases:
       const a: T = "some string";
     check: |-
       function main() {
-          assertEQ(foo(a), 8); // string is an alias to String
+          arktest.assertEQ(foo(a), 8); // string is an alias to String
       }
 
   - decl: |-
@@ -165,7 +165,7 @@ cases:
       const a: T = new String("some string");
     check: |-
       function main() {
-          assertEQ(foo(a), 8);
+          arktest.assertEQ(foo(a), 8);
       }
 
   - decl: |-
@@ -173,7 +173,7 @@ cases:
       const a: T = new Boolean(false);
     check: |-
       function main() {
-          assertEQ(foo(a), -1);
+          arktest.assertEQ(foo(a), -1);
       }
 
     # Custom
@@ -182,7 +182,7 @@ cases:
       const a: T = [1, -2];
     check: |-
       function main() {
-          assertEQ(foo(a), 21);
+          arktest.assertEQ(foo(a), 21);
       }
 
   - decl: |-
@@ -190,12 +190,12 @@ cases:
       const a: T = [[new Int(1)], [new Int(-2)]];
     check: |-
       function main() {
-          assertEQ(foo(a), 22);
+          arktest.assertEQ(foo(a), 22);
       }
 
   - decl: |-
       const a: TPL = [1.4, "str"];
     check: |-
       function main() {
-          assertEQ(foo(a), 24);
+          arktest.assertEQ(foo(a), 24);
       }

@@ -25,7 +25,7 @@ const testStr: string = decision ? "yes " + value1 : "no " + value1
 
 function main() {
     enum TestEnum { One = testStr }
-    assertEQ(TestEnum.One.valueOf(), "{{c.expected}}")
+    arktest.assertEQ(TestEnum.One.valueOf(), "{{c.expected}}")
 }
 
 {% endfor %}

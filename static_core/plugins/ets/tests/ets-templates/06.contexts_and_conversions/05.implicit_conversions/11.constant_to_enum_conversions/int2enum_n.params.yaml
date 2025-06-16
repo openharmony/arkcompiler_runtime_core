@@ -17,11 +17,11 @@ cases:
           const s: int = 200
       use: |-
           const v1: Color = s
-          assertEQ(v1, Color.Green)
+          arktest.assertEQ(v1, Color.Green)
     - decl: |-
           let s: int = 200
       use: |-
           let v1: Color = s
-          assertEQ(v1, Color.Green)
+          arktest.assertEQ(v1, Color.Green)
 
 

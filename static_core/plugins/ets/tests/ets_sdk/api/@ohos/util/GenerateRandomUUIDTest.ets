@@ -37,21 +37,21 @@ function main(): int {
 
 function testGenerateRandomUUID(): int {
     let id = util.generateRandomUUID()
-    assertEQ(id.length, 36)
+    arktest.assertEQ(id.length, 36)
     let delimiterIdx = new Array<int>(8, 13, 18, 23)
     const hexDigits = "0123456789abcdef"
     for (let i = 0; i < 36; ++i) {
        if (delimiterIdx.includes(i)) {
-           assertEQ(id[i], c'-')
+           arktest.assertEQ(id[i], c'-')
        } else {
-           assertTrue(hexDigits.includes(new Char(id[i]).toString()))
+           arktest.assertTrue(hexDigits.includes(new Char(id[i]).toString()))
        }
     }
 
     const versionByte = 14
-    assertEQ(id[versionByte], c'4', "Version byte has to be 0x4")
+    arktest.assertEQ(id[versionByte], c'4', "Version byte has to be 0x4")
     const withReservedBits = 19
-    assertTrue(id[withReservedBits] >= c'8' && id[withReservedBits] <= c'b',
+    arktest.assertTrue(id[withReservedBits] >= c'8' && id[withReservedBits] <= c'b',
         id[withReservedBits] + " are not valid reserved bits from range 0x8..0xb!")
     return success
 }
@@ -60,7 +60,7 @@ function testIsUniqueUUID(): int {
     let idSet: Set<string> = new Set<string>()
     for (let i = 0; i < 1000; ++i) {
         let id = util.generateRandomUUID()
-        assertFalse(idSet.has(id))
+        arktest.assertFalse(idSet.has(id))
         idSet.add(id)
     }
     return success
@@ -70,7 +70,7 @@ function testGetNonCachedUUID(): int {
     let idSet: Set<string> = new Set<string>()
     for (let i = 0; i < 1000; ++i) {
         let id = util.generateRandomUUID(false)
-        assertFalse(idSet.has(id))
+        arktest.assertFalse(idSet.has(id))
         idSet.add(id)
     }
     return success
@@ -81,10 +81,10 @@ function testGetCachedUUID(): int {
     for (let i = 0; i < 1000; ++i) {
         let id = util.generateRandomUUID(true)
         if (i > 0) {
-            assertTrue(idSet.has(id))
+            arktest.assertTrue(idSet.has(id))
         }
         idSet.add(id)
-        assertEQ(idSet.size, 1)
+        arktest.assertEQ(idSet.size, 1)
     }
     return success
 }

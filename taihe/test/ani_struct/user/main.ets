@@ -36,7 +36,7 @@ function test_struct_dbase5() {
     let info = structD.structD;
 
     console.log("StructTest.StructD: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_ebigint() {
@@ -51,7 +51,7 @@ function test_struct_ebigint() {
     let info = structE.structE;
 
     console.log("StructTest.StructE: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_funion() {
@@ -65,7 +65,7 @@ function test_struct_funion() {
     let info = structF.structF;
 
     console.log("StructTest.StructF: " + str.param1);
-    assertEQ(str.param1, info.param1);
+    arktest.assertEQ(str.param1, info.param1);
 }
 
 function test_struct_array() {
@@ -85,7 +85,7 @@ function test_struct_array() {
 
     console.log("StructTest.GArray: " + str.param1);
     console.log("StructTest.GArray: " + info.param1);
-    assertEQ(str.param1[0], info.param1[0]);
+    arktest.assertEQ(str.param1[0], info.param1[0]);
 }
 
 function test_struct_addNewCanvas() {
@@ -102,14 +102,14 @@ function test_struct_dbase5readonly() {
     let info = structDB5.dB5Readonly;
 
     console.log("StructTest.DB5Readonly: " + info.param1);
-    assertEQ(info.param1, 1 as byte);
+    arktest.assertEQ(info.param1, 1 as byte);
 }
 
 function test_struct_sebreadonly() {
     let info = structEB.sEBReadonly;
 
     console.log("StructTest.SEBReadonly: " + info.param1);
-    assertEQ(info.param1, true);
+    arktest.assertEQ(info.param1, true);
 }
 
 function test_struct_addNewDraw() {

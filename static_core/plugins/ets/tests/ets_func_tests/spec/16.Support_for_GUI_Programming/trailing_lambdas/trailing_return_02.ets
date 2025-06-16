@@ -31,6 +31,6 @@ function main(): void {
     let a = with_return() {
         return { name: "world" }
     }
-    assertEQ( a, "world")
+    arktest.assertEQ( a, "world")
 }
 

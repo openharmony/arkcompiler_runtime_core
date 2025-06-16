@@ -32,7 +32,7 @@ function foo(p: null|number|string): number {
 }
 
 function main() {
-    assertTrue(foo(null) == 2)
-    assertTrue(foo(42) == 2)
-    assertTrue(foo("abc") == 1 && str == "a")
+    arktest.assertTrue(foo(null) == 2)
+    arktest.assertTrue(foo(42) == 2)
+    arktest.assertTrue(foo("abc") == 1 && str == "a")
 }

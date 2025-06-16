@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class PinningTestsuite extends ArkTestsuite {
+class PinningTestsuite extends arktest.ArkTestsuite {
     constructor() {
         super("PinObject");
     }
@@ -22,7 +22,7 @@ class PinningTestsuite extends ArkTestsuite {
         try {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL)); // Clear heap
         } catch(e) {
-            assertTrue(!"Unexpected exception during FULL GC");
+            arktest.assertTrue(!"Unexpected exception during FULL GC");
         }
     }
 }
@@ -33,30 +33,30 @@ function main(): int {
     {
         let obj: Object = new Object();
         GC.pinObject(obj);
-        assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.YOUNG,
+        arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.YOUNG,
                  "The object before GC must be placed in young space");
         let addr_before_gc: long = GC.getObjectAddress(obj);
         // Run GC
         let gc_id = GC.startGC(GC.Cause.MIXED);
         GC.waitForFinishGC(gc_id);
         let addr_after_gc: long = GC.getObjectAddress(obj);
-        assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED,
+        arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED,
                  "The pinned object after GC must be placed in tenured space");
         GC.unpinObject(obj);
 
-        assertEQ(addr_before_gc, addr_after_gc, "Pinned object must has a fixed address");
+        arktest.assertEQ(addr_before_gc, addr_after_gc, "Pinned object must has a fixed address");
     });
     pinObjTestsuite.addTest("AllocatePinnedArrayTest", (): void throws =>
     {
         let obj = GC.allocatePinnedIntArray(10);
-        assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "The pinned array after GC must be placed in tenured space");
+        arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "The pinned array after GC must be placed in tenured space");
         let addr_before_gc: long = GC.getObjectAddress(obj);
         // Run GC
         let gc_id = GC.startGC(GC.Cause.MIXED);
         GC.waitForFinishGC(gc_id);
         let addr_after_gc: long = GC.getObjectAddress(obj);
         GC.unpinObject(obj);
-        assertEQ(addr_before_gc, addr_after_gc, "Pinned array must has a fixed address");
+        arktest.assertEQ(addr_before_gc, addr_after_gc, "Pinned array must has a fixed address");
     });
     pinObjTestsuite.addTest("AllocateNegativeSizePinnedArrayTest", (): void throws =>
     {

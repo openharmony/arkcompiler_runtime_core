@@ -20,7 +20,7 @@ cases:
       }
     check: |-
       let a: Partial<A> = {i:1, j:2}
-      assertEQ(a.j, 2)
+      arktest.assertEQ(a.j, 2)
     tags: compile-only, negative
     doc: Static field is not a part of Partial<T>
 
@@ -31,7 +31,7 @@ cases:
       }
     check: |-
       let a: Partial<AC> = {i:1, j:2}
-      assertEQ(a.j, 2)
+      arktest.assertEQ(a.j, 2)
     tags: compile-only, negative
     doc: Static field is not a part of Partial<T>
 
@@ -42,7 +42,7 @@ cases:
       }
     check: |-
       let a: Partial<A> = {j:2}
-      assertEQ(a.j, 2)
+      arktest.assertEQ(a.j, 2)
 
   - decl: |-
       abstract class AC {
@@ -51,7 +51,7 @@ cases:
       }
     check: |-
       let a: Partial<AC> = {j:2}
-      assertEQ(a.j, 2)
+      arktest.assertEQ(a.j, 2)
 
   - decl: |-
       let firstrun = true
@@ -63,12 +63,12 @@ cases:
     check: |-
       let a: P = {j:2}
       if(firstrun) {
-        assertEQ(P.i, undefined)
+        arktest.assertEQ(P.i, undefined)
         P.i = 3
         firstrun = false
       }
-      assertEQ(P.i, 3)
-      assertEQ(A.i, 1)
+      arktest.assertEQ(P.i, 3)
+      arktest.assertEQ(A.i, 1)
     doc: |-
       Static field is a part of Partial<T> class. Field becomes optional and, thus, gets undefined value.
 
@@ -82,12 +82,12 @@ cases:
     check: |-
       let a: P = {j:2}
       if(firstrun) {
-        assertEQ(P.i, undefined)
+        arktest.assertEQ(P.i, undefined)
         P.i = 3
         firstrun = false
       }
-      assertEQ(P.i, 3)
-      assertEQ(AC.i, 2)
+      arktest.assertEQ(P.i, 3)
+      arktest.assertEQ(AC.i, 2)
     doc: |-
       Static field is a part of Partial<T> class. Field becomes optional and, thus, gets undefined value.
 

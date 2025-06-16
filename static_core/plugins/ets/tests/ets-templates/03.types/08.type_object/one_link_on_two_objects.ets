@@ -28,5 +28,5 @@ function main(): void {
     let c = a;
 
     a.x = 10;
-    assertTrue( b.x == 10)
+    arktest.assertTrue( b.x == 10)
 }

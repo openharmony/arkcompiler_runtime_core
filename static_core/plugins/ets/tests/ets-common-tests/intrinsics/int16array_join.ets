@@ -24,47 +24,47 @@ const UTF16_JOINED_1 = "32767Ω-1Ω0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω-32768";
 function joinEmpty(): void {
     let a: Int16Array = new Int16Array(0);
     let s = a.join();
-    assertTrue(s.isEmpty());
+    arktest.assertTrue(s.isEmpty());
 }
 
 function joinSingle(): void {
     let a: Int16Array = new Int16Array(SINGLE);
-    assertEQ(a.join(), "1");
-    assertEQ(a.join(","), "1");
+    arktest.assertEQ(a.join(), "1");
+    arktest.assertEQ(a.join(","), "1");
 }
 
 function joinDefaultDelim(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join(), COMMA_JOINED);
+    arktest.assertEQ(a.join(), COMMA_JOINED);
 }
 
 function joinEmptyDelim(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join(""), EMPTY_JOINED);
+    arktest.assertEQ(a.join(""), EMPTY_JOINED);
 }
 
 function joinCommaDelim(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join(","), COMMA_JOINED);
+    arktest.assertEQ(a.join(","), COMMA_JOINED);
 }
 
 function joinNsignDelim(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join("###"), NSIGN_JOINED);
+    arktest.assertEQ(a.join("###"), NSIGN_JOINED);
 }
 
 function joinUtf16Delim(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join(" ΔΘΩ "), UTF16_JOINED);
+    arktest.assertEQ(a.join(" ΔΘΩ "), UTF16_JOINED);
 }
 
 function joinUtf16Delim1(): void {
     let a: Int16Array = new Int16Array(ARRAY);
-    assertEQ(a.join("Ω"), UTF16_JOINED_1);
+    arktest.assertEQ(a.join("Ω"), UTF16_JOINED_1);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Int16Array.join() tests")
+    const suite = new arktest.ArkTestsuite("Int16Array.join() tests")
     suite.addTest("join an empty Int16Array", joinEmpty)
     suite.addTest("join a single-element Int16Array", joinSingle)
     suite.addTest("join a normal Int16Array using default delimiter", joinDefaultDelim)

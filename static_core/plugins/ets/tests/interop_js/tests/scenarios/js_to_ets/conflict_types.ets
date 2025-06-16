@@ -21,7 +21,7 @@ function TestFunctionArgTypeConflictArray(): boolean {
     const EXPECTED_INT = 123;
     const EXPECTED_STRING = 'foo';
 
-    assertTrue(array.length == EXPECTED_LENGTH);
+    arktest.assertTrue(array.length == EXPECTED_LENGTH);
 
     return (array.at(0) as Number == EXPECTED_INT) && (array.at(1) as string == EXPECTED_STRING);
 }

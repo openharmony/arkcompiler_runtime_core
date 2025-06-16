@@ -27,5 +27,5 @@ let x: Record<Keys, number> = {
 
 function main(): void {
   let y = x['key2'];
-  assertEQ(y, 2);
+  arktest.assertEQ(y, 2);
 }

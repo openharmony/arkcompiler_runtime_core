@@ -22,5 +22,5 @@ function main() {
     const seet = new Set<int>();
     seet.add(11);
 
-    assertEQ(11, seet.values().next()!.value);
+    arktest.assertEQ(11, seet.values().next()!.value);
 }

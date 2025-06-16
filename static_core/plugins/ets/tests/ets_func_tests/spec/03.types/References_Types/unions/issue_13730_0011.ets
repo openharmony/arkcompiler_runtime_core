@@ -26,6 +26,6 @@ class X implements Y {}
 
 function main() : int {
     let y: Y | null = null
-    assertEQ( y, null)
+    arktest.assertEQ( y, null)
     return 0;
 }

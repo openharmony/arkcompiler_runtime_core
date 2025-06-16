@@ -21,6 +21,6 @@ function main(): void {
   let minInt: int = -2147483648;
   let maxInt: int = 2147483647;
 
-  assertTrue(minInt === -2147483648);
-  assertTrue(maxInt === 2147483647);
+  arktest.assertTrue(minInt === -2147483648);
+  arktest.assertTrue(maxInt === 2147483647);
 }

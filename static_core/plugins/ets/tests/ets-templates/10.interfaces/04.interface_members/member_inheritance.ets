@@ -32,5 +32,5 @@ class D implements B {
 }
 
 function main(): void {
-  assertEQ( new D().m(), 5 )
+  arktest.assertEQ( new D().m(), 5 )
 }

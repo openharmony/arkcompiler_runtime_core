@@ -23,6 +23,6 @@ desc: An array is an object which contains elements of a similar data type
 function main(): void {
     let arr:{{c.type}} = {{c.vals}}
     arr[0] = {{c.val}}
-    assertTrue( {{c.assert}})
+    arktest.assertTrue( {{c.assert}})
 }
 {% endfor %}

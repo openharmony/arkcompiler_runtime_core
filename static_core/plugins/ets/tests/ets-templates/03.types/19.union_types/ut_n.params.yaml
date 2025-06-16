@@ -185,11 +185,11 @@ cases:
               return p instanceof B ? 'B' : 'C'
           }
       use: |-
-          assertNE(foo<UT>(new Object()), 'C')  // CTE: wrong argument type
+          arktest.assertNE(foo<UT>(new Object()), 'C')  // CTE: wrong argument type
 
     - decl: |-
           function foo(p: boolean|int): string {
               return p instanceof Int ? 'I' : 'B'
           }
       use: |-
-          assertNE(foo(42.5), 'B')  // CTE: wrong argument type
+          arktest.assertNE(foo(42.5), 'B')  // CTE: wrong argument type

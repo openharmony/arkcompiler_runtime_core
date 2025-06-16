@@ -50,5 +50,5 @@ function compareMargin(left: Margin, right: Margin): int {
 function main(): void {
     let arr: FixedArray<Margin> = [5, "hello", "bye", 7]
     let maxx = superMax<Margin>(arr, compareMargin)
-    assertEQ(maxx, 7)
+    arktest.assertEQ(maxx, 7)
 }

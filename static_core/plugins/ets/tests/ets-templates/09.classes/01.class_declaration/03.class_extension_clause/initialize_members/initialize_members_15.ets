@@ -41,6 +41,6 @@ class Child extends Parent {
 function main(): void {
   const interface1: SomeInterface[] = [obj1, obj2];
   const myChild = new Child(interface1);
-  assertEQ(myChild.value[0].name, "Object1");
-  assertEQ(myChild.value[1].name, "Object2");
+  arktest.assertEQ(myChild.value[0].name, "Object1");
+  arktest.assertEQ(myChild.value[1].name, "Object2");
 }

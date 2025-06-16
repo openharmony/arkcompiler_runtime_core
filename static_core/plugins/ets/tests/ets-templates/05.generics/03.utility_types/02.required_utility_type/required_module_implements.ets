@@ -34,7 +34,7 @@ function main() {
   a.j = "str2"
   let b = a.i
   let c = a.j
-  assertEQ(gs,0, gs + " != 0")
+  arktest.assertEQ(gs,0, gs + " != 0")
 }
 
 {% endfor %}

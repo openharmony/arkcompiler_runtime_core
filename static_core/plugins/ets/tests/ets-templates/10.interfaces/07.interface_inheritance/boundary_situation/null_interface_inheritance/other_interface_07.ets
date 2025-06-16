@@ -28,5 +28,5 @@ function main(): void {
     value: 42
   };
   
-  assertEQ(obj.value, 42);
+  arktest.assertEQ(obj.value, 42);
 }

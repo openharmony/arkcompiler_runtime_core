@@ -27,5 +27,5 @@ class ReturnStringConstantChild implements ReturnStringConstantInterface {
 
 function main(): void {
   const instance = new ReturnStringConstantChild();
-  assertEQ(instance.CONST(), 'testString');
+  arktest.assertEQ(instance.CONST(), 'testString');
 }

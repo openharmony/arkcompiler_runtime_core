@@ -25,11 +25,11 @@ function main(): void {
     type UnionType = (T1 | T2) | (T3 | T4);
 
     let a: UnionType = "test";
-    assertEQ(typeof a, "string");
+    arktest.assertEQ(typeof a, "string");
     let b: UnionType = 10;
-    assertEQ(typeof b, "number");
+    arktest.assertEQ(typeof b, "number");
     let c: UnionType = true;
-    assertEQ(typeof c, "boolean");
+    arktest.assertEQ(typeof c, "boolean");
     let d: UnionType = null;
-    assertEQ(typeof d, "object");
+    arktest.assertEQ(typeof d, "object");
 }

@@ -20,7 +20,7 @@ cases:
       use: |-
           // incompatible types
           let arr: Object[] = [new Object(), new Object()]
-          assertEQ( foo(1.0, ...arr), "A" )
+          arktest.assertEQ( foo(1.0, ...arr), "A" )
 
     - decl: |-
           function foo(...a: number[]): string {
@@ -29,7 +29,7 @@ cases:
       use: |-
           // cannot use multiple spread operators
           let arr: number[] = [1.0, 2.0]
-          assertEQ( foo(...arr, ...arr), "N" )
+          arktest.assertEQ( foo(...arr, ...arr), "N" )
 
     - decl: |-
           class A {}
@@ -39,7 +39,7 @@ cases:
       use: |-
           // cannot use spread operator for foo
           let arr: A[] = [new A(), new A()]
-          assertEQ( foo(...arr), "A" )
+          arktest.assertEQ( foo(...arr), "A" )
 
     - decl: |-
           class A {}
@@ -51,5 +51,5 @@ cases:
       use: |-
           // incompatible types
           let arr: A[] = [new B(), new C()]
-          assertEQ( foo(...arr), "B" )
+          arktest.assertEQ( foo(...arr), "B" )
 

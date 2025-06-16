@@ -16,67 +16,67 @@ import {uri} from "@ohos.uri";
 
 function ConstructorTest033() {
   let uri = new uri.UriEntry("/username/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest034() {
   let uri = new uri.UriEntry("http:/userna^me:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest035() {
   let uri = new uri.UriEntry("http://?query#fagment");
-  assertEQ(uri.getScheme(), "http");
+  arktest.assertEQ(uri.getScheme(), "http");
 }
 
 function ConstructorTest036() {
   let uri = new uri.UriEntry("http:/username:password@www.baidu.com:99/pa^th/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest037() {
   let uri = new uri.UriEntry("http:/username:password@www.baidu.com:9^9/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest038() {
   let uri = new uri.UriEntry("http:/username:password@[1:0:0:1:2:1:2:1]:9^9/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest039() {
   let uri = new uri.UriEntry("http:/username:password@[1:0:0:1:2:1:2:1/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "");
+  arktest.assertEQ(uri.getErrStr(), "");
 }
 
 function ConstructorTest040() {
   let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:sfvs1:2:1:2:1]:99/path1?query#fagment");
-  assertEQ(uri.getErrStr(), "Ipv6 does not conform to the rule.");
+  arktest.assertEQ(uri.getErrStr(), "Ipv6 does not conform to the rule.");
 }
 function ConstructorTest041() {
   let uri = new uri.UriEntry("http、:/username:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "Scheme does not conform to the rule.");
+  arktest.assertEQ(uri.getErrStr(), "Scheme does not conform to the rule.");
 }
 
 function ConstructorTest042() {
   let uri = new uri.UriEntry("http://[ffff::1]:、99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "Port does not conform to the rule.");
+  arktest.assertEQ(uri.getErrStr(), "Port does not conform to the rule.");
 }
 
 function ConstructorTest043() {
   let uri = new uri.UriEntry("http://[ffff::1:99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "IPv6 is missing a closing bracket.");
+  arktest.assertEQ(uri.getErrStr(), "IPv6 is missing a closing bracket.");
 }
 
 function ConstructorTest044() {
   let uri = new uri.UriEntry("http://ffff::1]:99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "Host does not conform to the rule.");
+  arktest.assertEQ(uri.getErrStr(), "Host does not conform to the rule.");
 }
 
  
 
 function main(): int {
-  let suite = new ArkTestsuite("URI UT tests");
+  let suite = new arktest.ArkTestsuite("URI UT tests");
   suite.addTest("ConstructorTest033", ConstructorTest033);
   suite.addTest("ConstructorTest034", ConstructorTest034);
   suite.addTest("ConstructorTest035", ConstructorTest035);

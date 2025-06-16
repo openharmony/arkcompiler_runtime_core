@@ -180,7 +180,7 @@ class NumberFormatOptionsBuilder
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormatToParts");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormatToParts");
     suite.addTest("testNumberFormatToPartsWithDifferentStyles", testNumberFormatToPartsWithDifferentStyles);
     suite.addTest("testNumberFormatToPartsWithDifferentNumbers", testNumberFormatToPartsWithDifferentNumbers);
     suite.addTest("testNumberFormatToPartsWithDifferentLocales", testNumberFormatToPartsWithDifferentLocales);
@@ -207,13 +207,13 @@ function main(): int {
 }
 
 function assertPartEq(part: Intl.NumberFormatPart, eType: string, eValue: string) {
-    assertEQ(part.type, eType, `Error! part.type is not equal to ${eType}, got ${part.type}`);
-    assertEQ(part.value, eValue, `Error! part.value is not equal to ${eValue}, got ${part.value}`);
+    arktest.assertEQ(part.type, eType, `Error! part.type is not equal to ${eType}, got ${part.type}`);
+    arktest.assertEQ(part.value, eValue, `Error! part.value is not equal to ${eValue}, got ${part.value}`);
 }
 function assertRangePartEq(part: Intl.NumberRangeFormatPart, eType: string, eValue: string, eSource: string) {
-    assertEQ(part.type, eType, `Error! part.type is not equal to ${eType}, got ${part.type}`);
-    assertEQ(part.value, eValue, `Error! part.value is not equal to ${eValue}, got ${part.value}`);
-    assertEQ(part.source, eSource, `Error! part.source is not equal to ${eSource}, got ${part.source}`);
+    arktest.assertEQ(part.type, eType, `Error! part.type is not equal to ${eType}, got ${part.type}`);
+    arktest.assertEQ(part.value, eValue, `Error! part.value is not equal to ${eValue}, got ${part.value}`);
+    arktest.assertEQ(part.source, eSource, `Error! part.source is not equal to ${eSource}, got ${part.source}`);
 }
 
 function testNumberFormatToPartsWithDifferentStyles() {
@@ -229,7 +229,7 @@ function testNumberFormatToPartsWithDifferentStyles() {
     assertPartEq(parts[1], "integer", "12");
     assertPartEq(parts[2], "decimal", ".");
     assertPartEq(parts[3], "fraction", "34");
-    assertEQ(parts.length, 4, "Expected 4 parts for currency style");
+    arktest.assertEQ(parts.length, 4, "Expected 4 parts for currency style");
 
     const numberFormat2 = new Intl.NumberFormat(
         "en-US",
@@ -241,7 +241,7 @@ function testNumberFormatToPartsWithDifferentStyles() {
     assertPartEq(parts2[0], "integer", "12");
     assertPartEq(parts2[1], "decimal", ".");
     assertPartEq(parts2[2], "fraction", "34");
-    assertEQ(parts2.length, 3, "Expected 3 parts for decimal style");
+    arktest.assertEQ(parts2.length, 3, "Expected 3 parts for decimal style");
 
     const numberFormat3 = new Intl.NumberFormat(
         "en-US",
@@ -254,7 +254,7 @@ function testNumberFormatToPartsWithDifferentStyles() {
     assertPartEq(parts3[1], "group", ",");
     assertPartEq(parts3[2], "integer", "234");
     assertPartEq(parts3[3], "percentSign", "%");
-    assertEQ(parts3.length, 4, "Expected 4 parts for percent style");
+    arktest.assertEQ(parts3.length, 4, "Expected 4 parts for percent style");
 }
 
 function testNumberFormatToPartsWithDifferentNumbers() {
@@ -264,7 +264,7 @@ function testNumberFormatToPartsWithDifferentNumbers() {
     assertPartEq(intParts[0], "integer", "1");
     assertPartEq(intParts[1], "group", ",");
     assertPartEq(intParts[2], "integer", "234");
-    assertEQ(intParts.length, 3, "Expected 3 parts for integer");
+    arktest.assertEQ(intParts.length, 3, "Expected 3 parts for integer");
 
     // Test negative number
     const negFormat = new Intl.NumberFormat("en-US");
@@ -275,12 +275,12 @@ function testNumberFormatToPartsWithDifferentNumbers() {
     assertPartEq(negParts[3], "integer", "678");
     assertPartEq(negParts[4], "decimal", ".");
     assertPartEq(negParts[5], "fraction", "9");
-    assertEQ(negParts.length, 6, "Expected 6 parts for negative number");
+    arktest.assertEQ(negParts.length, 6, "Expected 6 parts for negative number");
 
     // Test zero
     const zeroParts = intFormat.formatToParts(0);
     assertPartEq(zeroParts[0], "integer", "0");
-    assertEQ(zeroParts.length, 1, "Expected 1 part for zero");
+    arktest.assertEQ(zeroParts.length, 1, "Expected 1 part for zero");
 
     // Test large number
     const largeParts = intFormat.formatToParts(1000000);
@@ -289,7 +289,7 @@ function testNumberFormatToPartsWithDifferentNumbers() {
     assertPartEq(largeParts[2], "integer", "000");
     assertPartEq(largeParts[3], "group", ",");
     assertPartEq(largeParts[4], "integer", "000");
-    assertEQ(largeParts.length, 5, "Expected 5 parts for large number");
+    arktest.assertEQ(largeParts.length, 5, "Expected 5 parts for large number");
 }
 
 function testNumberFormatToPartsWithDifferentLocales() {
@@ -301,7 +301,7 @@ function testNumberFormatToPartsWithDifferentLocales() {
     assertPartEq(usParts[2], "integer", "234");
     assertPartEq(usParts[3], "decimal", ".");
     assertPartEq(usParts[4], "fraction", "56");
-    assertEQ(usParts.length, 5, "Expected 5 parts for US English");
+    arktest.assertEQ(usParts.length, 5, "Expected 5 parts for US English");
 
     // German (uses comma as decimal separator)
     const deFormat = new Intl.NumberFormat("de-DE");
@@ -311,17 +311,17 @@ function testNumberFormatToPartsWithDifferentLocales() {
     assertPartEq(deParts[2], "integer", "234");
     assertPartEq(deParts[3], "decimal", ",");
     assertPartEq(deParts[4], "fraction", "56");
-    assertEQ(deParts.length, 5, "Expected 5 parts for German");
+    arktest.assertEQ(deParts.length, 5, "Expected 5 parts for German");
     // Arabic (uses different digits and RTL)
     const arFormat = new Intl.NumberFormat("ar-EG");
     const arParts = arFormat.formatToParts(1234.56);
     // Note: Actual values would be in Arabic digits, adjusting the test as needed
-    assertEQ(arParts[0].type, "integer", "Expected type 'integer'");
-    assertEQ(arParts[1].type, "group", "Expected type 'group'");
-    assertEQ(arParts[2].type, "integer", "Expected type 'integer'");
-    assertEQ(arParts[3].type, "decimal", "Expected type 'decimal'");
-    assertEQ(arParts[4].type, "fraction", "Expected type 'fraction'");
-    assertEQ(arParts.length, 5, "Expected 5 parts for Arabic");
+    arktest.assertEQ(arParts[0].type, "integer", "Expected type 'integer'");
+    arktest.assertEQ(arParts[1].type, "group", "Expected type 'group'");
+    arktest.assertEQ(arParts[2].type, "integer", "Expected type 'integer'");
+    arktest.assertEQ(arParts[3].type, "decimal", "Expected type 'decimal'");
+    arktest.assertEQ(arParts[4].type, "fraction", "Expected type 'fraction'");
+    arktest.assertEQ(arParts.length, 5, "Expected 5 parts for Arabic");
 }
 
 function testNumberFormatToPartsWithDifferentOptions() {
@@ -404,7 +404,7 @@ function testNumberFormatToPartsWithNotation() {
     assertPartEq(compactParts[1], "decimal", ".");
     assertPartEq(compactParts[2], "fraction", "235");
     assertPartEq(compactParts[3], "compact", "M");
-    assertEQ(compactParts.length, 4, "Expected t parts for compact");
+    arktest.assertEQ(compactParts.length, 4, "Expected t parts for compact");
 
     // Test compact notation with undefined options
     compactFormat = new Intl.NumberFormat(
@@ -419,7 +419,7 @@ function testNumberFormatToPartsWithNotation() {
     assertPartEq(compactParts[1], "decimal", ".");
     assertPartEq(compactParts[2], "fraction", "2");
     assertPartEq(compactParts[3], "compact", "M");
-    assertEQ(compactParts.length, 4, "Expected 4 parts for compact");
+    arktest.assertEQ(compactParts.length, 4, "Expected 4 parts for compact");
 }
 
 function testNumberFormatToPartsWithSignDisplay() {
@@ -435,13 +435,13 @@ function testNumberFormatToPartsWithSignDisplay() {
     const positiveParts = alwaysSignFormat.formatToParts(123);
     assertPartEq(positiveParts[0], "plusSign", "+");
     assertPartEq(positiveParts[1], "integer", "123");
-    assertEQ(positiveParts.length, 2, "Expected 2 parts for positive number");
+    arktest.assertEQ(positiveParts.length, 2, "Expected 2 parts for positive number");
 
     // Negative number should have - sign
     const negativeParts = alwaysSignFormat.formatToParts(-123);
     assertPartEq(negativeParts[0], "minusSign", "-");
     assertPartEq(negativeParts[1], "integer", "123");
-    assertEQ(negativeParts.length, 2, "Expected 2 parts for negative number");
+    arktest.assertEQ(negativeParts.length, 2, "Expected 2 parts for negative number");
 
     // Test with "never" sign display
     const neverSignFormat = new Intl.NumberFormat(
@@ -454,7 +454,7 @@ function testNumberFormatToPartsWithSignDisplay() {
     // Negative number should not have sign
     const negParts = neverSignFormat.formatToParts(-123);
     assertPartEq(negParts[0], "integer", "123");
-    assertEQ(negParts.length, 1, "Expected 1 part for negative number");
+    arktest.assertEQ(negParts.length, 1, "Expected 1 part for negative number");
 
     // Test with "exceptZero" sign display
     const exceptZeroFormat = new Intl.NumberFormat(
@@ -466,7 +466,7 @@ function testNumberFormatToPartsWithSignDisplay() {
 
     const zeroParts = exceptZeroFormat.formatToParts(0);
     assertPartEq(zeroParts[0], "integer", "0");
-    assertEQ(zeroParts.length, 1, "Expected 1 part for zeroExcept");
+    arktest.assertEQ(zeroParts.length, 1, "Expected 1 part for zeroExcept");
 }
 
 function testNumberFormatToPartsWithUnit() {
@@ -481,7 +481,7 @@ function testNumberFormatToPartsWithUnit() {
     const percentParts = percentFormat.formatToParts(0.5);
     assertPartEq(percentParts[0], "integer", "50");
     assertPartEq(percentParts[1], "percentSign", "%");
-    assertEQ(percentParts.length, 2, "Expected 2 parts for percent");
+    arktest.assertEQ(percentParts.length, 2, "Expected 2 parts for percent");
 
     // Test with currency instead of unit
     const currencyFormat = new Intl.NumberFormat(
@@ -497,7 +497,7 @@ function testNumberFormatToPartsWithUnit() {
     assertPartEq(currencyParts[1], "integer", "100");
     assertPartEq(currencyParts[2], "decimal", ".");
     assertPartEq(currencyParts[3], "fraction", "00");
-    assertEQ(currencyParts.length, 4, "Expected 4 parts for currency");
+    arktest.assertEQ(currencyParts.length, 4, "Expected 4 parts for currency");
 }
 
 function testNumberFormatToPartsWithGrouping() {
@@ -518,7 +518,7 @@ function testNumberFormatToPartsWithGrouping() {
             break;
         }
     }
-    assertEQ(hasGroupSeparator, true, "Expected group separator in format");
+    arktest.assertEQ(hasGroupSeparator, true, "Expected group separator in format");
 
     // Test with grouping disabled
     const noGroupFormat = new Intl.NumberFormat(
@@ -537,7 +537,7 @@ function testNumberFormatToPartsWithGrouping() {
             break;
         }
     }
-    assertEQ(hasGroupSeparator, false, "Expected no group separator in format");
+    arktest.assertEQ(hasGroupSeparator, false, "Expected no group separator in format");
 }
 
 function testNumberFormatToPartsWithEdgeCases() {
@@ -546,18 +546,18 @@ function testNumberFormatToPartsWithEdgeCases() {
     // Test with Infinity
     const infParts = format.formatToParts(Infinity);
     assertPartEq(infParts[0], "integer", "∞");
-    assertEQ(infParts.length, 1, "Expected 1 part for infinity");
+    arktest.assertEQ(infParts.length, 1, "Expected 1 part for infinity");
 
     // Test with negative Infinity
     const negInfParts = format.formatToParts(-Infinity);
     assertPartEq(negInfParts[0], "minusSign", "-");
     assertPartEq(negInfParts[1], "integer", "∞");
-    assertEQ(negInfParts.length, 2, "Expected 2 parts for infinity");
+    arktest.assertEQ(negInfParts.length, 2, "Expected 2 parts for infinity");
 
     // Test with very small and very large numbers
     const smallParts = format.formatToParts(0.0000001);
     assertPartEq(smallParts[0], "integer", "0");
-    assertEQ(smallParts.length, 1, "Expected 1 parts for small number");
+    arktest.assertEQ(smallParts.length, 1, "Expected 1 parts for small number");
 
     const largeParts = format.formatToParts(1e10);
     assertPartEq(largeParts[0], "integer", "10");
@@ -567,7 +567,7 @@ function testNumberFormatToPartsWithEdgeCases() {
     assertPartEq(largeParts[4], "integer", "000");
     assertPartEq(largeParts[5], "group", ",");
     assertPartEq(largeParts[6], "integer", "000");
-    assertEQ(largeParts.length, 7, "Expected 7 parts for large number");
+    arktest.assertEQ(largeParts.length, 7, "Expected 7 parts for large number");
 }
 
 function testNumberFormatToPartsWithBigInt() {
@@ -578,7 +578,7 @@ function testNumberFormatToPartsWithBigInt() {
     const smallParts = format.formatToParts(smallBigInt);
 
     assertPartEq(smallParts[0], "integer", "123");
-    assertEQ(smallParts.length, 1, "Expected 1 part for small BigInt");
+    arktest.assertEQ(smallParts.length, 1, "Expected 1 part for small BigInt");
 
     // Test with large BigInt
     const largeBigInt = 9007199254740991n; // 2^53 - 1
@@ -594,20 +594,20 @@ function testNumberFormatToPartsWithBigInt() {
     assertPartEq(largeParts[8], "integer", "740");
     assertPartEq(largeParts[9], "group", ",");
     assertPartEq(largeParts[10], "integer", "991");
-    assertEQ(largeParts.length, 11, "Expected 11 parts for large BigInt");
+    arktest.assertEQ(largeParts.length, 11, "Expected 11 parts for large BigInt");
 
     // Test with negative BigInt
     const negativeBigInt = -42n;
     const negativeParts = format.formatToParts(negativeBigInt);
     assertPartEq(negativeParts[0], "minusSign", "-");
     assertPartEq(negativeParts[1], "integer", "42");
-    assertEQ(negativeParts.length, 2, "Expected 2 parts for negative BigInt");
+    arktest.assertEQ(negativeParts.length, 2, "Expected 2 parts for negative BigInt");
 
     // Test with zero BigInt
     const zeroBigInt = 0n;
     const zeroParts = format.formatToParts(zeroBigInt);
     assertPartEq(zeroParts[0], "integer", "0");
-    assertEQ(zeroParts.length, 1, "Expected 1 part for zero BigInt");
+    arktest.assertEQ(zeroParts.length, 1, "Expected 1 part for zero BigInt");
 }
 
 function testNumberFormatRangeToPartsBasic() {
@@ -932,7 +932,7 @@ function testNumberFormatRangeToPartsWithChineseLocale() {
             .build());
 
     const cnPercentRangeParts = cnPercentRangeFormat.formatRangeToParts(0.25, 0.75);
-    assertEQ(cnPercentRangeParts.length, 5, "Expected parts in Chinese percent range format");
+    arktest.assertEQ(cnPercentRangeParts.length, 5, "Expected parts in Chinese percent range format");
     assertRangePartEq(cnPercentRangeParts[0], "integer", "25", "startRange");
     assertRangePartEq(cnPercentRangeParts[1], "percentSign", "%", "startRange");
     assertRangePartEq(cnPercentRangeParts[2], "literal", " - ", "shared");

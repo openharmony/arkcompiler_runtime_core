@@ -24,6 +24,6 @@ import { CONSTANT_A } from "./moduleA.ets";
 import { NamespaceA } from "./namespaceA.ets";
 
 function main(): void {
-    assertEQ(CONSTANT_A, "ValueA");
-    assertEQ(NamespaceA.CONSTANT_A, "ValueA");
+    arktest.assertEQ(CONSTANT_A, "ValueA");
+    arktest.assertEQ(NamespaceA.CONSTANT_A, "ValueA");
 }

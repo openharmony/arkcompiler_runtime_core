@@ -39,7 +39,7 @@ class B<T> {
 function main(): void {
     let b = new B<String>("hello")
     let a = b.foo();
-    assertTrue( a instanceof A)
-    assertTrue( a.data instanceof String)
-    assertEQ( a.data, "hello")
+    arktest.assertTrue( a instanceof A)
+    arktest.assertTrue( a.data instanceof String)
+    arktest.assertEQ( a.data, "hello")
 }

@@ -25,16 +25,16 @@ import { default as export_number, a as a2, b as b2 } from "./export_default_ano
 import { default as export_newclass, a as a3, b as b3 } from "./export_default_anonymous/export_newclass.ets";
 
 function main() {
-    assertEQ(export_string, "export_string")
-    assertEQ(a1,100)
-    assertEQ(b1,"export_string")
+    arktest.assertEQ(export_string, "export_string")
+    arktest.assertEQ(a1,100)
+    arktest.assertEQ(b1,"export_string")
 
-    assertEQ(export_number, 123456)
-    assertEQ(a2,100)
-    assertEQ(b2,"export_string")
+    arktest.assertEQ(export_number, 123456)
+    arktest.assertEQ(a2,100)
+    arktest.assertEQ(b2,"export_string")
 
-    assertEQ(export_newclass.foo(), "export_newclass_A_foo is invoked")
-    assertEQ(export_newclass.field, "export_newclass_A_field")
-    assertEQ(a2,100)
-    assertEQ(b2,"export_string")
+    arktest.assertEQ(export_newclass.foo(), "export_newclass_A_foo is invoked")
+    arktest.assertEQ(export_newclass.field, "export_newclass_A_field")
+    arktest.assertEQ(a2,100)
+    arktest.assertEQ(b2,"export_string")
 }

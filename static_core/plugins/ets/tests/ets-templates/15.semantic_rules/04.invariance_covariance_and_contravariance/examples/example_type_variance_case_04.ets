@@ -41,5 +41,5 @@ function main(): void {
   let resultA = a.methodOne(a);
   let resultB = b.methodOne(b);
 
-  assertEQ(resultA, resultB);
+  arktest.assertEQ(resultA, resultB);
 }

@@ -20,5 +20,5 @@ desc: Convert to obj-map type.
 function main(): void {
   const map = new Map<string, number>();
   const obj1: object = map;
-  assertTrue(obj1 == map);
+  arktest.assertTrue(obj1 == map);
 }

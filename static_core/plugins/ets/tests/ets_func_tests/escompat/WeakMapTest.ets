@@ -37,15 +37,15 @@ function weakMapOperations(): void {
 
     weakMap.set(k, v)
 
-    assertTrue(v === weakMap.get(k), "WeakMap.get() returned unexpected value")
-    assertTrue(weakMap.has(k), "WeakMap.has() returned false")
+    arktest.assertTrue(v === weakMap.get(k), "WeakMap.get() returned unexpected value")
+    arktest.assertTrue(weakMap.has(k), "WeakMap.has() returned false")
 
-    assertTrue(weakMap.delete(k), "WeakMap.delete() returned false")
+    arktest.assertTrue(weakMap.delete(k), "WeakMap.delete() returned false")
 
     // repeated removal
-    assertFalse(weakMap.delete(k), "repeated WeakMap.delete() returned true")
+    arktest.assertFalse(weakMap.delete(k), "repeated WeakMap.delete() returned true")
 
-    assertFalse(weakMap.has(k), "after detete WeakMap.has() returned true")
+    arktest.assertFalse(weakMap.has(k), "after detete WeakMap.has() returned true")
 }
 
 function newWeakMapUsingEntriesArray(): void {
@@ -55,8 +55,8 @@ function newWeakMapUsingEntriesArray(): void {
     const entries: ([Key, Val])[] = [[key10, new Val(key10.id)], [key20, new Val(key20.id)]]
     const weakMap = new WeakMap<Key, Val>(entries)
 
-    assertTrue(weakMap.has(key10))
-    assertTrue(weakMap.has(key20))
+    arktest.assertTrue(weakMap.has(key10))
+    arktest.assertTrue(weakMap.has(key20))
 }
 
 function newWeakMapUsingEntriesIterable(): void {
@@ -69,8 +69,8 @@ function newWeakMapUsingEntriesIterable(): void {
     const entries: Iterable<[Key, Val]> = Array.of<[Key, Val]>(entry1, entry2)
     const weakMap = new WeakMap<Key, Val>(entries)
 
-    assertTrue(weakMap.has(key1))
-    assertTrue(weakMap.has(key2))
+    arktest.assertTrue(weakMap.has(key1))
+    arktest.assertTrue(weakMap.has(key2))
 }
 
 function newWeakMapUsingNullEntries(): void {
@@ -79,7 +79,7 @@ function newWeakMapUsingNullEntries(): void {
     const key1 = new Key(200)
     nullEntriesMap.set(key1, new Val(key1.id))
 
-    assertTrue(nullEntriesMap.has(key1))
+    arktest.assertTrue(nullEntriesMap.has(key1))
 }
 
 function newWeakMapUsingUndefinedEntries(): void {
@@ -87,7 +87,7 @@ function newWeakMapUsingUndefinedEntries(): void {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("WeakMap API tests")
+    const suite = new arktest.ArkTestsuite("WeakMap API tests")
     suite.addTest("new WeakMap using entries array", newWeakMapUsingEntriesArray)
     suite.addTest("new WeakMap using entries iterable", newWeakMapUsingEntriesIterable)
     suite.addTest("WeakMap operations", weakMapOperations)

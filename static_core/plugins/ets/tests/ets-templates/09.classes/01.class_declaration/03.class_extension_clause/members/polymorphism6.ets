@@ -50,6 +50,6 @@ class Lion extends Mammal {
 
 function main(): void {
     const animal: Animal = new Lion("Mufasa");
-    assertEQ(animal.speak(), "Roar!");
-    assertEQ((animal as Lion).furColor, "Golden");
+    arktest.assertEQ(animal.speak(), "Roar!");
+    arktest.assertEQ((animal as Lion).furColor, "Golden");
 }

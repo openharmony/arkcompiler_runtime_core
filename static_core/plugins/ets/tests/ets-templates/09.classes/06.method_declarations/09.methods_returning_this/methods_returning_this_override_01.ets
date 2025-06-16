@@ -33,11 +33,11 @@ class D extends C {
 
 function main(): void {
     let x: D = new D().foo()
-    assertEQ(x.b, 2)
+    arktest.assertEQ(x.b, 2)
     let y: C = new C().foo()
-    assertEQ(y.b, 1)    
+    arktest.assertEQ(y.b, 1)    
     let z: C = new D()
     z.foo()
-    assertEQ(z.b, 2)
+    arktest.assertEQ(z.b, 2)
 }
 

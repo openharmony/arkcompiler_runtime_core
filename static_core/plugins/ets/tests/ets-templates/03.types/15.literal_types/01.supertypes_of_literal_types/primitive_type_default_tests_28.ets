@@ -21,5 +21,5 @@ let condition = true;
 let boolResult: boolean = condition ? true : false;
 
 function main(): void {
-    assertEQ(boolResult, true);
+    arktest.assertEQ(boolResult, true);
 }

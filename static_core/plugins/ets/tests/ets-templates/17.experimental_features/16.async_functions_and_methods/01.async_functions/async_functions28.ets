@@ -27,7 +27,7 @@ async function methodNestedAsync(): Promise<string> {
 
 async function startTest() {
     const result = await methodNestedAsync();
-    assertEQ(result, "Nested async!");
+    arktest.assertEQ(result, "Nested async!");
 }
 
 function main(): void {

@@ -33,6 +33,6 @@ struct StructClass {
 
 function main() {
     let structClass = new StructClass(100)
-    assertEQ(structClass.field, 100)
-    assertEQ(structClass.method(11), 111)
+    arktest.assertEQ(structClass.field, 100)
+    arktest.assertEQ(structClass.method(11), 111)
 }

@@ -20,7 +20,7 @@ tags: [negative, compile-only]
 ---*/
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormat with Compile Time Errors on fault options");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormat with Compile Time Errors on fault options");
     // Tests from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testNumberFormatConstructorNew0012", testNumberFormatConstructorNew0012);
     suite.addTest("testNumberFormatConstructorNew0025", testNumberFormatConstructorNew0025);

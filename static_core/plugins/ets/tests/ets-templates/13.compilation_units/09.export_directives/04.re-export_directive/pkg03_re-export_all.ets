@@ -21,5 +21,5 @@ files: ['./pkg03a/a.ets', './pkg03b/a.ets']
 import { ClassA, InterfaceA, foo, BAR } from './pkg03b'
 
 function main() {
-    assertEQ(BAR, 146)
+    arktest.assertEQ(BAR, 146)
 }

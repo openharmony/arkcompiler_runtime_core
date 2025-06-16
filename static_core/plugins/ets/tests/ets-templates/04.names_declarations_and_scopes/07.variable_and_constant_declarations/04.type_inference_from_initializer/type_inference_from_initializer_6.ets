@@ -19,6 +19,6 @@ desc: Constant declaration with union of literal types.
 
 function main(): void {
   let arr = [null, undefined];
-  assertEQ(arr[0], null);
-  assertEQ(arr[1], undefined);
+  arktest.assertEQ(arr[0], null);
+  arktest.assertEQ(arr[1], undefined);
 }

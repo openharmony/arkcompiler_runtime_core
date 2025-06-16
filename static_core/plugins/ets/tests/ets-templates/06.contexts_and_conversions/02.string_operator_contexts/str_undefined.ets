@@ -27,6 +27,6 @@ params: 'undefined'
 function main() {
   let src: {{t.type}} = {{t.val}};
   let dst: string = "" + src;
-  assertEQ( dst, "undefined" )
+  arktest.assertEQ( dst, "undefined" )
 }
 {% endfor %}

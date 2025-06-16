@@ -22,6 +22,6 @@ params: {{item.array}}
 
 function main(): void {
     let x: {{item.type}}[] = {{item.array}};
-    assertTrue( {{item.assert}})
+    arktest.assertTrue( {{item.assert}})
 }
 {% endfor %}

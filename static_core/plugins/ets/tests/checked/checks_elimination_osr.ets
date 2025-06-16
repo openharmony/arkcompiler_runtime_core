@@ -27,7 +27,7 @@ function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int 
     __noinline__foo(arr.length, elem); // can throw exception
     x = indexes[0];                    // NullCheck can be not executed
   } catch (e) {
-    assertTrue(false, "exception, " + e.toString());
+    arktest.assertTrue(false, "exception, " + e.toString());
   }
 
   for (let i: int = 0; i < arr.length; ++i) {

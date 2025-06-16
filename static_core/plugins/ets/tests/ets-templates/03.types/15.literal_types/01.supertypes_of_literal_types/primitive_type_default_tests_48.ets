@@ -23,5 +23,5 @@ class BoolPropClass {
 
 function main(): void {
     const obj = new BoolPropClass();
-    assertEQ(obj.boolProp, false);
+    arktest.assertEQ(obj.boolProp, false);
 }

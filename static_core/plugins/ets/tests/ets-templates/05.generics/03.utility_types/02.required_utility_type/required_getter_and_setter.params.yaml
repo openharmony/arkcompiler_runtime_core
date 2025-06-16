@@ -17,5 +17,5 @@ types:
   - class
 
 cases:
-  - assertEQ( a._i, 1.9 ) # getter
+  - arktest.assertEQ( a._i, 1.9 ) # getter
   - a._i = 1.2 # setter

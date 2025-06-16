@@ -34,7 +34,7 @@ class Derived extends Base {
 
 function main(): void {
     {{c.call}}
-    assertEQ(res, {{c.result}})
+    arktest.assertEQ(res, {{c.result}})
 }
 
 {% endfor %}

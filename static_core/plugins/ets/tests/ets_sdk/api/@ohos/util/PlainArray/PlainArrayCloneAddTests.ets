@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray clone non-empty container", testCloneWithNonEmpty);
     suite.addTest("PlainArray clone empty container", testCloneWithEmpty);
@@ -64,31 +64,31 @@ function testCloneWithNonEmpty() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let clonePlainArray = plainArray.clone();
-    assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
+    arktest.assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
 }
 
 function testCloneWithEmpty() {
     let plainArray = new PlainArray<number>();
     let clonePlainArray = plainArray.clone();
-    assertEQ(plainArray.length, clonePlainArray.length, "The length should be same as original plainArray");
-    assertEQ(clonePlainArray.length, 0, "The length should be 0");
+    arktest.assertEQ(plainArray.length, clonePlainArray.length, "The length should be same as original plainArray");
+    arktest.assertEQ(clonePlainArray.length, 0, "The length should be 0");
 }
 
 function testCloneWithChanging() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     let clonePlainArray = plainArray.clone();
-    assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
+    arktest.assertEQ(plainArray.toString(), clonePlainArray.toString(), "The elements of both containers should be same");
     clonePlainArray.add(TestData.testNumber6, TestData.testNumber1);
-    assertEQ(clonePlainArray.getKeyAt(TestData.testNumber5), TestData.testNumber6, "The key should be added");
-    assertEQ(clonePlainArray.getValueAt(TestData.testNumber5), TestData.testNumber1, "The value should be added");
-    assertEQ(plainArray.length, TestData.forNumber2.length, "The original plainArray length should not change");
+    arktest.assertEQ(clonePlainArray.getKeyAt(TestData.testNumber5), TestData.testNumber6, "The key should be added");
+    arktest.assertEQ(clonePlainArray.getValueAt(TestData.testNumber5), TestData.testNumber1, "The value should be added");
+    arktest.assertEQ(plainArray.length, TestData.forNumber2.length, "The original plainArray length should not change");
 }
 
 function testAddSingleType() {
     let plainArray = new PlainArray<number>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
+    arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
 }
 
 function testAddCompositeType() {
@@ -100,16 +100,16 @@ function testAddCompositeType() {
     plainArray.add(TestData.testNumber5, null);
     plainArray.add(TestData.testNumber6, undefined);
     console.log(plainArray.toString());
-    assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
-    assertEQ(plainArray.toString(), TestData.testString2, "The elements should be added");
+    arktest.assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
+    arktest.assertEQ(plainArray.toString(), TestData.testString2, "The elements should be added");
 }
 
 function testAddSameKey() {
     let plainArray = new PlainArray<number>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber1, TestData.testNumber2);
-    assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
-    assertEQ(plainArray.get(TestData.testNumber1), TestData.testNumber2,
+    arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
+    arktest.assertEQ(plainArray.get(TestData.testNumber1), TestData.testNumber2,
         "The value corresponding to key 1 should be 2");
 }
 
@@ -117,8 +117,8 @@ function testAddSameValue() {
     let plainArray = new PlainArray<number>();
     plainArray.add(TestData.testNumber1, TestData.testNumber1);
     plainArray.add(TestData.testNumber2, TestData.testNumber1);
-    assertEQ(plainArray.length, TestData.testNumber2, "PlainArray length should be 2");
-    assertEQ(plainArray.toString(), TestData.testString3, "The elements should be added");
+    arktest.assertEQ(plainArray.length, TestData.testNumber2, "PlainArray length should be 2");
+    arktest.assertEQ(plainArray.toString(), TestData.testString3, "The elements should be added");
 }
 
 function testAddSpecialNumber() {
@@ -127,8 +127,8 @@ function testAddSpecialNumber() {
     plainArray.add(0, TestData.testNumber1);
     plainArray.add(TestData.testNumberMax, TestData.testNumber1);
     plainArray.add(TestData.testNumberMin, TestData.testNumber1);
-    assertTrue(plainArray.has(-TestData.testNumber1), "The key should be added");
-    assertTrue(plainArray.has(0), "The key should be added");
-    assertTrue(plainArray.has(TestData.testNumberMax), "The key should be added");
-    assertTrue(plainArray.has(TestData.testNumberMin), "The key should be added");
+    arktest.assertTrue(plainArray.has(-TestData.testNumber1), "The key should be added");
+    arktest.assertTrue(plainArray.has(0), "The key should be added");
+    arktest.assertTrue(plainArray.has(TestData.testNumberMax), "The key should be added");
+    arktest.assertTrue(plainArray.has(TestData.testNumberMin), "The key should be added");
 }

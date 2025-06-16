@@ -55,10 +55,10 @@ function foo(p: Object|undefined): number {
 }
 
 function main() {
-    assertTrue(foo(undefined) == 1 && a === undefined)
-    assertTrue(foo(42.0) == 2 && num == 84)
+    arktest.assertTrue(foo(undefined) == 1 && a === undefined)
+    arktest.assertTrue(foo(42.0) == 2 && num == 84)
     let e: Error = new Error("xyz")
-    assertTrue(foo(e) == 3 && err == e && str == "xyz")
-    assertTrue(foo("abc") == 4 && str == "a")
-    assertTrue(foo(true) == 5 && !bool)
+    arktest.assertTrue(foo(e) == 3 && err == e && str == "xyz")
+    arktest.assertTrue(foo("abc") == 4 && str == "a")
+    arktest.assertTrue(foo(true) == 5 && !bool)
 }

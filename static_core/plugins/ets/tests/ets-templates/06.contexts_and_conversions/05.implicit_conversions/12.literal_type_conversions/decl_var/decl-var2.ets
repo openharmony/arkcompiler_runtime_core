@@ -23,7 +23,7 @@ tags: [{{c.tags}}]
 {%- for t in c['values'] %}
 function cvt{{loop.index}}(p: {{t.type}}) {
     let d: {{c.to_type}} = p;
-    assertEQ(d, {{t.val or t.expr}})
+    arktest.assertEQ(d, {{t.val or t.expr}})
 }
 {%- endfor %}
 

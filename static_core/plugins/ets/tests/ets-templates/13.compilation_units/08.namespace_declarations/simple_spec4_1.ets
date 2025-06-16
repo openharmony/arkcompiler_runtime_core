@@ -28,10 +28,10 @@ namespace A {
 
 namespace A {
     export function goo(): string {
-        assertEQ(A.foo(), "A foo")  // calls exported foo()
-        assertEQ(foo(), "A foo")    /* calls exported foo() as well as all A namespace
+        arktest.assertEQ(A.foo(), "A foo")  // calls exported foo()
+        arktest.assertEQ(foo(), "A foo")    /* calls exported foo() as well as all A namespace
                                         declarations are merged into one */
-        assertEQ(A.C.moo(), "A too")
+        arktest.assertEQ(A.C.moo(), "A too")
         return bar()                // bar() belongs to the same namespace
     }
 //    function foo(): void        // Compile-time error as foo() was already defined
@@ -39,7 +39,7 @@ namespace A {
 
 namespace A.C {
     export function moo() {
-        assertEQ(too(), "A too")    // too()  accessible when namespace C and too() are both exported
+        arktest.assertEQ(too(), "A too")    // too()  accessible when namespace C and too() are both exported
         return A.C.too()
     }
 }
@@ -47,5 +47,5 @@ namespace A.C {
 namespace B {  }
 
 function main() {
-    assertEQ(A.goo(), "A bar")
+    arktest.assertEQ(A.goo(), "A bar")
 }

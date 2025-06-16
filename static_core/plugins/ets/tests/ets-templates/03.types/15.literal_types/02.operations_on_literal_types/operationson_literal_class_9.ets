@@ -22,5 +22,5 @@ function main(): void {
     let tmp1: "bar" = "bar";
     let tmp2: "baz" = "baz";
     let result: string = tmp + tmp1 + tmp2;
-    assertTrue(typeof result === 'string');
+    arktest.assertTrue(typeof result === 'string');
 }

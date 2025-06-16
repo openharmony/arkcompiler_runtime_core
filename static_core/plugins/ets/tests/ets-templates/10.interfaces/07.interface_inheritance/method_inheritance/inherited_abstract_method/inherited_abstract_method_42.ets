@@ -45,5 +45,5 @@ class ChildClass implements ChildInterface {
 
 function main(): void {
   let instance: ParentInterface1  = new ChildClass();
-  assertEQ(instance.parentMethod2(), "Parent method2 implementation");
+  arktest.assertEQ(instance.parentMethod2(), "Parent method2 implementation");
 }

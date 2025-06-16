@@ -29,7 +29,7 @@ class A {
 
 function main(): void {
   let instance: A = new A();
-  assertTrue( {{case.assert}} )
+  arktest.assertTrue( {{case.assert}} )
 }
 
 {% endfor %}

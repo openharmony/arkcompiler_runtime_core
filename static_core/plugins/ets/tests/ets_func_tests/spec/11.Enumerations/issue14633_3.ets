@@ -24,5 +24,5 @@ enum MyEnum {
 }
 
 function main(): void {
-    assertEQ( new Number(MyEnum.N1.valueOf()), 80)
+    arktest.assertEQ( new Number(MyEnum.N1.valueOf()), 80)
 }

@@ -341,7 +341,7 @@ function GCJSRuntimeCleanup(): void {
         let fullGcId = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected exception during GC");
     }
 }
 

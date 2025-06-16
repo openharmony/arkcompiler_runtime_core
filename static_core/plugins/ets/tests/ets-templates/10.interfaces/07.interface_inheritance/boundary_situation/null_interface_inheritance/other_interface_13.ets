@@ -32,6 +32,6 @@ function main(): void {
     status: "inactive"
   };
 
-  assertEQ(obj1.status, "active");
-  assertEQ(obj2.status, "inactive");
+  arktest.assertEQ(obj1.status, "active");
+  arktest.assertEQ(obj2.status, "inactive");
 }

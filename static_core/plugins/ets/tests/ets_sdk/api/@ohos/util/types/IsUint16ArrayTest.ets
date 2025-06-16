@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isUint16Array() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isUint16Array() API tests")
     
     suite.addTest("Verify Uint16Array is identified as Uint16Array", testIsUint16Array001)
     suite.addTest("Verify Uint8Array is not identified as Uint16Array", testIsUint16Array002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsUint16Array001() {
     let proc = new util.types();
     let result = proc.isUint16Array(new Uint16Array());
-    assertTrue(result, "The Uint16Array should be of the same type as the Uint16Array");
+    arktest.assertTrue(result, "The Uint16Array should be of the same type as the Uint16Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_UINT16_ARRAY_002
@@ -51,7 +51,7 @@ function testIsUint16Array001() {
 function testIsUint16Array002() {
     let proc = new util.types();
     let result = proc.isUint16Array(new Uint8Array());
-    assertTrue(result == false, "The Uint8Array should be of the same type as the Uint8Array");
+    arktest.assertTrue(result == false, "The Uint8Array should be of the same type as the Uint8Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_UINT16_ARRAY_003
@@ -64,7 +64,7 @@ function testIsUint16Array002() {
 function testIsUint16Array003() {
     let proc = new util.types();
     let result = proc.isUint16Array(new Uint32Array());
-    assertTrue(result == false, "The Uint32Array should be of the same type as the Uint32Array");
+    arktest.assertTrue(result == false, "The Uint32Array should be of the same type as the Uint32Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_UINT16_ARRAY_004
@@ -77,7 +77,7 @@ function testIsUint16Array003() {
 function testIsUint16Array004() {
     let proc = new util.types();
     let result = proc.isUint16Array(new Uint8ClampedArray());
-    assertTrue(result == false, "The Uint8ClampedArray should be of the same type as the Uint8ClampedArray");
+    arktest.assertTrue(result == false, "The Uint8ClampedArray should be of the same type as the Uint8ClampedArray");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_UTIL_IS_UINT16_ARRAY_005
@@ -90,5 +90,5 @@ function testIsUint16Array004() {
 function testIsUint16Array005() {
     let proc = new util.types();
     let result = proc.isUint16Array(new Int8Array());
-    assertTrue(result == false, "The Int8Array should be of the same type as the Int8Array");
+    arktest.assertTrue(result == false, "The Int8Array should be of the same type as the Int8Array");
 }

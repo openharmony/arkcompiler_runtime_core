@@ -22,8 +22,8 @@ cases:
             return 'default';
           }
       use: |-
-            assertEQ(processNullableValue(null), 'default');
-            assertEQ(processNullableValue(' str'), 'str');
+            arktest.assertEQ(processNullableValue(null), 'default');
+            arktest.assertEQ(processNullableValue(' str'), 'str');
   
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of class instances).
       class: |-
@@ -51,9 +51,9 @@ cases:
 
             if (animal instanceof Dog) {
               let dog: Dog = animal as Dog
-              assertEQ(dog.bark(), 'Woof!');
+              arktest.assertEQ(dog.bark(), 'Woof!');
             }          
-            assertEQ(animal.sleep(), 'sleeping');
+            arktest.assertEQ(animal.sleep(), 'sleeping');
 
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of number).
       use: |-
@@ -61,7 +61,7 @@ cases:
             let p: Primitive = 7
             if (p instanceof Number) {
               let i: number = p as number
-              assertEQ(i, 7);
+              arktest.assertEQ(i, 7);
             }
 
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of boolean).
@@ -75,9 +75,9 @@ cases:
           }
       use: |-
             let tmp1 = test(true);
-            assertEQ(tmp1, true);
+            arktest.assertEQ(tmp1, true);
             let tmp2 = test(2);
-            assertEQ(tmp2, 2);
+            arktest.assertEQ(tmp2, 2);
 
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of literal).
       function: |-
@@ -90,9 +90,9 @@ cases:
             }
           }
       use: |-
-          assertEQ(logMethod("GET"), "Read operation");
-          assertEQ(logMethod("POST"), "write operation");
-          assertEQ(logMethod("PUT"), "write operation");
+          arktest.assertEQ(logMethod("GET"), "Read operation");
+          arktest.assertEQ(logMethod("POST"), "write operation");
+          arktest.assertEQ(logMethod("PUT"), "write operation");
 
     - desc: Accessing a specific type attribute after type narrowing(using the switch statement).
       function: |-
@@ -108,8 +108,8 @@ cases:
             }
           }
       use: |-
-          assertEQ(driveAction("red"), "Stop");
-          assertEQ(driveAction("yellow"), "Prepare");
+          arktest.assertEQ(driveAction("red"), "Stop");
+          arktest.assertEQ(driveAction("yellow"), "Prepare");
 
     - desc: Accessing a specific type attribute after type narrowing(type narrowing of literal and variable).
       function: |-
@@ -136,10 +136,10 @@ cases:
       use: |- 
           let state: GameState = "loading";
           state = transitionState(state, "start");
-          assertEQ(state, "playing");
+          arktest.assertEQ(state, "playing");
           state = transitionState(state, "pause");
-          assertEQ(state, "paused");
+          arktest.assertEQ(state, "paused");
           state = transitionState(state, "resume");
-          assertEQ(state, "playing");
+          arktest.assertEQ(state, "playing");
           state = transitionState(state, "end");
-          assertEQ(state, "gameover");
+          arktest.assertEQ(state, "gameover");

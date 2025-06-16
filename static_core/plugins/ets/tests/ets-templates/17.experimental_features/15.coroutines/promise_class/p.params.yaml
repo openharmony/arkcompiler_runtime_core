@@ -27,7 +27,7 @@ cases:
                   }
               }
           )
-          assertTrue((await r) == 'XYZ')
+          arktest.assertTrue((await r) == 'XYZ')
 
     - decl: |-
           type ON = Object|null
@@ -47,10 +47,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assertTrue(e.message == 'ABC')
+              arktest.assertTrue(e.message == 'ABC')
               return
           }
-          assertTrue(false)
+          arktest.assertTrue(false)
 
     - decl: |-
           type ON = Object|null
@@ -70,10 +70,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assertTrue(e.message == 'XYZ')
+              arktest.assertTrue(e.message == 'XYZ')
               return
           }
-          assertTrue(false)
+          arktest.assertTrue(false)
 
     - decl: |-
           type ON = Object|null
@@ -97,7 +97,7 @@ cases:
                   return p + 100.0
               }
           )
-          assertTrue((await r) == 111.0)
+          arktest.assertTrue((await r) == 111.0)
 
     - decl: |-
           type ON = Object|null
@@ -133,10 +133,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assertTrue(e.message == 'ABC')
+              arktest.assertTrue(e.message == 'ABC')
               return
           }
-          assertTrue(false)
+          arktest.assertTrue(false)
 
     - decl: |-
           type ON = Object|null
@@ -196,10 +196,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assertTrue(e.message == 'AEFJ')
+              arktest.assertTrue(e.message == 'AEFJ')
               return
           }
-          assertTrue(false)
+          arktest.assertTrue(false)
 
     - decl: |-
           type ON = Object|null
@@ -221,4 +221,4 @@ cases:
               (data:string) => { console.log(data) }
           );
           await r2;
-          assertTrue(true);
+          arktest.assertTrue(true);

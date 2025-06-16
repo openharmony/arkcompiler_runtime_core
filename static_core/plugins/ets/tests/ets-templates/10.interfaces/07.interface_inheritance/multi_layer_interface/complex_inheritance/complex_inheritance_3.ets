@@ -37,5 +37,5 @@ class D extends C {
 
 function main(): void {
     const d = new D();
-    assertEQ(d.getC(), 6);
+    arktest.assertEQ(d.getC(), 6);
 }

@@ -45,6 +45,6 @@ class CChild extends CParent {
 
 function main(): void {
   const cchild = new CChild();
-  assertEQ(cchild.speak(), "speaking");
-  assertEQ(cchild.move(), "moving");
+  arktest.assertEQ(cchild.speak(), "speaking");
+  arktest.assertEQ(cchild.move(), "moving");
 }

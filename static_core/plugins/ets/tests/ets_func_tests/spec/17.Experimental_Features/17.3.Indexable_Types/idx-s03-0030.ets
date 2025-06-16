@@ -71,14 +71,14 @@ function test1() : int {
     let x = new Bar(10);
 
     try {
-        assertEQ(x[0], 10)
+        arktest.assertEQ(x[0], 10)
     } catch(e) {
         result++
         console.log("Unexpexted exception 1");
     }
 
     try {
-        assertEQ(x["hello"], 10)
+        arktest.assertEQ(x["hello"], 10)
     } catch(e) {
         result++
         console.log("Unexpexted exception 1");
@@ -92,7 +92,7 @@ function test1() : int {
     }
 
     try {
-        assertEQ(x[0], 100)
+        arktest.assertEQ(x[0], 100)
     } catch(e) {
         result++
         console.log("Unexpexted exception 4");
@@ -106,7 +106,7 @@ function test1() : int {
     }
 
     try {
-        assertEQ(x["hello"], 100)
+        arktest.assertEQ(x["hello"], 100)
     } catch(e) {
         result++
         console.log("Unexpexted exception 6");
@@ -119,13 +119,13 @@ function test2() : int {
     let result = 0;
     let x = new Bar(10);
     try {
-        assertEQ(x[10], 1)
+        arktest.assertEQ(x[10], 1)
     } catch(e) {
         result++
     }
 
     try {
-        assertEQ(x["bye"], 1)
+        arktest.assertEQ(x["bye"], 1)
     } catch(e) {
         result++
     }
@@ -135,7 +135,7 @@ function test2() : int {
 }
 
 function main() {
-    assertEQ(test1(), 0)
-    assertEQ(test2(), 2)
+    arktest.assertEQ(test1(), 0)
+    arktest.assertEQ(test2(), 2)
 }
 

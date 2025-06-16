@@ -57,9 +57,9 @@ function clearIntervalTestFromCallback() {
     let flag = true;
     let id: number = -1;
     id = setInterval(() => {
-        assertTrue(flag);
+        arktest.assertTrue(flag);
         flag = false;
-        assertTrue(id != -1);
+        arktest.assertTrue(id != -1);
         clearInterval(id);
     }, zeroTimeout);
 }
@@ -74,13 +74,13 @@ function clearIntervalFromAnotherTimer() {
 }
 
 function clearTimeoutFromAnotherWorkerTest() {
-    let id = setTimeout(() => { assertTrue(false); }, longTimeout);
+    let id = setTimeout(() => { arktest.assertTrue(false); }, longTimeout);
     launch<void, (i: number) => void>(clearTimeout, id);
 }
 
 function sameWorkerIdTest() {
     let parentWorkerId = CoroutineExtras.getWorkerId();
-    setTimeout(() => { assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
+    setTimeout(() => { arktest.assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
 }
 
 function main() {

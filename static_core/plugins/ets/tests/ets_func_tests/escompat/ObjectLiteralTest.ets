@@ -25,15 +25,15 @@ function testObjectAssignKeys(): void {
 
 	const objKeys = Object.keys(obj)
 	const newObjKeys = Object.keys(newObj)
-	assertEQ(objKeys.length,  newObjKeys.length, "unexpected keys number")
+ arktest.assertEQ(objKeys.length,  newObjKeys.length, "unexpected keys number")
 
 	for (let i = 0; i < objKeys.length; i++) {
-		assertEQ(objKeys[i],  newObjKeys[i], "unexpected property name: " + newObjKeys[i])
+	 arktest.assertEQ(objKeys[i],  newObjKeys[i], "unexpected property name: " + newObjKeys[i])
 
 		const propName = objKeys[i]
 		const propVal = Reflect.get(newObj, propName)
 
-		assertEQ(Reflect.get(obj, propName),  propVal, `unexpected '${propName}' property value: ${propVal}`)
+	 arktest.assertEQ(Reflect.get(obj, propName),  propVal, `unexpected '${propName}' property value: ${propVal}`)
 	}
 }
 
@@ -56,7 +56,7 @@ function testObjectAssignEntries(): void {
 
 	const objEntries = Object.entries(obj)
 	const newObjEntries = Object.entries(newObj)
-	assertEQ(objEntries.length,  newObjEntries.length, "unexpected number of object entries")
+ arktest.assertEQ(objEntries.length,  newObjEntries.length, "unexpected number of object entries")
 
 	for (let i = 0; i < objEntries.length; i++) {
 		const objEntryName = objEntries[i]![0]
@@ -65,8 +65,8 @@ function testObjectAssignEntries(): void {
 		const newObjEntryName = newObjEntries[i]![0]
 		const newObjEntryVal = newObjEntries[i]![1]
 
-		assertEQ(objEntryName,  newObjEntryName, "unexpected entry name: " + newObjEntryName)
-		assertEQ(objEntryVal,  newObjEntryVal, `unexpected '${objEntryName}' property value: ${newObjEntryVal}`)
+	 arktest.assertEQ(objEntryName,  newObjEntryName, "unexpected entry name: " + newObjEntryName)
+	 arktest.assertEQ(objEntryVal,  newObjEntryVal, `unexpected '${objEntryName}' property value: ${newObjEntryVal}`)
 	}
 }
 
@@ -76,13 +76,13 @@ function testObjectAssignValues(): void {
 
 	const objVals = Object.values(obj)
 	const newObjVals = Object.values(newObj)
-	assertEQ(objVals.length,  newObjVals.length, "unexpected values number")
+ arktest.assertEQ(objVals.length,  newObjVals.length, "unexpected values number")
 
 	for (let i = 0; i < objVals.length; i++) {
 		const objVal = objVals[i]
 		const newObjVal = newObjVals[i]
 
-		assertEQ(objVal,  newObjVal, `unexpected object property value: ${newObjVal} at index [${i}]`)
+	 arktest.assertEQ(objVal,  newObjVal, `unexpected object property value: ${newObjVal} at index [${i}]`)
 	}
 }
 
@@ -92,18 +92,18 @@ function testObjectAssignGetOwnPropNames(): void {
 
 	const objProps = Object.getOwnPropertyNames(obj)
 	const newObjProps = Object.getOwnPropertyNames(newObj)
-	assertEQ(objProps.length,  newObjProps.length, "unexpected number of properties")
+ arktest.assertEQ(objProps.length,  newObjProps.length, "unexpected number of properties")
 
 	for (let i = 0; i < objProps.length; i++) {
 		const objProp = objProps[i]
 		const newObjProp = newObjProps[i]
 
-		assertEQ(objProp,  newObjProp, "unexpected property name: " + newObjProp)
+	 arktest.assertEQ(objProp,  newObjProp, "unexpected property name: " + newObjProp)
 	}
 }
 
 function main(): int {
-	const suite = new ArkTestsuite("Object literal of escompat.Record type tests")
+	const suite = new arktest.ArkTestsuite("Object literal of escompat.Record type tests")
 
 	suite.addTest("Object.assign(Record) result keys", testObjectAssignKeys)
 	suite.addTest("Object.assign(Record) result entries", testObjectAssignEntries)

@@ -149,11 +149,11 @@ function test_f64_array() {
 }
 
 function check_array<T extends Number | BigInt>(src: ArrayLike<T>, src2: ArrayLike<T>, exp: ArrayLike<T>) {
-    assertEQ(src.length, exp.length, "reverse(): bad array len")
-    assertEQ(src2.length, exp.length, "toReversed(): bad array len")
+    arktest.assertEQ(src.length, exp.length, "reverse(): bad array len")
+    arktest.assertEQ(src2.length, exp.length, "toReversed(): bad array len")
     for (let i = 0; i < exp.length; i++) {
-        assertEQ(src[i], exp[i], "reverse(): unexpected element: i: " + i)
-        assertEQ(src2[i], exp[i], "toReversed(): unexpected element: i: " + i)
+        arktest.assertEQ(src[i], exp[i], "reverse(): unexpected element: i: " + i)
+        arktest.assertEQ(src2[i], exp[i], "toReversed(): unexpected element: i: " + i)
     }
 }
 

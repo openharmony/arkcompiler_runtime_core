@@ -22,11 +22,11 @@ files:
 import u from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_union"
 
 function main(): void {
-    assertTrue(u == undefined);
+    arktest.assertTrue(u == undefined);
     u = new Number(4.1);
-    assertEQ(u, 4.1);
+    arktest.assertEQ(u, 4.1);
     u = "some str";
-    assertEQ(u, "some str");
+    arktest.assertEQ(u, "some str");
     u = null;
-    assertEQ(u, null);
+    arktest.assertEQ(u, null);
 }

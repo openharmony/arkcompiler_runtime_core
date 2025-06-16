@@ -43,6 +43,6 @@ function main(): void {
     },
     tags: ["developer", "designer"]
   };
-  assertEQ(obj.details.address, "123 Main St");
-  assertEQ(obj.tags[0], "developer");
+  arktest.assertEQ(obj.details.address, "123 Main St");
+  arktest.assertEQ(obj.tags[0], "developer");
 }

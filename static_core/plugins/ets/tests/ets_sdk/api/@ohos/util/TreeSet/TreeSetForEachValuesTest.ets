@@ -16,7 +16,7 @@
 import {TreeSet} from "@ohos.util.TreeSet";
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet ForEach Values API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet ForEach Values API tests")
 
     suite.addTest("TreeSet forEach the treeSet with no reference",
         testForEachNoReference)
@@ -43,7 +43,7 @@ function testForEachNoReference() {
     treeSet.forEach(() => {
         count++;
     });
-    assertEQ(count, 2, "The treeSet forEach should iterate over all elements");
+    arktest.assertEQ(count, 2, "The treeSet forEach should iterate over all elements");
 }
 
 function testForEachValueReference() {
@@ -54,7 +54,7 @@ function testForEachValueReference() {
     let flag = false;
     treeSet.forEach((value: string) => {
         flag = treeSet.has(value)
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values");
     });
 }
 
@@ -66,7 +66,7 @@ function testForEachValueKeyReference() {
     let flag = false;
     treeSet.forEach((value: string, key: string) => {
         flag = treeSet.has(value)
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values and keys");
+        arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values and keys");
     });
 }
 
@@ -78,7 +78,7 @@ function testForEachThreeReferences() {
     let flag = false;
     treeSet.forEach((value: string, key: string, treeSet: TreeSet<string>) => {
         flag = treeSet.has(value)
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values, keys, and the set itself");
+        arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values, keys, and the set itself");
     });
 }
 
@@ -88,14 +88,14 @@ function testValuesReturnIteratorByValue() {
     treeSet.add("aa");
     treeSet.add("bb");
     let it = treeSet.values();
-    assertEQ(it.next().value, "aa", "The treeSet values iterator should return the first value");
-    assertEQ(it.next().value, "bb", "The treeSet values iterator should return the second value");
-    assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined for no more values");
+    arktest.assertEQ(it.next().value, "aa", "The treeSet values iterator should return the first value");
+    arktest.assertEQ(it.next().value, "bb", "The treeSet values iterator should return the second value");
+    arktest.assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined for no more values");
 }
 
 function testValuesReturnIteratorByValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.values();
-    assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined when treeSet is empty");
+    arktest.assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined when treeSet is empty");
 }

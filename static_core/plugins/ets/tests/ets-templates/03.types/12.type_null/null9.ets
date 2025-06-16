@@ -23,5 +23,5 @@ function f(): Int|null {
 
 function main(): void {
     let a = f();
-    assertEQ( a, 5 )
+    arktest.assertEQ( a, 5 )
 }

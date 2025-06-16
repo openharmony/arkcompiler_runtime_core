@@ -19,5 +19,5 @@ desc: Variable declaration with mixed types.
 
 function main(): void {
     let tmp: number = 6, tmp1 = 1, tmp2 = "hello";
-    assertTrue(tmp1 == 1);
+    arktest.assertTrue(tmp1 == 1);
 }

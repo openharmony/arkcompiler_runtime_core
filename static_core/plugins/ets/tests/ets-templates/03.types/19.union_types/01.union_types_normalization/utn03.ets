@@ -21,5 +21,5 @@ function main(): void {
     type A = string | never;
     let a: A = "hello";
 
-    assertEQ(typeof a, "string");
+    arktest.assertEQ(typeof a, "string");
 }

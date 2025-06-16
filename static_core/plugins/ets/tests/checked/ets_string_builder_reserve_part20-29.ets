@@ -248,16 +248,16 @@ function partially_uncountable_reserve29() : string {
 }
 
 function main() : int {
-    assertEQ(multi_toString_reserve20(), "001", "Wrong result at multi_toString_reserve20")
-    assertEQ(multi_toString_if_reserve21(), "001", "Wrong result at multi_toString_if_reserve21")
-    assertEQ(multi_toString_if_reserve22(), "", "Wrong result at multi_toString_if_reserve22")
-    assertEQ(multi_toString_loop_reserve23(), "", "Wrong result at multi_toString_loop_reserve23")
-    assertEQ(types_reserve24(), "false12345678[object Object]", "Wrong result at types_reserve24")
-    assertEQ(lenArray_reserve25(), "012", "Wrong result at lenArray_reserve25")
-    assertEQ(lenArray_reserve26(), "012", "Wrong result at lenArray_reserve26")
-    assertEQ(lenArray_reserve27(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve27")
-    assertEQ(lenArray_reserve28(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve28")
-    assertEQ(partially_uncountable_reserve29(), "2345672345678910", "Wrong result at partially_uncountable_reserve29")
+    arktest.assertEQ(multi_toString_reserve20(), "001", "Wrong result at multi_toString_reserve20")
+    arktest.assertEQ(multi_toString_if_reserve21(), "001", "Wrong result at multi_toString_if_reserve21")
+    arktest.assertEQ(multi_toString_if_reserve22(), "", "Wrong result at multi_toString_if_reserve22")
+    arktest.assertEQ(multi_toString_loop_reserve23(), "", "Wrong result at multi_toString_loop_reserve23")
+    arktest.assertEQ(types_reserve24(), "false12345678[object Object]", "Wrong result at types_reserve24")
+    arktest.assertEQ(lenArray_reserve25(), "012", "Wrong result at lenArray_reserve25")
+    arktest.assertEQ(lenArray_reserve26(), "012", "Wrong result at lenArray_reserve26")
+    arktest.assertEQ(lenArray_reserve27(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve27")
+    arktest.assertEQ(lenArray_reserve28(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve28")
+    arktest.assertEQ(partially_uncountable_reserve29(), "2345672345678910", "Wrong result at partially_uncountable_reserve29")
 
     return 0
 }

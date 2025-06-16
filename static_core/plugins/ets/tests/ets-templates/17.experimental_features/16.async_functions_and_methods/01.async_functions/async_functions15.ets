@@ -30,7 +30,7 @@ async function raceExample(): Promise<string> {
 
 async function startTest() {
     const result = await raceExample();
-    assertEQ(result === "Promise 1 resolved", true);
+    arktest.assertEQ(result === "Promise 1 resolved", true);
 }
 
 function main(): void {

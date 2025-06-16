@@ -22,5 +22,5 @@ const substituteStr = "substituteStr" as "substituteStr";
 const template = `The value is ${substituteStr}`;
 
 function main(): void {
-    assertEQ(template, "The value is substituteStr");
+    arktest.assertEQ(template, "The value is substituteStr");
 }

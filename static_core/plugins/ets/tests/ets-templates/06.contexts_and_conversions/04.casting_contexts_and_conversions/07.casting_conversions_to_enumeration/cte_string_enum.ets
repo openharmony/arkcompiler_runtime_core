@@ -25,5 +25,5 @@ enum Color {
 }
 function main(): void {
   let str: string = 'Red';
-  assertTrue(str == Color.Red);
+  arktest.assertTrue(str == Color.Red);
 }

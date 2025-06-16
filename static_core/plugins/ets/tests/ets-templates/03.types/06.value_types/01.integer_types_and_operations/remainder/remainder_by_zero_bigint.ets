@@ -23,7 +23,7 @@ function main(): void {
         const a: bigint = 1
 	    const b: bigint = 0
 	    const result: bigint = a % b
-	    assertTrue(false)
+	    arktest.assertTrue(false)
     } catch (e: ArithmeticError) {
     }
 }
