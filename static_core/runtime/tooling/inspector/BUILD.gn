@@ -91,7 +91,9 @@ ohos_shared_library("libarkinspector") {
   ]
 
   external_deps += hiviewdfx_ext_deps
-
+  if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+    external_deps += [ "openssl:libcrypto_shared" ]
+  }
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else {

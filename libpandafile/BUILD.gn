@@ -250,6 +250,10 @@ ohos_source_set("libarkfile_static_verifier") {
       "zlib:shared_libz",
       sdk_libc_secshared_dep,
     ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   } else {
     external_deps = [
       "zlib:shared_libz",
@@ -302,6 +306,10 @@ ohos_source_set("libarkfile_frontend_set_static") {
       "zlib:libz",
       sdk_libc_secshared_dep,
     ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 
   part_name = "runtime_core"

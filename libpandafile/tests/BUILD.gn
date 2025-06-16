@@ -37,21 +37,20 @@ host_unittest_action("LibPandaFileTest") {
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
     "$ark_root/libziparchive:arkziparchive_config",
-    sdk_libc_secshared_config,
   ]
 
   deps = [
     "$ark_root/assembler:libarkassembler_static",
     "$ark_root/libpandafile:libarkfile_static",
   ]
-
+  external_deps = []
   if (ark_standalone_build) {
     deps += [ "$build_root/third_party_gn/googletest:gmock_main" ]
   } else {
-    deps += [ "//third_party/googletest:gmock_main" ]
+    external_deps += [ "googletest:gmock_main" ]
   }
 
-  external_deps = [
+  external_deps += [
     "zlib:libz",
     sdk_libc_secshared_dep,
   ]

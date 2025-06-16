@@ -1,5 +1,5 @@
 {
-    "name": "@arkcompiler/runtime_core",
+    "name": "@ohos/runtime_core",
     "version": "",
     "description": "方舟运行时的公共组件",
     "homePage": "https://gitee.com/openharmony",
@@ -35,14 +35,14 @@
                 "c_utils",
                 "openssl",
                 "libuv",
-                "node"
-            ],
-            "third_party": [
+                "pcre2",
                 "json",
                 "musl",
                 "openssl",
-                "pcre2"
-            ]
+                "elfio",
+                "node"
+            ],
+            "third_party": []
         },
         "build": {
             "sub_component": [
@@ -144,6 +144,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/libziparchive:libarkziparchive_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libziparchive"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/bytecode_optimizer:libarkbytecodeopt_frontend_static",
                     "header": {
                         "header_files": [],
@@ -186,7 +193,7 @@
                     }
                 },
                 {
-                   "name": "//arkcompiler/runtime_core/static_core/compiler:libarktscompiler_package",
+                    "name": "//arkcompiler/runtime_core/static_core/compiler:libarktscompiler_package",
                     "header": {
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/compiler"

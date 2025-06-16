@@ -143,6 +143,10 @@ ohos_shared_library("libarkcompiler") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+      ohos_indep_compiler_enable) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
 
@@ -169,6 +173,10 @@ ohos_static_library("libarkcompiler_frontend_static") {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
     external_deps = [ sdk_libc_secshared_dep ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
@@ -197,6 +205,10 @@ ohos_static_library(
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
     external_deps = [ sdk_libc_secshared_dep ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]

@@ -25,7 +25,6 @@ bcopt_test_config = [
   "$ark_root/libpandafile:arkfile_public_config",
   "$ark_root/compiler:arkcompiler_public_config",
   "$ark_root/bytecode_optimizer:bytecodeopt_public_config",
-  sdk_libc_secshared_config,
 ]
 
 bcopt_test_deps = [

@@ -95,6 +95,7 @@ ohos_static_library("arklinker_static") {
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
+  external_deps = [ sdk_libc_secshared_dep ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -120,6 +121,7 @@ ohos_executable("ark_link") {
     ":arklinker_static",
     ":link_options_h",
   ]
+  external_deps = [ sdk_libc_secshared_dep ]
 
   if (target_os != "win" && target_os != "mingw" && target_os != "winuwp") {
     if (is_linux) {

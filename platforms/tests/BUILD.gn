@@ -27,17 +27,17 @@ host_unittest_action("PlatformsTest") {
   configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
-    sdk_libc_secshared_config,
   ]
 
+  external_deps = []
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
   if (ark_standalone_build) {
     deps += [ "$build_root/third_party_gn/googletest:gmock_main" ]
   } else {
-    deps += [ "//third_party/googletest:gmock_main" ]
+    external_deps += [ "googletest:gmock_main" ]
   }
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  external_deps += [ sdk_libc_secshared_dep ]
 
   cflags = [ "-DWITH_MOCK" ]
 }
