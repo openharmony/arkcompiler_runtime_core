@@ -42,7 +42,7 @@ function testUndefinedInvoke(): void {
 
 function testNullInvoke(): void {
     let tmp = Number(null);
-    assertEQ(tmp.toFixed(2).toString(), '0.00');
+    arktest.assertEQ(tmp.toFixed(2).toString(), '0.00');
 }
 
 function main() {

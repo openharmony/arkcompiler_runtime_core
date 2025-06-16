@@ -78,8 +78,8 @@ function testGet(): void {
     arktest.assertEQ(match[2], "z", "testGet, int index, step 3");
     arktest.assertEQ(match[2 as number], "z", "testGet, number index, step 3");
 
-    expectError((): void => { match[-1] }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
-    expectError((): void => { match[match.length] }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))
+    arktest.expectError((): void => { match[-1] }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
+    arktest.expectError((): void => { match[match.length] }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))
 }
 
 /**
@@ -100,6 +100,6 @@ function testSet(): void {
     arktest.assertEQ(match[2], "z1", "testSet, int index, step 3");
     arktest.assertEQ(match[2 as number], "z1", "testSet, number index, step 3");
 
-    expectError((): void => { match[-1] = "a" }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
-    expectError((): void => { match[match.length] = "b" }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))
+    arktest.expectError((): void => { match[-1] = "a" }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
+    arktest.expectError((): void => { match[match.length] = "b" }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))
 }

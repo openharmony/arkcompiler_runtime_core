@@ -18,10 +18,10 @@ import { X } from "testDecl";
 function TestNamespace() {
     let c = new X.C()
     c.s = "Hi"
-    assertEQ(X.foo("1"), "1")
-    assertEQ(c.s, "Hi")
-    assertEQ(c.foo("2"), "2")
-    assertEQ(X.C.foo("3"), "3")
+    arktest.assertEQ(X.foo("1"), "1")
+    arktest.assertEQ(c.s, "Hi")
+    arktest.assertEQ(c.foo("2"), "2")
+    arktest.assertEQ(X.C.foo("3"), "3")
 }
 
 function testAll() {

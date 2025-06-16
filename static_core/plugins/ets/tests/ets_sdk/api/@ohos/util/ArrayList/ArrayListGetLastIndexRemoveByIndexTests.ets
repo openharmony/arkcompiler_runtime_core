@@ -141,7 +141,7 @@ function testRemoveByIndexWithDoubleIndex() {
             `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
             ((e as BusinessError).code == TypeErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByIndex(TestData.testDouble1)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByIndex(TestData.testDouble1)}, exceptionCheck);
 }
 
 function testRemoveByIndexWithDoubleIndex2() {
@@ -152,7 +152,7 @@ function testRemoveByIndexWithDoubleIndex2() {
             `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
             ((e as BusinessError).code == TypeErrorCodeId);
     }
-    expectThrow(() => {arrayList.removeByIndex(TestData.testDouble2)}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList.removeByIndex(TestData.testDouble2)}, exceptionCheck);
 }
 
 function testRemoveByIndexEmptyContainer() {

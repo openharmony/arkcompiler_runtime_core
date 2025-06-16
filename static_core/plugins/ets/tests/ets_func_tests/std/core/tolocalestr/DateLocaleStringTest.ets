@@ -55,7 +55,7 @@ function testDateToLocaleTimeString(): void {
     arktest.assertEQ(date.toLocaleTimeString(locale, { year: "numeric", month: "2-digit", day: "2-digit" }), "2024/02/19 10:00:00")
 
     const styleOptions: Intl.DateTimeFormatOptions = { dateStyle: "medium" }
-    expectError(() => {
+    arktest.expectError(() => {
         const result = date.toLocaleTimeString(langTag, styleOptions)
     }, new TypeError("Invalid option : dateStyle"))
 }
@@ -90,7 +90,7 @@ function testDateToLocaleDateString(): void {
     arktest.assertEQ(date.toLocaleDateString(locale, customOptions), "2024年2月19日 10:00")
 
     const timeStyleOptions: Intl.DateTimeFormatOptions = { timeStyle: "medium" }
-    expectError(() => {
+    arktest.expectError(() => {
         const result = date.toLocaleDateString(langTag, timeStyleOptions)
     }, new TypeError("Invalid option : timeStyle"))
 }

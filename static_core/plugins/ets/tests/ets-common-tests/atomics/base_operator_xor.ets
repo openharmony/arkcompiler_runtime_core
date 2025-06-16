@@ -42,11 +42,11 @@ function testXor() {
             Atomics.store(ta, j, 5)
 
             let old = Atomics.xor(ta, j, 1)
-            assertEQ(old, 5)
+            arktest.assertEQ(old, 5)
 
             for (let k = 0; k < arraySize; k++) {
                 let re = (k === j) ? 4 : 0
-                assertEQ(Atomics.load(ta, k), re)
+                arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
             Atomics.store(ta, j, 0)
@@ -55,7 +55,7 @@ function testXor() {
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
     suite.addTest('Function testXor', testXor)
     return suite.run()
 }

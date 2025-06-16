@@ -30,7 +30,7 @@ function main() {
 
     let job3 = launch<int, () => int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
 
@@ -39,7 +39,7 @@ function main() {
     let runId3 = job3.Await();
 
     arktest.assertEQ(runId1, runId2);
-    assertNE(runId1, runId3);
+    arktest.assertNE(runId1, runId3);
 }
 
 

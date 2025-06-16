@@ -118,7 +118,7 @@ function taskExecuteDelayedTest(): void {
         let res1 = await launchImpl(testDelayFunc);
         arktest.assertEQ(res1, "Concurrent function failed");
         let task2 = new taskpool.Task(longFunc, 50);
-        expectError(() => {
+        arktest.expectError(() => {
             await taskpool.executeDelayed(-100.0, task2);
         }, new Error("taskpool:: The delayTime is less than zero"));
     } catch(e: Error) {
@@ -140,9 +140,9 @@ function getDelayedTaskInfoTest(): void {
             state = taskInfo.state;
         }
     }
-    assertEQ(taskpool.State.DELAYED as int, state);
+    arktest.assertEQ(taskpool.State.DELAYED as int, state);
 
-    assertEQ(await p, "success");
+    arktest.assertEQ(await p, "success");
 
     taskpoolInfo = taskpool.getTaskPoolInfo();
     let delayedExists = true;
@@ -151,7 +151,7 @@ function getDelayedTaskInfoTest(): void {
             delayedExists = false;
         }
     }
-    assertTrue(delayedExists);
+    arktest.assertTrue(delayedExists);
 }
 
 function getDelayedTaskInfoWithCancelTest(): void {
@@ -168,9 +168,9 @@ function getDelayedTaskInfoWithCancelTest(): void {
             state = taskInfo.state;
         }
     }
-    assertEQ(taskpool.State.CANCELED as int, state);
+    arktest.assertEQ(taskpool.State.CANCELED as int, state);
 
-    expectError(() => {
+    arktest.expectError(() => {
         await p;
     }, new Error("taskpool:: task has been canceled"));
 }
@@ -253,12 +253,12 @@ function taskSendDataInAsyncFunction():void {
 
 function taskExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executePeriodically(-100.0, task1);
     }, new Error("taskpool:: The period value is less than zero"));
     let res = await taskpool.execute(task1);
     arktest.assertEQ(res, "abc");
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executePeriodically(100.0, task1);
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
 }
@@ -267,10 +267,10 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(sum, 5, 25);
     let task2 = new taskpool.Task(max, 36, 12);
     task1.addDependency(task2);
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executePeriodically(10.0, task1);
     }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executePeriodically(100.0, task2);
     }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
 }
@@ -403,7 +403,7 @@ function main(): int {
         arktest.assertEQ(res, "abc");
         arktest.assertEQ(funcTask.isDone(), true);
         // Disallow execute one task several times
-        expectError(() => {
+        arktest.expectError(() => {
             taskpool.execute(funcTask);
         }, new Error("taskpool:: task has been executed"));
         // Tasks with params
@@ -466,7 +466,7 @@ function main(): int {
         failedTask.onStartExecution(onStartExecutionCallback);
         failedTask.onExecutionSucceeded(onExecutionSucceededCallback);
         failedTask.onExecutionFailed(onExecutionFailedCallback);
-        expectError(() => { await taskpool.execute(failedTask) },
+        arktest.expectError(() => { await taskpool.execute(failedTask) },
                     new Error("Concurrent function failed"));
         arktest.assertEQ(onEnqueuedStr, onEnqueuedExpectedStr);
         arktest.assertEQ(onStartExecutionStr, onStartExecutionExpepctedStr);
@@ -476,10 +476,10 @@ function main(): int {
         let executedTask = new taskpool.Task(returnAbc);
         let expectedCallbackError = new Error("taskpool:: The executed task does not support the registration of listeners.");
         taskpool.execute(executedTask);
-        expectError(() => { executedTask.onEnqueued(() => {}); }, expectedCallbackError);
-        expectError(() => { executedTask.onStartExecution(() => {}); }, expectedCallbackError);
-        expectError(() => { executedTask.onExecutionSucceeded(() => {}); }, expectedCallbackError);
-        expectError(() => { executedTask.onExecutionFailed((e: Error) => {}); }, expectedCallbackError);
+        arktest.expectError(() => { executedTask.onEnqueued(() => {}); }, expectedCallbackError);
+        arktest.expectError(() => { executedTask.onStartExecution(() => {}); }, expectedCallbackError);
+        arktest.expectError(() => { executedTask.onExecutionSucceeded(() => {}); }, expectedCallbackError);
+        arktest.expectError(() => { executedTask.onExecutionFailed((e: Error) => {}); }, expectedCallbackError);
     });
     commonTaskSuite.addTest("IsCancelTest", (): void throws =>
     {
@@ -509,28 +509,28 @@ function main(): int {
         let wasCanceled = isCanceled.wait();
         // Check isCanceled from taskpool
         arktest.assertEQ(wasCanceled, true);
-        expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
+        arktest.expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
     });
     commonTaskSuite.addTest("CancelNonExecutingTaskTest", (): void throws =>
     {
         let expectedError = new Error("taskpool:: task is not executed or has been executed");
-        expectError(() => {
+        arktest.expectError(() => {
             let t = new taskpool.Task(returnAbc);
             taskpool.cancel(t);
             taskpool.execute(t);
         }, expectedError);
-        expectError(() => {
+        arktest.expectError(() => {
             let t = new taskpool.Task(returnAbc);
             await taskpool.execute(t);
             taskpool.cancel(t);
         }, expectedError);
         // tasks with params
-        expectError(() => {
+        arktest.expectError(() => {
             let t = new taskpool.Task(sum, 10, 20);
             taskpool.cancel(t);
             taskpool.execute(t);
         }, expectedError);
-        expectError(() => {
+        arktest.expectError(() => {
             let t = new taskpool.Task(sum, 10, 20);
             await taskpool.execute(t);
             taskpool.cancel(t);
@@ -546,9 +546,9 @@ function main(): int {
             arktest.assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
-        expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
+        arktest.expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
         // task finished, disallow new execution
-        expectError(() => {
+        arktest.expectError(() => {
             await taskpool.execute(task1);
         }, new Error("taskpool:: task has been executed"));
         let task2 = new taskpool.Task(testCancelFunc, 300);
@@ -607,9 +607,9 @@ function main(): int {
         waitCancel.set(false);
         while (isRunning.get()) {}
         arktest.assertEQ(isCanceled.get(), true);
-        expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
+        arktest.expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
         let task2 = new taskpool.Task(testCancelFunc, 100);
-        expectError(() => {
+        arktest.expectError(() => {
             await taskpool.execute(task2);
             // If isDone is true, cancel the task will throw an error.
             if (task2.isDone()) {
@@ -648,11 +648,11 @@ function main(): int {
         arktest.assertEQ(res1, "321");
         arktest.assertEQ(resultStr, "321");
         // Empty dependencies
-        expectError(() => {
+        arktest.expectError(() => {
             let task = new taskpool.Task(returnAbc);
             task.addDependency();
         }, new Error("taskpool:: addDependency has no params."));
-        expectError(() => {
+        arktest.expectError(() => {
             let task = new taskpool.Task(returnAbc);
             task.removeDependency();
         }, new Error("taskpool:: removeDependency has no params."));
@@ -734,29 +734,29 @@ function main(): int {
     {
         let task1 = new taskpool.Task(returnAbc);
         let task2 = new taskpool.Task(sum, 10, 20);
-        expectError(() => { task1.removeDependency(task2) }, new Error("taskpool:: task has no dependency"));
+        arktest.expectError(() => { task1.removeDependency(task2) }, new Error("taskpool:: task has no dependency"));
         let res1 = await taskpool.execute(task2);
         arktest.assertEQ(res1, 30);
-        expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
-        expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
+        arktest.expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
+        arktest.expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
         let task3 = new taskpool.Task(returnAbc);
         let task4 = new taskpool.Task(max, 30, 10);
         let expectedAgainExecuteError = new Error("taskpool:: executedTask with dependency cannot execute again");
         task1.addDependency(task3);
         let res2 = await taskpool.execute(task3);
         arktest.assertEQ(res2, "abc");
-        expectError(() => { task1.removeDependency(task3); }, new Error("taskpool:: cannot removeDependency on a dependent and executed task"));
-        expectError(() => { task1.removeDependency(task4); }, new Error("taskpool:: task has no dependency"));
+        arktest.expectError(() => { task1.removeDependency(task3); }, new Error("taskpool:: cannot removeDependency on a dependent and executed task"));
+        arktest.expectError(() => { task1.removeDependency(task4); }, new Error("taskpool:: task has no dependency"));
         let res3 = await taskpool.execute(task1);
         arktest.assertEQ(res3, "abc");
-        expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
-        expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
+        arktest.expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
+        arktest.expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
         // Try to remove dependency after execute
         let task5 = new taskpool.Task(returnAbc);
         let task6 = new taskpool.Task(returnAbc);
         task5.addDependency(task6);
         taskpool.execute(task5);
-        expectError(() => { task5.removeDependency(task6); }, new Error("taskpool:: executedTask cannot removeDependency"));
+        arktest.expectError(() => { task5.removeDependency(task6); }, new Error("taskpool:: executedTask cannot removeDependency"));
         taskpool.execute(task6);
     });
     commonTaskSuite.addTest("SendReceiveDataTest", () =>
@@ -823,7 +823,7 @@ function main(): int {
             arktest.assertEQ(e.message, "taskpool:: task is not executed or has been executed");
             return;
         }
-        expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
+        arktest.expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
         // When the task is canceled, recvCallback will no longer be executed.
         arktest.assertEQ(value, 0);
     });

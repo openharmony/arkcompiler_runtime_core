@@ -54,8 +54,8 @@ function main() {
   let items: arraystore.MyInterface[] = [{value: 42, prompt: "Hello World"}, item, alias, provider(), tlt() , tlo(provider()), GLOB ]
   receiver(items[0])
 
-  assertEQ(46, items[4].value)
-  assertEQ(7, spread(...items))
+  arktest.assertEQ(46, items[4].value)
+  arktest.assertEQ(7, spread(...items))
 
 }
 

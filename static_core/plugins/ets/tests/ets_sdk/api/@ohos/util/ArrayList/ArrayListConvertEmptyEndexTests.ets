@@ -187,7 +187,7 @@ function testIndexWithDoubleIndex() {
             `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
             ((e as BusinessError).code == TypeErrorCodeId);
     }
-    expectThrow(() => {arrayList[TestData.testDouble1]}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList[TestData.testDouble1]}, exceptionCheck);
 }
 
 function testIndexWithDoubleIndex2() {
@@ -198,7 +198,7 @@ function testIndexWithDoubleIndex2() {
             `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
             ((e as BusinessError).code == TypeErrorCodeId);
     }
-    expectThrow(() => {arrayList[TestData.testDouble2]}, exceptionCheck);
+    arktest.expectThrow(() => {arrayList[TestData.testDouble2]}, exceptionCheck);
 }
 
 function testIndexForOfLoop() {

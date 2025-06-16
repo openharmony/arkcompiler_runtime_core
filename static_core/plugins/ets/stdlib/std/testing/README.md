@@ -17,11 +17,11 @@ myTessuite.addTest("TestWithEqualityAndNonEquality", () => {
 });
 // Add one more test to the testsuite
 myTessuite.addTest("TestWithExceptions", () => {
-    expectError(() => { throw new Error() }, new Error());
+    arktest.expectError(() => { throw new Error() }, new Error());
     let expectedException = new Exception("Expected message");
-    expectException(() => { throw new Exception("Expected message") }, expectedException);
+    arktest.expectException(() => { throw new Exception("Expected message") }, expectedException);
     // Expect any exception
-    expectException(() => { throw new Exception("Expected message") });
+    arktest.expectException(() => { throw new Exception("Expected message") });
     arktest.expectNoThrow(() => {});
 });
 // Run all tests for the testsuite

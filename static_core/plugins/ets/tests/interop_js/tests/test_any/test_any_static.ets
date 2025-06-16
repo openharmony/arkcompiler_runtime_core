@@ -21,99 +21,99 @@ import { TestNew0, TestNew1, TestNew2 } from "testDecl";
 
 function testIsInstance() {
     let res = fooInstance instanceof Foo;
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
 function testLdByName() {
     let bar = fooInstance.bar;
-    assertEQ(bar, 0xcafe);
+    arktest.assertEQ(bar, 0xcafe);
 
     let baz = fooInstance.baz;
-    assertEQ(baz, "hello world");
+    arktest.assertEQ(baz, "hello world");
 }
 
 function testLdByVal() {
     let bar = fooInstance["bar"];
-    assertEQ(bar, 0xcafe);
+    arktest.assertEQ(bar, 0xcafe);
 
     let baz = fooInstance["baz"];
-    assertEQ(baz, "hello world");
+    arktest.assertEQ(baz, "hello world");
 }
 
 function testLdByIdx() {
     let babe = numberMapInstance[1];
-    assertEQ(babe, 0xbabe);
+    arktest.assertEQ(babe, 0xbabe);
 }
 
 function testStByIdx() {
     numberMapInstance[1] = 0xabcd;
 
     let babe = numberMapInstance[1];
-    assertEQ(babe, 0xabcd);
+    arktest.assertEQ(babe, 0xabcd);
 }
 
 function testStByName() {
     fooInstance.baz = "updated";
     let baz = fooInstance.baz;
-    assertEQ(baz, "updated");
+    arktest.assertEQ(baz, "updated");
 }
 
 function testStByVal() {
     fooInstance["bar"] = 0xf00d;
     let bar = fooInstance["bar"];
-    assertEQ(bar, 0xf00d);
+    arktest.assertEQ(bar, 0xf00d);
 
     fooInstance["baz"] = "testStByVal";
     let baz = fooInstance["baz"];
-    assertEQ(baz, "testStByVal");
+    arktest.assertEQ(baz, "testStByVal");
 }
 
 function testCall0() {
     let cafe = functionArg0();
-    assertEQ(cafe, 0xcafe);
+    arktest.assertEQ(cafe, 0xcafe);
 }
 
 function testCallShort() {
     let caff = functionArg1(0xcafe);
-    assertEQ(caff, 0xcaff);
+    arktest.assertEQ(caff, 0xcaff);
 }
 
 function testCallRange() {
     let caff = functionArg2(0xcafe, 1);
-    assertEQ(caff, 0xcaff);
+    arktest.assertEQ(caff, 0xcaff);
 }
 
 function testCallThis0() {
     let cafe = quxInstance.methodArg0();
-    assertEQ(cafe, 0xcafe);
+    arktest.assertEQ(cafe, 0xcafe);
 }
 
 function testCallThis1() {
     let caff = quxInstance.methodArg1(0xcafe);
-    assertEQ(caff, 0xcaff);
+    arktest.assertEQ(caff, 0xcaff);
 }
 
 function testCallThis2() {
     let caff = quxInstance.methodArg2(0xcafe, 1);
-    assertEQ(caff, 0xcaff);
+    arktest.assertEQ(caff, 0xcaff);
 }
 
 function testCallNew0() {
     let testNew0Instance = new TestNew0();
     let cafe = testNew0Instance.bar;
-    assertEQ(cafe, 0xcafe);
+    arktest.assertEQ(cafe, 0xcafe);
 }
 
 function testCallNew1() {
     let testNew1Instance = new TestNew1(0xcafe);
     let cafe = testNew1Instance.bar;
-    assertEQ(cafe, 0xcafe);
+    arktest.assertEQ(cafe, 0xcafe);
 }
 
 function testCallNew2() {
     let testNew2Instance = new TestNew2(0xcafe, 1);
     let caff = testNew2Instance.bar;
-    assertEQ(caff, 0xcaff);
+    arktest.assertEQ(caff, 0xcaff);
 }
 
 function testAll() {

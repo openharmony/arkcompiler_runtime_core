@@ -133,7 +133,7 @@ function main() {
     let c: StructTest.C = new StructTest.C(4, 5, 6);
 
     console.log("############## ani_struct start #############");
-    const suite = new ArkTestsuite("BundleManager Tests");
+    const suite = new arktest.ArkTestsuite("BundleManager Tests");
 
     console.log("a:", a);
     console.log("b:", b);

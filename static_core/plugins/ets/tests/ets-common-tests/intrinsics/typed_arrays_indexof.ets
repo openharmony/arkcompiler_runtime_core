@@ -14,7 +14,7 @@
  */
 
 function check_array_for_int(data: BigInt64Array, elem: int, expected: number): void {
-    assertEQ(data.indexOf(elem), expected, "data.indexOf(elem: int) must return " + expected);
+    arktest.assertEQ(data.indexOf(elem), expected, "data.indexOf(elem: int) must return " + expected);
 }
 
 function check_array(data: BigInt64Array, elem: BigInt, expected: number, fromIndex?: number): void {

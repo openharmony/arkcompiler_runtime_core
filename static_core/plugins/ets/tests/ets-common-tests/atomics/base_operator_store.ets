@@ -40,11 +40,11 @@ function testStore() {
 
         for (let j = 0; j < arraySize; j++) {
             let re = Atomics.store(ta, j, 12)
-            assertEQ(re, 12)
+            arktest.assertEQ(re, 12)
 
             for (let k = 0; k < arraySize; k++) {
                 let expected = (k === j) ? 12 : 0
-                assertEQ(Atomics.load(ta, k), expected)
+                arktest.assertEQ(Atomics.load(ta, k), expected)
             }
 
             Atomics.store(ta, j, 0)
@@ -53,7 +53,7 @@ function testStore() {
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
     suite.addTest('Function testStore', testStore)
     return suite.run()
 }

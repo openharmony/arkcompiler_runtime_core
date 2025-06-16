@@ -49,7 +49,7 @@ function testExtendToPosLength() {
 
 function testExtendToError() {
     let a = Array.from<number>(TestData.src);
-    expectError(
+    arktest.expectError(
         () => { a.extendTo(TestData.arrayLength3, TestData.initialValue3) },
         new RangeError("arrayLength must be <= int32 max")
     )

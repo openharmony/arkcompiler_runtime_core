@@ -43,7 +43,7 @@ function integer_test() {
     let i: long = 2;
     arktest.assertEQ(base_test.DivI64(h, i), 1);
 
-    expectError(() => {
+    arktest.expectError(() => {
         let x: long = 2;
         let y: long = 0;
         base_test.DivI64(x, y);

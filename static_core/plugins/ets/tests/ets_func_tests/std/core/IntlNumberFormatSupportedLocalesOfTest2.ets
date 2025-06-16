@@ -24,7 +24,7 @@ function main(): int {
 
 function testSupportedLocalesOf0007() {
     let locales: string[] = ['test', 'id-u-co-pinyin', 'de-ID', 'en-US'];
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }
 
 function testSupportedLocalesOf0010() {
@@ -32,5 +32,5 @@ function testSupportedLocalesOf0010() {
     let options: Intl.NumberFormatOptions = {
         localeMatcher: 'best fit'
     }
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }

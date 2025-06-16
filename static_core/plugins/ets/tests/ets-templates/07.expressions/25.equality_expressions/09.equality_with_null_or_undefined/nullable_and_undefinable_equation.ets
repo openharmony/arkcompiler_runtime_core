@@ -25,9 +25,9 @@ desc: >-
 let nullundef: null|undefined|{{c.type}} = {{c.value}}
 
 function main(): void {
-    assertTrue(nullundef == {{c.value2 if c.value2 else c.value}})
-    assertFalse(nullundef != {{c.value2 if c.value2 else c.value}})
-    assertTrue(nullundef === {{c.value2 if c.value2 else c.value}})
-    assertFalse(nullundef !== {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(nullundef == {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(nullundef != {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(nullundef === {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(nullundef !== {{c.value2 if c.value2 else c.value}})
 }
 {% endfor %}

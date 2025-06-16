@@ -61,14 +61,14 @@ function main(): int {
     pinObjTestsuite.addTest("AllocateNegativeSizePinnedArrayTest", (): void throws =>
     {
         let expectedError = new NegativeArraySizeError("The value must be non negative");
-        expectError((): void throws => { GC.allocatePinnedBooleanArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedByteArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedCharArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedShortArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedIntArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedLongArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedFloatArray(-1) }, expectedError);
-        expectError((): void throws => { GC.allocatePinnedDoubleArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedBooleanArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedByteArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedCharArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedShortArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedIntArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedLongArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedFloatArray(-1) }, expectedError);
+        arktest.expectError((): void throws => { GC.allocatePinnedDoubleArray(-1) }, expectedError);
     });
     return pinObjTestsuite.run();
 }

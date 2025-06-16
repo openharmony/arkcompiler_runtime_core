@@ -25,9 +25,9 @@ desc: >-
 let undefinable: undefined|{{c.type}} = {{c.value}}
 
 function main(): void {
-    assertTrue(undefinable == {{c.value2 if c.value2 else c.value}})
-    assertFalse(undefinable != {{c.value2 if c.value2 else c.value}})
-    assertTrue(undefinable === {{c.value2 if c.value2 else c.value}})
-    assertFalse(undefinable !== {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(undefinable == {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(undefinable != {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(undefinable === {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(undefinable !== {{c.value2 if c.value2 else c.value}})
 }
 {% endfor %}

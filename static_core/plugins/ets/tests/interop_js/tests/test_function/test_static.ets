@@ -16,23 +16,23 @@
 import { X, foo1, foo2, foo3, bar } from "testDecl";
 
 function TestFunction1() {
-    assertEQ(foo1("1"), "1")
+    arktest.assertEQ(foo1("1"), "1")
     let x = new X()
     x.s = "2"
-    assertEQ(foo2(x), "2")
+    arktest.assertEQ(foo2(x), "2")
     let value = 1
     for (let e of foo3(1, 2, 3, 4, 5, 6)) {
-        assertEQ(e, value)
+        arktest.assertEQ(e, value)
         value++
     }
 }
 
 function TestFunction2() {
-    assertEQ(bar("1"), "1")
-    assertEQ(bar(3.1), 3.1)
+    arktest.assertEQ(bar("1"), "1")
+    arktest.assertEQ(bar(3.1), 3.1)
     let value = 1.1
     for (let e of bar([1.1, 2.1, 3.1])) {
-        assertEQ(e, value)
+        arktest.assertEQ(e, value)
         value++
     }
 }

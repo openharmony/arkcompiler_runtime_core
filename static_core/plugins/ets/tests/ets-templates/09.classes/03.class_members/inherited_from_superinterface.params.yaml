@@ -13,5 +13,5 @@
 
 --- # List of valid class members
 interface_members:
-  - {interface: "foo(): int { return 5; }", class: "", check: "assertTrue( x.foo() == 5)" }
+  - {interface: "foo(): int { return 5; }", class: "", check: "arktest.assertTrue( x.foo() == 5)" }
   - {interface: "get bar(): int;\n  set bar(f: int)", class: "foo: int; get bar(): int { return this.foo; }; set bar(foo: int) { this.foo = foo; }", check: "x.foo = 3; arktest.assertTrue(x.foo == 3)"}

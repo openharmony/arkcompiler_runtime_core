@@ -24,11 +24,11 @@ function testAddBig() {
 
     for (let j = 0; j < arraySize; j++) {
         let old = Atomics.add(ta, j, 12n)
-        assertEQ(old, 0n)
+        arktest.assertEQ(old, 0n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -43,11 +43,11 @@ function testAndBig() {
         Atomics.store(ta, j, 3n)
 
         let old = Atomics.and(ta, j, 1n)
-        assertEQ(old, 3n)
+        arktest.assertEQ(old, 3n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 1n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -61,11 +61,11 @@ function testCompareExchangeBig() {
     for (let j = 0; j < arraySize; j++) {
         Atomics.store(ta, j, 7n)
         let old = Atomics.compareExchange(ta, j, 7n, 12n)
-        assertEQ(old, 7n)
+        arktest.assertEQ(old, 7n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -78,11 +78,11 @@ function testExchangeBig() {
 
     for (let j = 0; j < arraySize; j++) {
         let old = Atomics.exchange(ta, j, 12n)
-        assertEQ(old, 0n)
+        arktest.assertEQ(old, 0n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 12n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -98,7 +98,7 @@ function testLoadBig() {
 
         for (let k = 0; k < arraySize; k++) {
             let expected = (k === j) ? 12n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
         }
 
         Atomics.store(ta, j, 0n)
@@ -113,11 +113,11 @@ function testOrBig() {
         Atomics.store(ta, j, 2n)
 
         let old = Atomics.or(ta, j, 1n)
-        assertEQ(old, 2n)
+        arktest.assertEQ(old, 2n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 3n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -130,11 +130,11 @@ function testStoreBig() {
 
     for (let j = 0; j < arraySize; j++) {
         let re = Atomics.store(ta, j, 12n)
-        assertEQ(re, 12n)
+        arktest.assertEQ(re, 12n)
 
         for (let k = 0; k < arraySize; k++) {
             let expected = (k === j) ? 12n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), expected)
         }
 
         Atomics.store(ta, j, 0n)
@@ -149,11 +149,11 @@ function testSubBig() {
         Atomics.store(ta, j, 48n)
 
         let old = Atomics.sub(ta, j, 12n)
-        assertEQ(old, 48n)
+        arktest.assertEQ(old, 48n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 36n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -168,11 +168,11 @@ function testXorBig() {
         Atomics.store(ta, j, 5n)
 
         let old = Atomics.xor(ta, j, 1n)
-        assertEQ(old, 5n)
+        arktest.assertEQ(old, 5n)
 
         for (let k = 0; k < arraySize; k++) {
             let re = (k === j) ? 4n : 0n
-            assertEQ(Atomics.load(ta as BigUint64Array, k), re)
+            arktest.assertEQ(Atomics.load(ta as BigUint64Array, k), re)
         }
 
         Atomics.store(ta, j, 0n)
@@ -180,7 +180,7 @@ function testXorBig() {
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Atomics baseOperator')
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator')
     suite.addTest('Function Add', testAddBig)
     suite.addTest('Function And', testAndBig)
     suite.addTest('Function testCompareExchange', testCompareExchangeBig)

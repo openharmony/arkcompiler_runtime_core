@@ -395,7 +395,7 @@ function testAlloc() {
 function testEmptyAlloc() {
     const escape = '\0'
     let buf = buffer.alloc(2, escape, 'utf8')
-    assertEQ(encodeURI(buf.toString('utf8')), '%00%00')
+    arktest.assertEQ(encodeURI(buf.toString('utf8')), '%00%00')
 }
 
 function testAllocUninitialized() {
@@ -788,11 +788,11 @@ function testFloatReadWrite() {
     const testFloat = 3.14159
     buf.writeFloatBE(testFloat, 0)
     // Using approx comparison due to float precision
-    assertDoubleEQ(buf.readFloatBE(0), testFloat, 0.00001)
+    arktest.assertDoubleEQ(buf.readFloatBE(0), testFloat, 0.00001)
 
     // Test Little Endian
     buf.writeFloatLE(testFloat, 4)
-    assertDoubleEQ(buf.readFloatLE(4), testFloat, 0.00001)
+    arktest.assertDoubleEQ(buf.readFloatLE(4), testFloat, 0.00001)
 }
 
 function testDoubleReadWrite() {

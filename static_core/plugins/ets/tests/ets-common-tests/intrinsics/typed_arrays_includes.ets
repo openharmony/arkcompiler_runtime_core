@@ -230,8 +230,8 @@ function test_f32_array_inf() {
 
 function test_f64_array_nan() {
     const check_nan = (arr: Float64Array, nan_position: number) => {
-        assertLT(1, arr.length);
-        assertLT(nan_position, arr.length);
+        arktest.assertLT(1, arr.length);
+        arktest.assertLT(nan_position, arr.length);
         check_array(arr, NaN, true);
         check_array(arr, NaN, true, 0 as number);
         check_array(arr, NaN, true, nan_position);
@@ -244,11 +244,11 @@ function test_f64_array_nan() {
         check_array(arr, NaN, true, -(arr.length - nan_position));
     }
     const check_no_nan = (arr: Float64Array, nan_position: number) => {
-        assertLT(1, arr.length);
+        arktest.assertLT(1, arr.length);
         const val_position: number = nan_position < 4 ? 4 : 3;
-        assertLT(val_position, arr.length);
+        arktest.assertLT(val_position, arr.length);
         const value: number = arr[val_position];
-        assertFalse(isNaN(value));
+        arktest.assertFalse(isNaN(value));
         check_array(arr, value, true);
         check_array(arr, value, true, val_position);
         check_array(arr, value, false, arr.length + val_position);
@@ -288,8 +288,8 @@ function test_f64_array_nan() {
 
 function test_f32_array_nan() {
     const check_nan = (arr: Float32Array, nan_position: number) => {
-        assertLT(1, arr.length);
-        assertLT(nan_position, arr.length);
+        arktest.assertLT(1, arr.length);
+        arktest.assertLT(nan_position, arr.length);
         check_array(arr, NaN, true);
         check_array(arr, NaN, true, 0 as number);
         check_array(arr, NaN, true, nan_position);
@@ -303,11 +303,11 @@ function test_f32_array_nan() {
         check_array_for_float(arr, NaN.toFloat()); // No special case for NaN in Float32Array.includes(float)
     }
     const check_no_nan = (arr: Float32Array, nan_position: number) => {
-        assertLT(1, arr.length);
+        arktest.assertLT(1, arr.length);
         const val_position: number = nan_position < 5 ? 5 : 4;
-        assertLT(val_position, arr.length);
+        arktest.assertLT(val_position, arr.length);
         const value: number = arr[val_position];
-        assertFalse(isNaN(value));
+        arktest.assertFalse(isNaN(value));
         check_array(arr, 0, true);
         check_array(arr, Infinity, true);
         check_array(arr, value, true);

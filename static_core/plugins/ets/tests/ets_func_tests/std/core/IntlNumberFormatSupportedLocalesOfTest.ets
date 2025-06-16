@@ -40,23 +40,23 @@ function testSupportedLocalesOf() {
 function testSupportedLocalesOfEmpty() {
     let locales: string = ""
     let expectedError = new Error("Incorrect locale information provided");
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales); }, expectedError);
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales); }, expectedError);
 }
 
 function testSupportedLocalesOfUndefined() {
     let locales: string = ""
     let expectedError = new Error("Incorrect locale information provided");
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales, undefined); }, expectedError);
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales, undefined); }, expectedError);
 }
 
 function testSupportedLocalesOf0002() {
     let locales: string = '';
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }
 
 function testSupportedLocalesOf0003() {
     let locales: string = 'test';
-    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+    arktest.expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }
 
 function testSupportedLocalesOf0004() {
