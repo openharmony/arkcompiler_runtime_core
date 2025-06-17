@@ -37,7 +37,8 @@ parameters:
     verifier-timeout: 30
     verifier-config: "${URUNNER_PATH}/runner/suites/ets-verifier.config"
     work-dir: ${parameters.work-dir}
-
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    is-panda: True
 steps:
     es2panda:
         executable-path: ${parameters.build}/bin/es2panda

@@ -42,6 +42,10 @@ class OneTestRunner:
         return f"{name.upper()}_OTHER"
 
     @staticmethod
+    def __fail_kind_subprocess(name: str) -> str:
+        return f"{name.upper()}_SUBPROCESS"
+
+    @staticmethod
     def __fail_kind_timeout(name: str) -> str:
         return f"{name.upper()}_TIMEOUT"
 
@@ -76,12 +80,13 @@ class OneTestRunner:
             passed, fail_kind, output, error, return_code = self.__run(
                 name, params, result_validator, return_code_interpreter)
         except subprocess.SubprocessError as ex:
-            fail_kind = self.__fail_kind_other(name)
+            fail_kind = self.__fail_kind_subprocess(name)
             fail_kind_msg = f"{name}: Failed with {str(ex).strip()}"
             error = f"{error}\n{fail_kind_msg}" if error else fail_kind_msg
             return_code = -1
         self.__log_cmd(f"{name}: Actual error: {error.strip()}")
         self.__log_cmd(f"{name}: Actual return code: {return_code}\n")
+        fail_kind = fail_kind if fail_kind is not None and not passed else self.__fail_kind_other(name)
 
         report = TestReport(
             output=output,

@@ -33,6 +33,10 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     ark-args: []
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    # adds --boot-panda-files option to ark with all dependent and the current abc files
+    # adds --panda-files option to ark with all dependent and the current abc files
+    is-panda: True
 steps:
   imports: 
     only-es2panda:

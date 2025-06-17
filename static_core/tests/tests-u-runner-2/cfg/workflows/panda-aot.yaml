@@ -37,6 +37,11 @@ parameters:
         - ${parameters.ark-args}
         - "--enable-an:force"
     aot-args: [ ]
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
+    # adds --boot-panda-files option to ark with all dependent and the current abc files
+    # adds --panda-files option to ark with all dependent and the current abc files
+    is-panda: True
 steps:
     imports:
         only-es2panda:
