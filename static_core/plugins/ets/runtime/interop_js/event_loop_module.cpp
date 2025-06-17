@@ -20,7 +20,7 @@
 
 // NOTE(konstanting, #23205): A workaround for the hybrid cmake build. Will be removed soon
 // using a separate .cpp file with weak symbols.
-#if defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+#if defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS) && !defined(ARK_HYBRID)
 extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_get_uv_event_loop([[maybe_unused]] napi_env env, [[maybe_unused]] struct uv_loop_s **loop)
 {
@@ -28,7 +28,12 @@ napi_get_uv_event_loop([[maybe_unused]] napi_env env, [[maybe_unused]] struct uv
     INTEROP_LOG(ERROR) << "napi_add_env_cleanup_hook is implemented in OHOS since 4.1.0, please update" << std::endl;
     return napi_ok;
 }
-#endif /* PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS */
+#endif /* PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS && !ARK_HYBRID */
+
+#ifdef ARK_HYBRID
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_get_uv_event_loop([[maybe_unused]] napi_env env, [[maybe_unused]] struct uv_loop_s **loop);
+#endif
 
 namespace ark::ets::interop::js {
 

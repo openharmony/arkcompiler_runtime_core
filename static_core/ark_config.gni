@@ -49,6 +49,9 @@ if (is_standard_system || ark_standalone_build) {
 
 declare_args() {
   ark_enabled_plugins = default_ark_enabled_plugins
+  if (defined(ark_hybrid) && ark_hybrid) {
+    ark_enabled_plugins += [ "ets_runtime" ]
+  }
   extras = []
   if (!defined(is_ohos)) {
     is_ohos = false
@@ -109,6 +112,12 @@ if (is_mingw || support_jsapi) {
   enable_irtoc = false
   enable_codegen = false
 }
+
+if (ark_hybrid && !ark_standalone_build &&
+    !ark_static_standalone_build) {
+  enable_irtoc = false
+}
+
 if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||

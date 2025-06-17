@@ -20,10 +20,18 @@
 
 #include "js_runtime.h"
 #include "interop_test_helper.h"
+#include "static_core/libpandabase/utils/utils.h"
 
 namespace panda::ecmascript {
 int Main(const int argc, const char **argv)
 {
+    // Need to load libpandabase before libc comes to the process.
+    // That is because of some malloc hacks that should be loaded first before common malloc from libc.
+    // Since we use --as-needed flag, we need first of all call libpandabase symbol to load library before other
+    // libraries.
+#ifdef ARK_HYBRID
+    ark::ForceLoadLibPandaBase();
+#endif
     // Provide symbol to link with interop_test_helper library.
     ark::ets::interop::js::helper::LinkWithLibraryTrick();
 

@@ -27,9 +27,6 @@
 #include <functional>
 #include <string_view>
 
-#if defined(PANDA_JS_ETS_HYBRID_MODE)
-#include "interfaces/inner_api/napi/native_node_api.h"
-#else
 // NOLINTBEGIN(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
@@ -41,7 +38,6 @@ napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
 // NOLINTEND(readability-identifier-naming)
-#endif
 
 namespace ark::ets::interop::js {
 
