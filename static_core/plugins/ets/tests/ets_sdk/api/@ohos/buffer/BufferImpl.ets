@@ -14,6 +14,7 @@
  */
 
 import buffer from "@ohos.buffer"
+import { jsonx } from "std/core"
 
 
 function main(): int {
@@ -101,6 +102,7 @@ function main(): int {
     suite.addTest("Test buffer from string in utf8", testBufferFrom30006)
     suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
 
+    suite.addTest("Test buffer toJSON", testBufferToJSON)
     return suite.run()
 }
 
@@ -1031,4 +1033,34 @@ function testFillBase64UrlWithUnicode() {
     const buf = buffer.alloc(10).fill('F1刘FG', 0, 10, 'base64url');
     const str = buf.toString('hex');
     arktest.assertEQ(str, '17514617514617514617');
+}
+
+function testBufferToJSON() {
+    // Empty Buffer
+    let buf = buffer.from(new ArrayBuffer(0));
+    let str = JSON.stringifyJsonElement(buf.toJSON());
+    let parsed = JSON.parseJsonElement(str);
+    arktest.assertEQ(str, '{"type":"Buffer","data":[]}');
+    arktest.assertEQ(parsed.getElement("type").jsonType, jsonx.JsonType.JsonString);
+    arktest.assertEQ(parsed.getElement("data").jsonType, jsonx.JsonType.JsonArray);
+    arktest.assertEQ(parsed.getElement("data").asArray().length, 0);
+
+    // Non empty Buffer
+    buf = buffer.from(new ArrayBuffer(10));
+    buf[0] = 1;
+    buf[1] = 2;
+    buf[2] = 3;
+    buf[3] = 4;
+    buf[4] = 5;
+    str = JSON.stringifyJsonElement(buf.toJSON());
+    parsed = JSON.parseJsonElement(str);
+
+    arktest.assertEQ(str, '{"type":"Buffer","data":[1,2,3,4,5,0,0,0,0,0]}');
+    arktest.assertEQ(parsed.getElement("type").jsonType, jsonx.JsonType.JsonString);
+    arktest.assertEQ(parsed.getElement("data").jsonType, jsonx.JsonType.JsonArray);
+    const array = parsed.getElement("data").asArray()
+    arktest.assertEQ(array.length, 10);
+    for (let i: int = 0; i < array.length; ++i) {
+        arktest.assertEQ(array[i].jsonType, jsonx.JsonType.JsonNumber);
+    }
 }
