@@ -56,12 +56,12 @@ size_t TaskScheduler::StealTaskFromOtherWorker(WorkerThread *taskReceiver)
         // If worker was successfully found, steals task from its local queue
         TaskPtr task = chosenWorker->PopForegroundTask();
         if (task != nullptr) {
-            taskReceiver->AddForegroundTask(std::move(task));
+            taskReceiver->AddForegroundTask(task);
             return 1U;
         }
         task = chosenWorker->PopBackgroundTask();
         if (task != nullptr) {
-            taskReceiver->AddBackgroundTask(std::move(task));
+            taskReceiver->AddBackgroundTask(task);
             return 1U;
         }
         // If getting faild with Pop task we should retry
@@ -126,8 +126,8 @@ bool TaskScheduler::WaitUntilNewTasks(WorkerThread *worker)
 
 size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker, internal::SchedulableTaskQueueInterface *queue)
 {
-    auto addForegroundTaskFunc = [worker](TaskPtr &&task) { worker->AddForegroundTask(std::move(task)); };
-    auto addBackgroundTaskFunc = [worker](TaskPtr &&task) { worker->AddBackgroundTask(std::move(task)); };
+    auto addForegroundTaskFunc = [worker](TaskPtr &&task) { worker->AddForegroundTask(task); };
+    auto addBackgroundTaskFunc = [worker](TaskPtr &&task) { worker->AddBackgroundTask(task); };
 
     // Now we calc how many task we want to get from queue. If there are few tasks, then we want them to be evenly
     // distributed among the workers.

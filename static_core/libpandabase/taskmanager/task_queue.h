@@ -17,6 +17,7 @@
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H
 
 #include <atomic>
+#include <utility>
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
 #include "taskmanager/utils/task_time_stats.h"
@@ -92,7 +93,7 @@ public:
     void UnsetCallbacks() override;
 
 private:
-    using InternalTaskQueue = TwoLockQueue<TaskPtr, TaskAllocatorType>;
+    using InternalTaskQueue = TwoLockQueue<Task, TaskAllocatorType, QueueElemAllocationType::INPLACE>;
 
     PANDA_PUBLIC_API size_t AddForegroundTaskImpl(RunnerCallback &&runner);
     PANDA_PUBLIC_API size_t AddBackgroundTaskImpl(RunnerCallback &&runner);
@@ -100,8 +101,8 @@ private:
     PANDA_PUBLIC_API size_t IncrementCountOfLiveForegroundTasks();
     PANDA_PUBLIC_API size_t IncrementCountOfLiveBackgroundTasks();
 
-    static void OnForegroundTaskDestructionCallback(TaskQueueInterface *queue);
-    static void OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue);
+    static void OnForegroundTaskDestructionCallback(TaskQueueInterface *queue, void *node);
+    static void OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue, void *node);
 
     TaskQueue(QueuePriority priority, TaskWaitList *waitList, TaskTimeStatsBase *taskTimeStats)
         : SchedulableTaskQueueInterface(priority), taskTimeStats_(taskTimeStats), waitList_(waitList)
@@ -147,8 +148,9 @@ inline void TaskQueue<Allocator>::Destroy(SchedulableTaskQueueInterface *queue)
 }
 
 template <class Allocator>
-inline void TaskQueue<Allocator>::OnForegroundTaskDestructionCallback(TaskQueueInterface *queue)
+inline void TaskQueue<Allocator>::OnForegroundTaskDestructionCallback(TaskQueueInterface *queue, void *node)
 {
+    InternalTaskQueue::TryDeleteNode(node);
     auto iQueue = reinterpret_cast<TaskQueue *>(queue);
     // Atomic with relaxed order reason: all non-atomic and relaxed stores will be see after waitingMutex_ getting
     auto aliveTasks = iQueue->foregroundLiveTasks_.fetch_sub(1U, std::memory_order_relaxed);
@@ -159,8 +161,9 @@ inline void TaskQueue<Allocator>::OnForegroundTaskDestructionCallback(TaskQueueI
 }
 
 template <class Allocator>
-inline void TaskQueue<Allocator>::OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue)
+inline void TaskQueue<Allocator>::OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue, void *node)
 {
+    InternalTaskQueue::TryDeleteNode(node);
     auto iQueue = reinterpret_cast<TaskQueue *>(queue);
     // Atomic with relaxed order reason: all non-atomic and relaxed stores will be see after waitingMutex_ getting
     auto aliveTasks = iQueue->backgroundLiveTasks_.fetch_sub(1U, std::memory_order_relaxed);
@@ -273,6 +276,7 @@ inline size_t TaskQueue<Allocator>::ExecuteTask()
         return 0U;
     }
     task->RunTask();
+    Task::Delete(task);
     return 1U;
 }
 
@@ -284,6 +288,7 @@ inline size_t TaskQueue<Allocator>::ExecuteForegroundTask()
         return 0U;
     }
     task->RunTask();
+    Task::Delete(task);
     return 1U;
 }
 
@@ -295,6 +300,7 @@ inline size_t TaskQueue<Allocator>::ExecuteBackgroundTask()
         return 0U;
     }
     task->RunTask();
+    Task::Delete(task);
     return 1U;
 }
 
@@ -358,13 +364,13 @@ inline size_t TaskQueue<Allocator>::PopTasksToWorker(const AddTaskToWorkerFunc &
                                                      const AddTaskToWorkerFunc &addBackgroundTaskFunc, size_t size)
 {
     for (size_t i = 0; i < size; i++) {
-        TaskPtr task;
+        TaskPtr task = nullptr;
         if (foregroundTaskQueue_.TryPop(&task)) {
-            addForegroundTaskFunc(std::move(task));
+            addForegroundTaskFunc(task);
             continue;
         }
         if (backgroundTaskQueue_.TryPop(&task)) {
-            addBackgroundTaskFunc(std::move(task));
+            addBackgroundTaskFunc(task);
             continue;
         }
         return i;
@@ -377,9 +383,9 @@ inline size_t TaskQueue<Allocator>::PopForegroundTasksToHelperThread(const AddTa
                                                                      size_t size)
 {
     for (size_t i = 0; i < size; i++) {
-        TaskPtr task;
+        TaskPtr task = nullptr;
         if (foregroundTaskQueue_.TryPop(&task)) {
-            addTaskFunc(std::move(task));
+            addTaskFunc(task);
         }
         return i;
     }
@@ -393,7 +399,7 @@ inline size_t TaskQueue<Allocator>::PopBackgroundTasksToHelperThread(const AddTa
     for (size_t i = 0; i < size; i++) {
         TaskPtr task;
         if (backgroundTaskQueue_.TryPop(&task)) {
-            addTaskFunc(std::move(task));
+            addTaskFunc(task);
         }
         return i;
     }
@@ -441,8 +447,7 @@ inline void TaskQueue<Allocator>::UnsetCallbacks()
 template <class Allocator>
 inline size_t TaskQueue<Allocator>::AddForegroundTaskImpl(RunnerCallback &&runner)
 {
-    auto task = Task::Create(std::move(runner), this, OnForegroundTaskDestructionCallback);
-    foregroundTaskQueue_.Push(std::move(task));
+    foregroundTaskQueue_.Emplace(Task::Create, std::move(runner), this, OnForegroundTaskDestructionCallback);
     if (signalWorkersCallback_ != nullptr) {
         signalWorkersCallback_();
     }
@@ -452,8 +457,7 @@ inline size_t TaskQueue<Allocator>::AddForegroundTaskImpl(RunnerCallback &&runne
 template <class Allocator>
 inline size_t TaskQueue<Allocator>::AddBackgroundTaskImpl(RunnerCallback &&runner)
 {
-    auto task = Task::Create(std::move(runner), this, OnBackgroundTaskDestructionCallback);
-    backgroundTaskQueue_.Push(std::move(task));
+    backgroundTaskQueue_.Emplace(Task::Create, std::move(runner), this, OnBackgroundTaskDestructionCallback);
     if (signalWorkersCallback_ != nullptr) {
         signalWorkersCallback_();
     }

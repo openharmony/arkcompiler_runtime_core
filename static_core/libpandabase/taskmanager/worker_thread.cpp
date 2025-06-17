@@ -31,12 +31,12 @@ WorkerThread::WorkerThread(TaskScheduler *scheduler, TaskTimeStatsBase *taskTime
 
 void WorkerThread::AddForegroundTask(TaskPtr task)
 {
-    foregroundTaskQueue_.Push(std::move(task));
+    foregroundTaskQueue_.Push(task);
 }
 
 void WorkerThread::AddBackgroundTask(TaskPtr task)
 {
-    backgroundTaskQueue_.Push(std::move(task));
+    backgroundTaskQueue_.Push(task);
 }
 
 void WorkerThread::Join()
@@ -56,7 +56,7 @@ size_t WorkerThread::Size() const
 
 TaskPtr WorkerThread::PopTask()
 {
-    TaskPtr task;
+    TaskPtr task = nullptr;
     if (foregroundTaskQueue_.TryPop(&task)) {
         return task;
     }
@@ -66,14 +66,14 @@ TaskPtr WorkerThread::PopTask()
 
 TaskPtr WorkerThread::PopForegroundTask()
 {
-    TaskPtr task;
+    TaskPtr task = nullptr;
     foregroundTaskQueue_.TryPop(&task);
     return task;
 }
 
 TaskPtr WorkerThread::PopBackgroundTask()
 {
-    TaskPtr task;
+    TaskPtr task = nullptr;
     backgroundTaskQueue_.TryPop(&task);
     return task;
 }
@@ -100,6 +100,7 @@ size_t WorkerThread::ExecuteTasksFromLocalQueue()
             break;
         }
         task->RunTask();
+        Task::Delete(task);
         executed++;
     }
     return executed;

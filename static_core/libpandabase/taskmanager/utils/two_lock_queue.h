@@ -16,18 +16,26 @@
 #ifndef LIBPANDABASE_TASKMANAGER_UTILS_TWO_LOCK_QUEUE
 #define LIBPANDABASE_TASKMANAGER_UTILS_TWO_LOCK_QUEUE
 
+#include <type_traits>
 #include "libpandabase/taskmanager/utils/sp_sc_lock_free_queue.h"
 #include "libpandabase/os/mutex.h"
 
 namespace ark::taskmanager::internal {
 
-template <class T, class Allocator>
+template <class T, class Allocator, QueueElemAllocationType ALLOCATION_TYPE>
 class TwoLockQueue {
 public:
-    void Push(T &&val)
+    void Push(T *val)
     {
         os::memory::LockHolder lh(pushLock_);
-        queue_.Push(std::move(val));
+        queue_.Push(val);
+    }
+
+    template <class CreationFunc, class... Args>
+    void Emplace(CreationFunc creationFunc, Args &&...args)
+    {
+        os::memory::LockHolder lh(pushLock_);
+        queue_.Emplace(creationFunc, std::forward<Args>(args)...);
     }
 
     T Pop()
@@ -36,7 +44,7 @@ public:
         return queue_.Pop();
     }
 
-    bool TryPop(T *val)
+    bool TryPop(T **val)
     {
         os::memory::LockHolder lh(popLock_);
         return queue_.TryPop(val);
@@ -52,8 +60,13 @@ public:
         return queue_.Size();
     }
 
+    static void TryDeleteNode(void *node)
+    {
+        InternalTaskQueue::TryDeleteNode(node);
+    }
+
 private:
-    using InternalTaskQueue = SPSCLockFreeQueue<T, Allocator>;
+    using InternalTaskQueue = SPSCLockFreeQueue<T, Allocator, ALLOCATION_TYPE>;
 
     mutable os::memory::Mutex pushLock_;
     mutable os::memory::Mutex popLock_;
