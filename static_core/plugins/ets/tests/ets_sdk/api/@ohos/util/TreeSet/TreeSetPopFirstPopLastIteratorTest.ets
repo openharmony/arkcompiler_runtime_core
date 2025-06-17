@@ -15,9 +15,6 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet PopFirst PopLast Iterator API tests")
 
@@ -119,12 +116,12 @@ function testIterator() {
     let it = treeSet.$_iterator();
     arktest.assertEQ(it.next().value, "aa", "The treeSet $_iterator should return the first value");
     arktest.assertEQ(it.next().value, "bb", "The treeSet $_iterator should return the second value");
-    arktest.assertEQ(it.next().value, undefined, "The treeSet $_iterator should return undefined for no more values");
+    arktest.assertTrue(it.next().done, "The treeSet iterator.done should true for no more values");
 }
 
 function testIteratorEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.$_iterator();
-    arktest.assertEQ(it.next().value, undefined, "The treeSet $_iterator should return undefined when treeSet is empty");
+    arktest.assertTrue(it.next().done, "The treeSet iterator.done should true when treeSet is empty");
 }

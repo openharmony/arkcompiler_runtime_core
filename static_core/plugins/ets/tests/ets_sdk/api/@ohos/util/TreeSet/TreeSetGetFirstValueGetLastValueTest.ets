@@ -15,23 +15,20 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetFirstValue GetLastValue API tests")
 
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last value",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last value",
         testGetFirstValueGetLastValueSingleElement)
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last value from the null treeSet",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last value from the null treeSet",
         testGetFirstValueGetLastValueEmptyTreeSet)
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last value from the TreeSet with a set of data",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last value from the TreeSet with a set of data",
         testGetFirstValueGetLastValueMultipleElements)
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last value by descending",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last value by descending",
         testGetFirstValueGetLastValueDescendingOrder)
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last object value",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last object value",
         testGetFirstValueGetLastValueObjectValues)
-    suite.addTest("TreeSet getFirstValue getLastVallue first and last object value from the TreeSet with a set of data",
+    suite.addTest("TreeSet getFirstValue getLastValue first and last object value from the TreeSet with a set of data",
         testGetFirstValueGetLastValueMultipleObjectValues)
 
     return suite.run()
