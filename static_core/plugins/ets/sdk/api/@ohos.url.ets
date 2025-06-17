@@ -18,16 +18,25 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 const SyntaxErrorCodeId: number = 10200002;
 
-function createBusinessError(code: number, message:string){
+function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
     err.code = code;
-    err.name='BusinessError';
+    err.name = 'BusinessError';
     err.message = message;
     return err;
 }
 
+/**
+* The url module provides utilities for URL resolution and parsing.
+*
+* @namespace url
+*/
 export namespace url {
 
+    /**
+    * Store some constants and arrays
+    * @class Helper
+    */
     class Helper {
         static ASCII_32: number = 32;
         static ASCII_127: number = 127;
@@ -517,6 +526,10 @@ export namespace url {
         cPort: number = -1;
     }
 
+    /**
+    * Handle the specific URL logic
+    * @class InnerURL
+    */
     class InnerURL {
         flags: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false];
         cScheme: string = "";
@@ -1183,7 +1196,7 @@ export namespace url {
             return this.initOnlyInput(trimedStr);
         }
 
-        constructor() { }
+        constructor() {}
 
         getHostName(): string {
             let temp = "";
@@ -1618,6 +1631,11 @@ export namespace url {
         }
     }
 
+    /**
+    * The interface of URL is used to parse, construct, normalize, and encode URLs.
+    *
+    * @class URL
+    */
     export class URL {
 
         urlInner: InnerURL = new InnerURL();
@@ -1635,9 +1653,22 @@ export namespace url {
         cPort: string = '';
         cHasDoubleSlash: boolean = false;
         cParams: URLParams = new URLParams();
+        /**
+        * URL constructor, which is used to instantiate a URL object.
+        *
+        */
+        constructor() {}
 
-        constructor() { }
-
+        /**
+        * Replaces the original constructor to process arguments and return a url object.
+        *
+        * @param { string } inputUrl -  Absolute or relative input URL to resolve. 
+        * Base is required if input is relative.
+        * If input is an absolute value, base ignores the value.
+        * @param { string | URL } [base] - Base URL to parse if input is not absolute.
+        * @returns { URL }
+        * @throws { BusinessError } 10200002 - Invalid url string.
+        */
         static parseURL(inputUrl: string, inputBase?: string | URL): URL {
             let nativeUrl: URL;
 
@@ -1652,20 +1683,35 @@ export namespace url {
                 }
             }
             if (nativeUrl.urlInner.flags[0]) {
-                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
+                throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
             }
             setEncodedData(nativeUrl, nativeUrl.urlInner);
             return nativeUrl;
         }
 
+        /**
+        * Returns the serialized URL as a string.
+        *
+        * @returns { string } Returns the serialized URL as a string.
+        */
         toString(): string {
             return this.cHref;
         }
 
+        /**
+        * Gets the protocol portion of the URL.
+        *
+        * @return  {string} Returns the protocol portion of the URL.
+        */
         get protocol(): string {
             return this.cProtocol;
         }
 
+        /**
+        * Sets the protocol portion of the URL.
+        * 
+        * @param { string } scheme - protocol portion of the URL.
+        */
         set protocol(scheme: string) {
             if (scheme.length == 0) {
                 return;
@@ -1680,6 +1726,11 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the origin portion of the URL.
+        * 
+        * @return  {string} Returns the origin portion of the URL.
+        */
         get origin(): string {
             let kOpaqueOrigin: string = 'null';
             switch (this.cProtocol) {
@@ -1694,10 +1745,21 @@ export namespace url {
             return kOpaqueOrigin;
         }
 
+        /**
+        * Gets the username portion of the URL.
+        * 
+        * @return  {string} Returns the username portion of the URL.
+        * @type { string }
+        */
         get username(): string {
             return this.cUsername;
         }
 
+        /**
+        * Sets the username portion of the URL.
+        * 
+        * @param { string }  input - The username portion of the URL.
+        */
         set username(input: string) {
             if (this.cHost == null || this.cHost == '' || this.cProtocol == 'file:') {
                 return;
@@ -1707,10 +1769,20 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the password portion of the URL.
+        * 
+        * @return  {string} Returns the password portion of the URL.
+        */
         get password(): string {
             return this.cPassword;
         }
 
+        /**
+        * Sets the password portion of the URL.
+        * 
+        * @param { string } input - The password portion of the URL.
+        */
         set password(input: string) {
             if (this.cHost == null || this.cHost == '' || this.cProtocol == 'file:') {
                 return;
@@ -1720,20 +1792,40 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the serialized URL as a string.
+        * 
+        * @return  {string} Returns the serialized URL as a string.
+        */
         get hash(): string {
             return this.cHash;
         }
 
+        /**
+        * Sets the hash portion of the URL.
+        * 
+        * @param { string } fragment - The hash portion of the URL.
+        */
         set hash(fragment: string) {
             this.urlInner.setFragment(fixIllegalString(fragment));
             this.cHash = this.urlInner.getFragment();
             this.setHref();
         }
 
+        /**
+        * Gets the search portion of the URL.
+        * 
+        * @return  {string} Returns the search portion of the URL.
+        */
         get search(): string {
             return this.cSearch;
         }
 
+        /**
+        * Sets the search portion of the URL.
+        * 
+        * @param { string }  query - The search portion of the URL.
+        */
         set search(query: string) {
             this.urlInner.setEncodeSearch(fixIllegalString(query));
             this.cSearch = this.urlInner.getEncodeSearch();
@@ -1741,10 +1833,20 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the hostname portion of the URL.
+        * 
+        * @return  {string} Returns the hostname portion of the URL.
+        */
         get hostname(): string {
             return this.cHostname;
         }
 
+        /**
+        * Sets the hostname portion of the URL.
+        * 
+        * @param { string } hostname - The hostname portion of the URL.
+        */
         set hostname(hostname: string) {
             this.urlInner.setHostName(hostname);
             this.cHostname = this.urlInner.getHostName();
@@ -1752,10 +1854,20 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the host portion of the URL.
+        * 
+        * @return  {string} Returns the host portion of the URL.
+        */
         get host(): string {
             return this.cHost;
         }
 
+        /**
+        * Sets the host portion of the URL.
+        * 
+        * @param { string } host - The host portion of the URL.
+        */
         set host(host: string) {
             this.urlInner.setHost(host);
             this.cHost = this.urlInner.getHost();
@@ -1764,10 +1876,20 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the port portion of the URL.
+        * 
+        * @return  {string} Returns the port portion of the URL.
+        */
         get port(): string {
             return this.cPort;
         }
 
+        /**
+        * Sets the port portion of the URL.
+        * 
+        * @param { string }  port - The port portion of the URL.
+        */
         set port(port: string) {
             if (this.cHost == '' || this.cProtocol == 'file:' || port == '') {
                 return;
@@ -1778,34 +1900,64 @@ export namespace url {
             this.setHref();
         }
 
+        /**
+        * Gets the pathname portion of the URL.
+        * 
+        * @return  {string} Returns the pathname portion of the URL.
+        */
         get pathname(): string {
             return this.cPathname;
         }
 
+        /**
+        * Sets the pathname portion of the URL.
+        * 
+        * @param { string }  path - The pathname portion of the URL.
+        */
         set pathname(path: string) {
             this.urlInner.setPath(fixIllegalString(path));
             this.cPathname = this.urlInner.getPath();
             this.setHref();
         }
 
+        /**
+        * Gets the params portion of the URL.
+        * 
+        * @return  {URLParams} Returns the params portion of the URL.
+        */
         get params(): URLParams {
             return this.cParams;
         }
 
+        /**
+        * Returns the serialized URL as a string.
+        *
+        * @returns { string } Returns the serialized URL as a string.
+        */
         toJSON(): string {
             return this.cHref;
         }
 
+        /**
+        * Gets the href portion of the URL.
+        * 
+        * @return  {string} Returns the href portion of the URL.
+        */
         get href(): string {
             return this.cHref;
         }
 
+        /**
+        * Sets the href portion of the URL.
+        * 
+        * @param { string } href - The href portion of the URL.
+        */
         set href(href: string) {
             this.urlInner.setHref(href);
             if (!this.urlInner.flags[0]) {
                 setEncodedData(this, this.urlInner);
             } else {
-                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
+                throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
             }
         }
 
@@ -1958,15 +2110,38 @@ export namespace url {
         return result;
     }
 
+    /**
+    * The URLParams interface defines some practical methods to process URL query strings.
+    *
+    * @class URLParams
+    */
     export class URLParams {
         urlClass: NativeURLSearchParams;
         parentUrl: URL | null = null;
+
+        /**
+        * A parameterized constructor used to create an URLParams instance.
+        * As the input parameter of the constructor function, init supports four types.
+        * The input parameter is a character string two-dimensional array.
+        * The input parameter is the object list.
+        * The input parameter is a character string.
+        * The input parameter is the URLParams object.
+        *
+        * @param { string[][] | Record<string, string> | string | URLParams }
+        * @throws { BusinessError } 10200002 - Parameter error. Parameter verification failed.
+        */
         constructor(input?: [string, string][] | Record<string, string> | string | URLParams) {
             let arr = parameterProcess(input);
             this.urlClass = new NativeURLSearchParams();
             this.urlClass.setArray(arr);
         }
 
+        /**
+        * Appends a specified key/value pair as a new search parameter.
+        *
+        * @param { string } name - name name Key name of the search parameter to be inserted.
+        * @param { string } value - value value Values of search parameters to be inserted.
+        */
         append(params1: string, params2: string): void {
             params1 = fixUSVstring(params1);
             params2 = fixUSVstring(params2);
@@ -1977,6 +2152,16 @@ export namespace url {
                 this.parentUrl!.setHref();
             }
         }
+
+        /**
+        * Sets the value associated with a given search parameter to the
+        * given value. If there were several matching values, this method
+        * deletes the others. If the search parameter doesn't exist, this
+        * method creates it.
+        *
+        * @param { string } name - name name Key name of the parameter to be set.
+        * @param { string } value - value value Indicates the parameter value to be set.
+        */
         set(setName: string, setValues: string): void {
             setName = fixUSVstring(setName);
             setValues = fixUSVstring(setValues);
@@ -1987,6 +2172,11 @@ export namespace url {
                 this.parentUrl!.setHref();
             }
         }
+
+        /**
+        * Sort all key/value pairs contained in this object in place and return undefined.
+        *
+        */
         sort(): void {
             this.urlClass.sort();
             if (this.parentUrl != null) {
@@ -1995,35 +2185,83 @@ export namespace url {
                 this.parentUrl!.setHref();
             }
         }
+
+        /**
+        * Returns a Boolean that indicates whether a parameter with the specified name exists.
+        *
+        * @param { string } name - name name Specifies the name of a key-value pair.
+        * @returns { boolean } Returns a Boolean value that indicates whether a found
+        */
         has(hasname: string): boolean {
             hasname = fixUSVstring(hasname);
             return this.urlClass.isHas(hasname);
         }
+
+        /**
+        * Returns a query string suitable for use in a URL.
+        *
+        * @returns { string } Returns a search parameter serialized as a string, percent-encoded if necessary.
+        */
         toString(): string {
             return this.urlClass.toString();
         }
+
+        /**
+        * Returns an iterator allowing to go through all keys contained in this object.
+        *
+        * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
+        */
         keys(): IterableIterator<string> {
             return this.urlClass.iterByKeys().$_iterator();
         }
 
+        /**
+        * Returns an iterator allowing to go through all keys contained in this object.
+        *
+        * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
+        */
         values(): IterableIterator<string> {
             return this.urlClass.iterByValues().$_iterator();
         }
 
+        /**
+        * Returns all key-value pairs associated with a given search parameter as an array.
+        *
+        * @param { string } name - Specifies the name of a key value.
+        * @returns { Array<string> } Array<string> Returns all key-value pairs with the specified name.
+        */
         getAll(getAllname: string): Array<string> {
             getAllname = fixUSVstring(getAllname);
             return this.urlClass.getAll(getAllname);
         }
 
+        /**
+        * Returns the first value associated to the given search parameter.
+        *
+        * @param { string } name - Specifies the name of a key-value pair.
+        * @returns { string | undefined } Returns the first value found by name. If no value is found, undefined is returned.
+        * If no value is found, undefined is returned.
+        */
         get(getname: string): string | undefined {
             getname = fixUSVstring(getname);
             return this.urlClass.get(getname);
         }
 
-        entries(): IterableIterator<[string,string]> {
+        /**
+        * Returns an ES6 iterator. Each item of the iterator is a JavaScript Array.
+        * The first item of Array is name, and the second item of Array is value.
+        *
+        * @returns { IterableIterator<[string,string]> } Returns an iterator over all values.
+        */
+        entries(): IterableIterator<[string, string]> {
             return this.urlClass.entries().$_iterator();
         }
 
+        /**
+        * Deletes the given search parameter and its associated value,from the list of all search parameters.
+        *
+        * @param { string } name - name name Name of the key-value pair to be deleted.
+        */
         delete(deleteName: string): void {
             deleteName = fixUSVstring(deleteName);
             this.urlClass.delete(deleteName);
@@ -2035,6 +2273,12 @@ export namespace url {
             }
         }
 
+        /**
+        * Callback functions are used to traverse key-value pairs on the URLParams instance object.
+        *
+        * @param { function } callbackFn - callbackFn value Current traversal key value,
+        * key Indicates the name of the key that is traversed.
+        */
         forEach(
             objfun: (value: string, key: string, param: URLParams) => void
         ) {
@@ -2050,20 +2294,37 @@ export namespace url {
             }
         }
 
+        /**
+        * Returns an iterator allowing to go through all key/value
+        * pairs contained in this object.
+        *
+        * @returns { IterableIterator<[string, string]> } Returns an ES6 iterator.
+        * Each item of the iterator is a JavaScript Array.
+        * The first item of Array is name, and the second item of Array is value.
+        */
         $_iterator(): IterableIterator<[string, string]> {
             return this.urlClass.entries().$_iterator();
         }
 
+        /**
+        * Update an URLParams instance by a string input.
+        *
+        * @param { string } input - input string.
+        */
         updateParams(input: string): void {
             let arr = parameterProcess(input);
             this.urlClass.setArray(arr);
         }
     }
 
+    /**
+    * Handle the specific URLParams logic
+    * @class NativeURLParams
+    */
     class NativeURLSearchParams {
         private searchParams = new Array<string>();
 
-        constructor() { }
+        constructor() {}
 
         get(key: string): string | undefined {
             let len = this.searchParams.length;
@@ -2099,7 +2360,7 @@ export namespace url {
             }
         }
 
-        entries(): Array<[string,string]> {
+        entries(): Array<[string, string]> {
             let result = new Array<[string, string]>();
             for (let i = 0; i < this.searchParams.length; i += 2) {
                 let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]];
@@ -2196,7 +2457,7 @@ export namespace url {
             let arrayLen: number = array.length;
             let key: string = '';
             let value: string = '';
-            const regStr='%20';
+            const regStr = '%20';
             for (let pos: number = 0; pos < arrayLen; pos += 2) { // 2:Even subscripts exist as key values
                 key = encodePercentEncoding(array[pos], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
                 value = encodePercentEncoding(array[pos + 1], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
@@ -2221,7 +2482,7 @@ export namespace url {
         } else if (input instanceof Record) {
             return parseParamFromRecord(input as Record<string, string>)
         } else {
-            throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid input type.');
+            throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid input type.');
         }
     }
 
@@ -2230,7 +2491,7 @@ export namespace url {
         if (input.length == 0) {
             return result;
         } else if (input[0][0] == undefined || input[0][1] == undefined) {
-            throw createBusinessError(SyntaxErrorCodeId,'Parameter error. The type of input must be string[][].');
+            throw createBusinessError(SyntaxErrorCodeId, 'Parameter error. The type of input must be string[][].');
         }
 
         for (let it of input) {

@@ -18,26 +18,52 @@ import { BusinessError } from "@ohos.base";
 const SyntaxErrorCodeId: number = 10200002;
 const TypeErrorCodeId: number = 401;
 
-function createBusinessError(code: number, message:string){
-    let err = new BusinessError();
-    err.code = code;
-    err.name='BusinessError';
-    err.message = message;
-    return err;
+function createBusinessError(code: number, message: string) {
+  let err = new BusinessError();
+  err.code = code;
+  err.name = 'BusinessError';
+  err.message = message;
+  return err;
 }
 
+/**
+* The uri module provides utilities for URI resolution and parsing.
+*
+* @namespace uri
+*/
 export namespace uri {
-
+  /**
+  * URI Represents a Uniform Resource Identifier (URI) reference.
+  *
+  * @class URI
+  */
   export class URI {
     uriEntry: UriEntry;
+
+    /**
+    * URI constructor, which is used to instantiate a URI object.
+    * uri: Constructs a URI by parsing a given string.
+    *
+    * @param { string } uri - uri uri
+    * @throws { BusinessError } 10200002 - Invalid uri string.
+    */
     constructor(input: string) {
       this.uriEntry = new UriEntry(input);
       let errStr: string = this.uriEntry.getErrStr();
       if (errStr != "") {
-        throw createBusinessError(SyntaxErrorCodeId,`Syntax Error. Invalid Uri string: The ${errStr}`)
+        throw createBusinessError(SyntaxErrorCodeId, `Syntax Error. Invalid Uri string: The ${errStr}`)
       }
     }
 
+    /**
+    * Creates an opaque Uri from the given components.
+    *
+    * @param { string } scheme -  of the URI.
+    * @param { string } ssp -scheme-specific-part, everything between the scheme separator (':') and the fragment
+    * separator ('#'), which will get encoded.
+    * @param { string } fragment - fragment, everything after the '#', null if undefined, will get encoded.
+    * @returns { URI } Return Uri consisting of a given scheme, SSP, and fragment.
+    */
     static createFromParts(scheme: string, ssp: string, fragment: string): URI {
       let uriStr: string = scheme;
       uriStr += ':' + encodeURIComponent(ssp);
@@ -47,49 +73,111 @@ export namespace uri {
       return createNewUri(uriStr);
     }
 
+    /**
+    * Returns the serialized URI as a string.
+    *
+    * @returns { string } Returns the serialized URI as a string.
+    */
     toString(): string {
       return toAscllString(this.uriEntry.toString());
     }
 
+    /**
+    * Check whether this URI is equivalent to other URI objects.
+    *
+    * @param { URI } other - other other URI object to be compared
+    * @returns { boolean } boolean Tests whether this URI is equivalent to other URI objects.
+    */    
     equals(other: URI): boolean {
       return this.uriEntry.equals(other.uriEntry);
     }
-
+    
+    /**
+    * Check whether this URI is equivalent to other URI objects.
+    *
+    * @param { URI } other - other other URI object to be compared
+    * @returns { boolean } boolean Tests whether this URI is equivalent to other URI objects.
+    */
     equalsTo(other: URI): boolean {
       return this.uriEntry.equals(other.uriEntry);
     }
 
+    /**
+    * Indicates whether this URI is an absolute URI.
+    *
+    * @returns { boolean } boolean Indicates whether the URI is an absolute URI (whether the scheme component is defined).
+    */
     checkIsAbsolute(): boolean {
       return this.uriEntry.isAbsolute();
     }
 
+    /**
+    * Determine whether URI is Relative.
+    *
+    * @returns { boolean } Return true as Relative, otherwise return false.
+    */
     checkRelative(): boolean {
       return this.uriEntry.isRelative();
     }
 
+    /**
+    * Determine whether URI is Opaque.
+    *
+    * @returns { boolean } Return true as Opaque, otherwise return false.
+    */
     checkOpaque(): boolean {
       return this.uriEntry.isOpaque();
     }
 
+    /**
+    * Determine whether URI is hierarchical.
+    *
+    * @returns { boolean } Return true as Hierarchical, otherwise return false.
+    */
     checkHierarchical(): boolean {
       return this.uriEntry.isHierarchical();
     }
 
+    /**
+    * Encodes the key and value and then appends the result to the query string.
+    *
+    * @param { string } [key] - The key it will be encoded with.
+    * @param { string } [value] - The value it will be encoded with.
+    * @returns { URI } Return URI object.
+    */
     addQueryValue(key: string, value: string): URI {
       let uriStr = this.uriEntry.addQueryValue(encodeURIComponent(key), encodeURIComponent(value));
       return createNewUri(uriStr);
     }
 
+    /**
+    * Creates a new Uri by appending an already-encoded path segment to a base Uri.
+    *
+    * @param { string } encodedPathSegment - Encoded path segment to be added.
+    * @returns { URI } After adding, return the URI object.
+    */
     addEncodedSegment(encodedPathSegment: string): URI {
       let uriStr = this.uriEntry.addSegment(encodedPathSegment);
       return createNewUri(uriStr);
     }
 
+    /**
+    * Encodes the given path segment and appends it to the path.
+    *
+    * @param { string } [pathSegment] - path segment to be added.
+    * @returns { URI } After adding, return the URI object.
+    */
     addSegment(pathSegment: string): URI {
       let uriStr = this.uriEntry.addSegment(encodeURIComponent(pathSegment));
       return createNewUri(uriStr);
     }
 
+    /**
+    * Searches the query string for the first value with the given key.
+    *
+    * @param { string } key - Given the first value of the key.
+    * @returns { string | null } Return decoded value.
+    */
     getQueryValue(key: string): string | null {
       let query = this.uriEntry.getQuery();
       if (query === '') {
@@ -149,6 +237,11 @@ export namespace uri {
       }
     }
 
+    /**
+    * Returns a set of the unique names of all query parameters.
+    *
+    * @returns { Array<string> } Return a set of decoded names.
+    */
     getQueryNames(): Array<string> {
       let query = this.uriEntry.getQuery();
       if (query == "") {
@@ -170,6 +263,12 @@ export namespace uri {
       return Array.from<string>(names);
     }
 
+    /**
+    * Searches the query string for parameter values with the given key.
+    *
+    * @param { string } key - The key it will be encoded with.
+    * @returns { Array<string> } Return a set of decoded values.
+    */
     getQueryValues(key: string): Array<string> {
       let query = this.uriEntry.getQuery();
       if (query == "") {
@@ -193,6 +292,13 @@ export namespace uri {
       return values;
     }
 
+    /**
+    * Searches the query string for the first value with the given key and interprets it as a boolean value.
+    *
+    * @param { string } key - Indicates the key value to be queried.
+    * @param { boolean } defaultValue - The default value returned when the key has no query parameters.
+    * @returns { boolean } Query with key value returns true, otherwise returns false.
+    */
     getBooleanQueryValue(key: string, defaultValue: boolean): boolean {
       let flag = this.getQueryValue(key);
       if (flag == null) {
@@ -202,6 +308,11 @@ export namespace uri {
       return 'false' != flag && '0' != flag;
     }
 
+    /**
+    * Gets the decoded last path segment.
+    *
+    * @returns { string } Returns the last decoded segment, or null if the path is empty.
+    */
     getLastSegment(): string {
       let segments = this.uriEntry.getSegment();
       if (segments.length == 0) {
@@ -210,6 +321,11 @@ export namespace uri {
       return this.decodeSafelyInner(segments[segments.length - 1]);
     }
 
+    /**
+    * Gets the decoded path segments.
+    *
+    * @returns { Array<string> } Return decoded path segments, each without a leading or trailing "/".
+    */
     getSegment(): Array<string> {
       let array = new Array<string>();
       let segments = this.uriEntry.getSegment();
@@ -220,16 +336,31 @@ export namespace uri {
       return array;
     }
 
+    /**
+    * Clears the previously set query.
+    *
+    * @returns { URI } After clearing, return the URI object.
+    */
     clearQuery(): URI {
       let uriStr: string = this.uriEntry.clearQuery();
       return createNewUri(uriStr);
     }
 
+    /**
+    * Normalize the path of this URI, It is not safe to call the normalize interface with URI.
+    *
+    * @returns { URI } URI Used to normalize the path of this URI and return a URI object whose path has been normalized.
+    */
     normalize(): URI {
       let uriStr: string = this.uriEntry.normalize();
       return createNewUri(uriStr);
     }
 
+    /**
+    * Gets the protocol part of the URI.
+    *
+    * @returns { string | null }
+    */
     get scheme(): string | null {
       if (this.uriEntry.getScheme() == '') {
         return null;
@@ -237,6 +368,11 @@ export namespace uri {
       return this.uriEntry.getScheme();
     }
 
+    /**
+    * Gets the authority part of the URI.
+    *
+    * @returns { string | null }
+    */
     get authority(): string | null {
       let thisAuthority: string = this.uriEntry.getAuthority();
       if (thisAuthority == '') {
@@ -245,6 +381,11 @@ export namespace uri {
       return this.dealDecode(thisAuthority, true);
     }
 
+    /**
+    * Gets the decoding scheme-specific part of the URI.
+    *
+    * @returns { string }
+    */
     get ssp(): string {
       return this.dealDecode(this.uriEntry.getSsp(), true)
     }
@@ -268,6 +409,11 @@ export namespace uri {
       return result;
     }
 
+    /**
+    * Gets Obtains the user information part of the URI.
+    *
+    * @returns { string | null }
+    */
     get userInfo(): string | null {
       if (this.uriEntry.getUserinfo() == '') {
         return null;
@@ -275,6 +421,11 @@ export namespace uri {
       return this.decodeSafelyInner(this.uriEntry.getUserinfo());
     }
 
+    /**
+    * Gets the hostname portion of the URI without a port.
+    *
+    * @returns { string | null }
+    */
     get host(): string | null {
       if (this.uriEntry.getHost() == '') {
         return null;
@@ -282,10 +433,20 @@ export namespace uri {
       return this.uriEntry.getHost();
     }
 
+    /**
+    *  Gets the port portion of the URI.
+    *
+    * @returns { string }
+    */
     get port(): string {
       return Number.toString(this.uriEntry.getPort());
     }
 
+    /**
+    * Gets the path portion of the URI.
+    *
+    * @returns { string | null }
+    */
     get path(): string | null {
       if (this.uriEntry.getPath() == '') {
         return null;
@@ -293,6 +454,11 @@ export namespace uri {
       return this.decodeSafelyInner(this.uriEntry.getPath());
     }
 
+    /**
+    * Gets the query portion of the URI
+    *
+    * @returns { string | null }
+    */
     get query(): string | null {
       if (this.uriEntry.getQuery() == '') {
         return null;
@@ -300,6 +466,11 @@ export namespace uri {
       return this.decodeSafelyInner(this.uriEntry.getQuery());
     }
 
+    /**
+    * Gets the fragment portion of the URI
+    *
+    * @returns { string | null }
+    */
     get fragment(): string | null {
       if (this.uriEntry.getFragment() == '') {
         return null;
@@ -307,6 +478,11 @@ export namespace uri {
       return this.decodeSafelyInner(this.uriEntry.getFragment());
     }
 
+    /**
+    * Gets Obtains the encoded user information part of the URI.
+    *
+    * @returns { string | null }
+    */
     get encodedUserInfo(): string | null {
       if (this.uriEntry.getUserinfo() == '') {
         return null;
@@ -314,6 +490,11 @@ export namespace uri {
       return this.uriEntry.getUserinfo();
     }
 
+    /**
+    * Gets the encoded path portion of the URI .
+    *
+    * @returns { string | null }
+    */
     get encodedPath(): string | null {
       if (this.uriEntry.getPath() == '') {
         return null;
@@ -321,6 +502,11 @@ export namespace uri {
       return this.uriEntry.getPath();
     }
 
+    /**
+    * Gets the encoded query component from this URI.
+    *
+    * @returns { string | null }
+    */
     get encodedQuery(): string | null {
       if (this.uriEntry.getQuery() == '') {
         return null;
@@ -328,6 +514,11 @@ export namespace uri {
       return this.uriEntry.getQuery();
     }
 
+    /**
+    * Gets the encoded fragment part of this URI, everything after the '#'.
+    *
+    * @returns { string | null }
+    */
     get encodedFragment(): string | null {
       if (this.uriEntry.getFragment() == '') {
         return null;
@@ -335,6 +526,11 @@ export namespace uri {
       return this.uriEntry.getFragment();
     }
 
+    /**
+    * Gets the encoded authority part of this URI.
+    *
+    * @returns { string | null }
+    */
     get encodedAuthority(): string | null {
       let thisAuthority: string = this.uriEntry.getAuthority();
       if (thisAuthority == '') {
@@ -343,11 +539,22 @@ export namespace uri {
       return this.dealDecode(thisAuthority);
     }
 
+    /**
+    * Gets the scheme-specific part of this URI, i.e. everything between the scheme separator ':' and
+    * the fragment separator '#'.
+    *
+    * @returns { string }
+    */
     get encodedSSP(): string {
       let thisSsp: string = this.uriEntry.getSsp();
       return this.dealDecode(thisSsp);
     }
 
+    /**
+     * Sets the protocol part of the URI.
+     *
+     * @param { string | null } input
+     */
     set scheme(input: string | null) {
       if (input === null || input.length === 0) {
         return;
@@ -355,6 +562,10 @@ export namespace uri {
       this.uriEntry.setScheme(input);
     }
 
+    /**
+     * Sets the path portion of the URI.
+     * @param { string | null } input
+     */
     set path(input: string | null) {
       if (input === null) {
         return;
@@ -363,6 +574,8 @@ export namespace uri {
     }
 
     /**
+     * Sets the decoding scheme-specific part of the URI.
+     * @param { string | null } input
      * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
      */
     set ssp(input: string | null) {
@@ -372,6 +585,10 @@ export namespace uri {
       this.uriEntry.setSsp(encodeURI(input))
     }
 
+    /**
+     * Sets the decoding permission component part of this URI.
+     * @param { string | null } input
+     */
     set authority(input: string | null) {
       if (input === null) {
         return;
@@ -379,6 +596,10 @@ export namespace uri {
       this.uriEntry.setAuthority(encodeURI(input))
     }
 
+    /**
+     * Sets Obtains the user information part of the URI.
+     * @param { string | null } input
+     */
     set userInfo(input: string | null) {
       if (input === null) {
         return;
@@ -386,6 +607,10 @@ export namespace uri {
       this.uriEntry.setUserInfo(encodeURIComponent(input));
     }
 
+    /**
+     * Sets the query portion of the URI
+     * @param { string | null } input
+     */
     set query(input: string | null) {
       if (input === null) {
         return;
@@ -393,6 +618,10 @@ export namespace uri {
       this.uriEntry.setQuery(encodeURIComponent(input));
     }
 
+    /**
+     * Sets the fragment portion of the URI
+     * @param { string | null } input
+     */
     set fragment(input: string | null) {
       if (input === null) {
         return;
@@ -400,6 +629,10 @@ export namespace uri {
       this.uriEntry.setFragment(encodeURIComponent(input));
     }
 
+    /**
+     * Sets Obtains the encoded user information part of the URI.
+     * @param { string | null } input
+     */
     set encodedUserInfo(input: string | null) {
       if (input === null) {
         return;
@@ -407,6 +640,10 @@ export namespace uri {
       this.uriEntry.setUserInfo(input);
     }
 
+    /**
+     * Sets the encoded path portion of the URI.
+     * @param { string | null } input
+     */
     set encodedPath(input: string | null) {
       if (input === null) {
         return;
@@ -414,6 +651,10 @@ export namespace uri {
       this.uriEntry.setPath(input);
     }
 
+    /**
+     * Sets the encoded query component from this URI.
+     * @param { string | null } input
+     */
     set encodedQuery(input: string | null) {
       if (input === null) {
         return;
@@ -421,6 +662,10 @@ export namespace uri {
       this.uriEntry.setQuery(input);
     }
 
+    /**
+     * Sets the encoded fragment component from this URI.
+     * @param { string | null } input
+     */
     set encodedFragment(input: string | null) {
       if (input === null) {
         return;
@@ -428,6 +673,10 @@ export namespace uri {
       this.uriEntry.setFragment(input);
     }
 
+    /**
+     * Sets the encoded authority component from this URI.
+     * @param { string | null } input
+     */
     set encodedAuthority(input: string | null) {
       if (input === null) {
         return;
@@ -436,7 +685,9 @@ export namespace uri {
     }
 
     /**
-     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
+     * Sets the encoded scheme-specific part of this URI.
+     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature
+     * @param { string | null } input
      */
     set encodedSSP(input: string | null) {
       if (input === null) {
@@ -471,6 +722,9 @@ export namespace uri {
     SchemeSpecificPart: string = "";
   };
 
+  /**
+  * Handling specific URI logic
+  */
   export class UriEntry {
     uriData: UriData = new UriData();
     data: string = "";
@@ -711,10 +965,6 @@ export namespace uri {
     }
 
     private analysisIPV4() {
-      /**
-       * 正则图解析 https://www.jyshare.com/front-end/7625
-         regex_match默认使用的是完全匹配模式    js需要要加上^$
-      */
       let ipv4 = new RegExp("^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)$");
       let hostname = new RegExp("^(([a-zA-Z0-9]([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9])?\\.)+([a-zA-Z]"
         + "([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s])?))$|^([a-zA-Z0-9]([a-zA-Z0-9\\-~_|\\+{}!$&=,;:'()\\*\\s]*[a-zA-Z0-9])?)$");
