@@ -15,9 +15,6 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet Add Has API tests")
 

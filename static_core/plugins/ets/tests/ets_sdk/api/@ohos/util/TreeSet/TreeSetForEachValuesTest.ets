@@ -90,12 +90,12 @@ function testValuesReturnIteratorByValue() {
     let it = treeSet.values();
     arktest.assertEQ(it.next().value, "aa", "The treeSet values iterator should return the first value");
     arktest.assertEQ(it.next().value, "bb", "The treeSet values iterator should return the second value");
-    arktest.assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined for no more values");
+    arktest.assertTrue(it.next().done, "The treeSet values iterator.done should true for no more values");
 }
 
 function testValuesReturnIteratorByValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.values();
-    arktest.assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined when treeSet is empty");
+    arktest.assertTrue(it.next().done, "The treeSet values iterator.done should true when treeSet is empty");
 }
