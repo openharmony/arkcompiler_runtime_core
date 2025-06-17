@@ -1213,7 +1213,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
         std::string descriptor;
         const std::string filename_api11 = "source_021_api11.abc";
-        auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, 11);
+        EmitterConfig emitConfig {11};
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, emitConfig);
         EXPECT_TRUE(is_emitted);
         auto pf = panda_file::OpenPandaFile(filename_api11);
         EXPECT_NE(pf, nullptr);
@@ -1245,7 +1246,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
         std::string descriptor;
         const std::string filename_api12 = "source_021_api12.abc";
-        auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, 12);
+        EmitterConfig emitConfig {12};
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, emitConfig);
         EXPECT_TRUE(is_emitted);
         auto pf = panda_file::OpenPandaFile(filename_api12);
         EXPECT_NE(pf, nullptr);
@@ -1473,6 +1475,62 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_026, TestSize.Level1)
     auto source2 = R"(
         .record Rec {
             u8 rec2 <value=0>
+        }
+    )";
+    auto res1 = p1.Parse(source1);
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto res2 = p2.Parse(source2);
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res1.Value());
+    progs.push_back(&res2.Value());
+    const std::string filename = "source.pa";;
+    auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_TRUE(pf);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_027
+ * @tc.desc: Verify the AsmEmitter::EmitProgram Handle Function.
+ * @tc.type: FUNC
+ * @tc.require: I9OWSZ
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_027, TestSize.Level1)
+{
+    Parser p1;
+    auto source1 = R"(
+        .record Test {
+            any foo
+        }
+        .function any foo() {
+            ldai 0
+            ldai 1
+            return
+        }
+        .function any foo1() {
+            ldai 0
+            ldai 1
+            return
+        }
+    )";
+    Parser p2;
+    auto source2 = R"(
+        .function any main() {
+            ldai 0
+            ldai 1
+            return
+        }
+        .function any func1() {
+            ldai 0
+            ldai 1
+            return
+        }
+        .function any func2() {
+            ldai 0
+            ldai 1
+            return
         }
     )";
     auto res1 = p1.Parse(source1);
