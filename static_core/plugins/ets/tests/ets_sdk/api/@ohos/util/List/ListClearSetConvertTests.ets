@@ -14,6 +14,9 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -90,15 +93,13 @@ function testSetMultipleTypes() {
 
 function testSetElementsInEmptyContainer() {
     let list = new List<number>();
-    try {
-        list.set(0, TestData.testNumber3);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.set(0, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testSetGetIndexOfRemoveByIndex() {

@@ -23,6 +23,7 @@ function main() {
     suite.addTest("List length syncs with element count changes for single-type", testLengthSyncSingleType);
     suite.addTest("List length syncs with element count changes for multi-type", testLengthSyncMultiType);
     suite.addTest("List length with add large value", testLengthWithLargeValue);
+    suite.addTest("Testing List constructor support dataType", testListConstructor0001);
 
     return suite.run();
 }
@@ -51,33 +52,12 @@ function initializeList(list: List<number>, sourceArray: Array<number>) {
 
 function testCreateSingleTypeContainer() {
     let list: List<number>;
-    try {
-        list = new List<number>();
-    } catch (e) {
-        arktest.assertFalse(false, "Failed to create a single-type instance of List");
-        return;
-    }
-    list.add(TestData.testNumber1);
-    arktest.assertTrue(list instanceof List, "The instance should be List");
-    arktest.assertEQ(list.length, TestData.testNumber1, "List length should be 1");
+    arktest.expectNoThrow(() => {list = new List<number>()});
 }
 
 function testCreateCompositeTypeContainer() {
     let list: List<number | string | boolean | null | object | undefined>;
-    try {
-        list = new List<number | string | boolean | null | object | undefined>();
-    } catch (e) {
-        arktest.assertFalse(false, "Failed to create a composite-type instance of List");
-        return;
-    }
-    list.add(TestData.testNumber1);
-    list.add(TestData.testString1);
-    list.add(true);
-    list.add(null);
-    list.add(TestData.testObject1);
-    list.add(undefined);
-    arktest.assertTrue(list instanceof List, "The instance should be List");
-    arktest.assertEQ(list.length, TestData.testNumber6, "List length should be 6");
+    arktest.expectNoThrow(() => {list = new List<number | string | boolean | null | object | undefined>()});
 }
 
 function testLengthSyncSingleType() {
@@ -109,4 +89,10 @@ function testLengthWithLargeValue() {
         list.add(TestData.testNumber1);
     }
     arktest.assertEQ(list.length, TestData.testNumberLarge, "List length should be 10000 after adding elements");
+}
+
+function testListConstructor0001() {
+    let list = new List<number | string | Array<number | string | boolean> | boolean | bigint |
+    Int32Array | undefined | null | object>();
+    arktest.assertEQ(list.length, 0);
 }

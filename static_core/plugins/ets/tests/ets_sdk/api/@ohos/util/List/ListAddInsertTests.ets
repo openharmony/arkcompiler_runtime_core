@@ -14,6 +14,18 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
+
+class Temp1 {
+    age: number = 0
+    name: string = ""
+    constructor(age: number, name: string) {
+        this.age = age;
+        this.name = name;
+    }
+}
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -26,6 +38,8 @@ function main() {
         testInsertGetIndexOfRemoveByIndexHas);
     suite.addTest("List insert elements at index > length", testInsertIndexGreaterThanLength);
     suite.addTest("List insert elements at index < 0", testInsertIndexLessThanZero);
+    suite.addTest("Testing List Add different dataType data", testListAddVariousDataTypes);
+    suite.addTest("Testing List add special string", testListAddSpecialString);
 
     return suite.run();
 }
@@ -124,33 +138,61 @@ function testInsertGetIndexOfRemoveByIndexHas() {
 function testInsertIndexGreaterThanLength() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    try {
-        list.insert(TestData.testNumber1, TestData.testNumber6);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.insert(TestData.testNumber6, 10000)}, exceptionCheck);
 }
 
 function testInsertIndexLessThanZero() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    try {
-        list.insert(-TestData.testNumber1, TestData.testNumber6);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.insert(TestData.testNumber6, -TestData.testNumber1)}, exceptionCheck);
 }
 
 function initializeList(list: List<number>, sourceArray: Array<number>) {
     for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
+}
+
+// Test cases ported from ArkTS 1.0: LIST_ADD_0100
+function testListAddVariousDataTypes() {
+    let list = new List<number | string | boolean | undefined | null | Object>();
+    list.add("zhang san");
+    list.add(1);
+    let param: Temp1 = new Temp1(10, "zhang");
+    list.add(param);
+    list.add(undefined);
+    list.add(null);
+    list.add(true);
+    list.insert("insert", 0);
+    list.add([0, 1, 2, 4]);
+    list.removeByIndex(0);
+    for (let i = 0; i < 4; i++) {
+        arktest.assertEQ((list.get(6)! as Array<int>)[i], [0, 1, 2, 4][i]);
+    }
+    arktest.assertEQ(list.get(5), true);
+    arktest.assertEQ(list.get(4), null);
+    arktest.assertEQ(list.get(3), undefined);
+    arktest.assertEQ(list.get(2), param);
+    arktest.assertEQ(list.get(1), 1);
+    arktest.assertEQ(list.get(0), "zhang san");
+}
+
+// Test cases ported from ArkTS 1.0: LIST_ADD_0200
+function testListAddSpecialString() {
+    let list = new List<string>();
+    let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
+    list.add(param);
+    arktest.assertEQ(list.get(0), param);
 }
