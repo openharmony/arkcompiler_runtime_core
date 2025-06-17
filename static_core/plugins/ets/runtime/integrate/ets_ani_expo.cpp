@@ -26,11 +26,13 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env)
     vm->PreZygoteFork();
 }
 
-PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_option> &options)
+PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_option> &options, bool postZygoteFork)
 {
     [[maybe_unused]] EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
 
+    bool loadAppAotFile = false;
+    std::string appAotFileName;
     for (auto &opt : options) {
         std::string option(opt.option);
         if (option == INTEROP_OPTION_PREFIX) {
@@ -40,8 +42,8 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
             }
 #endif
         } else if (option.rfind(AOT_FILE_OPTION_PREFIX, 0) == 0) {
-            std::string aotFileName = option.substr(AOT_FILE_OPTION_PREFIX.size());
-            LoadAotFileForApp(aotFileName);
+            loadAppAotFile = true;
+            appAotFileName = option.substr(AOT_FILE_OPTION_PREFIX.size());
         } else if (option == ENABLE_AN_OPTION) {
             TryLoadAotFileForBoot();
         } else {
@@ -53,7 +55,14 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
     if (vm->GetLanguageContext().IsEnabledCHA()) {
         vm->GetRuntime()->GetClassLinker()->GetAotManager()->VerifyClassHierarchy();
     }
-    vm->PostZygoteFork();
+
+    if (loadAppAotFile) {
+        LoadAotFileForApp(appAotFileName);
+    }
+
+    if (postZygoteFork) {
+        vm->PostZygoteFork();
+    }
 }
 
 void ETSAni::LoadAotFileForApp(std::string const &aotFileName)
