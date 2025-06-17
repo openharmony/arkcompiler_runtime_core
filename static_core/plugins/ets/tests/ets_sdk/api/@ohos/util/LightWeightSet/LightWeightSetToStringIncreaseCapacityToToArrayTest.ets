@@ -15,9 +15,6 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet ToString IncreaseCapacityTo ToArray API tests")
 
@@ -70,45 +67,29 @@ function testIncreaseCapacityTo() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(16);
-        lightWeightSet.increaseCapacityTo(2);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightSet should not throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(16); });
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(2); });
 }
 
 function testIncreaseCapacityToLessThanLength() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(1);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightSet should throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(1); });
 }
 
 function testIncreaseCapacityToLeftFloat() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(Math.floor(1.2));
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "LightWeightSet should throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2)); });
 }
 
 function testIncreaseCapacityToRightFloat() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(Math.floor(3.8));
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "LightWeightSet should not throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8)); });
 }
 
 function testToArray() {

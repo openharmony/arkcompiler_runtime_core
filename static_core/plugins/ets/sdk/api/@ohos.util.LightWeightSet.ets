@@ -14,6 +14,9 @@
  */
 
 import LightWeightMap from '@ohos.util.LightWeightMap';
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
 
 interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**
@@ -209,8 +212,15 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @param index the index to get the value from
      *
      * @returns the value at the specified index
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     getValueAt(index: number): T | undefined {
+        this.checkIndex(index);
+
+        if (index < 0 || this.buckets.length <= index) {
+            return undefined;
+        }
         return this.buckets.getKeyAt(index);
     }
 
@@ -258,8 +268,12 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @param index the index to remove the value from
      *
      * @returns true if the value was removed, false otherwise
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     removeAt(index: number): boolean {
+        this.checkIndex(index);
+
         return this.buckets.removeAt(index);
     }
 
@@ -298,6 +312,13 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
             return (keyHash | positiveMask)
         } else {
             return (keyHash & (~positiveMask))
+        }
+    }
+
+    private checkIndex(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId,
+                new Error(`The type of "index" must be small integer. Received value is: ${index}`))
         }
     }
 }
