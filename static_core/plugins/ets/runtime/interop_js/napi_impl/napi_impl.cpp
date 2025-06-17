@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
 #include "heap/heap_visitor.h"
 #endif
 #include "libpandabase/macros.h"
@@ -54,7 +54,7 @@ napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value valu
     return napi_ok;
 }
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref,
                       [[maybe_unused]] std::function<void(uintptr_t)> &visitor)

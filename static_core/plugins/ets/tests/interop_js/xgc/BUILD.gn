@@ -241,7 +241,7 @@ group("xgc_tests") {
       ":root_from_ea_test",
     ]
 
-    if (ark_hybrid) {
+    if (ark_use_cmc_gc) {
       # xgc is adapt to cmc-gc
       deps -= [ ":create_runtime_test" ]
     }

@@ -107,7 +107,7 @@ function(panda_add_checked_test_ets)
         set(ARCHITECTURE "arm32")
     endif()
 
-    if (ARK_HYBRID OR PANDA_TARGET_64 AND NOT PANDA_USE_32_BIT_POINTER)
+    if (ARK_USE_CMC_GC OR PANDA_TARGET_64 AND NOT PANDA_USE_32_BIT_POINTER)
         set (CHECKER_BUILD_CONFIG "Hybrid")
     else()
         set (CHECKER_BUILD_CONFIG "Static")

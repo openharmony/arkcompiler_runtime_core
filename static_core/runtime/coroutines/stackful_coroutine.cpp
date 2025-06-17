@@ -173,7 +173,7 @@ bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)
 
 void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     GetCoroutine()->UnbindMutator();
 #endif
     SetStatus(getsBlocked ? Coroutine::Status::BLOCKED : Coroutine::Status::RUNNABLE);
@@ -181,7 +181,7 @@ void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 
 void StackfulCoroutineContext::RequestResume()
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     GetCoroutine()->BindMutator();
 #endif
     UpdateId(os::thread::GetCurrentThreadId(), GetCoroutine());

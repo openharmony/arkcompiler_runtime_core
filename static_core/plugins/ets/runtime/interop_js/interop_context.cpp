@@ -772,7 +772,7 @@ void InteropCtx::Destroy(void *ptr)
 
 static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
 {
-#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_HYBRID)
+#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_USE_CMC_GC)
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
     if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
         (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {

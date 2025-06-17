@@ -52,7 +52,7 @@ public:
     {
     }
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
     void MarkFromObject(napi_ref obj, const panda::RefFieldVisitor &visitor) override
     {
         values_->markFromObjectCalled = true;

@@ -21,7 +21,7 @@
 
 namespace ark {
 
-#ifndef ARK_HYBRID
+#ifndef ARK_USE_CMC_GC
 class PANDA_PUBLIC_API MutatorLock : public os::memory::RWLock {
     using LockT = os::memory::RWLock;
 #else

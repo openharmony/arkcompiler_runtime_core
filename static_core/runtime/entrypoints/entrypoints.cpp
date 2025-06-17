@@ -43,7 +43,7 @@
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 #include "base_runtime.h"
 #endif
 
@@ -392,7 +392,7 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
 extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
                                     [[maybe_unused]] ark::ObjectHeader *ref)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     panda::BaseRuntime::WriteBarrier(obj, field, ref);
 #else
@@ -402,7 +402,7 @@ extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[m
 
 extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     return panda::BaseRuntime::ReadBarrier(obj, field);
 #else
@@ -413,7 +413,7 @@ extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[ma
 
 extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     return panda::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
 #else

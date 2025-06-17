@@ -295,7 +295,7 @@ private:
 
         // Initialize GC:
         auto runtimeLang = paoc_->runtimeOptions_->GetRuntimeType();
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
         if (!paoc_->runtimeOptions_->WasSetGcType(runtimeLang)) {
             paoc_->runtimeOptions_->SetGcType("cmc-gc");
             LOG_PAOC(INFO) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";

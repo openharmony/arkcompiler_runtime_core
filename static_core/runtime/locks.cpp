@@ -56,7 +56,7 @@ MutatorLock *Locks::NewMutatorLock()
 
 void MutatorLock::ReadLock()
 {
-#ifndef ARK_HYBRID
+#ifndef ARK_USE_CMC_GC
     ASSERT(!HasLock());
 #endif
     LockT::ReadLock();
@@ -66,7 +66,7 @@ void MutatorLock::ReadLock()
 
 void MutatorLock::WriteLock()
 {
-#ifndef ARK_HYBRID
+#ifndef ARK_USE_CMC_GC
     ASSERT(!HasLock());
 #endif
     LockT::WriteLock();
@@ -96,7 +96,7 @@ bool MutatorLock::TryWriteLock()
 
 void MutatorLock::Unlock()
 {
-#ifndef ARK_HYBRID
+#ifndef ARK_USE_CMC_GC
     ASSERT(HasLock());
 #endif
     LockT::Unlock();

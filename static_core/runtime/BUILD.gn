@@ -43,7 +43,7 @@ config("arkruntime_public_config") {
 
   include_dirs += platform_include_dirs
 
-  if (ark_hybrid) {
+  if (ark_use_cmc_gc) {
     include_dirs += [ "$ark_root/../common_interfaces" ]
     cflags_cc = [
       "-Wno-gnu-anonymous-struct",
@@ -500,7 +500,7 @@ ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
 
-  if (ark_hybrid) {
+  if (ark_use_cmc_gc) {
     external_deps = [ "ets_runtime:libark_jsruntime" ]
   }
 

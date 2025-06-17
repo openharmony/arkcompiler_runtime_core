@@ -41,7 +41,7 @@
 #include <ctime>
 #include <csignal>
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 #include <node_api.h>
 #endif
 
@@ -210,7 +210,7 @@ int Main(int argc, const char **argv)
 
     SetPandaFiles(runtimeOptions, file);
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     // This workaround is needed to define weak symbols of napi in hybrid libarkruntime.so
     // It will be removed after #26269 fix
     volatile bool initNapi = false;

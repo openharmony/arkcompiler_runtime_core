@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/interop_js/app_state_manager.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "runtime/mem/gc/gc_trigger.h"
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
 #include "heap/heap_visitor.h"
 #endif
 
@@ -116,7 +116,7 @@ public:
     void GCPhaseStarted(mem::GCPhase phase) override;
     void GCPhaseFinished(mem::GCPhase phase) override;
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     /// Methods to adatp XRef to cmc-gc ///
     void UnmarkAllXRefs();
     void SweepUnmarkedXRefs();

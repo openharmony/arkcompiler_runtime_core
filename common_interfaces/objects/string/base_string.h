@@ -65,7 +65,7 @@ public:
     static constexpr size_t MAX_STRING_LENGTH = 0x40000000U;  // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+#if defined(ARK_USE_CMC_GC) || defined(USE_CMC_GC)
     static constexpr size_t PADDING_OFFSET = BaseObjectSize();
 #else
     static constexpr size_t LENGTH_AND_FLAGS_OFFSET = BaseObjectSize();
@@ -91,12 +91,12 @@ public:
         INVALID_STRING_ADD,
     };
 
-    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;       // 1
+    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;            // 1
     using IsInternBit = CompressedStatusBit::NextFlag;                            // 1
     using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>;  // 30
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * common::BITS_PER_BYTE,
                   "LengthBits does not match the field size");
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+#if defined(ARK_USE_CMC_GC) || defined(USE_CMC_GC)
     // When enable cmcgc, the ObjectHeader in 1.2 is 128 bits, to align with it, a 64bits padding is needed.
     PRIMITIVE_FIELD(padding, uint64_t, PADDING_OFFSET, LENGTH_AND_FLAGS_OFFSET)
 #endif
@@ -641,7 +641,7 @@ public:
      * @param maxLength Maximum number of characters to write.
      */
     template <typename Char, typename ReadBarrier>
-    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString* src, Char *buf, uint32_t maxLength);
+    static void WriteToFlat(ReadBarrier &&readBarrier, const BaseString *src, Char *buf, uint32_t maxLength);
 
     /**
      * @brief Write characters from a BaseString into a buffer at a given offset.
@@ -711,6 +711,7 @@ public:
      */
     template <typename ReadBarrier>
     static const uint16_t *GetNonTreeUtf16Data(ReadBarrier &&readBarrier, const BaseString *src);
+
 private:
     static constexpr bool IsStringType(ObjectType type);
 };

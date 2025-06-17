@@ -74,7 +74,7 @@
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 #include "base_runtime.h"
 #endif
 
@@ -717,7 +717,7 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     if (!options.WasSetGcType(plugins::LangToRuntimeType(lang))) {
         const_cast<RuntimeOptions &>(options).SetGcType("cmc-gc");
         LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
@@ -1586,7 +1586,7 @@ void Runtime::CheckOptionsFromOs() const
 
 void Runtime::InitBaseRuntime()
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     auto *baseRuntime = panda::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Init();
@@ -1595,7 +1595,7 @@ void Runtime::InitBaseRuntime()
 
 void Runtime::PreFiniBaseRuntime()
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     // Stop the current GC before all threads unregister
     // Change to a more accurate function, when the function was provided (see #26240).
     panda::BaseRuntime::RequestGC(panda::GcType::FULL);
@@ -1604,7 +1604,7 @@ void Runtime::PreFiniBaseRuntime()
 
 void Runtime::FiniBaseRuntime()
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     auto *baseRuntime = panda::BaseRuntime::GetInstance();
     ASSERT(baseRuntime != nullptr);
     baseRuntime->Fini();

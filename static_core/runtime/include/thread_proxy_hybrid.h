@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_THREAD_PROXY_HYBRID_H
 #define PANDA_RUNTIME_THREAD_PROXY_HYBRID_H
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 
 #include "runtime/include/thread_interface.h"
 
