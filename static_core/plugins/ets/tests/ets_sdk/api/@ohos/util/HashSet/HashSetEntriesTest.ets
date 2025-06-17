@@ -15,9 +15,6 @@
 
 import {HashSet} from "@ohos.util.HashSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("HashSet Entries API tests")
 
@@ -50,6 +47,6 @@ function testEntriesReturnIteratorByKeyValue() {
 function testEntriesReturnIteratorByKeyValueWithEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let iteratorSetValues = hashSet.entries();
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet entries iterator should return undefined when the hashSet is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet entries iterator.done should true when the hashSet is empty");
 }
