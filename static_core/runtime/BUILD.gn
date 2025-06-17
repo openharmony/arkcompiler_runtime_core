@@ -102,6 +102,7 @@ group("arkruntime_header_deps") {
     ":isa_gen_libarkruntime_interpreter-inl_gen_h",
     ":isa_gen_libarkruntime_isa_constants_gen_h",
     ":language_config_gen_inc",
+    ":core_any_intrinsics_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
     ":plugin_clear_profile_h",
@@ -758,6 +759,14 @@ ark_gen("arkruntime_gen_intrinsics") {
     extra_dependencies +=
         [ "$ark_root/../libabckit/src:abckit_concat_intrinsics_yaml" ]
   }
+}
+
+ark_gen_file("core_any_intrinsics_inc") {
+  template_file = "../runtime/interpreter/templates/core_any_intrinsics.inc.erb"
+  data = [ "$target_gen_dir/../plugin_options.yaml" ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$gen_include_dir/core_any_intrinsics.inc"
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
 }
 
 ark_gen_file("libarkruntime_options_gen_h") {

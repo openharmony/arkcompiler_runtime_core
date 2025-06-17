@@ -277,6 +277,16 @@ panda_isa_gen(
     DESTINATION ${GEN_INCLUDE_DIR}
 )
 
+panda_gen_file(
+        DATA ${CMAKE_BINARY_DIR}/plugin_options.yaml
+        TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/interpreter/templates/core_any_intrinsics.inc.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES plugin_options_merge
+        OUTPUTFILE ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc
+)
+add_custom_target(core_any_intrinsics_inc DEPENDS ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc)
+add_dependencies(arkruntime_interpreter_impl core_any_intrinsics_inc)
+
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
 set(BRIDGE_DISPATCH_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/templates/bridge_dispatch.S.erb")

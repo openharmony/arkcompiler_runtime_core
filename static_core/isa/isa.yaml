@@ -3009,7 +3009,7 @@ groups:
         acc: out:ref
         format: [pref_op_v_8_id_32]
         prefix: any
-        opcode_idx: [0xa6]
+        opcode_idx: [0x0]
 
   - title: Get field from reference of any type by name
     description: >
@@ -3036,7 +3036,7 @@ groups:
         acc: none
         format: [pref_op_v1_8_v2_8_id_32]
         prefix: any
-        opcode_idx: [0xa7]
+        opcode_idx: [0x1]
 
   - title: Store accumulator content into reference of any type field by name
     description: >
@@ -3063,7 +3063,7 @@ groups:
         acc: in:ref
         format: [pref_op_v_8_id_32]
         prefix: any
-        opcode_idx: [0xa8]
+        opcode_idx: [0x2]
 
   - title: Store register content into reference of any type field by name
     description: >
@@ -3076,21 +3076,21 @@ groups:
     exceptions:
       - x_null
     pseudo: |
-      if v2 == null then
+      if v1 == null then
         throw NullPointerException
       end
-      field = resolve_field_by_name(v2, string_id)
+      field = resolve_field_by_name(v1, string_id)
       if op == any.stbyname.v and size(field) < 32 then
-        v2.set(field, truncate(field, v1))
+        v1.set(field, truncate(field, v2))
       else
-        v2.set(field, v1)
+        v1.set(field, v2)
       end
     instructions:
       - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id
         acc: none
         format: [pref_op_v1_8_v2_8_id_32]
         prefix: any
-        opcode_idx: [0xa9]
+        opcode_idx: [0x3]
 
   - title: Load value to accumulator from reference of any type by index
     description: >
@@ -3107,10 +3107,11 @@ groups:
       acc = vs[acc]
     instructions:
       - sig: any.ldbyidx v:in:ref
-        acc: inout:i32->ref
+        acc: inout:f64->ref
         format: [pref_op_v_8]
         prefix: any
-        opcode_idx: [0xaa]
+        properties: [float]
+        opcode_idx: [0x4]
 
   - title: Store value from accumulator in reference of any type by index
     description: >
@@ -3127,11 +3128,12 @@ groups:
       end
       v1[v2] = acc
     instructions:
-      - sig: any.stbyidx v1:in:ref, v2:in:i32
+      - sig: any.stbyidx v1:in:ref, v2:in:f64
         acc: in:ref
         format: [pref_op_v1_8_v2_8]
         prefix: any
-        opcode_idx: [0xab]
+        properties: [ float ]
+        opcode_idx: [0x5]
 
   - title: Load value to accumulator from reference of any type by value
     description: >
@@ -3151,7 +3153,7 @@ groups:
         acc: out:ref
         format: [pref_op_v1_8_v2_8]
         prefix: any
-        opcode_idx: [0xac]
+        opcode_idx: [0x6]
 
   - title: Store value from accumulator in reference of any type by value
     description: >
@@ -3172,11 +3174,11 @@ groups:
         acc: in:ref
         format: [pref_op_v1_8_v2_8]
         prefix: any
-        opcode_idx: [0xad]
+        opcode_idx: [0x7]
 
   - title: Any call 0
     description: >
-      TBD
+      Call a function with no argument
     verification:
       - compatible_arguments
     properties:
@@ -3184,57 +3186,62 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1()
     instructions:
-      - sig: any.call.0 v1:in:top
-        acc: out:top
+      - sig: any.call.0 v1:in:ref
+        acc: out:ref
         prefix: any
         format: [pref_op_v1_8]
-        opcode_idx: [0xae]
+        opcode_idx: [0x8]
 
   - title: Any call range
     description: >
-      TBD
+      Call a function with range argument
     verification:
       - compatible_arguments
     properties:
       - any_call
-      - string_id
-      - id_shift
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1(v2, v2 + 1, ..., v2 + imm - 1)
     instructions:
-      - sig: any.call.range string_id, v1:in:top, v2:in:top, imm:u8
-        acc: out:top
+      - sig: any.call.range v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
         prefix: any
-        format: [pref_op_v1_8_v2_8_imm_8_id_32]
-        opcode_idx: [0xaf]
+        format: [pref_op_v1_8_v2_8_imm_8]
+        opcode_idx: [0x9]
 
   - title: Any call short
     description: >
-      TBD
+      Call a function with one argument
     verification:
       - compatible_arguments
     properties:
       - any_call
-      - string_id
-      - id_shift
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1(v2)
     instructions:
-      - sig: any.call.short string_id, v1:in:top, imm:u4
-        acc: out:top
+      - sig: any.call.short v1:in:ref, v2:in:ref
+        acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_imm_4_id_32]
-        opcode_idx: [0xb0]
+        format: [pref_op_v1_4_v2_4]
+        opcode_idx: [0xa]
 
   - title: Any call this 0
     description: >
-      TBD
+      Call a method with no argument
     verification:
       - compatible_arguments
     properties:
@@ -3244,17 +3251,20 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id()
     instructions:
-      - sig: any.call.this.0 string_id, v1:in:top
-        acc: out:top
+      - sig: any.call.this.0 string_id, v1:in:ref
+        acc: out:ref
         prefix: any
         format: [pref_op_v1_8_id_32]
-        opcode_idx: [0xb1]
+        opcode_idx: [0xb]
 
   - title: Any call this range
     description: >
-      TBD
+      Call a method with range argument
     verification:
       - compatible_arguments
     properties:
@@ -3264,17 +3274,20 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id(v2, v2 + 1, ..., v2 + imm - 1)
     instructions:
-      - sig: any.call.this.range string_id, v1:in:top, v2:in:top, imm:u8
-        acc: out:top
+      - sig: any.call.this.range string_id, v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
         prefix: any
         format: [pref_op_v1_8_v2_8_imm_8_id_32]
-        opcode_idx: [0xb2]
+        opcode_idx: [0xc]
 
-  - title: Any call thils short
+  - title: Any call this short
     description: >
-      TBD
+      Call a method with short argument
     verification:
       - compatible_arguments
     properties:
@@ -3284,17 +3297,20 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = v1.string_id(v2)
     instructions:
-      - sig: any.call.this.short string_id, v1:in:top, imm:u4
-        acc: out:top
+      - sig: any.call.this.short string_id, v1:in:ref, v2:in:ref
+        acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_imm_4_id_32]
-        opcode_idx: [0xb3]
+        format: [pref_op_v1_4_v2_4_id_32]
+        opcode_idx: [0xd]
 
   - title: Any call new 0
     description: >
-      TBD
+      Create an object with no argument to constructor
     verification:
       - compatible_arguments
     properties:
@@ -3302,17 +3318,20 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1()
     instructions:
-      - sig: any.call.new.0 v1:in:top
-        acc: out:top
+      - sig: any.call.new.0 v1:in:ref
+        acc: out:ref
         prefix: any
         format: [pref_op_v1_8]
-        opcode_idx: [0xb4]
+        opcode_idx: [0xe]
 
   - title: Any call new range
     description: >
-      TBD
+      Create an object with range argument to constructor
     verification:
       - compatible_arguments
     properties:
@@ -3320,17 +3339,20 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1(v2, v2 + 1, ..., v2 + imm - 1)
     instructions:
-      - sig: any.call.new.range v1:in:top, v2:in:top, imm:u8
-        acc: out:top
+      - sig: any.call.new.range v1:in:ref, v2:in:ref, imm:u8
+        acc: out:ref
         prefix: any
         format: [pref_op_v1_8_v2_8_imm_8]
-        opcode_idx: [0xb5]
+        opcode_idx: [0xf]
 
   - title: Any call new short
     description: >
-      TBD
+      Create an object with short argument to constructor
     verification:
       - compatible_arguments
     properties:
@@ -3338,10 +3360,32 @@ groups:
     exceptions:
       - x_call
     pseudo: |
-      TBD
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = new v1(v2)
     instructions:
-      - sig: any.call.new.short v1:in:top, imm:u4
-        acc: out:top
+      - sig: any.call.new.short v1:in:ref, v2:in:ref
+        acc: out:ref
         prefix: any
-        format: [pref_op_v1_4_imm_4]
-        opcode_idx: [0xb6]
+        format: [pref_op_v1_4_v2_4]
+        opcode_idx: [0x10]
+
+  - title: Any instanceof check
+    description: >
+      check whether an object belongs to a class
+    verification:
+      - v1_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      acc = acc instanceof v1
+    instructions:
+      - sig: any.isinstance v1:in:ref
+        acc: inout:ref->u1
+        prefix: any
+        format: [pref_op_v1_8]
+        opcode_idx: [0x11]

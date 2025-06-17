@@ -91,7 +91,7 @@ endfunction(compile_dynamic_file)
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #     PACKAGE_NAME
-#       unit1_test 
+#       unit1_test
 #   )
 function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
@@ -99,7 +99,7 @@ function(panda_ets_interop_js_gtest TARGET)
         ARG
         "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
         "ETS_CONFIG;PACKAGE_NAME"
-        "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
+        "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;ASM_SOURCE;LIBRARIES"
         ${ARGN}
     )
 
@@ -112,12 +112,14 @@ function(panda_ets_interop_js_gtest TARGET)
         OUTPUT_SUFFIX ".so"
     )
 
-    set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
-    panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
-        ETS_SOURCES ${ARG_ETS_SOURCES}
-        ETS_CONFIG ${ARG_ETS_CONFIG}
-    )
-    add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
+    if(DEFINED ARG_ETS_SOURCES)
+        set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
+        panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
+            ETS_SOURCES ${ARG_ETS_SOURCES}
+            ETS_CONFIG ${ARG_ETS_CONFIG}
+        )
+        add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
+    endif()
 
     set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
@@ -141,21 +143,32 @@ function(panda_ets_interop_js_gtest TARGET)
         )
     endif()
 
-    # if not set PACKAGE_NAME, using first ets file as its name;
-    set(ETS_SOURCES_NUM)
-    list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
-    if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
-        list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
-        get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
-    elseif(NOT DEFINED ARG_PACKAGE_NAME)
-        message(FATAL_ERROR "Please provide PACKAGE_NAME for ${TARGET}")
+    if(DEFINED ARG_ASM_SOURCE)
+        get_filename_component(ASM_DIR_PATH ${ARG_ASM_SOURCE} DIRECTORY)
+        get_filename_component(ASM_FILE_NAME ${ARG_ASM_SOURCE} NAME)
+        add_panda_assembly(TARGET ${TARGET}_asm_abc INDIR ${ASM_DIR_PATH} SOURCE ${ASM_FILE_NAME}
+                           OUTDIR ${CMAKE_CURRENT_BINARY_DIR} TARGETNAME ${TARGET}_asm)
+        set(ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_asm.abc")
     endif()
 
-    # Add launcher <${TARGET}_gtests> target
-    set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip)
-    if(ARG_COMPILATION_WITH_RUNTIMELINKER)
-        set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
+    # if not set PACKAGE_NAME, using first ets file as its name;
+    if(DEFINED ARG_ETS_SOURCES)
+        set(ETS_SOURCES_NUM)
+        list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
+        if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
+            list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
+            get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
+        elseif(NOT DEFINED ARG_PACKAGE_NAME)
+            message(FATAL_ERROR "Please provide PACKAGE_NAME for ${TARGET}")
+        endif()
+
+        # Add launcher <${TARGET}_gtests> target
+        set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip)
+        if(ARG_COMPILATION_WITH_RUNTIMELINKER)
+            set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
+        endif()
     endif()
+
     panda_ets_add_gtest(
         NAME ${TARGET}
         NO_EXECUTABLE
@@ -166,6 +179,7 @@ function(panda_ets_interop_js_gtest TARGET)
             "INTEROP_TEST_BUILD_DIR=${PANDA_BINARY_ROOT}/tests/ets_interop_js"
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
             "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
+            "ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH}"
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
@@ -185,6 +199,10 @@ function(panda_ets_interop_js_gtest TARGET)
 
     if(DEFINED ARG_JS_SOURCES OR ARG_TS_SOURCES)
         add_dependencies(${TARGET}_gtests ${TARGET}_dynamic_modules)
+    endif()
+
+    if(DEFINED ARG_ASM_SOURCE)
+        add_dependencies(${TARGET}_gtests ${TARGET}_asm_abc)
     endif()
 
     add_dependencies(ets_interop_js_gtests ${TARGET}_gtests)

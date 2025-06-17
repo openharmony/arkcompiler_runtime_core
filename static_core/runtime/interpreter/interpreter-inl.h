@@ -28,6 +28,7 @@
 #include <unordered_map>
 
 #include "bytecode_instruction.h"
+#include "intrinsics.h"
 #include "libpandabase/events/events.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
@@ -1207,64 +1208,159 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCall0()
     {
-        LOG_INST() << "Unimplemented instruction call.0";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        LOG_INST() << "any.call.0 v" << vs1;
+        ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCall0(this->GetThread(), funcObj);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallRange()
     {
-        LOG_INST() << "Unimplemented instruction any.call.range";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        auto argc = this->GetInst().template GetImm<FORMAT>();
+        uint16_t argStart = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        LOG_INST() << "any.call.range v" << vs1 << ", v" << argStart << ", " << argc;
+        ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallRange(this->GetThread(), this->GetFrame(), funcObj, argStart, argc);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallShort()
     {
-        LOG_INST() << "Unimplemented instruction any.call.short";
-        UNREACHABLE();
+        // This should be generated from plugin.erb file
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        LOG_INST() << "any.call.short v" << vs1 << ", v" << vs2;
+        ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallShort(this->GetThread(), funcObj, arg);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallThis0()
     {
-        LOG_INST() << "Unimplemented instruction any.call.this.0";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        auto stringId = this->GetInst().template GetId<FORMAT>().AsRawValue();
+        LOG_INST() << "any.call.this.0 v" << vs1 << ", " << stringId;
+        ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallThis0(this->GetThread(), this->GetFrame(), thisObj, stringId);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallThisRange()
     {
-        LOG_INST() << "Unimplemented instruction any.call.this.range";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        auto argc = this->GetInst().template GetImm<FORMAT>();
+        auto stringId = this->GetInst().template GetId<FORMAT>().AsRawValue();
+        uint16_t argStart = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        LOG_INST() << "any.call.this.range v" << vs1 << ", v" << argStart << ", " << argc << ", " << stringId;
+        ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallThisRange(this->GetThread(), this->GetFrame(), thisObj, stringId, argStart, argc);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallThisShort()
     {
-        LOG_INST() << "Unimplemented instruction any.call.this.short";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        auto stringId = this->GetInst().template GetId<FORMAT>().AsRawValue();
+        LOG_INST() << "any.call.this.short v" << vs1 << ", v" << vs2 << ", " << stringId;
+        ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallThisShort(this->GetThread(), this->GetFrame(), thisObj, stringId, arg);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallNew0()
     {
-        LOG_INST() << "Unimplemented instruction any.call.new.0";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        LOG_INST() << "any.call.new.0 v" << vs1;
+        ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallNew0(this->GetThread(), ctor);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallNewRange()
     {
-        LOG_INST() << "Unimplemented instruction any.call.new.range";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        auto argc = this->GetInst().template GetImm<FORMAT>();
+        uint16_t argStart = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        LOG_INST() << "any.call.new.range v" << vs1 << ", v" << argStart << ", " << argc;
+        ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallNewRange(this->GetThread(), this->GetFrame(), ctor, argStart, argc);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAnyCallNewShort()
     {
-        LOG_INST() << "Unimplemented instruction any.call.new.short";
-        UNREACHABLE();
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        LOG_INST() << "any.call.new.short v" << vs1 << ", v" << vs2;
+        ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
+        auto ret = intrinsics::AnyCallNewShort(this->GetThread(), ctor, arg);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, false>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyIsinstance()
+    {
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        LOG_INST() << "any.isinstance v" << vs1;
+
+        ObjectHeader *lhsObj = this->GetAcc().template GetAs<ObjectHeader *>();
+        ObjectHeader *rhsObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
+        bool ret = intrinsics::AnyIsinstance(this->GetThread(), lhsObj, rhsObj);
+        if (UNLIKELY(this->GetThread()->HasPendingException())) {
+            this->MoveToExceptionHandler();
+        }
+        this->GetAccAsVReg().SetPrimitive(ret);
+        this->template MoveToNextInst<FORMAT, false>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3850,13 +3946,9 @@ public:
         LOG_INST() << "any.ldbyname v" << vs << ", " << std::hex << "0x" << id;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
+        this->GetAccAsVReg().SetReference(ret);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3869,13 +3961,9 @@ public:
         LOG_INST() << "any.ldbyname.v v" << vd << ", v" << vs << ", " << std::hex << "0x" << id;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
+        this->GetFrameHandler().GetVReg(vd).SetReference(ret);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3887,13 +3975,9 @@ public:
         LOG_INST() << "any.stbyname v" << vs << ", " << std::hex << "0x" << id;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        ObjectHeader *val = this->GetAccAsVReg().GetReference();
+        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3906,13 +3990,9 @@ public:
         LOG_INST() << "any.stbyname.v v" << vs1 << ", v" << vs2 << ", " << std::hex << "0x" << id;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs2).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        ObjectHeader *val = this->GetFrame()->GetVReg(vs1).GetReference();
+        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3923,13 +4003,12 @@ public:
         LOG_INST() << "any.ldbyidx v" << vs << ", " << std::hex;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
+        ASSERT(!this->GetAccAsVReg().HasObject());
 
-        // NOTE: handle it
-        UNREACHABLE();
+        double index = this->GetAccAsVReg().GetDouble();
+        auto ldObj = intrinsics::AnyLdbyidx(this->GetThread(), obj, index);
+        this->GetAccAsVReg().SetReference(ldObj);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3938,16 +4017,13 @@ public:
         uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
         uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
 
-        LOG_INST() << "any.stbyidx v" << vs1 << ", v" << vs2 << ", " << std::hex;
+        LOG_INST() << "any.stbyidx v" << vs1 << ", " << vs2 << std::hex;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
-        if (UNLIKELY(obj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        [[maybe_unused]] double index = this->GetFrame()->GetVReg(vs2).GetDouble();
+        ObjectHeader *val = this->GetAccAsVReg().GetReference();
+        intrinsics::AnyStbyidx(this->GetThread(), obj, index, val);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3957,16 +4033,11 @@ public:
         uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
 
         LOG_INST() << "any.ldbyval v" << vs1 << ", v" << vs2 << ", " << std::hex;
-
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
         ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
-        if (UNLIKELY(obj == nullptr || valObj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        auto ldObj = intrinsics::AnyLdbyval(this->GetThread(), obj, valObj);
+        this->GetAccAsVReg().SetReference(ldObj);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
     template <BytecodeInstruction::Format FORMAT>
@@ -3978,14 +4049,10 @@ public:
         LOG_INST() << "any.stbyval v" << vs1 << ", v" << vs2 << ", " << std::hex;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
-        ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
-        if (UNLIKELY(obj == nullptr || valObj == nullptr)) {
-            RuntimeIfaceT::ThrowNullPointerException();
-            this->MoveToExceptionHandler();
-        }
-
-        // NOTE: handle it
-        UNREACHABLE();
+        ObjectHeader *key = this->GetFrame()->GetVReg(vs2).GetReference();
+        ObjectHeader *val = this->GetAccAsVReg().GetReference();
+        intrinsics::AnyStbyval(this->GetThread(), obj, key, val);
+        this->template MoveToNextInst<FORMAT, true>();
     }
 
 private:

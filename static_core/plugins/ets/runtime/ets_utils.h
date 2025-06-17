@@ -26,11 +26,17 @@ namespace ark::ets {
 static constexpr char const ETSGLOBAL_CLASS_NAME[] = "ETSGLOBAL";
 // NOLINTEND(modernize-avoid-c-arrays)
 
+static constexpr std::string_view INDEXED_INT_GET_METHOD_SIGNATURE = "I:Lstd/core/Object;";
+static constexpr std::string_view INDEXED_INT_SET_METHOD_SIGNATURE = "ILstd/core/Object;:V";
+
 bool IsEtsGlobalClassName(const std::string &descriptor);
 
 EtsObject *GetBoxedValue(EtsCoroutine *coro, Value value, EtsType type);
 
 Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj);
+
+EtsObject *GetPropertyValue(EtsCoroutine *coro, const EtsObject *etsObj, EtsField *field);
+bool SetPropertyValue(EtsCoroutine *coro, EtsObject *etsObj, EtsField *field, EtsObject *valToSet);
 
 class LambdaUtils {
 public:

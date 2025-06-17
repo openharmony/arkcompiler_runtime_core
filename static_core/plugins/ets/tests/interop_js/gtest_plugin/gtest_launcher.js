@@ -64,8 +64,9 @@ function main() {
 
 	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 	let gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	let asmAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH');
 
-	
+
 	let argv = helper.getArgv();
 	const arkJsNapiCliLastArgIdx = 5;
 
@@ -75,13 +76,23 @@ function main() {
 		return 1;
 	}
 
+	let userPandaFiles = gtestAbcPath;
+	if (asmAbcPath !== '') {
+		if (userPandaFiles === '') {
+			userPandaFiles += asmAbcPath;
+		} else {
+			userPandaFiles += (':' + asmAbcPath);
+		}
+	}
+
 	let createRuntimeOptions = {
 		'log-level': 'info',
 		'log-components': 'ets_interop_js',
-		'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
-		'panda-files': gtestAbcPath,
+		'boot-panda-files': stdlibPath + ':' + userPandaFiles,
+		'panda-files': userPandaFiles,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
+		'interpreter-type': 'irtoc'
 	};
 
 	if (gtestName === 'ets_interop_ts_to_ets_taskpool') {

@@ -41,6 +41,7 @@
   "plugins/ets/plugin.gn": "*",
   "plugins/ets/README.md": "*",
   "plugins/ets/RegisterPlugin.cmake": "*",
+  "plugins/ets/runtime/interpreter/any_opcodes.inc": {"G.INC.02": "*"},
   "plugins/ets/runtime/napi": "*",
   "plugins/ets/sdk/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/snippet_verifier": "*",
