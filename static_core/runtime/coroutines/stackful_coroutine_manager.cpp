@@ -1205,4 +1205,34 @@ PandaUniquePtr<StackfulCoroutineStateInfoTable> StackfulCoroutineManager::GetAll
     return infoTable;
 }
 
+void StackfulCoroutineManager::PreZygoteFork()
+{
+    WaitForNonMainCoroutinesCompletion();
+    if (enableMigration_) {
+        StopManagerThread();
+    }
+
+    // Will be refactored by using modified 'FinalizeWorkers' to avoid copy-paste. #26674
+    os::memory::LockHolder lock(workersLock_);
+    for (auto *worker : workers_) {
+        if (worker->IsMainWorker()) {
+            continue;
+        }
+        worker->SetActive(false);
+    }
+    // 1 is for MAIN
+    while (activeWorkersCount_ > 1) {
+        workersCv_.Wait(&workersLock_);
+    }
+}
+
+void StackfulCoroutineManager::PostZygoteFork()
+{
+    os::memory::LockHolder lh(workersLock_);
+    Runtime *runtime = Runtime::GetCurrent();
+    CreateWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
+    if (enableMigration_) {
+        StartManagerThread();
+    }
+}
 }  // namespace ark
