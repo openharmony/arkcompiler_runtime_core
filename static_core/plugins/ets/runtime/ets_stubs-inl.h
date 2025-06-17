@@ -365,6 +365,9 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro,
         auto methods = klass->GetVTable();
         for (size_t idx = from; idx < methods.size(); ++idx) {
             auto vmethod = methods[idx];
+            if (vmethod->IsPrivate()) {
+                continue;
+            }
             if (LIKELY(lookupTarget->GetName() != vmethod->GetName())) {
                 continue;
             }

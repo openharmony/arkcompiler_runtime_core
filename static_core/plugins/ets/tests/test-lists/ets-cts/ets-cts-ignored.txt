@@ -33,9 +33,6 @@
 03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
 03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
 
-#20936 Access to common union method doesn't work
-03.types/20.union_types/02.access_to_common_union_members/cm_meth2_6.ets
-
 #25172
 03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets
