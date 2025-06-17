@@ -388,6 +388,12 @@ function testAlloc() {
     arktest.assertEQ(buf2.at(0), 0x1);
 }
 
+function testEmptyAlloc() {
+    const escape = '\0'
+    let buf = buffer.alloc(2, escape, 'utf8')
+    assertEQ(encodeURI(buf.toString('utf8')), '%00%00')
+}
+
 function testAllocUninitialized() {
     const buf = buffer.allocUninitialized(10);
     arktest.assertEQ(buf.length, 10);

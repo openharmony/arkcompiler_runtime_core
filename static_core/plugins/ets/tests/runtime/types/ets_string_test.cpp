@@ -616,6 +616,28 @@ TEST_F(EtsStringTest, GetMutf8)
     ASSERT_EQ(strcmp(pandaString.data(), "hello"), 0);
 }
 
+TEST_F(EtsStringTest, ConvertToStringView)
+{
+    PandaVector<uint8_t> buf;
+    auto emptyString = EtsString::CreateNewEmptyString();
+    auto emptyStringView = emptyString->ConvertToStringView(&buf);
+    ASSERT_EQ(emptyStringView, "");
+
+    std::vector<uint8_t> data1 {0, 'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data2 {'H', 'e', 'l', 'l', 'o', 0, 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data3 {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    auto testString1 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data1.data()));
+    auto testString2 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data2.data()));
+    auto testString3 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data3.data()));
+
+    auto testString1View = testString1->ConvertToStringView(&buf);
+    ASSERT_EQ(testString1View, "");
+    auto testString2View = testString2->ConvertToStringView(&buf);
+    ASSERT_EQ(testString2View, "Hello");
+    auto testString3View = testString3->ConvertToStringView(&buf);
+    ASSERT_EQ(testString3View, "Helloworld!");
+}
+
 TEST_F(EtsStringTest, Resolve)
 {
     std::vector<uint8_t> data {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
