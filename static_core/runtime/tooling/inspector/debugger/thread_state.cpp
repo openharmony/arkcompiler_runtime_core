@@ -15,38 +15,25 @@
 
 #include "thread_state.h"
 
+#include <memory>
+#include <optional>
 #include <sstream>
 
 #include "include/tooling/pt_location.h"
 #include "macros.h"
-
+#include "breakpoint.h"
 #include "error.h"
 #include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
-std::vector<BreakpointId> ThreadState::GetBreakpointsByLocation(const PtLocation &location) const
-{
-    std::vector<BreakpointId> hitBreakpoints;
-
-    auto range = breakpointLocations_.equal_range(location);
-    std::transform(range.first, range.second, std::back_inserter(hitBreakpoints), [](auto &p) { return p.second; });
-
-    return hitBreakpoints;
-}
 
 void ThreadState::Reset()
 {
-    if (stepKind_ != StepKind::BREAK_ON_START) {
-        stepKind_ = StepKind::NONE;
-    }
+    stepKind_ = StepKind::BREAK_ON_START;
     stepLocations_.clear();
     methodEntered_ = false;
-    breakpointsActive_ = true;
     skipAllPauses_ = false;
     mixedDebugEnabled_ = false;
-    nextBreakpointId_ = 0;
-    breakpointLocations_.clear();
-    breakpointConditions_.Clear();
     pauseOnExceptionsState_ = PauseOnExceptionsState::NONE;
 }
 
@@ -106,11 +93,6 @@ void ThreadState::Pause()
     }
 }
 
-void ThreadState::SetBreakpointsActive(bool active)
-{
-    breakpointsActive_ = active;
-}
-
 void ThreadState::SetSkipAllPauses(bool skip)
 {
     skipAllPauses_ = skip;
@@ -120,37 +102,6 @@ void ThreadState::SetSkipAllPauses(bool skip)
 void ThreadState::SetMixedDebugEnabled(bool mixedDebugEnabled)
 {
     mixedDebugEnabled_ = mixedDebugEnabled;
-}
-
-BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
-{
-    ASSERT(!locations.empty());
-
-    auto id = nextBreakpointId_++;
-    for (auto &location : locations) {
-        breakpointLocations_.emplace(location, id);
-    }
-
-    if (condition != nullptr) {
-        ASSERT(locations.size() == 1);
-        breakpointConditions_.AddCondition(id, *condition);
-    }
-
-    return id;
-}
-
-void ThreadState::RemoveBreakpoint(BreakpointId id)
-{
-    for (auto it = breakpointLocations_.begin(); it != breakpointLocations_.end();) {
-        if (it->second == id) {
-            it = breakpointLocations_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    if (breakpointConditions_.HasCondition(id)) {
-        breakpointConditions_.RemoveCondition(id);
-    }
 }
 
 void ThreadState::SetPauseOnExceptions(PauseOnExceptionsState state)
@@ -281,35 +232,16 @@ void ThreadState::OnSingleStep(const PtLocation &location, const char *sourceFil
     }
 }
 
-static std::string DumpBreakpoint(BreakpointId bpId, const PtLocation &loc)
-{
-    std::stringstream ss;
-    ss << "breakpoint #" << bpId << " at " << loc.GetPandaFile() << ':' << loc.GetMethodId() << ':'
-       << loc.GetBytecodeOffset();
-    return ss.str();
-}
-
 bool ThreadState::ShouldStopAtBreakpoint(const PtLocation &location)
 {
-    if (!breakpointsActive_ || skipAllPauses_) {
+    if (skipAllPauses_) {
         return false;
     }
+    return bpStorage_.ShouldStopAtBreakpoint(location, engine_);
+}
 
-    auto rng = breakpointLocations_.equal_range(location);
-    for (auto iter = rng.first; iter != rng.second; ++iter) {
-        auto bpId = iter->second;
-        if (!breakpointConditions_.HasCondition(bpId)) {
-            // Should pause unconditionally
-            return true;
-        }
-        auto res = breakpointConditions_.EvaluateCondition(bpId);
-        if (!res) {
-            LOG(WARNING, DEBUGGER) << DumpBreakpoint(bpId, location) << " condition evaluation failure";
-            HandleError(res.Error());
-        } else if (res.Value()) {
-            return true;
-        }
-    }
-    return false;
+std::vector<BreakpointId> ThreadState::GetBreakpointsByLocation(const PtLocation &location) const
+{
+    return bpStorage_.GetBreakpointsByLocation(location);
 }
 }  // namespace ark::tooling::inspector

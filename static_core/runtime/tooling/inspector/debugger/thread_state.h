@@ -16,12 +16,16 @@
 #ifndef PANDA_TOOLING_INSPECTOR_THREAD_STATE_H
 #define PANDA_TOOLING_INSPECTOR_THREAD_STATE_H
 
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
+#include "breakpoint.h"
+#include "breakpoint_storage.h"
+#include "common.h"
+#include "debug_info_cache.h"
 #include "runtime/tooling/debugger.h"
 
-#include "evaluation/conditions_storage.h"
 #include "include/tooling/debug_interface.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
@@ -32,7 +36,10 @@ class DebuggableThread;
 
 class ThreadState final {
 public:
-    explicit ThreadState(EvaluationEngine &engine) : breakpointConditions_(engine) {}
+    explicit ThreadState(EvaluationEngine &engine, BreakpointStorage &bpStorage)
+        : engine_(engine), bpStorage_(bpStorage)
+    {
+    }
     ~ThreadState() = default;
 
     NO_COPY_SEMANTIC(ThreadState);
@@ -53,26 +60,8 @@ public:
     void StepOver(std::unordered_set<PtLocation, HashLocation> locations);
     void StepOut();
     void Pause();
-    void SetBreakpointsActive(bool active);
     void SetSkipAllPauses(bool skip);
     void SetMixedDebugEnabled(bool mixedDebugEnabled);
-    /**
-     * @brief Set a breakpoint with optional condition.
-     * @param locations to set breakpoint at, all will have the same BreakpointId.
-     * @param condition pointer to string with panda bytecode, will not be saved.
-     * @returns BreakpointId of set breakpoint.
-     */
-    BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition = nullptr);
-    void RemoveBreakpoint(BreakpointId id);
-
-    template <typename F>
-    void EnumerateBreakpoints(const F &func)
-    {
-        for (const auto &[loc, id] : breakpointLocations_) {
-            func(loc, id);
-        }
-    }
-
     void SetPauseOnExceptions(PauseOnExceptionsState state);
 
     void OnException(bool uncaught);
@@ -125,10 +114,8 @@ private:
 
     bool methodEntered_ {false};
 
-    bool breakpointsActive_ {true};
-    BreakpointId nextBreakpointId_ {0};
-    std::unordered_multimap<PtLocation, BreakpointId, HashLocation> breakpointLocations_;
-    ConditionsStorage breakpointConditions_;
+    EvaluationEngine &engine_;
+    BreakpointStorage &bpStorage_;
 
     PauseOnExceptionsState pauseOnExceptionsState_ {PauseOnExceptionsState::NONE};
 

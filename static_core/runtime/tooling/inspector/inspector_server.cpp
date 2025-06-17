@@ -43,18 +43,7 @@
 #include "types/url_breakpoint_response.h"
 
 namespace ark::tooling::inspector {
-InspectorServer::InspectorServer(Server &server) : server_(server)
-{
-    struct Response : public JsonSerializable {
-        void Serialize(JsonObjectBuilder &builder) const override
-        {
-            builder.AddProperty("debuggerId", 0);
-            builder.AddProperty("protocols", [](JsonArrayBuilder &) {});
-        }
-    };
-    server_.OnCall("Debugger.enable",
-                   [](auto, auto &) { return std::unique_ptr<JsonSerializable>(std::make_unique<Response>()); });
-}
+InspectorServer::InspectorServer(Server &server) : server_(server) {}
 
 void InspectorServer::Kill()
 {
@@ -82,8 +71,7 @@ void InspectorServer::OnOpen(std::function<void()> &&handler)
 {
     server_.OnOpen([this, handler = std::move(handler)]() {
         // A new connection is open, reinitialize the state
-        sessionManager_.EnumerateSessions([this](auto &id, auto thread) {
-            sourceManager_.RemoveThread(thread);
+        sessionManager_.EnumerateSessions([this](auto &id, [[maybe_unused]] auto thread) {
             if (!id.empty()) {
                 SendTargetAttachedToTarget(id);
             }
@@ -143,11 +131,10 @@ void InspectorServer::CallDebuggerResumed(PtThread thread)
     server_.Call(sessionManager_.GetSessionIdByThread(thread), "Debugger.resumed");
 }
 
-void InspectorServer::CallDebuggerScriptParsed(PtThread thread, ScriptId scriptId, std::string_view sourceFile)
+void InspectorServer::CallDebuggerScriptParsed(ScriptId scriptId, std::string_view sourceFile)
 {
-    auto sessionId = sessionManager_.GetSessionIdByThread(thread);
-    server_.Call(sessionId, "Debugger.scriptParsed", [&sourceFile, &thread, &scriptId](auto &params) {
-        params.AddProperty("executionContextId", thread.GetId());
+    server_.Call("", "Debugger.scriptParsed", [&sourceFile, &scriptId](auto &params) {
+        params.AddProperty("executionContextId", 0);
         params.AddProperty("scriptId", std::to_string(scriptId));
         params.AddProperty("url", sourceFile.data());
         params.AddProperty("startLine", 0);
@@ -164,7 +151,7 @@ void InspectorServer::CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallTy
     auto sessionId = sessionManager_.GetSessionIdByThread(thread);
 
     server_.Call(sessionId, "Runtime.consoleAPICalled", [&](auto &params) {
-        params.AddProperty("executionContextId", thread.GetId());
+        params.AddProperty("executionContextId", 0);
         params.AddProperty("timestamp", timestamp);
 
         switch (type) {
@@ -235,7 +222,6 @@ void InspectorServer::CallTargetDetachedFromTarget(PtThread thread)
     server_.Pause();
 
     sessionManager_.RemoveSession(sessionId);
-    sourceManager_.RemoveThread(thread);
 
     // Now no one will retrieve the detached thread from the sessions manager
     server_.Continue();
@@ -264,6 +250,22 @@ void InspectorServer::OnCallDebuggerContinueToLocation(
             return std::unique_ptr<JsonSerializable>();
         });
     // clang-format on
+}
+
+void InspectorServer::OnCallDebuggerEnable(std::function<void()> &&handler)
+{
+    struct Response : public JsonSerializable {
+        void Serialize(JsonObjectBuilder &builder) const override
+        {
+            builder.AddProperty("debuggerId", 0);
+            builder.AddProperty("protocols", [](JsonArrayBuilder &) {});
+        }
+    };
+
+    server_.OnCall("Debugger.enable", [handler = std::move(handler)](auto, auto &) {
+        handler();
+        return std::unique_ptr<JsonSerializable>(std::make_unique<Response>());
+    });
 }
 
 void InspectorServer::OnCallDebuggerGetPossibleBreakpoints(
@@ -495,14 +497,12 @@ Expected<std::unique_ptr<UrlBreakpointResponse>, std::string> InspectorServer::S
     std::set<std::string_view> sourceFiles;
     auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
-    auto id = handler(thread, sourceFileFilter, breakpointRequest.GetLineNumber(), sourceFiles, condition);
+    auto id = handler(thread, std::move(sourceFileFilter), breakpointRequest.GetLineNumber(), sourceFiles, condition);
     if (!id) {
         std::string msg = "Failed to set breakpoint";
         LOG(INFO, DEBUGGER) << msg;
         return Unexpected(msg);
     }
-    // Must be non-empty on success
-    ASSERT(!sourceFiles.empty());
 
     auto breakpointInfo = std::make_unique<UrlBreakpointResponse>(*id);
     AddLocations(*breakpointInfo, sourceFiles, breakpointRequest.GetLineNumber(), thread);
@@ -574,9 +574,18 @@ void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::functi
             auto response = std::make_unique<CustomUrlBreakpointLocations>();
             for (const auto &req : *optRequests) {
                 auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
-                response->Add(optResponse.HasValue()
-                    ? optResponse.Value()->ToCustomUrlBreakpointResponse()
-                    : CustomUrlBreakpointResponse(req.GetLineNumber()));
+                if (!optResponse.HasValue()) {
+                    response->Add(CustomUrlBreakpointResponse(req.GetLineNumber()));
+                    continue;
+                }
+
+                if (optResponse.Value()->GetLocations().size() != 0) {
+                    response->Add(optResponse.Value()->ToCustomUrlBreakpointResponse());
+                } else {
+                    auto resp = CustomUrlBreakpointResponse(req.GetLineNumber());
+                    resp.SetBreakpointId(optResponse.Value()->GetBreakpointId());
+                    response->Add(std::move(resp));
+                }
             }
             return std::unique_ptr<JsonSerializable>(std::move(response));
         });
@@ -1012,15 +1021,11 @@ void InspectorServer::EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread
 }
 
 void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
-                                       const std::vector<Scope> &scopeChain, PtThread thread,
+                                       const std::vector<Scope> &scopeChain, [[maybe_unused]] PtThread thread,
                                        const std::optional<RemoteObject> &objThis)
 {
     callFrames.Add([&](JsonObjectBuilder &callFrame) {
-        auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, callFrameInfo.sourceFile);
-
-        if (isNew) {
-            CallDebuggerScriptParsed(thread, scriptId, callFrameInfo.sourceFile);
-        }
+        auto scriptId = sourceManager_.GetScriptId(callFrameInfo.sourceFile);
 
         callFrame.AddProperty("callFrameId", std::to_string(callFrameInfo.frameId));
         callFrame.AddProperty("functionName", callFrameInfo.methodName.data());
@@ -1039,15 +1044,10 @@ void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallF
 }
 
 void InspectorServer::AddLocations(UrlBreakpointResponse &response, const std::set<std::string_view> &sourceFiles,
-                                   size_t lineNumber, PtThread thread)
+                                   size_t lineNumber, [[maybe_unused]] PtThread thread)
 {
     for (auto sourceFile : sourceFiles) {
-        auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, sourceFile);
-
-        if (isNew) {
-            CallDebuggerScriptParsed(thread, scriptId, sourceFile);
-        }
-
+        auto scriptId = sourceManager_.GetScriptId(sourceFile);
         response.AddLocation(Location {scriptId, lineNumber});
     }
 }
