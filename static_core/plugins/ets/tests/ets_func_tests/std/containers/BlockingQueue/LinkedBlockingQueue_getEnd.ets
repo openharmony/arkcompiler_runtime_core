@@ -84,9 +84,9 @@ function getEndConcurrentTest() {
     let testBlockingQueue = new LinkedBlockingQueue<int>(JOB_COUNT * PUSH_COUNT_PER_JOB)
     let flag: AtomicFlag = new AtomicFlag(false)
     let lock = new AsyncLock()
-    let jobs: Job<Promise<void>>[] = []
+    let jobs: Job<void>[] = []
     for (let i = 0; i < JOB_COUNT; i++) {
-        jobs.push(launch<Promise<void>, (a0: LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => Promise<void>>(getEndConcurrent, testBlockingQueue, lock, flag))
+        jobs.push(launch<void, (a0: LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => void>(getEndConcurrent, testBlockingQueue, lock, flag))
     }
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs[i].Await()
@@ -96,7 +96,7 @@ function getEndConcurrentTest() {
     }
 }
 
-async function getEndConcurrent(testBQ: LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
+function getEndConcurrent(testBQ: LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
     let arrPromise = new Array<Promise<void>>(PUSH_COUNT_PER_JOB)
     for (let i: int = 0; i < PUSH_COUNT_PER_JOB; i++) {
         let val = i
