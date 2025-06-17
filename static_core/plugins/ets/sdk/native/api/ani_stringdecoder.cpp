@@ -18,6 +18,7 @@
 #include <locale>
 #include "tools/format_logger.h"
 #include "unicode/unistr.h"
+#include <memory>
 
 namespace ark::ets::sdk::util {
 UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &codeflag)
@@ -46,13 +47,6 @@ UConverter *UtilHelper::CreateConverter(const std::string &encStr, UErrorCode &c
     return conv;
 }
 
-std::string UtilHelper::ConvertToString(UChar *uchar)
-{
-    std::u16string tempStr16(uchar);
-    std::string tepStr = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(tempStr16);
-    return tepStr;
-}
-
 StringDecoder::StringDecoder(const std::string &encoding)
 {
     UErrorCode codeflag = U_ZERO_ERROR;
@@ -62,22 +56,23 @@ StringDecoder::StringDecoder(const std::string &encoding)
 ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOffset, int32_t length, UBool flush)
 {
     size_t limit = static_cast<size_t>(ucnv_getMinCharSize(conv_)) * length;
-    size_t len = limit * sizeof(UChar);
-    UChar *arr = nullptr;
-    if (limit > 0) {
-        arr = new UChar[limit + 1] {0};
-    } else {
+    if (limit <= 0) {
         ThrowError(env, "Error obtaining minimum number of input bytes");
         return nullptr;
     }
-    UChar *target = arr;
+    std::vector<UChar> arr(limit + 1, 0);
+    UChar *target = arr.data();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    UChar *targetEnd = target + limit;
     UErrorCode codeFlag = U_ZERO_ERROR;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     source += byteOffset;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ucnv_toUnicode(conv_, &target, target + len, &source, source + length, nullptr, flush, &codeFlag);
-    if (U_FAILURE(codeFlag) != 0) {
-        FreedMemory(arr);
+    const char *sourceEnd = source + length;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ucnv_toUnicode(conv_, &target, targetEnd, &source, sourceEnd, nullptr, flush, &codeFlag);
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+    if (U_FAILURE(codeFlag)) {
         std::string err = "decoder error, ";
         err += u_errorName(codeFlag);
         ThrowError(env, err);
@@ -86,17 +81,13 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     pendingLen_ = ucnv_toUCountPending(conv_, &codeFlag);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     pend_ = source + length - pendingLen_;
-
     ani_string resultStr {};
-    size_t resultLen = target - arr;
-    if (static_cast<int32_t>(resultLen) <= 0 ||
-        env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr), resultLen, &resultStr) != ANI_OK) {
+    size_t resultLen = target - arr.data();
+    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr) != ANI_OK) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("StringDecoder:: create string error!");
-        FreedMemory(arr);
         return nullptr;
     }
-    FreedMemory(arr);
     return resultStr;
 }
 
@@ -113,31 +104,32 @@ ani_string StringDecoder::End(ani_env *env)
         return resultStr;
     }
     UErrorCode errorCode = U_ZERO_ERROR;
-    auto *outputBuffer = new UChar[pendingLen_];
+    std::vector<UChar> outputBuffer(pendingLen_);
+    UChar *target = outputBuffer.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    UChar *targetEnd = outputBuffer + pendingLen_;
-    UChar *target = outputBuffer;
+    UChar *const targetEnd = target + pendingLen_;
     const char *src = pend_;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    const char *sourceEnd = pend_ + pendingLen_;
+    const char *const sourceEnd = src + pendingLen_;
     UBool flush = 1;
     ucnv_toUnicode(conv_, &target, targetEnd, &src, sourceEnd, nullptr, flush, &errorCode);
-    if (U_FAILURE(errorCode) != 0) {
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+    if (U_FAILURE(errorCode)) {
         std::string err = "decoder error, ";
         err += u_errorName(errorCode);
         ThrowError(env, err);
         return nullptr;
     }
-    std::string tepStr = UtilHelper::ConvertToString(target);
-    env->String_NewUTF8(tepStr.c_str(), tepStr.size(), &resultStr);
-    delete[] outputBuffer;
+    const size_t convertedChars = target - outputBuffer.data();
+    if (convertedChars < outputBuffer.size()) {
+        outputBuffer[convertedChars] = 0;
+    }
+    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(outputBuffer.data()), convertedChars, &resultStr) != ANI_OK) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("StringDecoder::End create string error!");
+        return nullptr;
+    }
     return resultStr;
-}
-
-void StringDecoder::FreedMemory(UChar *&pData)
-{
-    delete[] pData;
-    pData = nullptr;
 }
 
 ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
