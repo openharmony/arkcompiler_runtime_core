@@ -14,6 +14,9 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -128,26 +131,19 @@ function testRemoveByIndexWithinRange() {
 function testRemoveByIndexOutsideRange() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    let errorCount = 0;
-    try {
-        list.removeByIndex(TestData.testNumber1w);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-                "The result should be 'Index out of range'");
-            errorCount++;
-        }
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        list.removeByIndex(-TestData.testNumber6);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-                "The result should be 'Index out of range'");
-            errorCount++;
-        }
+    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertEQ(errorCount, TestData.testNumber2, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.removeByIndex(TestData.testNumber1w)}, exceptionCheck);
+    arktest.expectThrow(() => {list.removeByIndex(-TestData.testNumber6)}, exceptionCheckTwo);
 }
 
 function testRemoveByIndexUndefined() {

@@ -14,6 +14,9 @@
  */
 
 import {List} from '@ohos.util.List';
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -29,7 +32,8 @@ function main() {
         testGetSubListEndIndexSmallerThanStartIndex);
     suite.addTest("List getSubList with change getSubList", testGetSubListWithChange);
     suite.addTest("List getSubList with empty container", testGetSubListEmptyContainer);
-    suite.addTest("List getSubList with start index = 0 and end index = length - 1", testGetSubListFullRange);
+    suite.addTest("List getSubList with start index = 0 and end index = length", testGetSubListFullRange);
+    suite.addTest("List getSubList with start index = end index", testGetSubListWithEqualStartAndEndIndex);
 
     return suite.run();
 }
@@ -201,43 +205,37 @@ function testGetSubList() {
 function testGetSubListStartIndexOutOfRange() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber);
-    try {
-        list.getSubList(-TestData.testNumber1, TestData.testNumber5);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.getSubList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
 }
 
 function testGetSubListEndIndexOutOfRange() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber);
-    try {
-        list.getSubList(TestData.testNumber1, TestData.testNumber8);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"toIndex\" is out of range. It must be > 0 && <= 5. Received value is: 8") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.getSubList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
 }
 
 function testGetSubListEndIndexSmallerThanStartIndex() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber);
-    try {
-        list.getSubList(TestData.testNumber5, TestData.testNumber1);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.getSubList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testGetSubListWithChange() {
@@ -255,23 +253,32 @@ function testGetSubListWithChange() {
 
 function testGetSubListEmptyContainer() {
     let list = new List<number>();
-    try {
-        list.getSubList(TestData.testNumber1, TestData.testNumber3);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.getSubList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testGetSubListFullRange() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber);
-    let getSubList = list.getSubList(0, TestData.testNumber5 - TestData.testNumber1);
+    let getSubList = list.getSubList(0, TestData.testNumber5);
     for (let i: number = 0; i < getSubList.length; i++) {
         arktest.assertEQ(getSubList.get(i), list.get(i), `Element at index ${i} should match`);
     }
-    arktest.assertEQ(getSubList.length, TestData.testNumber5 - TestData.testNumber1, "SubList length should be 4");
+    arktest.assertEQ(getSubList.length, TestData.testNumber5);
+}
+
+function testGetSubListWithEqualStartAndEndIndex() {
+    let list = new List<number>();
+    initializeList(list, TestData.forNumber);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+
+    arktest.expectThrow(() => {list.getSubList(TestData.testNumber1, TestData.testNumber1)}, exceptionCheck);
 }
