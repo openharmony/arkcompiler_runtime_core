@@ -14,6 +14,9 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -26,6 +29,7 @@ function main(): int {
     suite.addTest("PlainArray add same key", testAddSameKey);
     suite.addTest("PlainArray add same value", testAddSameValue);
     suite.addTest("PlainArray add special number", testAddSpecialNumber);
+    suite.addTest("PlainArray add out-of-range key", testAddOutOfRangeKey);
 
     return suite.run();
 }
@@ -131,4 +135,14 @@ function testAddSpecialNumber() {
     arktest.assertTrue(plainArray.has(0), "The key should be added");
     arktest.assertTrue(plainArray.has(TestData.testNumberMax), "The key should be added");
     arktest.assertTrue(plainArray.has(TestData.testNumberMin), "The key should be added");
+}
+
+function testAddOutOfRangeKey() {
+    let plainArray = new PlainArray<number>();
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {plainArray.add(2147483648, TestData.testNumber1)}, exceptionCheck);
 }
