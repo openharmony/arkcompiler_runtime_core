@@ -15,9 +15,6 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet RemoveAt API tests")
 
@@ -72,11 +69,9 @@ function testRemoveAtRightExceededIndex() {
 
 function testRemoveAtIndexOfEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    try {
-        lightWeightSet.removeAt(4);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.removeAt(2);
+    arktest.assertFalse(result, "The lightWeightSet should not remove with empty lightWeightSet");
+    arktest.assertEQ(lightWeightSet.length, 0);
 }
 
 function testRemoveAtLeftFloatIndex() {

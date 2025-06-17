@@ -15,9 +15,6 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet ForEach Values Iterator API tests")
 
@@ -93,14 +90,13 @@ function testValuesIterator() {
     let it = lightWeightSet.values();
     arktest.assertEQ(it.next().value, "aa", "The lightWeightSet values iterator should return the first value");
     arktest.assertEQ(it.next().value, "bb", "The lightWeightSet values iterator should return the second value");
-    arktest.assertEQ(it.next().value, undefined,
-        "The lightWeightSet values iterator should return undefined for no more values");
+    arktest.assertTrue(it.next().done, "The lightWeightSet values iterator.done should true for no more values");
 }
 
 function testValuesIteratorEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.values();
-    arktest.assertEQ(it.next().value, undefined, "The lightWeightSet values iterator should return undefined for an empty set");
+    arktest.assertTrue(it.next().done, "The lightWeightSet values iterator.done should true for an empty set");
 }
 
 function testIterator() {
@@ -110,11 +106,11 @@ function testIterator() {
     let it = lightWeightSet.$_iterator();
     arktest.assertEQ(it.next().value, "aa", "The lightWeightSet $_iterator should return the first value");
     arktest.assertEQ(it.next().value, "bb", "The lightWeightSet $_iterator should return the second value");
-    arktest.assertEQ(it.next().value, undefined, "The lightWeightSet $_iterator should return undefined for no more values");
+    arktest.assertTrue(it.next().done, "The lightWeightSet iterator.done should true for no more values");
 }
 
 function testIteratorEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let it = lightWeightSet.$_iterator();
-    arktest.assertEQ(it.next().value, undefined, "The lightWeightSet $_iterator should return undefined for an empty set");
+    arktest.assertTrue(it.next().done, "The lightWeightSet iterator.done should true for an empty set");
 }

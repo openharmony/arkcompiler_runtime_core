@@ -15,9 +15,6 @@
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet GetValueAt API tests")
 
@@ -57,31 +54,22 @@ function testGetValueAtLeftExceededIndex() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.getValueAt(-2);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(-2);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtRightExceededIndex() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.getValueAt(2);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(2);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtIndexOfEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    try {
-        lightWeightSet.getValueAt(4);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(4);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtLeftFloatIndex() {
