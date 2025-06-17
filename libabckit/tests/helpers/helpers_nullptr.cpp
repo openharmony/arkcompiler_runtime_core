@@ -16,9 +16,9 @@
 #include "helpers_nullptr.h"
 
 #include <gtest/gtest.h>
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
-#include "libabckit/include/c/statuses.h"
+#include "libabckit/c/abckit.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
+#include "libabckit/c/statuses.h"
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);

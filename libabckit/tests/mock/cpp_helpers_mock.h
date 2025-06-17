@@ -17,16 +17,16 @@
 #define ABCKIT_CPP_HELPERS_MOCK
 
 #include <string>
-#include "../../include/cpp/abckit_cpp.h"
+#include "../../include/libabckit/cpp/abckit_cpp.h"
 #include "check_mock.h"
-#include "include/cpp/headers/value.h"
-#include "include/cpp/headers/arkts/annotation.h"
-#include "include/cpp/headers/arkts/annotation_interface.h"
-#include "include/cpp/headers/arkts/annotation_interface_field.h"
-#include "include/cpp/headers/arkts/class.h"
-#include "include/cpp/headers/arkts/function.h"
-#include "include/cpp/headers/core/annotation_element.h"
-#include "include/cpp/headers/core/annotation_interface_field.h"
+#include "include/libabckit/cpp/headers/value.h"
+#include "include/libabckit/cpp/headers/arkts/annotation.h"
+#include "include/libabckit/cpp/headers/arkts/annotation_interface.h"
+#include "include/libabckit/cpp/headers/arkts/annotation_interface_field.h"
+#include "include/libabckit/cpp/headers/arkts/class.h"
+#include "include/libabckit/cpp/headers/arkts/function.h"
+#include "include/libabckit/cpp/headers/core/annotation_element.h"
+#include "include/libabckit/cpp/headers/core/annotation_interface_field.h"
 #include "mock/mock_values.h"
 
 #include <gtest/gtest.h>

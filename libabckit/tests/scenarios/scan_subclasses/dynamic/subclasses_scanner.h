@@ -15,12 +15,12 @@
 #ifndef ABCKIT_SUBCLASSES_SCANNER_H
 #define ABCKIT_SUBCLASSES_SCANNER_H
 
-#include "libabckit/include/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_dynamic.h"
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
 #include "helpers/visit_helper/visit_helper.h"
 #include "helpers/visit_helper/visit_helper-inl.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 struct ClassInfo {
     std::string path;

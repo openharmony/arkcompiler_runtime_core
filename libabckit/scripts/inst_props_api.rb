@@ -14,7 +14,7 @@ require 'ostruct'
 
 abckit_scripts = File.dirname(__FILE__)
 abckit_root    = File.expand_path('../', abckit_scripts)
-opcodes_path = File.expand_path('include/c/isa/isa_dynamic.h', abckit_root)
+opcodes_path = File.expand_path('include/libabckit/c/isa/isa_dynamic.h', abckit_root)
 
 Opcodes = []
 File.open(opcodes_path, 'r').read.split()

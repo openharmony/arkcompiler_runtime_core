@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
-#include "include/cpp/headers/core/annotation_interface.h"
-#include "include/cpp/headers/core/export_descriptor.h"
-#include "include/cpp/headers/core/function.h"
-#include "include/cpp/headers/core/import_descriptor.h"
-#include "include/cpp/headers/core/namespace.h"
+#include "include/libabckit/cpp/abckit_cpp.h"
+#include "include/libabckit/cpp/headers/core/annotation_interface.h"
+#include "include/libabckit/cpp/headers/core/export_descriptor.h"
+#include "include/libabckit/cpp/headers/core/function.h"
+#include "include/libabckit/cpp/headers/core/import_descriptor.h"
+#include "include/libabckit/cpp/headers/core/namespace.h"
 #include "tests/mock/check_mock.h"
 #include "src/mock/mock_values.h"
 #include "tests/mock/cpp_helpers_mock.h"

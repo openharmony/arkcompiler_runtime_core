@@ -16,7 +16,7 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../../include/c/extensions/arkts/metadata_arkts.h"
+#include "../../include/libabckit/c/extensions/arkts/metadata_arkts.h"
 
 #include <cstring>
 #include <gtest/gtest.h>

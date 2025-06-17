@@ -19,12 +19,12 @@
 #include <string>
 #include <queue>
 
-#include "../../include/c/abckit.h"
-#include "../../include/c/metadata_core.h"
-#include "../../include/c/isa/isa_dynamic.h"
-#include "../../include/c/isa/isa_static.h"
-#include "../../include/c/extensions/arkts/metadata_arkts.h"
-#include "../../include/c/extensions/js/metadata_js.h"
+#include "../../include/libabckit/c/abckit.h"
+#include "../../include/libabckit/c/metadata_core.h"
+#include "../../include/libabckit/c/isa/isa_dynamic.h"
+#include "../../include/libabckit/c/isa/isa_static.h"
+#include "../../include/libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "../../include/libabckit/c/extensions/js/metadata_js.h"
 
 // CC-OFFNXT(G.NAM.01) false positive
 extern std::queue<std::string> g_calledFuncs;

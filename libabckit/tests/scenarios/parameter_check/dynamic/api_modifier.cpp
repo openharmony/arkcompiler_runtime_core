@@ -15,7 +15,7 @@
 
 #include "api_modifier.h"
 #include "helpers/visit_helper/visit_helper-inl.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 #include <iostream>
 #include <cstring>

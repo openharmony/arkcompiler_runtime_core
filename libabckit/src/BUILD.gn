@@ -70,6 +70,7 @@ libabckit_sources = [
 
 libabckit_include_dirs = [
   "$ark_root_dynamic",
+  "$ark_root_dynamic/libabckit/include",
   "$ark_root_dynamic/libpandabase",
   "$target_gen_dir/src",
 ]

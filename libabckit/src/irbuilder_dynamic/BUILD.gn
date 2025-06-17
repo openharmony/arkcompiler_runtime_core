@@ -55,6 +55,7 @@ ohos_source_set("abckit_ir_builder_dynamic_source_set") {
 
     # so static_core must be listed first
     "$ark_root_static/..",
+    "$ark_root_static/../libabckit/include",
   ]
 
   part_name = "runtime_core"

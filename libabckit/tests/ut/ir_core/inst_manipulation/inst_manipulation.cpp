@@ -16,11 +16,11 @@
 #include <gtest/gtest.h>
 #include <fstream>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "adapter_static/ir_static.h"
 #include "metadata_inspect_impl.h"
-#include "libabckit/include/c/statuses.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/statuses.h"
+#include "libabckit/c/metadata_core.h"
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
 

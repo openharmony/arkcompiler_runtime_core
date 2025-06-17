@@ -19,7 +19,7 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../../include/c/metadata_core.h"
+#include "../../include/libabckit/c/metadata_core.h"
 
 #include <gtest/gtest.h>
 

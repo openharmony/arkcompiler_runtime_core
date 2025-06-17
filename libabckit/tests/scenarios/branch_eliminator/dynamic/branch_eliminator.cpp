@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 
 #include "branch_eliminator.h"
 
