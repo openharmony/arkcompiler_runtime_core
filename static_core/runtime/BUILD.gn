@@ -33,6 +33,7 @@ config("arkruntime_public_config") {
 
     # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
     "$ark_root/plugins/ets/runtime/ani/",
+    "$ark_root/runtime/tooling/inspector",
     get_label_info(
         "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
         "target_gen_dir"),
@@ -277,6 +278,7 @@ ohos_source_set("libarkruntime_set_static") {
     "tooling/debugger.cpp",
     "tooling/evaluation/expression_loader.cpp",
     "tooling/inspector/debugger_arkapi.cpp",
+    "tooling/inspector/types/profile_result.cpp",
     "tooling/pt_default_lang_extension.cpp",
     "tooling/pt_thread.cpp",
     "tooling/sampler/lock_free_queue.cpp",
