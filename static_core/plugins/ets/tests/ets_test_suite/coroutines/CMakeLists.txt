@@ -423,3 +423,11 @@ add_ets_coroutines_test(FILE eworker_parameter.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_ets_coroutines_test(FILE await_async_return_reject_promise.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
