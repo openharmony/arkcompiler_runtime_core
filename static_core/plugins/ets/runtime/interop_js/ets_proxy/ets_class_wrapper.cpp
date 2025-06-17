@@ -66,11 +66,23 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     napi_env env = ctx->GetJSEnv();
 
+    /**
+     * False-positive static-analyzer report:
+     * CheckClassInitialized is marked as GC trigger function
+     * but with <false> template (which is default) GC won't be triggered
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ASSERT(etsObject != nullptr);
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ASSERT(etsClass_ == etsObject->GetClass());
 
     SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (LIKELY(storage->HasReference(etsObject, env))) {
+        // See (CheckClassInitialized) reason
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return storage->GetJsObject(etsObject, env);
     }
 
@@ -78,6 +90,8 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     // etsObject will be wrapped in jsValue in responce to jsCtor call
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
+    // See (CheckClassInitialized) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
     {
@@ -87,8 +101,8 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
     if (this->needProxy_) {
-        ASSERT(storage->HasReference(etsObject, env));
-        return storage->GetJsObject(etsObject, env);
+        ASSERT(storage->HasReference(handle.GetPtr(), env));
+        return storage->GetJsObject(handle.GetPtr(), env);
     }
     return jsValue;
 }

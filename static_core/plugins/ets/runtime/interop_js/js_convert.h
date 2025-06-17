@@ -224,9 +224,13 @@ JSCONVERT_UNWRAP(BigInt)
         etsIntArray->Set(i, array[i]);
     }
 
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle etsIntArrayHandle(coro, etsIntArray);
+
     auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
     auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
-    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
+    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArrayHandle.GetPtr()));
     bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
 
     return bigInt;
