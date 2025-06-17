@@ -30,6 +30,6 @@ if (!etsRT) {
     throw new Error('Failed to create ETS Runtime!');
 }
 const benchName = helper.getEnvironmentVar('VMB_BENCH_NAME');
-const launcher = etsVm.getClass("L" + benchName + '/VmbLauncher;');
+const launcher = etsVm.getClass('L' + benchName + '/VmbLauncher;');
 launcher.main();
 print('[InteropLauncher] end');
