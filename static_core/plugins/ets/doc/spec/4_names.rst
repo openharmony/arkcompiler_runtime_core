@@ -121,39 +121,35 @@ Declarations
     frontend_status: Done
 
 A declaration introduces a named entity in an appropriate *declaration scope*
-(see :ref:`Scopes`).
+(see :ref:`Scopes`), see 
 
 .. index::
    named entity
    declared entity
    declaration scope
 
-|
-
-.. _Distinguishable Declarations:
-
-Distinguishable Declarations
-****************************
-
-.. meta:
-    frontend_status: Done
+- :ref:`Type Declarations`;
+- :ref:`Variable and Constant Declarations`;
+- :ref:`Function Declarations`;
+- :ref:`Declarations with Overload Signatures`;
+- :ref:`Classes`;
+- :ref:`Interfaces`;
+- :ref:`Enumerations`;
+- :ref:`Local Declarations`;
+- :ref:`Top-Level Declarations`;
+- :ref:`Overload Declarations`;
+- :ref:`Annotations`;
+- :ref:`Ambient Declarations`.
 
 Each declaration in the declaration scope must be *distinguishable*.
-
-A :index:`compile-time error` occurs otherwise.
-
-Declarations are *distinguishable* if they have:
-
--  Different names,
--  Different signatures (see :ref:`Declaration Distinguishable by Signatures`).
+Declarations are *distinguishable* if they have different names.
 
 .. index::
-   distinguishable declaration
    declaration scope
    name
    signature
 
-The examples below represent declarations distinguishable by names:
+Distinguishable declarations are represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -169,10 +165,7 @@ The examples below represent declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is not distinguishable by name (except a valid overloading as
-in :ref:`Function, Method and Constructor Overloading` and
-:ref:`Declaration Distinguishable by Signatures`), then a
-:index:`compile-time error` occurs:
+A :index:`compile-time error` occurs if a declaration is not distinguishable:
 
 .. code-block:: typescript
    :linenos:
@@ -201,12 +194,11 @@ in :ref:`Function, Method and Constructor Overloading` and
     interface Object {}
     let Array = 42
 
-    // Functions have the same name but are distinguishable by signatures
-    function foo() {}
-    function foo(p: number) {}
+**Note**. :ref:`Declarations with Overload Signatures` declares a single entity
+with an unique name and several signatures, but not several entities.
 
 .. index::
-   distinguishable declaration
+   declaration
    overloading
    distinguishable functions
 
@@ -261,6 +253,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _package-access:
 
+.. meta:
+    frontend_status: Done
+
 -  Name declared on the package level (*package level scope*) is accessible
    (see :ref:`Accessible`) throughout the entire package. The name can be
    accessed (see :ref:`Accessible`) in other packages or modules if exported.
@@ -275,6 +270,9 @@ The scope of an entity depends on the context the entity is declared in:
    module
 
 .. _module-access:
+
+.. meta:
+    frontend_status: Done
 
 -  *Module level scope* is applicable to separate modules only. A name
    declared on the module level is accessible (see :ref:`Accessible`)
@@ -303,6 +301,9 @@ The scope of an entity depends on the context the entity is declared in:
    namespace level scope
 
 .. _class-access:
+
+.. meta:
+    frontend_status: Done
 
 -  A name declared inside a class (*class level scope*) is accessible (see
    :ref:`Accessible`) in the class and sometimes, depending on the access
@@ -341,6 +342,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _interface-access:
 
+.. meta:
+    frontend_status: Done
+
 -  A name declared inside an interface (*interface level scope*) is accessible
    (see :ref:`Accessible`) inside and outside that interface (default
    ``public``).
@@ -355,6 +359,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _class-or-interface-type-parameter-access:
 
+.. meta:
+    frontend_status: Done
+
 -  *The scope of a type parameter* name in a class or interface declaration
    is that entire declaration, excluding static member declarations.
 
@@ -368,6 +375,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _function-type-parameter-access:
 
+.. meta:
+    frontend_status: Done
+
 -  The scope of a type parameter name in a function declaration is that
    entire declaration (*function parameter scope*).
 
@@ -378,6 +388,9 @@ The scope of an entity depends on the context the entity is declared in:
    scope
 
 .. _function-access:
+
+.. meta:
+    frontend_status: Done
 
 -  The scope of a name declared immediately inside the body of a function
    or a method declaration is the body of that declaration from the point of
@@ -393,6 +406,9 @@ The scope of an entity depends on the context the entity is declared in:
    method parameter name
 
 .. _block-access:
+
+.. meta:
+    frontend_status: Done
 
 -  The scope of a name declared inside a statement block is the body of
    the statement block from the point of declaration and up to the end
@@ -486,7 +502,7 @@ An interface declaration (see :ref:`Interfaces`), a class declaration (see
 :ref:`Classes`), an enum declaration (see :ref:`Enumerations`), or a type alias
 (see :ref:`Type Alias Declaration`) are type declarations.
 
-The syntax of *type declration* is presented below:
+The syntax of *type declaration* is presented below:
 
 .. code-block:: abnf
 
@@ -524,13 +540,13 @@ following:
 
 Scopes of type aliases are package, module, or namespace level scopes. Names of
 all type aliases must follow the uniqueness rules of
-:ref:`Distinguishable Declarations` in the current context.
+:ref:`Declarations` in the current context.
 
 .. index::
    type alias
    anonymous type
    array
-   distinguishable declaration
+   declaration
    function
    union type
    scope
@@ -1043,9 +1059,8 @@ The syntax of *signature* is presented below:
         '(' parameterList? ')' returnType?
         ;
 
-Overloading (see :ref:`Function, Method and Constructor Overloading`) is supported for
-functions, methods and constructors. The signatures of overloaded entities are important
-for their unique identification.
+A function, method, or constructor can have several *overload signatures* (see
+:ref:`Declarations with Overload Signatures`).
 
 .. index::
    signature
@@ -1485,11 +1500,11 @@ Return Type
 .. meta:
     frontend_status: Done
 
-Function or method return type defines the static type of the result of the
-function or method execution (see :ref:`Function Call Expression` and
-:ref:`Method Call Expression`). During the execution, the function or method
-can produce a value of a type assignable (see :ref:`Assignability`) to the
-return type.
+Function, method, or lambda return type defines the resultant type of the
+function, method, or lambda execution (see :ref:`Function Call Expression`,
+:ref:`Method Call Expression`, and :ref:`Lambda Expressions`). During the
+execution, the function, method, or lambda can produce a value of a type
+that is assignable to the return type (see :ref:`Assignability`).
 
 The syntax of *return type* is presented below:
 
@@ -1503,12 +1518,17 @@ If function or method return type is not ``void`` (see :ref:`Type void`), and
 the execution path of the function or method body has no return statement (see
 :ref:`Return Statements`), then a :index:`compile-time error` occurs.
 
+A :index:`compile-time error` occurs if lambda return type is not ``never``
+(see :ref:`Type never`), and the execution path of a function, method, or
+lambda body has no return statement (see :ref:`Return Statements`).
+
 A special form of return type with the keyword ``this`` as type annotation can
 be used in class instance methods only (see :ref:`Methods Returning this`).
 
-If function or method return type is not specified, then it is inferred from
-its body (see :ref:`Return Type Inference`). If there is no body, then the
-function or method return type is ``void`` (see :ref:`Type void`).
+If function, method, or lambda return type is not specified, then it is
+inferred from its body (see :ref:`Return Type Inference`). If there is no body,
+then the function, method, or lambda return type is ``void`` (see
+:ref:`Type void`).
 
 .. index::
    return type
@@ -1535,9 +1555,9 @@ Return Type Inference
 .. meta:
     frontend_status: Done
 
-An omitted function or method return type can be inferred from the function,
-or the method body. If the return type is omitted in a native function (see
-:ref:`Native Functions`), then a :index:`compile-time error` occurs.
+A missing function, method, or lambda return type can be inferred from the
+function, method, or lambda body. A :index:`compile-time error` occurs if
+return type is missing from a native function (see :ref:`Native Functions`).
 
 The current version of |LANG| allows inferring return types at least under
 the following conditions:
@@ -1550,10 +1570,15 @@ the following conditions:
    expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
    *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
    ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
-   is the return type.
--  If a function or a method is ``async`` (see :ref:`Async Functions and Methods`), 
-   the return type is inferred by using the rules above, and the return type ``T``
-   is not ``Promise``, then the return type is assumed to be ``Promise<T>``.
+   is the return type. If at least one of return statements has no expression, then
+   type ``undefined`` is added to the return type union.
+-  If a lambda body contains no return statement but at least one throw statement
+   (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
+   :ref:`Type never`).
+-  If a function, a method, or a lambda is ``async`` (see
+   :ref:`Async Functions and Methods`), a return type is inferred by applying
+   the above rules, and the return type ``T`` is not ``Promise``, then the return
+   type is assumed to be ``Promise<T>``.
 
 Future compiler implementations are to infer the return type in more cases.
 The example below represents type inference:
@@ -1614,10 +1639,10 @@ a corresponding :index:`compile-time error` occurs.
 
 |
 
-.. _Overload Signatures:
+.. _Declarations with Overload Signatures:
 
-Overload Signatures
-*******************
+Declarations with Overload Signatures
+*************************************
 
 .. meta:
     frontend_status: None
@@ -1657,10 +1682,12 @@ The call of ``foo()`` is executed as a call of the implementation function
 with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
-.. _Function Overload Signatures:
+|
 
-Function Overload Signatures
-============================
+.. _Function with Overload Signatures:
+
+Function with Overload Signatures
+=================================
 
 .. meta:
     frontend_status: None
@@ -1678,11 +1705,15 @@ is presented below (see also :ref:`Function Declarations`):
       'async'? 'function' identifier typeParameters? signature
       ;
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+*Function with overload signatures* declared in a non-ambient context must have
+an *implementation body* (it is then called *function with a body*).
+Otherwise, a  :index:`compile-time error` occurs.
 
-If not all overload signatures are either exported or non-exported, then a
-:index:`compile-time error` occurs.
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
+
+A :index:`compile-time error` occurs if not all overload signatures and
+implementation bodies (if any) are either exported or non-exported.
 
 .. index::
    call
@@ -1698,10 +1729,10 @@ If not all overload signatures are either exported or non-exported, then a
 
 |
 
-.. _Class Method Overload Signatures:
+.. _Class Method with Overload Signatures:
 
-Class Method Overload Signatures
-================================
+Class Method with Overload Signatures
+=====================================
 
 .. meta:
     frontend_status: None
@@ -1719,17 +1750,32 @@ is presented below (see also :ref:`Method Declarations`):
         methodModifier* identifier signature
         ;
 
-A :index:`compile-time error` occurs if the method implementation is not
-present, or does not immediately follow the declaration.
+*Method with overload signatures* declared in a non-ambient context must have
+an *implementation body* (it is then called *method with a body*). Otherwise,
+a :index:`compile-time error` occurs.
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
 
+A :index:`compile-time error` also occurs if not **all** of the following
+requirements are met:
 
-.. _Constructor Overload Signatures:
+- Access modifiers of an overload signature and an implementation method are
+  the same;
+- All overload signatures and the implementation method are either static or
+  non-static;
+- All overload signatures and the implementation method are either final or
+  non-final;
+- Overload signatures are not native (however, a native implementation method
+  is allowed);
+- Overload signatures are not abstract.
 
-Constructor Overload Signature
-================================
+|
+
+.. _Constructor with Overload Signatures:
+
+Constructor with Overload Signatures
+====================================
 
 .. meta:
     frontend_status: None
@@ -1748,18 +1794,35 @@ is presented below (see also :ref:`Constructor Declaration`):
         accessModifier? 'constructor' signature
         ;
 
-A :index:`compile-time error` occurs if at least two different overload
-signatures or implementation signatures have different *access modifiers*.
+*Constructor with overload signatures* declared in a non-ambient context must
+have an *implementation body* (it is then called *constructor with a body*).
+A :index:`compile-time error` occurs in the following situations:
 
-The semantic rules for *overload signatures* and its implementation body
-are described in :ref:`Overload Signatures Correctness Check`.
+- Implementation body is missing;
+- Implementation body fails to follow a signature immediately; or
+- Two or more signatures of an implementation body have different access
+  modifiers.
 
-.. _Overload Signatures Correctness Check:
+The semantic rules for *implementation bodies* are discussed in
+:ref:`Overload Signatures Implementation Body`.
 
-Overload Signatures Correctness Check
-=====================================
+|
 
-TBD
+.. _Overload Signatures Implementation Body:
+
+Overload Signatures Implementation Body
+=======================================
+
+*Implementation body* must have a signature as follows (see
+:index:`Type Any`):
+
+.. code-block:: typescript
+   :linenos:
+
+    (...args: Any[]): Any 
+
+Otherwise, a :index:`compile-time error` occurs.
+
 
 |
 

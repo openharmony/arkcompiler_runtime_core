@@ -266,8 +266,8 @@ Annotations can be applied to the following:
 
 - :ref:`Top-Level Declarations`;
 
-- Class members (see :ref:`Class Body`) or interface members (see
-  :ref:`Interface Body`);
+- Class members (see :ref:`Class Members`) or interface members (see
+  :ref:`Interface Members`);
 
 - Type usage (see :ref:`Using Types`);
 

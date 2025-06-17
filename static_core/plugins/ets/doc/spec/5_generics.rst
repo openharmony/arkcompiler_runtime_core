@@ -152,15 +152,15 @@ Type Parameter Constraint
 If possible instantiations need to be constrained, then an individual
 *constraint* can be set for each type parameter after the keyword ``extends``.
 A constraint can have the form of any type. If no constraint is specified,
-then the contraint is :ref:`Type Any`, so the lack of an explicit constraint
-effectively means ``extends Any``. As consequence such type parameter
-is not compatible with :ref:`Type Object`, and has no methods or fields
-available for use.
+then the constraint is :ref:`Type Any`, i.e., the lacking explicit constraint
+effectively means ``extends Any``. As a consequence, the type parameter is not
+compatible with :ref:`Type Object`, and has neither methods nor fields available
+for use.
 
-If type parameter *T* has type constraint
-*S*, then the actual type of the generic instantiation must be a subtype of 
-*S* (see :ref:`Subtyping`). If the constraint *S* is a non-nullish type
-(see :ref:`Nullish Types`), then *T* is also non-nullish.
+If type parameter *T* has type constraint *S*, then the actual type of the
+generic instantiation must be a subtype of *S* (see :ref:`Subtyping`). If the
+constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then *T* is
+also non-nullish.
 
 .. index::
    constraint

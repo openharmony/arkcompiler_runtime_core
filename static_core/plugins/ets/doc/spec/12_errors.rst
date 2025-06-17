@@ -105,7 +105,7 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 
 .. index::
    runtime system
-   standard libraty
+   standard library
    generic class
    subclass
    error situation

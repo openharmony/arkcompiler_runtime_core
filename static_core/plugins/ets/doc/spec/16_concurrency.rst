@@ -17,6 +17,9 @@
 Concurrency
 ###########
 
+.. meta:
+    frontend_status: Done
+
 |
 
 .. _Introductory Note:
@@ -24,6 +27,9 @@ Concurrency
 *****************
 Introductory Note
 *****************
+
+.. meta:
+    frontend_status: Done
 
 Most modern hardware has multiple cores. To achieve maximum performance, the
 software must be capable of using more than one core in some scenarios (e.g.,
@@ -40,12 +46,18 @@ is also crucial.
 Concurrency Subsystem Overview
 ******************************
 
+.. meta:
+    frontend_status: Done
+
 |
 
 .. _Major Concurrency Features:
 
 Major Concurrency Features
 ==========================
+
+.. meta:
+    frontend_status: Done
 
 |LANG| has APIs for asynchronous programming that enables tasks to be suspended
 and resumed later, and supports coroutines that can run in parallel (implicitly
@@ -159,6 +171,9 @@ is an implicit coroutine that can be called as a regular method.
 await
 =====
 
+.. meta:
+    frontend_status: Done
+
 ``await`` is used to wait for :ref:`Promise<Concurrency Promise Class>`
 
 If ``Promise`` not resolved, then the current coroutine is suspended until
@@ -175,6 +190,9 @@ Using ``await`` outside of :ref:`async functions<async functions>` is forbidden.
 
 Promise
 =======
+
+.. meta:
+    frontend_status: Done
 
 The ``Promise object`` is introduced to support asynchronous API. It is the
 object that represents a proxy for the result of an asynchronous operation. The
@@ -257,6 +275,9 @@ The methods are used as follows:
 Unhandled Rejected Promises
 ===========================
 
+.. meta:
+    frontend_status: Done
+
 In case of an unhandled rejection of ``Promise``, either the custom handler
 provided for ``Promise`` rejection is called, or the default ``Promise``
 rejection handler is called upon the entire program completion.
@@ -270,7 +291,7 @@ Coroutines (Experimental)
 *************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
 *structured coroutines*.

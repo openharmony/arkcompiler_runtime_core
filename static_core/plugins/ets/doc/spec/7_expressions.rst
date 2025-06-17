@@ -88,10 +88,12 @@ expression syntax rules:
 ``objectReference`` refers to one of the following three options:
 
 - Class that is to handle static members;
+
 - ``super`` that is to access constructors declared in the
   superclass, or the overridden method version of the superclass;
-- *primaryExpression* that is to refer to an instance variable of a class,
-  interface, or function type after evaluation, unless the manner of the
+
+- *primaryExpression* that is to refer to a variable
+  after evaluation, unless the manner of the
   evaluation is altered by the chaining operator '``?.``' (see
   :ref:`Chaining Operator`).
 
@@ -597,11 +599,8 @@ If *typeArguments* are provided, then *qualifiedName* is a valid instantiation
 of the generic method or function. Otherwise, a :index:`compile-time error`
 occurs.
 
-A :index:`compile-time error` also occurs in the following situations:
-
--  If a name referred by *qualifiedName* is undefined or inaccessible; or
--  If ambiguity occurs while resolving a name except the function or method
-   overloading case (see :ref:`Function, Method and Constructor Overloading`).
+A :index:`compile-time error` also occurs if a name referred by *qualifiedName*
+is undefined or inaccessible.
 
 Type of a *named reference* is the type of an expression.
 
@@ -1124,8 +1123,8 @@ override-compatible signatures (see :ref:`Override-Compatible Signatures`):
     o.method (new Derived) // OK
     o.method (new Base) // compile-time error
 
-If a class or an interface has some method implementaion, then its object
-literal can skip providing a new implemention of this method:
+If a class or an interface has some method implementation, then its object
+literal can skip providing a new implementation of this method:
 
 .. code-block:: typescript
    :linenos:
@@ -1149,6 +1148,7 @@ inferred from the context. A type inferred from the context can be either a
 named class (see :ref:`Object Literal of Class Type`), or an anonymous class
 created for the inferred interface type (see
 :ref:`Object Literal of Interface Type`).
+
 
 A :index:`compile-time error` occurs if:
 
@@ -1590,7 +1590,7 @@ initialized class instance if so do all name-value pairs.
 
 |
 
-.. _spread Expression:
+.. _Spread Expression:
 
 Spread Expression
 *****************
@@ -1600,8 +1600,8 @@ Spread Expression
 
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`) or tuple type (see :ref:`Tuple Types`) or
-any type which has iteraror defined (see :ref:`Iterable Types`). 
+array type (see :ref:`Array Types`), tuple type (see :ref:`Tuple Types`), or
+any type which has the iterator defined (see :ref:`Iterable Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
 The syntax of *spread expression* is presented below:
@@ -1612,14 +1612,14 @@ The syntax of *spread expression* is presented below:
         '...' expression
         ;
 
-A *spread expression* for arrays or tuples or iterable types can be evaluated
+A *spread expression* for arrays, tuples, or iterable types can be evaluated
 as follows:
 
 -  By the compiler at compile time if *expression* is constant (see
    :ref:`Constant Expressions`);
 -  At runtime otherwise.
 
-An array or tuple or iterable object referred by the *expression* is broken by
+An array, tuple, or iterable object referred by the *expression* is broken by
 the evaluation into a sequence of values. This sequence is used where a
 *spread expression* is used. It can be an assignment, a call of a function,
 method, or constructor. A sequence of types of these values is the type of the
@@ -1709,9 +1709,9 @@ method, or constructor. A sequence of types of these values is the type of the
 
 
 **Note**. If an argument is spread at the call site, then an appropriate
-parameter must be of the rest kind (see :ref:`Rest Parameter`). If an argument
-is spread into a sequence of ordinary non-optional parameters, then a
-:index:`compile-time error` occurs:
+parameter must be of the rest kind (see :ref:`Rest Parameter`). A
+:index:`compile-time error` occurs if an argument is spread into a sequence of
+ordinary non-optional parameters as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -2033,9 +2033,6 @@ form called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
 A method call with '``?.``' (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
 
-Resolving a method at compile time is more complicated than resolving a field
-because method overloading (see :ref:`Class Method Overloading`) can occur.
-
 There are several steps that determine and check the method to be called at
 compile time (see :ref:`Step 1 Selection of Type to Use`,
 :ref:`Step 2 Selection of Method`, and
@@ -2096,23 +2093,15 @@ Step 2: Selection of Method
 .. meta:
     frontend_status: Done
 
-After the type to use is known, the method to call must be determined. |LANG|
-supports overloading, and more than one method can be accessible under the
-method name used in the call.
-
-All accessible methods (see :ref:`Accessible`) are called
-*potentially applicable candidates*, and :ref:`Overload Resolution` is used to
-select the method to call. If *overload resolution* can definitely select a
-single method, then this method is called.
-A :index:`compile-time error` occurs in the following cases:
-
--  If no method is available for the call, or
--  If there is more than one applicable method, thus causing ambiguity.
+After the type to use is known, the method to call must be determined. 
+If a method name in the call refers an *overload declaration*
+(:ref:`Overload Declarations`),
+:ref:`Overload Resolution` is used to select the method to call. 
+A :index:`compile-time error` occurs if no method is available to call.
 
 .. index::
    overload resolution
    method call
-   potentially applicable candidate
    accessible method
    access
 
@@ -2171,8 +2160,8 @@ Type of a *method call expression* is the return type of the method.
 
     let x = A.method()     // compile-time error as void cannot be used as type annotation
     A.method ()            // OK
-    let y = new A.method() // compile-time error as void cannot be used as type annotation
-    new A.method()         // OK
+    let y = new A().method() // compile-time error as void cannot be used as type annotation
+    new A().method()         // OK
 
 .. index::
    method call expression
@@ -2240,40 +2229,24 @@ The function call is *safe* because it handles nullish values properly.
    undefined
    function call
 
-The following important situations depend on the form of expression in a call,
-and require different semantic checks:
+If the form of expression in the call is *qualifiedName*, and *qualifiedName*
+refers an *overload declaration* (:ref:`Overload Declarations`),
+:ref:`Overload Resolution` is used to select the function to call. 
+A :index:`compile-time error` occurs if no function is available to call.
 
-- The form of expression in the call is *qualifiedName*, and *qualifiedName*
-  refers to an accessible function (:ref:`Function Declarations`), or to a set
-  of accessible overloaded functions.
-
-  In this case, all accessible functions (see :ref:`Accessible`) are
-  *potentially applicable candidates*. :ref:`Overload Resolution` is used to
-  select the function to call. If *overload resolution* can definitely select a
-  single function, then this function is called.
-
-A :index:`compile-time error` occurs in the following cases:
-
--  If no function is available to call;
--  If there is more than one applicable function, thus causing ambiguity; or
--  All other forms of expression.
-
-  In this case, *overload resolution* is not required as the expression
-  determines the entity to call unambiguously. Semantic check is performed
-  in accordance with :ref:`Compatibility of Call Arguments`.
+Semantic check for call is performed in accordance with
+:ref:`Compatibility of Call Arguments`.
 
 .. index::
    call
    expression
    qualified name
    accessible function
-   overloaded function
    overload resolution
    expression
    semantic check
    compatibility
    function call
-   potentially applicable candidate
    accessibility
    qualified name
    function
@@ -2323,10 +2296,9 @@ Indexing Expressions
     frontend_status: Done
 
 *Indexing expressions* are used to access elements of arrays (see
-:ref:`Array Types`), strings (see :ref:`Type string`) and
-``Record`` instances (see :ref:`Record Utility Type`).
-Indexing expressions can also be applied to instances of indexable types (see
-:ref:`Indexable Types`).
+:ref:`Array Types`), strings (see :ref:`Type string`), and ``Record`` instances
+(see :ref:`Record Utility Type`). Indexing expressions can also be applied to
+instances of indexable types (see :ref:`Indexable Types`).
 
 The syntax of *indexing expression* is presented below:
 
@@ -2477,7 +2449,7 @@ An array indexing expression evaluated at runtime behaves as follows:
    :linenos:
 
     function setElement(names: string[], i: number, name: string) {
-        names[i] = name // run-time error, if 'i' is out of bounds
+        names[i] = name // runtime error, if 'i' is out of bounds
     }
 
 .. index::
@@ -2504,7 +2476,7 @@ _String Indexing Expression
     todo: return type is string
 
 *Index expression* for array indexing must be of a numeric type (see
-:ref:`Numeric Types`), the rules are the same as for
+:ref:`Numeric Types`). The same rules apply as those for
 :ref:`Array Indexing Expression`.
 
 If the index expression value of an array is less than zero, greater than
@@ -2520,20 +2492,20 @@ is thrown.
    :linenos:
 
     console.log("abc"[1]]) // prints: b
-    console.log("abc"[3]]) // run-time exception
-	
-The result of an string indexing expression is a value of ``string`` type.
+    console.log("abc"[3]]) // runtime exception
 
-**Note.** String value is immutable, it is not allowed to change a value of
-string element by indexing.
-	
+The result of a string indexing expression is a value of ``string`` type.
+
+**Note.** String value is immutable, and is not allowed to change a value of
+a string element by indexing.
+
 .. code-block:: typescript
    :linenos:
 
-	let x = "abc"
-	x[1] = "d" // compile-time error, string value is immutable
-	
-|	
+    let x = "abc"
+    x[1] = "d" // compile-time error, string value is immutable
+
+|
 
 .. _Record Indexing Expression:
 
@@ -2860,6 +2832,7 @@ as object reference in a method call expression, then empty parentheses
 
     new A.method()   // compile-time error
     new A().method() // OK
+    (new A).method() // OK
     let a = new A    // OK
 
 
@@ -3037,6 +3010,9 @@ operator.
 Type Inference in Cast Expression
 =================================
 
+.. meta:
+    frontend_status: Partly
+
 The following combinations of ``expr`` and ``target`` are considered for the
 ``expr as target`` expression:
 
@@ -3108,6 +3084,9 @@ Examples with object literals are provided in :ref:`Object literal`.
 Casting to Enumeration
 ======================
 
+.. meta:
+    frontend_status: Done
+
 There are two cases where an ``expr as target`` expression is used to convert
 an expression value to the ``target`` enumeration type:
 
@@ -3122,7 +3101,7 @@ In both cases, the check is performed at runtime:
 -  If the value of ``expr`` is the value of some constant of the enumeration
    type, then the value is converted to the enumeration type;
 
--  Otheriwise, a runtime error occurs.
+-  Otherwise, a runtime error occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -3142,6 +3121,9 @@ In both cases, the check is performed at runtime:
 
 Runtime Checking in Cast Expression
 ===================================
+
+.. meta:
+    frontend_status: Partly
 
 If none of the previous kinds of *cast expression* can be applied, then
 ``expr as target`` checks that the type of ``expr`` is a subtype of
@@ -3225,7 +3207,7 @@ The syntax of *typeof expression* is presented below:
 
 Any ``typeof`` expression is of type ``string``.
 
-If *typeof expression* refers to a name of the overloaded function or method,
+If *typeof expression* refers to a name of an overloaded function or method,
 then a :index:`compile-time error` occurs.
 
 The evaluation of a *typeof expression* starts with the ``expression``
@@ -4994,7 +4976,7 @@ The variant of equality evaluation to be used depends on types of the
 operands used as follows:
 
 -  *Value equality* is applied to entities of :ref:`Value Types`,
-   type ``string`` (see :ref:`Type string`) and type ``bigint`` (see
+   type ``string`` (see :ref:`Type string`), and type ``bigint`` (see
    :ref:`Type bigint`).
 -  *Reference Equality based on actual (dynamic) type* is applied to values of
    type ``Object`` (:ref:`Type Object`), values of union types
@@ -5287,7 +5269,7 @@ Function Type Equality Operators
 ================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 If both operands refer to the same function object, then the comparison
 returns ``true``. Otherwise, it is ``false``.
@@ -5433,6 +5415,9 @@ The following example illustrates an equality with a value of type ``Object``:
 
 Union Equality Operators
 ------------------------
+
+.. meta:
+    frontend_status: Partly
 
 Where one operand is of type ``T``:sub:`1`, and the other operand is of type
 ``T``:sub:`2`, while ``T``:sub:`1`, ``T``:sub:`2`, or both are a union type,
@@ -6767,10 +6752,10 @@ If a *lambda body* is a single ``expression`` it is treated as
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``
 
-If *lambda signature* return type is not ``void`` (see :ref:`Type void`), and
-the execution path of the lambda body has no return statement (see
-:ref:`Return Statements`) or no single expression as a body, then a
-:index:`compile-time error` occurs.
+If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or 
+``never`` (see :ref:`Type never`), and the execution path of the lambda body
+has no return statement (see :ref:`Return Statements`) or no single expression
+as a body, then a :index:`compile-time error` occurs.
 
 .. index::
    lambda body

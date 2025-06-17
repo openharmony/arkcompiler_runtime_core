@@ -292,10 +292,10 @@ String Operator Contexts
    if values of enumeration are of type ``string``.
 
 -  The operand of a nullish type that has a nullish value is converted as
-   described below:
+   follows:
 
-     - The operand ``null`` is converted to string ``null``;
-     - The operand ``undefined`` is converted to string ``undefined``.
+     - Operand ``null`` is converted to string ``null``.
+     - Operand ``undefined`` is converted to string ``undefined``.
 
 -  An operand of a reference type or ``enum`` type is converted by applying the
    method call ``toString()``.
@@ -353,7 +353,7 @@ Numeric contexts use numeric types conversions
 expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
-An operand of an enumeration type (see :ref:`Enumerations`) can be used in
+An operand of enumeration type (see :ref:`Enumerations`) can be used in
 the numeric context if values of this enumeration are of type ``int``.
 The type of this operand is assumed to be ``int``.
 
@@ -442,8 +442,8 @@ Widening Numeric Conversions
 - Values of a smaller numeric type to a larger type (see
   :ref:`Numeric Types`);
 
-- Values of an *enumeration* type (if enumeration constants of this type are
-  of numeric type) to the same or a wider numeric type.
+- Values of *enumeration* type (if enumeration constants of this type are
+  of a numeric type) to the same or a wider numeric type.
 
 .. index::
    widening
@@ -509,9 +509,9 @@ Enumeration to Constants Type Conversions
 .. meta:
     frontend_status: Done
 
-A value of an *enumeration* type is converted to type ``int``
+A value of *enumeration* type is converted to type ``int``
 if enumeration constants of this type are of type ``int``.
-This conversion never causes runtime errors.
+This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -531,9 +531,9 @@ This conversion never causes runtime errors.
    type int
 
 
-A value of ``enumeration`` type is converted to type ``string`` if enumeration
-constants of this type are of type ``string``.
-This conversion never causes runtime errors.
+A value of *enumeration* type is converted to type ``string`` if enumeration
+constants of this type are of type ``string``. This conversion never causes
+a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -549,8 +549,8 @@ This conversion never causes runtime errors.
    constant
    runtime error
 
-A value of an *enumeration* type with explicitly declared type of its constants
-is converted to the declared type. This conversion never causes runtime errors.
+A value of *enumeration* type with an explicitly declared type of constants
+is converted to the declared type. This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -582,7 +582,7 @@ A constant expression of some integer type is converted to *enumeration* type if
 -  Value of the constant expression is equal to the value of one of the
    enumeration type constants.
 
-This conversion never causes runtime errors.
+This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -594,7 +594,7 @@ This conversion never causes runtime errors.
     const one = 2
     e = one // ok, e is set to IntegerEnum.c
 
-A similar conversion of a string type expression also works as follows:
+The conversion of a string type expression is performed similarly as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -614,8 +614,8 @@ A similar conversion of a string type expression also works as follows:
    string type
    expression
 
-A similar conversion is applcable for constants of the *enumeration* explicitly
-declared type. This conversion never causes runtime errors.
+A similar conversion is applicable for constants of an explicitly declared
+*enumeration* type. This conversion never causes a runtime error.
 
 .. code-block:: typescript
    :linenos:

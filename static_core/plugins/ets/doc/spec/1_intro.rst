@@ -338,7 +338,7 @@ as used in other languages, application areas, or industries.
 
      (1) a token that denotes the action to be performed on a value (addition,
      subtraction, comparison, etc.).
-     
+
      (2) a syntactic construct that denotes an elementary calculation within
      an expression. Normally, an operator consists of an operator sign and
      one or more operands.
@@ -433,7 +433,7 @@ as used in other languages, application areas, or industries.
      and type arguments, where applicable, to be substituted for type
      parameters of the named type.
 
-   nullable type 
+   nullable type
      -- a variable declared to have the value ``null``, or ``type T | null``
      that can hold values of type ``T`` and its derived types.
 
@@ -442,7 +442,7 @@ as used in other languages, application areas, or industries.
 
    simple name
      -- a name that consists of a single identifier.
-     
+
    qualified name
      -- a name that consists of a sequence of identifiers separated with the
      token ‘``.``’.
@@ -536,11 +536,11 @@ as used in other languages, application areas, or industries.
      -- ordinary interface method declaration that specifies the method’s name
      and signature.
 
-
    overloading
-     -- situation where different methods inherited or declared in the same
-     class, interface, function, or constructors have the same name, and their
-     signatures are not overload-equivalent.
+     -- lanaguage feature that allows to use one name to
+     call several functions (in general sense,
+     including methods and constructors)
+     with different signatures and different bodies.
 
    shadowing
      -- situation where a derived class introduces a field with the same name as
@@ -557,7 +557,7 @@ as used in other languages, application areas, or industries.
    class level scope
      -- a name declared inside a class. It is accessible inside and sometimes---by
      means of an access modifier, or via a derived class---outside  that class.
-  
+
    interface level scope
      -- a name declared inside an interface. It is accessible inside and outside
      that interface.
@@ -581,7 +581,7 @@ as used in other languages, application areas, or industries.
      member declarations).
 
    static member
-     -- a class member that is not related to a particular class 
+     -- a class member that is not related to a particular class
      instance. A static member can be used across an entire program by using
      a qualified name notation (qualification is the name of a class).
 

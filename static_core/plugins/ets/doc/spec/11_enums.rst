@@ -48,7 +48,7 @@ Type ``const enum`` is supported for source-level compatibility with |TS|.
 Type ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
-Enumerations with explicitly specifed type values are described here 
+Enumerations with explicitly specified type values are described in
 :ref:`Enumeration with explicit type`.
 
 Qualification by type is mandatory to access the enumeration constant, except
@@ -92,7 +92,7 @@ If constant expression is omitted, then the value of the enum constant is set
 implicitly to an integer value (see :ref:`Enumeration Integer Values`).
 
 A :index:`compile-time error` occurs if integer or ``string`` type enumeration
-constants are combined in one enumeration.
+constants are combined in a single enumeration.
 
 .. index::
    enum constant
@@ -105,15 +105,15 @@ constants are combined in one enumeration.
    string type
    enumeration
 
-A type all enumeration constant values belongs is called *enumeration base type*.
-It is either ``int``, or ``long``, or ``string``.
+A type to which all enumeration constant values belong is called *enumeration
+base type*. This type is ``int``, ``long``, or ``string``.
 
 .. index::
    enumeration base type
 
 Any enumeration constant is of type ``enumeration``. Implicit conversion (see
 :ref:`Enumeration to Constants Type Conversions`) of an enumeration constant
-to integer types or type ``string`` depends on the type of
+to numeric types or type ``string`` depends on the type of
 constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,

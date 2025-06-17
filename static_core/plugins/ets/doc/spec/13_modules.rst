@@ -30,11 +30,12 @@ needs to use them.
 
 .. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
 
-There are three kinds of compilation units:
+There are four kinds of compilation units:
 
 - *Separate modules* (discussed below),
-- *Declaration modules* (discussed in detail in :ref:`Declaration Modules`), and
-- *Packages* (discussed in detail in :ref:`Packages`).
+- *Declaration modules* (discussed in detail in :ref:`Declaration Modules`),
+- *Packages* (discussed in detail in :ref:`Packages`), and
+- *Libraries* (discussed in detail in :ref:`Libraries`).
 
 
 The syntax of *compilation units* is presented below:
@@ -45,6 +46,7 @@ The syntax of *compilation units* is presented below:
         separateModuleDeclaration
         | packageDeclaration
         | declarationModule
+        | libraryDescription
         ;
 
     packageDeclaration:
@@ -207,8 +209,7 @@ The syntax of *import directives* is presented below:
 
 Each binding adds a declaration or declarations to the scope of a module
 or a package (see :ref:`Scopes`). Any declaration added so must be
-distinguishable in the declaration scope (see
-:ref:`Distinguishable Declarations`).
+distinguishable in the declaration scope (see :ref:`Declarations`).
 
 Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 
@@ -234,7 +235,7 @@ A :index:`compile-time error` occurs if:
 
     // File2
     package X
-    import * as ZZ fromn "File2" // Import the same file. Compile-time error!
+    import * as ZZ from "File2" // Import the same file. Compile-time error!
 
     // File3
     package Y
@@ -246,7 +247,7 @@ A :index:`compile-time error` occurs if:
    module
    package
    scope
-   distinguishable declaration
+   declaration
    declaration scope
    import directive
 
@@ -364,10 +365,13 @@ the original name. Otherwise, the identifier specified in *binding alias*
 is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
-If the *identifier* denotes several exported overloaded functions (see
-:ref:`Function, Method and Constructor Overloading`), then all these functions
-are added to the declaration scope. This situation is represented in the
-examples below:
+If an *identifier* denotes an *overload alias* (see
+:ref:`Function Overload Declarations`), then all its overloaded functions,
+either imported or not, are considered in :ref:`Overload Resolution` for the
+call.
+
+*Selective binding* that uses exported entities is represented in the examples
+below:
 
 .. index::
    import binding
@@ -381,6 +385,8 @@ examples below:
    access
    accessibility
    bound entity
+   selective binding
+   overload alias
    binding
 
 .. code-block:: typescript
@@ -389,7 +395,8 @@ examples below:
     export const PI = 3.14
     export function sin(d: number): number {}
 
-The import path of the module is now irrelevant:
+**Note**. The import path of the module is irrelevant and replaced for '``...``'
+in the examples below:
 
 +---------------------------------+--+--------------------------------------+
 |   Import                        |  |   Usage                              |
@@ -410,7 +417,7 @@ The import path of the module is now irrelevant:
 |                                 |  |        is not accessible */          |
 +---------------------------------+--+--------------------------------------+
 
-A single import statement can list several names:
+A single import statement can list several names as follows:
 
 +-------------------------------------+--+---------------------------------+
 |   Import                            |  |   Usage                         |
@@ -448,13 +455,13 @@ Import Type Directive
     frontend_status: Partly
     todo: no CTE for type import
 
-An import directive can have ``type`` modifier exclusively to be more
-compatibile with |TS| syntactically, see also :ref:`Export Type Directive`.
-|LANG| does not support any additional semantic checks for entities
-imported using *import type* directives.
+An import directive can have a ``type`` modifier exclusively for a better
+syntactic compatibility with |TS| (also see :ref:`Export Type Directive`).
+|LANG| supports no additional semantic checks for entities imported by using
+*import type* directives.
 
-The following code illustrates semantic checks done by |TS|
-but not by |LANG| compiler:
+The semantic checks performed by the compiler in |TS| but not in |LANG|
+are represented by the following code:
 
 .. code-block:: typescript
    :linenos:
@@ -523,14 +530,28 @@ compilation units, and the exact placement of the source code:
    folder. The source code of the package is comprised of all the |LANG| source
    files in the folder.
 
-   Otherwise, the compiler imports the module the *import path* refers to.
-   The source code of the module is the file with the extension provided
-   within the import path, or---if none is so provided---appended by the
-   compiler.
+-  If *import path* refers to a file that contains a library description, then
+   the import directive is resolved by using all exported declarations of that
+   library.
 
--  If *import path* refers to both a declaration module and a separate module or
-   package with the same name, then the reference to the separate module or
+-  If *import path* refers to the file that stores a declaration module or a
+   separate module, then the import directive is resolved by using all exported
+   declarations of that module.
+
+-  If *import path* refers to both a declaration module and a separate module
+   or a package with the same name, then reference to the separate module or
    package prevails.
+
+-  Otherwise (i.e., if the *import path* resolution fails to match any of the
+   above cases), a :index:`compile-time error` occurs.
+
+
+   **Note**. Any reference to a file can be in a form of a filename with its
+   extension specified explicitly, or simply a filename. In the latter case
+   the compiler uses its own algorithm and appends different extensions in a
+   certain order to find the file to process. The order and set of extensions
+   to append is defined by the compiler implementation.
+
 
 .. index::
    compilation unit
@@ -734,7 +755,7 @@ All entities exported from the core packages of the standard library (see
 :ref:`Standard Library`) are accessible as simple names (see :ref:`Accessible`)
 in any compilation unit across all its scopes. Using these names as
 programmer-defined entities causes to a :index:`compile-time error` in
-accordance to :ref:`Distinguishable Declarations`.
+accordance to :ref:`Declarations`.
 
 .. code-block:: typescript
    :linenos:
@@ -752,7 +773,7 @@ accordance to :ref:`Distinguishable Declarations`.
    simple name
    standard library
    access
-   distinguishable declaration
+   declaration
 
 |
 
@@ -1018,7 +1039,7 @@ The syntax of *namespace declarations* is presented below:
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' topDeclaration* initializerBlock? topDeclaration* '}'
+        '{' topDeclaration* staticBlock? topDeclaration* '}'
         ;
 
 Namespace can have an initializer block (see :ref:`Static Initialization`).
@@ -1434,10 +1455,10 @@ Export Type Directive
 .. meta:
     frontend_status: Done
 
-An export directive can have ``type`` modifier exclusively to be more
-compatibile with |TS| syntactically, see also :ref:`Import Type Directive`.
+An export directive can have a ``type`` modifier exclusively for a better
+syntactic compatibility with |TS| (also see :ref:`Import Type Directive`).
 
-The syntax of *export type directive* is presented below:
+The *export type directive* syntax is presented below:
 
 .. code-block:: abnf
 
@@ -1445,16 +1466,16 @@ The syntax of *export type directive* is presented below:
         'export' 'type' selectiveBindings
         ;
 
-
-|LANG| does not support any additional semantic checks for entities
-exported using *export type* directive.
-
 .. index::
    export
    declaration
    export type
    export directive
    syntax
+
+|LANG| supports no additional semantic checks for entities exported by using
+*export type* directives.
+
 
 |
 

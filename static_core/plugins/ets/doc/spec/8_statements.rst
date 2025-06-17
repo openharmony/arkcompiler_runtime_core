@@ -446,29 +446,24 @@ the result of class iterator advancing.
    statement
 
 If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
-is declared in the loop scope and is accessible only inside loop body.
-Otherwise, the variable is as declared above.
+is declared in the loop scope. The new variable is accessible only inside loop
+body. Otherwise, the variable is as declared above.
 The modifier ``const`` prohibits assignments into *forVariable*,
 while ``let`` allows modifications.
 
-If *forVariable* is declared inside loop, its type is inferred 
-to be the type of *iterated* elements, namely
+If *forVariable* is declared inside loop, then its type is inferred to be that
+of the *iterated* elements, namely:
 
 -  ``T``, if ``Array<T>`` or ``FixedArray<T>`` instance is iterated;
 
 -  ``string``, if ``string`` value is iterated;
 
--  Type argument of the *iterator*, if an instance of *iterable* type
+-  Type argument of the *iterator*, if an instance of the *iterable* type
    is iterated.
 
-If *forVariable* is declared outside the loop, the type of iterated element
-must be assignable (see :ref:`Assignability`)
-to the type of the variable, otherwise a :index:`compile-time error` occurs.
-
-Explicit type annotation of *forVariable* is allowed as an experimental
-feature (see :ref:`For-of Type Annotation`). 
-
-
+If *forVariable* is declared outside the loop, then the type of an iterated
+element must be assignable (see :ref:`Assignability`) to the type of the
+variable. Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    modifier
@@ -482,13 +477,10 @@ feature (see :ref:`For-of Type Annotation`).
    for-of type annotation
    annotation
 
-.. code-block-meta:
-    not-subset
-
 .. code-block:: typescript
    :linenos:
 
-    // existing variable 'ch'
+    // existing variable 's'
     let s : string
     for (s of "a string object") {
       console.log(s)
@@ -499,12 +491,15 @@ feature (see :ref:`For-of Type Annotation`).
       console.log(s)
     }
 
-    // new variable 'element', its type is inferred from expression after 'of',
-    // and it cannot be assigned with a new value in the loop body
+    // new variable 'element', its type is inferred from expression after 'of'.
+    // as 'const' it cannot be assigned with a new value in the loop body
     for (const element of [1, 2, 3]) {
       console.log(element)
       element = 66 // Compile-time error as 'element' is 'const'
     }
+
+Explicit type annotation of *forVariable* is allowed as an experimental
+feature (see :ref:`For-of Explicit Type Annotation`).
 
 |
 
@@ -635,12 +630,12 @@ method body with non-``void`` return type.
    method body
    constructor
 
-A ``return`` statement (with no *expression*) can occur in one of the following
-situations:
+A ``return`` statement (with no *expression*) can occur inside one of the
+following:
 
-- Inside a initializer block;
-- Inside a constructor body;
-- Inside a function or a method body with return type ``void`` (see
+- Initializer block;
+- Constructor body;
+- Function or method body with the return type ``void`` (see
   :ref:`Type void`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
@@ -671,11 +666,10 @@ The execution of *returnStatement* leads to the termination of the
 surrounding function, method, or initializer. If an *expression* is
 provided, the resultant value is the evaluated *expression*.
 
-In case of constructors, initializer blocks, and top-level
-statements, the control is transferred out of the scope of the construction in
-question, but no result is required. Other statements of the surrounding
-function, method body, initializer block, or top-level statement are
-not executed.
+In case of constructors, initializer blocks, and top-level statements, the
+control is transferred out of the scope of the construction, but no result is
+required. Other statements of the surrounding function, method body,
+initializer block, or top-level statement are not executed.
 
 .. index::
    execution
@@ -1048,20 +1042,20 @@ can be performed while leaving the ``try-catch``:
    ``catch`` block is executed. The execution of a ``try`` block completes
    abruptly if an error is thrown inside the ``try`` block. 
 
-#. The execution of a ``try`` block completes abruptly if error *x* is thrown
-   inside the ``try`` block. If the ``catch`` clause is present and the
+#. The the execution of a ``try`` block completes abruptly if error *x* is
+   thrown inside the ``try`` block. If the ``catch`` clause is present, and the
    execution of the body of the ``catch`` clause completes normally, then the
    entire ``try`` statement completes normally. Otherwise, the ``try``
    statement completes abruptly.
 
-#. If no ``catch`` clause in place then the error is propagated to the
-   surrounding and caller scopes until it reaches the scope with the ``catch``
-   clause which handles the error. If no such scope exits then the whole
-   coroutine stack (see :ref:`Coroutines (Experimental)`) is discarded,
-   and subsequent steps are defined by the execution environment.
+#. If no ``catch`` clause is in place, then the error is propagated to the
+   surrounding and caller scopes until reaching the scope with the ``catch``
+   clause to handle the error. If there is no such scope, then the whole
+   coroutine stack (see :ref:`Coroutines (Experimental)`) is discarded.
+   Subsequent steps are then defined by the execution environment.
 
-#. If ``finally`` clause in place and its execution completes abruptly then the
-   ``try`` statement completes abruptly as well.
+#. If ``finally`` clause is in place, and its execution completes abruptly, then
+   the ``try`` statement also completes abruptly.
 
 .. index::
    try statement
