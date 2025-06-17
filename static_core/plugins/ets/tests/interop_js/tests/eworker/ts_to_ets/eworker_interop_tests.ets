@@ -34,11 +34,8 @@ function testCreateArray() {
     let callback = ():boolean => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers');
         let createArrayDy = module.getProperty('createArray');
-        // [5]
         let res1 = createArrayDy.invoke(ESValue.wrapNumber(5), ESValue.wrapNumber(1));
-        // ['a', 1, 'a', 1]
         let res2 = createArrayDy.invoke(ESValue.wrapString('a'), ESValue.wrapNumber(1), ESValue.wrapNumber(4));
-        // [true, true]
         let res3 = createArrayDy.invoke(ESValue.wrapBoolean(true), ESValue.wrapNumber(2));
         return (res1.getProperty(0).toNumber() === 5) &&
                     (res2.getProperty(0).toString() === 'a') &&
@@ -254,7 +251,7 @@ function testCustomThrowError() {
 
 function testEAWorkerNestedExecute() {
     let callback = ():boolean => {
-        let innerWorker = new EAWorker();
+        let innerWorker = new EAWorker(true);
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers');
         let processInputDy = module.getProperty('processInput');
         let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
