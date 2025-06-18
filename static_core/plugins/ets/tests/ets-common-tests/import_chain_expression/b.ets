@@ -19,7 +19,7 @@
 
 class A {
     f1() : string {
-        return ""
+        return ''
     }
 }
 

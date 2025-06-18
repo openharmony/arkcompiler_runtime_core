@@ -17,15 +17,15 @@
   files: [AnnotationsSrc.ets]
 ---*/
 
-import * as AnnoSrc from "./AnnotationsSrc"
+import * as AnnoSrc from './AnnotationsSrc'
 
 new AnnoSrc.C()
 @AnnoSrc.ClassAuthor()
 class MyClass {
    @AnnoSrc.ClassAuthor
-   foo(){}
+   foo() {}
 }
 
 @AnnoSrc.ClassAuthor
-function main(){}
+function main() {}
 

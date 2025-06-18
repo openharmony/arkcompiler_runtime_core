@@ -18,6 +18,6 @@ function main() {
     let arr = new Int32Array(buf, 0, 1);
 
     let x = Atomics.wait(arr, 0, 1)
-    arktest.assertEQ(x, "not-equal")
+    arktest.assertEQ(x, 'not-equal')
 }
 

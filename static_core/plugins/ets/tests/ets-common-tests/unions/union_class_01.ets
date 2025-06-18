@@ -14,10 +14,10 @@
  */
 
 class TestClass {
-    tmp:String = "123"
+    public tmp: String = '123'
 }
 class TestClass1 {
-    tmp:String = "234"
+    public tmp: String = '234'
 }
 function foo(a: TestClass | TestClass1) {
     console.println(a.tmp)

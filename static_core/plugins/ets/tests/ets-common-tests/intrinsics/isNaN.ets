@@ -14,19 +14,42 @@
  */
 
 function main(): int {
-    if (!Float.isNaN(Float.NaN)) return 1;
-    if (Float.isNaN(Float.POSITIVE_INFINITY)) return 2;
-    if (Float.isNaN(Float.NEGATIVE_INFINITY)) return 3;
-    if (Float.isNaN(Float.MAX_VALUE)) return 4;
-    if (Float.isNaN(Float.MIN_VALUE)) return 5;
-    if (Float.isNaN(1.2345 as float)) return 6;
+    if (!Float.isNaN(Float.NaN)) {
+        return 1;
+    }
+    if (Float.isNaN(Float.POSITIVE_INFINITY)) {
+        return 2;
+    }
+    if (Float.isNaN(Float.NEGATIVE_INFINITY)) {
+        return 3;
+    }
+    if (Float.isNaN(Float.MAX_VALUE)) {
+        return 4;
+    }
+    if (Float.isNaN(Float.MIN_VALUE)) {
+        return 5;
+    }
+    if (Float.isNaN(1.2345 as float)) {
+        return 6;
+    }
 
-    if (!Double.isNaN(Double.NaN)) return 11;
-    if (Double.isNaN(Double.POSITIVE_INFINITY)) return 12;
-    if (Double.isNaN(Double.NEGATIVE_INFINITY)) return 13;
-    if (Double.isNaN(Double.MAX_VALUE)) return 14;
-    if (Double.isNaN(Double.MIN_VALUE)) return 15;
-    if (Double.isNaN(1.2345)) return 16;
-
+    if (!Double.isNaN(Double.NaN)) {
+        return 11;
+    }
+    if (Double.isNaN(Double.POSITIVE_INFINITY)) {
+        return 12;
+    }
+    if (Double.isNaN(Double.NEGATIVE_INFINITY)) {
+        return 13;
+    }
+    if (Double.isNaN(Double.MAX_VALUE)) {
+        return 14;
+    }
+    if (Double.isNaN(Double.MIN_VALUE)) {
+        return 15;
+    }
+    if (Double.isNaN(1.2345)) {
+        return 16;
+    }
     return 0;
 }

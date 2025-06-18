@@ -17,9 +17,8 @@
   files: [re_export.ets]
 ---*/
 
-import * as A from "./re_export"
+import * as A from './re_export'
 
-function main() : void
-{
+function main() : void {
     A.bar();
 }

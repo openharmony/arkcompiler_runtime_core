@@ -18,7 +18,7 @@ files:
 - ./re-export.ets
 ---*/
 
-import {test_func} from "./re-export"
+import {test_func} from './re-export'
 
 function main(): void {
   test_func()

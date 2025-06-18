@@ -20,7 +20,7 @@
 
 
 export class BObj {
-    static foo(){
+    static foo() {
         arktest.assertEQ(1, 1)
     }
 }

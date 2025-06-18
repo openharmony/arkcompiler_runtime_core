@@ -17,4 +17,4 @@
   tags: [not-a-test]
 ---*/
 
-export function bar():void{}
+export function bar(): void {}

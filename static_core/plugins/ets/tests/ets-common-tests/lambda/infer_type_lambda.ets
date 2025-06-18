@@ -14,7 +14,7 @@
  */
 
 class Foo {
-    public lambdaInferType () {
+    public lambdaInferType() {
         let x = () => {
             return 1
         }
@@ -22,14 +22,14 @@ class Foo {
     }
     
     public lambdaInferTypeReturnLambda() {
-        let x= () => () => {
+        let x = () => () => {
            return 1
         }
         return x
     }
 
     public lambdaInferTypeReturnLambda1() {
-        let x= ()=>{
+        let x = () => {
             let y = () => {
                 return 1
             }
@@ -38,12 +38,12 @@ class Foo {
         return x
     }
 
-    public lambdaInferTypeReturnLiteral () {
+    public lambdaInferTypeReturnLiteral() {
         let x = () => 1
         return x
     }
 
-    public lambdaNestingReturnStatement () {
+    public lambdaNestingReturnStatement() {
         return () => {
             return () => {
                 return 1

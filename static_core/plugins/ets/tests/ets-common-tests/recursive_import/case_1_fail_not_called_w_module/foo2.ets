@@ -18,9 +18,9 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {A} from "./foo1"
+import {A} from './foo1'
 
 export function foo(a: A): int {
-    console.log("in foo");
+    console.log('in foo');
     return 0;
 }

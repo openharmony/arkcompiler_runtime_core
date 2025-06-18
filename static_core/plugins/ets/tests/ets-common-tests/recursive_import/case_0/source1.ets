@@ -19,10 +19,10 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo} from "./source2"
+import {foo} from './source2'
 
-export class A{
-    a: number;
+export class A {
+    public a: number;
 }
 
 export function func() {

@@ -18,8 +18,8 @@ files:
 - ./sourceB.ets
 ---*/
 
-import {v} from "./sourceB.ets"
-import * as all from "./sourceB.ets"
+import {v} from './sourceB.ets'
+import * as all from './sourceB.ets'
 
 function main() : void {
     arktest.assertEQ(5, v());

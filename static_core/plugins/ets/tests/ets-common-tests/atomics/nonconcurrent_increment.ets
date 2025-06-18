@@ -24,6 +24,6 @@ function main() {
         Atomics.add(arr, 0, 1 as byte)
     }
     let x = Atomics.load(arr, 0)
-    console.println("result is " + x)
+    console.println('result is ' + x)
     arktest.assertEQ(x, RESULT)
 }

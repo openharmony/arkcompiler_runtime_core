@@ -17,7 +17,7 @@
 files: [enum_export.ets]
 ---*/
 
-import { Letter } from "./enum_export"
+import { Letter } from './enum_export'
 
 function main() {
     let letter: Letter = Letter.A

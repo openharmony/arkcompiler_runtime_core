@@ -13,62 +13,62 @@
  * limitations under the License.
  */
 
-function SumInt(value1: int, value2: int): int {
+function sumInt(value1: int, value2: int): int {
     return value1 + value2;
 }
 
-function TaskpoolFuncTestSumInt() {
-    let result = await taskpool.execute(SumInt, 10, 20);
+function taskpoolFuncTestSumInt() {
+    let result = await taskpool.execute(sumInt, 10, 20);
     arktest.assertEQ(result, 30);
 }
 
-function TaskpoolFuncTestAnd() {
-    let And = (value1: boolean, value2: boolean): boolean => {
+function taskpoolFuncTestAnd() {
+    let and = (value1: boolean, value2: boolean): boolean => {
         if (value1 & value2) {
             return true;
         }
         return false;
     }
-    let result = await taskpool.execute(And, true, true);
+    let result = await taskpool.execute(and, true, true);
     arktest.assertEQ(result, true);
 }
 
-function TaskpoolFuncTestStrCat() {
-    let StrCat = (value1: string, value2: string): string => {
+function taskpoolFuncTestStrCat() {
+    let strCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
-    let result = await taskpool.execute(StrCat, "abc", "def");
-    arktest.assertEQ(result, "abcdef");
+    let result = await taskpool.execute(strCat, 'abc', 'def');
+    arktest.assertEQ(result, 'abcdef');
 }
 
-function TaskpoolFuncTestStrCat2() {
-    let StrCat = (value1: string, value2: string): string => {
+function taskpoolFuncTestStrCat2() {
+    let strCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
-    let result = await taskpool.execute(StrCat, "abc", "def");
-    result = await taskpool.execute(StrCat, "abc", "def");
-    arktest.assertEQ(result, "abcdef");
+    let result = await taskpool.execute(strCat, 'abc', 'def');
+    result = await taskpool.execute(strCat, 'abc', 'def');
+    arktest.assertEQ(result, 'abcdef');
 }
 
-function TaskpoolFuncTestStrCat3() {
-    let StrCat = (value1: string, value2: string): string => {
+function taskpoolFuncTestStrCat3() {
+    let strCat = (value1: string, value2: string): string => {
         return value1 + value2;
     }
-    let Sum = (value1: string, value2: string): string => {
-        return value1 + StrCat(value2, "hello");
+    let sum = (value1: string, value2: string): string => {
+        return value1 + strCat(value2, 'hello');
     }
-    let result = await taskpool.execute(Sum, "abc", "def");
-    arktest.assertEQ(result, "abcdefhello");
+    let result = await taskpool.execute(sum, 'abc', 'def');
+    arktest.assertEQ(result, 'abcdefhello');
 }
 
-function TaskpoolFuncTestArraySum() {
-    let Sum = (value1: int[], value2: int[]): int[] => {
+function taskpoolFuncTestArraySum() {
+    let sum = (value1: int[], value2: int[]): int[] => {
         let result: int[] = [0, 0];
         result[0] = value1[0] + value2[0];
         result[1] = value1[1] + value2[1];
         return result;
     }
-    let result = (await taskpool.execute(Sum, [1, 2], [3, 4])) as int[];
+    let result = (await taskpool.execute(sum, [1, 2], [3, 4])) as int[];
     arktest.assertEQ(result[0], 4);
     arktest.assertEQ(result[1], 6);
 }
@@ -76,44 +76,44 @@ function TaskpoolFuncTestArraySum() {
 class A {
     constructor(a: int, b: int) { this.a = a; this.b = b; }
     constructor() { this(0, 0); }
-    a: int;
-    b: int;
+    public a: int;
+    public b: int;
 }
 
-function TaskpoolFuncTestClassFieldsSum() {
-    let Sum = (value1: A, value2: A): A => {
+function taskpoolFuncTestClassFieldsSum() {
+    let sum = (value1: A, value2: A): A => {
         let result = new A();
         result.a = value1.a + value2.a;
         result.b = value1.b + value2.b;
         return result;
     }
-    let result = (await taskpool.execute(Sum, new A(1, 2), new A(3, 4))) as A;
+    let result = (await taskpool.execute(sum, new A(1, 2), new A(3, 4))) as A;
     arktest.assertEQ(result.a, 4);
     arktest.assertEQ(result.b, 6);
 }
 
-function TaskpoolFuncTestSumInt2() {
-    let result1 = await taskpool.execute(SumInt, 10, 20);
-    let result2 = await taskpool.execute(SumInt, 30, 40);
+function taskpoolFuncTestSumInt2() {
+    let result1 = await taskpool.execute(sumInt, 10, 20);
+    let result2 = await taskpool.execute(sumInt, 30, 40);
     arktest.assertEQ(result1, 30);
     arktest.assertEQ(result2, 70);
 }
 
-function TaskpoolFuncTestSumInt2SameArguments() {
-    let result1 = await taskpool.execute(SumInt, 10, 20);
-    let result2 = await taskpool.execute(SumInt, 10, 20);
+function taskpoolFuncTestSumInt2SameArguments() {
+    let result1 = await taskpool.execute(sumInt, 10, 20);
+    let result2 = await taskpool.execute(sumInt, 10, 20);
     arktest.assertEQ(result1, 30);
     arktest.assertEQ(result2, 30);
 }
 
-function TaskpoolFuncTestSumAndMulti() {
-    let MultiInt = (value1: int, value2: int): int => {
+function taskpoolFuncTestSumAndMulti() {
+    let multiInt = (value1: int, value2: int): int => {
         return value1 * value2;
     }
-    let result1 = await taskpool.execute(SumInt, 10, 20);
-    let result2 = await taskpool.execute(MultiInt, 10, 20);
-    let result3 = await taskpool.execute(SumInt, 10, 30);
-    let result4 = await taskpool.execute(MultiInt, 20, 20);
+    let result1 = await taskpool.execute(sumInt, 10, 20);
+    let result2 = await taskpool.execute(multiInt, 10, 20);
+    let result3 = await taskpool.execute(sumInt, 10, 30);
+    let result4 = await taskpool.execute(multiInt, 20, 20);
     arktest.assertEQ(result1, 30);
     arktest.assertEQ(result2, 200);
     arktest.assertEQ(result3, 40);
@@ -121,16 +121,16 @@ function TaskpoolFuncTestSumAndMulti() {
 }
 
 function main(): int {
-    TaskpoolFuncTestSumInt();
-    TaskpoolFuncTestAnd();
-    TaskpoolFuncTestStrCat();
-    TaskpoolFuncTestStrCat2();
-    TaskpoolFuncTestStrCat3();
-    TaskpoolFuncTestArraySum();
-    TaskpoolFuncTestClassFieldsSum();
-    TaskpoolFuncTestSumInt2();
-    TaskpoolFuncTestSumInt2SameArguments();
-    TaskpoolFuncTestSumAndMulti();
+    taskpoolFuncTestSumInt();
+    taskpoolFuncTestAnd();
+    taskpoolFuncTestStrCat();
+    taskpoolFuncTestStrCat2();
+    taskpoolFuncTestStrCat3();
+    taskpoolFuncTestArraySum();
+    taskpoolFuncTestClassFieldsSum();
+    taskpoolFuncTestSumInt2();
+    taskpoolFuncTestSumInt2SameArguments();
+    taskpoolFuncTestSumAndMulti();
     CoroutineExtras.stopTaskpool();
     return 0;
 }

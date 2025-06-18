@@ -19,7 +19,7 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo_in_2} from "./foo2"
+import {foo_in_2} from './foo2'
 
 export function main() : void {
     foo_in_2();

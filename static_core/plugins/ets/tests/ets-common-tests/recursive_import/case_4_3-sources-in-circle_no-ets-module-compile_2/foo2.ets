@@ -17,9 +17,9 @@
 tags: [not-a-test]
 ---*/
 
-import {A} from "./foo1"
+import {A} from './foo1'
 
-export function foo_in_2(): int {
-    console.log("in foo_in_2");
+export function fooIn2(): int {
+    console.log('in foo_in_2');
     return 0;
 }

@@ -20,15 +20,15 @@ function erase<T>(v: T): Any {
 }
 
 class Klass {
-    public f:number;
+    public f: number;
 
     constructor(f:number) {
-        this.f= f;
+        this.f = f;
     }
 }
 
 function foo(n: number): Klass | undefined {
-    if(n == 0){
+    if (n == 0) {
         return undefined;
     }
     return new Klass(n);
@@ -49,8 +49,8 @@ enum Color64 {
 }
 
 enum ColorString {
-    Red = "",
-    Green = "Green"
+    Red = '',
+    Green = 'Green'
 }
 
 function testNormal() {
@@ -68,8 +68,8 @@ function testNormal() {
     arktest.assertTrue(istrue(new Double(0.5)));
     arktest.assertTrue(!istrue(new Char(0 as char)));
     arktest.assertTrue(istrue(new Char(c'0')));
-    arktest.assertTrue(!istrue(""));
-    arktest.assertTrue(istrue("Hello"));
+    arktest.assertTrue(!istrue(''));
+    arktest.assertTrue(istrue('Hello'));
     arktest.assertTrue(!istrue(false));
     arktest.assertTrue(istrue(true));
     arktest.assertTrue(!istrue(null));
@@ -108,8 +108,8 @@ function testErase() {
     arktest.assertTrue(istrue(erase(new Double(0.5))));
     arktest.assertTrue(!istrue(erase(new Char(0 as char))));
     arktest.assertTrue(istrue(erase(new Char(c'0'))));
-    arktest.assertTrue(!istrue(erase("")));
-    arktest.assertTrue(istrue(erase("Hello")));
+    arktest.assertTrue(!istrue(erase('')));
+    arktest.assertTrue(istrue(erase('Hello')));
     arktest.assertTrue(!istrue(erase(false)));
     arktest.assertTrue(istrue(erase(true)));
     arktest.assertTrue(!istrue(erase(null)));

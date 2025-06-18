@@ -17,7 +17,7 @@
   files: [b.ets]
 ---*/
 
-import {b} from "./b.ets";
+import {b} from './b.ets';
 
 
 function main() : void {

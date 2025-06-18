@@ -19,10 +19,10 @@ files:
 tags: [not-a-test]
 ---*/
 
-import {foo_in_2} from "./foo2"
+import {fooIn2} from './foo2'
 
-export function foo_in_3(): int {
-    console.log("in foo_in_3");
-    foo_in_2();
+export function fooIn3(): int {
+    console.log('in foo_in_3');
+    fooIn2();
     return 0;
 }

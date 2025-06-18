@@ -14,8 +14,8 @@
  */
 
 function main(): int {
-    let upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".getChars();
-    let lowerCase = "abcdefghijklmnopqrstuvwxyz".getChars();
+    let upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.getChars();
+    let lowerCase = 'abcdefghijklmnopqrstuvwxyz'.getChars();
     for (let i = 0; i < upperCase.length; i++) {
         let uc = upperCase[i];
         let lc = lowerCase[i];

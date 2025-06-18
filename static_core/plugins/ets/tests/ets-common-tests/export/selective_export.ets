@@ -31,6 +31,6 @@ let a: int = 4;
 export { a };
 
 export class COPT {
-    i?: number = 0;
-    j?: string = "";
+    public i?: number = 0;
+    public j?: string = '';
 }
