@@ -16,6 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
@@ -105,21 +106,23 @@ function testInsertWithNegativeIndex() {
 function testInsertWithDoubleIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.insert(TestData.testNumber3, TestData.testDouble1);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        arktest.assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    arktest.assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
+    expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble1)}, exceptionCheck);
 }
 
 function testInsertWithDoubleIndex2() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.insert(TestData.testNumber3, TestData.testDouble2);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        arktest.assertEQ(arrayList[i], TestData.result4[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    arktest.assertEQ(arrayList.length, TestData.testNumber6, "ArrayList length should be 6 after insert operation");
+    expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testDouble2)}, exceptionCheck);
 }
 
 function testHasElement() {

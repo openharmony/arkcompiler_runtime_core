@@ -16,6 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
@@ -135,23 +136,23 @@ function testRemoveByIndexOutOfRange() {
 function testRemoveByIndexWithDoubleIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.removeByIndex(TestData.testDouble1);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        arktest.assertEQ(arrayList[i], TestData.result7[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    arktest.assertEQ(arrayList.length, TestData.testNumber5 - TestData.testNumber1,
-        "ArrayList length should be 4 after removeByIndex operation");
+    expectThrow(() => {arrayList.removeByIndex(TestData.testDouble1)}, exceptionCheck);
 }
 
 function testRemoveByIndexWithDoubleIndex2() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.removeByIndex(TestData.testDouble2);
-    for (let i: int = 0; i < arrayList.length; i++) {
-        arktest.assertEQ(arrayList[i], TestData.result7[i], `Element at index ${i} should match`);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
     }
-    arktest.assertEQ(arrayList.length, TestData.testNumber5 - TestData.testNumber1,
-        "ArrayList length should be 4 after removeByIndex operation");
+    expectThrow(() => {arrayList.removeByIndex(TestData.testDouble2)}, exceptionCheck);
 }
 
 function testRemoveByIndexEmptyContainer() {
