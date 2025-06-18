@@ -163,6 +163,9 @@ export final class ESValue {
     }
 
     public toBoolean(): boolean {
+        if(this.isObject()) {
+            return JSRuntime.getValueObject(this.ev, Class.of(new boolean())) as boolean;
+        }
         return JSRuntime.getValueBoolean(this.ev);
     }
 
@@ -171,6 +174,9 @@ export final class ESValue {
     }
 
     public toNumber(): number {
+        if(this.isObject()) {
+            return JSRuntime.getValueObject(this.ev, Class.of(new object())) as number;
+        }
         return JSRuntime.getValueDouble(this.ev);
     }
 
