@@ -37,6 +37,7 @@ constexpr std::string_view CONCURRENT_MODULE_REQUEST_RECORD_NAME = "_ESConcurren
 constexpr std::string_view SLOT_NUMBER_RECORD_NAME = "_ESSlotNumberAnnotation";
 constexpr std::string_view EXPECTED_PROPERTY_COUNT_RECORD_NAME = "_ESExpectedPropertyCountAnnotation";
 constexpr std::string_view DOT = ".";
+constexpr std::string_view RECORD_ANNOTATION_SEPARATOR = ".";
 constexpr char AT_SEPARATOR = '@';
 constexpr char COLON_SEPARATOR = ':';
 constexpr char NORMALIZED_OHMURL_SEPARATOR = '&';
