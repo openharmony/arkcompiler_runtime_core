@@ -512,8 +512,21 @@ Otherwise, a :index:`compile-time error` occurs.
 
     interface I5 extends I1 { foo() {} } // override method from I1
     class C4 implements I1, I5 {
-       // OK, as I5.foo overrides I1.foo, and there is only one implementation accessible
+       // Compile-time error as foo() from I1 and foo() from I5 have different implementations
     }
+
+    class Base {}
+    class Derived extends Base {}
+
+    interface IBase {
+        foo(p: Base) {}
+    }
+    interface IDerived {
+        foo(p: Derived) {}
+    }
+    class C implements IBase, IDerived {} // foo() from IBase overrides foo() from IDerived
+    new C().foo(new Base) // foo() from IBase is called
+
 
 A single method declaration in a class is allowed to implement methods of one
 or more superinterfaces.
@@ -666,7 +679,9 @@ A class can contain declarations of the following members:
 -  Fields,
 -  Methods,
 -  Accessors,
--  Constructors, 
+-  Constructors,
+-  Method overloads (see :ref:`Class Method Overload Declarations`),
+-  Constructor overloads (see :ref:`Constructor Overload Declarations`),
 
 and
 
@@ -700,6 +715,18 @@ Declarations can be inherited or immediately declared in a class. Any
 declaration within a class has a class scope. The class scope is fully
 defined in :ref:`Scopes`.
 
+Members can be static or non-static as follows:
+
+-  Static members that are not part of class instances, and can be accessed
+   by using a qualified name notation (see :ref:`Names`) anywhere the class
+   name is accessible (see :ref:`Accessible`); and
+-  Non-static, or instance members that belong to any instance of the class.
+
+All names of static entities and, separately, all names of non-static entities
+in a class declaration scope (see :ref:`Scopes`) must be unique, 
+i.e., fields, methods and overloads with the same static or non-static status
+cannot have the same name.
+
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
@@ -719,8 +746,6 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
    scope
 
 |
-
-
 
 Class members are as follows:
 
@@ -782,17 +807,6 @@ A *method* is defined by the following:
 #. *Argument type*, i.e., the list of types of arguments applicable to the
    method member.
 #. *Return type*, i.e., the return type of the method member.
-
-Members can be as follows:
-
--  Static members that are not part of class instances, and can be accessed
-   by using a qualified name notation (see :ref:`Names`) anywhere the class
-   name is accessible (see :ref:`Accessible`); and
--  Non-static, or instance members that belong to any instance of the class.
-
-All names in static and, separately, non-static class declaration scopes (see
-:ref:`Scopes`) must be unique, i.e., fields and methods cannot have the
-same name.
 
 .. index::
    class field
@@ -1525,8 +1539,23 @@ A :index:`compile-time error` occurs if:
    provide implementation for *m*.
 
 An abstract method declaration provided by an abstract subclass can override
-another abstract method. A :index:`compile-time error` occurs if an abstract
-method overrides a non-abstract instance method.
+another abstract method. Also an abstract method may override non-abstract ones
+inherited from the base class or base interfaces.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        foo() {}
+    }
+    interface I {
+        foo() {} // default implementation
+    }
+    abstract class X extends C implements I {
+        abstract foo(): void /* Here abstract foo() overrides both foo() 
+                                coming from class C and interface I */
+    }
+
 
 .. index::
    abstract method declaration
@@ -2074,7 +2103,13 @@ The high-level sequence of a *primary constructor* body includes the following:
 
 3. Implicitly executed field initializers in the order they appear in a class body.
 
-4. Optional arbitrary code.
+4. Optional arbitrary code, that
+
+   - does not use the value of an instance field before its initialization;
+   
+   - does not use ``this`` to denote newly created instance before all
+     instance fields, excluding :ref:`Fields with Late Initialization`,
+     are initialized.
 
 .. index::
    primary constructor

@@ -435,18 +435,49 @@ The syntax of *ambient interface declaration* is presented below:
 
     ambientInterfaceMember
         : interfaceProperty
-        | interfaceMethodDeclaration
+        | ambientInterfaceMethodDeclaration
         | ambientIndexerDeclaration
         | ambientIterableDeclaration
+        ;
+
+    ambientInterfaceMethodDeclaration:
+        'default'? identifier signature
         ;
 
 *Ambient interface* can contain additional members in the same manner as
 an ambient class (see :ref:`Ambient Indexer`, and :ref:`Ambient Iterable`).
 
+
+if interface method declaration is marked with the keyword ``default`` then the
+non-ambient interface must contain the default implementation for this method.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare interface I1 {
+        default foo (): void // method foo will have the default implementation
+    }
+    class C1 implements I1 {} // Class C1 is valid as foo() has the default implemenation
+
+    interface I1 {
+        // If such interface is used as I1 it will be runtime error as there is
+        // no default implementation for foo()
+        foo (): void 
+    }
+
+    declare interface I2 {
+        foo (): void // method foo has no default implementation
+    }
+    class C2 implements I2 {} // Class C2 is invalid as foo() has no implemenation
+    class C3 implements I2 { foo() {} } // Class C3 is valid as foo() has implemenation
+
+
+
 .. index::
    ambient interface
    ambient interface declaration
    ambient class
+   default method implementation
 
 |
 

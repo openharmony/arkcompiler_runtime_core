@@ -687,11 +687,71 @@ Utility Types
 |LANG| supports several embedded types, called *utility* types. Utility types
 allow constructing new types by adjusting properties of initial types. If the
 initial types are class or interface, then the resultant utility types are also
-handled as class or interface types.
+handled as class or interface types. Below is the list of the utility types,
+sorted alphabetically.
 
 .. index::
    embedded type
    utility type
+
+|
+
+.. _Awaited Utility Type:
+
+Awaited Utility Type
+====================
+
+.. meta:
+    frontend_status: None
+
+Type ``Awaited<T>`` constructs a type which has no type ``Promise`` in it. It
+is like await in async functions, or the .then() method on Promises. All
+occurencies of type ``Promise`` are recursively removed.
+
+It is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    type A = Awaited<Promise<string>>  // type A is string
+    
+    type B = Awaited<Promise<Promise<number>>> // type B is number
+    
+    type C = Awaited<boolean | Promise<number>> // type C is boolean | number
+    
+
+|
+
+.. _NonNullable Utility Type:
+
+NonNullable Utility Type
+========================
+
+.. meta:
+    frontend_status: None
+
+Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
+types.
+
+It is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    type X = Object | null | undefined
+    type Y = NonNullable<X> // That is Object
+
+    class A <T> {
+      field: NonNullable<T> // That non-nullable version of the type parameter
+      constructor (field: NonNullable<T>) {
+        this.field = field
+      }
+    }
+
+    const a = new A<Object|null> (new Object)
+    a.field // type of field is Object
+
+
 
 |
 

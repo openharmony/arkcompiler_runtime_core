@@ -39,7 +39,6 @@ Grammar Summary
 
     typeReference:
         typeReferencePart ('.' typeReferencePart)*
-        |  identifier '!'
         ;
 
     typeReferencePart:
@@ -967,13 +966,18 @@ Grammar Summary
         '{' ambientInterfaceMember* '}'
         ;
 
+
     ambientInterfaceMember
         : interfaceProperty
-        | interfaceMethodDeclaration
+        | ambientInterfaceMethodDeclaration
         | ambientIndexerDeclaration
-        | ambientCallSignatureDeclaration
         | ambientIterableDeclaration
         ;
+
+    ambientInterfaceMethodDeclaration:
+        'default'? identifier signature
+        ;
+
 
     ambientNamespaceDeclaration:
         'namespace' qualifiedName '{' ambientNamespaceElement* '}'

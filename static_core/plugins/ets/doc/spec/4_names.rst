@@ -121,7 +121,7 @@ Declarations
     frontend_status: Done
 
 A declaration introduces a named entity in an appropriate *declaration scope*
-(see :ref:`Scopes`), see 
+(see :ref:`Scopes`), see
 
 .. index::
    named entity
@@ -321,6 +321,11 @@ The scope of an entity depends on the context the entity is declared in:
    -  The expression the value stores;
    -  A reference to the class instance for the names of instance entities; or
    -  Name of the class for static entities.
+
+   |LANG| supports using the same identifier as a name of static entity and
+   as a name of instance entity, as they are *distinguishable* by the context,
+   which is either a name of the class for static entities or
+   the expression that denotes an instance.
 
 .. index::
    class level scope
@@ -704,7 +709,7 @@ Variable Declarations
 
 .. meta:
     frontend_status: Partly
-    todo: arrays never have default values 
+    todo: arrays never have default values
     todo: raise error for non initialized arrays: let x: number[];console.log(x)
     todo: fix grammar change - ident '?' is not allowed, readonly is not here
 
@@ -1157,7 +1162,7 @@ Readonly Parameters
 .. meta:
     frontend_status: Done
 
-If the parameter type is ``readonly`` array or tuple type, then 
+If the parameter type is ``readonly`` array or tuple type, then
 no assignment and no function or method call can modify
 elements of this array or tuple.
 Otherwise, a :index:`compile-time error` occurs:
@@ -1285,7 +1290,8 @@ The syntax of *rest parameter* is presented below:
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
--  Has a type that is neither an array type nor a tuple type.
+-  Has a type that is neither an array type nor a tuple type nor a type
+   parameter constrained by an array or a tuple type.
 
 A call of entity with a rest parameter of array type ``T[]``
 (or ``FixedArray<T>``) can accept any number of arguments
@@ -1431,6 +1437,21 @@ as a prefix before the fixed-size array argument:
     sum(...x) // spread an fixed-size array 'x'
        // returns 6
 
+
+In case of generics type parameter can be used as a rest parameter if it is
+constrained by array or tupel type.
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum<T extends Array<number>>(...numbers: T): number {
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+    }
+
+
 .. index::
    argument
    fixed-size array type
@@ -1461,19 +1482,16 @@ top-level variable within the body of that function or method:
 .. code-block:: typescript
    :linenos:
 
-    class T1 {}
-    class T2 {}
-    class T3 {}
-
-    let variable: T1
-    function foo (variable: T2) {
-        // 'variable' has type T2 and refers to the function parameter
+    let x: number = 1
+    function foo (x: string) {
+        // 'x' refers to the parameter and has type string
     }
     class SomeClass {
-      method (variable: T3) {
-        // 'variable' has type T3 and refers to the method parameter
+      method (x: boolean) {
+        // 'x' refers to the method parameter and has type boolean
       }
     }
+    x++ // 'x' refers to the global variable
 
 .. index::
    shadowing
@@ -1649,7 +1667,7 @@ Declarations with Overload Signatures
 have several *overload signatures* followed by one implementation body.
 
 A call of an entity with overload signatures is always a call of the
-implementation body. If the implementation body is missing then a
+implementation body. If the implementation body is missing, then a
 :index:`compile-time error` occurs.
 
 
@@ -1698,7 +1716,7 @@ implementation bodies (if any) are either exported or non-exported.
    overload signature
    compatibility
 
-The example below has two overload signatures defined for a function:
+The example below shows two overload signatures defined for a function:
 
 .. index::
    function
@@ -1719,10 +1737,10 @@ The example below has two overload signatures defined for a function:
     foo("aa")      // ok, call fits the 2nd signature
     foo(undefined) // compile-time error, implementation signature is not accessible
 
-The call of ``foo()`` is executed as a call of the implementation function
+The call of ``foo()`` is executed as a call of an implementation function
 with an empty array argument. The call of ``foo(x)`` is executed as a call
-of the implementation function with the argument - array with the only ``x`` as
-an element.
+of an implementation function with an argument in the form of an array with
+the sole element ``x``.
 
 
 |
@@ -1768,7 +1786,7 @@ requirements are met:
   is allowed);
 - Overload signatures are not abstract.
 
-The example below has two overload signatures defined for a method:
+The example below shows two overload signatures defined for a method:
 
 .. index::
    method
@@ -1795,8 +1813,8 @@ The example below has two overload signatures defined for a method:
 
 The call of ``a.foo()`` is executed as a call of the implementation method
 with an empty array argument. The call of ``a.foo(x)`` is executed as a call
-of the implementation method with the argument - array with the only ``x`` as
-an element.
+of an implementation method with an argument in the form of an array with the
+sole element ``x``.
 
 .. code-block:: typescript
    :linenos:
@@ -1805,7 +1823,7 @@ an element.
     // mix of static and non-static
     class Incorrect {
       foo(): void                    // 1st signature
-      private foo(x: string): void   // 2nd signature 
+      private foo(x: string): void   // 2nd signature
       protected foo(x: string): void // 3rd signature
       static foo(x: Object): void    // 4th signature
       foo(...args: Any[]): Any       // implementation signature
@@ -1849,7 +1867,7 @@ A :index:`compile-time error` occurs in the following situations:
 The semantic rules for *implementation bodies* are discussed in
 :ref:`Overload Signatures Implementation Body`.
 
-The example below has two overload signatures defined for a constructor:
+The example below shows two overload signatures defined for a constructor:
 
 .. index::
    constructor
@@ -1870,10 +1888,11 @@ The example below has two overload signatures defined for a constructor:
     new A("aa")      // ok, call fits the 2nd signature
     new A(undefined) // compile-time error, implementation signature is not accessible
 
-The call of ``A()`` is executed as a call of the implementation method
-with an empty array argument. The call of ``A(x)`` is executed as a call
-of the implementation constructor with the argument - array with the only ``x`` as
-an element.
+
+The call of ``A()`` is executed as a call of an implementation constructor with
+an empty array argument. The call of ``A(x)`` is executed as a call of an
+implementation constructor with an argument in the form of an array with the
+sole element ``x``.
 
 
 |
@@ -1883,16 +1902,16 @@ an element.
 Overload Signatures Implementation Body
 =======================================
 
-*Implementation body* must have a signature 
+*Implementation body* must have a signature as follows:
 
-- for functions or methods as follows (see :index:`Type Any`):
+- For functions or methods (see :index:`Type Any`):
 
 .. code-block:: typescript
    :linenos:
 
-    (...args: Any[]): Any 
+    (...args: Any[]): Any
 
-- for constructors:
+- For constructors:
 
 .. code-block:: typescript
    :linenos:

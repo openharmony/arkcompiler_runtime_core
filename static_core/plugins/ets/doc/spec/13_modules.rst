@@ -367,8 +367,8 @@ is used. In the latter case, the bounded entity is no longer accessible (see
 
 If an *identifier* denotes an *overload alias* (see
 :ref:`Function Overload Declarations`), then all its accessible overloaded
-functions, either they are imported or not, are considered in 
-:ref:`Overload Resolution for Overload Declarations` for the call validity.
+functions, either imported or not, are considered in the process of
+:ref:`Overload Resolution for Overload Declarations` for call validity.
 
 .. code-block:: typescript
    :linenos:

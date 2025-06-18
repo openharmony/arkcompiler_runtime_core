@@ -276,9 +276,10 @@ More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
 If the subtyping relation of two types is not defined in a section below,
-then such types are not related to each other. Specifically, two array types
-(resizable and fixed-size alike), and two tuple types are not related to each
-other, except where they are identical (see :ref:`Type Identity`).
+then such types are not related to each other. Specifically,
+two :ref:`Resizable Array Types`, and two :ref:`Tuple Types`
+are not related to each other, except where they are identical
+(see :ref:`Type Identity`).
 
 .. index::
    subtyping
@@ -383,7 +384,7 @@ Subtyping for Literal Types
 .. meta:
     frontend_status: Done
 
-Any ``string`` literal type (see :ref:`Literal Types`) is *subtype* of type
+Any ``string`` literal type (see :ref:`String Literal Types`) is *subtype* of type
 ``string``. It affects overriding as shown in the example below:
 
 .. code-block:: typescript
@@ -558,6 +559,14 @@ following conditions are  met:
        /* Compile-time error: too less parameters */
     }
 
+    let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
+    foo = (p?: number): void => {}                             // OK:  ``m <= n``
+    foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
+    foo = (p: number): void => {}                              
+          // Compile-time error: 1st parameter in type is optional but in lambda mandatory
+    foo = (p1: number, p2?: string): void => {}
+          // Compile-time error:  1st parameter in type is optional but in lambda mandatory
+
 .. index::
    parameter type
    covariance
@@ -566,6 +575,46 @@ following conditions are  met:
    contravariant return type
    supertype
    parameter
+
+|
+
+.. _Subtyping for Fixed-Size Array Types:
+
+Subtyping for Fixed-Size Array Types
+====================================
+
+Fixed-size array types are covariant, meaning that
+
+``FixedSize<B> <: FixedSize<A>`` if ``B <: A``.
+
+The following example illustrate this:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: FixedArray<number> = [1, 2, 3]
+    let y: FixedArray<Object> = x // ok, as number <: Object
+    y = x // compile-time error
+
+Covariant array assignment can lead to ``ArrayStoreError`` runtime error
+if a value of incorrect type is put into the array. The runtime
+system performs run-time checks to ensure type-safety. It is illustrated
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {}
+    class D extends C {}
+
+    function foo (ca: FixedArray<C>) {
+      ca[0] = new C()
+    }
+
+    let da: FixedArray<D> = [new D()]
+    let ca: FixedArray<C> = da
+
+    foo(ca) // run-time error in 'foo'
 
 |
 
@@ -630,7 +679,7 @@ Assignability
 
 Type ``T``:sub:`1` is assignable to type ``T``:sub:`2` if:
 
--  ``T``:sub:`1` is type ``never`` and ``T``:sub:`2` is any other type;
+-  ``T``:sub:`1` is type ``never``;
 
 -  ``T``:sub:`1` is identical to ``T``:sub:`2` (see :ref:`Type Identity`);
 
@@ -901,7 +950,7 @@ This technique called *type inference* allows keeping type safety and
 program code readability, doing less typing, and focusing on business logic.
 Type inference is applied by the compiler in the following contexts:
 
-- :ref:`Type Inference for Integer Constant Expressions`;
+- :ref:`Type Inference for Numeric Constant Expressions`;
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
 - Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
 - Function, method or lambda return type (see :ref:`Return Type Inference`);
@@ -937,19 +986,22 @@ Type inference is applied by the compiler in the following contexts:
 
 |
 
-.. _Type Inference for Integer Constant Expressions:
+.. _Type Inference for Numeric Constant Expressions:
 
-Type Inference for Integer Constant Expressions
+Type Inference for Numeric Constant Expressions
 ===============================================
 
 .. meta:
     frontend_status: Partly
 
-The type of expression of integer types for :ref:`Constant Expressions` is
+The type of expression of a numeric type for :ref:`Constant Expressions` is
 first evaluated from the expression as follows:
 
 - Type of an integer literal is the default type of the literal:
   ``int`` or ``long`` (see :ref:`Integer Literals`);
+
+- Type of a floating-point literal is the default type of the literal:
+  ``double`` or ``float`` (see :ref:`Floating-Point Literals`);
 
 - Type of a named constant is specified in the constant declaration;
 
@@ -958,12 +1010,15 @@ first evaluated from the expression as follows:
 
 - Type of a :ref:`Cast expression` is specified in the expression target type.
 
-The evaluated result type can be inferred to a smaller integer *target type*
-from the context if it is of an integer type and the following conditions are met:
+The evaluated numeric result type can be inferred to a numeric *target type*
+from the context if the following conditions are met:
 
-#. Top-level expression is not a cast expression;
+#. Last executed operator in the expression is not a cast operator ``as``;
 
-#. Value of the expression fits into the range of the *target type*.
+#. The *target type* is a larger numeric type then the evaluated result type or
+   the evaluated result type is an integer type,
+   the *target type* is a smaller integer type
+   and value of the expression fits into the range of the *target type*.
 
 A :index:`compile-time error` occurs if the context is a union type,
 and the evaluated value can be treated
@@ -981,7 +1036,7 @@ The examples below illustrate valid and invalid narrowing.
     b = 64 + 63 // ok, int -> byte narrowing
     b = 128 // compile-time-error, value is out of range
     b = 1.0 // compile-time-error, floating-point value cannot be narrowed
-    b = 1 as short // // compile-time-error, cast expression
+    b = 1 as short // // compile-time-error, cast expression fixes 'short' type
 
     let s: short = 32768 // compile-time-error, value is out of range
 
@@ -1066,7 +1121,7 @@ allow operations that are specific to the type so narrowed:
 
 Other examples are explicit calls to ``instanceof``
 (see :ref:`InstanceOf Expression`) or checks against ``null``
-(see :ref:`Reference Equality`) as part of ``if`` statements
+(see :ref:`Equality Expressions`) as part of ``if`` statements
 (see :ref:`if Statements`) or conditional expressions
 (see :ref:`Conditional Expressions`):
 
@@ -1103,15 +1158,14 @@ Other examples are explicit calls to ``instanceof``
    instanceof
    null
    semantic check
-   reference equality
 
 In like cases, a smart compiler can deduce the smart type of an entity without
 requiring additional checks or casts (see :ref:`Cast Expression`).
 
 Overloading (see :ref:`Overload Declarations`) can cause tricky situations
-when a smart type leads to the call of an entity
-(see :ref:`Overload Resolution for Overload Declarations`)
-that suits smart type rather than static type of an argument:
+when a smart type results in calling an entity that suits the smart type
+rather than a static type of an argument (see
+:ref:`Overload Resolution for Overload Declarations`):
 
 .. code-block:: typescript
    :linenos:
@@ -1174,6 +1228,9 @@ in a supertype    (see :ref:`Override-Compatible Signatures`).
    object type
    runtime
    override-compatibility
+
+In some case of *method overriding* an implementation is forced to
+:ref:`Make a Bridge Method for Overriding Method`.
 
 |
 
@@ -1313,19 +1370,16 @@ The table below represents semantic rules that apply in various contexts:
 
    * - A *constructor* is defined in a subclass.
      - All base class constructors are available for call in all derived class
-       constructors.
-
+       constructors via ``super`` call (see :ref:`Explicit Constructor Call`).
 
 .. code-block:: typescript
    :linenos:
 
    class Base {
-      constructor() {}
       constructor(p: number) {}
    }
    class Derived extends Base {
       constructor(p: string) {
-           super()
            super(5)
       }
    }
@@ -1742,18 +1796,18 @@ Overloading
 ***********
 
 *Overloading* is the language feature that allows to use one name to
-call several functions, or methods, or constructors with different signatures
+call several functions, methods, or constructors with different signatures
 and different bodies.
 
-The actual function, or method, or constructor to be called is determined at
+The actual function, method, or constructor to be called is determined at
 compile time. Thus, *overloading* is related to compile-time polymorphism.
 
-|LANG| support two mechanisms for *overloading*:
+|LANG| supports the following two *overloading*  mechanisms:
 
-- |TS| compatible feature: :ref:`Declarations with Overload Signatures`
-  that is mainly used to improve type checking;
+- |TS|-compatible feature: :ref:`Declarations with Overload Signatures`
+  mainly used to improve type checking; and
 
-- and innovative form of *managed overloading*: :ref:`Overload Declarations`.
+- Innovative *managed overloading* (see :ref:`Overload Declarations`).
 
 .. index::
    overloading
@@ -1766,19 +1820,20 @@ compile time. Thus, *overloading* is related to compile-time polymorphism.
    compile-time polymorphism
    overloading
 
-*Overload resolution* is used to select one entity to be called from a set of
-candidates if a name to call refers to a *overload declaration* (see
-:ref:`Overload resolution for Overload Declarations`).
+*Signature resolution* is used to select one entity to call from a set of
+candidates if the name to call refers to a *declaration with overload signatures*
+(see :ref:`Signature Resolution for Overload Signatures`).
 
-*Signature resolution* is used to select one entity to be called from a set of
-candidates if a name to call refers to a *declaration with overload signatures*
-(see :ref:`Signature resolution for Overload Signatures`).
+*Overload resolution* is used to select one entity to call from a set of
+candidates if the name to call refers to an *overload declaration* (see
+:ref:`Overload Resolution for Overload Declarations`).
 
-Both resolution schemes use the first match textual order to make the
-resolution process straightforward.
+Both mechanisms of resolution use the first-match textual order to streamline
+the resolution process.
 
-TBD: A :index:`compile-time warning` is issued if the order of entities in *overload
-declarations* implies that some overloaded entities can never be selected for the call.
+TBD: A :index:`compile-time warning` is issued if the order of entities in an
+*overload declaration* implies that some overloaded entities can never be
+selected for a call.
 
 .. code-block:: typescript
    :linenos:
@@ -1793,22 +1848,22 @@ declarations* implies that some overloaded entities can never be selected for th
 
 |
 
-.. _Signature resolution for Overload Signatures:
+.. _Signature Resolution for Overload Signatures:
 
-Signature resolution for Overload Signatures
+Signature Resolution for Overload Signatures
 ============================================
 
 .. meta:
     frontend_status: None
 
-*Overload signatures* allows allows specifying a function, or method, or
-constructor that can have several signatures and one *implementation body*
-with its own fixed *implementation siganture* (see
-:ref:`Overload Signatures Implementation Body`). At the call site, call
-arguments are checked against these several signatures in their declaration
-order: the first one that is appropriate for the given arguments means that
-the call is valid. If no appropriate signature found then a
-:index:`compile-time error` occurs.
+*Overload signature* allows specifying a function, method, or constructor that
+can have multiple signatures and a single *implementation body* with its own
+fixed *implementation siganture* (see
+:ref:`Overload Signatures Implementation Body`).
+Call arguments are checked at the call site against such multiple signatures in
+their declaration order: the call is considered valid as soon as the first
+signature is found appropriate for the arguments given.
+A :index:`compile-time error` occurs if no appropriate signature is found.
 
 .. code-block:: typescript
    :linenos:
@@ -1824,21 +1879,21 @@ the call is valid. If no appropriate signature found then a
 
 |
 
-.. _Overload resolution for Overload Declarations:
+.. _Overload Resolution for Overload Declarations:
 
-Overload resolution for Overload Declarations
+Overload Resolution for Overload Declarations
 =============================================
 
 .. meta:
     frontend_status: None
 
-*Overload declarations* defines an ordered set of entities, at the call site
-the first *accessible* entity from this set with appropriate signature
-is used to call. The *first match* algorithm gives a developer with
-full control over selecting specific entity to call.
-That's why this approach is called *managed overloading*.
-
-This example illustrates the developer control over calls:
+*Overload declaration* defines an ordered set of entities, and the first entity
+from this set that is *accessible* and has an appropriate signature is used to
+call at the call site.
+This approach is called *managed overloading* because the *first-match*
+algorithm provides full control for a developer to select a specific entity
+to call. This developer control over calls is represented by the following
+example:
 
 .. code-block:: typescript
    :linenos:
@@ -1971,7 +2026,7 @@ Type mapping determines the *effective types* as follows:
    the number of element types *n* for :ref:`Tuple Types` in the form
    ``[T1, T2 ..., Tn]``. **TBD**
 
--  String for *string literal types* (see :ref:`Literal Types`).
+-  String for :ref:`String Literal Types`.
 
 -  Enumeration base type of the same const enum type for *const enum* types
    (see :ref:`Enumerations`).

@@ -148,10 +148,10 @@ makes a *package* even more independent from its environment.
 
 |
 
-.. _Character Type and Literals:
+.. _Type char:
 
-Character Type and Literals
-***************************
+Type ``char``
+*************
 
 .. meta:
     frontend_status: Partly
@@ -232,7 +232,7 @@ Character Equality Operators
     frontend_status: Partly
     todo: need to adapt the implementation to the latest specification
 
-*Character equality* is used for operands of type ``boolean``.
+*Value equality* is used for operands of type ``char``.
 
 If both operands represent the same Unicode code point,
 then the result of ':math:`==`' or ':math:`===`'
@@ -256,8 +256,8 @@ Fixed-Size Array Types
 *Fixed-size array type*, written as ``FixedArray<T>``, is the built-in type
 characterized by the following:
 
--  Any object of array type contains elements, and the number of such elements
-   is known as *array length*.
+-  Any object of array type contains elements. The number of elements
+   is known as *array length* and can be accessed using ``length`` property.
 -  Array length is a non-negative integer number.
 -  Array length is set once at runtime and cannot be changed after that.
 -  Array element is accessed by its index. *Index* is an integer number
@@ -918,16 +918,16 @@ Iterable Types
 .. meta:
     frontend_status: Done
 
-A type is *iterable* if it has an accessible parameterless method with the name
-``$_iterator`` and a return type that is a subtype (see :ref:`Subtyping`) of
-type ``Iterator`` as defined in the standard library (see :ref:`Standard Library`).
-It guarantees that an object returned by the
-``$_iterator`` method is of the type which implements ``Iterator``, and thus
-allows traversing an object of the *iterable* type.
+A class or an interface is *iterable* if it implements the interface ``Iterable``
+defined in the standard library (see :ref:`Standard Library`) and thus has an
+accessible parameterless method with the name ``$_iterator`` and a return type
+that is a subtype (see :ref:`Subtyping`) of type ``Iterator`` as defined in the
+standard library. It guarantees that an object returned by the ``$_iterator``
+method is of the type which implements ``Iterator``, and thus allows traversing
+an object of the *iterable* type.
 
-A class or an interface can be made *iterable*. A union of iterable types
-is also *iterable*. It means that instances of such types can be used in
-``for-of`` statements (see :ref:`For-Of Statements`).
+A union of iterable types is also *iterable*. It means that instances of such
+types can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
 An *iterable* class ``C`` is represented by the example below:
 
@@ -948,7 +948,7 @@ An *iterable* class ``C`` is represented by the example below:
 .. code-block:: typescript
    :linenos:
 
-      class C {
+      class C implements Iterable {
         data: string[] = ['a', 'b', 'c']
         $_iterator() { // Return type is inferred from the method body
           return new CIterator(this)
@@ -1110,7 +1110,7 @@ Callable Types with ``$_invoke`` Method
 .. meta:
     frontend_status: Done
 
-The method ``$_invoke`` can have an arbitrary signature. The method can be used
+The ``static`` method ``$_invoke`` can have an arbitrary signature. The method can be used
 in a *type call expression* in either case above. If the signature has
 parameters, then the call must contain corresponding arguments.
 
@@ -1135,6 +1135,8 @@ parameters, then the call must contain corresponding arguments.
    type call expression
    argument
 
+If a type contains an instance method ``$_invoke`` it does not make the type *callable*.
+
 |
 
 .. _Callable Types with $_instantiate Method:
@@ -1145,7 +1147,7 @@ Callable Types with ``$_instantiate`` Method
 .. meta:
     frontend_status: Done
 
-The method ``$_instantiate`` can have an arbitrary signature by itself.
+The ``static`` method ``$_instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
 must be a ``factory`` (i.e., it must be a *parameterless function type
 returning some class type*).
@@ -1222,6 +1224,8 @@ if:
     }
     let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
+If a type contains an instance method ``$_instantiate`` it does not make the type *callable*.
+
 |
 
 .. _Statements Experimental:
@@ -1281,20 +1285,20 @@ full control over selecting specific entity to call from several
 overloaded entities.
 
 An *overload declaration* is used for *managed overloading* to
-define a set of overloaded entities (functions, methods, constructors)
-and to define its order.
+define a set and order of overloaded entities (functions, methods,
+or constructors).
 
-If *overload declaration* can be used
+An *overload declaration* can be used as follows:
 
--  as *top-level declaration* (see :ref:`Top-Level Declarations`)
-   to specify overload for functions; or
+-  As a *top-level declaration* (see :ref:`Top-Level Declarations`)
+   to specify the overload for functions;
 
--  in a class declaration (see :ref:`Class Members`); or
+-  In a class declaration (see :ref:`Class Members`); or
 
--  in an interface declaration (see :ref:`Interface Members`)
+-  In an interface declaration (see :ref:`Interface Members`).
 
-An *overload declaration* starts with  the keyword ``overload`` and
-declares an *overload alias* for a set of explicitly listed entities:
+An *overload declaration* starts with the keyword ``overload`` and
+declares an *overload alias* for a set of explicitly listed entities as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1316,8 +1320,8 @@ declares an *overload alias* for a set of explicitly listed entities:
     maxN(1, 2)    // maxN is explicitly called
 
 The semantics of an entity included into an overloaded set does not change.
-Such entities follow the ordinary accessibility rules and can be used
-separately, e.g., can be called explicitly from the overload alias:
+Such entities follow the ordinary accessibility rules, and can be used
+separately from an overload alias, e.g., called explicitly:
 
 .. code-block:: typescript
    :linenos:
@@ -1447,6 +1451,7 @@ Class Method Overload Declarations
     frontend_status: None
 
 An *overload method declaration* allows to declare an *overload alias*
+as a class member (see :ref:`Class Members`)
 for a set of static or instance methods (see :ref:`Method Declarations`).
 
 The syntax is presented below:
@@ -1544,7 +1549,7 @@ of :ref:`Overload Resolution for Overload Declarations`:
     }
 
 
-Some or all overloaded functions can be ``native``:
+Some or all overloaded functions can be ``native`` as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1573,7 +1578,7 @@ The example below illustrates *overload declaration* in subtypes:
     class Base {
         overload process { processNumber, processString }
         processNumber(n: number) {/*body*/}
-        processString(n: number) {/*body*/}
+        processString(n: string) {/*body*/}
     }
 
     class D1 extends Base {
@@ -1595,7 +1600,8 @@ The example below illustrates *overload declaration* in subtypes:
     new D2().process(1.0) // calls processNumber from Base (first appropriate)
 
 Methods with special names (see :ref:`Indexable Types`, :ref:`Iterable Types`,
-and :ref:`Callable Types`) can be overloaded in the same way as ordinary methods:
+and :ref:`Callable Types`) can be overloaded in the same manner as ordinary
+methods:
 
 .. code-block:: typescript
    :linenos:
@@ -1622,6 +1628,7 @@ Interface Method Overload Declarations
     frontend_status: None
 
 *Interface method overload declaration* allows to declare an *overload alias*
+as an interface member (see :ref:`Interface Members`)
 for a set of interface methods (see :ref:`Interface Method Declarations`).
 
 The syntax is presented below:
@@ -1754,9 +1761,8 @@ position in a list of overloaded constructors:
     new C("abc") // fromString is used
     new C.fromString("aa") // fromString is explicitly used
 
-A :index:`compile-time error` occurs, if
-*overload constructor declaration* or a named constructor
-(see :ref:`Constructor Names`) is used in a class where
+A :index:`compile-time error` occurs if an *overload constructor declaration* or
+a named constructor (see :ref:`Constructor Names`) is used in a class where a
 :ref:`Constructor with Overload Signatures` is defined:
 
 .. code-block:: typescript
@@ -1806,7 +1812,7 @@ declaration*. This important case is represented by the following example:
     d.foo("aa") // overload alias is used to call 'fooString' from D
     c.foo(1)    // method 'foo' from is called (no overload)
 
-If the name of a method and of an *overload alias* is the same, then the method
+If names of a method and of an *overload alias* are the same, then the method
 can be overriden as usual:
 
 .. code-block:: typescript
@@ -1844,13 +1850,12 @@ implements the interface:
     }
 
 Semantically, it means than the *overload alias* is considered at the call
-site only and **not** in the following situations:
+site only, and **not** in the following situations:
 
 - :ref:`Overriding`;
 
-- overloaded entities list, see
-  :ref:`Class Method Overload Declarations` and
-  :ref:`Interface Method Overload Declarations`;
+- Overloaded entities list (see :ref:`Class Method Overload Declarations` and
+  :ref:`Interface Method Overload Declarations`);
 
 - :ref:`Method Reference`.
 
@@ -1875,7 +1880,7 @@ site only and **not** in the following situations:
 
 A :index:`compile-time error` occurs if the name of an *overload alias*
 is the same as the name of a method (with the same static or non-static
-modifier) that is not listed as an overloaded method:
+modifier) that is not listed as an overloaded method as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1886,8 +1891,8 @@ modifier) that is not listed as an overloaded method:
         fooBoolean(b: boolean) {/*body*/}
 
         overload foo { // compile-time error
-            fooBoolean, fooString 
-        } 
+            fooBoolean, fooString
+        }
     }
 
 |
@@ -2090,7 +2095,7 @@ in :ref:`New Expressions`:
 The feature is also important for :ref:`Constructor Overload Declarations`.
 
 A :index:`compile-time error` occurs if a named constructor
-is used in a class where
+is used in a class where a
 :ref:`Constructor with Overload Signatures` is defined:
 
 .. code-block:: typescript
@@ -3219,81 +3224,6 @@ module.
       function increment(c: C) {
         c.count++ // ok
       }
-
-
-|
-
-.. _Generics Experimental:
-
-Generics Experimental
-*********************
-
-.. meta:
-    frontend_status: Done
-
-|
-
-.. _NonNullish Type Parameter:
-
-NonNullish Type Parameter
-=========================
-
-.. meta:
-    frontend_status: Partly
-
-If some generic class has a type parameter with a nullish union type constraint,
-then special syntax can be used for type annotation to get a non-nullish
-version of the type parameter variable. The example below illustrates this
-possibility:
-
-.. index::
-   generic class
-   type parameter
-   nullish union type
-   nullish union
-   constraint
-   type
-   type annotation
-   annotation
-   non-nullish type
-   type parameter
-   variable
-   parameter
-
-.. code-block:: typescript
-   :linenos:
-
-      class A<T> {  // in fact it extends Object|null|undefined
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      class B<T extends SomeType | null> {
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      class C<T extends SomeType | undefined> {
-          foo (p: T): T! { // foo returns non-nullish value of p
-             return p!
-          }
-      }
-
-      let a = new A<Object>
-      let b = new B<SomeType>
-      let c = new C<SomeType>
-
-      let result: Object = new Object  // Type of result is non-nullish !
-      result = a.foo(result)
-      result = b.foo(new SomeType)
-      result = c.foo(new SomeType)
-
-      // All such assignments are type-valid as well
-      result = a.foo(void)      // void! => never
-      result = b.foo(null)      // null! => never
-      result = c.foo(undefined) // undefined! => never
 
 .. raw:: pdf
 
