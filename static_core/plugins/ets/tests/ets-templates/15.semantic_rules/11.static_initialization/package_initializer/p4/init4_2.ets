@@ -23,6 +23,6 @@ tags: [compile-only]
 
 package p4
 
-const pi: float = 3.14159
+const pi: float = 3.14159f
 
 export { pi }

@@ -830,25 +830,13 @@
 ############
 
 # 1.
-# Resizable array is inferred for array literal in union context instead of FixedArray
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_29.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
-# verifier error
+# verifier error - not supported cast array literal to union of fixedarrays
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_26.ets
 
 # 2.
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's
 # return type '[Object|null|undefined, Object|null|undefined]' [x.ets:1:21]
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
-
-# 4.
-# TypeError: Floating-point value cannot be converted [init4_2.ets:27:19]
-# it seems double literal should also be inferred via preferred type to float
-15.semantic_rules/11.static_initialization/package_initializer/p4/init4_1.ets
-15.semantic_rules/11.static_initialization/package_initializer/p4/init4_2.ets
 
 # 16.
 # Need to reimplement a check for overload-equivalent sigs in case of type params. Previous impl was buggy
@@ -922,27 +910,9 @@
 
 # end of 41
 
-# 48 ES2PANDA_NEG_FAIL The return type of an async function must be Promise<T>.
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_10.ets
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_11.ets
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_9.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_12.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_13.ets
-16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_14.ets
-
 # 50 RUNTIME_FAIL RangeError: Out of bounds
 05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
 05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
-
-# 51 ASSERT IN ES2PANDA 'SyntaxError: Invalid number.' This line should be unreachable: lexer/token/number.h:169
-07.expressions/20.unary_expressions/07.bitwise_complement/bitwise_complement_neg.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_13.ets
-
-# 54 RUNTIME_FAIL ClassCastError: std.core.Float cannot be cast to std.core.Double
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_4.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_2.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
 
 # 56 ES2PANDA_NEG_FAIL A value of type Function can not be called directly. A developer must use the unsafeCall method instead.
 03.types/19.function_types/01.type_function/negative_1.ets
