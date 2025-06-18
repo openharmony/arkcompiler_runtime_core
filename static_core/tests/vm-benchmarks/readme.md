@@ -166,6 +166,34 @@ To provide additional option to compiler or virtual machine
   `--report-json-compact` disables prettifying of json.
 * `--report-csv=path.csv` to save results in csv format. Only basic info included.
 
+Apart from saved report files text report will always be printed in console.
+Also json files could be displayed in separate command:
+`vmb report <options> report.json`
+For full list of options issue: `vmb report --help`
+
+Note that in saved reports time (or speed) values are _nanoseconds_ (or ns/operation)
+and sizes are bytes, while in console output time comes in _seconds_.
+
+Output format could be controlled by `--number-format` option to `run|all|report` command:
+- `auto` (default) : `1µ 1m 1K ..`
+- `nano`: `1n 1000n ..`
+- `expo`: `7.00e-02 5.01e+03 ..`
+
+### Comparison of full test time
+
+Two runs could be compared test by test on total bench time (including compilation, device interactions etc):
+
+```shell
+vmb report --compare-meta --tolerance 10 ./{1,2}.json
+
+Full test time comparison (seconds)
+===================================
+name             | r1 | r2 |
+============================
+Sample_testSum   |  18|  18|1.77e+01->1.83e+01(same)
+VoidBench_test   |   9|  11|9.21e+00->1.13e+01(worse +22.6%)
+
+```
 
 ## Log and output:
 
@@ -326,6 +354,9 @@ Please refer to [this manual](./examples/benchmarks/interop/readme.md) and [exam
 See also [readme here](../../plugins/ets/tests/benchmarks/interop_js/README.md)
 
 ## Self tests and linters
+
+To run all unit tests and linters ussue following command:
+
 ```sh
 make tox
 ```

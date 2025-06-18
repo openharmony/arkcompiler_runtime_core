@@ -63,7 +63,7 @@ class Tool(ToolBase):
                     '--log-file={gclog} '
         if OptFlags.JIT_STATS in self.flags:
             opts += '--compiler-dump-jit-stats-csv={abc}.dump.csv '
-        if OptFlags.AOT in self.flags:
+        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
             an_files.append('{an}')
         if an_files:
             enable_an = '' if Target.HOST == self.target else '--enable-an:force'
