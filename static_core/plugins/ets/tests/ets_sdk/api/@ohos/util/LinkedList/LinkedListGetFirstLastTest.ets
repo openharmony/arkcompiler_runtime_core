@@ -49,13 +49,7 @@ function testGetFirstNonEmptyContainer() {
 
 function testGetFirstEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.getFirst();
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when out of range");
-        return;
-    }
-    arktest.assertFalse(false, "Throw error when out of range");
+    arktest.assertEQ(linkedList.getFirst(), undefined);
 }
 
 function testGetFirstUndefined() {
@@ -73,13 +67,7 @@ function testGetLastNonEmptyContainer() {
 
 function testGetLastEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.getLast();
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when out of range");
-        return;
-    }
-    arktest.assertFalse(false, "Throw error when out of range");
+    arktest.assertEQ(linkedList.getLast(), undefined);
 }
 
 function testGetLastUndefined() {
