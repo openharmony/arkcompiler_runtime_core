@@ -49,10 +49,17 @@ function checkLaunchMigration(): void {
     launch<void, () => void>(testLaunch).Await();
 }
 
-function main() {
+function testAwaitMigration(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
     arktest.assertEQ(res, true);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.await_migrate');
+    testSuite.addTest('testAwaitMigration', testAwaitMigration);
+    let res = testSuite.run();
+    return res;
 }

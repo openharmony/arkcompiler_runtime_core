@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testEworkersReachedLimit() {
     let exceptionWasCatched = false;
     let eaWorkers = new Array<EAWorker>();
     try {
@@ -21,11 +21,18 @@ function main() {
             eaWorkers.push(new EAWorker());
         }
     } catch (e) {
-        arktest.assertEQ(e.toString(), "CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached");
+        arktest.assertEQ(e.toString(), 'CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached');
         exceptionWasCatched = true;
     }
     eaWorkers.forEach((eaWorker: EAWorker) => {
         eaWorker.join();
     });
     arktest.assertTrue(exceptionWasCatched);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.eworkers_reached_limit');
+    testSuite.addTest('testEworkersReachedLimit', testEworkersReachedLimit);
+    let res = testSuite.run();
+    return res;
 }

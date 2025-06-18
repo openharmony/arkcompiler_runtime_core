@@ -23,7 +23,7 @@ async function foo() {}
 
 let resolvePromiseFn: ((value: String) => void) | null = null;
 
-function main() {
+function testWakeForEvent() {
     let p1 = new Promise<String>((resolve: (value: String) => void): void => {
         resolvePromiseFn = resolve;
     });
@@ -31,14 +31,21 @@ function main() {
     let p2 = foo();
 
     let p3 = p1.then<Number>((value: String): Number => {
-        arktest.assertEQ(value, "Panda");
+        arktest.assertEQ(value, 'Panda');
         return 42;
     });
 
     p2.then<void>((): void => {
-        resolvePromiseFn!("Panda");
+        resolvePromiseFn!('Panda');
     });
 
     let value = await p3;
     arktest.assertEQ(value, 42);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.wake_for_another_event');
+    testSuite.addTest('testWakeForEvent', testWakeForEvent);
+    let res = testSuite.run();
+    return res;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() {
+function testElauncherId(): void {
     let resolveFn: (val: number) => void;
     let p = new Promise<number>((resolve: (val: number) => void) => {
         resolveFn = resolve;
@@ -23,4 +23,11 @@ function main() {
     });
     let eLauncherId = await p;
     arktest.assertNE(eLauncherId, CoroutineExtras.getWorkerId());
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.elauncher_id');
+    testSuite.addTest('testElauncherId', testElauncherId);
+    let res = testSuite.run();
+    return res;
 }

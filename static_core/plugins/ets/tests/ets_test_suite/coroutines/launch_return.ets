@@ -15,6 +15,8 @@
 
 const FLOAT_PI: float = 3.14f;
 
+type L = StdDebug.Logger
+
 async function byteFunc(): Promise<Object> {
     return -3 as byte as Object;
 }
@@ -44,119 +46,143 @@ async function doubleFunc(): Promise<Object> {
 }
 
 let passed: boolean = false;
-let errorMessage = "";
+let errorMessage = '';
 
 function reset(): void {
     passed = false;
-    errorMessage = "";
+    errorMessage = '';
 }
 
 function check(test: String): void {
     if (!passed) {
-        console.println("Test " + test + " failed: " + errorMessage);
+        L.log('Test ' + test + ' failed: ' + errorMessage);
         throw new Error();
     }
 }
 
-export function main(): int {
+function testByteFunc(): void {
     reset();
     let byteP: Promise<Object> = byteFunc();
     let pThen = byteP.then<Object>((value: Object): Object => {
         if ((value as Byte) == -3) {
             passed = true;
         } else {
-            errorMessage = "Expected -3 but got " + value;
+            errorMessage = 'Expected -3 but got ' + value;
         }
         return value
     });
     await byteP;
     await (pThen as Promise<Object>);
-    check("byteFunc");
+    check('byteFunc');
+}
 
+function testCharFunc(): void {
     reset();
     let charP: Promise<Object> = charFunc();
-    pThen = charP.then<Object>((value: Object): Object => {
+    let pThen = charP.then<Object>((value: Object): Object => {
         if ((value as Char) == c'x') {
             passed = true;
         } else {
-            errorMessage = "Expected 'x' but got " + value;
+            errorMessage = 'Expected x but got ' + value;
         }
         return value
     });
     await charP;
     await (pThen as Promise<Object>);
-    check("charFunc");
+    check('charFunc');
+}
 
+function testShortFunc(): void {
     reset();
     let shortP: Promise<Object> = shortFunc();
-    pThen = shortP.then<Object>((value: Object): Object => {
+    let pThen = shortP.then<Object>((value: Object): Object => {
         if ((value as Short) == 32767) {
             passed = true;
         } else {
-            errorMessage = "Expected 32767 but got " + value;
+            errorMessage = 'Expected 32767 but got ' + value;
         }
         return value
     });
     await shortP;
     await (pThen as Promise<Object>);
-    check("shortFunc");
+    check('shortFunc');
+}
 
+function testIntFunc(): void {
     reset();
     let intP: Promise<Object> = intFunc();
-    pThen = intP.then<Object>((value: Object): Object => {
+    let pThen = intP.then<Object>((value: Object): Object => {
         if ((value as Int) == 5) {
             passed = true;
         } else {
-            errorMessage = "Expected 5 but got " + value;
+            errorMessage = 'Expected 5 but got ' + value;
         }
         return value
     });
     await intP;
     await (pThen as Promise<Object>);
-    check("intFunc");
+    check('intFunc');
+}
 
+function testLongFunc(): void {
     reset();
     let longP: Promise<Object> = longFunc();
-    pThen = longP.then<Object>((value: Object): Object => {
+    let pThen = longP.then<Object>((value: Object): Object => {
         if ((value as Long) == 777) {
             passed = true;
         } else {
-            errorMessage = "Expected 777 but got " + value;
-            console.println(errorMessage);
+            errorMessage = 'Expected 777 but got ' + value;
+            L.log(errorMessage);
         }
         return value
     });
     await longP;
     await (pThen as Promise<Object>);
-    check("longFunc");
+    check('longFunc');
+}
 
+function testFloatFunc(): void {
     reset();
     let floatP: Promise<Object> = floatFunc();
-    pThen = floatP.then<Object>((value: Object): Object => {
+    let pThen = floatP.then<Object>((value: Object): Object => {
         if ((value as Float) == FLOAT_PI) {
             passed = true;
         } else {
-            errorMessage = "Expected " + FLOAT_PI + " but got " + value;
-            console.println(errorMessage);
+            errorMessage = 'Expected ' + FLOAT_PI + ' but got ' + value;
+            L.log(errorMessage);
         }
         return value
     });
     await floatP;
     await (pThen as Promise<Object>);
-    check("floatFunc");
+    check('floatFunc');
+}
 
+function testDoubleFunc(): void {
     reset();
     let doubleP: Promise<Object> = doubleFunc();
-    pThen = doubleP.then<Object>((value: Object): Object => {
+    let pThen = doubleP.then<Object>((value: Object): Object => {
         if ((value as Double) == 2.71) {
             passed = true;
         } else {
-            errorMessage = "Expected 2.71 but got " + value;
+            errorMessage = 'Expected 2.71 but got ' + value;
         }
         return value
     });
     await doubleP;
     await (pThen as Promise<Object>);
-    check("doubleFunc");
-    return 0;
+    check('doubleFunc');
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_return');
+    testSuite.addTest('testByteFunc', testByteFunc);
+    testSuite.addTest('testCharFunc', testCharFunc);
+    testSuite.addTest('testShortFunc', testShortFunc);
+    testSuite.addTest('testIntFunc', testIntFunc);
+    testSuite.addTest('testLongFunc', testLongFunc);
+    testSuite.addTest('testFloatFunc', testFloatFunc);
+    testSuite.addTest('testDoubleFunc', testDoubleFunc);
+    let res = testSuite.run();
+    return res;
 }

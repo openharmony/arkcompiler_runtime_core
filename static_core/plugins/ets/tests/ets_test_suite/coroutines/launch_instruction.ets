@@ -15,138 +15,84 @@
 
 import { launch } from "std/concurrency"
 
-let passed = false;
-
-function reset() {
-    passed = false;
-}
-
-function check(test: String) {
-    if (!passed) {
-        console.println("Test " + test + " failed");
-        throw new Error();
-    }
-}
-
 function noarg(): Object | null {
-    passed = true;
     return null;
 }
 
-function onearg(x: int): Object | null {
-    if (x != 1) {
-        console.println("Test 'onearg': expected argument '1' but was " + x);
-        throw new Error();
-    }
-    passed = true;
+function onearg(x: int): null {
+    arktest.assertEQ(x, 1);
     return null;
 }
 
-function twoargs(x: int, y: int): Object | null {
-    if (x != 1) {
-        console.println("Test 'twoargs': expected first argument '1' but was " + x);
-        throw new Error();
-    }
-    if (y != 2) {
-        console.println("Test 'twoargs': expected second argument '2' but was " + y);
-        throw new Error();
-    }
-    passed = true;
+function twoargs(x: int, y: int): null {
+    arktest.assertEQ(x, 1);
+    arktest.assertEQ(y, 2);
     return null;
 }
 
-function threeargs(x: int, y: int, z: int): Object | null {
-    if (x != 1) {
-        console.println("Test 'threeargs': expected first argument '1' but was " + x);
-        throw new Error();
-    }
-    if (y != 2) {
-        console.println("Test 'threeargs': expected second argument '2' but was " + y);
-        throw new Error();
-    }
-    if (z != 3) {
-        console.println("Test 'threeargs': expected third argument '3' but was " + z);
-        throw new Error();
-    }
-    passed = true;
+function threeargs(x: int, y: int, z: int): null {
+    arktest.assertEQ(x, 1);
+    arktest.assertEQ(y, 2);
+    arktest.assertEQ(z, 3);
     return null;
 }
 
-function fourargs(x1: int, x2: int, x3: int, x4: int): Object | null {
-    if (x1 != 1) {
-        console.println("Test 'fourargs': expected first argument '1' but was " + x1);
-        throw new Error();
-    }
-    if (x2 != 2) {
-        console.println("Test 'fourargs': expected second argument '2' but was " + x2);
-        throw new Error();
-    }
-    if (x3 != 3) {
-        console.println("Test 'fourargs': expected third argument '3' but was " + x3);
-        throw new Error();
-    }
-    if (x4 != 4) {
-        console.println("Test 'fourargs': expected fourth argument '4' but was " + x4);
-        throw new Error();
-    }
-    passed = true;
+function fourargs(x: int, y: int, z: int, w: int): null {
+    arktest.assertEQ(x, 1);
+    arktest.assertEQ(y, 2);
+    arktest.assertEQ(z, 3);
+    arktest.assertEQ(w, 4);
     return null;
 }
 
-function fiveargs(x1: int, x2: int, x3: int, x4: int, x5: int): Object | null {
-    if (x1 != 1) {
-        console.println("Test 'fiveargs': expected first argument '1' but was " + x1);
-        throw new Error();
-    }
-    if (x2 != 2) {
-        console.println("Test 'fiveargs': expected second argument '2' but was " + x2);
-        throw new Error();
-    }
-    if (x3 != 3) {
-        console.println("Test 'fiveargs': expected third argument '3' but was " + x3);
-        throw new Error();
-    }
-    if (x4 != 4) {
-        console.println("Test 'fiveargs': expected fourth argument '4' but was " + x4);
-        throw new Error();
-    }
-    if (x5 != 5) {
-        console.println("Test 'fiveargs': expected fifth argument '5' but was " + x5);
-        throw new Error();
-    }
-    passed = true;
+function fiveargs(x: int, y: int, z: int, w: int, v: int): null {
+    arktest.assertEQ(x, 1);
+    arktest.assertEQ(y, 2);
+    arktest.assertEQ(z, 3);
+    arktest.assertEQ(w, 4);
+    arktest.assertEQ(v, 5);
     return null;
 }
 
-export function main(): int {
-    reset()
+function testLaunchNoArgs(): void {
     launch<Object | null , () => Object | null>(noarg);
     Coroutine.Schedule();
-    check("noarg");
+}
 
-    reset()
+function testLaunchOneArgs(): void {
     launch<Object | null , (x: int) => Object | null>(onearg, 1);
     Coroutine.Schedule();
-    check("onearg");
+}
 
-    reset()
+function testLaunchTwoArgs(): void {
     launch<Object | null , (x1: int, x2: int) => Object | null>(twoargs, 1, 2);
     Coroutine.Schedule();
-    check("twoargs");
+}
 
-    reset()
+function testLaunchThreeArgs(): void {
     launch<Object | null , (x1: int, x2: int, x3: int) => Object | null>(threeargs, 1, 2, 3);
     Coroutine.Schedule();
-    check("threeargs");
+}
 
-    reset()
+function testLaunchFourArgs(): void {
     launch<Object | null , (x1: int, x2: int, x3: int, x4: int) => Object | null>(fourargs, 1, 2, 3, 4);
     Coroutine.Schedule();
-    check("fourargs");
+}
 
-    reset()
+function testLaunchFiveArgs(): void {
     launch<Object | null , (x1: int, x2: int, x3: int, x4: int, x5: int) => Object | null>(fiveargs, 1, 2, 3, 4, 5);
     Coroutine.Schedule();
-    check("fiveargs");
-    return 0;
+}
+
+function main(): int {
+    // These tests must be run with exactly one coroutine worker thread due to it's design.
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_instruction');
+    testSuite.addTest('testLaunchNoArgs', testLaunchNoArgs);
+    testSuite.addTest('testLaunchOneArgs', testLaunchOneArgs);
+    testSuite.addTest('testLaunchTwoArgs', testLaunchTwoArgs);
+    testSuite.addTest('testLaunchThreeArgs', testLaunchThreeArgs);
+    testSuite.addTest('testLaunchFourArgs', testLaunchFourArgs);
+    testSuite.addTest('testLaunchFiveArgs', testLaunchFiveArgs);
+    let res = testSuite.run();
+    return res;
 }

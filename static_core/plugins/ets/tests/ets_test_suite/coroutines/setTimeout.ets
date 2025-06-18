@@ -15,17 +15,6 @@
 
 import { launch } from "std/concurrency"
 
-type Test = () => void;
-
-let tests = new Array<Test>(
-    setTimeoutTest,
-    clearTimeoutTest,
-    clearIntervalTestFromCallback,
-    clearIntervalFromAnotherTimer,
-    clearTimeoutFromAnotherWorkerTest,
-    sameWorkerIdTest,
-);
-
 let zeroTimeout = 0;
 let shortTimeout = 10;
 let mediumTimeout = 100;
@@ -81,13 +70,68 @@ function sameWorkerIdTest() {
     setTimeout(() => { arktest.assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
 }
 
-function main() {
-    firstTimerIdTest();
+function testSetTimeoutLaunch() {
+    launch<void, () => void>(setTimeoutTest);
+}
+
+function testClearTimeoutLaunch() {
+    launch<void, () => void>(clearTimeoutTest);
+}
+
+function testClearIntervalFromCbLaunch() {
+    launch<void, () => void>(clearIntervalTestFromCallback);
+}
+
+function testClearIntervalFromTimerLaunch() {
+    launch<void, () => void>(clearIntervalFromAnotherTimer);
+}
+
+function testCearTimeoutFromWorkerLaunch() {
+    launch<void, () => void>(clearTimeoutFromAnotherWorkerTest);
+}
+
+function testSameWorkerIdTestLaunch() {
+    launch<void, () => void>(sameWorkerIdTest);
+}
+
+function testFirstTimerIdLaunch() {
+    launch<void, () => void>(firstTimerIdTest);
+}
+
+function main(): int {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    for (let test of tests) {
-        test();
-    }
-    for (let test of tests) {
-        launch<void, () => void>(test);
-    }
+    
+    let testSuite = new arktest.ArkTestsuite('coroutines.setTimeout');
+
+    /**
+     * Test on main coroutine worker
+     * Note: firstTimerIdTest should be executed at the first, or it will fail
+     */
+    testSuite.addTest('firstTimerIdTest', firstTimerIdTest);
+    testSuite.addTest('setTimeoutTest', setTimeoutTest);
+    testSuite.addTest('clearTimeoutTest', clearTimeoutTest);
+    testSuite.addTest('clearIntervalTestFromCallback', clearIntervalTestFromCallback);
+    testSuite.addTest('clearIntervalFromAnotherTimer', clearIntervalFromAnotherTimer);
+    testSuite.addTest('clearTimeoutFromAnotherWorkerTest', clearTimeoutFromAnotherWorkerTest);
+    testSuite.addTest('sameWorkerIdTest', sameWorkerIdTest);
+    
+    /**
+     * Test on non-main coroutine worker using launch
+     */
+    testSuite.addTest('testSetTimeoutLaunch', testSetTimeoutLaunch);
+    testSuite.addTest('testClearTimeoutLaunch', testClearTimeoutLaunch);
+    testSuite.addTest('testClearIntervalFromCbLaunch', testClearIntervalFromCbLaunch);
+    testSuite.addTest('testClearIntervalFromTimerLaunch', testClearIntervalFromTimerLaunch);
+    testSuite.addTest('testCearTimeoutFromWorkerLaunch', testCearTimeoutFromWorkerLaunch);
+    testSuite.addTest('testSameWorkerIdTestLaunch', testSameWorkerIdTestLaunch);
+    testSuite.addTest('testFirstTimerIdLaunch', testFirstTimerIdLaunch);
+
+    /**
+     * Note: none of these tests will actually be registered as failing by ArkTest in case if it fails. 
+     * Instead, the whole program will fail with the uncaught error. This is to be fixed in future.
+     * This is because all the setTimeouts are executed as separate coroutines.
+     */
+    let res = testSuite.run();
+    
+    return res;
 }

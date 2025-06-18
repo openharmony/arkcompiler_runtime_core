@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+type L = StdDebug.Logger
+
 async function AsyncFailing(): Promise<string> {
     throw Error('AsyncFailing');
 }
@@ -22,26 +24,27 @@ function Failing(): string {
 }
 
 function SingleRejectedJob(): null {
-    throw Error("I'm your single rejected job");
+    throw Error('This is a single rejected job');
 }
 
-function main(): void {
+function testAllhandledRejection(): void {
     StdProcess.on('unhandledJobRejection', (obj: Object): void => {
-        arktest.assertTrue(false, "Job handler didn't switch");
+        arktest.assertTrue(false, 'Job handler not switched');
     });
+    
     StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
         arktest.assertTrue(false, 'All promises should be handled');
     });
-
-    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
-        arktest.assertTrue(obj instanceof Error, 'not Erorr is not expected')
-        arktest.assertEQ((obj as Error).message, "I'm your single rejected job");
+    
+     StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+        arktest.assertTrue(obj instanceof Error, 'not Erorr is not expected');
+        arktest.assertEQ((obj as Error).message, "This is a single rejected job");
 
         StdProcess.on('unhandledJobRejection', (obj: Object): void => {
             arktest.assertTrue(false, 'All jobs should be handled');
         });
     });
-
+    
     let g = launch<string, () => string>(Failing);
 
     try {
@@ -53,7 +56,7 @@ function main(): void {
 
     let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println('Test failed: unreachable code');
+        L.log('Test failed: unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     });
@@ -74,4 +77,11 @@ function main(): void {
     }
 
     launch<null, () => null>(SingleRejectedJob);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
+    testSuite.addTest('testAllhandledRejection', testAllhandledRejection);
+    let res = testSuite.run();
+    return res;
 }
