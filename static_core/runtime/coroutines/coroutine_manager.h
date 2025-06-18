@@ -278,6 +278,12 @@ public:
     /// @return true if coroutine switch for the current worker is disabled
     virtual bool IsCoroutineSwitchDisabled() = 0;
 
+    /* ZygoteFork operations */
+    /// Called before Zygote fork to clean up and stop all worker threads.
+    virtual void PreZygoteFork() = 0;
+    /// Called after Zygote fork to reinitialize and restart worker threads.
+    virtual void PostZygoteFork() = 0;
+
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
     /// Create native coroutine context instance (implementation dependent)

@@ -52,6 +52,7 @@
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
@@ -84,13 +85,10 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
-    if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
-        auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(), taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
-        if (taskScheduler == nullptr) {
-            return false;
-        }
-        Runtime::SetTaskScheduler(taskScheduler);
+    if (options.GetWorkersType() == "taskmanager" && !Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Start(options.GetTaskmanagerWorkersCount(),
+                                        taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
+        Runtime::SetTaskManagerUsed(true);
     }
     return true;
 }
@@ -341,16 +339,27 @@ void PandaEtsVM::PreZygoteFork()
 {
     ASSERT(mm_ != nullptr);
     ASSERT(compiler_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
     mm_->PreZygoteFork();
     compiler_->PreZygoteFork();
+    coroutineManager_->PreZygoteFork();
+    if (taskmanager::TaskManager::IsUsed()) {
+        preForkWorkerCount_ = taskmanager::TaskManager::GetWorkersCount();
+        taskmanager::TaskManager::SetWorkersCount(0U);
+    }
 }
 
 void PandaEtsVM::PostZygoteFork()
 {
     ASSERT(compiler_ != nullptr);
     ASSERT(mm_ != nullptr);
+    ASSERT(coroutineManager_ != nullptr);
 
+    if (taskmanager::TaskManager::IsUsed()) {
+        taskmanager::TaskManager::SetWorkersCount(preForkWorkerCount_);
+    }
+    coroutineManager_->PostZygoteFork();
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
     // Postpone GC on application start-up

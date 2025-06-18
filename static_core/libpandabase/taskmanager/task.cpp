@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,10 @@
  */
 
 #include "libpandabase/taskmanager/task.h"
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/utils/time.h"
+#include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
 
-namespace ark::taskmanager {
+namespace ark::taskmanager::internal {
 
 void TaskLifeTimeAggregator::GetAndStoreTimeOfTaskAddingToQueue()
 {
@@ -28,27 +29,27 @@ void TaskLifeTimeAggregator::GetAndStoreTimeOfTaskExecutionStart()
     startExecutionTime_ = time::GetCurrentTimeInMicros(false);
 }
 
-void TaskLifeTimeAggregator::GetTimeOfTaskExecutionFinishAndStoreTimeStats(TaskProperties prop)
+void TaskLifeTimeAggregator::GetTimeOfTaskExecutionFinishAndStoreTimeStats(TaskQueueInterface *queue)
 {
-    auto *scheduler = TaskScheduler::GetTaskScheduler();
-    ASSERT(scheduler != nullptr);
-    auto *taskTimeStats = scheduler->GetTaskTimeStats();
+    auto *taskTimeStats = static_cast<SchedulableTaskQueueInterface *>(queue)->GetTaskTimeStats();
     ASSERT(taskTimeStats != nullptr);
     auto endExecutionTime = time::GetCurrentTimeInMicros(false);
-    taskTimeStats->CollectLifeAndExecutionTimes(prop, endExecutionTime - addingToQueueTime_,
+    taskTimeStats->CollectLifeAndExecutionTimes(queue->GetQueueId(), endExecutionTime - addingToQueueTime_,
                                                 endExecutionTime - startExecutionTime_);
 }
 
 /* static */
-Task Task::Create(TaskProperties properties, RunnerCallback runner)
+Task::Ptr Task::Create(RunnerCallback runner, TaskQueueInterface *queue, OnDestructionCallback callback)
 {
-    Task task(properties, std::move(runner));
-    return task;
+    // Task can be created only by TaskQueue so callback should be controled from outside.
+    ASSERT(callback != nullptr);
+    // CC-OFFNXT(G.RES.09-CPP): constructor of Task class is private
+    return std::unique_ptr<Task>(new Task(std::move(runner), queue, callback));
 }
 
-TaskProperties Task::GetTaskProperties() const
+Task::~Task()
 {
-    return properties_;
+    onDestructionCallback_(parentQueue_);
 }
 
 void Task::RunTask()
@@ -61,100 +62,33 @@ void Task::RunTask()
 
 void Task::MakeInvalid()
 {
-    properties_ = INVALID_TASK_PROPERTIES;
     runner_ = nullptr;
 }
 
 bool Task::IsInvalid() const
 {
-    return properties_ == INVALID_TASK_PROPERTIES;
+    return runner_ == nullptr;
 }
 
 void Task::EventOnTaskAdding()
 {
-    auto *scheduler = TaskScheduler::GetTaskScheduler();
-    if UNLIKELY (scheduler == nullptr) {
-        return;
-    }
-    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+    if (static_cast<SchedulableTaskQueueInterface *>(parentQueue_)->GetTaskTimeStats() != nullptr) {
         lifeTimeStorage_.GetAndStoreTimeOfTaskAddingToQueue();
     }
 }
 
 void Task::EventOnStartExecution()
 {
-    auto *scheduler = TaskScheduler::GetTaskScheduler();
-    if UNLIKELY (scheduler == nullptr) {
-        return;
-    }
-    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+    if (static_cast<SchedulableTaskQueueInterface *>(parentQueue_)->GetTaskTimeStats() != nullptr) {
         lifeTimeStorage_.GetAndStoreTimeOfTaskExecutionStart();
     }
 }
 
 void Task::EventOnEndExecution()
 {
-    auto *scheduler = TaskScheduler::GetTaskScheduler();
-    if UNLIKELY (scheduler == nullptr) {
-        return;
-    }
-    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
-        lifeTimeStorage_.GetTimeOfTaskExecutionFinishAndStoreTimeStats(properties_);
+    if (static_cast<SchedulableTaskQueueInterface *>(parentQueue_)->GetTaskTimeStats() != nullptr) {
+        lifeTimeStorage_.GetTimeOfTaskExecutionFinishAndStoreTimeStats(parentQueue_);
     }
 }
 
-std::ostream &operator<<(std::ostream &os, TaskType type)
-{
-    switch (type) {
-        case TaskType::GC:
-            os << "TaskType::GC";
-            break;
-        case TaskType::JIT:
-            os << "TaskType::JIT";
-            break;
-        default:
-            UNREACHABLE();
-            break;
-    }
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, VMType type)
-{
-    switch (type) {
-        case VMType::DYNAMIC_VM:
-            os << "VMType::DYNAMIC_VM";
-            break;
-        case VMType::STATIC_VM:
-            os << "VMType::STATIC_VM";
-            break;
-        default:
-            UNREACHABLE();
-            break;
-    }
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, TaskExecutionMode mode)
-{
-    switch (mode) {
-        case TaskExecutionMode::FOREGROUND:
-            os << "TaskExecutionMode::FOREGROUND";
-            break;
-        case TaskExecutionMode::BACKGROUND:
-            os << "TaskExecutionMode::BACKGROUND";
-            break;
-        default:
-            UNREACHABLE();
-            break;
-    }
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, TaskProperties prop)
-{
-    os << "{" << prop.GetTaskType() << "," << prop.GetVMType() << "," << prop.GetTaskExecutionMode() << "}";
-    return os;
-}
-
-}  // namespace ark::taskmanager
+}  // namespace ark::taskmanager::internal

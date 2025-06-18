@@ -19,6 +19,7 @@
 #include "libpandabase/os/mem.h"
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/time.h"
+#include "libpandabase/taskmanager/task_manager.h"
 #include "runtime/assert_gc_scope.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/dyn_objects.h"
@@ -58,9 +59,8 @@ GC::GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
 {
     if (gcSettings_.UseTaskManagerForGC()) {
         // Create gc task queue for task manager
-        auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
-        gcWorkersTaskQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
-            taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
+        gcWorkersTaskQueue_ = taskmanager::TaskManager::CreateTaskQueue<decltype(internalAllocator_->Adapter())>(
+            taskmanager::MAX_QUEUE_PRIORITY);
         ASSERT(gcWorkersTaskQueue_ != nullptr);
     }
 }
@@ -87,8 +87,7 @@ GC::~GC()
         allocator->Delete(workersTaskPool_);
     }
     if (gcWorkersTaskQueue_ != nullptr) {
-        taskmanager::TaskScheduler::GetTaskScheduler()->UnregisterAndDestroyTaskQueue<decltype(allocator->Adapter())>(
-            gcWorkersTaskQueue_);
+        taskmanager::TaskManager::DestroyTaskQueue<decltype(allocator->Adapter())>(gcWorkersTaskQueue_);
     }
 }
 

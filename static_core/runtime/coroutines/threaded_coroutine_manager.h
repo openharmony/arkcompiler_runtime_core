@@ -53,6 +53,8 @@ public:
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
+    void PreZygoteFork() override {};
+    void PostZygoteFork() override {};
 
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
