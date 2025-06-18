@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,8 @@ enum RegionFlag {
     IS_PROMOTED = 1U << 8U,
     IS_RESERVED = 1U << 9U,
     IS_PINNED = 1U << 10U,
-    IS_MIXEDTLAB = 1U << 11U
+    IS_MIXEDTLAB = 1U << 11U,
+    IS_ZEROED = 1U << 12U,
 };
 
 constexpr bool IsYoungRegionFlag(RegionFlag flag)
@@ -528,7 +529,7 @@ public:
                       OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
     Region *NewRegion(void *region, RegionSpace *space, size_t regionSize, RegionFlag edenOrOldOrNonmovable,
-                      RegionFlag properties);
+                      RegionFlag properties, RegionFlag zeroed = RegionFlag::IS_UNUSED);
 
     template <OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
     void FreeRegion(Region *region);

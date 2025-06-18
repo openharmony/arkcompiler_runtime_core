@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,13 @@ enum class OSPagesAllocPolicy : bool {
 
 class Pool {
 public:
-    explicit constexpr Pool(size_t size, void *mem) : size_(size), mem_(mem) {}
-    explicit Pool(std::pair<size_t, void *> pool) : size_(pool.first), mem_(pool.second) {}
+    explicit constexpr Pool(size_t size, void *mem, bool zeroFlag = false) : size_(size), mem_(mem), zeroFlag_(zeroFlag)
+    {
+    }
+    explicit Pool(std::pair<size_t, void *> pool, bool zeroFlag = false)
+        : size_(pool.first), mem_(pool.second), zeroFlag_(zeroFlag)
+    {
+    }
 
     size_t GetSize() const
     {
@@ -47,6 +52,16 @@ public:
     void *GetMem()
     {
         return mem_;
+    }
+
+    bool IsZeroed() const
+    {
+        return zeroFlag_;
+    }
+
+    void SetZeroFlag()
+    {
+        zeroFlag_ = true;
     }
 
     bool operator==(const Pool &other) const
@@ -67,6 +82,7 @@ public:
 private:
     size_t size_;
     void *mem_;
+    bool zeroFlag_;
 };
 
 constexpr Pool NULLPOOL {0, nullptr};

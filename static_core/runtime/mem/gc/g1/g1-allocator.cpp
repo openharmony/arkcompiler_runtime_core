@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize
     } else {
         newTlab = objectAllocator_->CreateTLAB(tlabSize);
     }
-    if (newTlab != nullptr) {
+    if (newTlab != nullptr && !newTlab->IsZeroed()) {
         ASAN_UNPOISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
         MemoryInitialize(newTlab->GetStartAddr(), newTlab->GetSize());
         ASAN_POISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
@@ -196,14 +196,14 @@ void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
-        mem = objectAllocator_->Alloc(size, align, pinned);
+        RegionMem regionMem = objectAllocator_->AllocExt(size, align, pinned);
+        if (objInit == ObjMemInitPolicy::REQUIRE_INIT && !regionMem.isZeroed) {
+            ObjectMemoryInit(regionMem.mem, size);
+        }
+        mem = regionMem.mem;
     } else {
         mem = humongousObjectAllocator_->Alloc(size, DEFAULT_ALIGNMENT);
         // Humongous allocations have initialized memory by a default
-        return mem;
-    }
-    if (objInit == ObjMemInitPolicy::REQUIRE_INIT) {
-        ObjectMemoryInit(mem, size);
     }
     return mem;
 }
