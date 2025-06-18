@@ -163,6 +163,18 @@ function consolePrint(color: Color, text: string): void {
     console.print("\x1b[0m")
 }
 
+class BooleanTestClass {
+    flag: boolean = false;
+}
+
+function jsonParseWithBoolean(): int {
+    let str = '{"flag":true}'
+    let type = Type.from<BooleanTestClass>()
+    let ret = JSON.parse<BooleanTestClass>(str, type) as BooleanTestClass
+    Assertions.assertEquals(ret.flag, true)
+    return RESULT_SUCCESS
+}
+
 function main(): int {
     let failures = RESULT_SUCCESS
 
@@ -172,6 +184,7 @@ function main(): int {
     //failures += test(jsonParseArrayUsingReviverWhichReturnsUndefined, "JSON.parse(array) using 'reviver' which returns 'undefined'")
     failures += test(jsonParseUsingReplacingReviver, "JSON.parse() using replacing 'reviver'")
     failures += test(jsonParseArrayWithReplacingReviver, "JSON.parse(array) using replacing 'reviver'")
+    failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
 
     if (failures == RESULT_SUCCESS) {
         consolePrint(Color.Green, "PASSED: ")
