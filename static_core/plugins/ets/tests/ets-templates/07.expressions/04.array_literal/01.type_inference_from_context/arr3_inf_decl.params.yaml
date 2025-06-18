@@ -245,7 +245,7 @@ cases:
 
     - use: |-
           // declaration context, union of arrays
-          let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean> = [false, !false, false]
+          let a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean> = [false, !false, false] as FixedArray<Boolean>
           arktest.assertEQ((a as FixedArray<Boolean>)[0], false)
           arktest.assertEQ((a as FixedArray<Boolean>)[1], true)
           arktest.assertEQ((a as FixedArray<Boolean>)[2], false)

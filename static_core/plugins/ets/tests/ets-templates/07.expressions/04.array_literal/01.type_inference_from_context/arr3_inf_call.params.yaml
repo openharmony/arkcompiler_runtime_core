@@ -349,7 +349,7 @@ cases:
           }
       use: |-
           // call context, union of arrays
-          foo([!true, true, !true])
+          foo([!true, true, !true] as FixedArray<Boolean>)
 
     - decl: |-
           function foo(a: FixedArray<Number>|FixedArray<String>|FixedArray<Boolean>) {
