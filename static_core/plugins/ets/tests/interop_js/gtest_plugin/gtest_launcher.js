@@ -92,15 +92,11 @@ function main() {
 		'panda-files': userPandaFiles,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
-		'interpreter-type': 'irtoc'
+		'interpreter-type': 'irtoc',
+		'taskpool-support-interop': 'true',
 	};
 
-	if (gtestName === 'ets_interop_ts_to_ets_taskpool') {
-		createRuntimeOptions['taskpool-support-interop'] = 'true';
-	}
-
 	const etsVmRes = globalThis.gtest.etsVm.createRuntime(createRuntimeOptions);
-
 	if (!etsVmRes) {
 		print('Failed to create ETS runtime');
 		return 1;

@@ -18,10 +18,11 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EAWorkerTest : public EtsInteropTest {};
+class ConcurrencyTest : public EtsInteropTest {};
 
-TEST_F(EAWorkerTest, eworkerInteropTest)
+TEST_F(ConcurrencyTest, interopTest)
 {
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "eworkerInteropTest"));
+    ASSERT_EQ(true, CallEtsFunction<bool>("eworker_interop_tests", "eworkerInteropTest"));
+    ASSERT_EQ(true, CallEtsFunction<bool>("taskpool_interop_tests", "taskpoolInteropTest"));
 }
 }  // namespace ark::ets::interop::js::testing

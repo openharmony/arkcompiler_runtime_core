@@ -11,8 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_gtest(ets_interop_ts_to_ets_taskpool
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_interop_taskpool.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/taskpool_interop_tests.ets
-    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/taskpool_helpers.ts
-)
+add_subdirectory(ts_to_ets)
+
