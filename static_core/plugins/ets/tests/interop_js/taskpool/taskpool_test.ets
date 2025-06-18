@@ -71,3 +71,34 @@ function RunTasksWithJsAsyncCallTest(): void {
     assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
 }
+
+// This is a pure CPU task without IO request
+function additionDelay(delay: number): void {
+    let start: number = new Date().getTime();
+    while (new Date().getTime() - start < delay) {
+        continue;
+    }
+}
+
+function testCPUTaskDuration(): void {    
+    let task: taskpool.Task = new taskpool.Task(additionDelay, 300.0);
+    let runner: taskpool.SequenceRunner = new taskpool.SequenceRunner();
+
+    // All initialized with 0
+    arktest.assertTrue(task.ioDuration == 0);
+    arktest.assertTrue(task.cpuDuration == 0);
+    arktest.assertTrue(task.totalDuration == 0);
+
+    await runner.execute(task); 
+
+    arktest.assertTrue(task.cpuDuration > 0);
+    arktest.assertTrue(task.totalDuration > 0);
+    arktest.assertTrue(task.ioDuration == 0);
+}
+
+export function main(): int {
+    let testSuite = new arktest.ArkTestsuite('taskpool.taskpool_test');
+    testSuite.addTest('testCPUTaskDuration', testCPUTaskDuration);
+    let res = testSuite.run();
+    return res;
+}
