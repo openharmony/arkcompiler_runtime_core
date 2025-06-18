@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-function test_optional_params(): void {
-    let module = ESValue.load("../../plugins/ets/tests/interop_js/tests/test_optional_params/ts_to_ets/test_optional_params_ts_to_ets");
-    module.getProperty("foo1").invoke(ESValue.wrap(1), ESValue.wrap("str"));
-    module.getProperty("foo2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true));
-    module.getProperty("foo3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true), ESValue.wrap(2));
+function testOptionalParams(): void {
+    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_optional_params/ts_to_ets/test_optional_params_ts_to_ets');
+    module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str'));
+    module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true));
+    module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2));
 
-    module.getProperty("fun1").invoke(ESValue.wrap(1), ESValue.wrap("str"));
-    module.getProperty("fun2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false));
-    module.getProperty("fun3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false), ESValue.wrap(2));
+    module.getProperty('fun1').invoke(ESValue.wrap(1), ESValue.wrap('str'));
+    module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false));
+    module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2));
 }

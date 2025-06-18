@@ -20,45 +20,45 @@ namespace ark::ets::interop::js::testing {
 
 class EtsESValueStringLiteralKeyTest : public EtsInteropTest {};
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_field_access_by_dot)
+TEST_F(EtsESValueStringLiteralKeyTest, checkFieldAccessByDot)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_field_access_by_dot");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkFieldAccessByDot");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_string_literal)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithStringLiteral)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_string_literal");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithStringLiteral");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_string_key)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithStringKey)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_string_key");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithStringKey");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_string_from_foo)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithStringFromFoo)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_string_from_foo");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithStringFromFoo");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_expression)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithExpression)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithExpression");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_expression_str_literals)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithExpressionStrLiterals)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithExpressionStrLiterals");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsESValueStringLiteralKeyTest, check_esvalue_with_expression_strings)
+TEST_F(EtsESValueStringLiteralKeyTest, checkEsvalueWithExpressionStrings)
 {
-    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "check_esvalue_with_expression");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "checkEsvalueWithExpressionStrings");
     ASSERT_EQ(ret, 0);
 }
 }  // namespace ark::ets::interop::js::testing
