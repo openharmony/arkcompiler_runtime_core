@@ -52,3 +52,6 @@
 
 #25054
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
+
+#26913
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oom-string.ets
