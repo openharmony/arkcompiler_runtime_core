@@ -1174,7 +1174,7 @@ class JSONWriter {
         if (array.length > 0) {
             this.path.add(array)
 
-            const lastElementIndex = array.length.toInt()
+            const lastElementIndex = array.length.toInt() - 1
 
             for (let idx = 0; idx < lastElementIndex; idx++) {
                 this.writeObjectsArrayElement(array[idx], idx)
