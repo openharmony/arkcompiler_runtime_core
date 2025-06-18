@@ -1,3 +1,32 @@
+#26477 "Any" keyword as identifier
+02.lexical_elements/07.keywords/types_0.ets
+
+#26687
+02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_0.ets
+
+#26515
+02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_2.ets
+
+#26476 bigint literals with hex, oct, bin
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_10.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_11.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_12.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_4.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_5.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_6.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_7.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_8.ets
+02.lexical_elements/09.literals/04.bigint_literals/bigint_literals_9.ets
+
+#26512 regex literals not implemented
+02.lexical_elements/09.literals/08.regex_literal/regex_anchor_boundaries.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_basic_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_example_literals.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_flags_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_groups_capturing.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
+
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 
