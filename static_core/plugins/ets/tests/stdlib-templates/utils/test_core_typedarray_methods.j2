@@ -55,6 +55,10 @@ function main(): int {
     failures += check(testTypedArrayIndexOf2(), "Test .indexOf method v2")
     failures += check(testTypedArrayLastIndexOf(), "Test .lastIndexOf method")
 
+    {% for i in range(5) -%}
+    failures += check(testEntries({{.i}}), "Test .entries method");
+    {%+ endfor %}
+
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -1583,3 +1587,19 @@ const testTypedArrayLastIndexOf = parametrize<ObjectTypeAndExpectations<number[]
         return failures == 0 ? success : fail
     }
 )
+
+function testEntries(count: number): number {
+    let arr = new {{.item.objectType}}(count);
+    for (let i = 0; i < count; i++) {
+        arr[i] = (i + 1) as {{.item.primitiveType}};
+    }
+    let fails: number = 0;
+    let current: number = 0;
+    for (const entry of arr.entries()) {
+        fails += entry[0] != current ? 1 : 0;
+        fails += (entry[1]) != {{.item.create}}(current + 1) ? 1 : 0;
+        current++;
+    }
+    fails += count != current as number ? 1 : 0;
+    return fails;
+}

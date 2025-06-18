@@ -370,7 +370,11 @@ function {{.ci.name}}(): int {
     let expected: FixedArray<{{.item.primitiveType}}> = [{%+ for ea in ci.expected %}{{.ea}} as {{.item.primitiveType}}, {% endfor %}];
 
     try {
+        {%- if ci.src is defined %}
+        origin = createFromSource({{.ci.src}});
+        {%- else %}
         origin = createFromSource(src);
+        {%- endif %}
     } catch(e) {
         console.println(e);
         return fail;
