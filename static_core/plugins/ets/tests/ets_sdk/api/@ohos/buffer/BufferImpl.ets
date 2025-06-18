@@ -105,6 +105,7 @@ function main(): int {
     suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
 
     suite.addTest("Test buffer toJSON", testBufferToJSON)
+    suite.addTest("Test readIntLE, readUIntLE, readIntBE, readUIntBE", testReadIntUintLEBE)
     return suite.run()
 }
 
@@ -239,6 +240,19 @@ function testFromBufferOrUint8Array() {
     arktest.assertEQ(bufOffset.at(3), 6)
     arktest.assertEQ(bufOffset.length, 4)
     arktest.assertEQ(bufOffset.byteOffset, 3)
+
+    let ab1 = ArrayBuffer.from("1236", "utf-8")
+    arktest.assertEQ(ab1.byteLength, 4)
+
+    let buf = buffer.from("1236")
+    let ab = buf.buffer
+    arktest.assertEQ(ab.byteLength, 4)
+    arktest.assertEQ(buf.length, 4)
+    let arr = new Uint8Array(ab)
+    arktest.assertEQ(arr.length, 4)
+
+    let a = new Uint8Array(buf.buffer, buf.byteOffset, buf.length);
+    arktest.assertEQ(a.toString(), "49,50,51,54")
 }
 
 function testFromString() {
@@ -500,6 +514,17 @@ function testTranscode() {
     let b9_hex = buffer.transcode(b9, "base64", "hex");
     arktest.assertEQ(b9_hex.toString("hex"), "e29c9320c3a0206578616d706c65", "Case (9) failed: base64 -> hex");
     checkInvariant(b9, "base64", "hex");
+
+    //10. utf-8 → ascii
+    {
+        let newBuf = buffer.transcode(buffer.from('€'), 'utf-8', 'ascii')
+        arktest.assertEQ(newBuf.toString(), '?', "Case (10) failed: utf-8 -> ascii")
+    }
+
+    {
+        let newBuf = buffer.transcode(buffer.from('ab€gg£'), 'utf-8', 'ascii')
+        arktest.assertEQ(newBuf.toString(), 'ab?gg?', "Case (10) failed: utf-8 -> ascii")
+    }
 }
 
 function testBufferCompare() {
@@ -595,6 +620,16 @@ function testFill() {
     const buf = buffer.alloc(5);
     buf.fill('b');
     arktest.assertEQ(buf.toString('ascii'), 'bbbbb');
+
+    let ab = new ArrayBuffer(10)
+    let buf3 = buffer.from(ab)
+    arktest.expectNoThrow(() => {
+        arktest.assertEQ(JSON.stringify(buf3), '{"type":"Buffer","data":[0,0,0,0,0,0,0,0,0,0]}')
+        buf3.fill(1)
+        arktest.assertEQ(new Uint8Array(ab).toString(), "1,1,1,1,1,1,1,1,1,1")
+        arktest.assertEQ(JSON.stringify(buf3), '{"type":"Buffer","data":[1,1,1,1,1,1,1,1,1,1]}')
+        arktest.assertEQ(JSON.stringify(new Uint8Array(ab)), '{"0":1,"1":1,"2":1,"3":1,"4":1,"5":1,"6":1,"7":1,"8":1,"9":1}')
+    })
 }
 
 function testKeys() {
@@ -755,6 +790,27 @@ function testUInt8ReadWrite() {
     // Test mid value
     buf.writeUInt8(128, 2)
     arktest.assertEQ(buf.readUInt8(2), 128)
+
+    // Test -2 -> 254
+    {
+        let buf = buffer.from([1, 9, -2])
+        arktest.assertEQ(buf.readUInt8(2), 254)
+    }
+
+    {
+        let buf = buffer.from([-2, 12, 5])
+        arktest.assertEQ(buf.readUInt8(0), 254)
+    }
+
+    {
+        let buf = buffer.from([1, -2])
+        arktest.assertEQ(buf.readUInt8(1), 254)
+    }
+
+    {
+        let buf = buffer.from([-2])
+        arktest.assertEQ(buf.readUInt8(0), 254)
+    }
 }
 
 function testUInt16ReadWrite() {
@@ -858,6 +914,53 @@ function testVarLengthIntReadWrite() {
     const negValue = -0x1234;
     buf.writeIntBE(negValue, 10, 2)
     arktest.assertEQ(buf.readIntBE(10, 2), negValue)
+}
+
+function testReadIntUintLEBE() {
+    {
+        let buf = buffer.from([0x12, 0x34, 0x56, 0x78, 0x90, 0xab])
+
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "-546f87a9cbee")
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "1234567890ab")
+
+        arktest.assertEQ(buf.readUIntLE(0, 6).toString(16), "ab9078563412")
+        arktest.assertEQ(buf.readUIntBE(0, 6).toString(16), "1234567890ab")
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), buf.readUIntBE(0, 6).toString(16))
+    }
+
+    {
+        let buf = buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x01])
+
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "1")
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "10000000000")
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), buf.readUIntLE(0, 6).toString(16))
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), buf.readUIntBE(0, 6).toString(16))
+    }
+
+    {
+        let buf = buffer.from([0x01, 0x00, 0x00, 0x00, 0x00, 0x00])
+
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "1")
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "10000000000")
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), buf.readUIntLE(0, 6).toString(16))
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), buf.readUIntBE(0, 6).toString(16))
+    }
+    {
+        let buf = buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "-1")
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "-1")
+        arktest.assertEQ(buf.readUIntLE(0, 6).toString(16), "ffffffffffff")
+        arktest.assertEQ(buf.readUIntBE(0, 6).toString(16), "ffffffffffff")
+    }
+
+    {
+        // test overfill
+        let buf = buffer.from([0x8f, 0xff, 0xff, 0xff, 0xff, 0xff])
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "-71")
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "-700000000001")
+        arktest.assertEQ(buf.readUIntLE(0, 6).toString(16), "ffffffffff8f")
+        arktest.assertEQ(buf.readUIntBE(0, 6).toString(16), "8fffffffffff")
+    }
 }
 
 function testVarLengthUIntReadWrite() {
@@ -970,6 +1073,9 @@ function testByteOffset() {
     let buf = buffer.from("1236");
     let offset = buf.byteOffset;
     arktest.assertEQ(offset, 0)
+    arktest.expectNoThrow(() => {
+        arktest.assertEQ(JSON.stringify(buf.byteOffset), "0")
+    })
 
     const a = new ArrayBuffer(5)
     a.set(0, 0 as byte)
@@ -1064,6 +1170,12 @@ function testBufferToJSON() {
     arktest.assertEQ(array.length, 10);
     for (let i: int = 0; i < array.length; ++i) {
         arktest.assertEQ(array[i].jsonType, jsonx.JsonType.JsonNumber);
+    }
+
+    {
+        let ab = new ArrayBuffer(10)
+        let buf = buffer.from(ab as Object, 0, 2)
+        arktest.assertEQ(JSON.stringify(buf), '{"type":"Buffer","data":[0,0]}')
     }
 }
 
