@@ -14,6 +14,10 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -21,6 +25,7 @@ function main(): int {
     suite.addTest("PlainArray remove with exist key", testRemoveWithExistKey);
     suite.addTest("PlainArray remove with non-exist key", testRemoveWithNonExistKey);
     suite.addTest("PlainArray remove empty container", testRemoveWithEmpty);
+    suite.addTest("PlainArray remove out-of-range key", testRemoveOutOfRangeKey);
     suite.addTest("PlainArray removeAt by valid index", testRemoveAtValidIndex);
     suite.addTest("PlainArray removeAt by boundary index", testRemoveAtBoundaryIndex);
     suite.addTest("PlainArray removeAt by exceeded index", testRemoveAtExceededIndex);
@@ -77,6 +82,17 @@ function testRemoveWithEmpty() {
     arktest.assertEQ(plainArray.length, 0, "The sequence should not change");
 }
 
+function testRemoveOutOfRangeKey() {
+    let plainArray = new PlainArray<number>();
+    plainArray.add(TestData.testNumber1, TestData.testNumber1);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {plainArray.remove(2147483648)}, exceptionCheck);
+}
+
 function testRemoveAtValidIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
@@ -95,37 +111,13 @@ function testRemoveAtBoundaryIndex() {
 function testRemoveAtExceededIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    let count = 0;
-    try {
-        plainArray.removeAt(-TestData.testNumber1);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
-    }
-    try {
-        plainArray.removeAt(TestData.testNumber6);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
-    }
-    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+    arktest.assertEQ(plainArray.removeAt(-TestData.testNumber1), undefined);
+    arktest.assertEQ(plainArray.removeAt(TestData.testNumber6), undefined);
 }
 
 function testRemoveAtWithEmpty() {
     let plainArray = new PlainArray<number>();
-    try {
-        plainArray.removeAt(0);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
-    }
-    arktest.assertTrue(false, "The result should be 'RangeError'");
+    arktest.assertEQ(plainArray.removeAt(0), undefined);
 }
 
 function testRangeFromValidRange() {
@@ -147,37 +139,29 @@ function testRangeFromExceededRange() {
 function testRangeFromExceededIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    let count = 0;
-    try {
-        plainArray.removeRangeFrom(-TestData.testNumber2, TestData.testNumber2);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -2") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        plainArray.removeRangeFrom(TestData.testNumber6, TestData.testNumber2);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(-TestData.testNumber2, TestData.testNumber2)}, exceptionCheck);
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(TestData.testNumber6, TestData.testNumber2)}, exceptionCheckTwo);
 }
 
 function testRangeFromWithEmpty() {
     let plainArray = new PlainArray<number>();
-    try {
-        plainArray.removeRangeFrom(0, TestData.testNumber2);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertTrue(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(0, TestData.testNumber2)}, exceptionCheck);
 }
 
 function testRangeFromWithDouble() {

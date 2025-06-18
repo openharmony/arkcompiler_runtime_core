@@ -14,6 +14,9 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -64,37 +67,29 @@ function testSetValueAtBoundaryIndex() {
 function testSetValueAtExceededIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    let count = 0;
-    try {
-        plainArray.setValueAt(-TestData.testNumber1, TestData.testNumber6);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -1`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        plainArray.setValueAt(TestData.testNumber6, TestData.testNumber6);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 6`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.setValueAt(-TestData.testNumber1, TestData.testNumber6)}, exceptionCheck);
+    arktest.expectThrow(() => {plainArray.setValueAt(TestData.testNumber6, TestData.testNumber6)}, exceptionCheckTwo);
 }
 
 function testSetValueAtWithEmpty() {
     let plainArray = new PlainArray<number>();
-    try {
-        plainArray.setValueAt(0, TestData.testNumber2);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertTrue(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.setValueAt(0, TestData.testNumber2)}, exceptionCheck);
 }
 
 function testToStringWithNonEmpty() {

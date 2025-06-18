@@ -14,6 +14,9 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");
@@ -27,6 +30,7 @@ function main(): int {
     suite.addTest("PlainArray isEmpty is true", testIsEmptyInitially);
     suite.addTest("PlainArray has", testHasWithExisting);
     suite.addTest("PlainArray has with inexistent key", testHasWithNonExisting);
+    suite.addTest("PlainArray has out-of-range key", testHasOutOfRangeKey);
 
     return suite.run();
 }
@@ -57,33 +61,12 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let plainArray: PlainArray<number>;
-    try {
-        plainArray = new PlainArray<number>();
-    } catch (e) {
-        arktest.assertTrue(false, "Failed to create a single-type instance of PlainArray");
-        return;
-    }
-    plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    arktest.assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
-    arktest.assertEQ(plainArray.length, TestData.testNumber1, "PlainArray length should be 1");
+    arktest.expectNoThrow(() => {plainArray = new PlainArray<number>()});
 }
 
 function testCreateCompositeTypeContainer() {
     let plainArray: PlainArray<number | string | boolean | object | null | undefined>;
-    try {
-        plainArray = new PlainArray<number | string | boolean | object | null | undefined>();
-    } catch (e) {
-        arktest.assertTrue(false, "Failed to create a composite-type instance of PlainArray");
-        return;
-    }
-    plainArray.add(TestData.testNumber1, TestData.testNumber1);
-    plainArray.add(TestData.testNumber2, TestData.testString1);
-    plainArray.add(TestData.testNumber3, false);
-    plainArray.add(TestData.testNumber4, TestData.testObject1);
-    plainArray.add(TestData.testNumber5, null);
-    plainArray.add(TestData.testNumber6, undefined);
-    arktest.assertTrue(plainArray instanceof PlainArray, "The instance should be PlainArray");
-    arktest.assertEQ(plainArray.length, TestData.testNumber6, "PlainArray length should be 6");
+    arktest.expectNoThrow(() => {plainArray = new PlainArray<number | string | boolean | object | null | undefined>()});
 }
 
 function testLengthSyncSingleType() {
@@ -151,4 +134,15 @@ function testHasWithNonExisting() {
         arktest.assertEQ(plainArray.getValueAt(i), TestData.forNumber1[i], "The value should be exist");
     }
     arktest.assertFalse(plainArray.has(TestData.testNumber1w), "The plainArray should not contain the key");
+}
+
+function testHasOutOfRangeKey() {
+    let plainArray = new PlainArray<number>();
+    plainArray.add(TestData.testNumber1, TestData.testNumber1);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {plainArray.has(2147483648)}, exceptionCheck);
 }
