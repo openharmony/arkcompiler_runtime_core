@@ -38,7 +38,7 @@ class TestXGCEcmaVmAdaptor : public TestXGCVmAdaptor {
 public:
     TestXGCEcmaVmAdaptor(napi_env env, TestXGCEcmaAdaptorValues *values) : TestXGCVmAdaptor(env), values_(values) {}
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
     void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const panda::RefFieldVisitor &visitor) override
     {
         std::stringstream err;

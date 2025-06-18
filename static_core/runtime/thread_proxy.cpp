@@ -217,7 +217,7 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
     TSAN_ANNOTATE_HAPPENS_AFTER(&fts_);
 }
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 
 using namespace panda;
 

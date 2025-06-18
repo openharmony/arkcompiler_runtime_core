@@ -96,7 +96,7 @@ public:
 
     ::ark::mem::BarrierType GetPreReadType() const override
     {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
         return ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
 #else
         return ::ark::mem::BarrierType::PRE_RB_NONE;
@@ -105,7 +105,7 @@ public:
 
     ::ark::mem::BarrierType GetPreType() const override
     {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
         return ::ark::mem::BarrierType::PRE_WRB_NONE;
 #else
         return ::ark::mem::BarrierType::PRE_SATB_BARRIER;
@@ -114,7 +114,7 @@ public:
 
     ::ark::mem::BarrierType GetPostType() const override
     {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
         return ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER;
 #else
         return ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;

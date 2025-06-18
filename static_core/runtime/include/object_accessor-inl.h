@@ -29,7 +29,7 @@ namespace ark {
 template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
 inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {
@@ -80,7 +80,7 @@ template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, b
 inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThread *thread, const void *obj,
                                                size_t offset)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {
@@ -260,7 +260,7 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value,
 template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memoryOrder)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {

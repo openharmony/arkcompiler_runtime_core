@@ -22,7 +22,7 @@
 #include "runtime/trace.h"
 
 namespace ark {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
 {
     reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
@@ -152,7 +152,7 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
 
 void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
     if (wasCreated) {
         auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();

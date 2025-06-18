@@ -23,7 +23,7 @@
 
 namespace ark::ets::interop::js {
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_CMC_GC)
 void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const panda::RefFieldVisitor &visitor)
 {
 #ifdef PANDA_JS_ETS_HYBRID_MODE

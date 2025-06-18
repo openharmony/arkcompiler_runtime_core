@@ -17,8 +17,8 @@ if (!defined(ark_static_standalone_build)) {
 if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
-if (!defined(ark_hybrid)) {
-  ark_hybrid = false
+if (!defined(ark_use_cmc_gc)) {
+  ark_use_cmc_gc = false
 }
 
 ark_root = "//arkcompiler/runtime_core/static_core"

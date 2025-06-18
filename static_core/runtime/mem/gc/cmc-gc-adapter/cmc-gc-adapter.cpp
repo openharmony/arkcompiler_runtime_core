@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 #include "base_runtime.h"
 #endif
 
@@ -51,7 +51,7 @@ void CMCGCAdapter<LanguageConfig>::RunPhasesImpl([[maybe_unused]] GCTask &task)
 template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     panda::BaseRuntime::RequestGC(panda::GcType::FULL);
 #endif
     return false;
@@ -71,7 +71,7 @@ void CMCGCAdapter<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]
 template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     panda::BaseRuntime::RequestGC(panda::GcType::FULL);
 #endif
     return false;
@@ -86,7 +86,7 @@ bool CMCGCAdapter<LanguageConfig>::IsPostponeGCSupported() const
 template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::StopGC()
 {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     // Change to a more accurate function, when the function was provided (see #26240).
     panda::BaseRuntime::RequestGC(panda::GcType::FULL);
 #endif

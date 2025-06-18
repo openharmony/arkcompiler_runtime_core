@@ -21,12 +21,12 @@
 #include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 #include "thread/thread_holder.h"
 #endif
 
 namespace ark {
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
 using CommonRootVisitor = panda::CommonRootVisitor;
 
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
@@ -319,7 +319,7 @@ public:
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
 
-#ifdef ARK_HYBRID
+#ifdef ARK_USE_CMC_GC
     void Visit(CommonRootVisitor visitor)
     {
         visitor(nullptr);
