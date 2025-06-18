@@ -563,7 +563,7 @@ void ComputeElementCharSize(ElementComputeResult &res, EtsObject *element, const
 }
 
 template <typename T>
-size_t NumberToU16Chars(PandaVector<EtsChar> &buf, size_t pos, T number)
+size_t NumberToChars(PandaVector<EtsChar> &buf, size_t pos, T number)
 {
     if constexpr (std::is_integral_v<T>) {
         auto num = number < 0 ? -static_cast<uint64_t>(number) : static_cast<uint64_t>(number);
@@ -588,7 +588,7 @@ size_t NumberToU16Chars(PandaVector<EtsChar> &buf, size_t pos, T number)
 }
 
 template <typename T>
-size_t NumberToU8Chars(PandaVector<char> &buf, size_t pos, T number)
+size_t NumberToChars(PandaVector<char> &buf, size_t pos, T number)
 {
     if constexpr (std::is_integral_v<T>) {
         auto [strEnd, result] = std::to_chars(&buf[pos], &buf[pos + MaxChars<T>()], number);
@@ -607,6 +607,27 @@ size_t NumberToU8Chars(PandaVector<char> &buf, size_t pos, T number)
             return str.length();
         });
     }
+}
+
+template <typename T, typename BufferType>
+void HandleNumericType(EtsObject *element, BufferType &buf, size_t &pos)
+{
+    auto value = GetNumericValue<T>(element);
+    pos += NumberToChars<T>(buf, pos, value);
+}
+
+template <typename BufferType>
+using NumericHandler = void (*)(EtsObject *, BufferType &, size_t &);
+
+template <typename BufferType>
+static constexpr auto GetNumericHandlerTable(const EtsPlatformTypes *ptypes)
+{
+    return std::array {std::pair {ptypes->coreInt, &HandleNumericType<EtsInt, BufferType>},
+                       std::pair {ptypes->coreDouble, &HandleNumericType<EtsDouble, BufferType>},
+                       std::pair {ptypes->coreByte, &HandleNumericType<EtsByte, BufferType>},
+                       std::pair {ptypes->coreShort, &HandleNumericType<EtsShort, BufferType>},
+                       std::pair {ptypes->coreLong, &HandleNumericType<EtsLong, BufferType>},
+                       std::pair {ptypes->coreFloat, &HandleNumericType<EtsFloat, BufferType>}};
 }
 
 void ComputeCharSize(EtsObjectArray *buffer, EtsInt actualLength, ElementComputeResult &res,
@@ -666,6 +687,14 @@ void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPla
     }
 
     auto elementCls = element->GetClass();
+    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<char>>(ptypes);
+    for (const auto &entry : numericHandlerTable) {
+        if (entry.first == elementCls) {
+            entry.second(element, buf, pos);
+            return;
+        }
+    }
+
     if (elementCls->IsStringClass()) {
         auto strElement = coretypes::String::Cast(element->GetCoreType());
         auto str = strElement->GetDataUtf8();
@@ -674,12 +703,6 @@ void ProcessUtf8Element(EtsObject *element, PandaVector<char> &buf, const EtsPla
             memcpy_s(&buf[pos], utf8Size, str, elementSize);
             pos += elementSize;
         }
-    } else if (IsIntegerClass(elementCls, ptypes)) {
-        auto value = GetNumericValue<EtsLong>(element);
-        pos += NumberToU8Chars(buf, pos, value);
-    } else if (IsNumericClass(elementCls, ptypes)) {
-        auto value = GetNumericValue<EtsDouble>(element);
-        pos += NumberToU8Chars(buf, pos, value);
     } else if (elementCls == ptypes->coreBoolean) {
         auto value = GetNumericValue<EtsBoolean>(element);
         const char *text = (value == 1) ? "true" : "false";
@@ -734,18 +757,20 @@ void ProcessUtf16Element(EtsObject *element, PandaVector<EtsChar> &buf, const Et
     }
 
     auto elementCls = element->GetClass();
+    const auto &numericHandlerTable = GetNumericHandlerTable<PandaVector<EtsChar>>(ptypes);
+    for (const auto &entry : numericHandlerTable) {
+        if (entry.first == elementCls) {
+            entry.second(element, buf, pos);
+            return;
+        }
+    }
+
     if (elementCls->IsStringClass()) {
         auto strElement = coretypes::String::Cast(element->GetCoreType());
         auto strSize = strElement->IsUtf16() ? strElement->GetUtf16Length() : strElement->GetUtf8Length();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         strElement->CopyDataUtf16(buf.data() + pos, strSize);
         pos += strSize;
-    } else if (IsIntegerClass(elementCls, ptypes)) {
-        auto value = GetNumericValue<EtsLong>(element);
-        pos += NumberToU16Chars(buf, pos, value);
-    } else if (IsNumericClass(elementCls, ptypes)) {
-        auto value = GetNumericValue<EtsDouble>(element);
-        pos += NumberToU16Chars(buf, pos, value);
     } else if (elementCls == ptypes->coreBoolean) {
         auto value = GetNumericValue<EtsBoolean>(element);
         const char *text = (value == 1) ? "true" : "false";
