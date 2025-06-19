@@ -384,7 +384,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyFromLambda(EtsLong methodPtr, EtsIn
     externalFn.GetFn().metadata->SetAttribute(typeapi_create_consts::ATTR_EXTERNAL);
     externalFn.Create();
 
-    m->GetFn().regsNum = 1;
+    m->GetFn().regsNum = 1U;
     m->GetFn().AddInstruction(pandasm::Create_LDSTATIC_OBJ(fld));
     m->GetFn().AddInstruction(pandasm::Create_STA_OBJ(0));
     if (EtsMethod::ToRuntimeMethod(meth)->IsFinal()) {

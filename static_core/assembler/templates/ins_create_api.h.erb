@@ -21,7 +21,7 @@
 namespace ark::pandasm {
 
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
-% insn = group.first 
+% insn = group.first
 % signature = assembler_signature(group, insn.jump?)
 % signature_str = signature.map { |o| "#{o.type} #{o.name}" }.join(', ')
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -38,20 +38,17 @@ inline Ins Create_<%= insn.asm_token %>(<%= signature_str %>)
 %          count_reg += 1
 %      end
 %   end
-%   if count_reg > 0 then
-    <%=group.first.emitter_name%>_.regs.reserve(<%= count_reg %>);
-%   end
 %   format.each_with_index do |o, i|
 %       if o.name.start_with?('imm')
 %          if insn.jump?
-    <%=group.first.emitter_name%>_.ids.push_back(label);
+    <%=group.first.emitter_name%>_.EmplaceID(label);
 %          else
-    <%=group.first.emitter_name%>_.imms.emplace_back(<%= o.name %>);
+    <%=group.first.emitter_name%>_.EmplaceImm(<%= o.name %>);
 %          end
 %       elsif o.name.start_with?('id')
-    <%=group.first.emitter_name%>_.ids.push_back(<%= o.name %>);
+    <%=group.first.emitter_name%>_.EmplaceID(<%= o.name %>);
 %       else
-    <%=group.first.emitter_name%>_.regs.push_back(<%= o.name %>);
+    <%=group.first.emitter_name%>_.EmplaceReg(<%= o.name %>);
 %       end
 %   end
     return <%=insn.emitter_name%>_;

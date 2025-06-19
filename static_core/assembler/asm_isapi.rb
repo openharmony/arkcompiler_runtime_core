@@ -64,6 +64,24 @@ def max_number_of_src_regs
   end.max
 end
 
+def max_number_of_regs
+  Panda::instructions.map do |insn|
+    insn.operands.select(&:reg?).size
+  end.max
+end
+
+def max_number_of_imms
+  Panda::instructions.map do |insn|
+    insn.operands.select(&:imm?).size
+  end.max
+end
+
+def max_number_of_ids
+  Panda::instructions.map do |insn|
+    insn.operands.select(&:id?).size
+  end.max
+end
+
 IR = Struct.new(:opcode, :flags, :dst_idx, :use_idxs)
 
 module Panda

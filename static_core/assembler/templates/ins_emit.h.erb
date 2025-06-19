@@ -70,41 +70,41 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %   ni = 0
 %   insn.operands.each do |op|
 %     if op.reg?
-%       ops << "#{regs}[#{nr}]"
+%       ops << "GetReg(#{nr})"
 %       nr += 1
 %     elsif op.imm?
 %       if insn.jump?
-%         ops << 'labels.find(ids[0])->second'
+%         ops << 'labels.find(GetID(0))->second'
 %       else
 %         from_type, to_type = op_size(insn) == 64 ? ['double', 'int64_t'] : ['float', 'int32_t']
 %         if insn.float?
-%           ops << bit_cast("imms[#{ni}]", to_type, from_type)
+%           ops << bit_cast("GetImm(#{ni})", to_type, from_type)
 %         elsif type(insn).start_with? 'u' # can hold both float and integer literals
-%           ops << "std::holds_alternative<double>(imms[#{ni}]) ? #{bit_cast("imms[#{ni}]", to_type, from_type)} : std::get<int64_t>(imms[#{ni}])"
+%           ops << "std::holds_alternative<double>(GetImm(#{ni})) ? #{bit_cast("GetImm(#{ni})", to_type, from_type)} : GetImm<int64_t>(#{ni})"
 %         else
-%           ops << "std::get<int64_t>(imms[#{ni}])"
+%           ops << "GetImm<int64_t>(#{ni})"
 %         end
 %       end
 %       ni += 1
 %     elsif op.id?
 %       if insn.properties.include?('method_id')
 %         if insn.properties.include?('call_virt') && ((insn.mnemonic.include? '.virt') || (insn.mnemonic.include? '.polymorphic'))
-%           ops << 'methods.find(ids[0])->second->GetIndex(method)'
+%           ops << 'methods.find(GetID(0))->second->GetIndex(method)'
 %         else
 %           ops << 'foundMethod->GetIndex(method)'
 %         end
 %       elsif insn.properties.include?('static_method_id')
 %         ops << 'foundMethod->GetIndex(method)'
 %       elsif insn.properties.include?('field_id')
-%         ops << 'fields.find(ids[0])->second->GetIndex(method)'
+%         ops << 'fields.find(GetID(0))->second->GetIndex(method)'
 %       elsif insn.properties.include?('static_field_id')
-%         ops << 'staticFields.find(ids[0])->second->GetIndex(method)'
+%         ops << 'staticFields.find(GetID(0))->second->GetIndex(method)'
 %       elsif insn.properties.include?('type_id')
-%         ops << 'classes.find(ids[0])->second->GetIndex(method)'
+%         ops << 'classes.find(GetID(0))->second->GetIndex(method)'
 %       elsif insn.properties.include?('string_id')
-%         ops << 'strings.find(ids[0])->second->GetOffset()'
+%         ops << 'strings.find(GetID(0))->second->GetOffset()'
 %       elsif insn.properties.include?('literalarray_id')
-%         ops << 'static_cast<uint32_t>(literalarrays.find(ids[0])->second->GetIndex())'
+%         ops << 'static_cast<uint32_t>(literalarrays.find(GetID(0))->second->GetIndex())'
 %       else
 %         raise "Unexpected ID type"
 %       end
@@ -121,44 +121,44 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     case Opcode::<%= insn.asm_token %>: {
 % if insn.properties.include?('method_id')
 %   if insn.properties.include?('call_virt') && ((insn.mnemonic.include? '.virt') || (insn.mnemonic.include? '.polymorphic'))
-        if (ids.empty() || (methods.find(ids[0]) == methods.cend())) {
+        if (IDEmpty() || (methods.find(GetID(0)) == methods.cend())) {
             return false;
         }
 %   else
-        if (ids.empty()) {
+        if (IDEmpty()) {
             return false;
         }
-        auto *foundMethod = GetMethodForHybridOpcode(ids[0], methods, staticMethods);
+        auto *foundMethod = GetMethodForHybridOpcode(GetID(0), methods, staticMethods);
         if (foundMethod == nullptr) {
             return false;
         }
 %   end
 % elsif insn.properties.include?('static_method_id')
-        if (ids.empty()) {
+        if (IDEmpty()) {
             return false;
         }
-        auto *foundMethod = GetMethodForHybridOpcode(ids[0], staticMethods, methods);
+        auto *foundMethod = GetMethodForHybridOpcode(GetID(0), staticMethods, methods);
         if (foundMethod == nullptr) {
             return false;
         }
 % elsif insn.properties.include?('field_id')
-        if (ids.empty() || (fields.find(ids[0]) == fields.cend())) {
+        if (IDEmpty() || (fields.find(GetID(0)) == fields.cend())) {
             return false;
         }
 % elsif insn.properties.include?('static_field_id')
-        if (ids.empty() || (staticFields.find(ids[0]) == staticFields.cend())) {
+        if (IDEmpty() || (staticFields.find(GetID(0)) == staticFields.cend())) {
             return false;
         }
 % elsif insn.properties.include?('type_id')
-        if (ids.empty() || (classes.find(ids[0]) == classes.cend())) {
+        if (IDEmpty() || (classes.find(GetID(0)) == classes.cend())) {
             return false;
         }
 % elsif insn.properties.include?('string_id')
-        if (ids.empty() || (strings.find(ids[0]) == strings.cend())) {
+        if (IDEmpty() || (strings.find(GetID(0)) == strings.cend())) {
             return false;
         }
 % elsif insn.jump?
-        if (ids.empty() || (labels.find(ids[0]) == labels.cend())) {
+        if (IDEmpty() || (labels.find(GetID(0)) == labels.cend())) {
             return false;
         }
 % end
@@ -171,35 +171,34 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %     imms_num += 1
 %   end
 % end
-% if insn.properties.include?('short_long_range') && !insn.range? 
+% if insn.properties.include?('short_long_range') && !insn.range?
 %   if imms_num > 0
-        if (imms.size() < <%= imms_num %>) {
+        if (ImmSize() < <%= imms_num %>) {
             return false;
         }
 %   end
 % elsif insn.jump?
 %   if regs_num > 0
-        if (regs.size() < <%= regs_num %>) {
+        if (RegSize() < <%= regs_num %>) {
             return false;
         }
 %   end
 % else
 %   if regs_num > 0 and imms_num > 0
-        if (regs.size() < <%= regs_num %> || imms.size() < <%= imms_num %>) {
+        if (RegSize() < <%= regs_num %> || ImmSize() < <%= imms_num %>) {
             return false;
         }
 %   elsif regs_num > 0
-        if (regs.size() < <%= regs_num %>) {
+        if (RegSize() < <%= regs_num %>) {
             return false;
         }
 %   elsif imms_num > 0
-        if (imms.size() < <%= imms_num %>) {
+        if (ImmSize() < <%= imms_num %>) {
             return false;
         }
 %   end
 % end
 % if insn.properties.include?('short_long_range') && !insn.mnemonic.include?('range')
-        auto registers = regs;
 %   call_mnemonics = if insn.mnemonic.end_with?('.short')
 %     [insn.mnemonic]
 %   else
@@ -207,9 +206,9 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %   end
 %   call_mnemonics.map { |m| instruction_hash[m] }.each do |i|
 %     registers = i.operands.select(&:reg?)
-        if (registers.size() < <%= registers.size + 1 %>) {
-            while (registers.size() < <%= registers.size %>) {
-                registers.push_back(0);
+        if (RegSize() < <%= registers.size + 1 %>) {
+            while (RegSize() < <%= registers.size %>) {
+                const_cast<Ins*>(this)->EmplaceReg(0U);
             }
             emitter.<%= i.emitter_name %>(<%= operands(i, "registers").join(", ") %>);
             break;

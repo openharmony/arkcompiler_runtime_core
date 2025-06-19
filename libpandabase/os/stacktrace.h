@@ -16,9 +16,9 @@
 #ifndef LIBPANDABASE_OS_STACKTRACE_H
 #define LIBPANDABASE_OS_STACKTRACE_H
 
+#include <cstdint>
 #include <vector>
 #include <iostream>
-#include <cstdint>
 #include "../panda_visibility.h"
 
 namespace panda {

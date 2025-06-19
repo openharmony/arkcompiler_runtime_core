@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,51 @@
 #ifndef PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
 #define PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
 
+#include <string>
+#include <memory>
+#include "macros.h"
+
 namespace ark::pandasm {
+
+inline const std::string EMPTY_LINE {};  // NOLINT(fuchsia-statically-constructed-objects)
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class FileLocation {
-public:
-    std::string wholeLine; /* The line in which the field is defined */
-                           /*  Or line in which the field met, if the field is not defined */
-    size_t boundLeft = 0;
-    size_t boundRight = 0;
-    size_t lineNumber = 0;
-    bool isDefined = false;
+    std::unique_ptr<std::string> wholeLine_; /* The line in which the field is defined */
+                                             /*  Or line in which the field met, if the field is not defined */
 
 public:
-    FileLocation(std::string &fC, size_t bL, size_t bR, size_t lN, bool d)
-        : wholeLine(std::move(fC)), boundLeft(bL), boundRight(bR), lineNumber(lN), isDefined(d)
-    {
-    }
+    FileLocation() = default;
     ~FileLocation() = default;
 
     DEFAULT_MOVE_SEMANTIC(FileLocation);
-    DEFAULT_COPY_SEMANTIC(FileLocation);
+    NO_COPY_SEMANTIC(FileLocation);
+
+    explicit FileLocation(std::string fC, std::uint16_t bL, std::uint16_t bR, std::uint32_t lN, bool d)
+        : wholeLine_(std::make_unique<std::string>(std::move(fC))),
+          lineNumber(lN),
+          boundLeft(bL),
+          boundRight(bR),
+          isDefined(d)
+    {
+    }
+
+    std::uint32_t lineNumber = 0U;
+    std::uint16_t boundLeft = 0U;
+    std::uint16_t boundRight = 0;
+    bool isDefined = false;
+
+    std::string const &WholeLine() const noexcept
+    {
+        return wholeLine_ != nullptr ? *wholeLine_ : EMPTY_LINE;
+    }
+
+    template <typename... Args>
+    void SetLine(Args &&...args)
+    {
+        static_assert(std::is_constructible_v<std::string, Args...>, "Invalid string initialization value.");
+        wholeLine_ = std::make_unique<std::string>(std::forward<Args>(args)...);
+    }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

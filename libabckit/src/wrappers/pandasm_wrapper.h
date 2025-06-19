@@ -16,12 +16,12 @@
 #ifndef LIBABCKIT_SRC_WRAPPERS_PANDASM_WRAPPER_H
 #define LIBABCKIT_SRC_WRAPPERS_PANDASM_WRAPPER_H
 
+#include <cstdint>
 #include <unordered_set>
 #include <map>
 #include <string>
 #include <vector>
 #include <variant>
-#include <cstdint>
 
 namespace panda::panda_file {
 enum class SourceLang : uint8_t;

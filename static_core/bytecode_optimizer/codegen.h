@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,10 +59,6 @@ public:
     {
         return "BytecodeGen";
     }
-    std::vector<pandasm::Ins> GetEncodedInstructions() const
-    {
-        return res_;
-    }
 
     void Reserve(size_t resSize = 0)
     {
@@ -96,12 +92,11 @@ public:
         return "label_" + std::to_string(id);
     }
 
-    void EmitLabel(const std::string &label)
+    void EmitLabel(std::string &&label)
     {
-        pandasm::Ins l;
-        l.label = label;
-        l.setLabel = true;
-        result_.emplace_back(l);
+        pandasm::Ins l {};
+        l.SetLabel(std::move(label));
+        result_.emplace_back(std::move(l));
     }
 
     void EmitJump(const BasicBlock *bb);

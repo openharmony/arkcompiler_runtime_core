@@ -37,7 +37,7 @@ public:
     DEFAULT_COPY_SEMANTIC(Type);
     ~Type() = default;
 
-    Type(std::string_view componentName, size_t rank, bool ignorePrimitive = false) : rank_(rank)
+    Type(std::string_view componentName, std::uint32_t rank, bool ignorePrimitive = false) : rank_(rank)
     {
         name_ = GetName(componentName, rank_);
         typeId_ = GetId(name_, ignorePrimitive);
@@ -45,7 +45,7 @@ public:
         Canonicalize();
     }
 
-    Type(const Type &componentType, size_t rank)
+    Type(const Type &componentType, std::uint32_t rank)
         : Type(componentType.GetComponentName(), componentType.GetRank() + rank)
     {
     }
@@ -142,7 +142,7 @@ public:
 
     std::string GetComponentDescriptor(bool ignorePrimitive) const;
 
-    size_t GetRank() const
+    std::uint32_t GetRank() const
     {
         return rank_;
     }
@@ -150,7 +150,7 @@ public:
     Type GetComponentType() const
     {
         ASSERT(componentNames_.size() == 1);
-        return Type(componentNames_[0], rank_ > 0 ? rank_ - 1 : 0);
+        return Type(componentNames_[0], rank_ > 0U ? rank_ - 1U : 0U);
     }
 
     panda_file::Type::TypeId GetId() const
@@ -172,7 +172,7 @@ public:
 
     bool IsArray() const
     {
-        return rank_ > 0;
+        return rank_ > 0U;
     }
 
     bool IsObject() const
@@ -265,8 +265,8 @@ private:
     static PANDA_PUBLIC_API std::string GetName(std::string_view componentName, size_t rank);
 
     std::vector<std::string> componentNames_;
-    size_t rank_ {0};
     std::string name_;
+    std::uint32_t rank_ {0U};
     panda_file::Type::TypeId typeId_ {panda_file::Type::TypeId::VOID};
 };
 

@@ -490,7 +490,7 @@ TEST(linkertests, ForeignBase)
         derv->fieldList.push_back(std::move(fld));
 
         auto func = ark::pandasm::Function("main", LANG);
-        func.regsNum = 1;
+        func.regsNum = 1U;
         func.returnType = ark::pandasm::Type("void", 0);
         func.AddInstruction(ark::pandasm::Create_NEWOBJ(0, "Derv"));
         func.AddInstruction(ark::pandasm::Create_LDOBJ(0, "Derv.fld"));

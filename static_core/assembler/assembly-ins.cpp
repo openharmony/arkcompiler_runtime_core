@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,45 +13,46 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include "assembly-ins.h"
 
 namespace ark::pandasm {
 
-std::string ark::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_t firstArgIdx) const
+std::string ark::pandasm::Ins::RegsToString(bool &first, bool const printArgs, size_t const firstArgIdx) const
 {
-    std::stringstream translator;
-    for (const auto &reg : this->regs) {
+    std::string translator {};
+    for (std::size_t i = 0U; i < RegSize(); ++i) {
         if (!first) {
-            translator << ",";
+            translator += ',';
         } else {
             first = false;
         }
 
+        auto const reg = static_cast<std::size_t>(GetReg(i));
         if (printArgs && reg >= firstArgIdx) {
-            translator << " a" << reg - firstArgIdx;
+            translator += " a" + std::to_string(reg - firstArgIdx);
         } else {
-            translator << " v" << reg;
+            translator += " v" + std::to_string(reg);
         }
     }
-    return translator.str();
+    return translator;
 }
 
 std::string ark::pandasm::Ins::ImmsToString(bool &first) const
 {
-    std::stringstream translator;
-    for (const auto &imm : this->imms) {
+    std::stringstream translator {};
+    for (std::size_t i = 0U; i < ImmSize(); ++i) {
         if (!first) {
-            translator << ",";
+            translator << ',';
         } else {
             first = false;
         }
 
-        auto *number = std::get_if<double>(&imm);
-        if (number != nullptr) {
-            translator << " " << std::scientific << *number;
+        auto value = GetImm(i);
+        ;
+        if (std::holds_alternative<double>(value)) {
+            translator << " " << std::scientific << std::get<double>(value);
         } else {
-            translator << " 0x" << std::hex << std::get<int64_t>(imm);
+            translator << " 0x" << std::hex << std::get<int64_t>(value);
         }
         translator.clear();
     }
@@ -60,17 +61,17 @@ std::string ark::pandasm::Ins::ImmsToString(bool &first) const
 
 std::string ark::pandasm::Ins::IdsToString(bool &first) const
 {
-    std::stringstream translator;
-    for (const auto &id : this->ids) {
+    std::string translator {};
+    for (std::size_t i = 0U; i < IDSize(); ++i) {
         if (!first) {
-            translator << ",";
+            translator += ',';
         } else {
             first = false;
         }
 
-        translator << " " << id;
+        translator += GetID(i);
     }
-    return translator.str();
+    return translator;
 }
 
 std::string ark::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgIdx) const
@@ -83,32 +84,27 @@ std::string ark::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgI
     return ss.str();
 }
 
-std::string ark::pandasm::Ins::RegToString(size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
+std::string ark::pandasm::Ins::RegToString(size_t const idx, bool const isFirst, bool const printArgs,
+                                           size_t const firstArgIdx) const
 {
-    if (idx >= regs.size()) {
+    if (idx >= RegSize()) {
         return std::string("");
     }
 
-    std::stringstream translator;
-
-    if (!isFirst) {
-        translator << ", ";
+    std::string translator {!isFirst ? ", " : " "};
+    auto const reg = static_cast<std::size_t>(GetReg(idx));
+    if (printArgs && reg >= firstArgIdx) {
+        translator += 'a' + std::to_string(reg - firstArgIdx);
     } else {
-        translator << " ";
+        translator += 'v' + std::to_string(reg);
     }
 
-    if (printArgs && regs[idx] >= firstArgIdx) {
-        translator << "a" << regs[idx] - firstArgIdx;
-    } else {
-        translator << "v" << regs[idx];
-    }
-
-    return translator.str();
+    return translator;
 }
 
 std::string ark::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
 {
-    if (idx >= imms.size()) {
+    if (idx >= ImmSize()) {
         return std::string("");
     }
 
@@ -130,22 +126,13 @@ std::string ark::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
     return translator.str();
 }
 
-std::string ark::pandasm::Ins::IdToString(size_t idx, bool isFirst) const
+std::string ark::pandasm::Ins::IdToString(size_t const idx, bool const isFirst) const
 {
-    if (idx >= ids.size()) {
+    if (idx >= IDSize()) {
         return std::string("");
     }
 
-    std::stringstream translator;
-
-    if (!isFirst) {
-        translator << ", ";
-    } else {
-        translator << " ";
-    }
-
-    translator << ids[idx];
-
-    return translator.str();
+    return (isFirst ? " " : ", ") + GetID(idx);
 }
+
 }  // namespace ark::pandasm

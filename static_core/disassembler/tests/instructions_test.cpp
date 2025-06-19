@@ -294,7 +294,7 @@ TEST(InstructionsTest, TestCorrectReg)
     ASSERT(program);
     ark::pandasm::Program *prog = &(program.Value());
     auto mainFunc = prog->functionStaticTable.find("main:()");
-    mainFunc->second.regsNum = 0;
+    mainFunc->second.regsNum = 0U;
 
     auto pf = ark::pandasm::AsmEmitter::Emit(*prog);
     ASSERT(pf);
