@@ -17,11 +17,11 @@
 #define CPP_ABCKIT_INSTRUCTION_IMPL_H
 
 #include <cstdint>
-#include "./instruction.h"
-#include "./graph.h"
-#include "./file.h"
-#include "./core/function.h"
-#include "./core/import_descriptor.h"
+#include "instruction.h"
+#include "graph.h"
+#include "file.h"
+#include "core/function.h"
+#include "core/import_descriptor.h"
 #include "basic_block.h"
 #include "core/export_descriptor.h"
 #include "literal_array.h"

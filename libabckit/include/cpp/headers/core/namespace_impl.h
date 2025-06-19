@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_NAMESPACE_IMPL_H
 #define CPP_ABCKIT_CORE_NAMESPACE_IMPL_H
 
-#include "./namespace.h"
-#include "./function.h"
-#include "./class.h"
+#include "namespace.h"
+#include "function.h"
+#include "class.h"
 
 namespace abckit::core {
 

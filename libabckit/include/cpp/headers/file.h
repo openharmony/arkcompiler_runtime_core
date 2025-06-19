@@ -16,14 +16,14 @@
 #ifndef CPP_ABCKIT_FILE_H
 #define CPP_ABCKIT_FILE_H
 
-#include "./base_classes.h"
-#include "./value.h"
-#include "./literal.h"
-#include "./literal_array.h"
+#include "base_classes.h"
+#include "value.h"
+#include "literal.h"
+#include "literal_array.h"
 
-#include "./core/module.h"
-#include "./arkts/module.h"
-#include "./js/module.h"
+#include "core/module.h"
+#include "arkts/module.h"
+#include "js/module.h"
 #include "config.h"
 
 #include <functional>

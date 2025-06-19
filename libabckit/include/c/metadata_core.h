@@ -25,8 +25,8 @@
 #include <cstdint>
 #endif /* __cplusplus */
 
-#include "./declarations.h"
-#include "./api_version.h"
+#include "declarations.h"
+#include "api_version.h"
 
 #ifdef __cplusplus
 extern "C" {

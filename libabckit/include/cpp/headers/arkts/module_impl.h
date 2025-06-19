@@ -16,10 +16,10 @@
 #ifndef CPP_ABCKIT_ARKTS_MODULE_IMPL_H
 #define CPP_ABCKIT_ARKTS_MODULE_IMPL_H
 
-#include "./module.h"
-#include "./import_descriptor.h"
+#include "module.h"
+#include "import_descriptor.h"
 #include "../core/import_descriptor.h"
-#include "./annotation_interface.h"
+#include "annotation_interface.h"
 #include "../core/annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)

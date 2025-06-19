@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_CLASS_IMPL_H
 #define CPP_ABCKIT_CORE_CLASS_IMPL_H
 
-#include "./class.h"
-#include "./annotation.h"
-#include "./function.h"
+#include "class.h"
+#include "annotation.h"
+#include "function.h"
 #include "module.h"
 
 namespace abckit::core {

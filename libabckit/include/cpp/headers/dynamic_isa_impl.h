@@ -16,11 +16,11 @@
 #ifndef CPP_ABCKIT_DYNAMIC_ISA_IMPL_H
 #define CPP_ABCKIT_DYNAMIC_ISA_IMPL_H
 
-#include "./graph.h"
-#include "./file.h"
-#include "./literal_array.h"
-#include "./core/import_descriptor.h"
-#include "./core/module.h"
+#include "graph.h"
+#include "file.h"
+#include "literal_array.h"
+#include "core/import_descriptor.h"
+#include "core/module.h"
 #include "config.h"
 
 #include <memory>

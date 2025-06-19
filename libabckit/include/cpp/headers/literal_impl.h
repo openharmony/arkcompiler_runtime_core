@@ -18,7 +18,7 @@
 
 #include <cstdint>
 #include "literal_array.h"
-#include "./literal.h"
+#include "literal.h"
 
 namespace abckit {
 

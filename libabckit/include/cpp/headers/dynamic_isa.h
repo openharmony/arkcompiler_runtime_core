@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_DYNAMIC_ISA_H
 #define CPP_ABCKIT_DYNAMIC_ISA_H
 
-#include "./instruction.h"
-#include "./core/import_descriptor.h"
+#include "instruction.h"
+#include "core/import_descriptor.h"
 #include "config.h"
 
 #include <cstdint>

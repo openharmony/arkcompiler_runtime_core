@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 #define CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 
-#include "./function.h"
-#include "./class.h"
-#include "./module.h"
+#include "function.h"
+#include "class.h"
+#include "module.h"
 #include "../config.h"
 #include "../graph.h"
 

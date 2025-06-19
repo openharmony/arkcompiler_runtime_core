@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_LITERAL_ARRAY_IMPL_H
 #define CPP_ABCKIT_LITERAL_ARRAY_IMPL_H
 
-#include "./literal_array.h"
-#include "./literal.h"
+#include "literal_array.h"
+#include "literal.h"
 #include <functional>
 #include <memory>
 #include <string_view>

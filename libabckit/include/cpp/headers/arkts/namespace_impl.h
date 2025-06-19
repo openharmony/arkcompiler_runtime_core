@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_ARKTS_NAMESPACE_IMPL_H
 #define CPP_ABCKIT_ARKTS_NAMESPACE_IMPL_H
 
-#include "./namespace.h"
+#include "namespace.h"
 
 namespace abckit::arkts {
 

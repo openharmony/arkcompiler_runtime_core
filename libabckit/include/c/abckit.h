@@ -23,9 +23,9 @@
 #include <cstddef>
 #endif
 
-#include "./statuses.h"
-#include "./api_version.h"
-#include "./declarations.h"
+#include "statuses.h"
+#include "api_version.h"
+#include "declarations.h"
 
 #ifdef __cplusplus
 extern "C" {

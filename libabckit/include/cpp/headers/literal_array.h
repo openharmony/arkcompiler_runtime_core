@@ -16,10 +16,10 @@
 #ifndef CPP_ABCKIT_LITERAL_ARRAY_H
 #define CPP_ABCKIT_LITERAL_ARRAY_H
 
-#include "./base_classes.h"
+#include "base_classes.h"
 #include "config.h"
-#include "./value.h"
-#include "./literal.h"
+#include "value.h"
+#include "literal.h"
 #include <functional>
 
 namespace abckit {

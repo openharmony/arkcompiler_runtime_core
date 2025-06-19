@@ -16,10 +16,10 @@
 #ifndef CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H
 #define CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H
 
-#include "./function.h"
-#include "./annotation.h"
+#include "function.h"
+#include "annotation.h"
 #include "../core/annotation.h"
-#include "./annotation_interface.h"
+#include "annotation_interface.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {

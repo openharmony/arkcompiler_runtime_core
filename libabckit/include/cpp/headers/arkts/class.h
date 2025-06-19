@@ -18,7 +18,7 @@
 
 #include "../core/class.h"
 #include "../base_concepts.h"
-#include "./annotation_interface.h"
+#include "annotation_interface.h"
 
 namespace abckit::arkts {
 

@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_INSTRUCTION_H
 #define CPP_ABCKIT_INSTRUCTION_H
 
-#include "./base_classes.h"
+#include "base_classes.h"
 #include "core/export_descriptor.h"
-#include "./type.h"
+#include "type.h"
 #include "literal_array.h"
 
 #include <functional>

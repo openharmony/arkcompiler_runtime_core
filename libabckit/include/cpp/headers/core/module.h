@@ -17,10 +17,10 @@
 #define CPP_ABCKIT_CORE_MODULE_H
 
 #include "../base_classes.h"
-#include "./class.h"
-#include "./export_descriptor.h"
-#include "./namespace.h"
-#include "./annotation_interface.h"
+#include "class.h"
+#include "export_descriptor.h"
+#include "namespace.h"
+#include "annotation_interface.h"
 
 namespace abckit::core {
 

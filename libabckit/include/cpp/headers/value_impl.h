@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_VALUE_IMPL_H
 #define CPP_ABCKIT_VALUE_IMPL_H
 
-#include "./value.h"
-#include "./type.h"
-#include "./literal_array.h"
+#include "value.h"
+#include "type.h"
+#include "literal_array.h"
 
 namespace abckit {
 

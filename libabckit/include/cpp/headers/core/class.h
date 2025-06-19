@@ -17,7 +17,7 @@
 #define CPP_ABCKIT_CORE_CLASS_H
 
 #include "../base_classes.h"
-#include "./function.h"
+#include "function.h"
 
 #include <functional>
 #include <vector>

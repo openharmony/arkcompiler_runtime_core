@@ -17,9 +17,9 @@
 #define CPP_ABCKIT_FILE_IMPL_H
 
 #include <string_view>
-#include "./file.h"
-#include "./js/module.h"
-#include "./arkts/module.h"
+#include "file.h"
+#include "js/module.h"
+#include "arkts/module.h"
 
 namespace abckit {
 

@@ -18,7 +18,7 @@
 
 #include <functional>
 
-#include "./annotation_element.h"
+#include "annotation_element.h"
 #include "../base_classes.h"
 
 namespace abckit::core {

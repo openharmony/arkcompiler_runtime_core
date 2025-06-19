@@ -17,7 +17,7 @@
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_H
 
 #include "../base_classes.h"
-#include "./module.h"
+#include "module.h"
 
 #include <string>
 

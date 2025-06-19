@@ -17,7 +17,7 @@
 #define CPP_ABCKIT_CORE_FUNCTION_H
 
 #include "../base_classes.h"
-#include "./annotation.h"
+#include "annotation.h"
 
 #include <functional>
 #include <string>
