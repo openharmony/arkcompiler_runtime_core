@@ -316,6 +316,24 @@ class Checker
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
   end
 
+  def WRITE_FILE(**args)
+    inputs = ""
+    outputs = ""
+    ext = ""
+    args.each do |name, value|
+      case name
+      when :inputs
+        inputs << value
+      when :outputs
+        outputs << value
+      when :ext
+        ext << value
+      end
+    end
+
+    File.open("#{@cwd}/#{outputs}.#{ext}", "w") { |file| file.write(inputs) }
+  end
+
   def RUN_PAOC(**args)
     @aot_file = "#{@cwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.an"
 

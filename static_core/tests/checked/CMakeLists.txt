@@ -151,6 +151,7 @@ endif()
 # Disable checked tests with sanitizers for arm64, since it takes too long time running on qemu.
 if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANITIZER AND NOT PANDA_ENABLE_THREAD_SANITIZER))
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_black_list.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/const_array_test.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/disable_intrinsics.pa BOOT)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ldarray_obj.pa)
