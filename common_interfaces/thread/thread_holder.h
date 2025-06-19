@@ -146,6 +146,11 @@ public:
         ThreadHolder *holder_ {nullptr};
     };
 
+    static constexpr size_t GetMutatorBaseOffset()
+    {
+        return offsetof(ThreadHolder, mutatorBase_);
+    }
+
 private:
     ~ThreadHolder()
     {
@@ -168,6 +173,7 @@ private:
 
     NO_COPY_SEMANTIC_CC(ThreadHolder);
     NO_MOVE_SEMANTIC_CC(ThreadHolder);
+
     friend JSThread;
     friend ThreadHolderManager;
 };

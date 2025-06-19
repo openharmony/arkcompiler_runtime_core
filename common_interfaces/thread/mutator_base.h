@@ -200,15 +200,9 @@ public:
         callbackRequest_.store(false, std::memory_order_relaxed);
     }
 
-    void SetSafepointStatePtr(uint64_t* slot) { safepointStatePtr_ = slot; }
-
     void SetSafepointActive(bool value)
     {
-        uint64_t* statePtr = safepointStatePtr_;
-        if (statePtr == nullptr) {
-            return;
-        }
-        *statePtr = static_cast<uint64_t>(value);
+        safepointActive_ = static_cast<uint32_t>(value);
     }
 
     // Spin wait phase transition finished when GC is tranverting this mutator's phase
@@ -258,9 +252,9 @@ public:
         return mutatorPhase_.load(std::memory_order_acquire);
     }
 
-    const void* GetSafepointPage() const
+    bool GetSafepointActiveState() const
     {
-        return safepointStatePtr_;
+        return safepointActive_;
     }
 
     void MutatorBaseLock() { mutatorBaseLock_.lock(); }
@@ -278,9 +272,15 @@ public:
         jsThread_ = nullptr;
     }
 
+    static constexpr size_t GetSafepointActiveOffset()
+    {
+        return offsetof(MutatorBase, safepointActive_);
+    }
+
 private:
+    // Indicate whether execution thread should check safepoint suspension request
+    uint32_t safepointActive_ = 0;
     // Indicate the current mutator phase and use which barrier in concurrent gc
-    // ATTENTION: THE LAYOUT FOR GCPHASE MUST NOT BE CHANGED!
     std::atomic<GCPhase> mutatorPhase_ = { GCPhase::GC_PHASE_UNDEF };
     // in saferegion, it will not access any managed objects and can be visitted by observer
     std::atomic<uint32_t> inSaferegion_ = { SAFE_REGION_TRUE };
@@ -288,8 +288,6 @@ private:
     std::mutex observeCntMutex_;
     // Increase when this mutator is observed by some observer
     std::atomic<size_t> observerCnt_ = { 0 };
-
-    uint64_t* safepointStatePtr_ = nullptr; // state: active or not
 
     // If set implies this mutator should process suspension requests
     std::atomic<uint32_t> suspensionFlag_ = { 0 };
