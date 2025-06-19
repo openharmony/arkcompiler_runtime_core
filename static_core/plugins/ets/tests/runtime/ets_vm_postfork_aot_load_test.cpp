@@ -53,7 +53,7 @@ void CompileInvalidAot(const char *abcPath, const char *anPath)
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsVMPostforkAotTest, DISABLED_PostforkAotFailedTest)
+TEST_F(EtsVMPostforkAotTest, PostforkAotFailedTest)
 {
     const char *abcPath = std::getenv("ANI_GTEST_ABC_PATH");
     ASSERT_NE(abcPath, nullptr);
@@ -63,21 +63,17 @@ TEST_F(EtsVMPostforkAotTest, DISABLED_PostforkAotFailedTest)
     ASSERT(dot != std::string_view::npos);
     ASSERT(abcPathString.substr(dot) == ".abc" || abcPathString.substr(dot) == ".zip");
 
-    std::string aotPath = abcPathString.substr(0, dot) + "_invalid.an";
+    std::string aotPath = abcPathString.substr(0, dot) + ".an";
 
     CompileInvalidAot(abcPath, aotPath.c_str());
 
-    std::string aotFileString = "--ext:aot-file=" + aotPath;
-    ani_option aotFile = {aotFileString.c_str(), nullptr};
-    ani_option enableAn = {"--ext:enable-an", nullptr};
-    ark::ets::ETSAni::Prefork(env_);
+    ani_option enableAn = {"--ext:--enable-an", nullptr};
     std::vector<ani_option> options;
-    options.push_back(aotFile);
     options.push_back(enableAn);
     pid_t pid = fork();
     ASSERT_NE(pid, -1);
     if (pid == 0) {
-        ark::ets::ETSAni::Postfork(env_, options);
+        ark::ets::ETSAni::Postfork(env_, options, false);
         _exit(0);
     } else {
         int status = 0;
