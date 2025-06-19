@@ -57,9 +57,9 @@ void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, Cla
     {
         os::memory::LockHolder lock {pandaFilesLock_};
         pandaFiles_.push_back({context, std::forward<std::unique_ptr<const panda_file::File>>(pf)});
+        // NOTE(@srokashevich, #29734): after fix move the line below out of the lock block
+        GetAotManager()->UpdatePandaFilesSnapshot(file, context, Runtime::GetOptions().IsArkAot());
     }
-
-    GetAotManager()->UpdatePandaFilesSnapshot(file, context, Runtime::GetOptions().IsArkAot());
 
     if (context == nullptr || context->IsBootContext()) {
         os::memory::LockHolder lock {bootPandaFilesLock_};

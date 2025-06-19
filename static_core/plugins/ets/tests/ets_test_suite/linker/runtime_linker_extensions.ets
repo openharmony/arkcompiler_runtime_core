@@ -37,6 +37,10 @@ class DummyRuntimeLinker extends RuntimeLinker {
 
 class Test {
     static stdCoreObjectName = "std.core.Object";
+    static stdCoreObjectWrongName1 = "std/core/Object";
+    static stdCoreObjectWrongName2 = "Lstd/core/Object;";
+    static stdCoreObjectWrongName3 = "Lstd.core.Object;";
+    static stdCoreObjectWrongName4 = "[D";
     static additionalClass1Name = "additional1.AdditionalClass1";
     static additionalClass2Name = "additional2.AdditionalClass2";
 
@@ -83,7 +87,7 @@ class Test {
     }
 
     private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
-        const rawFiles = new Array<FixedArray<byte>>(paths.length as int);
+        const rawFiles = new Array<FixedArray<byte>>(paths.length.toInt());
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);
@@ -135,7 +139,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
         // Create linkers
         const placeholderClass = Class.of(new A());
         const baseLinker = new AbcRuntimeLinker(undefined, abcFiles);
@@ -155,7 +159,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
 
@@ -223,7 +227,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new AbcRuntimeLinker(undefined, abcFiles);
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
@@ -234,7 +238,7 @@ class Test {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
-        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx as int] = path; });
+        reducedAbcFiles.forEach((path: string, idx: number) => { abcFiles[idx.toInt()] = path; });
         // Create linker
         const linker = new MemoryRuntimeLinker(undefined, Test.loadRawFiles(abcFiles));
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
@@ -247,16 +251,16 @@ class Test {
     static testConcurrentAddAbcFiles() {
         const linker = new AbcRuntimeLinker(undefined, []);
         const allAbcFiles = Test.getAdditionalFilesList();
-        const promises = new Array<Job<void>>();
+        const jobs = new Array<Job<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            promises.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
+            jobs.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
         }
         // Try to load a class from "additional1.ets"
         arktest.expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
             (e) => e instanceof LinkerClassNotFoundError
         );
-        promises.forEach((p: Job<void>): void => { p.Await(); });
+        jobs.forEach((p: Job<void>): void => { p.Await(); });
         Test.addSingleAbcFile(linker, allAbcFiles[0]);
         // Now class must be found
         arktest.expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
@@ -267,6 +271,22 @@ class Test {
         arktest.expectThrow(() => { new AbcRuntimeLinker(undefined, path) },
             (e) => e instanceof AbcFileNotFoundError
         );
+    }
+
+    static testWrongClassName() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+
+        const errorCheck = (e: Error | Exception) => { return (e instanceof LinkerClassNotFoundError) }
+        arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName1) }, errorCheck);
+        arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName2) }, errorCheck);
+        arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName3) }, errorCheck);
+        arktest.expectThrow(() => { linker.loadClass(Test.stdCoreObjectWrongName4) }, errorCheck);
+
+        const memoryLinker = new MemoryRuntimeLinker(undefined, []);
+        arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName1) }, errorCheck);
+        arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName2) }, errorCheck);
+        arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName3) }, errorCheck);
+        arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName4) }, errorCheck);
     }
 
     static test() {
@@ -281,9 +301,11 @@ class Test {
         Test.testRuntimeLinkerAddAbcFiles();
         Test.testMemoryRuntimeLinkerAddAbcFiles();
         Test.testConcurrentAddAbcFiles();
+        Test.testWrongClassName();
     }
 }
 
 function main() {
+    loadLibrary("runtime_linker_extensions-shared-lib");
     Test.test();
 }

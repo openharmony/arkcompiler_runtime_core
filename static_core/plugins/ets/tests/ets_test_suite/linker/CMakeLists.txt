@@ -136,11 +136,12 @@ function(test_runtime_linker_extensions test)
     add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list} ${native_lib})
     add_linker_test(${test} additional_dependencies
         SKIP_ARM32_COMPILER
-        RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=${test}.Test::createWeakRef")
+        # issues:22179: remove "--verification-mode=disabled" option after fix
+        RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=${test}.Test::createWeakRef" "--verification-mode=disabled")
 
 endfunction()
 
-# test_runtime_linker_extensions(runtime_linker_extensions) // issues:22179 add '--verification-mode=on-the-fly',case failed
+test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 add '--verification-mode=on-the-fly',case failed
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context

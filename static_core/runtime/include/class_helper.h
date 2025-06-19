@@ -46,7 +46,8 @@ public:
     // In general for any T: sizeof(T*) != OBJECT_POINTER_SIZE
     static constexpr size_t POINTER_SIZE = sizeof(uintptr_t);
 
-    PANDA_PUBLIC_API static const uint8_t *GetDescriptor(const uint8_t *name, PandaString *storage);
+    PANDA_PUBLIC_API static const uint8_t *GetDescriptor(const uint8_t *name, PandaString *storage,
+                                                         bool strictPublicDescriptor = false);
 
     static const uint8_t *GetTypeDescriptor(const PandaString &name, PandaString *storage);
 

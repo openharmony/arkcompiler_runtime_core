@@ -60,7 +60,10 @@ EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeL
 {
     const auto name = clsName->GetMutf8();
     PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
+    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    if (classDescriptor == nullptr) {
+        return nullptr;
+    }
 
     auto *coro = EtsCoroutine::GetCurrent();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
