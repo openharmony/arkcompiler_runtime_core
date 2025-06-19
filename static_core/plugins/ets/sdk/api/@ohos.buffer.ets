@@ -875,9 +875,27 @@ Received value is: ${resolvedEnd}`)
                     } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
                         strValue = fillInPaddingBase64(strValue);
                     }
-                    let buff = ArrayBuffer.from(strValue, resolvedEncoding as string);
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, buff.at((i % buff.byteLength).toInt()).toByte());
+                    let buff: Uint8Array;
+
+                    if (resolvedEncoding === 'ucs2' || resolvedEncoding === 'ucs-2' || resolvedEncoding === 'utf16le') {
+                        const u16 = new Uint16Array(strValue.length);
+                        for (let i = 0; i < strValue.length; i++) {
+                            u16[i] = strValue.charCodeAt(i);
+                        }
+                        buff = new Uint8Array(u16.buffer);
+                    } else {
+                        buff = new Uint8Array(ArrayBuffer.from(strValue, resolvedEncoding as string));
+                    }
+
+                    let pos = offsetInt;
+                    while (pos + buff.byteLength <= resolvedEndInt) {
+                        for (let j: int = 0; j < buff.byteLength; j++) {
+                            this.buffer.set(pos++, buff[j].toByte());
+                        }
+                    }
+
+                    for (let j: int = 0; pos < resolvedEndInt; j++, pos++) {
+                        this.buffer.set(pos, buff[j].toByte());
                     }
                     return this;
                 case "number":
