@@ -26,8 +26,15 @@
 namespace ark {
 
 /* static */
-const uint8_t *ClassHelper::GetDescriptor(const uint8_t *name, PandaString *storage)
+const uint8_t *ClassHelper::GetDescriptor(const uint8_t *name, PandaString *storage, bool strictPublicDescriptor)
 {
+    if (strictPublicDescriptor) {
+        auto componentName = PandaString(utf::Mutf8AsCString(name));
+        if (std::find(componentName.begin(), componentName.end(), '/') != componentName.end()) {
+            return nullptr;
+        }
+    }
+
     return GetArrayDescriptor(name, 0, storage);
 }
 
