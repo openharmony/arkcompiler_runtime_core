@@ -61,6 +61,9 @@ public:
     void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
     void FinalizeWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) override;
 
+    void PreZygoteFork() override;
+    void PostZygoteFork() override;
+
     /* ThreadManager interfaces, see ThreadManager class for the details */
     void WaitForDeregistration() override;
     void SuspendAllThreads() override;

@@ -82,7 +82,7 @@ void GCWorker::FinalizeAndDestroyWorker()
     gcTaskQueue_->Signal();
     if (gc_->GetSettings()->UseTaskManagerForGC()) {
         needToFinish_ = true;
-        taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(GC_WORKER_TASK_PROPERTIES);
+        gc_->GetWorkersTaskQueue()->WaitBackgroundTasks();
         return;
     }
     ASSERT(gc_->GetSettings()->UseThreadPoolForGC());
@@ -98,8 +98,7 @@ void GCWorker::FinalizeAndDestroyWorker()
 void GCWorker::CreateAndAddTaskToTaskManager()
 {
     ASSERT_PRINT(gcRunner_ != nullptr, "Need to create task only for TaskManager case");
-    auto gcTaskmanagerTask = taskmanager::Task::Create(GC_WORKER_TASK_PROPERTIES, gcRunner_);
-    gc_->GetWorkersTaskQueue()->AddTask(std::move(gcTaskmanagerTask));
+    gc_->GetWorkersTaskQueue()->AddBackgroundTask(gcRunner_);
 }
 
 void GCWorker::GCTaskRunner()

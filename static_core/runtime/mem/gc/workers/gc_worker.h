@@ -65,9 +65,6 @@ public:
     void OnPostponeGCEnd();
 
 private:
-    static constexpr taskmanager::TaskProperties GC_WORKER_TASK_PROPERTIES = {
-        taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
-
     PandaUniquePtr<GCTask> GetTask();
     void RunGC(PandaUniquePtr<GCTask> task);
 
@@ -87,7 +84,7 @@ private:
     /* Internal thread specific variables */
     std::thread *gcInternalThread_ {nullptr};
     /* TaskManager specific variables */
-    taskmanager::Task::RunnerCallback gcRunner_ {nullptr};
+    taskmanager::RunnerCallback gcRunner_ {nullptr};
     std::atomic_bool needToFinish_ {false};
     os::memory::Mutex gcTaskRunMutex_;
     os::memory::Mutex postponedTasksMutex_;
