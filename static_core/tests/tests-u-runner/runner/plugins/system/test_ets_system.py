@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #
 
 import logging
-from os import path
+from os import makedirs, path
 from typing import List, Any
 
 from runner.descriptor import Descriptor
@@ -31,11 +31,16 @@ class TestETSSystem(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
         self.expected_path = f"{path.splitext(self.path)[0]}-expected.txt"
+        self.bytecode_path = test_env.work_dir.intermediate
+        makedirs(self.bytecode_path, exist_ok=True)
+        self.test_abc = self.bytecode_path / f"{self.test_id}.abc"
+        self.test_abc.parent.mkdir(parents=True, exist_ok=True)
+
 
     def do_run(self) -> TestFileBased:
         desc = Descriptor(self.path).get_descriptor()
 
-        es2panda_flags = []
+        es2panda_flags = [f"--output={self.test_abc}"]
         es2panda_flags.extend(self.flags)
         if 'flags' in desc and 'module' in desc['flags']:
             es2panda_flags.append("--module")
