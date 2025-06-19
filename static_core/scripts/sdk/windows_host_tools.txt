@@ -1,2 +1,3 @@
 bin/ark_link.exe
+bin/dependency_analyzer.exe
 bin/es2panda.exe
