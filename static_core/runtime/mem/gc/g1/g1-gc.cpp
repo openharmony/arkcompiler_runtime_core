@@ -1551,20 +1551,26 @@ void G1GC<LanguageConfig>::FastYoungMark(const CollectionSet &collectibleRegions
     auto allocator = this->GetInternalAllocator();
     PandaVector<Region *> youngRegions(collectibleRegions.Young().begin(), collectibleRegions.Young().end());
     GCMarkingStackType::MarkedObjects markedObjects(youngRegions.size(), nullptr);
+    PandaVector<std::pair<Region *, PandaDeque<ObjectHeader *> *>> tasks(youngRegions.size());
+    bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
     for (size_t idx = 0; idx < youngRegions.size(); ++idx) {
         auto *region = youngRegions[idx];
         region->SetLiveBytes(0U);
         markedObjects[idx] = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
         auto *markedObjDeque = markedObjects[idx];
         ASSERT(markedObjDeque != nullptr);
-        GCMarkWholeRegionTask gcWorkerTask(region, markedObjDeque);
-        bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
+        tasks[idx] = std::make_pair(region, markedObjDeque);
+        GCMarkWholeRegionTask gcWorkerTask(&tasks[idx]);
         if (useGcWorkers && this->GetWorkersTaskPool()->AddTask(GCMarkWholeRegionTask(gcWorkerTask))) {
             continue;
         }
         // Couldn't add new task, so do task processing immediately
         this->WorkerTaskProcessing(&gcWorkerTask, nullptr);
     }
+    if (useGcWorkers) {
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
+    }
+    tasks.clear();
 
     RefCacheBuilder<LanguageConfig, true> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, nullptr);
     auto refsChecker = [this, &builder](Region *region, const MemRange &memRange) {
