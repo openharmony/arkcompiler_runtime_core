@@ -73,7 +73,6 @@ class RunnerETSSystem(RunnerJS):
 
         ets_flags = [
             "--extension=ets",
-            "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ]
         all_warnings = ets_flags + SystemArkTSFlags.ALL_WARNINGS.value

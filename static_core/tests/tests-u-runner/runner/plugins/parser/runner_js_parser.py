@@ -64,7 +64,6 @@ class RunnerJSParser(RunnerJS):
             TestDirectory('compiler/ts', 'ts', flags=['--extension=ts']),
             TestDirectory('compiler/ets', 'ets', flags=[
                 '--extension=ets',
-                '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'
             ]),
@@ -72,14 +71,13 @@ class RunnerJSParser(RunnerJS):
             TestDirectory('parser/as', 'ts', flags=['--parse-only', '--extension=as']),
             TestDirectory('parser/ets', 'ets', flags=[
                 '--extension=ets',
-                '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}',
                 f'--ets-path={es2panda_test}'
             ]),
         ]
 
         if self.config.general.with_js:
-            test_dirs.append(TestDirectory('compiler/js', 'js', flags=['--extension=js', '--output=/dev/null']))
+            test_dirs.append(TestDirectory('compiler/js', 'js', flags=['--extension=js']))
             test_dirs.append(TestDirectory('ark_tests/parser/js', 'js', flags=['--parse-only', '--extension=js']))
             test_dirs.append(TestDirectory('parser/js', 'js', flags=['--parse-only', '--extension=js']))
 

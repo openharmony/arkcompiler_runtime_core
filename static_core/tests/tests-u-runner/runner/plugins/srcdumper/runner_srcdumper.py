@@ -76,41 +76,18 @@ class RunnerSRCDumper(RunnerJS):
         return test
 
     def _collect_test_directories(self) -> List[TestDirectory]:
+        flags = [
+            '--extension=ets',
+            '--output=/dev/null',
+            '--exit-after-phase', 'plugins-after-parse',
+            f'--arktsconfig={self.arktsconfig}'
+        ]
         return [
-            TestDirectory('compiler/ets', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-parse',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('parser/ets', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-parse',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('runtime/ets', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-parse',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('ast', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-parse',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
-
-            TestDirectory('srcdump', 'ets', flags=[
-                '--extension=ets',
-                '--output=/dev/null',
-                '--exit-after-phase', 'plugins-after-parse',
-                f'--arktsconfig={self.arktsconfig}'
-            ]),
+            TestDirectory('compiler/ets', 'ets', flags),
+            TestDirectory('parser/ets', 'ets', flags),
+            TestDirectory('runtime/ets', 'ets', flags),
+            TestDirectory('ast', 'ets', flags),
+            TestDirectory('srcdump', 'ets', flags),
         ]
 
     def _copy_test_files_to_artifacts(self, test_dirs: List[TestDirectory]) -> None:

@@ -100,7 +100,8 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     if (graph->IsDynamicMethod()) {
         RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
     } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_1) {
-        RunOpts<Canonicalization, compiler::Lowering>(graph);
+        RunOpts<compiler::Peepholes, Canonicalization, compiler::Lowering, compiler::MoveConstants,
+                BytecodeOptPeepholes>(graph);
     } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
