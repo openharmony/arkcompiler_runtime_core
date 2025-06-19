@@ -510,6 +510,20 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateClasses)
     helpers_nullptr::TestNullptr(g_inspectApiImp->moduleEnumerateClasses);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateInterfaces,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateInterfaces)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->moduleEnumerateInterfaces);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateEnums,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateEnums)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->moduleEnumerateEnums);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::moduleEnumerateExports,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateExports)
@@ -536,6 +550,13 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateNamespaces)
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateTopLevelFunctions)
 {
     helpers_nullptr::TestNullptr(g_inspectApiImp->moduleEnumerateTopLevelFunctions);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateFields,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, moduleEnumerateFields)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->moduleEnumerateFields);
 }
 
 // Test: test-kind=api, api=InspectApiImpl::moduleGetFile,
@@ -599,6 +620,55 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, namespaceGetName)
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, namespaceGetParentNamespace)
 {
     helpers_nullptr::TestNullptr(g_inspectApiImp->namespaceGetParentNamespace);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateFields,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, classEnumerateFields)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->classEnumerateFields);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceGetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, interfaceGetName)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->interfaceGetName);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateMethods,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, interfaceEnumerateMethods)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->interfaceEnumerateMethods);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::interfaceEnumerateFields,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, interfaceEnumerateFields)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->interfaceEnumerateFields);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumGetName,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, enumGetName)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->enumGetName);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumEnumerateMethods,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, enumEnumerateMethods)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->enumEnumerateMethods);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumEnumerateFields,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, enumEnumerateFields)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->enumEnumerateFields);
 }
 
 // Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass,

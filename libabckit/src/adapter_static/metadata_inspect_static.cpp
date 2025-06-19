@@ -74,6 +74,15 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = ns->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, namespaceName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(ns->owningModule->file, namespaceName.data(), namespaceName.size());
+}
+
 // ========================================
 // Class
 // ========================================
@@ -85,6 +94,32 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     auto [moduleName, className] = ClassGetNames(record->name);
 
     return CreateStringStatic(klass->owningModule->file, className.data(), className.size());
+}
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = iface->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, interfaceName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(iface->owningModule->file, interfaceName.data(), interfaceName.size());
+}
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto *record = enm->GetArkTSImpl()->impl.GetStaticClass();
+    auto [_, enumName] = ClassGetNames(record->name);
+
+    return CreateStringStatic(enm->owningModule->file, enumName.data(), enumName.size());
 }
 
 // ========================================

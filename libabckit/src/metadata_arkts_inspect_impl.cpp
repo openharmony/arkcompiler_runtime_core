@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "helpers_common.h"
+
 #include <cassert>
 #include "libabckit/c/abckit.h"
 #include "libabckit/c/extensions/arkts/metadata_arkts.h"
@@ -620,14 +622,9 @@ bool ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(Abc
     return true;
 }
 
-bool ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
+bool ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *ns, void *data))
 {
-    for (auto &n : m->namespaces) {
-        if (!cb(n.get(), data)) {
-            return false;
-        }
-    }
-    return true;
+    return ModuleEnumerateNamespacesHelper(m, data, cb);
 }
 
 bool ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
@@ -635,10 +632,25 @@ bool ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(Abckit
     return ModuleEnumerateClassesHelper(m, data, cb);
 }
 
+bool ArkTSModuleEnumerateInterfaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    return ModuleEnumerateInterfacesHelper(m, data, cb);
+}
+
+bool ArkTSModuleEnumerateEnums(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    return ModuleEnumerateEnumsHelper(m, data, cb);
+}
+
 bool ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     return ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
+}
+
+bool ArkTSModuleEnumerateFields(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreModuleField *field, void *data))
+{
+    return ModuleEnumerateFieldsHelper(m, data, cb);
 }
 
 bool ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
@@ -705,6 +717,11 @@ bool ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(A
     return ClassEnumerateMethodsHelper(klass, data, cb);
 }
 
+bool ArkTSClassEnumerateFields(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClassField *field, void *data))
+{
+    return ClassEnumerateFieldsHelper(klass, data, cb);
+}
+
 bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
@@ -717,6 +734,36 @@ bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
         }
     }
     return true;
+}
+
+// ========================================
+// Interface
+// ========================================
+
+bool ArkTSInterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
+                                    bool (*cb)(AbckitCoreFunction *method, void *data))
+{
+    return InterfaceEnumerateMethodsHelper(iface, data, cb);
+}
+
+bool ArkTSInterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
+                                   bool (*cb)(AbckitCoreInterfaceField *field, void *data))
+{
+    return InterfaceEnumerateFieldsHelper(iface, data, cb);
+}
+
+// ========================================
+// Enum
+// ========================================
+
+bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
+{
+    return EnumEnumerateMethodsHelper(enm, data, cb);
+}
+
+bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
+{
+    return EnumEnumerateFieldsHelper(enm, data, cb);
 }
 
 // ========================================

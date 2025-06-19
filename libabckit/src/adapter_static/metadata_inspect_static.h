@@ -33,11 +33,25 @@ bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitString *NamespaceGetNameStatic(AbckitCoreNamespace *ns);
+
 // ========================================
 // Class
 // ========================================
 
 AbckitString *ClassGetNameStatic(AbckitCoreClass *klass);
+
+// ========================================
+// Interface
+// ========================================
+
+AbckitString *InterfaceGetNameStatic(AbckitCoreInterface *iface);
+
+// ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetNameStatic(AbckitCoreEnum *enm);
 
 // ========================================
 // Function

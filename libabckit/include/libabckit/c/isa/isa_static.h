@@ -133,7 +133,7 @@ enum AbckitIsaApiStaticConditionCode {
  * @brief Struct that holds the pointers to the API used to work with static ISA.
  * @note Valid targets: `ABCKIT_TARGET_ARK_TS_V2`.
  */
-struct AbckitIsaApiStatic {
+struct CAPI_EXPORT AbckitIsaApiStatic {
     /**
      * @brief Returns core class of `inst`.
      * @return AbckitCoreClass *.
@@ -847,7 +847,7 @@ struct AbckitIsaApiStatic {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitIsaApiStatic const *AbckitGetIsaApiStaticImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitIsaApiStatic const *AbckitGetIsaApiStaticImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }

@@ -639,11 +639,12 @@ void AssignNamespacesToParent(std::vector<std::unique_ptr<AbckitCoreNamespace>> 
 {
     for (auto &n : namespaces) {
         ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
+        auto &nName = GetDynFunction(n->GetArkTSImpl()->f.get())->name;
         panda::pandasm::Function *func = n->GetArkTSImpl()->f->GetArkTSImpl()->GetDynamicImpl();
         auto [kind, parentName] = GetParentKindAndName(func->name, GetScopeNamesArray(n->owningModule));
         switch (kind) {
             case ParentKind::MODULE:
-                n->owningModule->namespaces.emplace_back(std::move(n)).get();
+                n->owningModule->nt.emplace(nName, std::move(n));
                 break;
             case ParentKind::NAMESPACE: {
                 ASSERT(nameToNamespace.count(parentName) == 1);
@@ -956,7 +957,7 @@ void DumpHierarchy(AbckitFile *file)
 
     for (auto &[mName, m] : file->localModules) {
         LIBABCKIT_LOG_NO_FUNC(DEBUG) << mName << std::endl;
-        for (auto &n : m->namespaces) {
+        for (auto &[_, n] : m->nt) {
             dumpNamespace(n.get(), "");
         }
         for (auto &[cName, c] : m->ct) {

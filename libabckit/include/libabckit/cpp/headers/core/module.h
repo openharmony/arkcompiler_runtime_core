@@ -18,6 +18,9 @@
 
 #include "../base_classes.h"
 #include "./class.h"
+#include "./interface.h"
+#include "./enum.h"
+#include "./field.h"
 #include "./export_descriptor.h"
 #include "./namespace.h"
 #include "./annotation_interface.h"
@@ -40,9 +43,13 @@ class Module : public ViewInResource<AbckitCoreModule *, const File *> {
     /// @brief to access private constructor
     friend class core::AnnotationInterface;
     /// @brief to access private constructor
-    friend class core::Class;
+    friend class core::Interface;
+    /// @brief to access private constructor
+    friend class core::Enum;
     /// @brief to access private constructor
     friend class core::Function;
+    /// @brief to access private constructor
+    friend class core::ModuleField;
     /// @brief abckit::DefaultHash<Module>
     friend class abckit::DefaultHash<Module>;
     /// @brief abckit::DynamicIsa
@@ -122,11 +129,32 @@ public:
     std::vector<core::Class> GetClasses() const;
 
     /**
+     * @brief Return vector with module's interfaces.
+     * @return std::vector<core::Interface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Interface> GetInterfaces() const;
+
+    /**
+     * @brief Return vector with module's enums.
+     * @return std::vector<core::Enum>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Enum> GetEnums() const;
+
+    /**
      * @brief Return vector with module's functions.
      * @return std::vector<core::Function>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Function> GetTopLevelFunctions() const;
+
+    /**
+     * @brief Return vector with module's fields.
+     * @return std::vector<core::ModuleField>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::ModuleField> GetFields() const;
 
     /**
      * @brief Return vector with module's annotation interfaces.
@@ -187,6 +215,26 @@ public:
     bool EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
 
     /**
+     * @brief Enumerates interfaces of the Module, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateInterfaces(const std::function<bool(core::Interface)> &cb) const;
+
+    /**
+     * @brief Enumerates enums of the Module, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
+     */
+    bool EnumerateEnums(const std::function<bool(core::Enum)> &cb) const;
+
+    /**
      * @brief Enumerates imports of the Module, invoking callback `cb` for each import.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
@@ -229,7 +277,13 @@ public:
 private:
     bool GetClassesInner(std::vector<core::Class> &classes) const;
 
+    bool GetInterfacesInner(std::vector<core::Interface> &interfaces) const;
+
+    bool GetEnumsInner(std::vector<core::Enum> &enums) const;
+
     bool GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const;
+
+    bool GetFieldsInner(std::vector<core::ModuleField> &fields) const;
 
     bool GetAnnotationInterfacesInner(std::vector<core::AnnotationInterface> &ifaces) const;
 

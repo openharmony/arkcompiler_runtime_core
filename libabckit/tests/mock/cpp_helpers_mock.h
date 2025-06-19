@@ -100,6 +100,38 @@ inline abckit::arkts::Class GetMockArktsClass(const abckit::File &file)
     return c;
 }
 
+inline abckit::core::Interface GetMockCoreInterface(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::Interface> interfaces;
+
+    cmd.EnumerateInterfaces([&interfaces](abckit::core::Interface iface) -> bool {
+        interfaces.push_back(iface);
+        return true;
+    });
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateInterfaces"));
+
+    return interfaces.front();
+}
+
+inline abckit::core::Enum GetMockCoreEnum(const abckit::File &file)
+{
+    abckit::core::Module cmd = GetMockCoreModule(file);
+
+    std::vector<abckit::core::Enum> enums;
+
+    cmd.EnumerateEnums([&enums](abckit::core::Enum enm) -> bool {
+        enums.push_back(enm);
+        return true;
+    });
+
+    EXPECT_TRUE(CheckMockedApi("ModuleEnumerateEnums"));
+
+    return enums.front();
+}
+
 inline abckit::core::Function GetMockCoreFunction(const abckit::File &file)
 {
     abckit::core::Class cls = GetMockCoreClass(file);

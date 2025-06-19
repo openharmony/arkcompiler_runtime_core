@@ -408,6 +408,31 @@ bool InterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
 }
 
 // ========================================
+// Enum
+// ========================================
+
+AbckitString *EnumGetName(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_STRING;
+}
+
+bool EnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return cb(DEFAULT_CORE_FUNCTION, data);
+}
+
+bool EnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return cb(DEFAULT_CORE_ENUM_FIELD, data);
+}
+
+// ========================================
 // Module Field
 // ========================================
 
@@ -1171,6 +1196,14 @@ static AbckitInspectApi g_inspectApiImpl = {
     InterfaceEnumerateMethods,
     InterfaceEnumerateAnnotations,
     InterfaceEnumerateFields,
+
+    // ========================================
+    // Enum
+    // ========================================
+
+    EnumGetName,
+    EnumEnumerateMethods,
+    EnumEnumerateFields,
 
     // ========================================
     // Module Field
