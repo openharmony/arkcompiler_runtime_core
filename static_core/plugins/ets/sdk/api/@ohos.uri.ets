@@ -731,6 +731,15 @@ export namespace uri {
     inputUri: string = "";
     errStr: string = "";
 
+    private REG_ALPHA = new RegExp("[a-zA-Z]", 'g');
+    private REG_SCHEME = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*]", 'g');
+    private REG_URLC = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/?:@\\[\\]%\"]", 'g');
+    private REG_PATH = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*/:@%]", 'g');
+    private REG_USER_INFO = new RegExp("[\\da-zA-Z+\\-.| _~!$&=,;'(){}*:%]", 'g');
+    private REG_PORT = new RegExp("[\\da-zA-Z\\-]", 'g');
+    private REG_NONASC = new RegExp("[^\\x00-\\x7F]", 'g');
+    private REG_DIGIT = new RegExp("[\\d]", 'g');
+
     constructor(input: string) {
       this.errStr = "";
       if (input == "") {
@@ -790,23 +799,16 @@ export namespace uri {
       }
     }
 
-    private checkCharacter(data: string, rule: boolean[], flag: boolean): boolean {
-      let dataLen = data.length;
-      for (let i = 0; i < dataLen; i++) {
-        let charCode = data.charCodeAt(i);
-        if (charCode >= 0 && charCode < MAX_BIT_SIZE) {
-          if (!rule[charCode]) {
-            return false;
-          }
-        } else if (!flag) {
-          return false;
-        }
+    private checkCharacter(str: string, regex: RegExp, ignoreNonAscll: boolean) {
+      if (ignoreNonAscll) {
+        str = str.replaceAll(this.REG_NONASC, '');
       }
-      return true;
+      str = str.replaceAll(regex, "");
+      return str == '';
     }
 
     private specialPath() {
-      if (!this.checkCharacter(this.data, UriRule.rulePath, true)) {
+      if (!this.checkCharacter(this.data, this.REG_PATH, true)) {
         this.errStr = "SpecialPath does not conform to the rule.";
         return;
       }
@@ -820,7 +822,7 @@ export namespace uri {
         return;
       }
       let fragment = this.data.substring(pos + 1);
-      if (!this.checkCharacter(fragment, UriRule.ruleUrlc, true)) {
+      if (!this.checkCharacter(fragment, this.REG_URLC, true)) {
         this.errStr = "Fragment does not conform to the rule.";
         return;
       }
@@ -830,7 +832,7 @@ export namespace uri {
 
     private analysisQuery(pos: number) {
       let query = this.data.substring(pos + 1);
-      if (!this.checkCharacter(query, UriRule.ruleUrlc, true)) {
+      if (!this.checkCharacter(query, this.REG_URLC, true)) {
         this.errStr = "Query does not conform to the rule.";
         return;
       }
@@ -847,14 +849,12 @@ export namespace uri {
         this.uriData.SchemeSpecificPart += (this.uriData.query);
         this.data = "";
       } else {
-        let code = this.data.charCodeAt(0);
-        if (code >= 0 && code < MAX_BIT_SIZE &&
-          !UriRule.ruleAlpha[code]) {
+        if (!this.REG_ALPHA.test(this.data.substring(0, 1))) {
           this.errStr = "Scheme the first character must be a letter.";
           return;
         }
         let scheme = this.data.substring(0, pos);
-        if (!this.checkCharacter(scheme, UriRule.ruleScheme, false)) {
+        if (!this.checkCharacter(scheme, this.REG_SCHEME, false)) {
           this.errStr = "Scheme does not conform to the rule.";
           return;
         }
@@ -923,7 +923,7 @@ export namespace uri {
 
     private analysisPath(pos: number) {
       let path = this.data.substring(pos);
-      if (!this.checkCharacter(path, UriRule.rulePath, true)) {
+      if (!this.checkCharacter(path, this.REG_PATH, true)) {
         this.errStr = "Path does not conform to the rule.";
         return;
       }
@@ -933,7 +933,7 @@ export namespace uri {
 
     private analysisUserInfo(pos: number) {
       let userInfo = this.data.substring(0, pos);
-      if (!this.checkCharacter(userInfo, UriRule.ruleUserInfo, true)) {
+      if (!this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
         this.errStr = "UserInfo does not conform to the rule.";
         return;
       }
@@ -943,10 +943,10 @@ export namespace uri {
 
     private analysisPort(pos: number) {
       let port = this.data.substring(pos + 1);
-      if (!this.checkCharacter(port, UriRule.rulePort, true)) {
+      if (!this.checkCharacter(port, this.REG_PORT, true)) {
         this.errStr = "Port does not conform to the rule.";
         return false;
-      } else if (this.checkCharacter(port, UriRule.ruleDigit, false)) {
+      } else if (this.checkCharacter(port, this.REG_DIGIT, false)) {
         // 10:The maximum number of bits for int value
         if (port.length == 0 || port.length > 10) {
           return false;
@@ -1247,9 +1247,7 @@ export namespace uri {
     }
 
     setScheme(scheme: string): void {
-      let code = scheme.charCodeAt(0);
-      if (code >= 0 && code < MAX_BIT_SIZE &&
-        !UriRule.ruleAlpha[code]) {
+      if (!this.checkCharacter(scheme.substring(0, 1), this.REG_ALPHA, true)) {
         this.errStr = "Scheme the first character must be a letter.";
         return;
       }
@@ -1261,7 +1259,7 @@ export namespace uri {
         temp = scheme;
       }
 
-      if (!this.checkCharacter(temp, UriRule.ruleScheme, false)) {
+      if (!this.checkCharacter(temp, this.REG_SCHEME, false)) {
         this.errStr = "Scheme does not conform to the rule.";
         return;
       }
@@ -1283,7 +1281,7 @@ export namespace uri {
         const userStr = this.data.substring(0, atPos);
         this.data = this.data.substring(atPos + 1);
 
-        if (!this.checkCharacter(userStr, UriRule.ruleUserInfo, true)) {
+        if (!this.checkCharacter(userStr, this.REG_USER_INFO, true)) {
           this.errStr = "userInfo does not conform to the rule";
           return;
         }
@@ -1344,7 +1342,7 @@ export namespace uri {
     }
 
     setUserInfo(userInfo: string): void {
-      if (!this.uriData.host || !this.checkCharacter(userInfo, UriRule.ruleUserInfo, true)) {
+      if (!this.uriData.host || !this.checkCharacter(userInfo, this.REG_USER_INFO, true)) {
         this.errStr = "userInfo does not conform to the rule";
         return;
       }
@@ -1355,7 +1353,7 @@ export namespace uri {
     }
 
     setPath(pathStr: string): void {
-      if (!this.checkCharacter(pathStr, UriRule.rulePath, true)) {
+      if (!this.checkCharacter(pathStr, this.REG_PATH, true)) {
         this.errStr = "pathStr does not conform to the rule";
         return;
       }
@@ -1365,7 +1363,7 @@ export namespace uri {
     }
 
     setQuery(queryStr: string): void {
-      if (!this.checkCharacter(queryStr, UriRule.ruleUrlc, true)) {
+      if (!this.checkCharacter(queryStr, this.REG_URLC, true)) {
         this.errStr = "QueryStr does not conform to the rule";
         return;
       }
@@ -1375,7 +1373,7 @@ export namespace uri {
     }
 
     setFragment(fragmentStr: string): void {
-      if (!this.checkCharacter(fragmentStr, UriRule.ruleUrlc, true)) {
+      if (!this.checkCharacter(fragmentStr, this.REG_URLC, true)) {
         this.errStr = "Fragment does not conform to the rule";
         return;
       }
@@ -1450,45 +1448,5 @@ export namespace uri {
     }
   }
 
-  class UriRule {
-    static ruleAlpha = new boolean[MAX_BIT_SIZE];
-    static ruleScheme = new boolean[MAX_BIT_SIZE];
-    static ruleUrlc = new boolean[MAX_BIT_SIZE];
-    static rulePath = new boolean[MAX_BIT_SIZE];
-    static ruleUserInfo = new boolean[MAX_BIT_SIZE];
-    static ruleDigit = new boolean[MAX_BIT_SIZE];
-    static rulePort = new boolean[MAX_BIT_SIZE];
-    static {
-      let digitAggregate = "0123456789";
-      UriRule.setBit(UriRule.ruleDigit, digitAggregate);
 
-      let alphasAggregate = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      UriRule.setBit(UriRule.ruleAlpha, alphasAggregate);
-
-      let schemeAggregate = digitAggregate + alphasAggregate + "+-.| _-~!$&=,;'(){}*";
-      UriRule.setBit(UriRule.ruleScheme, schemeAggregate);
-
-      let uricAggregate = schemeAggregate + ";/?:@&=$,[]_!~*'()%\"";
-      UriRule.setBit(UriRule.ruleUrlc, uricAggregate);
-
-      let pathAggregate = schemeAggregate + ";/:@&=$,_!~*'()%";
-      UriRule.setBit(UriRule.rulePath, pathAggregate);
-
-      let userInfoAggregate = schemeAggregate + ";:&=$,_!~*'()%";
-      UriRule.setBit(UriRule.ruleUserInfo, userInfoAggregate);
-
-      let portAggregate = digitAggregate + alphasAggregate + ".:@-;&=+$,-_!~*'()";
-      UriRule.setBit(UriRule.rulePort, portAggregate);
-    }
-
-    private static setBit(arr: boolean[], str: string) {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i] = false;
-      }
-      for (let i = 0; i < str.length; i++) {
-        let code = str.charCodeAt(i);
-        arr[code] = true;
-      }
-    }
-  }
 }
