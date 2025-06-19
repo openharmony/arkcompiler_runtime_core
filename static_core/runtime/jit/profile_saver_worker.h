@@ -18,7 +18,7 @@
 #include <chrono>
 #include "runtime/include/mem/allocator.h"
 #include "libpandabase/taskmanager/task_queue_interface.h"
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/taskmanager/task_manager.h"
 
 namespace ark {
 /// @brief Profile Saver worker
@@ -30,8 +30,7 @@ public:
 
     ~ProfileSaverWorker()
     {
-        taskmanager::TaskScheduler::GetTaskScheduler()
-            ->UnregisterAndDestroyTaskQueue<decltype(internalAllocator_->Adapter())>(profileSaverTaskQueue_);
+        taskmanager::TaskManager::DestroyTaskQueue<decltype(internalAllocator_->Adapter())>(profileSaverTaskQueue_);
     }
 
     void InitializeWorker();
@@ -67,10 +66,6 @@ public:
     void WaitForFinishSaverTask();
 
 private:
-    static constexpr taskmanager::TaskProperties PROFILE_SAVER_WORKER_TASK_PROPERTIES = {
-        taskmanager::TaskType::PROFILE_SAVER, taskmanager::VMType::STATIC_VM,
-        taskmanager::TaskExecutionMode::BACKGROUND};
-
     taskmanager::TaskQueueInterface *profileSaverTaskQueue_ {nullptr};
     os::memory::Mutex taskQueueLock_;
     std::atomic<bool> profileSaverWorkerJoined_ {true};

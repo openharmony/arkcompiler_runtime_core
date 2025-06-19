@@ -86,7 +86,7 @@ Runtime *Runtime::instance_ = nullptr;
 RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-objects)
 std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
 os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
-taskmanager::TaskScheduler *Runtime::taskScheduler_ = nullptr;
+bool Runtime::isTaskManagerUsed_ = false;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
@@ -414,6 +414,7 @@ bool Runtime::DestroyUnderLockHolder()
     ark::Logger::Sync();
     delete instance_;
     instance_ = nullptr;
+
     ark::mem::MemConfig::Finalize();
 
     return true;
@@ -487,10 +488,6 @@ bool Runtime::Destroy()
     // uses barriers
     instance_->GetPandaVM()->StopGC();
 
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Finalize();
-    }
-
     if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());
     }
@@ -499,10 +496,6 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-    if (taskScheduler_ != nullptr) {
-        taskmanager::TaskScheduler::Destroy();
-        taskScheduler_ = nullptr;
-    }
 
     FiniBaseRuntime();
 
@@ -638,6 +631,11 @@ Runtime::~Runtime()
     // crossing map is shared by different VMs.
     mem::CrossingMapSingleton::Destroy();
 
+    if (Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Finish();
+        Runtime::SetTaskManagerUsed(false);
+    }
+
     RuntimeInternalAllocator::Finalize();
     PoolManager::Finalize();
 }
@@ -747,10 +745,6 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
     if (pandaVm_ == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to create panda vm";
         return false;
-    }
-
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Initialize();
     }
 
     panda_file::File::OpenMode openMode = GetLanguageContext(GetRuntimeType()).GetBootPandaFilesOpenMode();

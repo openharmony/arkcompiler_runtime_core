@@ -751,7 +751,7 @@ private:
     ReferenceProcessor *referenceProcessor_ {nullptr};
 
     // NOTE(ipetrov): choose suitable priority
-    static constexpr size_t GC_TASK_QUEUE_PRIORITY = taskmanager::TaskQueueInterface::MAX_PRIORITY;
+    static constexpr size_t GC_TASK_QUEUE_PRIORITY = taskmanager::MAX_QUEUE_PRIORITY;
     taskmanager::TaskQueueInterface *gcWorkersTaskQueue_ = nullptr;
 
     /* GC worker specific variables */

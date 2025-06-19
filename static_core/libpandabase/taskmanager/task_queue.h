@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,12 @@
 #ifndef PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H
 
+#include <atomic>
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
-#include "libpandabase/taskmanager/utils/sp_sc_lock_free_queue.h"
+#include "taskmanager/utils/task_time_stats.h"
+#include "libpandabase/taskmanager/task.h"
+#include "libpandabase/taskmanager/utils/two_lock_queue.h"
 
 namespace ark::taskmanager::internal {
 
@@ -39,244 +42,436 @@ public:
     NO_COPY_SEMANTIC(TaskQueue);
     NO_MOVE_SEMANTIC(TaskQueue);
 
-    /**
-     * @brief The TaskQueue factory. Intended to be used by the TaskScheduler's CreateAndRegister method.
-     * @param task_type: TaskType of queue.
-     * @param vm_type: VMType of queue.
-     * @param priority: A number from 1 to 10 that determines the weight of the queue during the task selection process
-     * @return a pointer to the created queue.
-     */
-    static PANDA_PUBLIC_API SchedulableTaskQueueInterface *Create(TaskType taskType, VMType vmType, uint8_t priority)
-    {
-        TaskQueueAllocatorType allocator;
-        auto *mem = allocator.allocate(1U);
-        return new (mem) TaskQueue<TaskAllocatorType>(taskType, vmType, priority);
-    }
+    static PANDA_PUBLIC_API SchedulableTaskQueueInterface *Create(QueuePriority priority, TaskWaitList *waitList,
+                                                                  TaskTimeStatsBase *taskTimeStats);
+    static PANDA_PUBLIC_API void Destroy(SchedulableTaskQueueInterface *queue);
 
-    static PANDA_PUBLIC_API void Destroy(SchedulableTaskQueueInterface *queue)
-    {
-        TaskQueueAllocatorType allocator;
-        std::allocator_traits<TaskQueueAllocatorType>::destroy(allocator, queue);
-        allocator.deallocate(static_cast<TaskQueue<TaskAllocatorType> *>(queue), 1U);
-    }
+    PANDA_PUBLIC_API size_t AddForegroundTask(RunnerCallback runner) override;
+    PANDA_PUBLIC_API size_t AddBackgroundTask(RunnerCallback runner) override;
 
-    PANDA_PUBLIC_API ~TaskQueue() override
-    {
-        ASSERT(AreInternalQueuesEmpty());
-    }
+    PANDA_PUBLIC_API WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) override;
+    PANDA_PUBLIC_API WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) override;
 
-    /**
-     * @brief Adds task in task queue. Operation is thread-safe.
-     * @param task - task that will be added
-     * @return the size of queue after @arg task was added to it.
-     */
-    PANDA_PUBLIC_API size_t AddTask(Task &&task) override
-    {
-        auto properties = task.GetTaskProperties();
-        ASSERT(properties.GetTaskType() == GetTaskType());
-        ASSERT(properties.GetVMType() == GetVMType());
-        // Send info about new added task
-        if (LIKELY(newTasksCallback_ != nullptr)) {
-            newTasksCallback_(properties, 1UL);
-        }
-        AddTaskWithoutNewTaskCallbackExecution(std::move(task));
-        return Size();
-    }
+    PANDA_PUBLIC_API WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime) override;
+    PANDA_PUBLIC_API WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime) override;
 
-    /**
-     * @brief The method adds a task to the queue without execution the new task callback. This method should only be
-     * used with tasks that have already triggered this callback.
-     * @param task: instance of Task
-     */
-    void AddTaskWithoutNewTaskCallbackExecution(Task &&task) override
-    {
-        EventOnTaskAdding(&task);
-        // Push task in one of internal queues based on its TaskExecutionMode
-        PushTaskToInternalQueues(std::move(task));
-        // Signal workers that should execute new task
-        if (signalWorkersCallback_ != nullptr) {
-            signalWorkersCallback_();
-        }
-    }
+    PANDA_PUBLIC_API void SignalWaitList(WaiterId id) override;
 
-    /**
-     * @brief Pops task from task queue. Operation is thread-safe. The method will wait a new task if queue is empty
-     * and method WaitForQueueEmptyAndFinish has not been executed. Otherwise it will return std::nullopt.
-     * This method should be used only in TaskScheduler
-     */
-    [[nodiscard]] std::optional<Task> PopTask() override
-    {
-        return PopTaskFromInternalQueues();
-    }
+    [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const override;
+    [[nodiscard]] PANDA_PUBLIC_API bool HasForegroundTasks() const override;
+    [[nodiscard]] PANDA_PUBLIC_API bool HasBackgroundTasks() const override;
 
-    /**
-     * @brief Pops task from task queue with specified execution mode. Operation is thread-safe. The method will wait
-     * a new task if queue with specified execution mode is empty and method WaitForQueueEmptyAndFinish has not been
-     * executed. Otherwise it will return std::nullopt.
-     * This method should be used only in TaskScheduler!
-     * @param mode - execution mode of task that we want to pop.
-     */
-    [[nodiscard]] std::optional<Task> PopTask(TaskExecutionMode mode) override
-    {
-        if (UNLIKELY(!HasTaskWithExecutionMode(mode))) {
-            return std::nullopt;
-        }
-        auto *queue = &foregroundTaskQueue_;
-        if (UNLIKELY(mode != TaskExecutionMode::FOREGROUND)) {
-            queue = &backgroundTaskQueue_;
-        }
-        auto task = queue->Pop();
-        return task;
-    }
+    [[nodiscard]] PANDA_PUBLIC_API size_t Size() const override;
+    [[nodiscard]] PANDA_PUBLIC_API size_t CountOfForegroundTasks() const override;
+    [[nodiscard]] PANDA_PUBLIC_API size_t CountOfBackgroundTasks() const override;
 
-    /**
-     * @brief Method pops several tasks to worker.
-     * @param addTaskFunc - Functor that will be used to add popped tasks to worker
-     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
-     * method will not wait and will pop all stored tasks.
-     * @return count of task that was added to worker
-     */
-    size_t PopTasksToWorker(const AddTaskToWorkerFunc &addTaskFunc, size_t size) override
-    {
-        if (UNLIKELY(AreInternalQueuesEmpty())) {
-            return 0;
-        }
-        size_t returnSize = 0;
-        for (; !AreInternalQueuesEmpty() && returnSize < size; returnSize++) {
-            addTaskFunc(PopTaskFromInternalQueues().value());
-        }
-        return returnSize;
-    }
+    PANDA_PUBLIC_API size_t ExecuteTask() override;
+    PANDA_PUBLIC_API size_t ExecuteForegroundTask() override;
+    PANDA_PUBLIC_API size_t ExecuteBackgroundTask() override;
 
-    /**
-     * @brief Method pops several tasks to helper thread. Helper thread in TaskScheduler is the thread that uses
-     * HelpWorkersWithTasks method.
-     * @param addTaskFunc - Functor that will be used to add popped tasks to helper
-     * @param size - Count of tasks you want to pop. If it is greater then count of tasks that are stored in queue,
-     * method will not wait and will pop all stored tasks.
-     * @param mode - Execution mode of task you wast to pop
-     * @return count of task that was added to helper
-     */
-    size_t PopTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc, size_t size, TaskExecutionMode mode) override
-    {
-        if (!HasTaskWithExecutionMode(mode)) {
-            return 0;
-        }
-        auto *queue = &foregroundTaskQueue_;
-        if (mode != TaskExecutionMode::FOREGROUND) {
-            queue = &backgroundTaskQueue_;
-        }
-        size_t returnSize = 0;
-        for (; HasTaskWithExecutionMode(mode) && returnSize < size; returnSize++) {
-            addTaskFunc(queue->Pop().value());
-        }
-        return returnSize;
-    }
+    PANDA_PUBLIC_API void WaitTasks() override;
+    PANDA_PUBLIC_API void WaitForegroundTasks() override;
+    PANDA_PUBLIC_API void WaitBackgroundTasks() override;
 
-    [[nodiscard]] PANDA_PUBLIC_API bool IsEmpty() const override
-    {
-        return AreInternalQueuesEmpty();
-    }
+    [[nodiscard]] TaskPtr PopTask() override;
+    [[nodiscard]] TaskPtr PopForegroundTask() override;
+    [[nodiscard]] TaskPtr PopBackgroundTask() override;
 
-    [[nodiscard]] PANDA_PUBLIC_API size_t Size() const override
-    {
-        return SumSizeOfInternalQueues();
-    }
+    size_t PopTasksToWorker(const AddTaskToWorkerFunc &addForegroundTaskFunc,
+                            const AddTaskToWorkerFunc &addBackgroundTaskFunc, size_t size) override;
+    size_t PopForegroundTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc, size_t size) override;
+    size_t PopBackgroundTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc, size_t size) override;
 
-    /**
-     * @brief Method @returns true if queue does not have queue with specified execution mode
-     * @param mode - execution mode of tasks
-     */
-    [[nodiscard]] PANDA_PUBLIC_API bool HasTaskWithExecutionMode(TaskExecutionMode mode) const override
-    {
-        if (mode == TaskExecutionMode::FOREGROUND) {
-            return !foregroundTaskQueue_.IsEmpty();
-        }
-        return !backgroundTaskQueue_.IsEmpty();
-    }
+    size_t GetCountOfLiveTasks() const override;
+    size_t GetCountOfLiveForegroundTasks() const override;
+    size_t GetCountOfLiveBackgroundTasks() const override;
 
-    [[nodiscard]] PANDA_PUBLIC_API size_t CountOfTasksWithExecutionMode(TaskExecutionMode mode) const override
-    {
-        if (mode == TaskExecutionMode::FOREGROUND) {
-            return foregroundTaskQueue_.Size();
-        }
-        return backgroundTaskQueue_.Size();
-    }
+    TaskTimeStatsBase *GetTaskTimeStats() const override;
 
-    /**
-     * @brief This method saves the @arg callback.
-     * @param newTaskCallback - function that get count of inputted tasks and uses in AddTask method.
-     * @param signalWorkersCallback - function that should signal workers to return to work if it's needed
-     */
-    void SetCallbacks(NewTasksCallback newTaskCallback, SignalWorkersCallback signalWorkersCallback) override
-    {
-        newTasksCallback_ = std::move(newTaskCallback);
-        signalWorkersCallback_ = std::move(signalWorkersCallback);
-    }
-
-    /// @brief Removes callback function. This method should be used only in TaskScheduler!
-    void UnsetCallbacks() override
-    {
-        newTasksCallback_ = nullptr;
-        signalWorkersCallback_ = nullptr;
-    }
+    void SetCallbacks(SignalWorkersCallback signalWorkersCallback) override;
+    void UnsetCallbacks() override;
 
 private:
-    using InternalTaskQueue = SPSCLockFreeQueue<Task, TaskAllocatorType>;
+    using InternalTaskQueue = TwoLockQueue<TaskPtr, TaskAllocatorType>;
 
-    TaskQueue(TaskType taskType, VMType vmType, uint8_t priority)
-        : SchedulableTaskQueueInterface(taskType, vmType, priority)
+    PANDA_PUBLIC_API size_t AddForegroundTaskImpl(RunnerCallback &&runner);
+    PANDA_PUBLIC_API size_t AddBackgroundTaskImpl(RunnerCallback &&runner);
+
+    PANDA_PUBLIC_API size_t IncrementCountOfLiveForegroundTasks();
+    PANDA_PUBLIC_API size_t IncrementCountOfLiveBackgroundTasks();
+
+    static void OnForegroundTaskDestructionCallback(TaskQueueInterface *queue);
+    static void OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue);
+
+    TaskQueue(QueuePriority priority, TaskWaitList *waitList, TaskTimeStatsBase *taskTimeStats)
+        : SchedulableTaskQueueInterface(priority), taskTimeStats_(taskTimeStats), waitList_(waitList)
     {
     }
-
-    bool AreInternalQueuesEmpty() const
+    PANDA_PUBLIC_API ~TaskQueue() override
     {
-        return foregroundTaskQueue_.IsEmpty() && backgroundTaskQueue_.IsEmpty();
-    }
-
-    size_t SumSizeOfInternalQueues() const
-    {
-        return foregroundTaskQueue_.Size() + backgroundTaskQueue_.Size();
-    }
-
-    void PushTaskToInternalQueues(Task &&task)
-    {
-        if (task.GetTaskProperties().GetTaskExecutionMode() == TaskExecutionMode::FOREGROUND) {
-            os::memory::LockHolder lockGuard(pushForegroundLock_);
-            foregroundTaskQueue_.Push(std::move(task));
-        } else {
-            os::memory::LockHolder lockGuard(pushBackgroundLock_);
-            backgroundTaskQueue_.Push(std::move(task));
-        }
-    }
-
-    std::optional<Task> PopTaskFromInternalQueues()
-    {
-        auto task = foregroundTaskQueue_.Pop();
-        if (task.has_value()) {
-            return task;
-        }
-        return backgroundTaskQueue_.Pop();
-    }
-
-    void EventOnTaskAdding(Task *task)
-    {
-        ASSERT(task != nullptr);
-        task->EventOnTaskAdding();
+        ASSERT(foregroundTaskQueue_.IsEmpty() && backgroundTaskQueue_.IsEmpty());
     }
 
     /// subscriber_lock_ is used in case of calling new_tasks_callback_
-    NewTasksCallback newTasksCallback_;
     SignalWorkersCallback signalWorkersCallback_;
+    TaskTimeStatsBase *taskTimeStats_ {nullptr};
+
+    os::memory::Mutex waitingMutex_;
+    os::memory::ConditionVariable waitingCondVar_;
 
     /// foreground part of TaskQueue
-    mutable os::memory::Mutex pushForegroundLock_;
+    std::atomic_size_t foregroundLiveTasks_ {0};
     InternalTaskQueue foregroundTaskQueue_;
-
     /// background part of TaskQueue
-    mutable os::memory::Mutex pushBackgroundLock_;
+    std::atomic_size_t backgroundLiveTasks_ {0};
     InternalTaskQueue backgroundTaskQueue_;
+
+    TaskWaitList *waitList_ = nullptr;
 };
+
+template <class Allocator>
+inline SchedulableTaskQueueInterface *TaskQueue<Allocator>::Create(QueuePriority priority, TaskWaitList *waitList,
+                                                                   TaskTimeStatsBase *taskTimeStats)
+{
+    TaskQueueAllocatorType allocator;
+    auto *mem = allocator.allocate(1U);
+    return new (mem) TaskQueue<TaskAllocatorType>(priority, waitList, taskTimeStats);
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::Destroy(SchedulableTaskQueueInterface *queue)
+{
+    TaskQueueAllocatorType allocator;
+    std::allocator_traits<TaskQueueAllocatorType>::destroy(allocator, queue);
+    allocator.deallocate(static_cast<TaskQueue<TaskAllocatorType> *>(queue), 1U);
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::OnForegroundTaskDestructionCallback(TaskQueueInterface *queue)
+{
+    auto iQueue = reinterpret_cast<TaskQueue *>(queue);
+    // Atomic with relaxed order reason: all non-atomic and relaxed stores will be see after waitingMutex_ getting
+    auto aliveTasks = iQueue->foregroundLiveTasks_.fetch_sub(1U, std::memory_order_relaxed);
+    if (aliveTasks == 1U) {
+        os::memory::LockHolder lh(iQueue->waitingMutex_);
+        iQueue->waitingCondVar_.SignalAll();
+    }
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::OnBackgroundTaskDestructionCallback(TaskQueueInterface *queue)
+{
+    auto iQueue = reinterpret_cast<TaskQueue *>(queue);
+    // Atomic with relaxed order reason: all non-atomic and relaxed stores will be see after waitingMutex_ getting
+    auto aliveTasks = iQueue->backgroundLiveTasks_.fetch_sub(1U, std::memory_order_relaxed);
+    if (aliveTasks == 1U) {
+        os::memory::LockHolder lh(iQueue->waitingMutex_);
+        iQueue->waitingCondVar_.SignalAll();
+    }
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::AddForegroundTask(RunnerCallback runner)
+{
+    IncrementCountOfLiveForegroundTasks();
+    return AddForegroundTaskImpl(std::move(runner));
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::AddBackgroundTask(RunnerCallback runner)
+{
+    IncrementCountOfLiveBackgroundTasks();
+    return AddBackgroundTaskImpl(std::move(runner));
+}
+
+template <class Allocator>
+inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddForegroundTaskInWaitList(RunnerCallback runner,
+                                                                                   uint64_t timeToWait)
+{
+    IncrementCountOfLiveForegroundTasks();
+    auto waitListCallback = [this](RunnerCallback &&irunner) { AddForegroundTaskImpl(std::move(irunner)); };
+    return waitList_->AddValueToWait({std::move(runner), waitListCallback}, timeToWait);
+}
+
+template <class Allocator>
+inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitList(RunnerCallback runner,
+                                                                                   uint64_t timeToWait)
+{
+    IncrementCountOfLiveBackgroundTasks();
+    auto waitListCallback = [this](RunnerCallback &&irunner) { AddBackgroundTaskImpl(std::move(irunner)); };
+    return waitList_->AddValueToWait({std::move(runner), waitListCallback}, timeToWait);
+}
+
+template <class Allocator>
+inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddForegroundTaskInWaitList(RunnerCallback runner)
+{
+    IncrementCountOfLiveForegroundTasks();
+    auto waitListCallback = [this](RunnerCallback &&irunner) { AddForegroundTaskImpl(std::move(irunner)); };
+    return waitList_->AddValueToWait({std::move(runner), waitListCallback});
+}
+
+template <class Allocator>
+inline PANDA_PUBLIC_API WaiterId TaskQueue<Allocator>::AddBackgroundTaskInWaitList(RunnerCallback runner)
+{
+    IncrementCountOfLiveBackgroundTasks();
+    auto waitListCallback = [this](RunnerCallback &&irunner) { AddBackgroundTaskImpl(std::move(irunner)); };
+    return waitList_->AddValueToWait({std::move(runner), waitListCallback});
+}
+
+template <class Allocator>
+void TaskQueue<Allocator>::SignalWaitList(WaiterId id)
+{
+    auto waitVal = waitList_->GetValueById(id);
+    if (!waitVal.has_value()) {
+        return;
+    }
+    auto [task, taskPoster] = std::move(waitVal.value());
+    taskPoster(std::move(task));
+}
+
+template <class Allocator>
+inline bool TaskQueue<Allocator>::IsEmpty() const
+{
+    return foregroundTaskQueue_.IsEmpty() && backgroundTaskQueue_.IsEmpty();
+}
+
+template <class Allocator>
+inline bool TaskQueue<Allocator>::HasForegroundTasks() const
+{
+    return !foregroundTaskQueue_.IsEmpty();
+}
+
+template <class Allocator>
+inline bool TaskQueue<Allocator>::HasBackgroundTasks() const
+{
+    return !backgroundTaskQueue_.IsEmpty();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::Size() const
+{
+    return foregroundTaskQueue_.Size() + backgroundTaskQueue_.Size();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::CountOfForegroundTasks() const
+{
+    return foregroundTaskQueue_.Size();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::CountOfBackgroundTasks() const
+{
+    return backgroundTaskQueue_.Size();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::ExecuteTask()
+{
+    TaskPtr task = PopTask();
+    if (task == nullptr) {
+        return 0U;
+    }
+    task->RunTask();
+    return 1U;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::ExecuteForegroundTask()
+{
+    TaskPtr task = PopForegroundTask();
+    if (task == nullptr) {
+        return 0U;
+    }
+    task->RunTask();
+    return 1U;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::ExecuteBackgroundTask()
+{
+    TaskPtr task = PopBackgroundTask();
+    if (task == nullptr) {
+        return 0U;
+    }
+    task->RunTask();
+    return 1U;
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::WaitTasks()
+{
+    os::memory::LockHolder lh(waitingMutex_);
+    while (GetCountOfLiveBackgroundTasks() != 0 || GetCountOfLiveForegroundTasks() != 0) {
+        waitingCondVar_.Wait(&waitingMutex_);
+    }
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::WaitForegroundTasks()
+{
+    os::memory::LockHolder lh(waitingMutex_);
+    while (GetCountOfLiveForegroundTasks() != 0) {
+        waitingCondVar_.Wait(&waitingMutex_);
+    }
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::WaitBackgroundTasks()
+{
+    os::memory::LockHolder lh(waitingMutex_);
+    while (GetCountOfLiveBackgroundTasks() != 0) {
+        waitingCondVar_.Wait(&waitingMutex_);
+    }
+}
+
+template <class Allocator>
+inline TaskPtr TaskQueue<Allocator>::PopTask()
+{
+    TaskPtr task = nullptr;
+    if (foregroundTaskQueue_.TryPop(&task)) {
+        return task;
+    }
+    backgroundTaskQueue_.TryPop(&task);
+    return task;
+}
+
+template <class Allocator>
+inline TaskPtr TaskQueue<Allocator>::PopForegroundTask()
+{
+    TaskPtr task = nullptr;
+    foregroundTaskQueue_.TryPop(&task);
+    return task;
+}
+
+template <class Allocator>
+inline TaskPtr TaskQueue<Allocator>::PopBackgroundTask()
+{
+    TaskPtr task = nullptr;
+    backgroundTaskQueue_.TryPop(&task);
+    return task;
+}
+
+template <class Allocator>
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability. Keyword "inline" needs to satisfy ODR rule.
+inline size_t TaskQueue<Allocator>::PopTasksToWorker(const AddTaskToWorkerFunc &addForegroundTaskFunc,
+                                                     const AddTaskToWorkerFunc &addBackgroundTaskFunc, size_t size)
+{
+    for (size_t i = 0; i < size; i++) {
+        TaskPtr task;
+        if (foregroundTaskQueue_.TryPop(&task)) {
+            addForegroundTaskFunc(std::move(task));
+            continue;
+        }
+        if (backgroundTaskQueue_.TryPop(&task)) {
+            addBackgroundTaskFunc(std::move(task));
+            continue;
+        }
+        return i;
+    }
+    return size;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::PopForegroundTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc,
+                                                                     size_t size)
+{
+    for (size_t i = 0; i < size; i++) {
+        TaskPtr task;
+        if (foregroundTaskQueue_.TryPop(&task)) {
+            addTaskFunc(std::move(task));
+        }
+        return i;
+    }
+    return size;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::PopBackgroundTasksToHelperThread(const AddTaskToHelperFunc &addTaskFunc,
+                                                                     size_t size)
+{
+    for (size_t i = 0; i < size; i++) {
+        TaskPtr task;
+        if (backgroundTaskQueue_.TryPop(&task)) {
+            addTaskFunc(std::move(task));
+        }
+        return i;
+    }
+    return size;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::GetCountOfLiveTasks() const
+{
+    return GetCountOfLiveForegroundTasks() + GetCountOfLiveBackgroundTasks();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::GetCountOfLiveForegroundTasks() const
+{
+    // Atomic with relaxed order reason: no order dependency with another variables
+    return foregroundLiveTasks_.load(std::memory_order_relaxed);
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::GetCountOfLiveBackgroundTasks() const
+{
+    // Atomic with relaxed order reason: no order dependency with another variables
+    return backgroundLiveTasks_.load(std::memory_order_relaxed);
+}
+
+template <class Allocator>
+inline TaskTimeStatsBase *TaskQueue<Allocator>::GetTaskTimeStats() const
+{
+    return taskTimeStats_;
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::SetCallbacks(SignalWorkersCallback signalWorkersCallback)
+{
+    signalWorkersCallback_ = std::move(signalWorkersCallback);
+}
+
+template <class Allocator>
+inline void TaskQueue<Allocator>::UnsetCallbacks()
+{
+    signalWorkersCallback_ = nullptr;
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::AddForegroundTaskImpl(RunnerCallback &&runner)
+{
+    auto task = Task::Create(std::move(runner), this, OnForegroundTaskDestructionCallback);
+    foregroundTaskQueue_.Push(std::move(task));
+    if (signalWorkersCallback_ != nullptr) {
+        signalWorkersCallback_();
+    }
+    return foregroundTaskQueue_.Size();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::AddBackgroundTaskImpl(RunnerCallback &&runner)
+{
+    auto task = Task::Create(std::move(runner), this, OnBackgroundTaskDestructionCallback);
+    backgroundTaskQueue_.Push(std::move(task));
+    if (signalWorkersCallback_ != nullptr) {
+        signalWorkersCallback_();
+    }
+    return backgroundTaskQueue_.Size();
+}
+
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::IncrementCountOfLiveForegroundTasks()
+{
+    // Atomic with relaxed order reason: no order dependency with another variables
+    return foregroundLiveTasks_.fetch_add(1U, std::memory_order_relaxed);
+}
+template <class Allocator>
+inline size_t TaskQueue<Allocator>::IncrementCountOfLiveBackgroundTasks()
+{
+    // Atomic with relaxed order reason: no order dependency with another variables
+    return backgroundLiveTasks_.fetch_add(1U, std::memory_order_relaxed);
+}
 
 }  // namespace ark::taskmanager::internal
 

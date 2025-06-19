@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,44 +16,12 @@
 #ifndef PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_INTERFACE_H
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_INTERFACE_H
 
-#include "libpandabase/taskmanager/task.h"
-#include "libpandabase/os/mutex.h"
 #include <atomic>
-#include <queue>
+
+#include "libpandabase/taskmanager/task_manager_common.h"
+#include "libpandabase/taskmanager/utils/wait_list.h"
 
 namespace ark::taskmanager {
-
-class TaskQueueId {
-public:
-    constexpr TaskQueueId() : TaskQueueId(TaskType::UNKNOWN, VMType::UNKNOWN) {}
-    constexpr TaskQueueId(TaskType tt, VMType vt)
-        : val_(static_cast<uint16_t>(tt) |
-               static_cast<uint16_t>(static_cast<uint16_t>(vt) << (BITS_PER_BYTE * sizeof(TaskType))))
-    {
-        static_assert(sizeof(TaskType) == sizeof(TaskQueueId) / 2);
-        static_assert(sizeof(VMType) == sizeof(TaskQueueId) / 2);
-    }
-
-    friend constexpr bool operator==(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ == rv.val_;
-    }
-
-    friend constexpr bool operator!=(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ != rv.val_;
-    }
-
-    friend constexpr bool operator<(const TaskQueueId &lv, const TaskQueueId &rv)
-    {
-        return lv.val_ < rv.val_;
-    }
-
-private:
-    uint16_t val_;
-};
-
-constexpr TaskQueueId INVALID_TASKQUEUE_ID = TaskQueueId();
 
 /**
  * @brief TaskQueueInteface is an interface of push-thread-safe queue for tasks. Queues can be registered in
@@ -64,67 +32,73 @@ public:
     NO_COPY_SEMANTIC(TaskQueueInterface);
     NO_MOVE_SEMANTIC(TaskQueueInterface);
 
-    static constexpr uint8_t MAX_PRIORITY = 10;
-    static constexpr uint8_t MIN_PRIORITY = 1;
-    static constexpr uint8_t DEFAULT_PRIORITY = 5;
-
-    PANDA_PUBLIC_API TaskQueueInterface(TaskType taskType, VMType vmType, uint8_t priority)
-        : taskType_(taskType), vmType_(vmType), priority_(priority)
+    PANDA_PUBLIC_API explicit TaskQueueInterface(QueuePriority priority = DEFAULT_QUEUE_PRIORITY) : priority_(priority)
     {
-        ASSERT(priority >= MIN_PRIORITY);
-        ASSERT(priority <= MAX_PRIORITY);
+        TASK_MANAGER_CHECK_PRIORITY_VALUE(priority);
     }
     PANDA_PUBLIC_API virtual ~TaskQueueInterface() = default;
 
-    /**
-     * @brief Adds task in task queue. Operation is thread-safe.
-     * @param task - task that will be added
-     * @return the size of queue after @arg task was added to it.
-     */
-    PANDA_PUBLIC_API virtual size_t AddTask(Task &&task) = 0;
+    PANDA_PUBLIC_API virtual size_t AddForegroundTask(RunnerCallback runner) = 0;
+    PANDA_PUBLIC_API virtual size_t AddBackgroundTask(RunnerCallback runner) = 0;
+
+    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) = 0;
+    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime, uint64_t timeToWait) = 0;
+
+    PANDA_PUBLIC_API virtual WaiterId AddForegroundTaskInWaitList(RunnerCallback runtime) = 0;
+    PANDA_PUBLIC_API virtual WaiterId AddBackgroundTaskInWaitList(RunnerCallback runtime) = 0;
+
+    PANDA_PUBLIC_API virtual void SignalWaitList(WaiterId id) = 0;
 
     [[nodiscard]] PANDA_PUBLIC_API virtual bool IsEmpty() const = 0;
+    [[nodiscard]] PANDA_PUBLIC_API virtual bool HasForegroundTasks() const = 0;
+    [[nodiscard]] PANDA_PUBLIC_API virtual bool HasBackgroundTasks() const = 0;
+
     [[nodiscard]] PANDA_PUBLIC_API virtual size_t Size() const = 0;
+    [[nodiscard]] PANDA_PUBLIC_API virtual size_t CountOfForegroundTasks() const = 0;
+    [[nodiscard]] PANDA_PUBLIC_API virtual size_t CountOfBackgroundTasks() const = 0;
 
-    /**
-     * @brief Method @returns true if queue does not have queue with specified execution mode
-     * @param mode - execution mode of tasks
-     */
-    [[nodiscard]] PANDA_PUBLIC_API virtual bool HasTaskWithExecutionMode(TaskExecutionMode mode) const = 0;
+    PANDA_PUBLIC_API size_t virtual ExecuteTask() = 0;
+    PANDA_PUBLIC_API size_t virtual ExecuteForegroundTask() = 0;
+    PANDA_PUBLIC_API size_t virtual ExecuteBackgroundTask() = 0;
 
-    [[nodiscard]] PANDA_PUBLIC_API virtual size_t CountOfTasksWithExecutionMode(TaskExecutionMode mode) const = 0;
+    PANDA_PUBLIC_API void virtual WaitTasks() = 0;
+    PANDA_PUBLIC_API void virtual WaitForegroundTasks() = 0;
+    PANDA_PUBLIC_API void virtual WaitBackgroundTasks() = 0;
 
-    uint8_t GetPriority() const
-    {
-        // Atomic with acquire order reason: data race with priority_ with dependencies on reads after the
-        // load which should become visible
-        return priority_.load(std::memory_order_acquire);
-    }
+    void SetPriority(QueuePriority priority);
+    QueuePriority GetPriority() const;
 
-    void SetPriority(uint8_t priority)
-    {
-        ASSERT(priority >= MIN_PRIORITY);
-        ASSERT(priority <= MAX_PRIORITY);
-        // Atomic with release order reason: data race with priority_ with no synchronization or ordering constraints
-        // imposed on other reads or writes
-        priority_.store(priority, std::memory_order_release);
-    }
-
-    TaskType GetTaskType() const
-    {
-        return taskType_;
-    }
-
-    VMType GetVMType() const
-    {
-        return vmType_;
-    }
+    void Register(QueueId id);
+    QueueId GetQueueId() const;
 
 private:
-    TaskType taskType_;
-    VMType vmType_;
-    std::atomic_uint8_t priority_;
+    QueueId id_ = INVALID_ID;
+    std::atomic<QueuePriority> priority_;
 };
+
+inline QueuePriority TaskQueueInterface::GetPriority() const
+{
+    // Atomic with relaxed order reason: no order dependency with another variables
+    return priority_.load(std::memory_order_relaxed);
+}
+
+inline void TaskQueueInterface::SetPriority(QueuePriority priority)
+{
+    TASK_MANAGER_CHECK_PRIORITY_VALUE(priority);
+    // Atomic with relaxed order reason: no order dependency with another variables
+    priority_.store(priority, std::memory_order_relaxed);
+}
+
+inline QueueId TaskQueueInterface::GetQueueId() const
+{
+    return id_;
+}
+
+inline void TaskQueueInterface::Register(QueueId id)
+{
+    ASSERT_PRINT(id_ == INVALID_ID, "Second registration");
+    id_ = id;
+}
 
 }  // namespace ark::taskmanager
 

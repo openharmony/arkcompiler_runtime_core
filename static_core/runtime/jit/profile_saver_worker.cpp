@@ -16,6 +16,7 @@
 #include "runtime/jit/profile_saver_worker.h"
 #include "include/runtime.h"
 #include "runtime/jit/profiling_saver.h"
+#include "taskmanager/task_manager.h"
 #include "utils/logger.h"
 
 namespace ark {
@@ -24,10 +25,8 @@ ProfileSaverWorker::ProfileSaverWorker(mem::InternalAllocatorPtr internalAllocat
     : internalAllocator_(internalAllocator)
 {
     os::memory::LockHolder lock(taskQueueLock_);
-    auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
-    profileSaverTaskQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
-        taskmanager::TaskType::PROFILE_SAVER, taskmanager::VMType::STATIC_VM,
-        taskmanager::TaskQueueInterface::MIN_PRIORITY);
+    profileSaverTaskQueue_ = taskmanager::TaskManager::CreateTaskQueue<decltype(internalAllocator_->Adapter())>(
+        taskmanager::MIN_QUEUE_PRIORITY);
     lastSaveTime_ = std::chrono::steady_clock::now();
     hasProfileSaverTaskInQueue_ = false;
     profileSaverWorkerJoined_ = false;
@@ -47,14 +46,12 @@ void ProfileSaverWorker::JoinWorker()
         os::memory::LockHolder lock(taskQueueLock_);
         profileSaverWorkerJoined_ = true;
     }
-    taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(
-        PROFILE_SAVER_WORKER_TASK_PROPERTIES);
+    profileSaverTaskQueue_->WaitBackgroundTasks();
 }
 
 void ProfileSaverWorker::WaitForFinishSaverTask()
 {
-    taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(
-        PROFILE_SAVER_WORKER_TASK_PROPERTIES);
+    profileSaverTaskQueue_->WaitBackgroundTasks();
 }
 
 void ProfileSaverWorker::EndTask()
@@ -86,15 +83,15 @@ bool ProfileSaverWorker::TryAddTask()
     LOG(INFO, RUNTIME) << "[profile_saver] profile saver task created.";
     AddTask();
 
-    // Workaround for issues #26299.
+    // Workaround for issue #26299
     // Taskmanager doesn't work after poskfork, so we execute saver task at current thread.
-    taskmanager::TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(PROFILE_SAVER_WORKER_TASK_PROPERTIES);
+    profileSaverTaskQueue_->ExecuteBackgroundTask();
     return true;
 }
 
 void ProfileSaverWorker::AddTask()
 {
-    profileSaverTaskQueue_->AddTask(taskmanager::Task::Create(PROFILE_SAVER_WORKER_TASK_PROPERTIES, [this]() mutable {
+    profileSaverTaskQueue_->AddBackgroundTask([this]() mutable {
         auto instance = Runtime::GetCurrent();
         if (instance->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
             LOG(INFO, RUNTIME) << "[profile_saver] increamental saving profile data...";
@@ -111,6 +108,6 @@ void ProfileSaverWorker::AddTask()
             LOG(INFO, RUNTIME) << "[profile_saver] No profiled method, skip saver task.";
         }
         this->EndTask();
-    }));
+    });
 }
 }  // namespace ark

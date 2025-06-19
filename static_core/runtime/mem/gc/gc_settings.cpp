@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     gcWorkersCount_ = options.GetGcWorkersCount();
     manageGcThreadsAffinity_ = options.IsManageGcThreadsAffinity();
     useWeakCpuForGcConcurrent_ = options.IsUseWeakCpuForGcConcurrent();
-    useThreadPoolForGcWorkers_ = Runtime::GetTaskScheduler() == nullptr;
+    useThreadPoolForGcWorkers_ = !Runtime::IsTaskManagerUsed();
     gcMarkingStackNewTasksFrequency_ = options.GetGcMarkingStackNewTasksFrequency();
     gcRootMarkingStackMaxSize_ = options.GetGcRootMarkingStackMaxSize();
     gcWorkersMarkingStackMaxSize_ = options.GetGcWorkersMarkingStackMaxSize();

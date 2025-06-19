@@ -692,7 +692,7 @@ public:
             return;
         }
 
-        if ((Runtime::GetTaskScheduler() == nullptr) || noAsyncJit_) {
+        if (!Runtime::IsTaskManagerUsed() || noAsyncJit_) {
             compilerWorker_ =
                 internalAllocator_->New<CompilerThreadPoolWorker>(internalAllocator_, this, noAsyncJit_, options);
         } else {
@@ -794,7 +794,7 @@ protected:
 
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *GetThreadPool()
     {
-        ASSERT(Runtime::GetTaskScheduler() == nullptr || noAsyncJit_);
+        ASSERT(!Runtime::IsTaskManagerUsed() || noAsyncJit_);
         if (compilerWorker_ != nullptr) {
             return static_cast<CompilerThreadPoolWorker *>(compilerWorker_)->GetThreadPool();
         }
