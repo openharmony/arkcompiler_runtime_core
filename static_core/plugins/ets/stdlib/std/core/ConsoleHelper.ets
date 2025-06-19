@@ -231,22 +231,22 @@ export class Formatter {
     private static processArg(flag: string, arg: Object): string {
         // %c: CSS. This specifier is ignored and will skip any CSS passed in.
         if (flag == "c" && (arg instanceof String)) {
-            return Formatter.extractContents(arg as string)
+            return Formatter.extractContents(arg.toString())
         } else if (flag == "s" && !(arg instanceof BigInt)) {
-            return arg as string
+            return arg.toString()
         } else if (flag == "d") {
             if (arg instanceof BigInt) {
-                throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                throw new Error("invalid flag " + flag + " for arg " + arg)
             }
             return "" + new Number(arg.toString())
         } else if (flag == "i") {
             if (arg instanceof BigInt) {
-                throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                throw new Error("invalid flag " + flag + " for arg " + arg)
             }
-            return "" + parseInt(arg as string, 10)
+            return "" + parseInt(arg.toString(), 10)
         }
         else if (flag == "f") {
-            return "" + parseFloat(arg as string)
+            return "" + parseFloat(arg.toString())
         } else if (flag == "j") {
             let res = ""
             try {
