@@ -24,6 +24,9 @@
 #include "verification/util/is_system.h"
 #include "verification/util/optional_ref.h"
 #include "generated/base_options.h"
+#ifdef ARK_HYBRID
+#include <node_api.h>
+#endif
 
 // generated
 #include "ark_version.h"
@@ -414,6 +417,15 @@ int Main(int argc, const char **argv)
     paParser.Add(&options);
     paParser.PushBackTail(&file);
     paParser.EnableTail();
+
+#ifdef ARK_HYBRID
+    // This workaround is needed to define weak symbols of napi in hybrid libarkruntime.so
+    // It will be removed after #26269 fix
+    volatile bool initNapi = false;
+    if (initNapi) {
+        napi_module_register(nullptr);
+    }
+#endif
 
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);
