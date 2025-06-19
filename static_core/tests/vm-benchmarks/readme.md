@@ -134,9 +134,19 @@ as path to doclets: `vmb all -p x ./test1/test1.js ./more-tests/ ./even-more`
 as path to generated tests: `vmb run -p x ./generated`
 - Files with `.lst` extension would be treated as lists of paths, relative to `CWD`
 - `--tags=sanity,my` (`-T`) will generate and run only tests tagged with `sanity` OR `my`
-- `--tests=my_test` (`-t`) will run only tests containing `my_test` in name
+- `--tests=Test1,'Foo_.*'` (`-t`) will run tests with names matching one of the pattern provided
+- `--test-list=/path/to/list.txt` will do the same as `-t`
+but reading names and/or name patterns from file (line by line)
 - To exclude some tests from run point `--exclude-list` to the file with test names to exclude
 - To exclude tests with tags use `-ST` (`--skip-tags`) option. F.e. `--skip-tags=negative,flaky`
+
+Note: `--tests` option expects comma-separated list of exact test names
+or regular expression (using python syntax), f.e.:
+- `-t foo,bar` will select only `foo` and `bar`
+- `-t '[^f]oo',foo` will select both `foo` and `boo` (selection by OR condition)
+- `--tests='.*foo(_\d+)?',bar` will select `Test_foo_1 ; foo ; bar` but skip `Test_bar ; bar_1 ; foo_test`
+
+Note: options `--tests` and `--test-list` could be combined (by OR condition) in one command line
 
 ## Benchmark's measurement options:
 * `-wi` (`--warmup-iters`) controls the number of warmup iterations,

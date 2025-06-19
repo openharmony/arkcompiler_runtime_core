@@ -330,6 +330,28 @@ def test_vmb_compare_flaky():
     TestCase().assertIn('Time: 4.93e+00->5.19e+00(worse +5.3%); Size: n/a; RSS: n/a', lines)
 
 
+def test_perf_degredation_status():
+    r1 = create_report(testA=[4.0], degradant=[100.0])
+    r2 = create_report(testA=[4.0], degradant=[100.4])
+    r3 = create_report(testA=[4.0], degradant=[100.6])
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        cmp = VMBReport.compare_vmb(r1, r2)
+        cmp.process_perf_regressions()
+        lines = [line.strip() for line in
+                 f.getvalue().split("\n") if line]
+    TestCase().assertEqual('', ''.join(lines),
+                           'Compare should NOT signal degradation below 0.5%')
+    f1 = io.StringIO()
+    with contextlib.redirect_stdout(f1):
+        cmp = VMBReport.compare_vmb(r1, r3)
+        cmp.process_perf_regressions()
+        lines = [line.strip() for line in
+                 f1.getvalue().split("\n") if line]
+    TestCase().assertIn('degradant 1.00e+02->1.01e+02(worse +0.6%)', lines,
+                        'Compare should signal degradation above 0.5%')
+
+
 def test_vmb_report_exclude():
     f = io.StringIO()
     tc = TestCase()
