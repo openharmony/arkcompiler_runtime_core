@@ -115,7 +115,7 @@ static bool EqualityResursionAllowed(EtsObject *obj)
     return !(obj->GetClass()->IsEtsEnum() || obj->GetClass()->IsFunctionReference());
 }
 
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
+// CC-OFFNXT(huge_cca_cyclomatic_complexity[C++], huge_cyclomatic_complexity[C++], huge_method[C++]) big case
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
     auto cls1 = obj1->GetClass();
@@ -126,6 +126,10 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     ASSERT(ptypes != nullptr);
 
     if (cls1->IsStringClass()) {
+        if (UNLIKELY(cls2->IsEtsEnum())) {
+            obj2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+            cls2 = obj2->GetClass();
+        }
         return cls2->IsStringClass() &&
                coretypes::String::Cast(obj1->GetCoreType())->Compare(coretypes::String::Cast(obj2->GetCoreType())) == 0;
     }
@@ -139,15 +143,18 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         return CompareBoxedPrimitive<EtsLong>(obj1, obj2);
     }
     if (auto num1 = GetBoxedNumericValue<EtsDouble>(ptypes, obj1); num1.has_value()) {
+        if (UNLIKELY(cls2->IsEtsEnum())) {
+            obj2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        }
         auto num2 = GetBoxedNumericValue<EtsDouble>(ptypes, obj2);
         return num2.has_value() && num2.value() == num1.value();
     }
     if (cls1->IsEtsEnum()) {
-        if (UNLIKELY(!cls2->IsEtsEnum())) {
-            return false;
-        }
         auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
-        auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        auto *value2 = obj2;
+        if (LIKELY(cls2->IsEtsEnum())) {
+            value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        }
         if (!EqualityResursionAllowed(value1) || !EqualityResursionAllowed(value2)) {
             return false;
         }
