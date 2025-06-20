@@ -74,7 +74,7 @@ const FROM_BUFFER: FromBuffer;
 type arrType = String | undefined;
 
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
-    private buffer: FixedArray<NullishType>
+    private buffer: FixedArray<Any>
     internal actualLength: int
 
     override get length(): int {
@@ -115,7 +115,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Creates a new instance of Array
      */
     public constructor(arrayLen: int) {
-        this.buffer = new NullishType[arrayLen]
+        this.buffer = new Any[arrayLen]
         this.actualLength = arrayLen
     }
 
@@ -123,13 +123,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this(arrayLen.toInt())
     }
 
-    internal constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
+    internal constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
 
     internal constructor() {
-        this.buffer = new NullishType[4]
+        this.buffer = new Any[4]
         this.actualLength = 0
     }
 
@@ -139,7 +139,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param d Array initializer
      */
     public constructor(first: T, ...d: T[]) {
-        this.buffer = new NullishType[d.length + 1]
+        this.buffer = new Any[d.length + 1]
         this.actualLength = d.length.toInt() + 1
 
         this.buffer[0] = first
@@ -319,9 +319,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     */
     public static from<T>(arr: FixedArray<T>): Array<T> {
         const len = arr.length
-        const ret : FixedArray<NullishType> = new NullishType[len.toInt()]
+        const ret : FixedArray<Any> = new Any[len.toInt()]
         for (let i: int = 0; i < len; i++) {
-            ret[i] = arr[i] as NullishType
+            ret[i] = arr[i] as Any
         }
         return new Array<T>(FROM_BUFFER, ret)
     }
@@ -643,7 +643,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
-    private static defaultComparator(a: NullishType, b: NullishType): number {
+    private static defaultComparator(a: Any, b: Any): number {
         if (a instanceof Number && b instanceof Number) {
             const x = a
             const y = b
@@ -701,9 +701,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns Copy of an `Array`'s primitive array data.
      */
-    private copyArray(): FixedArray<NullishType> {
+    private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
-        let res : FixedArray<NullishType> = new NullishType[len]
+        let res : FixedArray<Any> = new Any[len]
         for (let i = 0; i < len; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -732,7 +732,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 this.$_set_unsafe(i, undefined as T)
             }
 
-            sort_default<NullishType>(this.buffer, strArr, 0, sortTo)
+            sort_default<Any>(this.buffer, strArr, 0, sortTo)
         }
         catch (e) {
             if (e instanceof OutOfMemoryError) {
@@ -745,7 +745,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private slow_default_sort(): void {
         let idxNonUndef = 0
-        const cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+        const cmp: (l: Any, r: Any) => number = (l: Any, r: Any): number => {
             return Array.defaultComparator(l, r)
         }
         for (let i = 0; i < this.actualLength; i++) {
@@ -759,7 +759,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i = idxNonUndef; i < this.actualLength; i++) {
             this.$_set_unsafe(i, undefined as T)
         }
-        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
+        sort_stable<Any>(this.buffer, 0, sortTo, cmp)
     }
 
     private move_undefined_end(): int {
@@ -802,10 +802,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
 
         const compareTo: int = this.move_undefined_end()
-        let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+        let cmp: (l: Any, r: Any) => number = (l: Any, r: Any): number => {
             return comparator!(l as T, r as T)
         }
-        sort_stable<NullishType>(this.buffer, 0, compareTo, cmp)
+        sort_stable<Any>(this.buffer, 0, compareTo, cmp)
         return this
     }
 
@@ -889,7 +889,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy : FixedArray<NullishType> = new NullishType[this.buffer.length * 2 + cap]
+            const copy : FixedArray<Any> = new Any[this.buffer.length * 2 + cap]
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i]
             }
@@ -991,7 +991,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns true is arr is a non-nullish array, false otherwise
      */
-    public static isArray(o: NullishType): boolean {
+    public static isArray(o: Any): boolean {
         if (o instanceof Array) {
             return true
         }
@@ -1028,8 +1028,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
             this.unshiftInternal(buffer, values)
             this.buffer = buffer
-        }
-        else {
+        } else {
             this.unshiftInternal(this.buffer, values)
         }
 
@@ -1168,7 +1167,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             totalAdd += items[i].length.toInt()
         }
 
-        const buf : FixedArray<NullishType> = new NullishType[totalAdd];
+        const buf : FixedArray<Any> = new Any[totalAdd];
 
         for (let i = 0; i < this.actualLength; i++) {
             buf[i] = this.$_get_unsafe(i);
@@ -1534,7 +1533,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (count < 0) {
             count = 0;
         }
-        let res : FixedArray<NullishType> = new NullishType[count]
+        let res : FixedArray<Any> = new Any[count]
         for (let i = 0; i < count; i++) {
             res[i] = this.$_get_unsafe(relStart + i);
         }
@@ -1718,7 +1717,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             if (i != 0) {
                 sb.append(",")
             }
-            let x = this.$_get_unsafe(i) as NullishType;
+            let x = this.$_get_unsafe(i) as Any;
             if ((null !== x) && (undefined !== x)) {
                 sb.append((x! as object).toLocaleString()) // #26217
             }
@@ -1774,7 +1773,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (start > len - delete) {
             delete = len - start
         }
-        const res : FixedArray<NullishType> = new NullishType[len - delete + items.length];
+        const res : FixedArray<Any> = new Any[len - delete + items.length];
         for (let i = 0; i < start; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -1908,7 +1907,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns reversed copy of the current Array
      */
     public toReversed(): Array<T> {
-        let arr : FixedArray<NullishType> = new NullishType[this.actualLength]
+        let arr : FixedArray<Any> = new Any[this.actualLength]
         for (let i = 0; i < this.actualLength; i++) {
             arr[this.actualLength - 1 - i] = this.$_get_unsafe(i)
         }
@@ -1974,7 +1973,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
-        let res : FixedArray<NullishType> = new NullishType[len];
+        let res : FixedArray<Any> = new Any[len];
         for (let i = 0; i < this.actualLength; i++) {
             res[i] = callbackfn(this.$_get_unsafe(i), i.toDouble(), this);
         }

@@ -95,10 +95,10 @@ function TestReturnBooleanAsAny(): boolean {
     return testVal == TEST_BOOLEAN
 }
 
-// Note: Using NullishType is a workaround until #17745 is not resolved
+// Note: Using Any is a workaround until #17745 is not resolved
 function TestReturnNullAsAny(): boolean {
     const TestFunc: TReturnsAny = returnNullAsAny
-    const testVal = TestFunc() as NullishType
+    const testVal = TestFunc() as Any
     return testVal == null
 }
 
@@ -231,10 +231,10 @@ function TestReturnBoolSubsetByValue(): boolean {
     )
 }
 
-// Note: Using NullishType is a workaround until #17745 is not resolved
+// Note: Using Any is a workaround until #17745 is not resolved
 function TestReturnNullSubsetByValue(): boolean {
     const TestFunc = returnNullSubsetByValue
-    const testVal = TestFunc() as NullishType
+    const testVal = TestFunc() as Any
     return (
         testVal == null
         && typeof testVal == 'object'

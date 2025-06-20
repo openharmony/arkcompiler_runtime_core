@@ -70,7 +70,7 @@ export final class Char extends Object implements Comparable<Char> {
     * @returns comparison result of underlying primitive chars.
     * Returns false if the argument is not an instance of Char.
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }

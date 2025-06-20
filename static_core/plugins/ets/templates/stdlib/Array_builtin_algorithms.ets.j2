@@ -19,9 +19,9 @@ package std.core;
 
 export const KEY_NOT_FOUND = -1;
 
-{% for T in ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char', 'NullishType'] %}
+{% for T in ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char', 'Any'] %}
 
-{% if T != "NullishType" -%}
+{% if T != "Any" -%}
 // C++ semantics
 // (lower|upper)BoundSearch([1, 1, 2, 2, 2, 3, 3], 2, 0, 7)
 //                                 ^        ^

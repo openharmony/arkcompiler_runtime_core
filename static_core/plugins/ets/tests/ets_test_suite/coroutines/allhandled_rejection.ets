@@ -52,7 +52,7 @@ function testAllhandledRejection(): void {
     } catch(e) {
     }
 
-    AsyncFailing().catch((e: NullishType) => {});
+    AsyncFailing().catch((e: Any) => {});
 
     let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
@@ -60,7 +60,7 @@ function testAllhandledRejection(): void {
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     });
-    q.catch((e: NullishType) => {});
+    q.catch((e: Any) => {});
 
     let f = async (): Promise<void> => {
         try {

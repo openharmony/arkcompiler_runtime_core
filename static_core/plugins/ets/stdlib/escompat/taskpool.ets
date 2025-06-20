@@ -77,19 +77,19 @@ export namespace taskpool {
             removeFromIdleWorkers(this);
             workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! + 1);
             this.currentPriority = task.priority;
-            let job = this.run<NullishType>((): NullishType => {
+            let job = this.run<Any>((): Any => {
                 ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
                     waitingTasksNum--;
                 });
                 let res = task?.execute();
                 return res;
             });
-            const taskRunner = (value: NullishType): NullishType => {
+            const taskRunner = (value: Any): Any => {
                 let res = job.Await();
                 return res;
             };
-            let p = Promise.resolve<NullishType>(new Object()).then<NullishType, NullishType>(taskRunner, taskRunner);
-            p.then((res: NullishType) => {
+            let p = Promise.resolve<Any>(new Object()).then<Any, Any>(taskRunner, taskRunner);
+            p.then((res: Any) => {
 				task?.resolve(res);
             }).catch((e) => {
                 task?.reject(e);
@@ -125,7 +125,7 @@ export namespace taskpool {
 
         // For managerWorker to expand.
         internal triggerExpand(): void {
-            let expandJob = this.run<NullishType>((): NullishType => {
+            let expandJob = this.run<Any>((): Any => {
                 let targetNum: int = 0;
                 ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
                     if (totalExecCount) {
@@ -163,7 +163,7 @@ export namespace taskpool {
 
         // For managerWorker to shrink.
         private triggerShrink(): void {
-            let shrinkJob = this.run<NullishType>((): NullishType => {
+            let shrinkJob = this.run<Any>((): Any => {
                 this.timerId = setInterval(() => {
                     let runningWorkersNum: int = 0;
                     ConcurrencyHelpers.lockGuard(workersMutex, () => {
@@ -274,19 +274,19 @@ export namespace taskpool {
          *
          * @param { string } name The name of task
          * @param { Function } func Concurrent function to execute in the taskpool
-         * @param { ...NullishType } args arguments for function to execute with
+         * @param { ...Any } args arguments for function to execute with
          */
-        constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
+        constructor(name: string, func: Function, ...args: FixedArray<Any>) {
             this.name = name;
             this.arguments = Array.from(args);
             if (isSupportingInterop()) {
                 let serializeHelper = new InteropSerializeHelper(args);
-                this.taskFunction = (): NullishType => {
+                this.taskFunction = (): Any => {
                     let deserializedArgs = serializeHelper.deserialize();
                     return func.unsafeCall(...deserializedArgs);
                 };
             } else {
-                this.taskFunction = (): NullishType => {
+                this.taskFunction = (): Any => {
                     return func.unsafeCall(...args);
                 };
             }
@@ -304,9 +304,9 @@ export namespace taskpool {
          * Create a Task instance
          *
          * @param { Function } func Concurrent function to execute in the taskpool
-         * @param { ...NullishType } args arguments for function to execute with
+         * @param { ...Any } args arguments for function to execute with
          */
-        constructor(func: Function, ...args: FixedArray<NullishType>) {
+        constructor(func: Function, ...args: FixedArray<Any>) {
             this(func.name, func, ...args);
         }
 
@@ -449,11 +449,11 @@ export namespace taskpool {
 
         /**
          * Send data to host side and trigger the registered callback
-         * @param { ...NullishType } args arguments for the registered callback
+         * @param { ...Any } args arguments for the registered callback
          * @throws Error if the function is not called from a taskpool task
          * @throws Error if the callback is not registered
          */
-        static sendData(...args: FixedArray<NullishType>): void {
+        static sendData(...args: FixedArray<Any>): void {
             const item: Task | undefined = getCurrentTask();
             if (item === undefined) {
                 throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
@@ -475,10 +475,10 @@ export namespace taskpool {
         }
 
         /// Concurrent function to execute in taskpool
-        taskFunction: () => NullishType;
+        taskFunction: () => Any;
 
         /// The concurrent function arguments
-        arguments?: NullishType[];
+        arguments?: Any[];
 
         /// Task name
         name: string;
@@ -585,7 +585,7 @@ export namespace taskpool {
             return ((Chrono.nanoNow() - this.startTime) / Chrono.NS_PER_MS).toInt();
         }
 
-        internal execute(): NullishType {
+        internal execute(): Any {
             initWorkerPool();
             this.waitForDependencies();
             if (!taskStarted(this)) {
@@ -593,7 +593,7 @@ export namespace taskpool {
                 this.throwCancelTaskError();
             }
             this.callUserCallback(this.onStartCallback);
-            let result: NullishType = null;
+            let result: Any = null;
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
@@ -678,13 +678,13 @@ export namespace taskpool {
          * @see taskpool.execute
          * @see taskpool.SequenceRunner.execute
          */
-        internal getOnReceivePromise(p: Promise<NullishType>): Promise<NullishType> {
+        internal getOnReceivePromise(p: Promise<Any>): Promise<Any> {
             if (this.onReceiveCallback === undefined) {
                 return p;
             }
-            return p.then<NullishType>((value: NullishType): NullishType => {
-                const argsArray: Array<FixedArray<NullishType>> = this.extractDataArgs();
-                argsArray.forEach((args: FixedArray<NullishType>) => {
+            return p.then<Any>((value: Any): Any => {
+                const argsArray: Array<FixedArray<Any>> = this.extractDataArgs();
+                argsArray.forEach((args: FixedArray<Any>) => {
                     try {
                         this.onReceiveCallback!.unsafeCall(...args);
                     } catch(e) {}
@@ -715,10 +715,10 @@ export namespace taskpool {
         }
 
         /// @see taskpool.Task.getOnReceivePromise
-        internal extractDataArgs(): Array<FixedArray<NullishType>> {
+        internal extractDataArgs(): Array<FixedArray<Any>> {
             ConcurrencyHelpers.mutexLock(this.dataMutex);
-            const argsArray: Array<FixedArray<NullishType>> = this.argsArray;
-            this.argsArray = new Array<FixedArray<NullishType>>();
+            const argsArray: Array<FixedArray<Any>> = this.argsArray;
+            this.argsArray = new Array<FixedArray<Any>>();
             ConcurrencyHelpers.mutexUnlock(this.dataMutex);
             return argsArray;
         }
@@ -763,7 +763,7 @@ export namespace taskpool {
         internal taskMutex: Object;
         internal condVar: Object;
 
-        internal resolve: (value: NullishType) => void;
+        internal resolve: (value: Any) => void;
         internal reject: (e: Error) => void;
 
         internal priority: Priority;
@@ -772,7 +772,7 @@ export namespace taskpool {
 
         private onReceiveCallback?: Function;
         private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
-        private argsArray: Array<FixedArray<NullishType>> = new Array<FixedArray<NullishType>>();
+        private argsArray: Array<FixedArray<Any>> = new Array<FixedArray<Any>>();
 
         private onEnqueueCallback?: CallbackFunction;
         private onStartCallback?: CallbackFunction;
@@ -791,16 +791,16 @@ export namespace taskpool {
          * @param { string } name The name of long task
          * @param { Function } func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: Function, ...args: FixedArray<NullishType>) {
+        constructor(name: string, func: Function, ...args: FixedArray<Any>) {
             super(name, func, ...args);
         }
 
         /**
          * Create a LongTask instance
          * @param { Function } func Concurrent function to execute in the taskpool
-         * @param { ...NullishType } args arguments for func to execute with
+         * @param { ...Any } args arguments for func to execute with
          */
-        constructor(func: Function, ...args: FixedArray<NullishType>) {
+        constructor(func: Function, ...args: FixedArray<Any>) {
             super("", func, ...args);
         }
 
@@ -844,9 +844,9 @@ export namespace taskpool {
          * Add a concurrent function into task group
          *
          * @param { Function } func the concurrent function to add to the task group
-         * @param { ...NullishType } args arguments for func to execute with
+         * @param { ...Any } args arguments for func to execute with
          */
-        addTask(func: Function, ...args: FixedArray<NullishType>): void {
+        addTask(func: Function, ...args: FixedArray<Any>): void {
             this.addTask(new Task(func, ...args));
         }
 
@@ -900,10 +900,10 @@ export namespace taskpool {
     class SeqRunnerImpl {
         constructor(id: int) {
             this.id = id;
-            this.seqPromise = Promise.resolve<NullishType>(new Object());
+            this.seqPromise = Promise.resolve<Any>(new Object());
         }
         readonly id: int;
-        seqPromise: Promise<NullishType>;
+        seqPromise: Promise<Any>;
     }
 
     /**
@@ -923,7 +923,7 @@ export namespace taskpool {
             this.tasks = new Array<Task>();
         }
 
-        execute(task: Task): Promise<NullishType> {
+        execute(task: Task): Promise<Any> {
             initWorkerPool();
             this.checkExecution(task);
             task.seqId = this.impl.id;
@@ -932,17 +932,17 @@ export namespace taskpool {
             task.isSubmitted = true;
             if (isTaskPoolUseLaunch) {
                 task.enqueue(this.priority);
-                const taskRunner = (value: NullishType): NullishType => {
+                const taskRunner = (value: Any): Any => {
                     return task.execute();
                 };
-                this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType>(taskRunner, (error) => {
+                this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<Any>(taskRunner, (error) => {
                     taskRunner(undefined);
                     return new Promise<never>((resolve, reject) => {});
                 } ));
                 return this.impl.seqPromise;
             }
 
-            const promise = new Promise<NullishType>((resolve, reject) => {
+            const promise = new Promise<Any>((resolve, reject) => {
                 task.resolve = resolve;
                 task.reject = reject;
             });
@@ -1042,10 +1042,10 @@ export namespace taskpool {
      * Create task and execute
      *
      * @param { Function } func a concurrent function to create task from
-     * @param { ...NullishType } args arguments for func to execute with
-     * @returns { Promise<NullishType> } Promise for result of executed task
+     * @param { ...Any } args arguments for func to execute with
+     * @returns { Promise<Any> } Promise for result of executed task
      */
-    export function execute(func: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
+    export function execute(func: Function, ...args: FixedArray<Any>): Promise<Any> {
         initWorkerPool();
         if (isTaskPoolUseLaunch) {
             return launchPromise(func, ...args);
@@ -1059,9 +1059,9 @@ export namespace taskpool {
      *
      * @param task The task to execute
      * @param { Priority } [priority] priority for the task
-     * @returns { Promise<NullishType> } Promise for result of executed task
+     * @returns { Promise<Any> } Promise for result of executed task
      */
-    export function execute(task: Task, priority?: Priority): Promise<NullishType> {
+    export function execute(task: Task, priority?: Priority): Promise<Any> {
         initWorkerPool();
         task.checkExecution();
         taskSubmitted(task);
@@ -1072,7 +1072,7 @@ export namespace taskpool {
             return task.getOnReceivePromise(launchPromise(task.execute));
         }
 
-        const promise = new Promise<NullishType>((resolve, reject) => {
+        const promise = new Promise<Any>((resolve, reject) => {
             task.resolve = resolve;
             task.reject = reject;
         });
@@ -1085,17 +1085,17 @@ export namespace taskpool {
      *
      * @param { TaskGroup } group The task group for execution
      * @param { Priority } [priority] priority for tasks in the group
-     * @returns { Promise<Array<NullishType>> } Promise for array of results of executed tasks from the group
+     * @returns { Promise<Array<Any>> } Promise for array of results of executed tasks from the group
      */
-    export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
+    export function execute(group: TaskGroup, priority?: Priority): Promise<Array<Any>> {
         initWorkerPool();
         const tasksCount = group.tasks.length.toInt();
         if (tasksCount == 0) {
-            return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
+            return Promise.resolve<Array<Any>>(new Array<Any>());
         }
         taskGroupSubmitted(group.id, tasksCount);
         group.isTaskAlreadySubmitted = true;
-        const promises: Array<Promise<NullishType>> = new Array<Promise<NullishType>>();
+        const promises: Array<Promise<Any>> = new Array<Promise<Any>>();
         group.tasks.forEach((task: Task) => {
             taskSubmitted(task);
             task.isSubmitted = true;
@@ -1103,7 +1103,7 @@ export namespace taskpool {
             if (isTaskPoolUseLaunch) {
                 promises.push(task.getOnReceivePromise(launchPromise(task.execute)));
             } else {
-                const promise = new Promise<NullishType>((resolve, reject) => {
+                const promise = new Promise<Any>((resolve, reject) => {
                     task.resolve = resolve;
                     task.reject = reject;
                 });
@@ -1111,7 +1111,7 @@ export namespace taskpool {
                 promises.push(task.getOnReceivePromise(promise));
             }
         });
-        return Promise.all<NullishType>(promises);
+        return Promise.all<Any>(promises);
     }
 
     /**
@@ -1120,16 +1120,16 @@ export namespace taskpool {
      * @param { int } delayTime timeout in ms to execute task after
      * @param { Task } task The task to execute
      * @param { Priority } [priority] priority for task
-     * @returns { Promise<NullishType> } Promise for result of executed task
+     * @returns { Promise<Any> } Promise for result of executed task
      */
-    export function executeDelayed(delayTime: int, task: Task, priority?: Priority): Promise<NullishType> {
+    export function executeDelayed(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
         initWorkerPool();
         task.checkExecutionForDelayedTask(delayTime);
         task.isSubmitted = true;
         ConcurrencyHelpers.lockGuard(mutex, () => {
             pendingDelayed.add(task);
         });
-        return new Promise<NullishType>((resolve, reject) => {
+        return new Promise<Any>((resolve, reject) => {
             task.timerId = setTimeout(() => {
                 ConcurrencyHelpers.lockGuard(mutex, () => {
                     pendingDelayed.delete(task);
@@ -1143,18 +1143,18 @@ export namespace taskpool {
                 taskSubmitted(task);
                 task.enqueue(priority);
                 if (isTaskPoolUseLaunch) {
-                    launchImpl(task, priority).then((res: NullishType) => {
+                    launchImpl(task, priority).then((res: Any) => {
                         resolve(res);
                     }).catch((e) => {
                         reject(e);
                     })
                 } else {
-                    const p = new Promise<NullishType>((resolve, reject) => {
+                    const p = new Promise<Any>((resolve, reject) => {
                         task.resolve = resolve;
                         task.reject = reject;
                     })
                     notifyExecuteTask();
-                    task.getOnReceivePromise(p).then((res: NullishType) => {
+                    task.getOnReceivePromise(p).then((res: Any) => {
                         resolve(res);
                     }).catch((e) => {
                         reject(e);
@@ -1185,7 +1185,7 @@ export namespace taskpool {
             if (isTaskPoolUseLaunch) {
                 launchImpl(task, priority);
             } else {
-                const p = new Promise<NullishType>((resolve, reject) => {
+                const p = new Promise<Any>((resolve, reject) => {
                     task.resolve = resolve;
                     task.reject = reject;
                 })
@@ -1812,11 +1812,11 @@ export namespace taskpool {
      * @param task submitting task
      * @param priority task execution priority
      */
-    function launchImpl(task: Task, priority?: Priority): Promise<NullishType> {
-        const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+    function launchImpl(task: Task, priority?: Priority): Promise<Any> {
+        const job: Job<Any> = launch<Any, () => Any>(
             task.execute
         );
-        let promise = new Promise<NullishType>((resolve, reject) => {
+        let promise = new Promise<Any>((resolve, reject) => {
             try {
                 let res = job.Await();
                 resolve(res);
@@ -1888,10 +1888,10 @@ export namespace taskpool {
     const WORKERS_MINIMUM: int = 1; // 1: minimum thread num when idle.
 }
 
-function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
-    let resolver: (((v: NullishType | PromiseLike<NullishType>) => void) | undefined) = undefined;
+function launchPromise(f: Function, ...args: FixedArray<Any>): Promise<Any> {
+    let resolver: (((v: Any | PromiseLike<Any>) => void) | undefined) = undefined;
     let rejecter: (((error: Error) => void) | undefined) = undefined;
-    let p = new Promise<NullishType>((res, rej) => {
+    let p = new Promise<Any>((res, rej) => {
         resolver = res
         rejecter = rej;
     })

@@ -18,9 +18,9 @@ desc: 10.6.2 Inheritance and Overriding
 tags: [compile-only]
 ---*/
 
-type EntryType = [PropertyKey, NullishType]
+type EntryType = [PropertyKey, Any]
 type __Record<K, V> = Map<K, V>
-type RecordForObject = Map<PropertyKey, NullishType>
+type RecordForObject = Map<PropertyKey, Any>
 
 interface I {
     keys(o: Object): string[]
@@ -28,7 +28,7 @@ interface I {
     getOwnPropertyNames(o: Object): string[]
     hasOwn(target: Object, key: string): boolean
     hasOwn(target: Object, index: number): boolean
-    values__(o: Object): NullishType[]
+    values__(o: Object): Any[]
     fromEntries<T>(entries: Map<PropertyKey, T>): __Record<PropertyKey, T>
     assign(target: RecordForObject,  ...source: Object[]): RecordForObject
 }

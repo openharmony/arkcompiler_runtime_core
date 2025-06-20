@@ -94,7 +94,7 @@ function main() {
     console.dir(calculator);
 
     // Array with mixed types
-    const mixedArray: NullishType[] = [
+    const mixedArray: Any[] = [
         1,
         "string",
         [1, 2, 3],

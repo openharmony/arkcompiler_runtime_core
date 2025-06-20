@@ -93,11 +93,11 @@ class TypeAPI {
     private static NullTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getNullTypeDescriptor()
     private static UndefinedTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getUndefinedTypeDescriptor()
 
-    static getTypeDescriptor(o: NullishType): RuntimeTypeDescriptor {
+    static getTypeDescriptor(o: Any): RuntimeTypeDescriptor {
         if (o === null) {
             return TypeAPI.NullTypeDescriptor
         }
-        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(__narrowAny<object>(o)))
+        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(o as object))
     }
 
     static getTypeName(cls: Class): string {
@@ -367,9 +367,9 @@ export abstract class Type extends Object {
 
     // -----
 
-    public static of(o: NullishType): Type {
+    public static of(o: Any): Type {
         const td = TypeAPI.getTypeDescriptor(o)
-        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(o as object)
         const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
         return Type.resolve(td, contextLinker)!
     }
@@ -537,7 +537,7 @@ export abstract class Type extends Object {
         return false
     }
 
-    internal abstract convertObject(obj: NullishType): NullishType;
+    internal abstract convertObject(obj: Any): Any;
 
     private isNumericType(): boolean {
         return (this) instanceof ByteType
@@ -674,7 +674,7 @@ export final class NullType extends Type {
         return other instanceof NullType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         if (obj != null) {
             throw new Error("invalid conversion")
         }
@@ -745,7 +745,7 @@ export final class UndefinedType extends Type {
         return other instanceof UndefinedType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when undefined becomes available")
     }
 }
@@ -820,7 +820,7 @@ export final class VoidType extends Type {
         return other instanceof VoidType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         if (!this.assignableFrom(Type.of(obj))) {
             throw new Error("invalid conversion")
         }
@@ -904,7 +904,7 @@ export final class CharType extends Type {
         return other instanceof CharType && this.isValue != (other as CharType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid type for conversion")
@@ -988,7 +988,7 @@ export final class BooleanType extends Type {
         return other instanceof BooleanType && this.isValue != (other as BooleanType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid type for conversion")
@@ -1072,7 +1072,7 @@ export final class ByteType extends Type {
         return other instanceof ByteType && this.isValue != (other as ByteType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1167,7 +1167,7 @@ export final class ShortType extends Type {
         return other instanceof ShortType && this.isValue != (other as ShortType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1262,7 +1262,7 @@ export final class IntType extends Type {
         return other instanceof IntType && this.isValue != (other as IntType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1357,7 +1357,7 @@ export final class LongType extends Type {
         return other instanceof LongType && this.isValue != (other as LongType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1452,7 +1452,7 @@ export final class FloatType extends Type {
         return other instanceof FloatType && this.isValue != (other as FloatType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1547,7 +1547,7 @@ export final class DoubleType extends Type {
         return other instanceof DoubleType && this.isValue != (other as DoubleType).isReference()
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -1895,7 +1895,7 @@ export final class ClassType extends Type {
     }
 
     // todo(kprokopenko): make varargs
-    public make(args: FixedArray<NullishType>): Object {
+    public make(args: FixedArray<Any>): Object {
         const argTypes = new Array<Type>(args.length)
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])
@@ -1947,7 +1947,7 @@ export final class ClassType extends Type {
         if (ctors.length != 1) {
             throw new Error("can't select consturctor: " + ctors.length + " left")
         }
-        return __narrowAny(ctors.at(0)!.invoke(undefined, args))!
+        return ctors.at(0)!.invoke(undefined, args) as Object
     }
 
     // class.subTypeOf(U) means that `class extends U` or `class implements U`
@@ -1983,7 +1983,7 @@ export final class ClassType extends Type {
         return false
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
@@ -2167,7 +2167,7 @@ export final class InterfaceType extends Type {
         return TypeAPI.isInheritedFrom(this.cls, expected.cls)
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
@@ -2333,7 +2333,7 @@ export final class ArrayType extends Type {
         return TypeAPI.makeArrayInstance(this.elemTD, this.getContextLinker(), length)
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -2374,7 +2374,7 @@ export final class TupleType extends Type {
         throw new Error("Not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): add when tuple becomes available")
     }
 }
@@ -2580,7 +2580,7 @@ export final class LambdaType extends FunctionType {
         }
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj
@@ -2641,7 +2641,7 @@ export final class MethodType extends FunctionType {
         return this.getReceiverTypeDescriptor() !== undefined
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         throw new Error("Only LambdaType can be converted")
     }
 
@@ -2716,7 +2716,7 @@ export final class StringType extends Type {
         return other instanceof StringType
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (!this.equals(objType)) {
             throw new Error("invalid conversion")
@@ -2828,7 +2828,7 @@ export final class EnumType extends Type {
         throw new Error("not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         throw new Error("todo(kprokopenko): enum conversion")
     }
 }
@@ -2944,7 +2944,7 @@ export final class UnionType extends Type {
         throw new Error("not implemented")
     }
 
-    internal override convertObject(obj: NullishType): NullishType {
+    internal override convertObject(obj: Any): Any {
         const objType = Type.of(obj)
         if (this.equals(objType)) {
             return obj

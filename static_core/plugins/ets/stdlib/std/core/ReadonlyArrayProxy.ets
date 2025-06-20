@@ -18,13 +18,13 @@ package std.core;
 export namespace proxy
 {
 export interface ReadonlyArrayProxyHandler<T> {
-	get(target: ReadonlyArray<T>, name: string): NullishType
+	get(target: ReadonlyArray<T>, name: string): Any
 
 	get(target: ReadonlyArray<T>, index: int): T
 }
 
 export abstract class DefaultReadonlyArrayProxyHandler<T> implements ReadonlyArrayProxyHandler<T> {
-	override get(target: ReadonlyArray<T>, name: string): NullishType {
+	override get(target: ReadonlyArray<T>, name: string): Any {
 		if (name == "length") {
 			return target.length
 		}

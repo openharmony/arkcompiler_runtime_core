@@ -74,13 +74,13 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     head?: ListNode<T>;
     private tail?: ListNode<T>;
 
-    public jsonReplacer(): Record<String, NullishType> {
-        let arrayObj: Record<String, NullishType> = {};
+    public jsonReplacer(): Record<String, Any> {
+        let arrayObj: Record<String, Any> = {};
         this.forEach((value, index) => {
             if (Array.isArray(value)) {
-                for (let i = 0; i < (value as Array<NullishType>).length; i++) {
-                    if ((value as Array<NullishType>)[i] === undefined) {
-                        (value as Array<NullishType>)[i] = null;
+                for (let i = 0; i < (value as Array<Any>).length; i++) {
+                    if ((value as Array<Any>)[i] === undefined) {
+                        (value as Array<Any>)[i] = null;
                     }
                 }
             }
@@ -166,7 +166,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     /**
     * Iterates over each element in the linked list, executing the provided callback function for each element.
     *
-    * @param callbackfn - A function that accepts up to two arguments. 
+    * @param callbackfn - A function that accepts up to two arguments.
     * @param callbackfn.value - The current element being processed in the linked list.
     * @param callbackfn.index - The index of the current element being processed in the linked list.
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.

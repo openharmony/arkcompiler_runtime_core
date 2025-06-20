@@ -20,7 +20,7 @@ export class Formatter {
         return (new Formatter).stringifyObject(obj, '\n', 1, full)
     }
 
-    private static isNullObject(obj: NullishType): boolean {
+    private static isNullObject(obj: Any): boolean {
         return (obj == undefined) || (obj == null)
     }
 
@@ -40,25 +40,25 @@ export class Formatter {
         return obj instanceof Array
     }
 
-    private stringifySubObject(delimiter: string, subObj: NullishType, subObjName: string, depth: number, full: boolean = false): string {
+    private stringifySubObject(delimiter: string, subObj: Any, subObjName: string, depth: number, full: boolean = false): string {
 
         if (Formatter.isNullObject(subObj)) {
             return Formatter.nullObjectDescription(subObjName) + ',' + delimiter
         }
 
         let strB = new StringBuilder
-        subObj = __narrowAny(subObj)
+        subObj = subObj as object
 
-        if (Formatter.isArray(subObj!)) {
-            strB.append(subObjName + ':' + delimiter + Formatter.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
-        } else if (Formatter.isObject(subObj!)) {
-            strB.append(this.subObjectDescription(subObj!, subObjName, this.isCircular(subObj!), delimiter, depth))
-        } else if (Formatter.isFunction(subObj!)) {
-            strB.append(Formatter.functionDescription(subObj!, delimiter, true, full))
+        if (Formatter.isArray(subObj)) {
+            strB.append(subObjName + ':' + delimiter + Formatter.arrayToString(delimiter + '  ', subObj as Array<Object>, depth, full))
+        } else if (Formatter.isObject(subObj)) {
+            strB.append(this.subObjectDescription(subObj, subObjName, this.isCircular(subObj), delimiter, depth))
+        } else if (Formatter.isFunction(subObj)) {
+            strB.append(Formatter.functionDescription(subObj, delimiter, true, full))
         } else {
-            strB.append(Formatter.simpleObjectDescription(subObj!, subObjName, true))
+            strB.append(Formatter.simpleObjectDescription(subObj, subObjName, true))
         }
-        this.objects.add(subObj!)
+        this.objects.add(subObj)
 
         strB.append(',' + delimiter)
         return strB.toString()
@@ -93,12 +93,12 @@ export class Formatter {
 
     private objects = new Set<Object>
 
-    private isCircular(obj: NullishType): boolean {
+    private isCircular(obj: Any): boolean {
         if (obj == null) {
             return false
         }
 
-        return this.objects.has(__narrowAny<object>(obj))
+        return this.objects.has(obj as object)
     }
 
     private static nullObjectDescription(objName: string = ''): string {
@@ -110,26 +110,26 @@ export class Formatter {
         return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
     }
 
-    private stringifyObject(obj: NullishType, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+    private stringifyObject(obj: Any, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
 
         if (Formatter.isNullObject(obj)) {
             return Formatter.nullObjectDescription()
         }
 
-        obj = __narrowAny(obj)
-        this.objects.add(obj!)
+        obj = obj as object
+        this.objects.add(obj)
         let strB = new StringBuilder
-        if (Formatter.isArray(obj!)) {
-            strB.append(Formatter.arrayToString(delimiter, obj! as Array<Object>, depth, full))
-        } else if (Formatter.isFunction(obj!)) {
-            strB.append(Formatter.functionDescription(obj!, delimiter, false, full))
+        if (Formatter.isArray(obj)) {
+            strB.append(Formatter.arrayToString(delimiter, obj as Array<Object>, depth, full))
+        } else if (Formatter.isFunction(obj)) {
+            strB.append(Formatter.functionDescription(obj, delimiter, false, full))
             if (!full) {
                 strB = (new StringBuilder).append('{ ').append(strB.toString()).append(' }')
             }
-        } else if (Formatter.isObject(obj!)) {
-            strB.append(this.objectDescription(obj!, delimiter, depth, full))
+        } else if (Formatter.isObject(obj)) {
+            strB.append(this.objectDescription(obj, delimiter, depth, full))
         } else {
-            strB.append(Formatter.simpleObjectDescription(obj!, ''))
+            strB.append(Formatter.simpleObjectDescription(obj, ''))
         }
         return strB.toString()
     }
@@ -198,7 +198,7 @@ export class Formatter {
         return subObj ? subObj! as int : 0
     }
 
-    private static getValue(key: string, obj: Object): NullishType {
+    private static getValue(key: string, obj: Object): Any {
         if (!obj) {
             return null
         }
@@ -273,18 +273,18 @@ export class Formatter {
         return "%" + flag
     }
 
-    private static joinLastArgs(index: int, args: Array<NullishType>): string {
+    private static joinLastArgs(index: int, args: Array<Any>): string {
         let sb = new StringBuilder
         for (let i = index; i < args.length; ++i) {
             sb.append(" ")
             // behavior for null and undefined expected to be the same as for empty string
-            sb.append(args[i] != undefined && args[i] != null ? __narrowAny(args[i])!.toString() : "")
+            sb.append(args[i] != undefined && args[i] != null ? (args[i] as object).toString() : "")
         }
         return sb.toString()
     }
 
     // NOTE(ivan-tyulyandin): some modifiers work wrongly, see #25046
-    public format(s: string, args: Array<NullishType>): string {
+    public format(s: string, args: Array<Any>): string {
         let preI: int = 0
         let i: int = 0
         let argCounter = 0

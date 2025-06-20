@@ -1225,8 +1225,8 @@ export native function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstS
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: FixedArray<NullishType>): FixedArray<NullishType> {
-    const r : FixedArray<NullishType> = new NullishType[src.length];
+export function copyOf(src: FixedArray<Any>): FixedArray<Any> {
+    const r : FixedArray<Any> = new Any[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1254,4 +1254,4 @@ export function copyOf(src: FixedArray<NullishType>): FixedArray<NullishType> {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export native function copyTo(src: FixedArray<NullishType>, dst: FixedArray<NullishType>, dstStart: int, srcStart: int, srcEnd: int): void;
+export native function copyTo(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;

@@ -32,7 +32,7 @@ function __fail(): void {
   __fail_count += 1;
 }
 
-class ArrayValueIterator implements IterableIterator<NullishType> {
+class ArrayValueIterator implements IterableIterator<Any> {
   private idx: int
   private val: ArrayValue
 
@@ -41,19 +41,19 @@ class ArrayValueIterator implements IterableIterator<NullishType> {
     this.val = val
   }
 
-  override $_iterator(): IterableIterator<NullishType> {
+  override $_iterator(): IterableIterator<Any> {
     return this;
   }
 
-  override next(): IteratorResult<NullishType> {
+  override next(): IteratorResult<Any> {
     if (this.idx >= this.val.getLength()) {
-      return new IteratorResult<NullishType>()
+      return new IteratorResult<Any>()
     }
-    return new IteratorResult<NullishType>(this.val.getElement(this.idx++).getData());
+    return new IteratorResult<Any>(this.val.getElement(this.idx++).getData());
   }
 }
 
-function __value_rewrap_builtin_array(a: NullishType): NullishType {
+function __value_rewrap_builtin_array(a: Any): Any {
   if (!(Type.of(a) instanceof ArrayType)) {
     return a;
   }
@@ -70,7 +70,7 @@ class IterableData {
 }
 const KNOWN_ITERABLES = new Array<IterableData>()
 
-function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<NullishType> | undefined {
+function getIteratorFromIterable(a: Any, aTypeUncasted: Type): Iterator<Any> | undefined {
   if (!(aTypeUncasted instanceof ClassType)) {
     return undefined
   }
@@ -80,7 +80,7 @@ function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<
   for (let i = 0; i < KNOWN_ITERABLES.length; i++) {
     const ki = KNOWN_ITERABLES[i];
     if (ki.cls.equals(aType)) {
-      return ki.meth.invoke(a, [])! as Iterator<NullishType>
+      return ki.meth.invoke(a, [])! as Iterator<Any>
     }
   }
   const mNum = aType.getMethodsNum();
@@ -88,13 +88,13 @@ function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<
     const m = aType.getMethod(i);
     if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
       KNOWN_ITERABLES.push(new IterableData(aType, m));
-      return m.invoke(a, [])! as Iterator<NullishType>
+      return m.invoke(a, [])! as Iterator<Any>
     }
   }
   return undefined;
 }
 
-function __value_is_same(a: NullishType, b: NullishType): boolean {
+function __value_is_same(a: Any, b: Any): boolean {
   if (Runtime.sameValue(a, b)) {
     return true;
   }
@@ -166,7 +166,7 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
   return false
 }
 
-function __check_value(a: NullishType, b: NullishType): void {
+function __check_value(a: Any, b: Any): void {
   if (__value_is_same(a, b)) {
     return
   }

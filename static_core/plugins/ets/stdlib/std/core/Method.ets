@@ -15,8 +15,8 @@
 
 package std.core;
 
-native function TypeAPIMethodInvoke(methodType: MethodType, recv: NullishType, args: FixedArray<NullishType>): NullishType
-native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: FixedArray<NullishType>): Object
+native function TypeAPIMethodInvoke(methodType: MethodType, recv: Any, args: FixedArray<Any>): Any
+native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: FixedArray<Any>): Object
 
 /**
  * Represents method of class or interface
@@ -89,7 +89,7 @@ export final class Method extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public invoke(recv: NullishType, args: FixedArray<NullishType>): NullishType {
+    public invoke(recv: Any, args: FixedArray<Any>): Any {
         const isCtor = this.isConstructor()
         const isStatic = this.isStatic()
         if ((isStatic || isCtor) != (recv == null)) {
@@ -99,7 +99,7 @@ export final class Method extends Object {
         if (thisType.getParametersNum() != args.length) {
             throw new Error("arguments length mismatch " + thisType.getParametersNum() + " != " + args.length)
         }
-        let convertedArgs: FixedArray<NullishType> = new NullishType[args.length]
+        let convertedArgs: FixedArray<Any> = new Any[args.length]
         for (let i = 0; i < convertedArgs.length; i++) {
             if (args[i] === undefined) {
                 convertedArgs[i] = args[i]
@@ -125,7 +125,7 @@ export final class Method extends Object {
         return this.accessMod
     }
 
-    public equals(oth: NullishType): boolean {
+    public equals(oth: Any): boolean {
         return oth instanceof Method &&
                 this.methodType!.equals((oth as Method).methodType!) &&
                 this.name == (oth as Method).name &&

@@ -1363,7 +1363,7 @@ export class RegExp extends Object {
                 let capN = result.$_get(n);
                 args.pushBack(capN)
             }
-            let namedCaptures: NullishType = /*result.groups*/ undefined;
+            let namedCaptures: Any = /*result.groups*/ undefined;
             args.pushBack(position.toDouble());
             args.pushBack(str)
             if (namedCaptures != undefined) {

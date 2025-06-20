@@ -460,8 +460,8 @@ export namespace util {
     * @returns Returns: <string> The formatted string
     */
     export function format(s: string, ...args: Object[]): string {
-        // arrays are invariant, need to copy Objects to NullishTypes
-        let a = new Array<NullishType>(args.length)
+        // arrays are invariant, need to copy
+        let a = new Array<Any>(args.length)
         for (let i = 0; i < args.length; ++i) {
             a[i] = args[i]
         }
@@ -1094,7 +1094,7 @@ export namespace util {
             return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
         }
 
-        private static isNullObject(obj: NullishType): boolean {
+        private static isNullObject(obj: Any): boolean {
             return (obj == undefined) || (obj == null)
         }
 
@@ -1114,25 +1114,25 @@ export namespace util {
             return obj instanceof Array
         }
 
-        private stringifySubObject(delimiter: string, subObj: NullishType, subObjName: string, depth: number, full: boolean = false): string {
+        private stringifySubObject(delimiter: string, subObj: Any, subObjName: string, depth: number, full: boolean = false): string {
 
             if (UtilHelper.isNullObject(subObj)) {
                 return UtilHelper.nullObjectDescription(subObjName) + ',' + delimiter
             }
 
             let strB = new StringBuilder
-            subObj = __narrowAny(subObj)
+            subObj = subObj as object
 
-            if (UtilHelper.isArray(subObj!)) {
-                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
-            } else if (UtilHelper.isObject(subObj!)) {
-                strB.append(this.subObjectDescription(subObj!, subObjName, this.isCircular(subObj!), delimiter, depth))
-            } else if (UtilHelper.isFunction(subObj!)) {
-                strB.append(UtilHelper.functionDescription(subObj!, delimiter, true, full))
+            if (UtilHelper.isArray(subObj)) {
+                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj as Array<Object>, depth, full))
+            } else if (UtilHelper.isObject(subObj)) {
+                strB.append(this.subObjectDescription(subObj, subObjName, this.isCircular(subObj), delimiter, depth))
+            } else if (UtilHelper.isFunction(subObj)) {
+                strB.append(UtilHelper.functionDescription(subObj, delimiter, true, full))
             } else {
-                strB.append(UtilHelper.simpleObjectDescription(subObj!, subObjName, true))
+                strB.append(UtilHelper.simpleObjectDescription(subObj, subObjName, true))
             }
-            this.objects.add(subObj!)
+            this.objects.add(subObj)
 
             strB.append(',' + delimiter)
             return strB.toString()
@@ -1167,12 +1167,12 @@ export namespace util {
 
         private objects = new Set<Object>
 
-        private isCircular(obj: NullishType): boolean {
+        private isCircular(obj: Any): boolean {
             if (obj == null) {
                 return false
             }
 
-            return this.objects.has(__narrowAny<object>(obj))
+            return this.objects.has(obj as object)
         }
 
         private static nullObjectDescription(objName: string = ''): string {
@@ -1184,25 +1184,25 @@ export namespace util {
             return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
         }
 
-        private stringifyObject(obj: NullishType, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+        private stringifyObject(obj: Any, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
 
             if (UtilHelper.isNullObject(obj)) {
                 return UtilHelper.nullObjectDescription()
             }
-            obj = __narrowAny(obj)
-            this.objects.add(obj!)
+            obj = obj as object
+            this.objects.add(obj)
             let strB = new StringBuilder
-            if (UtilHelper.isArray(obj!)) {
-                strB.append(UtilHelper.arrayToString(delimiter, obj! as Array<Object>, depth, full))
-            } else if (UtilHelper.isFunction(obj!)) {
-                strB.append(UtilHelper.functionDescription(obj!, delimiter, false, full))
+            if (UtilHelper.isArray(obj)) {
+                strB.append(UtilHelper.arrayToString(delimiter, obj as Array<Object>, depth, full))
+            } else if (UtilHelper.isFunction(obj)) {
+                strB.append(UtilHelper.functionDescription(obj, delimiter, false, full))
                 if (!full) {
                     strB = (new StringBuilder).append('{ ').append(strB.toString()).append(' }')
                 }
-            } else if (UtilHelper.isObject(obj!)) {
-                strB.append(this.objectDescription(obj!, delimiter, depth, full))
+            } else if (UtilHelper.isObject(obj)) {
+                strB.append(this.objectDescription(obj, delimiter, depth, full))
             } else {
-                strB.append(UtilHelper.simpleObjectDescription(obj!, ''))
+                strB.append(UtilHelper.simpleObjectDescription(obj, ''))
             }
             return strB.toString()
         }
@@ -1271,7 +1271,7 @@ export namespace util {
             return subObj ? subObj! as int : 0
         }
 
-        private static getValue(key: string, obj: Object): NullishType {
+        private static getValue(key: string, obj: Object): Any {
             if (!obj) {
                 return null
             }
@@ -1537,7 +1537,7 @@ export namespace util {
          * Check whether the entered value is the iterator type of set.
          * @param { Object } value - A Set iterator value
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
-         * 
+         *
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isSetIterator(value: Object): boolean {
@@ -1621,7 +1621,7 @@ export namespace util {
          * Check whether the entered value is of type asyncfunction.
          * @param { Object } value - A AsyncFunction value
          * @returns { boolean } Returns true if the value is a built-in AsyncFunction instance.
-         * 
+         *
          * Since the current interface cannot be correctly determined, it returns false by default
          */
         isAsyncFunction(value: Object): boolean {

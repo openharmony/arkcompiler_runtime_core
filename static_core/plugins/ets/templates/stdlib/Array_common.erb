@@ -678,7 +678,7 @@ private joinObject(sep?: String): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = <%= get_unsafe.(this, 'i') %> as NullishType;
+        let x = <%= get_unsafe.(this, 'i') %> as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }

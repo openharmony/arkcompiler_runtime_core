@@ -510,7 +510,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     // 1. Reference fields
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
-    private value: NullishType = undefined;
+    private value: Any = undefined;
     private mutex = new Mutex();
     private event = new Event();
     private callbackQueue?: Object[];

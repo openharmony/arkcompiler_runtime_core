@@ -386,10 +386,10 @@ export class EAWorker {
      * Note: it has no effect if EAWorker was stoped
      *
      * @param { Function } task function to execute
-     * @param { ...NullishType } args argumnents for task to execute with
+     * @param { ...Any } args argumnents for task to execute with
      * @returns { Job<R> } Job that represents the task
      */
-    public run<R> (task: Function, ...args: FixedArray<NullishType>): Job<R> {
+    public run<R> (task: Function, ...args: FixedArray<Any>): Job<R> {
         if (this.isMain) {
             return EAWorker.postToMain<R>(task, ...args);
         }
@@ -401,17 +401,17 @@ export class EAWorker {
 
     public static postToMain<R>(
         coroFun: Function,
-        ...args: FixedArray<NullishType>
+        ...args: FixedArray<Any>
     ) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, false);
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, false);
     }
 
     public static postToMain<R>(
         coroFun: Function,
         launchParams: LaunchParams,
-        ...args: FixedArray<NullishType>
+        ...args: FixedArray<Any>
     ) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag);
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag);
     }
 
     /**
@@ -420,7 +420,7 @@ export class EAWorker {
      */
     private native static postTaskToMain<R>(
       coroFun: Object,
-      args: FixedArray<NullishType>,
+      args: FixedArray<Any>,
       abortFlag: boolean
     ) : Job<R>;
 
@@ -483,7 +483,7 @@ export class EAWorker {
 };
 
 interface InternalWorker {
-    run<R>(task:Function, ...args:FixedArray<NullishType>): Job<R>;
+    run<R>(task:Function, ...args:FixedArray<Any>): Job<R>;
 
     start(initialTask?: Task);
 
@@ -570,7 +570,7 @@ class InteropWorker implements InternalWorker {
         return this?.workerId;
     }
 
-    public run<R>(task:Function, ...args:FixedArray<NullishType>):Job<R> {
+    public run<R>(task:Function, ...args:FixedArray<Any>):Job<R> {
         let job = new CompletableJob<R>();
         this.initEvent.wait();
         let serializeHelper = new InteropSerializeHelper(args);
@@ -589,7 +589,7 @@ class InteropWorker implements InternalWorker {
                 break;
             }
         }
-        
+
         // handle message cancellation
         if (currentMessage !== undefined) {
             if (this.messages.get(currentMessage) === MessageStatus.CANCELLED) {
@@ -709,7 +709,7 @@ class StaticWorker implements InternalWorker {
         return this?.workerId;
     }
 
-    public run<T>(task: Function, ...args:FixedArray<NullishType>): Job<T> {
+    public run<T>(task: Function, ...args:FixedArray<Any>): Job<T> {
         let job = new CompletableJob<T>();
         let wrapperTask = ():T => {
             return task.unsafeCall(...args) as T;
@@ -795,7 +795,7 @@ class StaticWorker implements InternalWorker {
             }
 
             if (shouldExecute) {
-                task(); 
+                task();
             }
         }
     }

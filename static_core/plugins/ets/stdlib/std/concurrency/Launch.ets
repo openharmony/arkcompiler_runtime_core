@@ -42,8 +42,8 @@ type CoroFunT<A, R> = (
  *
  * @returns instance of the Job class that represents newly launched coroutine.
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<NullishType>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<Any>);
 }
 
 /**
@@ -63,7 +63,7 @@ export type CoroutineId = int;
 export type WorkerId = int;
 
 /**
- * @class WorkerGroup a group of workers which a coroutine can be launched to. 
+ * @class WorkerGroup a group of workers which a coroutine can be launched to.
  */
 export class WorkerGroup {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
@@ -119,16 +119,16 @@ export class LaunchParams {
  *
  * @returns instance of the Job class that represents newly launched coroutine.
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<NullishType>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>, launchParams);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
 }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
   if (launchParams) {
-    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag, launchParams.workerGroupId);
+    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
   }
-  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, false, WorkerGroup.ANY_ID);
+  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, false, WorkerGroup.ANY_ID);
 }
 
 function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
@@ -143,4 +143,4 @@ function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
   return res;
 }
 
-native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<NullishType>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;
+native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<Any>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;

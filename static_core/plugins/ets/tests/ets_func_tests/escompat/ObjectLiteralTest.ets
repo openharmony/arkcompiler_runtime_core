@@ -39,7 +39,7 @@ function testObjectAssignKeys(): void {
 	}
 }
 
-function objEntriesComparator(l: [String, NullishType], r: [String, NullishType]): number {
+function objEntriesComparator(l: [String, Any], r: [String, Any]): number {
 	const lname = l[0]
 	const rname = r[0]
 

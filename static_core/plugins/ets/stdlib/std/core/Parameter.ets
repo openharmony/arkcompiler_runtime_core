@@ -49,7 +49,7 @@ export final class Parameter extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public equals(oth: NullishType): boolean {
+    public equals(oth: Any): boolean {
         return oth instanceof Parameter &&
                 this.paramType!.equals((oth as Parameter).paramType!) &&
                 this.name == (oth as Parameter).name &&

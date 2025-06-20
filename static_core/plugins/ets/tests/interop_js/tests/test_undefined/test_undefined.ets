@@ -16,7 +16,7 @@
 import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "js_code"
 
 function TestPassUndefinedToEts(): boolean {
-    let a: NullishType = etsUndefinedProduce()
+    let a: Any = etsUndefinedProduce()
     if (a as JSValue !== JSRuntime.getUndefined()) {
         return false;
     }
@@ -27,21 +27,21 @@ function TestPassUndefinedToEts(): boolean {
 }
 
 function TestPassUndefinedFromEts(): boolean {
-    let mUndefined: NullishType = undefined;
+    let mUndefined: Any = undefined;
     return etsUndefinedConsume(mUndefined) as boolean;
 }
 
 function TestPassNullToEts(): boolean {
-    if (etsNullProduce() as NullishType !== null) {
+    if (etsNullProduce() as Any !== null) {
         return false;
     }
-    if (etsNullProduce() as NullishType === undefined) {
+    if (etsNullProduce() as Any === undefined) {
         return false;
     }
     return true;
 }
 
 function TestPassNullFromEts(): boolean {
-    let mNull: NullishType = null;
+    let mNull: Any = null;
     return etsNullConsume(mNull) as boolean;
 }

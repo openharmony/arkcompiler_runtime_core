@@ -172,7 +172,7 @@ export final class BigInt {
         return true
     }
 
-    equals(other: NullishType): boolean {
+    equals(other: Any): boolean {
         if (!(other instanceof BigInt)) {
             return false
         }

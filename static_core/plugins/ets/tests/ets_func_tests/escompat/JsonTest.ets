@@ -287,9 +287,9 @@ function testStringifyObjectOfDerivedClass(): int {
 
 class TestNode {
     value: string
-    next: NullishType
+    next: Any
 
-    constructor(value: string, next: NullishType = null) {
+    constructor(value: string, next: Any = null) {
         this.value = value
         this.next = next
     }

@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 
-function dummyReplacer(key: string, value: NullishType): NullishType {
+function dummyReplacer(key: string, value: Any): Any {
     return value
 }
 
-function toStringReplacer(key: string, value: NullishType): NullishType {
+function toStringReplacer(key: string, value: Any): Any {
     if (key == "") {
         return value
     }
@@ -24,7 +24,7 @@ function toStringReplacer(key: string, value: NullishType): NullishType {
     return "" + value
 }
 
-function toFnReplacer(key: string, value: NullishType): NullishType {
+function toFnReplacer(key: string, value: Any): Any {
     return key == "id" ? () => {} : value
 }
 
@@ -71,10 +71,10 @@ class O<T> implements JsonReplacer {
         this.buffer.push(val)
     }
 
-    jsonReplacer(): Record<String, NullishType> {
+    jsonReplacer(): Record<String, Any> {
         const buf = this.buffer
         const len = buf.length
-        let arrayObj: Record<String, NullishType> = {}
+        let arrayObj: Record<String, Any> = {}
         for (let i = 0; i < len; i++) {
             arrayObj[String(i)] = buf[i]
         }
@@ -106,13 +106,13 @@ function jsonStringifyObjectWithFunctionReplacer(): void {
 }
 
 function jsonStringifyRecordWithFunctionReplacer(): void {
-    const record: Record<string, NullishType> = { "id": 1, "name": "R" }
+    const record: Record<string, Any> = { "id": 1, "name": "R" }
     arktest.assertEQ(JSON.stringify(record, dummyReplacer), `{"id":1,"name":"R"}`)
     arktest.assertEQ(JSON.stringify(record, toFnReplacer), `{"name":"R"}`)
 }
 
 function jsonStringifyArrayWithFunctionReplacer(): void {
-    const replacer = (key: string, value: NullishType): NullishType => {
+    const replacer = (key: string, value: Any): Any => {
         if (key == "" || key == "0") {
             return value
         } else {
@@ -134,7 +134,7 @@ function jsonStringifyArrayWithFunctionReplacer(): void {
     arktest.assertEQ(JSON.stringify(ar, toStringReplacer, 1), '[\n "A(1)",\n "A(1)"\n]')
     arktest.assertEQ(JSON.stringify(ar, replacer), '[{},null]')
 
-    const reverser = (key: string, value: NullishType): NullishType =>
+    const reverser = (key: string, value: Any): Any =>
             Array.isArray(value) ? Array.from(value as FixedArray<Object>).reverse() : value
 
     arktest.assertEQ(JSON.stringify([new A(1), new A(2)] as FixedArray<A>, reverser), '[{"id":2,"name":"A"},{"id":1,"name":"A"}]')
@@ -149,7 +149,7 @@ function jsonStringifyArrayWithFunctionReplacer(): void {
 const EMPTY_ARRAY: FixedArray<string> = []
 
 function jsonStringifyWithArrayReplacer(): void {
-    const rec: Record<string, NullishType> = { 'id': 1, 'name': 'R' }
+    const rec: Record<string, Any> = { 'id': 1, 'name': 'R' }
     arktest.assertEQ(JSON.stringify(new A(), EMPTY_ARRAY), '{}')
     arktest.assertEQ(JSON.stringify(rec, EMPTY_ARRAY), '{}')
     arktest.assertEQ(JSON.stringify(new A(), ['id']), '{"id":1}')
@@ -174,16 +174,16 @@ function jsonStringifyWithArrayReplacer(): void {
 
 function jsonStringifyWithNullReplacer(): void {
     arktest.assertEQ(JSON.stringify(new A(), null), '{"id":1,"name":"A"}')
-    const rec: Record<string, NullishType> = { 'id': 1, 'name': 'R' }
+    const rec: Record<string, Any> = { 'id': 1, 'name': 'R' }
     arktest.assertEQ(JSON.stringify(rec, null), '{"id":1,"name":"R"}')
     arktest.assertEQ(JSON.stringify(new E(), null, '  '), '{}')
-    const emptyRec: Record<string, NullishType> = {}
+    const emptyRec: Record<string, Any> = {}
     arktest.assertEQ(JSON.stringify(emptyRec, null, '  '), '{}')
 }
 
 function jsonStringifyWithUndefinedReplacer(): void {
     arktest.assertEQ(JSON.stringify(new A(), undefined), '{"id":1,"name":"A"}')
-    const rec: Record<string, NullishType> = { 'id': 1, 'name': 'R' }
+    const rec: Record<string, Any> = { 'id': 1, 'name': 'R' }
     arktest.assertEQ(JSON.stringify(rec, undefined), '{"id":1,"name":"R"}')
 }
 

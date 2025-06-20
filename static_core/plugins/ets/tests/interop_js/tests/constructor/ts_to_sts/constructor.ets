@@ -133,7 +133,7 @@ function checkIIFEConstructor(): boolean {
 function checkIIFEConstructorUndefined(): boolean {
     const TSClass = IIFEConstructor(tsInt);
 
-    return TSClass as NullishType == undefined;
+    return TSClass as Any == undefined;
 }
 
 function checkCreateIIFEConstructorFromTs(): boolean {

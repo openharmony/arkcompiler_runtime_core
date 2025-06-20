@@ -50,7 +50,7 @@ class jscall {
     native static bigint$a(top: JSValue, qname: String, v0: JSValue): BigInt;
 
     native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
-    native static any$a$obj(top: JSValue, qname: String, v0: JSValue): NullishType;
+    native static any$a$obj(top: JSValue, qname: String, v0: JSValue): Any;
     native static any$b(top: JSValue, qname: String, v0: boolean): JSValue;
     native static any$n(top: JSValue, qname: String, v0: double): JSValue;
     native static any$s(top: JSValue, qname: String, v0: String): JSValue;
@@ -124,7 +124,7 @@ function testUndefined(): boolean {
 function testNull(): boolean {
     let v = JSRuntime.getNull();
     let r = "object:null";
-    if (jscall.any$a(jsvars.m, ".identity", v) as NullishType !== null) {
+    if (jscall.any$a(jsvars.m, ".identity", v) as Any !== null) {
         return false;
     }
     return r == vstringify(v);

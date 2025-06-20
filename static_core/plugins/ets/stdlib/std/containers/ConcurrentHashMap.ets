@@ -145,7 +145,7 @@ export namespace containers {
 
         private static readonly MIN_BUCKETS_COUNT = 8;
 
-        private getBucketIndex(k: NullishType): int {
+        private getBucketIndex(k: Any): int {
             if (k === null) {
                 return 0;
             }

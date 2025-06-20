@@ -159,7 +159,7 @@ function testUnion() {
 }
 
 class A implements Function {
-    unsafeCall(...r: FixedArray<NullishType>): NullishType { return null }
+    unsafeCall(...r: FixedArray<Any>): Any { return null }
     get name() {
         return "A";
     }

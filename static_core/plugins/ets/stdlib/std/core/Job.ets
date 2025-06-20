@@ -94,5 +94,5 @@ export final class CompletableJob<T> extends Job<T>
     }
 
     private native finishImpl<U>(value: U): void
-    private native failImpl(error: NullishType): void
+    private native failImpl(error: Any): void
 }

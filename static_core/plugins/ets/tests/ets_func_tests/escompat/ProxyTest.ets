@@ -54,7 +54,7 @@ class ObjProxyHandler extends proxy.DefaultProxyHandler<ObjWithProps> {
     setTrapped: boolean = false
     getIdTrapped: boolean = false
 
-    get(target: ObjWithProps, name: string): NullishType {
+    get(target: ObjWithProps, name: string): Any {
         this.getTrapped = true
 
         const value = super.get(target, name)
@@ -65,12 +65,12 @@ class ObjProxyHandler extends proxy.DefaultProxyHandler<ObjWithProps> {
         }
     }
 
-    set(target: ObjWithProps, name: string, value: NullishType): boolean {
+    set(target: ObjWithProps, name: string, value: Any): boolean {
         this.setTrapped = true
         return super.set(target, name, value)
     }
 
-    invoke(target: ObjWithProps, method: Method, args: FixedArray<NullishType>): NullishType {
+    invoke(target: ObjWithProps, method: Method, args: FixedArray<Any>): Any {
         const methodName = method.getName()
         if (methodName == "isNameSet") {
             return false
@@ -95,11 +95,11 @@ interface ProxyTest {
 }
 
 class interfaceProxyHandler<T extends Object> implements proxy.ProxyHandler<T>{
-    public get(target:T, name:string):NullishType {
+    public get(target:T, name:string):Any {
         return (reflect.Value.of(target) as ClassValue).getFieldByName(name).getData()
     }
 
-    public set(target:T, name:string, newValue:NullishType):boolean {
+    public set(target:T, name:string, newValue:Any):boolean {
         const targetValue = reflect.Value.of(target) as ClassValue
         const value = targetValue.getFieldByName(name).getData()
 
@@ -114,7 +114,7 @@ class interfaceProxyHandler<T extends Object> implements proxy.ProxyHandler<T>{
         return true
     }
 
-    public invoke(target:T, method:Method, args:FixedArray<NullishType>):NullishType {
+    public invoke(target:T, method:Method, args:FixedArray<Any>):Any {
         return method.invoke(target, args)
     }
 }

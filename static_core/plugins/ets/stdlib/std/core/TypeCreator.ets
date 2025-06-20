@@ -1240,8 +1240,8 @@ export final class CallableBodyFunction extends CallableBody {
  * Represents call to lambda with boxing all arguments
  */
 export final class CallableBodyErasedFunction extends CallableBody {
-    internal /* readonly */ body: (recv: NullishType, args: FixedArray<NullishType>) => NullishType
-    public constructor(m: (recv: NullishType, args: FixedArray<NullishType>) => NullishType) {
+    internal /* readonly */ body: (recv: Any, args: FixedArray<Any>) => Any
+    public constructor(m: (recv: Any, args: FixedArray<Any>) => Any) {
         super()
         this.body = m
     }

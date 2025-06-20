@@ -48,16 +48,16 @@ class Trash {
     }
 }
 
-function newUndefiningReviver(...keys: FixedArray<string>): (k: string, v: NullishType) => NullishType {
-    return (key: string, val: NullishType) => Array.from<string>(keys).indexOf(key) != -1 ? undefined : val
+function newUndefiningReviver(...keys: FixedArray<string>): (k: string, v: Any) => Any {
+    return (key: string, val: Any) => Array.from<string>(keys).indexOf(key) != -1 ? undefined : val
 }
 
-function newNullingReviver(...keys: FixedArray<string>): (k: string, v: NullishType) => NullishType {
-    return (key: string, val: NullishType) => Array.from<string>(keys).indexOf(key) != -1 ? null : val
+function newNullingReviver(...keys: FixedArray<string>): (k: string, v: Any) => Any {
+    return (key: string, val: Any) => Array.from<string>(keys).indexOf(key) != -1 ? null : val
 }
 
-function newReplacingReviver(replacements: Map<string, NullishType>): (k: string, v: NullishType) => NullishType {
-    return (key: string, val: NullishType) => {
+function newReplacingReviver(replacements: Map<string, Any>): (k: string, v: Any) => Any {
+    return (key: string, val: Any) => {
         if (replacements.has(key)) {
             return replacements.get(key)
         }
@@ -66,7 +66,7 @@ function newReplacingReviver(replacements: Map<string, NullishType>): (k: string
     }
 }
 
-function replacingReviver(key: string, val: NullishType): NullishType {
+function replacingReviver(key: string, val: Any): Any {
     if (key == "x") {
         return 10.0
     } else {
@@ -83,7 +83,7 @@ function jsonParseUsingUndefinedReviver(): int {
 
     arktest.assertEQ(point.x, parsedPoint.x)
     arktest.assertEQ(point.y, parsedPoint.y)
-    
+
     return RESULT_SUCCESS
 }
 
@@ -109,7 +109,7 @@ function jsonParseArrayUsingReviverWhichReturnsUndefined(): int {
 function jsonParseUsingReplacingReviver(): int {
     const NEW_X = 10.0
 
-    const replacements = new Map<string, NullishType>()
+    const replacements = new Map<string, Any>()
     replacements.set("x", NEW_X)
 
     const point = new Point(3, 4)
@@ -139,7 +139,7 @@ function jsonParseUsingReplacingReviver(): int {
 function jsonParseArrayWithReplacingReviver(): int {
     const romans: FixedArray<Nullish<string>> = ["I", "II"]
 
-    const replacements = new Map<string, NullishType>()
+    const replacements = new Map<string, Any>()
 
     const replacedRomans: FixedArray<Nullish<string>> = ["I"]
     replacements.set("", replacedRomans)
@@ -152,7 +152,7 @@ function jsonParseArrayWithReplacingReviver(): int {
 
 enum Color {
     Black = 0,
-    Red = 1, 
+    Red = 1,
     Green = 2
 }
 

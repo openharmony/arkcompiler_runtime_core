@@ -133,7 +133,7 @@ export final class AsyncLock {
         this.unlock(asyncLockInfo); });
     }
 
-    private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
+    private static launchPromise<T>(f: Function, ...args: FixedArray<Any>): Promise<T> {
         let resolver: (((v: T | PromiseLike<T>) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;
         let p = new Promise<T>((res, rej) => {

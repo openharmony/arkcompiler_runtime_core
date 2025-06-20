@@ -100,7 +100,7 @@ function testPendingPromise(): int {
     p.then<void>((): void => {
         globalTest!.fail();
     });
-    p.catch<void>((error: NullishType): void => {
+    p.catch<void>((error: Any): void => {
         globalTest!.fail();
     });
     // Check callback are not called inside 'then' and 'catch'
@@ -122,7 +122,7 @@ function testResolvedPromise(): int {
         }
         return null;
     });
-    p.catch<Object | null>((err: NullishType): Object | null => {
+    p.catch<Object | null>((err: Any): Object | null => {
         globalTest!.fail();
         return null;
     });
@@ -279,7 +279,7 @@ function testResolvePromiseThenFinally(): int {
         } else {
             globalTest!.fail();
         }
-    }, (error: NullishType): void => {
+    }, (error: Any): void => {
         globalTest!.fail();
     });
     p1.finally((): void => {

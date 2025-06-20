@@ -51,7 +51,7 @@ function testReturnThisAsString(): boolean {
 }
 
 function testReturnThisAsNull(): boolean {
-    return getThis.call(TEST_NULL) as NullishType == TEST_NULL
+    return getThis.call(TEST_NULL) as Any == TEST_NULL
 }
 
 function testReturnThisAsMap(): boolean {
@@ -92,7 +92,7 @@ function testReturnThisAsAsyncFunc(): boolean {
         testVal = value;
         return null;
     });
-    p.catch<string | null>((err: NullishType): string | null => {
+    p.catch<string | null>((err: Any): string | null => {
         return null;
     });
     return testVal == TEST_STRING;

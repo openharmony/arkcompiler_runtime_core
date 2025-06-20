@@ -125,7 +125,7 @@ function jsonStringifyMapWithEntries(): void {
 }
 
 function jsonStringifyRecord(): void {
-    let record: Record<string | number, NullishType> = {}
+    let record: Record<string | number, Any> = {}
     record["name"] = "arkts";
     record["version"] = 1;
 
@@ -142,13 +142,13 @@ function jsonStringifyRecord(): void {
 }
 
 function jsonStringifyRecordWithSpace(): void {
-    const rec: Record<string, NullishType> = { 'name': 'Rec', 'version': 2 }
+    const rec: Record<string, Any> = { 'name': 'Rec', 'version': 2 }
     const recJson = JSON.stringify(rec, undefined, ' ')
     arktest.assertEQ(recJson, '{\n "name": "Rec",\n "version": 2\n}')
 }
 
 function jsonStringifyRecordWithUndefinedValue(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record["name"] = "arkts";
     record["version"] = 1.0;
     record["ignore"] = undefined;
@@ -163,17 +163,17 @@ function jsonStringifyRecordWithUndefinedValue(): void {
 }
 
 function jsonStringifyRecordWithUndefinedValueWithSpace(): void {
-    const record: Record<string, NullishType> = { 'name': 'arkts', 'version': 1, 'ignore': undefined }
+    const record: Record<string, Any> = { 'name': 'arkts', 'version': 1, 'ignore': undefined }
     const recordJson = JSON.stringify(record, undefined, ' ')
     arktest.assertEQ(recordJson, '{\n "name": "arkts",\n "version": 1\n}')
 }
 
 function jsonStringifyNestedRecord(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record["name"] = "arkts";
     record["version"] = 1.0;
 
-    const nestedRecord: Record<string, NullishType> = new Record<string, NullishType>();
+    const nestedRecord: Record<string, Any> = new Record<string, Any>();
     nestedRecord["inner"] = record;
     nestedRecord["desc"] = new String("nested");
 
@@ -190,8 +190,8 @@ function jsonStringifyNestedRecord(): void {
 }
 
 function jsonStringifyNestedRecordWithSpace(): void {
-    const record: Record<string, NullishType> = { 'name': 'arkts', 'version': 1}
-    const nestedRecord: Record<string, NullishType> = { 'desc': 'nested' }
+    const record: Record<string, Any> = { 'name': 'arkts', 'version': 1}
+    const nestedRecord: Record<string, Any> = { 'desc': 'nested' }
     record['nested'] = nestedRecord
 
     const recordJson = JSON.stringify(record, undefined, ' ')
@@ -199,7 +199,7 @@ function jsonStringifyNestedRecordWithSpace(): void {
 }
 
 function jsonStringifyRecordWithClassInstance(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record["TestClass"] = new TestClass('Test');
 
     let jsonStr = JSON.stringify(record);
@@ -214,13 +214,13 @@ function jsonStringifyRecordWithClassInstance(): void {
 
 function jsonStringifyRecordWithClassInstanceWithSpace(): void {
     // CC-OFFNXT(G.NAM.03) implementation feature
-    const record: Record<string, NullishType> = { 'TestClass': new TestClass('Test') }
+    const record: Record<string, Any> = { 'TestClass': new TestClass('Test') }
     const recordJson = JSON.stringify(record, undefined, ' ')
     arktest.assertEQ(recordJson, '{\n "TestClass": {\n  "value": "Test"\n }\n}')
 }
 
 function jsonStringifyRecordWithArray(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record['list'] = new Array<Number>(1, 2, 3);
 
     let jsonStr = JSON.stringify(record);
@@ -237,12 +237,12 @@ function jsonStringifyRecordWithArray(): void {
 }
 
 function jsonStringifyRecordWithArrayWithSpace(): void {
-    const record: Record<string, NullishType> = { 'list': [1, 2, 3] }
+    const record: Record<string, Any> = { 'list': [1, 2, 3] }
     arktest.assertEQ(JSON.stringify(record, undefined, ' '), '{\n "list": [\n  1,\n  2,\n  3\n ]\n}')
 }
 
 function jsonStringifyRecordWithNull(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record['nullable'] = null;
 
     let jsonStr = JSON.stringify(record);
@@ -254,7 +254,7 @@ function jsonStringifyRecordWithNull(): void {
 }
 
 function jsonStringifyRecordWithNullWithSpace(): void {
-    const record: Record<string, NullishType> = { 'nullable': null }
+    const record: Record<string, Any> = { 'nullable': null }
     arktest.assertEQ(JSON.stringify(record, undefined, ' '), '{\n "nullable": null\n}')
 }
 
@@ -281,7 +281,7 @@ function jsonStringifyRecordWithSameValue(): void {
 
 function jsonStringifyNestedMap(): void {
     const map = new Map<string, Object>();
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string, Any> = new Record<string, Any>();
     record["name"] = "arkts";
     map.set("nested", record);
 
@@ -289,7 +289,7 @@ function jsonStringifyNestedMap(): void {
 }
 
 function jsonStringifyCyclicRecord(): void {
-    const cycleRecord = new Record<string, NullishType>();
+    const cycleRecord = new Record<string, Any>();
     cycleRecord["self"] = cycleRecord;
     try {
         JSON.stringify(cycleRecord);
