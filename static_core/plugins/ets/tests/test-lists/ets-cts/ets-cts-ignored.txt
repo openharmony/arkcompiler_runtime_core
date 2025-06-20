@@ -721,28 +721,6 @@
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_1.ets
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_2.ets
 
-# 46 TypeError: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type.
-07.expressions/33.constant_expression/check_enum/constant_calculation_25.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_28.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_29.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_30.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_31.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_32.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_33.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_34.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_12.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_6.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_11.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_12.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_6.ets
-
 # 47 'VERIFIER_FAIL: [TID 000c96] E/verifier: Verifier error 8: Bad array element type3
 17.experimental_features/02.fixed_array_types/far3_6.ets
 

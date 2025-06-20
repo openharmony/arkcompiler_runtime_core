@@ -42,15 +42,14 @@ cases:
   - { type: long, value: 50006, sign: '+', expected: 50016 }
   - { type: long, value: 50006, sign: '-', expected: 49996 }
 
-  - { type: float, value: 123.2f, sign: '*', expected: 1232  }
-  - { type: float, value: 123.2f, sign: '/', expected: 12    }
-  - { type: float, value: 123.2f, sign: '%', expected: 3     }
-  - { type: float, value: 123.2f, sign: '+', expected: 133   }
-  - { type: float, value: 123.2f, sign: '-', expected: 113   }
+  - { type: float, value: 123.2f, sign: '*', expected: 1232, neg: 'compile-only, negative'  }
+  - { type: float, value: 123.2f, sign: '/', expected: 12, neg: 'compile-only, negative'    }
+  - { type: float, value: 123.2f, sign: '%', expected: 3 , neg: 'compile-only, negative'    }
+  - { type: float, value: 123.2f, sign: '+', expected: 133, neg: 'compile-only, negative'   }
+  - { type: float, value: 123.2f, sign: '-', expected: 113, neg: 'compile-only, negative'   }
 
-  - { type: number, value: 5051.9, sign: '*', expected: 50519  }
-  - { type: number, value: 5051.9, sign: '/', expected: 505    }
-  - { type: number, value: 5051.9, sign: '%', expected: 1      }
-  - { type: number, value: 5051.9, sign: '+', expected: 5061   }
-  - { type: number, value: 5051.9, sign: '-', expected: 5041   }
-      
+  - { type: number, value: 5051.9, sign: '*', expected: 50519, neg: 'compile-only, negative'  }
+  - { type: number, value: 5051.9, sign: '/', expected: 505, neg: 'compile-only, negative'    }
+  - { type: number, value: 5051.9, sign: '%', expected: 1, neg: 'compile-only, negative'      }
+  - { type: number, value: 5051.9, sign: '+', expected: 5061, neg: 'compile-only, negative'   }
+  - { type: number, value: 5051.9, sign: '-', expected: 5041, neg: 'compile-only, negative'   }

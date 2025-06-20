@@ -17,6 +17,7 @@
 /*---
 desc: 
     Constant expression with number conversion as enum initializer.
+tags: [{{c.neg}}]
 ---*/
 
 const testValue: {{c.type}} = {{c.value}}

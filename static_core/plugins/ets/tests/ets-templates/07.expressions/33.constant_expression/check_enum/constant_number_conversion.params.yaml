@@ -17,6 +17,7 @@ cases:
   - { type: int,   value: c'p',   expected: 112   }
   - { type: int,    value: 3000,   expected: 3000  }
   - { type: long,   value: 50000,  expected: 50000 }
-  - { type: float,  value: 120.2f, expected: 120   }
-  - { type: number, value: 5050.9, expected: 5050  }
+  - { type: float,  value: 120.2f, expected: 120, neg: 'compile-only, negative'   }
+  - { type: number, value: 5050.9, expected: 5050, neg: 'compile-only, negative'  }
+
       
