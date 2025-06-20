@@ -128,6 +128,53 @@ function taskExecuteDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
+function getDelayedTaskInfoTest(): void {
+    const taskName = "testDelayedtaskInfo"
+    let task = new taskpool.Task(taskName, longFunc, 50);
+    let p = taskpool.executeDelayed(100, task);
+
+    let taskpoolInfo = taskpool.getTaskPoolInfo();
+    let state = -1;
+    for (const taskInfo of taskpoolInfo.taskInfos) {
+        if (taskInfo.name === taskName) {
+            state = taskInfo.state;
+        }
+    }
+    assertEQ(taskpool.State.DELAYED as int, state);
+
+    assertEQ(await p, "success");
+
+    taskpoolInfo = taskpool.getTaskPoolInfo();
+    let delayedExists = true;
+    for (const taskInfo of taskpoolInfo.taskInfos) {
+        if (taskInfo.name === taskName && taskInfo.state === taskpool.State.DELAYED) {
+            delayedExists = false;
+        }
+    }
+    assertTrue(delayedExists);
+}
+
+function getDelayedTaskInfoWithCancelTest(): void {
+    const taskName = "testDelayedCanceltaskInfo"
+    let task = new taskpool.Task(taskName, longFunc, 50);
+    let p = taskpool.executeDelayed(100, task);
+
+    taskpool.cancel(task);
+
+    let taskpoolInfo = taskpool.getTaskPoolInfo();
+    let state = -1;
+    for (const taskInfo of taskpoolInfo.taskInfos) {
+        if (taskInfo.name === taskName) {
+            state = taskInfo.state;
+        }
+    }
+    assertEQ(taskpool.State.CANCELED as int, state);
+
+    expectError(() => {
+        await p;
+    }, new Error("taskpool:: task has been canceled"));
+}
+
 let verifyCount = 0;
 function verifySendDataRes(a:int):void{
     arktest.assertEQ(a, 10)
@@ -829,6 +876,8 @@ function main(): int {
         arktest.assertNE(task2.totalDuration, 0);
     });
     commonTaskSuite.addTest("TaskExecuteDelayedTest", taskExecuteDelayedTest);
+    commonTaskSuite.addTest("getDelayedTaskInfoTest", getDelayedTaskInfoTest);
+    commonTaskSuite.addTest("getDelayedTaskInfoWithCancelTest", getDelayedTaskInfoWithCancelTest);
     commonTaskSuite.addTest("TaskExecutePeriodicallyTest", taskExecutePeriodicallyTest);
     commonTaskSuite.addTest("TaskWithDependencyExecutePeriodicallyTest", taskWithDependencyExecutePeriodicallyTest);
     commonTaskSuite.addTest("TaskOnReceiveDataTest", taskOnReceiveData);
