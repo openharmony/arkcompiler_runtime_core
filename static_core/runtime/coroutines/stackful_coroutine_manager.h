@@ -241,6 +241,15 @@ private:
     void MigrateCoroutinesInward(uint32_t &count);
     StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, size_t maskValue) REQUIRES(workersLock_);
 
+    /**
+     * @brief Calculate worker limits based on configuration
+     * @param config The coroutine manager configuration
+     * @param exclusiveWorkersLimit Output parameter for exclusive workers limit
+     * @param commonWorkersLimit Output parameter for common workers limit
+     */
+    void CalculateWorkerLimits(const CoroutineManagerConfig &config, size_t &exclusiveWorkersLimit,
+                               size_t &commonWorkersLimit);
+
     // for thread safety with GC
     mutable os::memory::Mutex coroListLock_;
     // all registered coros
