@@ -91,7 +91,7 @@ size_t SharedReferenceStorageVerifier::CheckJEtsObjectAlive(const SharedReferenc
 {
     size_t failCount = 0;
     ObjectHeader *obj = item->GetEtsObject()->GetCoreType();
-    if (item->GetCtx()->GetPandaEtsVM()->GetHeapManager()->IsLiveObject(obj)) {
+    if (!item->GetCtx()->GetPandaEtsVM()->GetHeapManager()->IsLiveObject(obj)) {
         LOG_REF_VERIFIER << "Shared reference corruption found! ETS object address does not alive at " << std::hex
                          << item << "," << index;
         failCount++;
@@ -183,11 +183,6 @@ size_t SharedReferenceStorageVerifier::CheckJsObjectType(const SharedReference *
 {
     size_t failCount = 0;
     if (!CheckJsObjectTypeIsJsXref(item)) {
-        LOG_REF_VERIFIER << "Shared Reference corruption found! Js Type is not JSType::JS_XREF_OBJECT at " << std::hex
-                         << item << "," << index;
-        failCount++;
-    }
-    if (CheckJsObjectTypeIsJsXref(item)) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! Js Type is not JSType::JS_XREF_OBJECT at " << std::hex
                          << item << "," << index;
         failCount++;
