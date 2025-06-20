@@ -825,7 +825,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int8Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toByte())
+                const mapped = result.zeroIfInfinity((mapfn)!(x.value!, i));
+                result.setUnsafe(i, mapped.toByte());
             }
             return result
         }
@@ -845,7 +846,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int8Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toByte())
+            const val = temp.zeroIfInfinity((mapfn)!(x, index[0]));
+            temp.setUnsafe(index[0], val.toByte());
             index[0]++
         })
         return new Int8Array(temp.buffer, 0, index[0])
@@ -867,8 +869,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toByte()))
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0].toDouble());
+            const safe = res.zeroIfInfinity(mapped);
+            res.setUnsafe(idx[0], safe.toByte());
+            idx[0]++;
         })
         return res
     }
@@ -2572,7 +2576,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int16Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toShort())
+                const mapped = result.zeroIfInfinity((mapfn)!(x.value!, i));
+                result.setUnsafe(i, mapped.toShort());
             }
             return result
         }
@@ -2592,7 +2597,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int16Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toShort())
+            const val = temp.zeroIfInfinity((mapfn)!(x, index[0]));
+            temp.setUnsafe(index[0], val.toShort());
             index[0]++
         })
         return new Int16Array(temp.buffer, 0, index[0])
@@ -2614,8 +2620,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toShort()))
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0].toDouble());
+            const safe = res.zeroIfInfinity(mapped);
+            res.setUnsafe(idx[0], safe.toShort());
+            idx[0]++;
         })
         return res
     }
@@ -4297,7 +4305,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Int32Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).toInt())
+                const mapped = result.zeroIfInfinity((mapfn)!(x.value!, i));
+                result.setUnsafe(i, mapped.toInt());
             }
             return result
         }
@@ -4317,7 +4326,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int32Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).toInt())
+            const val = temp.zeroIfInfinity((mapfn)!(x, index[0]));
+            temp.setUnsafe(index[0], val.toInt());
             index[0]++
         })
         return new Int32Array(temp.buffer, 0, index[0])
@@ -4339,8 +4349,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()).toInt()))
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0].toDouble());
+            const safe = res.zeroIfInfinity(mapped);
+            res.setUnsafe(idx[0], safe.toInt());
+            idx[0]++;
         })
         return res
     }
@@ -6046,7 +6058,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 if (x.done) {
                     return new BigInt64Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, (mapfn)!(x.value!, i).getLong())
+                const mapped = (mapfn)!(x.value!, i);
+                result.setUnsafe(i, mapped.getLong());
             }
             return result
         }
@@ -6066,7 +6079,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 }
                 temp = new BigInt64Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).getLong())
+            const val = (mapfn)!(x, index[0]);
+            temp.setUnsafe(index[0], val.getLong());
             index[0]++
         })
         return new BigInt64Array(temp.buffer, 0, index[0])
@@ -6088,8 +6102,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).getLong())
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0]);
+            res.setUnsafe(idx[0], mapped.getLong());
+            idx[0]++;
         })
         return res
     }
@@ -7765,7 +7780,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Float32Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, (mapfn)!(x.value!, i).toFloat())
+                const mapped = (mapfn)!(x.value!, i);
+                result.setUnsafe(i, mapped.toFloat());
             }
             return result
         }
@@ -7785,7 +7801,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float32Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).toFloat())
+            const val = (mapfn)!(x, index[0]);
+            temp.setUnsafe(index[0], val.toFloat());
             index[0]++
         })
         return new Float32Array(temp.buffer, 0, index[0])
@@ -7807,8 +7824,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).toFloat())
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0]);
+            res.setUnsafe(idx[0], mapped.toFloat());
+            idx[0]++;
         })
         return res
     }
@@ -9390,7 +9408,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 if (x.done) {
                     return new Float64Array(result.buffer, 0, i)
                 }
-                result.setUnsafe(i, (mapfn)!(x.value!, i).toDouble())
+                const mapped = (mapfn)!(x.value!, i);
+                result.setUnsafe(i, mapped.toDouble());
             }
             return result
         }
@@ -9410,7 +9429,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float64Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).toDouble())
+            const val = (mapfn)!(x, index[0]);
+            temp.setUnsafe(index[0], val.toDouble());
             index[0]++
         })
         return new Float64Array(temp.buffer, 0, index[0])
@@ -9432,8 +9452,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            res.setUnsafe(idx[0], mapfn(x as T, idx[0]).toDouble())
-            idx[0] += 1
+            const mapped = mapfn(x as T, idx[0]);
+            res.setUnsafe(idx[0], mapped.toDouble());
+            idx[0]++;
         })
         return res
     }

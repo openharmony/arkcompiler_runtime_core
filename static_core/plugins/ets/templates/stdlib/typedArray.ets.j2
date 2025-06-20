@@ -969,9 +969,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                     return new {{N}}Array(result.buffer, 0, i)
                 }
                 {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)){{fromElementCompat}})
+                const mapped = result.zeroIfInfinity((mapfn)!(x.value!, i));
+                result.setUnsafe(i, mapped{{fromElementCompat}});
                 {%- else %}
-                result.setUnsafe(i, (mapfn)!(x.value!, i){{fromElementCompat}})
+                const mapped = (mapfn)!(x.value!, i);
+                result.setUnsafe(i, mapped{{fromElementCompat}});
                 {%- endif %}
             }
             return result
@@ -993,9 +995,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 temp = new {{N}}Array(tb)
             }
             {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])){{fromElementCompat}})
+            const val = temp.zeroIfInfinity((mapfn)!(x, index[0]));
+            temp.setUnsafe(index[0], val{{fromElementCompat}});
             {%- else %}
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0]){{fromElementCompat}})
+            const val = (mapfn)!(x, index[0]);
+            temp.setUnsafe(index[0], val{{fromElementCompat}});
             {%- endif %}
             index[0]++
         })
@@ -1019,11 +1023,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-            res.setUnsafe(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble()){{fromElementCompat}}))
+            const mapped = mapfn(x as T, idx[0].toDouble());
+            const safe = res.zeroIfInfinity(mapped);
+            res.setUnsafe(idx[0], safe{{fromElementCompat}});
             {%- else %}
-            res.setUnsafe(idx[0], mapfn(x as T, idx[0]){{fromElementCompat}})
+            const mapped = mapfn(x as T, idx[0]);
+            res.setUnsafe(idx[0], mapped{{fromElementCompat}});
             {%- endif %}
-            idx[0] += 1
+            idx[0]++;
         })
         return res
     }
