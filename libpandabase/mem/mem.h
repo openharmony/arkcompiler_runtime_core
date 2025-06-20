@@ -66,8 +66,9 @@ enum Alignment {
     LOG_ALIGN_11 = 11,
     LOG_ALIGN_12 = 12,
     LOG_ALIGN_13 = 13,
+    LOG_ALIGN_14 = 14,
     LOG_ALIGN_MIN = LOG_ALIGN_2,
-    LOG_ALIGN_MAX = LOG_ALIGN_13,
+    LOG_ALIGN_MAX = LOG_ALIGN_14,
 };
 
 /**
