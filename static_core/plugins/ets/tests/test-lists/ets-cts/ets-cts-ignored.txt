@@ -419,6 +419,9 @@
 08.statements/11.continue_statements/continue_for_of3l.ets
 08.statements/11.continue_statements/continue_for_of5l.ets
 
+#27010
+08.statements/15.try_statements/01.catch_clauses/catch_2.ets
+
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
 
