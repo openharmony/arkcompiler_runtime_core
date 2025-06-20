@@ -17,36 +17,44 @@
 import os
 import unittest
 from pathlib import Path
+from typing import ClassVar
+from unittest.mock import patch
 
 from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
-from runner.test.config_test import data_test_suite0
+from runner.test.config_test.data import data_test_suite0
 
 
 class TestSuiteConfigTest0(unittest.TestCase):
-    current_folder = os.path.dirname(__file__)
+    test_environ: ClassVar[dict[str, str]] = {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
+        'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
+        'PANDA_BUILD': Path.cwd().as_posix(),
+        'WORK_DIR': Path.cwd().as_posix()
+    }
     args = data_test_suite0.args
 
-    def setUp(self) -> None:
-        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
-        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
-        os.environ["WORK_DIR"] = "."
-        os.environ["PANDA_BUILD"] = "."
-        self.general = GeneralOptions(self.args, IOptions())
-        self.test_suite = TestSuiteOptions(self.args, self.general)
-        self.workflow = WorkflowOptions(cfg_content=self.args, parent_test_suite=self.test_suite)
+    def prepare_test(self) -> tuple[TestSuiteOptions, WorkflowOptions]:
+        general = GeneralOptions(self.args, IOptions())
+        test_suite = TestSuiteOptions(self.args, general)
+        workflow = WorkflowOptions(cfg_content=self.args, parent_test_suite=test_suite)
+        return test_suite, workflow
 
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_loaded_steps(self) -> None:
-        self.assertEqual(len(self.workflow.steps), 1)
+        _, workflow = self.prepare_test()
+        self.assertEqual(len(workflow.steps), 1)
         self.assertSetEqual(
-            {step.name for step in self.workflow.steps},
+            {step.name for step in workflow.steps},
             {'echo'}
         )
 
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_echo_step(self) -> None:
-        echo = [step for step in self.workflow.steps if step.name == 'echo']
+        _, workflow = self.prepare_test()
+        echo = [step for step in workflow.steps if step.name == 'echo']
         self.assertEqual(len(echo), 1, "Step 'es2panda' not found")
         step = echo[0]
         self.assertEqual(str(step.executable_path), "/usr/bin/echo")
@@ -60,10 +68,12 @@ class TestSuiteConfigTest0(unittest.TestCase):
             "${test-id}"
         })
 
+    @patch.dict(os.environ, test_environ, clear=True)
     def test_test_suite(self) -> None:
-        self.assertEqual(self.test_suite.suite_name, "test_suite")
-        self.assertEqual(self.test_suite.test_root, Path.cwd().resolve())
-        self.assertEqual(self.test_suite.list_root, Path.cwd().resolve())
-        self.assertEqual(self.test_suite.extension(), "sts")
-        self.assertEqual(self.test_suite.load_runtimes(), "ets")
-        self.assertEqual(self.test_suite.work_dir, ".")
+        test_suite, _ = self.prepare_test()
+        self.assertEqual(test_suite.suite_name, "test_suite")
+        self.assertEqual(test_suite.test_root, Path.cwd().resolve())
+        self.assertEqual(test_suite.list_root, Path.cwd().resolve())
+        self.assertEqual(test_suite.extension(), "sts")
+        self.assertEqual(test_suite.load_runtimes(), "ets")
+        self.assertEqual(test_suite.work_dir, ".")
