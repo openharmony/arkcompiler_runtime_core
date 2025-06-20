@@ -781,6 +781,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreStringEquals
+    irtoc_impl: StringEqualsCompressedNativePlus
     codegen_func: CreateStringEquals
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringEquals
@@ -887,6 +888,7 @@ intrinsics:
       ret: i32
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringIndexOf
+    irtoc_impl: StringIndexOfNativePlus
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOf
     llvm_codegen_func: EmitStringIndexOf
@@ -901,6 +903,7 @@ intrinsics:
       ret: i32
       args: [u16, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
+    irtoc_impl: StringIndexOfAfterNativePlus
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOfAfter
     llvm_codegen_func: EmitStringIndexOfAfter
@@ -953,6 +956,24 @@ intrinsics:
       ret: i32
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
+
+#  Not yet clear if we have to retain the dedicated hashcode implementation
+#  for Strings as an intrinsic, will clear this out in the follow up patch
+#  Now just make sure it works as intended wrt finalized Object.$_hashCode
+#  - name: StdCoreStringHashCode
+#    space: ets
+#    class_name: std.core.String
+#    method_name: $_hashCode
+#    static: false
+#    signature:
+#      ret: i32
+#      args: [ ]
+#    impl: ark::ets::intrinsics::StdCoreStringHashCode
+#    irtoc_impl: StringHashCodeCompressedNativePlus
+#    codegen_func: CreateStringHashCode
+#    codegen_arch: [arm64, amd64]
+#    llvm_codegen_func: EmitStringHashCode
+#    safe_intrinsic: true
 
   - name: StdCoreStringIsCompressed
     space: ets
@@ -1021,6 +1042,7 @@ intrinsics:
     llvm_codegen_func: EmitStringCompareTo
     codegen_arch: [arm64, amd64]
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
+    irtoc_impl: StringCompareToNativePlus
     need_param_locations: true
     safe_intrinsic: true
 
@@ -1072,6 +1094,7 @@ intrinsics:
       ret: u1
       args: [ std.core.String, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringStartsWith
+    irtoc_impl: StringStartsWithNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringStartsWith
     llvm_codegen_func: EmitStringStartsWith
@@ -1085,6 +1108,7 @@ intrinsics:
       ret: u1
       args: [ std.core.String, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringEndsWith
+    irtoc_impl: StringEndsWithNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringEndsWith
     llvm_codegen_func: EmitStringEndsWith
@@ -4317,6 +4341,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreBoolCopyTo
+    irtoc_impl: ArrayCopyTo1BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4336,6 +4361,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreCharCopyTo
+    irtoc_impl: ArrayCopyTo2BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4355,6 +4381,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreByteCopyTo
+    irtoc_impl: ArrayCopyTo1BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4374,6 +4401,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreShortCopyTo
+    irtoc_impl: ArrayCopyTo2BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4393,6 +4421,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreIntCopyTo
+    irtoc_impl: ArrayCopyTo4BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4412,6 +4441,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreLongCopyTo
+    irtoc_impl: ArrayCopyTo8BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4431,6 +4461,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreFloatCopyTo
+    irtoc_impl: ArrayCopyTo4BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4450,6 +4481,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreDoubleCopyTo
+    irtoc_impl: ArrayCopyTo8BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -6719,6 +6751,7 @@ intrinsics:
       ret: u1
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharIsWhiteSpace
+    irtoc_impl: CharIsWhiteSpaceNativePlus
     safe_intrinsic: true
     codegen_arch: [arm64, amd64]
     codegen_func: CreateCharIsWhiteSpace
@@ -8663,6 +8696,7 @@ intrinsics:
       ret: std.core.Object
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatMapGet
+    irtoc_impl: MapGetNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateMapGet
     llvm_codegen_func: EmitMapGet
@@ -8676,6 +8710,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatMapHas
+    irtoc_impl: MapHasNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateMapHas
     llvm_codegen_func: EmitMapHas
@@ -8689,6 +8724,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatMapDelete
+    irtoc_impl: MapDeleteNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateMapDelete
     llvm_codegen_func: EmitMapDelete
@@ -8705,6 +8741,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatSetHas
+    irtoc_impl: SetHasNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSetHas
     llvm_codegen_func: EmitSetHas
@@ -8718,6 +8755,7 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatSetDelete
+    irtoc_impl: SetDeleteNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSetDelete
     llvm_codegen_func: EmitSetDelete

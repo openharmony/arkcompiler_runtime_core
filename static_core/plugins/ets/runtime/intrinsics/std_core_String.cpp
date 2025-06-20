@@ -527,16 +527,8 @@ EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str
 
 EtsInt StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
 {
-    /* corner cases */
-    if (str1->GetLength() == 0) {
-        return -str2->GetLength();
-    }
-    if (str2->GetLength() == 0) {
-        return str1->GetLength();
-    }
-
-    /* use the default implementation otherwise */
-    return str1->Compare(str2);
+    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return str1->GetCoreType()->Compare(str2->GetCoreType(), ctx);
 }
 
 EtsString *StdCoreStringTrimLeft(EtsString *thisStr)

@@ -111,13 +111,16 @@ public:
     DECLARE_GRAPH_MODE(InterpreterEntry);
     // Graph will be compiled for abckit
     DECLARE_GRAPH_MODE(AbcKit);
+    // Declare an interpreter mode to use by the IrToc
+    DECLARE_GRAPH_MODE(NativePlus);
 
 #undef DECLARE_GRAPH_MODE
 #undef DECLARE_GRAPH_MODE_MODIFIERS
 
     bool SupportManagedCode() const
     {
-        return !IsNative() && !IsFastPath() && !IsBoundary() && !IsInterpreter() && !IsInterpreterEntry();
+        return !IsNative() && !IsFastPath() && !IsBoundary() && !IsInterpreter() && !IsInterpreterEntry() &&
+               !IsNativePlus();
     }
 
     void Dump(std::ostream &stm);
@@ -133,6 +136,7 @@ private:
     using FlagInterpreter = FlagBoundary::NextFlag;
     using FlagInterpreterEntry = FlagInterpreter::NextFlag;
     using FlagAbcKit = FlagInterpreterEntry::NextFlag;
+    using FlagNativePlus = FlagAbcKit::NextFlag;
 
     uint32_t value_ {0};
 

@@ -491,6 +491,7 @@ public:
     void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
     void GenerateNativePrologue(const FrameInfo &frameInfo) override;
     void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
@@ -503,6 +504,9 @@ public:
     // Calculating information about parameters and save regs_offset registers for special needs
     ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
     asmjit::x86::Assembler *GetMasm();
+
+private:
+    void GenerateEpilogueImpl(const FrameInfo &frameInfo, const std::function<void()> &postJob);
 };  // Amd64CallingConvention
 }  // namespace ark::compiler::amd64
 

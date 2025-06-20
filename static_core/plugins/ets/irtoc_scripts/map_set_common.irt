@@ -418,17 +418,20 @@ end
 
 ################################################################
 
-scoped_macro(:processMapHas) do |map, key|
+scoped_macro(:processMapHas) do |map, key, mode|
   findOffset(map, key, "Return(0).b")
   Return(1).b
-
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("MAP_HAS_USUAL")
-  Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapHasUsualBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if mode == :NativePlus
+    Return(Call(map, key).Method('EtsEscompatMapHas').b).b
+  else
+    entrypoint = get_entrypoint_offset("MAP_HAS_USUAL")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapHasUsualBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 end
 
-scoped_macro(:processMapGet) do |map, key|
+scoped_macro(:processMapGet) do |map, key, mode|
   offset := findOffset(map, key, "Return(nullptr).ptr")
 
   entry := Load(buck_data, offset).ref
@@ -436,13 +439,17 @@ scoped_macro(:processMapGet) do |map, key|
   Return(object).ptr
 
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("MAP_GET_USUAL")
-  Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapGetUsualBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if mode == :NativePlus
+    Return(Call(map, key).Method('EtsEscompatMapGet').b).b
+  else
+    entrypoint = get_entrypoint_offset("MAP_GET_USUAL")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapGetUsualBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 end
 
 
-scoped_macro(:processMapDelete) do |map, key|
+scoped_macro(:processMapDelete) do |map, key, mode|
   offset := findOffset(map, key, "Return(0).b")
 
   entry := Load(buck_data, offset).ref
@@ -466,7 +473,11 @@ scoped_macro(:processMapDelete) do |map, key|
   Return(1).b
 
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("MAP_DELETE_USUAL")
-  Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapDeleteUsualBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if mode == :NativePlus
+    Return(Call(map, key).Method('EtsEscompatMapDelete').b).b
+  else
+    entrypoint = get_entrypoint_offset("MAP_DELETE_USUAL")
+    Intrinsic(:SLOW_PATH_ENTRY, map, key).AddImm(entrypoint).MethodAsImm("MapDeleteUsualBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 end

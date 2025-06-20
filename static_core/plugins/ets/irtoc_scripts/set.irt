@@ -14,32 +14,44 @@
 
 include_relative 'map_set_common.irt'
 
-function(:SetHasIrToc,
-        params: {set: 'ref', key: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateSetHas(cgmode)
+  prefix = (cgmode == :NativePlus ?  'NativePlus' : '')
+  function("SetHas#{prefix}".to_sym,
+          params: {set: 'ref', key: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  map := LoadI(set).Imm(MapConstants::SET_ELEMENTS_OFFSET).ref
-  processMapHas(map, key)
+    map := LoadI(set).Imm(MapConstants::SET_ELEMENTS_OFFSET).ref
+    processMapHas(map, key, cgmode)
 }
+end          
 
-function(:SetDeleteIrToc,
-        params: {set: 'ref', key: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateSetDelete(cgmode)
+  prefix = (cgmode == :NativePlus ?  'NativePlus' : '')
+  function("SetDelete#{prefix}".to_sym,
+          params: {set: 'ref', key: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).Terminator.void
-    next
-  end
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
 
-  map := LoadI(set).Imm(MapConstants::SET_ELEMENTS_OFFSET).ref
-  processMapDelete(map, key)
+    map := LoadI(set).Imm(MapConstants::SET_ELEMENTS_OFFSET).ref
+    processMapDelete(map, key, cgmode)
 }
+end
+
+GenerateSetHas(:FastPath)
+GenerateSetHas(:NativePlus)
+GenerateSetDelete(:FastPath)
+GenerateSetDelete(:NativePlus)
+

@@ -212,7 +212,7 @@ function(:CharIsWhiteSpace,
           params: {ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -628,7 +628,7 @@ function(:StringStartsWithBase,
           params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -663,12 +663,14 @@ Label(:Done)
   Return(1).b
 }
 
-
-function(:StringStartsWith,
-          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringStartsWith(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringStartsWith#{suffix}".to_sym,
+           params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -708,23 +710,38 @@ function(:StringStartsWith,
     Return(0).b
   }
 
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(pfx).DstReg(regmap[:arg1]).ref
-  LiveOut(from_index2).DstReg(regmap[:arg2]).i32
-  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase").Terminator.b
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    LiveOut(pfx).DstReg(regmap[:arg2]).ref
+    LiveOut(from_index2).DstReg(regmap[:arg3]).i32
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(pfx).DstReg(regmap[:arg1]).ref
+    LiveOut(from_index2).DstReg(regmap[:arg2]).i32
+  end
+  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE#{upsuffix}")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase#{suffix}").Terminator.b
+
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str, pfx, from_index).Method("StdCoreStringStartsWith").b).b
+  else
+    entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringStartsWith(:FastPath)
+GenerateStringStartsWith(:NativePlus)
 
 
 function(:StringEndsWithBase,
           params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -761,12 +778,14 @@ Label(:Done)
   Return(1).b
 }
 
-
-function(:StringEndsWith,
-          params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringEndsWith(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringEndsWith#{suffix}".to_sym,
+           params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -809,16 +828,31 @@ function(:StringEndsWith,
     Return(0).b
   }
 
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(sfx).DstReg(regmap[:arg1]).ref
-  LiveOut(end_index2).DstReg(regmap[:arg2]).i32
-  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    LiveOut(sfx).DstReg(regmap[:arg2]).ref
+    LiveOut(end_index2).DstReg(regmap[:arg3]).i32
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(sfx).DstReg(regmap[:arg1]).ref
+    LiveOut(end_index2).DstReg(regmap[:arg2]).i32
+  end
+  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE#{upsuffix}")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase#{suffix}").Terminator.b
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str, sfx, end_index).Method("StdCoreStringEndsWith").b).b
+  else
+    entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringEndsWith(:FastPath)
+GenerateStringEndsWith(:NativePlus)
+
 
 function(:StringGetBytesTlab,
         params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
@@ -1179,7 +1213,7 @@ function(:StringIndexOfCompressedSmall,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1206,7 +1240,7 @@ function(:StringIndexOfCompressedMedium,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1245,7 +1279,7 @@ function(:StringIndexOfCompressedLarge,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1277,7 +1311,7 @@ function(:StringIndexOfCompressed,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1333,7 +1367,7 @@ function(:StringIndexOfUncompressedSmall,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1361,7 +1395,7 @@ function(:StringIndexOfUncompressedMedium,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1393,7 +1427,7 @@ function(:StringIndexOfUncompressed,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1442,12 +1476,14 @@ Label(:Loop)
   Return(-1).i32
 }
 
-
-function(:StringIndexOf,
-          params: {str: 'ref', ch: 'u16', fake: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_regs,
-          mode: [:FastPath]) {
+def GenerateStringIndexOf(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringIndexOf#{suffix}".to_sym,
+            params: {str: 'ref', ch: 'u16', fake: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1473,23 +1509,38 @@ function(:StringIndexOf,
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
-        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
+        name = "StringIndexOfUncompressedSmall#{suffix}"
+        if cgmode == :NativePlus
+          Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+        else
+          entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL#{upsuffix}")
+          Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+        end
     }
     # 16 <= data size < 32
     If(str_data_size_u16, 32).LT.Unlikely.b {
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
-        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
+        name = "StringIndexOfUncompressedMedium#{suffix}"
+        if cgmode == :NativePlus
+          Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+        else
+          entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM#{upsuffix}")
+          Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+        end
     }
     # 32 <= data size
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
+    name = "StringIndexOfUncompressed#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1502,37 +1553,64 @@ function(:StringIndexOf,
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
+    name = "StringIndexOfCompressedSmall#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 8 <= data size < 16
   If(str_data_size_u8, 16).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
+    name = "StringIndexOfCompressed#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 16 <= data size < 32
   If(str_data_size_u8, 32).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
+    name = "StringIndexOfCompressedLarge#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 32 <= data size
   LiveOut(str_data).DstReg(regmap[:arg0]).ptr
   LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+  name = "StringIndexOfCompressed#{suffix}"
+  if cgmode == :NativePlus
+    Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED#{upsuffix}")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, ch).AddImm(entrypoint).MethodAsImm("StringIndexOf3ArgBridge").Terminator.i32
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+      Return(Call(str, ch).Method("StdCoreStringIndexOf").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, ch, fake).AddImm(entrypoint).MethodAsImm("StringIndexOfOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
 
+GenerateStringIndexOf(:FastPath)
+GenerateStringIndexOf(:NativePlus)
 
 # 'IndexOfAfter' calls the corresponding functions from the 'IndexOf' family
 # for the purpose of code efficiency and to avoid code duplication.
@@ -1540,16 +1618,29 @@ Label(:SlowPathEntrypoint)
 # never returns to 'StringIndexOfAfter' because of TAIL_CALL. So the codegen and libllvm
 # take care of it and emit instructions adding 'start_index' to the result returned
 # by 'StringIndexOfAfter'.
-function(:StringIndexOfAfter,
-          params: {str: 'ref', ch: 'u16', start_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringIndexOfAfter(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringIndexOfAfter#{suffix}".to_sym,
+            params: {str: 'ref', ch: 'u16', start_index: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
+  end
+
+  # make any negative index zero only for Native mode as
+  # the codegen takes care of it if the mode is FastPath
+  if cgmode == :NativePlus
+    start_index0 := start_index
+    IfImm(Compare(start_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+      start_index1 := 0
+    }
+    start_index := Phi(start_index0, start_index1).i32
   end
 
   check_string_type(str)
@@ -1579,23 +1670,50 @@ function(:StringIndexOfAfter,
       LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
-      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
+      name = "StringIndexOfUncompressedSmall#{suffix}"
+      if cgmode == :NativePlus
+        rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+        If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+        }
+        Return(Phi(rc0, rc1).i32).i32
+      else
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL#{upsuffix}")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+      end
     }
     # 16 <= data size < 32
     If(data_size_u16, 32).LT.Unlikely.b {
       LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
-      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
+      name = "StringIndexOfUncompressedMedium#{suffix}"
+      if cgmode == :NativePlus
+        rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+        If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+        }
+        Return(Phi(rc0, rc1).i32).i32
+      else
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM#{upsuffix}")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+      end
     }
     # 32 <= data size
     LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
+    name = "StringIndexOfUncompressed#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1610,36 +1728,81 @@ function(:StringIndexOfAfter,
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
+    name = "StringIndexOfCompressedSmall#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 8 <= data size < 16
   If(data_size_u8, 16).LT.Unlikely.b {
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
+    name = "StringIndexOfCompressedMedium#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 16 <= data size < 32
   If(data_size_u8, 32).LT.Unlikely.b {
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
+    name = "StringIndexOfCompressedLarge#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 32 <= data size
   LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
   LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+  name = "StringIndexOfCompressed#{suffix}"
+  if cgmode == :NativePlus
+    rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+    If(rc0, -1).NE.b {
+      rc1 := Add(rc0, start_index).i32
+    }
+    Return(Phi(rc0, rc1).i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED#{upsuffix}")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+      Return(Call(str, ch, start_index).Method("StdCoreStringIndexOfAfter").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringIndexOfAfter(:FastPath)
+GenerateStringIndexOfAfter(:NativePlus)
+
 
 function(:StringRepeatTlab,
         params: {str: 'ref', cnt: 'i32'},
