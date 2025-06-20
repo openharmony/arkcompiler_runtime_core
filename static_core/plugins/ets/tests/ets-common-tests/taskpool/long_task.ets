@@ -80,29 +80,32 @@ function executePeriodicallyTest(): void {
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
 }
 
+function executeTest() {
+    let task = new taskpool.LongTask(sumFunc);
+    let result = await taskpool.execute(task);
+    arktest.assertEQ(result, 30);
+}
+
+function doubleExecutionTest() {
+    let task = new taskpool.LongTask(sumFunc);
+    taskpool.execute(task);
+    arktest.expectError(() => { taskpool.execute(task) },
+                new Error("taskpool:: The long task can only be executed once"));
+}
+
+function longTaskWithParamsTest() {
+    let task = new taskpool.LongTask(sum, 100, 200);
+    let res = await taskpool.execute(task);
+    arktest.assertEQ(res, 300);
+}
+
 function main(): int {
-    let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
-    longTaskTestsuite.addTest("ExecuteTest", () =>
-    {
-        let task = new taskpool.LongTask(sumFunc);
-        let result = await taskpool.execute(task);
-        assertEQ(result, 30);
-    });
-    longTaskTestsuite.addTest("DoubleExecutionTest", (): void throws =>
-    {
-        let task = new taskpool.LongTask(sumFunc);
-        taskpool.execute(task);
-        expectError(() => { taskpool.execute(task) },
-                    new Error("taskpool:: The long task can only be executed once"));
-    });
-    longTaskTestsuite.addTest("LongTaskWithParamsTest", (): void throws =>
-    {
-        let task = new taskpool.LongTask(sum, 100, 200);
-        let res = await taskpool.execute(task);
-        assertEQ(res, 300);
-    });
+    let longTaskTestsuite = new arktest.ArkTestsuite("taskpool.LongTask");
     longTaskTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
     longTaskTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
+    longTaskTestsuite.addTest("ExecuteTest", executeTest);
+    longTaskTestsuite.addTest("DoubleExecutionTest", doubleExecutionTest);
+    longTaskTestsuite.addTest("LongTaskWithParamsTest", longTaskWithParamsTest);
     let res = longTaskTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
