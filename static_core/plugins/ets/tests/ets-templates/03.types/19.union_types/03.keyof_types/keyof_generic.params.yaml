@@ -14,10 +14,9 @@
 cases:
   - decl: |-
       class A<T> {}
-      let n: never
     check: |-
-      type t = keyof A<Number>
-      let a: t = n
+      let a: number|keyof A<Number>
+      arktest.assertEQ(typeof a, 'number')
 
   - decl: |-
       class A<T,V> {

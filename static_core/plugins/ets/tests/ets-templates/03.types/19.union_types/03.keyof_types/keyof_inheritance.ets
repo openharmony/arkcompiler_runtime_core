@@ -19,6 +19,7 @@
 desc: >-
     The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
     The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
+tags: {{case.tags}}
 ---*/
 
 {{case.decl|indent}}

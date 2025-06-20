@@ -546,14 +546,6 @@ std/serialization/std_serialization_json_stringify_char_array.ets
 std/serialization/std_serialization_json_stringify_int_array.ets
 std/serialization/std_serialization_json_stringify_long_array.ets
 std/serialization/std_serialization_json_stringify_short_array.ets
-std/core/std_core_string_String_charCodeAt_int.ets
-std/core/std_core_string_String_getLength.ets
-std/core/std_core_string_String_indexOf_String_int.ets
-std/core/std_core_string_String_indexOf_String_number.ets
-std/core/std_core_string_String_indexOf_char_int.ets
-std/core/std_core_string_String_lastIndexOf_String_int.ets
-std/core/std_core_string_String_lastIndexOf_char_int.ets
-std/core/std_core_string_String_search_String.ets
 std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
