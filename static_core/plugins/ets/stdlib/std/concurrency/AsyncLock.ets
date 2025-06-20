@@ -34,7 +34,7 @@ export final class AsyncLock {
 
     internal constructor(name: string) {
         this.name = name;
-        asyncLockManager.locks.set(name, this);
+        asyncLockManager.setElem(this);
     }
 
     /**
@@ -90,16 +90,14 @@ export final class AsyncLock {
     public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
         let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
-
-        let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options); }
+        let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options, asyncLockInfo); }
         if (this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
-            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, asyncLockInfo, options); }
+            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, options,  asyncLockInfo); }
         } else {
             ConcurrencyHelpers.mutexLock(this.mutex);
             this.pending.add(asyncLockInfo);
             ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
-
         return AsyncLock.launchPromise(wrapped, this);
     }
 
@@ -111,12 +109,12 @@ export final class AsyncLock {
                 this.held.add(asyncLockInfo);
                 this.holderCID = callerCID;
                 this.mode = mode;
+                this.event = ConcurrencyHelpers.eventCreate();
                 return true;
             }
-            if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED && this.holderCID == callerCID) {
+            if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
                 this.counter++;
                 this.held.add(asyncLockInfo);
-                this.holderCID = callerCID;
                 this.mode = mode;
                 return true;
             }
@@ -126,11 +124,13 @@ export final class AsyncLock {
         }
     }
 
-    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>) : Promise<T> {
-        if (options.signal != null && options.signal!.aborted == true) {
-            throw new Error("Aborted");
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<T> {
+        return Promise.resolve<T>(callback()).finally(() => {
+            if (options.signal != null && options.signal!.aborted == true ) {
+            this.fireCondEvent();
+            throw new Error('Aborted');
         }
-        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
+        this.unlock(asyncLockInfo); });
     }
 
     private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
@@ -152,10 +152,15 @@ export final class AsyncLock {
         return p;
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : Promise<T> {
-        let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
-        this.lock<U>(callerCID, mode, asyncLockInfo, options);
-        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<T> {
+
+        this.lock<U>(callerCID, mode,  asyncLockInfo, options);
+        return Promise.resolve<T>(callback()).finally(() => {if (options.signal != null && options.signal!.aborted == true ) {
+            this.fireCondEvent();
+            throw new Error('Aborted');
+        }
+            this.unlock(asyncLockInfo); 
+        });
     }
 
     private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
@@ -165,29 +170,31 @@ export final class AsyncLock {
 
         if (timeout) {
            setTimeout(() => {
+                 this.fireCondEvent();
                isTimeoutExec = true;
            }, timeout);
         }
 
         while (isDone == false) {
-            if (options.signal != null && options.signal!.aborted == true) {
-                throw new Error("Aborted");
-            }
 
+             if (options.signal != null && options.signal!.aborted == true) {
+                 this.fireCondEvent();
+                 throw new Error('Aborted');
+            }
             if(isTimeoutExec == true) {
-                throw new Error("AsyncLock timeout");
+                throw new Error('AsyncLock timeout');
             }
            
             ConcurrencyHelpers.mutexLock(this.mutex);
-
             if (this.holderCID == 0) {
                 this.holderCID = callerCID;
                 this.mode = mode;
                 this.counter = 1;
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
+                this.event = ConcurrencyHelpers.eventCreate();
                 isDone = true;
-            } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED && this.holderCID == callerCID) {
+            } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
                 this.counter++;
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
@@ -198,12 +205,17 @@ export final class AsyncLock {
 
             if (isDone == false) {
                 if (options.isAvailable) {
-                    throw new Error("AsyncLock is not available");
+                    throw new Error('AsyncLock is not available');
                 } else {
-                    Coroutine.Schedule();
+                    ConcurrencyHelpers.eventWait(this.event)
                 }
             }
-        }
+        } 
+    }
+
+    private fireCondEvent()
+    {
+        ConcurrencyHelpers.eventFire(this.event);
     }
 
     private unlock(asyncLockInfo: AsyncLockInfo): void {
@@ -213,6 +225,7 @@ export final class AsyncLock {
         if (this.counter == 0) {
             this.holderCID = 0;
             this.mode = AsyncLockMode.UNLOCKED;
+            this.fireCondEvent();
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
@@ -264,4 +277,5 @@ export final class AsyncLock {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
+    private event: Object = ConcurrencyHelpers.eventCreate();
 }

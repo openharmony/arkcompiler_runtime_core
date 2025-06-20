@@ -142,12 +142,106 @@ asyncLockAppTestsuite.addTest("disarmTimeoutTest", () => {
      arktest.assertTrue(disarmTimeoutTest());
 });
 
+asyncLockAppTestsuite.addTest("abortTest", () => {
+     arktest.assertTrue(abortTest());
+});
+
+asyncLockAppTestsuite.addTest("deadLockTest", () => {
+    arktest.assertTrue(deadlockTest())
+})
+
+asyncLockAppTestsuite.addTest("nestedDeadLockTest", () => {
+    arktest.assertTrue(nestedDeadlockTest())
+})
+
+asyncLockAppTestsuite.addTest("twoLocksSingleTest", () => {
+    arktest.assertTrue(twoLocksSingleTest())
+})
+
+asyncLockAppTestsuite.addTest("twoThreadsAcquireOwnLocks", () => {
+    arktest.assertTrue(twoThreadsAcquireOwnLocks())
+})
+
+asyncLockAppTestsuite.addTest("multipleWakeupTest", () => {
+    arktest.assertTrue(multipleWakeupTest())
+})
+
+asyncLockAppTestsuite.addTest("waitForLock", () => {
+    arktest.assertTrue(waitForLock())
+})
+
+asyncLockAppTestsuite.addTest("dontWaitForLock", () => {
+    arktest.assertTrue(dontWaitForLock())
+})
+
+asyncLockAppTestsuite.addTest("queryWithDeadlockTest", () => {
+    arktest.assertTrue(queryWithDeadlockTest())
+})
+
+asyncLockAppTestsuite.addTest("sequentialLock", () => {
+    arktest.assertTrue(sequentialLock())
+})
+
+asyncLockAppTestsuite.addTest("sequentialLockUnlocked1", () => {
+    arktest.assertTrue(sequentialLockUnlocked1())
+})
+
+asyncLockAppTestsuite.addTest("sequentialLockUnlocked3", () => {
+    arktest.assertTrue(sequentialLockUnlocked3())
+})
+
+asyncLockAppTestsuite.addTest("disarmTimeoutLongAwaitTest", () => {
+    arktest.assertTrue(disarmTimeoutLongAwaitTest())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceSharedSharedAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceSharedSharedAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceSharedSharedNotAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceSharedSharedNotAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceSharedExclusiveAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceSharedExclusiveAvailable())
+})
+
+ asyncLockAppTestsuite.addTest("acquireLockTwiceSharedExclusiveNotAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceSharedExclusiveNotAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceExclusiveSharedAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceExclusiveSharedAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceExclusiveSharedNotAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceExclusiveSharedNotAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceExclusiveExclusiveAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceExclusiveExclusiveAvailable())
+})
+
+asyncLockAppTestsuite.addTest("acquireLockTwiceExclusiveExclusiveNotAvailable", () => {
+    arktest.assertTrue(acquireLockTwiceExclusiveExclusiveNotAvailable())
+})
+
+asyncLockAppTestsuite.addTest("sequentialLockInf", () => {
+    arktest.assertTrue(sequentialLockInf())
+})
+
+asyncLockAppTestsuite.addTest("doubleExitSharedLock", () => {
+    arktest.assertTrue(doubleExitSharedLock())
+})
+
+
 async function applyLockJob(lockName: string, mode: AsyncLockMode, tidBuf: Uint32Array, tid: number): Promise<void> {
     let lock = AsyncLock.request(lockName);
     lock.lockAsync<void>(async () => {
         let old = Atomics.compareExchange(tidBuf, 0, 0, tid);
          arktest.assertEQ(old, 0, "Expected 0, but was: " + old);
-        await new Promise<void>((resolve: () => void): void => {setTimeout(resolve, 100)});
+        await new Promise<void>((resolve: () => void): void => {setTimeout( () => {
+            resolve()}, 100)});
         old = Atomics.compareExchange(tidBuf, 0, tid, 0);
          arktest.assertEQ(old, tid, "Expected old=" + tid + ", but was: " + old);
     }, mode);
@@ -192,7 +286,7 @@ function queryTest2() {
          arktest.assertEQ(pending.length, 0, 'Test failed: expected pending.length=0, but was ' + pending.length);
         let held: AsyncLockInfo[] = state.held;
          arktest.assertEQ(held.length, 1, 'Test failed: expected held.length=1, but was ' + held.length);
-         arktest.assertNE(held[0].name, lockName, 'Test failed');
+         arktest.assertEQ(held[0].name, lockName, 'Test failed');
     }, AsyncLockMode.EXCLUSIVE);
     return p;
 }
@@ -289,6 +383,9 @@ function asynclockStateTest4() {
     arktest.assertTrue(res,'Test failed, the res expected true.');
 }
 
+function assertasyncLockQueryTest() {
+    arktest.expectNoThrow(() => { queryTest2(); });
+}
 function assertasynclockStateTest1() {
     arktest.expectNoThrow(() => { asynclockStateTest1(); });
 }
@@ -340,7 +437,7 @@ function deadlockTest() {
     }, AsyncLockMode.EXCLUSIVE, options);
     // setTimeout is needed to force event loop to process AsyncLock's timer
     setTimeout(() => {
-    }, (options.timeout as int));
+    }, (options.timeout.toInt()));
     return check_negative(p, "deadlockTest");
 }
 
@@ -359,7 +456,7 @@ function nestedDeadlockTest() {
     }, AsyncLockMode.EXCLUSIVE, options);
     // setTimeout is needed to force event loop to process AsyncLock's timer
     setTimeout(() => {
-    }, (options.timeout as int));
+    }, (options.timeout.toInt()));
     return check_negative(p, "nestedDeadlockTest");
 }
 
@@ -411,12 +508,12 @@ async function lockJob(lockName: string, flagBuf: Uint32Array): Promise<void> {
     let lock = AsyncLock.request(lockName);
     lock.lockAsync<void>(async () => {
         Atomics.compareExchange(flagBuf, 0, 0, 1);
-        await new Promise<void>((resolve: () => void): void => {setTimeout(resolve, 100)});
+        await new Promise<void>((resolve: () => void): void => {setTimeout( () => {resolve()}, 100)});
         Atomics.compareExchange(flagBuf, 0, 1, 0);
     }, AsyncLockMode.SHARED);
 }
 
-async function multipleWakeupTest() {
+function multipleWakeupTest() {
     let lockName = "multipleWakeupLock";
     let sab = new ArrayBuffer(4);
     let flagBuf = new Uint32Array(sab);
@@ -482,10 +579,11 @@ function queryWithDeadlockTest() {
 
 async function lockHolderJob(lockName: string, timeout: number, flagBuf: Uint32Array): Promise<void> {
     let lock = AsyncLock.request(lockName);
-    lock.lockAsync<void>(async () => {
+    return lock.lockAsync<void>(async () => {
         Atomics.compareExchange(flagBuf, 0, 0, 1);
-        await new Promise<void>((resolve: () => void): void => {setTimeout(resolve, 100)});
+        await new Promise<void>((resolve: (val : int ) => void): void => {setTimeout(() => {resolve(10)}, timeout)});
     }, AsyncLockMode.EXCLUSIVE);
+    
 }
 
 function sequentialLock() {
@@ -495,7 +593,8 @@ function sequentialLock() {
     flagBuf[0] = 0;
     // NOTE(mredkin): #23718 signatures needed
     // taskpool.execute(lockHolderJob, lockNameB, 100, flagBuf);
-    let p = new Promise<void>((resolve: () => void, reject: (e: Error) => void): void => {
+    launch(lockHolderJob, lockNameB, 100, flagBuf)
+    let p = new Promise<void>((resolve: (v : int) => void, reject: (e: Error) => void): void => {
         let lockA = new AsyncLock();
         lockA.lockAsync(() => {
             // busy loop
@@ -505,7 +604,7 @@ function sequentialLock() {
             lockB.lockAsync(() => {
                 let old = Atomics.load(flagBuf, 0);
                 if (old == 2) {
-                    resolve();
+                    resolve(123);
                 } else {
                     reject(new Error("Expected 2, but was: " + old));
                 }
@@ -526,7 +625,8 @@ function sequentialLockInf() {
     flagBuf[0] = 0;
     // NOTE(mredkin): #23718 signatures needed
     // taskpool.execute(lockHolderJob, lockNameB, 1000, flagBuf);
-    let p = new Promise<void>((resolve: () => void, reject: (e: Error) => void): void => {
+    launch(lockHolderJob, lockNameB, 1000, flagBuf);
+    let p = new Promise<void>((resolve: (v :int) => void, reject: (e: Error) => void): void => {
         let lockA = new AsyncLock();
         lockA.lockAsync(() => {
             // busy loop
@@ -541,7 +641,7 @@ function sequentialLockInf() {
             });
             let old = Atomics.compareExchange(flagBuf, 0, 1, 2);
             if (old == 1) {
-                resolve();
+                resolve(123);
             } else {
                 reject(new Error("Expected 1, but was: " + old));
             }
@@ -567,7 +667,7 @@ function sequentialLockUnlocked() {
 }
 
 function sequentialLockUnlocked1() {
-    let p = new Promise<void>((resolve: () => void, reject: (e: Error) => void): void => {
+    let p = new Promise<void>((resolve: (v :int) => void, reject: (e: Error) => void): void => {
         let lockA = new AsyncLock();
         lockA.lockAsync<void>(/*F1*/ async () => {
             let lockB = new AsyncLock();
@@ -576,7 +676,7 @@ function sequentialLockUnlocked1() {
                     return 42.0
                 }, AsyncLockMode.SHARED);
                 if (res == 42) {
-                    resolve();
+                    resolve(123);
                 } else {
                     reject(new Error("Test failed. Expected 42, but was " + res));
                 }
@@ -587,7 +687,7 @@ function sequentialLockUnlocked1() {
 }
 
 function sequentialLockUnlocked3() {
-    let p = new Promise<void>((resolve: () => void, reject: (e: Error) => void): void => {
+    let p = new Promise<void>((resolve: (v :int) => void, reject: (e: Error) => void): void => {
         let lockA = new AsyncLock();
         lockA.lockAsync<void>(/*F1*/ async () => {
             let lockB = new AsyncLock();
@@ -595,9 +695,9 @@ function sequentialLockUnlocked3() {
                 let p1 = lockA.lockAsync<number>(/*F3*/ () => {
                     return 42
                 }, AsyncLockMode.EXCLUSIVE);
-                p1.then((v: int): void => {
+                p1.then((v: number): void => {
                     if (v == 42) {
-                        resolve();
+                        resolve(123);
                     } else {
                         reject(new Error("Expected 42, but was " + v));
                     }
@@ -627,7 +727,7 @@ function disarmTimeoutLongAwaitTest() {
     let options = new AsyncLockOptions<void>();
     options.timeout = 500;
     let p: Promise<void> = lock.lockAsync<void, void>(async () => {
-        await new Promise<number>((resolve: (a: int) => void, reject: (e: Error) => void): void => {
+        await new Promise<number>((resolve : (a : number) => void, reject : (e :Error) => void): void =>  {
             setTimeout(() => {
                 resolve(123);
             }, 1500);
@@ -639,12 +739,12 @@ function disarmTimeoutLongAwaitTest() {
 function acquireLockTwiceSuccess(outerMode: AsyncLockMode, innerMode: AsyncLockMode,
                                  isAvailable: boolean): Promise<void> {
     let lock = new AsyncLock();
-    return new Promise<void>((resolve: () => void): void => {
+    return new Promise<void>((resolve: (v : int) => void): void => {
         let innerOptions = new AsyncLockOptions<void>();
         innerOptions.isAvailable = isAvailable;
         lock.lockAsync<void>(() => {
             lock.lockAsync<void, void>(() => {
-                resolve();
+                resolve(123);
             }, innerMode, innerOptions);
         }, outerMode);
     });
@@ -661,15 +761,15 @@ function acquireLockTwiceSharedSharedNotAvailable() {
 function acquireLockTwiceReject(outerMode: AsyncLockMode, innerMode: AsyncLockMode,
                                 isAvailable: boolean): Promise<void> {
     let lock = new AsyncLock();
-    return new Promise<void>((resolve: () => void, reject: (e: Error) => void): void => {
+    return new Promise<void>((resolve: (v : int) => void, reject: (e: Error) => void): void => {
         let innerOptions = new AsyncLockOptions<void>();
         innerOptions.isAvailable = isAvailable;
         lock.lockAsync((): void => {
-            lock.lockAsync(() => {
+             await  lock.lockAsync(() => {
             }, innerMode, innerOptions).then((): void => {
                 reject(new Error("Test failed"));
             }, (e: Error): void => {
-                resolve()
+                resolve(123)
             });
         }, outerMode);
     });
@@ -704,7 +804,7 @@ async function mainExecutor(index: number, flagBuf: Uint32Array, timeout: number
     await lock.lockAsync(async () => {
         flagBuf[index] = 1;
          arktest.assertEQ(flagBuf[2], 0, "Unexpected set flag at 2");
-        await new Promise<void>((resolve: () => void): void => setTimeout(resolve, timeout as int));
+        await new Promise<void>((resolve: (v : int) => void): void => setTimeout(() => {resolve(123)}, timeout.toInt()));
         flagBuf[index] = 0;
     }, AsyncLockMode.SHARED);
 }
@@ -715,7 +815,7 @@ async function taskExecutor(flagBuf: Uint32Array, timeout: number) {
         flagBuf[2] = 1;
          arktest.assertEQ(flagBuf[0], 0, "Unexpected set flag at 0");
          arktest.assertEQ(flagBuf[1], 0, "Unexpected set flag at 1");
-        await new Promise<void>((resolve: () => void): void => setTimeout(resolve, timeout as int));
+        await new Promise<void>((resolve: (v : int) => void): void => setTimeout(() => {resolve(123)}, timeout.toInt()));
         flagBuf[2] = 0;
     }, AsyncLockMode.EXCLUSIVE);
 }
@@ -731,6 +831,7 @@ function doubleExitSharedLock() {
         mainExecutor(1, flagBuf, 300),
         // NOTE(mredkin): #23718 signatures needed
         // taskpool.execute(taskExecutor, flagBuf, 100),
+        launch(taskExecutor, flagBuf, 100),
     ]), "doubleExitSharedLock");
 }
 
@@ -753,8 +854,11 @@ function main(): int {
     asyncLockTestsuite.addTest('asynclockStateTest4', assertasynclockStateTest4);
     asyncLockTestsuite.addTest('asynclockabortTest', () => { arktest.assertTrue(abortTest()); });
     
+    asyncLockTestsuite.addTest('assertasyncLockQueryTest',assertasyncLockQueryTest); 
+
+
     let summ = 0;
     summ += asyncLockTestsuite.run();
     summ += asyncLockAppTestsuite.run();
-    return summ;
+    return summ
 }
