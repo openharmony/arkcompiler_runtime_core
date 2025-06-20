@@ -12,3 +12,16 @@ ets-common-tests/exporting-ambient-decl/main.ets
 
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
+
+# 26776
+ets-common-tests/atomics/base_operator_add.ets
+ets-common-tests/atomics/base_operator_and.ets
+ets-common-tests/atomics/base_operator_bigint.ets
+ets-common-tests/atomics/base_operator_biguint.ets
+ets-common-tests/atomics/base_operator_compare_exchange.ets
+ets-common-tests/atomics/base_operator_exchange.ets
+ets-common-tests/atomics/base_operator_load.ets
+ets-common-tests/atomics/base_operator_or.ets
+ets-common-tests/atomics/base_operator_store.ets
+ets-common-tests/atomics/base_operator_sub.ets
+ets-common-tests/atomics/base_operator_xor.ets

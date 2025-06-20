@@ -360,7 +360,7 @@ public:
     }
     ClassType GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndBitwiseXorImpl(index, val, byteOffset);
+        return GetAndBitwiseAndImpl(index, val, byteOffset);
     }
     ClassType GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, ClassType val)
     {
