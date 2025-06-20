@@ -96,7 +96,7 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
 template void InstBuilder::BuildLdObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 template void InstBuilder::BuildLdObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
-std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
+static std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
 {
     switch (type) {
         case DataType::REFERENCE:
