@@ -2420,9 +2420,3 @@ export class JSONNull extends JSONValue {
         return JSONNull.value
     }
 }
-
-export interface JSONable<T> {
-    createFromJSONValue(json: JSONValue): T {
-        throw new JSONTypeError("createFromJSONValue was not overrided")
-    }
-}

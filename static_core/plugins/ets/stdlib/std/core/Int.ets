@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed int value and related operations
  */
-export final class Int extends Integral implements Comparable<Int>, JSONable<Int> {
+export final class Int extends Integral implements Comparable<Int> {
     private value: int;
 
     /**
@@ -411,24 +411,5 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      */
     public isGreaterEqualThan(other: Int): boolean {
         return this.value >= other.toInt();
-    }
-
-    /**
-     * Creates a Int instance based on JSONValue
-     *
-     * @param json: JSONValue - a JSON representation
-     *
-     * @throws JSONTypeError if json does not encode a valid int
-     *
-     * @returns Int - int value decoded from JSON
-     */
-    public createFromJSONValue(json: JSONValue): Int {
-        if (json instanceof JSONNumber) {
-            let num = (json as JSONNumber).value
-            if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
-                return Int.valueOf(Double.toInt(num))
-            }
-        }
-        throw new JSONTypeError("Cannot create Int from JSON", new ErrorOptions(json as Object))
     }
 }
