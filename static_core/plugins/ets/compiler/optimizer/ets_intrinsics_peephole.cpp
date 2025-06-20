@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -108,7 +109,8 @@ Inst *GetStringFromLength(Inst *inst)
             return nullptr;
         }
         auto input1 = inst->GetInput(1).GetInst();
-        if (!input1->IsConst() || input1->CastToConstant()->GetRawValue() != 1) {
+        if (!input1->IsConst() ||
+            input1->CastToConstant()->GetRawValue() != ark::coretypes::String::STRING_LENGTH_SHIFT) {
             return nullptr;
         }
         lenArray = inst->GetInput(0).GetInst();

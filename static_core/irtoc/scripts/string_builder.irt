@@ -140,7 +140,7 @@ def GenerateStringBuilderString(compression)
 
         if compression
             utf16 := AndI(length).Imm(1).u32
-            length := ShrI(length).Imm(1).u32
+            length := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32
         end
 
         # do not do compressed string unpacking

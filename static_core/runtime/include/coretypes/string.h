@@ -29,6 +29,8 @@ namespace ark::coretypes {
 class Array;
 class String : public ObjectHeader {
 public:
+    static constexpr uint32_t STRING_LENGTH_SHIFT = 2U;
+
     static String *Cast(ObjectHeader *object)
     {
         // NOTE(linxiang) to do assert
@@ -246,7 +248,7 @@ public:
     {
         uint32_t length;
         if (compressedStringsEnabled_) {
-            length = length_ >> 1U;
+            length = length_ >> STRING_LENGTH_SHIFT;
         } else {
             length = length_;
         }
@@ -363,9 +365,10 @@ protected:
     void SetLength(uint32_t length, bool compressed = false)
     {
         if (compressedStringsEnabled_) {
-            ASSERT(length < 0x80000000U);
+            ASSERT(length <= MAX_STRING_LENGTH);
             // Use 0u for compressed/utf8 expression
-            length_ = (length << 1U) | (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED);
+            length_ = (length << STRING_LENGTH_SHIFT) | (static_cast<uint32_t>(NON_INTERNED) << 1U) |
+                      (compressed ? STRING_COMPRESSED : STRING_UNCOMPRESSED);
         } else {
             length_ = length;
         }
@@ -385,9 +388,16 @@ protected:
 private:
     PANDA_PUBLIC_API static bool compressedStringsEnabled_;
     static constexpr uint32_t STRING_COMPRESSED_BIT = 0x1;
+    static constexpr uint32_t MAX_STRING_LENGTH = (1U << 30U) - 1U;  // reserve 30 free slots for length
+
     enum CompressedStatus {
         STRING_COMPRESSED,
         STRING_UNCOMPRESSED,
+    };
+
+    enum InternStatus {
+        NON_INTERNED,
+        INTERNED,
     };
 
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length);

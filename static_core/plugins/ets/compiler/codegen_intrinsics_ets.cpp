@@ -229,7 +229,7 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     enc->EncodeAdd(reg2, reg2, Imm(1));
     enc->EncodeStr(reg2, args.SbIndexAddr());
     // Unpack length of string
-    enc->EncodeShr(reg1, reg1, Imm(1));
+    enc->EncodeShr(reg1, reg1, Imm(ark::coretypes::String::STRING_LENGTH_SHIFT));
     // Add length of string to the current length of StringBuilder
     enc->EncodeLdr(reg2, false, args.SbLengthAddr());
     enc->EncodeAdd(reg2, reg2, reg1);

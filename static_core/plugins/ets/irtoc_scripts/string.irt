@@ -69,18 +69,18 @@ Label(:_L1)
     _new_str_data := Add(_new_str1, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     If(_compressable, 1).EQ.Likely.b {
       compress_u16_to_u8_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
-      StoreI(_new_str1, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      StoreI(_new_str1, ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       Goto(:_Fast_Substring_Result)
     }
     copy_u16_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
-    StoreI(_new_str1, OrI(ShlI(_char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(_new_str1, OrI(ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
     Goto(:_Fast_Substring_Result)
   }
   # Source string is already compressed
   _new_str2 := allocate_string_tlab(_klass, Cast(_char_count).word)
   _new_str_data2 := Add(_new_str2, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
   copy_u8_chars(_src_str_data, _new_str_data2, Cast(_char_count).u64)
-  StoreI(_new_str2, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  StoreI(_new_str2, ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
 Label(:_Fast_Substring_Result)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -273,7 +273,7 @@ function(:StringTrimLeftBase,
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := Cast(1).i32
   If(not_compressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
@@ -339,7 +339,7 @@ Label(:L1)
   If(ws, 0).EQ.Likely.b {
     Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
   }
-  If(ShrI(length_packed).Imm(1).i32, 1).EQ.Unlikely.b {
+  If(ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32, 1).EQ.Unlikely.b {
     LiveOut(str).DstReg(regmap[:arg0]).ref
     entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
@@ -365,7 +365,7 @@ function(:StringTrimRightBase,
   end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
@@ -424,7 +424,7 @@ function(:StringTrimRight,
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   last_char_index :=  SubI(length).Imm(1).i32
   If(not_compressed, 0).EQ.Likely.b {
     ws1 := is_white_space_u8(Load(str_data, last_char_index).u8)
@@ -462,7 +462,7 @@ function(:StringTrimBase,
   end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   left := 0
   right := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
@@ -539,7 +539,7 @@ function(:StringTrim,
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   not_compressed := AndI(length_packed).Imm(1).i32
-  length := ShrI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   # length == 1
   If(length, 1).EQ.b {
     If(not_compressed, 0).EQ.Likely.b {
@@ -624,7 +624,7 @@ function(:StringStartsWithBase,
   str_not_compressed := AndI(str_len_packed).Imm(1).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
   pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
@@ -680,8 +680,8 @@ function(:StringStartsWith,
   }
   from_index2 := Phi(from_index, from_index1).i32
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
-  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
+  pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
 
   If(from_index2, Sub(str_len, pfx_len).i32).GT.Unlikely.b {
     # Return 'false' in this case, as we know that 'pfx' is not empty
@@ -715,7 +715,7 @@ function(:StringEndsWithBase,
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   sfx_not_compressed := AndI(sfx_len_packed).Imm(1).i32
   sfx_data := Add(Cast(sfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  sfx_len := ShrI(sfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   from_index := Sub(end_index, sfx_len).i32;
 
   sfx_i1 := 0
@@ -769,14 +769,14 @@ function(:StringEndsWith,
     Return(0).b
   }
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   # If 'end_index' is greater than length of 'str' make it equal to length of 'str'.
   If(end_index, str_len).GT.Unlikely.b {
     end_index1 := str_len
   }
   end_index2 := Phi(end_index, end_index1).i32
 
-  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  sfx_len := ShrI(sfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   from_index := Sub(end_index2, sfx_len).i32;
   IfImm(Compare(from_index, 0).LT.b).Imm(0).NE.Unlikely.b {
     # Return 'false' in this case, as 'sfx' length is greater than 'end_index'.
@@ -813,7 +813,7 @@ function(:StringGetBytesTlab,
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
   uncompressed := AndI(length).Imm(1).u32;
-  length := ShrI(length).Imm(1).u32;
+  length := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32;
 
   If(Cast(end_index).u32, length).A.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
@@ -1042,10 +1042,10 @@ def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressible, 1).EQ.Likely {
         convert_char_codes_to_u8_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
@@ -1116,10 +1116,10 @@ def GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled)
     if string_compression_enabled
       If(compressible, 1).EQ.Likely {
         Store(str_data, Cast(0).u64, char).u8
-        StoreI(new_str, Cast(2).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, Cast(4).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       } Else {
         Store(str_data, Cast(0).u64, char).u16
-        StoreI(new_str, OrI(Cast(2).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        StoreI(new_str, OrI(Cast(4).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
       }
     else
       Store(str_data, Cast(0).u64, char).u16  
@@ -1431,7 +1431,7 @@ function(:StringIndexOf,
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
   IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
-    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
+    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFC).u32
     # 0 < data size < 16
     If(str_data_size_u16, 16).LT.Unlikely.b {
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
@@ -1460,7 +1460,7 @@ function(:StringIndexOf,
     Return(-1).i32
   }
 
-  str_data_size_u8 := ShrI(str_len_packed).Imm(1).u32
+  str_data_size_u8 := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
   # 0 < data size < 8
   If(str_data_size_u8, 8).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
@@ -1518,7 +1518,7 @@ function(:StringIndexOfAfter,
     Return(-1).i32
   }
 
-  str_len := ShrI(str_len_packed).Imm(1).i32
+  str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
 
   # Return '-1' if 'start_index' is out of range
   If(start_index, str_len).GE.Unlikely.b {
@@ -1625,8 +1625,10 @@ function(:StringRepeatTlab,
   klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   uncompressed := AndI(length).Imm(1).u32
-  length := Shl(ShrI(length).Imm(1).u32, uncompressed).u32
+  codes_count := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32
+  length := Shl(ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
   size := Mul(length, count).u32
+  codes_count := Mul(codes_count, count).u32
   new_str := allocate_string_tlab(klass, Cast(size).u64);
   new_buf := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
@@ -1656,11 +1658,11 @@ Label(:outer)
   Goto(:outer)
 
 Label(:End)
-  # shift left if it was a compressed string
-  # mark the (unset) lowest bit with uncompressed
-  compress := Neg(SubI(uncompressed).Imm(1).u32).u32
-  length := Or(Shl(size, compress).u32, uncompressed).u32
-  StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  If(uncompressed, 0).EQ.Likely {
+    StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  } Else {
+    StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  }
   Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
@@ -1683,7 +1685,7 @@ function(:WriteStringToMem,
   buf := Bitcast(mem).ptr
   len := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   utf16 := AndI(len).Imm(1).u32
-  len_0 := ShrI(len).Imm(1).u32
+  len_0 := ShrI(len).Imm(Constants::STRING_LENGTH_SHIFT).u32
   len := len_0
 
   If(len, 0).EQ.Unlikely.b {
@@ -1736,7 +1738,7 @@ function(:CreateStringFromMem,
   str := allocate_string_tlab_no_debug(klass, size)
   str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   copy_u8_chars(addr, str_data, size);
-  size_0 := ShlI(size).Imm(1).u32
+  size_0 := ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
   If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
     size_1 := OrI(ShrI(size_0).Imm(1).u32).Imm(1).u32

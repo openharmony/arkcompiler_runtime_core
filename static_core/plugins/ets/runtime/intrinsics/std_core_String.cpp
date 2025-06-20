@@ -485,29 +485,7 @@ EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
 /* the allocation routine to create an unitialized string of the given size */
 extern "C" EtsString *AllocateStringObject(size_t length, bool compressed)
 {
-    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto vm = Runtime::GetCurrent()->GetPandaVM();
-    ASSERT(vm != nullptr);
-    auto *stringClass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
-    size_t size =
-        compressed ? coretypes::String::ComputeSizeMUtf8(length) : coretypes::String::ComputeSizeUtf16(length);
-    auto string = reinterpret_cast<EtsString *>(vm->GetHeapManager()->AllocateObject(
-        stringClass, size, DEFAULT_ALIGNMENT, nullptr, mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
-    if (string != nullptr) {
-        // After setting length we should have a full barrier, so this write should happens-before barrier
-        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-        auto len = ToNativePtr<uint32_t>(ToUintPtr(string) + coretypes::String::GetLengthOffset());
-        auto hashcode = ToNativePtr<uint32_t>(ToUintPtr(string) + coretypes::String::GetHashcodeOffset());
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        len[0] = compressed ? (length << 1U) : (length << 1U) | 1U;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        hashcode[0] = 0U;
-        TSAN_ANNOTATE_IGNORE_WRITES_END();
-        // Witout full memory barrier it is possible that architectures with
-        // weak memory order can try fetching string legth before it's set
-        arch::FullMemoryBarrier();
-    }
-    return string;
+    return EtsString::AllocateNonInitializedString(length, compressed);
 }
 
 EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
