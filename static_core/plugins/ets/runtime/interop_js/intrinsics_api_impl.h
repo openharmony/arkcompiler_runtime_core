@@ -150,10 +150,14 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 
     napi_value result;
     napi_value jsVal = etsJsValue->GetNapiValue(env);
-    auto rc = napi_get_element(env, jsVal, index, &result);
-    if (UNLIKELY(NapiThrownGeneric(rc))) {
-        ctx->ForwardJSException(coro);
-        return {};
+
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        auto rc = napi_get_element(env, jsVal, index, &result);
+        if (UNLIKELY(NapiThrownGeneric(rc))) {
+            ctx->ForwardJSException(coro);
+            return {};
+        }
     }
 
     auto res = T::UnwrapWithNullCheck(ctx, env, result);
