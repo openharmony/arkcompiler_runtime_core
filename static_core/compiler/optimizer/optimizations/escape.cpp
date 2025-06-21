@@ -421,6 +421,246 @@ void EscapeAnalysis::Dump()
     DumpAliases();
 }
 
+bool EscapeAnalysis::DecomposeAnalysis::Decompose()
+{
+    auto bbs = graph_->GetBlocksRPO();
+    for (auto cur = bbs.rbegin(); cur != bbs.rend(); cur++) {
+        do {
+        } while (SplitOneBlock(*cur));
+    }
+    return !decomposeBbs_.empty();
+}
+
+bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
+{
+    auto deoptPos = std::find_if(deoptBb->AllInstsSafeReverse().begin(), deoptBb->AllInstsSafeReverse().end(),
+                                 [this](Inst *inst) { return IsDecomposableInst(inst); });
+    if (deoptPos == deoptBb->AllInstsSafeReverse().end()) {
+        return false;
+    }
+
+    Inst *deopt = *deoptPos;
+    auto ss = deopt->GetSaveState();
+    ASSERT(ss != nullptr);
+    auto callInst = ss->GetCallerInst();
+    // NOTE : support inlined call
+    if (callInst != nullptr) {
+        return false;
+    }
+
+    // Split blocks with instructions having can_deoptimize flag.
+    // succBb is the true branch for ifImm inst.
+    auto succBb = deoptBb->SplitBlockAfterInstruction(deopt, true);
+
+    // Create new empty block (false branch).
+    auto emptyBb = graph_->CreateEmptyBlock();
+    auto endBb = graph_->HasEndBlock() ? graph_->GetEndBlock() : graph_->CreateEndBlock();
+    emptyBb->SetAllFields(deoptBb->GetAllFields());
+    emptyBb->SetOsrEntry(false);
+    deoptBb->GetLoop()->AppendBlock(emptyBb);
+    deoptBb->AddSucc(emptyBb);
+    emptyBb->AddSucc(endBb);
+
+    // Add savestate and deoptimize instruction into the empty block.
+    auto saveState4Deopt = CopySaveState(graph_, ss);
+    emptyBb->PrependInst(saveState4Deopt);
+    DeoptimizeType deoptType;
+    switch (deopt->GetOpcode()) {
+        case Opcode::NullCheck:
+            deoptType = DeoptimizeType::NULL_CHECK;
+            break;
+        case Opcode::DeoptimizeIf:
+            deoptType = deopt->CastToDeoptimizeIf()->GetDeoptimizeType();
+            break;
+        default:
+            UNREACHABLE();
+    }
+
+    auto newDeopt = graph_->CreateInstDeoptimize(DataType::NO_TYPE, deopt->GetPc(), saveState4Deopt, deoptType);
+    emptyBb->AppendInst(newDeopt);
+
+    // Replace conditional deoptimize with compare + ifimm instruction.
+    ReplaceDeopt(deoptBb, succBb, deopt, newDeopt);
+
+    CloneSaveStatesToSucc(deoptBb, succBb);
+    if (!ss->HasUsers()) {
+        ss->ClearFlag(inst_flags::NO_DCE);
+    }
+
+    return true;
+}
+
+void EscapeAnalysis::DecomposeAnalysis::Compose()
+{
+    for (auto &pair : decomposeBbs_) {
+        auto [bb, ss, newDeopt, deoptOpcode, bitFields] = pair.second;
+        BasicBlock *deoptBb = pair.first;
+        auto newDeoptBb = deoptBb->GetSuccessor(1);
+        if (bb != newDeoptBb) {
+            continue;
+        }
+        auto materialized = std::find_if(newDeoptBb->AllInsts().begin(), newDeoptBb->AllInsts().end(),
+                                         [](Inst *inst) { return inst->IsAllocation(); });
+        if (materialized != newDeoptBb->AllInsts().end()) {
+            continue;
+        }
+
+        Inst *deoptInput = nullptr;
+        IdentifyDeoptInput(deoptBb, deoptOpcode, deoptInput);
+        RecoverDeopt(deoptBb, pair.second, deoptInput);
+    }
+}
+
+void EscapeAnalysis::DecomposeAnalysis::IdentifyDeoptInput(BasicBlock *deoptBb, Opcode opcode, Inst *&deoptInput)
+{
+    ASSERT(deoptBb != nullptr);
+    Inst *lastInst = deoptBb->GetLastInst();
+    ASSERT(lastInst != nullptr && lastInst->GetOpcode() == Opcode::IfImm);
+    switch (opcode) {
+        case Opcode::NullCheck: {
+            Inst *cmpInst = lastInst->GetInput(0).GetInst();
+            ASSERT(cmpInst != nullptr && cmpInst->GetOpcode() == Opcode::Compare);
+            deoptInput = cmpInst->GetInput(0).GetInst();
+            break;
+        }
+        case Opcode::DeoptimizeIf: {
+            deoptInput = lastInst->GetInput(0).GetInst();
+            break;
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
+}
+
+void EscapeAnalysis::DecomposeAnalysis::ReplaceDeopt(BasicBlock *deoptBb, BasicBlock *succBb, Inst *deopt,
+                                                     Inst *newDeopt)
+{
+    IfImmInst *ifImm = nullptr;
+    CompareInst *compare = nullptr;
+    auto pc = deopt->GetPc();
+    Inst *deoptInput = nullptr;
+    auto it = deoptUsers_.find(deoptBb);
+    if (it != deoptUsers_.end()) {
+        deoptUsers_.emplace(succBb, it->second);
+        deoptUsers_.erase(deoptBb);
+    }
+    switch (deopt->GetOpcode()) {
+        case Opcode::NullCheck: {
+            deoptInput = deopt->GetInput(0).GetInst();
+            compare = graph_->CreateInstCompare(DataType::BOOL, pc, deoptInput, graph_->GetOrCreateNullPtr(),
+                                                DataType::REFERENCE, ConditionCode::CC_EQ);
+            ifImm = graph_->CreateInstIfImm(DataType::BOOL, pc, compare, 0, DataType::BOOL, ConditionCode::CC_EQ);
+            auto &users = deoptUsers_.try_emplace(deoptBb, graph_->GetLocalAllocator()->Adapter()).first->second;
+            for (auto &user : deopt->GetUsers()) {
+                users.push_back(user.GetInst());
+            }
+            std::reverse(users.begin(), users.end());
+            deopt->ReplaceUsers(deoptInput);
+            break;
+        }
+        case Opcode::DeoptimizeIf: {
+            deoptInput = deopt->GetInput(0).GetInst();
+            ifImm = graph_->CreateInstIfImm(DataType::BOOL, pc, deoptInput, 0, DataType::BOOL, ConditionCode::CC_EQ);
+            break;
+        }
+        default:
+            COMPILER_LOG(ERROR, PEA) << "Decompose for Opcode " << deopt->GetOpcodeStr() << " hasn't been implemented.";
+            UNREACHABLE();
+    }
+    if (decomposeBbs_.find(deoptBb) != decomposeBbs_.end()) {
+        ASSERT(decomposeBbs_.find(succBb) == decomposeBbs_.end());
+        decomposeBbs_[succBb] = decomposeBbs_[deoptBb];
+    }
+    auto bitFields = deopt->GetAllFields();
+    decomposeBbs_[deoptBb] =
+        std::make_tuple(deoptBb->GetSuccessor(1), deopt->GetSaveState(), newDeopt, deopt->GetOpcode(), bitFields);
+    deopt->ClearFlag(inst_flags::NO_DCE);
+    deopt->RemoveInputs();
+    deopt->RemoveUsers();
+    deoptBb->ReplaceInst(deopt, ifImm);
+    if (compare != nullptr) {
+        deoptBb->InsertBefore(compare, ifImm);
+    }
+}
+
+void EscapeAnalysis::DecomposeAnalysis::RecoverDeopt(BasicBlock *deoptBb, DeoptInfo &deoptInfo, Inst *deoptInput)
+{
+    auto [bb, ss, newDeopt, deoptOpcode, bitFields] = deoptInfo;
+    ASSERT(deoptBb != nullptr && deoptInput != nullptr && bb != nullptr && newDeopt != nullptr);
+    Inst *recoveredSs = nullptr;
+    if (ss == nullptr || !ss->HasUsers()) {
+        recoveredSs = CopySaveState(graph_, newDeopt->GetSaveState());
+    }
+    DeoptimizeType deoptType = newDeopt->CastToDeoptimize()->GetDeoptimizeType();
+    auto pc = newDeopt->GetPc();
+    auto blocksInLoop = bb->GetLoop()->GetBlocks();
+    if (std::find(blocksInLoop.begin(), blocksInLoop.end(), bb) != blocksInLoop.end()) {
+        bb->GetLoop()->RemoveBlock(bb);
+    }
+    graph_->DisconnectBlock(bb, true, false);
+
+    switch (deoptOpcode) {
+        case Opcode::NullCheck: {
+            ASSERT(deoptBb->GetLastInst() != nullptr && deoptBb->GetLastInst()->GetOpcode() == Opcode::Compare);
+            deoptBb->RemoveInst(deoptBb->GetLastInst());
+            if (recoveredSs != nullptr) {
+                deoptBb->AppendInst(recoveredSs);
+            } else {
+                recoveredSs = ss;
+            }
+            auto nullCheck = graph_->CreateInstNullCheck(deoptInput->GetType(), pc, deoptInput, recoveredSs);
+            nullCheck->SetAllFields(bitFields);
+            deoptBb->AppendInst(nullCheck);
+            for (auto &inst : deoptUsers_.at(deoptBb)) {
+                inst->ReplaceInput(deoptInput, nullCheck);
+            }
+            break;
+        }
+        case Opcode::DeoptimizeIf: {
+            if (recoveredSs != nullptr) {
+                deoptBb->AppendInst(recoveredSs);
+            } else {
+                recoveredSs = ss;
+            }
+            auto deoptIf = graph_->CreateInstDeoptimizeIf(pc, deoptInput, recoveredSs, deoptType);
+            deoptIf->SetAllFields(bitFields);
+            deoptBb->AppendInst(deoptIf);
+            break;
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
+}
+
+void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb)
+{
+    for (Inst *saveState : bb->AllInstsSafeReverse()) {
+        if (!saveState->IsSaveState()) {
+            continue;
+        }
+
+        ArenaVector<User *> seperatedUsers(graph_->GetLocalAllocator()->Adapter());
+        for (auto &user : saveState->GetUsers()) {
+            if (user.GetInst()->GetBasicBlock() != succBb || user.GetInst()->GetOpcode() == Opcode::ReturnInlined ||
+                (user.GetInst()->IsCall() && static_cast<CallInst *>(user.GetInst())->IsInlined())) {
+                continue;
+            }
+            seperatedUsers.push_back(&user);
+        }
+        if (seperatedUsers.empty()) {
+            continue;
+        }
+
+        auto saveStateClone = CopySaveState(graph_, static_cast<SaveStateInst *>(saveState));
+        for (auto &user : seperatedUsers) {
+            user->GetInst()->ReplaceInput(saveState, saveStateClone);
+        }
+        succBb->PrependInst(saveStateClone);
+    }
+}
+
 // Create state corresponding to the beginning of the basic block by merging
 // states of its predecessors.
 void EscapeAnalysis::MergeProcessor::MergeStates(BasicBlock *block)
@@ -756,6 +996,9 @@ bool EscapeAnalysis::RunImpl()
     if (!GetGraph()->HasEndBlock()) {
         return false;
     }
+
+    DecomposeAnalysis decomposer(GetGraph());
+
 #ifndef NDEBUG
     MarkerHolder mh {GetGraph()};
     removableLoads_ = mh.GetMarker();
@@ -763,16 +1006,16 @@ bool EscapeAnalysis::RunImpl()
     Initialize();
 
     if (!liveIns_.Run(true)) {
-        return false;
+        return decomposer.HasDecomposed();
     }
 
     if (!FindVirtualizableAllocations()) {
-        return false;
+        return decomposer.HasDecomposed();
     }
 
     if (virtualizableAllocations_.empty()) {
         COMPILER_LOG(DEBUG, PEA) << "No allocations to virtualize";
-        return false;
+        return decomposer.HasDecomposed();
     }
 
     ScalarReplacement sr {GetGraph(), aliases_, phis_, materializationInfo_, saveStateInfo_};

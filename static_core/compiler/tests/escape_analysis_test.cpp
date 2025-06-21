@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3246,6 +3246,531 @@ TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleUsedRefInLoops)
     auto graph = CreateEmptyGraph();
     out_graph::CorrectlyHandleSingleUsedRefInLoops::CREATE(graph);
 
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(SplitDeoptimizationP1, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(59U, Opcode::SaveState);
+            INST(7U, Opcode::DeoptimizeIf).Inputs(6U, 59U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP1, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        INST(53U, Opcode::NullPtr).ref();
+        BASIC_BLOCK(3U, 10U, 11U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U}).ClearFlag(inst_flags::NO_DCE);
+            INST(54U, Opcode::Compare).b().Inputs(4U, 53U).SrcType(DataType::REFERENCE).CC(ConditionCode::CC_EQ);
+            INST(55U, Opcode::IfImm).b().SrcType(DataType::BOOL).Imm(0U).CC(CC_EQ).Inputs(54U);
+        }
+        BASIC_BLOCK(11U, -1L)
+        {
+            INST(51U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(52U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NULL_CHECK).Inputs(51U);
+        }
+        BASIC_BLOCK(10U, 8U, 9U)
+        {
+            INST(56U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 56U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(47U, Opcode::SaveState).ClearFlag(inst_flags::NO_DCE);
+            INST(50U, Opcode::IfImm).b().SrcType(DataType::BOOL).Imm(0U).CC(CC_EQ).Inputs(6U);
+        }
+        BASIC_BLOCK(9U, -1L)
+        {
+            INST(48U, Opcode::SaveState);
+            INST(49U, Opcode::Deoptimize).Inputs(48U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(57U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(58U, Opcode::NullCheck).ref().Inputs(4U, 57U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(56U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 56U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(59U, Opcode::SaveState);
+            INST(60U, Opcode::DeoptimizeIf).Inputs(6U, 59U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(7U, Opcode::NullCheck).ref().Inputs(11U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(57U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(58U, Opcode::NullCheck).ref().Inputs(56U, 57U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(50U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 50U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP4, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(7U, Opcode::DeoptimizeIf).Inputs(6U);
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP5, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(7U, Opcode::LoadObject).u64().Inputs(5U).ObjField(UINT64_FIELD);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::Phi).u64().Inputs(0U, 7U);
+            INST(10U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(8U, 10U);
+            INST(9U, Opcode::Return).ref().Inputs(3U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP5, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(17U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, 6U, 7U)
+        {
+            INST(16U, Opcode::IfImm).b().SrcType(DataType::BOOL).Imm(0U).CC(CC_EQ).Inputs(17U);
+        }
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(20U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(21U, Opcode::NewObject).ref().Inputs(2U, 20U);
+            INST(12U, Opcode::SaveState).Inputs(0U, 21U).SrcVregs({0U, 1U});
+            INST(13U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::NULL_CHECK).Inputs(12U);
+        }
+        BASIC_BLOCK(6U, 4U)
+        {
+            INST(22U, Opcode::Cast).u64().SrcType(DataType::INT64).Inputs(17U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::Phi).u64().Inputs(0U, 22U);
+            INST(10U, Opcode::SaveState);
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(8U, 10U);
+            INST(18U, Opcode::SaveState);
+            INST(19U, Opcode::NewObject).ref().Inputs(2U, 18U);
+            INST(9U, Opcode::Return).ref().Inputs(19U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP6, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(12U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(13U, Opcode::NullCheck).ref().Inputs(4U, 12U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(8U, Opcode::LoadArray).s32().Inputs(13U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP6, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(54U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 54U);
+            INST(57U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(58U, Opcode::NullCheck).ref().Inputs(4U, 57U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(8U, Opcode::LoadArray).s32().Inputs(58U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP7, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(20U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(12U, Opcode::SaveStateDeoptimize).Inputs(20U).SrcVregs({20U});
+            INST(13U, Opcode::NullCheck).ref().Inputs(20U, 12U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(8U, Opcode::LoadArray).s32().Inputs(13U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP7, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(54U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 54U);
+            INST(20U, Opcode::NewArray).ref().Inputs(44U, 0U, 54U);
+            INST(57U, Opcode::SaveStateDeoptimize).Inputs(20U).SrcVregs({20U});
+            INST(58U, Opcode::NullCheck).ref().Inputs(20U, 57U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(8U, Opcode::LoadArray).s32().Inputs(58U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP8, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5);
+        CONSTANT(1U, 4);
+        CONSTANT(2U, 0);
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+            INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
+            INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(5U, Opcode::BoundsCheck).b().Inputs(0U, 1U, 3U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 2U).SrcType(DataType::BOOL).CC(ConditionCode::CC_EQ);
+            INST(59U, Opcode::SaveState);
+            INST(7U, Opcode::DeoptimizeIf).Inputs(6U, 59U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(8U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+            INST(9U, Opcode::Return).s32().Inputs(8U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationN1, Graph *graph, uint32_t callInstId, uint32_t ss1Id, uint32_t ss2Id)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInstId, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ss1Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, 11U);
+            INST(ss2Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, 13U);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(16U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+// Positive Test 1 - Just decompose
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP1)
+{
+    src_graph::SplitDeoptimizationP1::CREATE(GetGraph());
+    EscapeAnalysis::DecomposeAnalysis da {GetGraph()};
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP1::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 2 - Multiple deoptimization insts without DFG dependency in one basic block
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP2)
+{
+    src_graph::SplitDeoptimizationP1::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP2::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 3 - Multiple deoptimization insts with DFG dependency in one basic block
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP3)
+{
+    src_graph::SplitDeoptimizationP3::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP3::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 4 - Multiple deoptimization insts in different basic blocks
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP4)
+{
+    src_graph::SplitDeoptimizationP4::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP2::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 5 - Materialization occurs
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP5)
+{
+    src_graph::SplitDeoptimizationP5::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP5::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 6 - Multiple NullCheck insts without direct DFG dependency in one basic block
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP6)
+{
+    src_graph::SplitDeoptimizationP6::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP6::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 7 - Multiple NullCheck insts without any DFG dependency in one basic block
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP7)
+{
+    src_graph::SplitDeoptimizationP7::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP7::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 8 : Deoptimization inst is the last inst in one basic block
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP8)
+{
+    src_graph::SplitDeoptimizationP8::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    src_graph::SplitDeoptimizationP1::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Negative Test 1 : Deoptimization's savestate inst is in an inlined func
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationN1)
+{
+    static constexpr uint32_t CALL_INST_ID = 10;
+    static constexpr uint32_t SS1_ID = 11;
+    static constexpr uint32_t SS2_ID = 13;
+    src_graph::SplitDeoptimizationN1::CREATE(GetGraph(), CALL_INST_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+
+    EscapeAnalysis::DecomposeAnalysis da {GetGraph()};
+
+    auto graph = CreateEmptyGraph();
+    src_graph::SplitDeoptimizationN1::CREATE(graph, CALL_INST_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
