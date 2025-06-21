@@ -252,6 +252,8 @@
         native parseTagImpl(tag:string) : string
         private native defaultLang() : string
 
+        static native defaultTag(): string
+
         private fillBaseName() {
             let sb = new StringBuilder()
             sb.append(this.language as string)

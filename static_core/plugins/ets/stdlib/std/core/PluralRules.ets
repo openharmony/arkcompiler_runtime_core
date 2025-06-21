@@ -75,8 +75,11 @@ export namespace Intl {
         }
 
         private resolveLocale(localeMatcher: "lookup" | "best fit", locales?: string | FixedArray<string>): string {
-            const locale = PluralRules.toArray(locales)[0]
-            return localeMatcher === "lookup" ? intlLookUpLocale(locale) : intlBestFitLocale(locale)
+            if (locales === undefined) {
+                return Locale.defaultTag()
+            }
+            const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
+            return localeMatcher === "lookup" ? intlLookUpLocale(arr) : intlBestFitLocale(arr)
         }
 
         public resolvedOptions(): ResolvedPluralRulesOptions {
@@ -96,30 +99,12 @@ export namespace Intl {
             return PluralRules.selectDouble(value, options) as LDMLPluralRule
         }
 
-        public static supportedLocalesOf(locales: string | FixedArray<string>, options?: SupportedLocalesOfOptions): FixedArray<string> {
-            const result = PluralRules.toArray(locales)
-            const localeMatcher = options?.localeMatcher ?? "best fit"
-            for (let i = 0; i < result.length; i++) {
-                result[i] = localeMatcher === "lookup"
-                    ? intlLookUpLocale(result[i])
-                    : intlBestFitLocale(result[i])
-            }
-            return result
-        }
-
-        private static toArray(locales?: string | FixedArray<string>): FixedArray<string> {
-            if (!locales) {
-                return [PluralRules.getDefaultLocaleTag()]
-            }
-            if (locales instanceof string) {
-                return [locales as string]
-            }
-            return locales as FixedArray<string>
+        public static supportedLocalesOf(locales: string | FixedArray<string>, options?: SupportedLocalesOfOptions): string[] {
+            const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
+            return options?.localeMatcher === "lookup" ? intlLookUpLocales(arr) : intlBestFitLocales(arr)
         }
 
         private static native selectDouble(value: double, options: Object): string
-
-        private static native getDefaultLocaleTag(): string
 
         private static native getPluralCategories(locale: string, type: string): Object
     }

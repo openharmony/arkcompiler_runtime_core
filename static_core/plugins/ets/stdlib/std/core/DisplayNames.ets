@@ -112,7 +112,7 @@ export namespace Intl {
                 const lookupLocale = options != null && options!.localeMatcher == "lookup"
                 this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
             } else {
-                this.locale = LocaleMatch.bestFitLocale("");
+                this.locale = Locale.defaultTag();
             }
         }
 
@@ -190,21 +190,7 @@ export namespace Intl {
         }
 
         private static bestFitLocales(locales: Array<string>): string[] {
-            const bestFitLocales = new Array<string>()
-
-            for (const locale of locales) {
-                const bestFitLocale = intlBestFitLocale(locale)
-                if (locale.startsWith(bestFitLocale)) {
-                    bestFitLocales.push(locale)
-                }
-            }
-
-            const result: string[] = new string[bestFitLocales.length]
-            for (let i = 0; i < result.length; i++) {
-                result[i] = bestFitLocales[i]
-            }
-
-            return result
+            return intlBestFitLocales(locales)
         }
     }
 }

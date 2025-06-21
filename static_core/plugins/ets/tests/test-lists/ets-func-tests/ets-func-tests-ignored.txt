@@ -308,12 +308,6 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#25344
-std/core/IntlNumberFormatSupportedLocalesOfTest2.ets
-
-#25239
-std/core/IntlNumberFormatSupportedLocalesOfTest3.ets
-
 #25264
 std/core/ConsoleArrayTest.ets
 

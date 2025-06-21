@@ -16,8 +16,6 @@
 package std.core;
 
 export namespace Intl {
-    const LOCALES_DEFAULT: string[] = []
-
     export class DateTimeFormat {
         private static readonly DEFAULT_OPTIONS: DateTimeFormatOptions = {
             year: "numeric",
@@ -30,9 +28,12 @@ export namespace Intl {
         private readonly pattern: string
 
         public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
-            const requestedLocales: string | string[] = locales ?? LOCALES_DEFAULT
-            const lookupLocale = options != null && options!.localeMatcher == "lookup"
-            this.locale = lookupLocale ? intlLookUpLocale(requestedLocales) : intlBestFitLocale(requestedLocales)
+            if (locales === undefined) {
+                this.locale = Locale.defaultTag()
+            } else {
+                const lookupLocale = options?.localeMatcher == "lookup"
+                this.locale = lookupLocale ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
+            }
 
             if (options === undefined || DateTimeFormatOptions.isEmpty(options)) {
                 this.options = DateTimeFormat.DEFAULT_OPTIONS
@@ -111,11 +112,11 @@ export namespace Intl {
 
             if (options) {
                 return (options.localeMatcher == "best fit")
-                        ? intlSupportedBestFitLocales(langTags)
-                        : intlSupportedLookupLocales(langTags)
+                        ? intlBestFitLocales(langTags)
+                        : intlLookUpLocales(langTags)
             }
 
-            return intlSupportedBestFitLocales(langTags)
+            return intlBestFitLocales(langTags)
         }
 
         private native formatImpl(timestamp: number): string

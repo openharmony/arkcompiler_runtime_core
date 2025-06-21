@@ -26,17 +26,15 @@ let correctLocaleList: string[] = [ru_RU, zh_CN, en_US]
 function main(): int {
     let failures: int = 0
     failures += check(testSetOptions(), "Test set option values")
-    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    // failures += check(testOkLocalesConstructor(), "Test constructor with correct locales & default options")
-    // failures += check(testInvalidLocalesConstructor(), "Test constructor with invalid locales & default options")
+    failures += check(testOkLocalesConstructor(), "Test constructor with correct locales & default options")
+    failures += check(testInvalidLocalesConstructor(), "Test constructor with invalid locales & default options")
     failures += check(testCompareStrings(), "Test compare strings")
     failures += check(testDefaultCollator(), "Test Collator with ru_RU locale & default options")
     failures += check(testSensivity(), "Test Collator with ru_RU locale & sensivity")
     failures += check(testPunctuation(), "Test Collator with en_US locale & punctuation")
     failures += check(testNumeric(), "Test Collator with ru_RU locale & numeric")
     failures += check(testCaseFirst(), "Test Collator with ru_RU locale & caseFirst")
-    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    // failures += check(testSupportedLocalesOf(), "Test static SupportedLocalesOf")
+    failures += check(testSupportedLocalesOf(), "Test static SupportedLocalesOf")
     failures += check(testUsage(), "Test Collator with search usage")
     failures += check(testCollation(), "Test Collator specific collation")
     failures += check(testCollationFromLocale(), "Test Collator get collation from Locale")

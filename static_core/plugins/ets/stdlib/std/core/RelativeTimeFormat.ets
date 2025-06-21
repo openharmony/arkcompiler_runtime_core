@@ -144,11 +144,7 @@ export namespace Intl {
         }
 
         static supportedLocalesOf(locales: string, options?: RelativeTimeFormatOptions): string[] {
-            let list: string[] = []
-            if (locales instanceof String) {
-                list = [locales]
-            }
-            return RelativeTimeFormat.supportedLocalesOfImpl(list, options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
+            return RelativeTimeFormat.supportedLocalesOfImpl([locales], options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
         }
 
         static supportedLocalesOf(locales: string[], options?: RelativeTimeFormatOptions): string[] {
@@ -158,6 +154,9 @@ export namespace Intl {
         private native formatImpl(value: number, unit: string): string
         private native formatToPartsImpl(value: number, unit: string): RelativeTimeFormatPart[]
         private native resolvedOptionsImpl(): ResolvedRelativeTimeFormatOptions
-        private static native supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[]
+
+        private static supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[] {
+            return options.localeMatcher === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
+        }
     }
 }
