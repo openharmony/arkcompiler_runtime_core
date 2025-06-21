@@ -19,6 +19,10 @@
 
 #include "interfaces/inner_api/napi/native_node_api.h"
 
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_OHOS)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface, [[maybe_unused]] void **ecmaIface);
+#else
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface, [[maybe_unused]] void **ecmaIface)
 {
@@ -26,6 +30,7 @@ napi_vm_handshake([[maybe_unused]] napi_env env, [[maybe_unused]] void *stsIface
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
+#endif
 
 namespace ark::ets::interop::js {
 

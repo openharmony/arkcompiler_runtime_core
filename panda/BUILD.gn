@@ -35,7 +35,14 @@ ohos_executable("ark_bin") {
     "$ark_root/runtime:libarkruntime",
   ]
 
-  deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+  external_deps = []
+
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
+
   configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
   output_name = "ark"

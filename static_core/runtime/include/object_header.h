@@ -144,6 +144,11 @@ public:
         return MEMBER_OFFSET(ObjectHeader, classWord_);
     }
 
+    static constexpr size_t GetMarkOffset()
+    {
+        return MEMBER_OFFSET(ObjectHeader, markWord_);
+    }
+
     // Mask to get class word from register:
     // * 64-bit system, 64-bit class word: 0xFFFFFFFFFFFFFFFF
     // * 64-bit system, 48-bit class word: 0x0000FFFFFFFFFFFF (external CMC GC)
@@ -371,8 +376,8 @@ private:
 };
 
 #if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_32)
-constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
-static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkOffset());
+constexpr uint32_t OBJECT_HEADER_MARK_OFFSET = 0U;
+static_assert(OBJECT_HEADER_MARK_OFFSET == ark::ObjectHeader::GetMarkOffset());
 #else
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());

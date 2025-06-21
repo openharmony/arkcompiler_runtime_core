@@ -54,17 +54,23 @@ ohos_shared_library("interop_test_helper") {
 
   include_dirs = [ "$js_root/../../foundation/arkui/napi" ]
 
+  external_deps = []
+
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
+
   if (ark_standalone_build) {
     public_configs += [ ":interop_test_helper_config" ]
 
     deps = [
       "$ark_third_party_root/libuv:uv",
-      "$js_root:libark_jsruntime",
       "$js_root/../../foundation/arkui/napi:ace_napi",
     ]
   } else {
-    external_deps = [
-      "ets_runtime:libark_jsruntime",
+    external_deps += [
       "libuv:uv",
       "napi:ace_napi",
     ]
