@@ -24,6 +24,7 @@ cases:
       - { type: char, expr: "c'A'", op: '!=' }
       - { type: Boolean, expr: new Boolean(false), op: '!==' }
       - { type: Byte, expr: new Byte(new Int(1).toByte()), op: '!==' }
+      - { type: Byte, expr: new Byte(new Int(1).byteValue()), op: '!==' }
       - { type: Char, expr: new Char(c'A'), op: '!==' }
       - { type: Error, expr: new Error("msg"), op: '!==' }
       - { type: "char[]", expr: "[c'A', c'B']", op: '!==' }

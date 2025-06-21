@@ -26,5 +26,6 @@ function main(): void {
 {% for c in cases %}
     arktest.assertEQ(v{{loop.index}}, {{c['val']}})
     arktest.assertEQ(b{{loop.index}}.toLong(), {{c['val']}})
+    arktest.assertEQ(b{{loop.index}}.longValue(), {{c['val']}})
 {% endfor %}
 }

@@ -396,6 +396,21 @@ cases:
 
     - decl: |-
           class A {
+              foo(...p: (Double|Short|Byte)[]): double {
+                  let res = 0.0
+                  for (let el of p) res += (el as Numeric).doubleValue()
+                  return res
+              }
+          }
+      use: |-
+          // union of value types in result array
+          let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
+          let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
+          let obj = new A
+          arktest.assertTrue(obj.foo(...ar) == 42.0)
+
+    - decl: |-
+          class A {
               foo(...p: (Int|Number|String|undefined)[]): number {
                   return p.length
               }
