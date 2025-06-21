@@ -16,20 +16,25 @@
 #include <cstring>
 #include "plugins/ets/runtime/ets_namespace_manager.h"
 #include "plugins/ets/runtime/ets_namespace_manager_impl.h"
+#include "libpandabase/utils/logger.h"
 
 namespace ark::ets {
 
-PANDA_PUBLIC_API void EtsNamespaceManager::SetAppLibPaths(const AppLibPathMap &appLibPaths)
+PANDA_PUBLIC_API void EtsNamespaceManager::SetAppLibPaths(const AppBundleModuleNamePathMap &appModuleNames,
+                                                          CreateNamespaceCallback &cb)
 {
     LOG(INFO, RUNTIME) << "set ets app library path";
-    if (appLibPaths.empty()) {
-        LOG(WARNING, RUNTIME) << "no ets app library path to set";
+    if (appModuleNames.empty()) {
+        LOG(ERROR, RUNTIME) << "no ets app library path to set";
         return;
     }
+    ASSERT(cb != nullptr);
     EtsNamespaceManagerImpl &instance = EtsNamespaceManagerImpl::GetInstance();
-    for (const auto &appLibPath : appLibPaths) {
-        instance.CreateApplicationNs(appLibPath.first, appLibPath.second);
+    for (const auto &bundleModuleName : appModuleNames) {
+        std::string namespaceName;
+        if (cb(bundleModuleName.second, namespaceName)) {
+            instance.RegisterNamespaceName(bundleModuleName.first, namespaceName);
+        }
     }
 }
-
 }  // namespace ark::ets
