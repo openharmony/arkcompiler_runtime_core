@@ -14,6 +14,10 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
+const EmptyContainerErrorCodeId: number = 10200010;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -72,22 +76,18 @@ function testRemoveByIndexWithinRange() {
 function testRemoveByIndexOutsideRange() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    let errorCount = 0;
-    try {
-        linkedList.removeByIndex(TestData.testNumber1w);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            errorCount++;
-        }
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        linkedList.removeByIndex(-TestData.testNumber6);
-    } catch (e) {
-        if (e instanceof RangeError) {
-            errorCount++;
-        }
+    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertEQ(errorCount, TestData.testNumber2, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.removeByIndex(TestData.testNumber1w)}, exceptionCheck);
+    arktest.expectThrow(() => {linkedList.removeByIndex(-TestData.testNumber6)}, exceptionCheck1);
 }
 
 function testRemoveByIndexUndefined() {
@@ -122,13 +122,11 @@ function testRemoveFirstFromEmptyContainer() {
 
 function testRemoveFirstFromNonEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.removeFirst();
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
-    arktest.assertFalse(false, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.removeFirst()}, exceptionCheck);
 }
 
 function testRemoveLastFromEmptyContainer() {
@@ -143,13 +141,11 @@ function testRemoveLastFromEmptyContainer() {
 
 function testRemoveLastFromNonEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.removeLast();
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
-    arktest.assertFalse(false, "Throw error when LinkedList index out of range");
+    expectThrow(() => {linkedList.removeLast()}, exceptionCheck);
 }
 
 function testRemoveUniqueElement() {

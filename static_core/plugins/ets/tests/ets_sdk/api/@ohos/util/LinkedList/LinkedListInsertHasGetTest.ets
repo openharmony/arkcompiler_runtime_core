@@ -14,6 +14,9 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -109,25 +112,23 @@ function testInsertAddFirstGetIndexOfRemoveByIndexHas() {
 function testInsertIndexGreaterThanLength() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    try {
-        linkedList.insert(TestData.testNumber6, TestData.testNumber1);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.insert(TestData.testNumber1w, TestData.testNumber6)}, exceptionCheck);
 }
 
 function testInsertIndexLessThanZero() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    try {
-        linkedList.insert(-TestData.testNumber6, TestData.testNumber1);
-    } catch (e) {
-        arktest.assertTrue(e instanceof RangeError, "Throw error when LinkedList index out of range");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    arktest.assertFalse(false, "Throw error when LinkedList index out of range");
+    arktest.expectThrow(() => {linkedList.insert(-TestData.testNumber6, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testHasElementInContainer() {

@@ -14,6 +14,9 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");
@@ -73,12 +76,11 @@ function testSetMultipleTypes() {
 
 function testSetElementsInEmptyContainer() {
     let linkedList = new LinkedList<number>();
-    try {
-        linkedList.set(0, TestData.testNumber1);
-    } catch (e) {
-        arktest.assertEQ(e instanceof RangeError, true, "The result should be 'RangeError'");
-        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.", "The result should be 'Index out of bounds'");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+    arktest.expectThrow(() => {linkedList.set(0, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testSetGetIndexOfRemoveByIndex() {
@@ -152,6 +154,6 @@ function initMultiTypeLinkedList() {
     linkedList.add(undefined);
     linkedList.add(null);
     linkedList.add(true);
-    
+
     return linkedList;
 }

@@ -135,7 +135,7 @@ function testGetIndexOfAddRemoveFirstAdd() {
 
 function testGetIndexOfRepeatedElement() {
     let linkedList = initializeNumberLinkedList();
-   
+
     arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber2), TestData.testNumber1, "First index of 2 should be 1");
 }
 

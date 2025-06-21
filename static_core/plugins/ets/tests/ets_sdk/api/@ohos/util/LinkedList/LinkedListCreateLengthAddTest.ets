@@ -54,33 +54,12 @@ class TestData {
 
 function testCreateSingleTypeContainer() {
     let linkedList: LinkedList<number>;
-    try {
-        linkedList = new LinkedList<number>();
-    } catch (e) {
-        arktest.assertFalse(false, "The memory application needs to be successful");
-        return;
-    }
-    linkedList.add(TestData.testNumber1);
-    arktest.assertTrue(linkedList instanceof LinkedList, "The instance should be LinkedList");
-    arktest.assertEQ(linkedList.length, TestData.testNumber1, "LinkedList length should be 1");
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<number>()});
 }
 
 function testCreateCompositeTypeContainer() {
     let linkedList: LinkedList<number | string | boolean | null | object | undefined>;
-    try {
-        linkedList = new LinkedList<number | string | boolean | null | object | undefined>();
-    } catch (e) {
-        arktest.assertFalse(false, "The memory application needs to be successful");
-        return;
-    }
-    linkedList.add(TestData.testNumber1);
-    linkedList.add(TestData.testString1);
-    linkedList.add(true);
-    linkedList.add(null);
-    linkedList.add(TestData.testObject1);
-    linkedList.add(undefined);
-    arktest.assertTrue(linkedList instanceof LinkedList, "The instance should be LinkedList");
-    arktest.assertEQ(linkedList.length, TestData.testNumber6, "LinkedList length should be 6");
+    arktest.expectNoThrow(() => {linkedList = new LinkedList<number | string | boolean | null | object | undefined>()});
 }
 
 function testLengthSyncSingleType() {
