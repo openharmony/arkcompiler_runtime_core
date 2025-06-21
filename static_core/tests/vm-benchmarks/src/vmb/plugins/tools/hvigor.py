@@ -160,10 +160,13 @@ class Tool(ToolBase):
 
     def exec(self, bu: BenchUnit) -> None:
         if self.signing_config:
-            build_config['app']['signingConfigs'] = [{
-                "name": "default",
-                "material": load_json(self.signing_config)}]
-            build_config['app']['products'][0]['signingConfig'] = 'default'
+            try:
+                build_config['app']['signingConfigs'] = [{
+                    "name": "default",
+                    "material": load_json(self.signing_config)}]
+                build_config['app']['products'][0]['signingConfig'] = 'default'
+            except KeyError as e:
+                raise RuntimeError('Corrupted build config') from e
         Tool.emit_config(build_config, bu.path.joinpath('build-profile.json5'))
         Tool.emit_config(oh_package, bu.path.joinpath('oh-package.json5'))
         Tool.emit_config(oh_package, bu.path.joinpath(self.mod_name, 'oh-package.json5'))

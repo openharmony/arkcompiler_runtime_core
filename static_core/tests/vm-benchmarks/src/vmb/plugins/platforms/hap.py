@@ -38,7 +38,7 @@ module_config: Dict[str, Any] = {
         "name": "entry",
         "type": "entry",
         "description": "$string:module_desc",
-        "mainElement": "Empty_Ability",
+        "mainElement": "EmptyAbility",
         "deviceTypes": [
           "default",
           "tablet"
@@ -53,8 +53,8 @@ module_config: Dict[str, Any] = {
 }
 
 ability_config = {
-    "name": "Empty_Ability",
-    "srcEntry": "./ets/entryability/Empty_Ability.ts",
+    "name": "EmptyAbility",
+    "srcEntry": "./ets/entryability/EmptyAbility.ts",
     "description": "$string:EntryAbility_desc",
     "icon": "$media:icon",
     "label": "$string:EntryAbility_label",
@@ -177,14 +177,17 @@ class Platform(PlatformBase):
         # EtsRuntime
         runtime_ts = self.resource_dir.joinpath('EtsRuntime.ts')
         copy_file(runtime_ts, self.ability_dir.joinpath(runtime_ts.name))
-        # Empty_Ability
-        empty_src = self.resource_dir.joinpath('Empty_Ability.ts')
+        # EmptyAbility
+        empty_src = self.resource_dir.joinpath('EmptyAbility.ts')
         empty_ts = self.ability_dir.joinpath(empty_src.name)
         copy_file(empty_src, empty_ts)
-        # Add Empty_Ability to module.json5
+        # Add EmptyAbility to module.json5
         ability_template = self.resource_dir.joinpath('EntryAbility.ts.tpl')
         module_config_copy = deepcopy(module_config)
-        module_config_copy['module']['abilities'].append(ability_config)
+        try:
+            module_config_copy['module']['abilities'].append(ability_config)
+        except KeyError as e:
+            raise RuntimeError('Corrupted module config') from e
         hap_unit = BenchUnit(self.hap_dir)
         abc_for_aot: List[Union[str, Path]] = []
         for bu in bus:
@@ -205,7 +208,10 @@ class Platform(PlatformBase):
             bu_ability = deepcopy(ability_config)
             bu_ability['name'] = f'{bu.name}_Ability'
             bu_ability['srcEntry'] = f'./ets/entryability/{bu.name}_Ability.ts'
-            module_config_copy['module']['abilities'].append(bu_ability)
+            try:
+                module_config_copy['module']['abilities'].append(bu_ability)
+            except KeyError as e:
+                raise RuntimeError('Corrupted module config') from e
         if OptFlags.AOT in self.flags:
             self.run_ark_aot(abc=abc_for_aot, an=self.lib_dir.joinpath('aot_file.an.so'))
         # flush module.json5

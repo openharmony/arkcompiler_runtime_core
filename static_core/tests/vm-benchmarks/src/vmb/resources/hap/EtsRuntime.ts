@@ -13,36 +13,36 @@
  * limitations under the License.
  */
 
-import hilog from "@ohos.hilog";
+import hilog from '@ohos.hilog';
 
 export function InitEtsRuntime(bench_file: string, bench_mode: string): void {
-    globalThis.Panda = globalThis.requireNapi("ets_interop_js_napi", true);
-    const libs = "/data/storage/el1/bundle/libs/arm64";
-    const bench = libs + "/" + bench_file;
-    const stdlib = libs + "/etsstdlib.abc.so";
+    globalThis.Panda = globalThis.requireNapi('ets_interop_js_napi', true);
+    const libs = '/data/storage/el1/bundle/libs/arm64';
+    const bench = libs + '/' + bench_file;
+    const stdlib = libs + '/etsstdlib.abc.so';
     const opts = {
-        "panda-files": bench,
-        "boot-panda-files": stdlib + ":" + bench,
-        "gc-trigger-type": "heap-trigger",
-        "load-runtimes": "ets",
-        "compiler-enable-jit": "false",
-        "run-gc-in-place": "true"
+        'panda-files': bench,
+        'boot-panda-files': stdlib + ':' + bench,
+        'gc-trigger-type': 'heap-trigger',
+        'load-runtimes': 'ets',
+        'compiler-enable-jit': 'false',
+        'run-gc-in-place': 'true'
     };
-    if ("aot" == bench_mode) {
-        opts["enable-an:force"] = "true";
-        opts["aot-file"] = libs + "/aot_file.an.so";
+    if ('aot' === bench_mode) {
+        opts['enable-an:force'] = 'true';
+        opts['aot-file'] = libs + '/aot_file.an.so';
     }
-    if ("jit" == bench_mode) {
-        opts["compiler-enable-jit"] = "true";
-        opts["no-async-jit"] = "false";
+    if ('jit' === bench_mode) {
+        opts['compiler-enable-jit'] = 'true';
+        opts['no-async-jit'] = 'false';
     }
-    if ("int" == bench_mode) {
-        opts["compiler-enable-jit"] = "false";
+    if ('int' === bench_mode) {
+        opts['compiler-enable-jit'] = 'false';
     }
     if (!globalThis.Panda.createRuntime(opts)) {
-        hilog.info(0, "VMB", "%{public}s", "ETS RUNTIME CREATE ERROR");
-        throw new Error("ERROR CREATING ETS RUNTIME");
+        hilog.info(0, 'VMB', '%{public}s', 'ETS RUNTIME CREATE ERROR');
+        throw new Error('ERROR CREATING ETS RUNTIME');
     } else {
-        hilog.info(0, "VMB", "%{public}s", "ETS RUNTIME CREATE OK");
+        hilog.info(0, 'VMB', '%{public}s', 'ETS RUNTIME CREATE OK');
     }
 }
