@@ -172,6 +172,14 @@ void Coroutine::Destroy()
 void Coroutine::Initialize()
 {
     context_->AttachToCoroutine(this);
+    // NOTE(cao ying, #26951): we need to remove this after refactoring the ark_aot initialization sequence,
+    // which should not include the unnecessary parts
+    // NOTE(cao ying, #26507): long command line causes SEGV under OHOS during the stack overflow
+    // checker initialization. Currently long command lines are not required for ark, but are required
+    // for ark_aot. So let's disable the stack overflow checker for ark_aot as a hotfix.
+    if (Runtime::GetCurrent()->GetOptions().IsArkAot()) {
+        return;
+    }
     InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
                               ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
 }
