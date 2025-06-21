@@ -19,25 +19,22 @@
 #include "libpandabase/os/mutex.h"
 #include <string>
 #include <cstddef>
-
 #include <libpandabase/macros.h>
+#include <functional>
 #if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
 #include <dlfcn.h>
 #endif
 #include "os/library_loader.h"
 #include "plugins/ets/runtime/ets_native_library.h"
+using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
 
 namespace ark::ets {
 class EtsNamespaceManagerImpl {
 public:
     static EtsNamespaceManagerImpl &GetInstance();
 
-    void CreateApplicationNs(const std::string &abcPath, const std::vector<std::string> &appLibPath);
-
-    void CreateLdNamespace(const std::string &searchKey, const char *libLoadPath);
-
     Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNs(const std::string &pathKey, const char *name);
-
+    void RegisterNamespaceName(const std::string &key, const std::string &value);
     virtual ~EtsNamespaceManagerImpl();
 
     NO_COPY_SEMANTIC(EtsNamespaceManagerImpl);
@@ -46,11 +43,9 @@ public:
 
 private:
     EtsNamespaceManagerImpl() = default;
-#if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
-    std::map<std::string, Dl_namespace> nsMap_;
-#endif
+
     mutable os::memory::RWLock lock_;
-    std::map<std::string, char *> appLibPathMap_ GUARDED_BY(lock_);
+    std::map<std::string, std::string> namespaceNames_ GUARDED_BY(lock_);
 };
 }  // namespace ark::ets
 #endif  // !PLUGINS_ETS_RUNTIME_NAMESPACE_MANAGER_IMPL_H

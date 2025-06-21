@@ -22,38 +22,7 @@ namespace ark::ets {
 EtsNamespaceManagerImpl::~EtsNamespaceManagerImpl()
 {
     os::memory::WriteLockHolder lock(lock_);
-    for (const auto &item : appLibPathMap_) {
-        delete[] item.second;
-    }
-    std::map<std::string, char *>().swap(appLibPathMap_);
-}
-
-void EtsNamespaceManagerImpl::CreateApplicationNs(const std::string &abcPath,
-                                                  const std::vector<std::string> &appLibPath)
-{
-    LOG(INFO, RUNTIME) << "EtsNamespaceManagerImpl::CreateApplicationNs: ets app abcpath = " << abcPath.c_str();
-    std::string tmpPath;
-    for (const auto &path : appLibPath) {
-        if (path.empty()) {
-            continue;
-        }
-        if (!tmpPath.empty()) {
-            tmpPath += ":";
-        }
-        tmpPath += path;
-    }
-    char *tmp = strdup(tmpPath.c_str());  // Consider using InternalAllocator instead of strdup -> issues#26703
-    if (tmp == nullptr) {
-        LOG(ERROR, RUNTIME) << "EtsNamespaceManagerImpl::CreateApplicationNs: strdup failed, tmpPath is null.";
-        return;
-    }
-    os::memory::WriteLockHolder writeLock(lock_);
-    if (appLibPathMap_.find(abcPath) != appLibPathMap_.end() && appLibPathMap_[abcPath] != nullptr) {
-        delete[] appLibPathMap_[abcPath];
-    }
-    appLibPathMap_[abcPath] = tmp;
-    CreateLdNamespace(abcPath, tmp);
-    LOG(INFO, RUNTIME) << "EtsNamespaceManagerImpl::CreateApplicationNs: ets app lib path: " << appLibPathMap_[abcPath];
+    namespaceNames_.clear();
 }
 
 EtsNamespaceManagerImpl &EtsNamespaceManagerImpl::GetInstance()
@@ -62,29 +31,10 @@ EtsNamespaceManagerImpl &EtsNamespaceManagerImpl::GetInstance()
     return instance;
 }
 
-void EtsNamespaceManagerImpl::CreateLdNamespace([[maybe_unused]] const std::string &searchKey,
-                                                [[maybe_unused]] const char *libLoadPath)
+void EtsNamespaceManagerImpl::RegisterNamespaceName(const std::string &key, const std::string &value)
 {
-#if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
-    Dl_namespace current_ns;
-    Dl_namespace ns;
-    std::string nsName = "pathNS_" + searchKey;
-    dlns_init(&ns, nsName.c_str());
-    dlns_get(nullptr, &current_ns);
-    Dl_namespace ndk_ns;
-    dlns_get("ndk", &ndk_ns);
-    dlns_create2(&ns, libLoadPath, 0);
-    dlns_set_namespace_separated(nsName.c_str(), true);
-    dlns_set_namespace_permitted_paths(nsName.c_str(), libLoadPath);
-    if (strlen(ndk_ns.name) > 0) {
-        dlns_inherit(&ns, &ndk_ns, "allow_all_shared_libs");
-        dlns_inherit(&ndk_ns, &current_ns, "allow_all_shared_libs");
-        dlns_inherit(&current_ns, &ndk_ns, "allow_all_shared_libs");
-    }
-    nsMap_[searchKey] = ns;
-    LOG(INFO, RUNTIME) << "EtsNamespaceManagerImpl::CreateLdNamespace searchKey :" << searchKey.c_str()
-                       << " ets create a library loading path :" << libLoadPath;
-#endif
+    os::memory::WriteLockHolder lock(lock_);
+    namespaceNames_[key] = value;
 }
 
 Expected<EtsNativeLibrary, os::Error> EtsNamespaceManagerImpl::LoadNativeLibraryFromNs(const std::string &pathKey,
@@ -94,26 +44,34 @@ Expected<EtsNativeLibrary, os::Error> EtsNamespaceManagerImpl::LoadNativeLibrary
                        << " loading library name :" << name;
 #if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
     PandaString errInfo = "EtsNamespaceManagerImpl::LoadNativeLibraryFromNs: ";
-    Dl_namespace ns;
+    std::string abcPath = pathKey;
+    std::string namespaceName;
     os::memory::ReadLockHolder lock(lock_);
-    if (appLibPathMap_.find(pathKey) != appLibPathMap_.end()) {
-        ns = nsMap_[pathKey];
+    if (namespaceNames_.find(abcPath) != namespaceNames_.end()) {
+        namespaceName = namespaceNames_[abcPath];
     } else {
-        if (appLibPathMap_.find("default") != appLibPathMap_.end()) {
-            LOG(WARNING, RUNTIME)
-                << "EtsNamespaceManagerImpl::LoadNativeLibraryFromNs: not  find appLibPath, use `pathNS_default` ns";
-            ns = nsMap_["default"];
+        abcPath = "default";
+        if (namespaceNames_.find(abcPath) != namespaceNames_.end()) {
+            LOG(WARNING, RUNTIME) << "EtsNamespaceManagerImpl::LoadNativeLibraryFromNs: " << abcPath.c_str()
+                                  << "not  find namespaceNames_, use `pathNS_default` ns";
+            namespaceName = namespaceNames_[abcPath];
         } else {
-            errInfo += "pathKey: " + pathKey + " and `default` not found in appLibPathMap_";
+            errInfo += "pathKey: " + abcPath + " and `default` not found in namespaceNames_";
             return Unexpected(os::Error(errInfo.c_str()));
         }
+    }
+    Dl_namespace ns;
+    if (dlns_get(namespaceName.data(), &ns) != 0) {
+        errInfo += "pathKey: " + abcPath + "namespaceName: " + namespaceName + " not found";
+        return Unexpected(os::Error(errInfo.c_str()));
     }
     void *nativeHandle = nullptr;
     nativeHandle = dlopen_ns(&ns, name, RTLD_LAZY);
     if (nativeHandle == nullptr) {
         char *dlerr = dlerror();
-        auto dlerrMsg =
-            dlerr != nullptr ? dlerr : "Error loading path " + std::string(name) + ":No such file or directory";
+        auto dlerrMsg = dlerr != nullptr ? dlerr
+                                         : "Error loading path " + std::string(name) + "in namespace" +
+                                               std::string(namespaceName) + ":No such file or directory";
         errInfo += "load app library failed. " + std::string(dlerrMsg);
         return Unexpected(os::Error(errInfo.c_str()));
     }
