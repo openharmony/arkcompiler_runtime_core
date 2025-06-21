@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef TESTS_FUZZTEST_CHECKSECUREMEM_FUZZER_CHECKSECUREMEM_FUZZER_H
+#define TESTS_FUZZTEST_CHECKSECUREMEM_FUZZER_CHECKSECUREMEM_FUZZER_H
+
+#define FUZZ_PROJECT_NAME "checksecuremem_fuzzer"
+
+#endif  // TESTS_FUZZTEST_CHECKSECUREMEM_FUZZER_CHECKSECUREMEM_FUZZER_H

@@ -76,12 +76,6 @@ namespace OHOS {
     void GoToNextFileFuzzTest(const uint8_t* data, [[maybe_unused]] size_t size)
     {
         {
-            // handle is nullptr
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::GoToNextFile(handle);
-        }
-
-        {
             // handle is not nullptr
             // creating an empty pandafile
             const char* s = reinterpret_cast<char*>(const_cast<uint8_t*>(data));

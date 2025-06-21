@@ -749,4 +749,19 @@ HWTEST(LIBZIPARCHIVE, IllegalPathTest, testing::ext::TestSize.Level0)
     ASSERT_EQ(CloseCurrentFile(zipfile), ZIPARCHIVE_ERR);
     ASSERT_EQ(CloseArchiveFile(zipfile), ZIPARCHIVE_ERR);
 }
+
+HWTEST(LIBZIPARCHIVE, GetGlobalFileInfoWithNullHandle, testing::ext::TestSize.Level0)
+{
+    panda::ZipArchiveHandle handle = nullptr;
+    panda::GlobalStat gi = GlobalStat();
+
+    ASSERT_EQ(panda::GetGlobalFileInfo(handle, &gi), ZIPARCHIVE_ERR);
+}
+
+HWTEST(ZipArchiveTest, GoToNextFileWithNullHandle, testing::ext::TestSize.Level0)
+{
+    panda::ZipArchiveHandle handle = nullptr;
+
+    ASSERT_EQ(GoToNextFile(handle), ZIPARCHIVE_ERR);
+}
 }  // namespace panda::test

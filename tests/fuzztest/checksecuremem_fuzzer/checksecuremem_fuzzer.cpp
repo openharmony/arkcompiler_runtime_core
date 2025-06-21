@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,26 +13,20 @@
  * limitations under the License.
  */
 
-#include "expected_fuzzer.h"
-
-#include "utils/expected.h"
+#include "checksecuremem_fuzzer.h"
+#include "libpandafile/file.h"
 
 namespace OHOS {
-    enum class ErrorCode { FIRST, SECOND };
-
-    void ExpectedFuzzTest([[maybe_unused]] const uint8_t* data, [[maybe_unused]] size_t size)
-    {
-        panda::Expected<int, ErrorCode> expected;
-        if (expected.HasValue() && *expected != expected.Value()) {
-            return;
-        }
-    }
+void CheckSecureMemFuzzTest(const uint8_t *data, size_t size)
+{
+    panda::panda_file::CheckSecureMem(reinterpret_cast<uintptr_t>(data), size);
 }
+}  // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::ExpectedFuzzTest(data, size);
+    OHOS::CheckSecureMemFuzzTest(data, size);
     return 0;
 }

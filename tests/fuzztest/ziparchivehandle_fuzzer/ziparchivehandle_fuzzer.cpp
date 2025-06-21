@@ -22,21 +22,7 @@ namespace OHOS {
     void ZipArchiveHandleFuzzTest(const uint8_t* data, size_t size)
     {
         std::string str(data, data + size);
-        {
-            // CloseArchive test
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::CloseArchive(handle);
-        }
-        {
-            // CloseArchiveFile test
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::CloseArchiveFile(handle);
-        }
-        {
-            // CloseCurrentFile test
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::CloseCurrentFile(handle);
-        }
+
         {
             // ExtractToMemory test
             panda::ZipArchiveHandle handle = nullptr;
@@ -54,17 +40,6 @@ namespace OHOS {
             panda::ZipArchiveHandle handle = nullptr;
             const char* path = str.c_str();
             panda::OpenArchive(handle, path);
-        }
-        {
-            // OpenArchiveFile test
-            panda::ZipArchiveHandle handle = nullptr;
-            FILE* fp = nullptr;
-            panda::OpenArchiveFile(handle, fp);
-        }
-        {
-            // OpenCurrentFile test
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::OpenCurrentFile(handle);
         }
     }
 }
