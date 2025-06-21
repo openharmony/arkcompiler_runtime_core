@@ -233,6 +233,24 @@ function taskSendData():void {
     arktest.assertEQ(verifyCount, 5);
 }
 
+function taskSendDataInAsyncFunction():void {
+    clearCount();
+    let task = new taskpool.Task(async() => {
+        taskpool.Task.sendData(10);
+        await Promise.resolve();
+        taskpool.Task.sendData("string");
+        taskpool.Task.sendData(undefined);
+        taskpool.Task.sendData(null);
+        taskpool.Task.sendData(1.0);
+    });
+
+    task.onReceiveData((): void => {
+        verifyCount++
+    });
+    await taskpool.execute(task);
+    arktest.assertEQ(verifyCount, 5);
+}
+
 function taskExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
     expectError(() => {
@@ -300,6 +318,50 @@ function testTaskpoolInfo() {
     arktest.assertEQ(await p, "result");
 }
 
+function namedTaskFunction(flagForTask:Event, isRunTask:Event):string {
+    isRunTask.fire();
+    flagForTask.wait();
+    return "result"
+}
+
+function testTaskpoolInfoOfNoneNameTask() {
+    // Check non empty threadInfo without tasks
+    let emptyThreadInfo = taskpool.getTaskPoolInfo();
+    let flagForTask = new Event();
+    let isRunTask = new Event();
+    // When taskpool using launch we do not have default worker for it
+    // So the behavior is little bit different with taskpool using EAWorker
+    if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        arktest.assertNE(emptyThreadInfo.threadInfos.length, 0);
+    }
+    let task = new taskpool.Task(namedTaskFunction, flagForTask, isRunTask);
+    let info1 = taskpool.getTaskPoolInfo();
+    // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
+    if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        arktest.assertNE(info1.threadInfos.length, 0);
+    }
+    let p = taskpool.execute(task, taskpool.Priority.HIGH);
+    // wait for task started
+    isRunTask.wait();
+    let info2 = taskpool.getTaskPoolInfo();
+    // Notify to continue task
+    flagForTask.fire();
+    // Check current priority of the worker
+    arktest.assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
+    arktest.assertEQ(info2.taskInfos.length, 1);
+    arktest.assertNE(info2.threadInfos.length, 0);
+    let isNonEmptyWorker: boolean = false;
+    for (let threadInfo of info2.threadInfos) {
+        arktest.assertLT(0, threadInfo.tid);
+        isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
+    }
+    arktest.assertEQ(isNonEmptyWorker, true);
+    // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
+    arktest.assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    arktest.assertEQ(info2.taskInfos[0].name, "namedTaskFunction");
+    arktest.assertEQ(await p, "result");
+}
+
 function returnNumber(): int {
     return 100;
 }
@@ -323,6 +385,7 @@ function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite("taskpool.CommonTask");
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite("taskpool.CommonTask.DISABLED");
     commonTaskSuite.addTest("GetTaskpoolInfoTest", testTaskpoolInfo);
+    commonTaskSuite.addTest("GetTaskpoolInfoOfNoneNameTaskTest", testTaskpoolInfoOfNoneNameTask);
     commonTaskSuite.addTest("ExceedContinueTaskCountTest", exceedContinueTaskTest);
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
     {
@@ -882,6 +945,7 @@ function main(): int {
     commonTaskSuite.addTest("TaskWithDependencyExecutePeriodicallyTest", taskWithDependencyExecutePeriodicallyTest);
     commonTaskSuite.addTest("TaskOnReceiveDataTest", taskOnReceiveData);
     commonTaskSuite.addTest("TaskSendDataTest", taskSendData);
+    commonTaskSuite.addTest("TaskSendDataInAsyncFunction", taskSendDataInAsyncFunction);
     commonTaskSuite.addTest("testOnReceiveDataRestParameter", testOnReceiveDataRestParameter);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
