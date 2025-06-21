@@ -56,7 +56,6 @@ host_unittest_action("LibPandaBaseTest") {
   configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
-    sdk_libc_secshared_config,
   ]
 
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]

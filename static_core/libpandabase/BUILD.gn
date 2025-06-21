@@ -200,8 +200,6 @@ config("arkbase_public_config") {
   if (ark_static_standalone_build) {
     ldflags = [ "-ldl" ]
   }
-
-  configs = [ sdk_libc_secshared_config ]
 }
 
 libarkbase_configs = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@
 #include "compiler/optimizer/optimizations/scheduler.h"
 #include "compiler/optimizer/optimizations/try_catch_resolving.h"
 #include "compiler/optimizer/optimizations/vn.h"
-#include "elfio/elfio.hpp"
+#include "elfio.hpp"
 #include "irtoc_runtime.h"
 
 namespace ark::irtoc {

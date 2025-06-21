@@ -70,6 +70,7 @@ ohos_source_set("ets_interop_js_napi_static") {
       "hilog:libhilog",
       "libuv:uv",
       "napi:ace_napi",
+      sdk_libc_secshared_dep,
     ]
   } else if (ark_standalone_build && ark_ets_hybrid) {
     deps += [

@@ -54,6 +54,7 @@ group("ark_packages") {
     deps += [ "runtime/interop_js:ets_interop_js_napi" ]
   }
   if (!(ark_standalone_build ||
+        (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
         (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
     deps += [
       ":commonsdk_packages",
@@ -63,6 +64,7 @@ group("ark_packages") {
 }
 
 if (!(ark_standalone_build ||
+      (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
       (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
   generate_static_abc("ets2abc_etsstdlib_bootabc") {
     arktsconfig = "$ark_root/plugins/ets/stdlib/arktsconfig.json"
@@ -298,7 +300,12 @@ if (with_stdlib) {
         "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/bin/arktsconfig.json",
         json_relative_path_array,
         "json")
-
+    if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+      write_file(
+          "$root_build_dir/clang_x64/obj/binarys/arkcompiler/ets_frontend/innerapis/ets2panda/clang_x64/libs/arktsconfig.json",
+          json_array,
+          "list lines")
+    }
     args = [
       "--extension=ets",
       "--opt-level=2",

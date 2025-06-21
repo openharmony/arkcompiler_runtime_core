@@ -223,7 +223,9 @@ template("ark_gen_file") {
     script = "$ark_root/isa/gen.rb"
 
     # rerun action when data file or template file update
-    inputs = [ invoker.template_file ] + invoker.data
+    if (defined(ohos_indep_compiler_enable) && !ohos_indep_compiler_enable) {
+      inputs = [ invoker.template_file ] + invoker.data
+    }
     outputs = [ invoker.output_file ]
     args = positional_argv + keyword_argv
     deps = extra_dependencies
@@ -427,8 +429,13 @@ template("es2panda_gen") {
       } else {
         external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
       }
-      es2panda_bin =
-          rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/es2panda")
+      if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+        es2panda_bin = rebase_path(
+                "${es2panda_root_out}/obj/binarys/arkcompiler/ets_frontend/innerapis/ets2panda/clang_x64/libs/es2panda")
+      } else {
+        es2panda_bin = rebase_path(
+                "${es2panda_root_out}/arkcompiler/ets_frontend/es2panda")
+      }
       script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
       if (defined(invoker.sources)) {
         sources = invoker.sources

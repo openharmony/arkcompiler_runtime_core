@@ -13,9 +13,12 @@
 
 group("fuzztest") {
   testonly = true
-
-  deps = [
-    "anitextdecoder_fuzzer:fuzztest",
-    "anitextencoder_fuzzer:fuzztest",
-  ]
+  if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+    deps = []
+  } else {
+    deps = [
+      "anitextdecoder_fuzzer:fuzztest",
+      "anitextencoder_fuzzer:fuzztest",
+    ]
+  }
 }

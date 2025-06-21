@@ -199,6 +199,10 @@ ohos_source_set("libarkbase_static_fuzz") {
     "json:nlohmann_json_static",
     sdk_libc_secshared_dep,
   ]
+  if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+      ohos_indep_compiler_enable) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -260,6 +264,10 @@ ohos_source_set("libarkbase_frontend_set_static") {
       "json:nlohmann_json_static",
       sdk_libc_secshared_dep,
     ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
 
   part_name = "runtime_core"

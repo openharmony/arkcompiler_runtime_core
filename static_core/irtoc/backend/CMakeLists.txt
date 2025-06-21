@@ -50,6 +50,7 @@ panda_target_include_directories(irtoc
 
 panda_target_include_directories(irtoc
     SYSTEM PUBLIC ${PANDA_THIRD_PARTY_SOURCES_DIR}/elfio
+    SYSTEM PUBLIC ${PANDA_THIRD_PARTY_SOURCES_DIR}/elfio/elfio
 )
 
 # Compile one or more irtoc script files into elf object file.

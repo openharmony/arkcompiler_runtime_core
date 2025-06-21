@@ -72,6 +72,7 @@ ohos_shared_library("arkts_abc2program") {
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
   
+  external_deps = [ sdk_libc_secshared_dep ]
   if (is_mingw) {
      deps += [ "$ark_root/libpandabase:libarktsbase" ]
   } else {
@@ -101,6 +102,7 @@ ohos_static_library("arkts_abc2program_frontend_static") {
 
   configs = abc2program_configs
 
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = [
     ":abc2program_plugins_inc",
     ":abc_type_convert_cpp",

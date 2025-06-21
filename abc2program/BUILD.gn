@@ -69,6 +69,10 @@ ohos_shared_library("abc2program") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+      ohos_indep_compiler_enable) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   if (!is_standard_system) {
     relative_install_dir = "ark"
@@ -107,6 +111,10 @@ ohos_static_library("abc2program_frontend_static") {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
     external_deps = [ "bounds_checking_function:libsec_static" ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
   cflags = [ "-Wno-c++20-designator" ]
 

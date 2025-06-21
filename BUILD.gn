@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -206,7 +206,6 @@ config("ark_config") {
     "-Wextra",
     "-Werror",
     "-fno-rtti",
-    "-fno-exceptions",
     "-Wno-invalid-offsetof",
 
     "-Wno-gnu-statement-expression",
@@ -214,6 +213,9 @@ config("ark_config") {
     "-Wno-unused-result",
     "-Wno-unused-but-set-variable",
   ]
+  if (defined(ohos_indep_compiler_enable) && !ohos_indep_compiler_enable) {
+    cflags_cc += [ "-fno-exceptions" ]
+  }
 
   cflags_c = []
 

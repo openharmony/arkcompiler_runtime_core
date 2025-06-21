@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,11 +20,11 @@ config("arkziparchive_config") {
   ]
 }
 
-ohos_source_set("libarkziparchive_static") {
+ohos_static_library("libarkziparchive_static") {
   sources = [ "zip_archive.cpp" ]
 
-  public_configs = [
-    ":arkziparchive_config",
+  public_configs = [ ":arkziparchive_config" ]
+  configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
   ]
@@ -92,6 +92,10 @@ ohos_source_set("libarkziparchive_frontend_set_static") {
       "zlib:libz",
       sdk_libc_secshared_dep,
     ]
+    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
+        ohos_indep_compiler_enable) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
 
   part_name = "runtime_core"
@@ -100,7 +104,11 @@ ohos_source_set("libarkziparchive_frontend_set_static") {
 
 ohos_static_library("libarkziparchive_frontend_static") {
   stack_protector_ret = false
-  deps = [ ":libarkziparchive_frontend_set_static" ]
+  if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+    deps = [ ":libarkziparchive_static" ]
+  } else {
+    deps = [ ":libarkziparchive_frontend_set_static" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

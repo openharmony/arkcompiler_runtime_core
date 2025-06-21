@@ -27,6 +27,8 @@ if (enable_irtoc) {
     cflags_cc = [
       "-isystem",
       rebase_path("$ark_third_party_root/elfio", root_build_dir),
+      "-isystem",
+      rebase_path("$ark_third_party_root/elfio/elfio", root_build_dir),
     ]
   }
 
@@ -130,6 +132,10 @@ if (enable_irtoc) {
     ]
 
     external_deps = [ sdk_libc_secshared_dep ]
+    if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
+      external_deps += [ "elfio:elfio" ]
+      cflags_cc = [ "-Wno-error=missing-field-initializers" ]  # for elfio.hpp
+    }
 
     if (is_llvm_interpreter) {
       sources += [ "$target_gen_dir/generated/irtoc_code_llvm.cpp" ]
