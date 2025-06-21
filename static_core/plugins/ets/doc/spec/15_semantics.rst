@@ -486,7 +486,7 @@ by the example below:
 
 .. index::
    union type
-   normalization
+   union type normalization
    subtype
 
 .. code-block:: typescript
@@ -520,8 +520,7 @@ following conditions are  met:
    -  ``FP``:sub:`i` is an optional parameter if ``SP``:sub:`i` is an optional
       parameter.
 
--  ``FR`` can be any type if ``SR`` is type ``void``. Otherwise, the resultant
-   type ``FR`` is a subtype of ``SR`` (covariance).
+-  type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
    function type
@@ -557,9 +556,6 @@ following conditions are  met:
 
        let g: () => Base = bb
        /* Compile-time error: too less parameters */
-
-       let h: (p: Base) => void = bb
-       /* OK: result type of supertype is void */
     }
 
 .. index::
@@ -1114,8 +1110,8 @@ requiring additional checks or casts (see :ref:`Cast Expression`).
 
 Overloading (see :ref:`Overload Declarations`) can cause tricky situations
 when a smart type leads to the call of an entity
-(see :ref:`Overload Resolution`) that suits smart type rather than static type
-of an argument:
+(see :ref:`Overload Resolution for Overload Declarations`)
+that suits smart type rather than static type of an argument:
 
 .. code-block:: typescript
    :linenos:
@@ -1603,10 +1599,10 @@ Override compatibility with ``Object`` is represented by the example below:
           p07: Base[],
           p08: [Base, Base]
        ): void
-       kinds_of_return_type(): Object // It can be overridden by all subtypes except primitive ones
+       kinds_of_return_type(): Object // It can be overridden by all subtypes of Object
     }
     interface Derived extends Base {
-       kinds_of_parameters( // Object is a supertype for all types except primitive ones
+       kinds_of_parameters( // Object is a supertype for all class types
           p1: Object,
           p2: Object,
           p3: Object, // Compile-time error: number and Object are not override-compatible
@@ -1690,10 +1686,11 @@ If a class (*derived class*) implements an interface (*base interface*), and
 the base interface has a set of overload signatures, then the derived class
 can provide a valid overriding overload signature (or signatures) for all
 overload signatures of the base interface. The derived class can introduce
-additional overload signatures. The implementation interface must have
-the signature ``(...p: Any[]): Any``. This signature is a valid overriding for
-any overloaded signature. The same works if one class extends another class.
-The situation is represented by the example below:
+additional overload signatures. The implementation body must have
+the signature ``(...p: Any[]): Any`` (see
+:ref:`Overload Signatures Implementation Body`). This signature is a valid
+overriding for any overloaded signature. The same works if one class extends
+another class. The situation is represented by the example below:
 
 
 .. code-block:: typescript
@@ -1745,11 +1742,11 @@ Overloading
 ***********
 
 *Overloading* is the language feature that allows to use one name to
-call several functions (in general sense, including methods and constructors)
-with different signatures and different bodies.
+call several functions, or methods, or constructors with different signatures
+and different bodies.
 
-The actual function to be called is determined at compile
-time. Thus, *overloading* is related to compile-time polymorphism.
+The actual function, or method, or constructor to be called is determined at
+compile time. Thus, *overloading* is related to compile-time polymorphism.
 
 |LANG| support two mechanisms for *overloading*:
 
@@ -1757,7 +1754,6 @@ time. Thus, *overloading* is related to compile-time polymorphism.
   that is mainly used to improve type checking;
 
 - and innovative form of *managed overloading*: :ref:`Overload Declarations`.
-
 
 .. index::
    overloading
@@ -1770,37 +1766,103 @@ time. Thus, *overloading* is related to compile-time polymorphism.
    compile-time polymorphism
    overloading
 
-TBD: A :index:`compile-time warning` is issued if the the order of
-*overload signatures* or order of entity in *overload declarations*
-is wrong in a sense that some signature or entity can never
-be selected for call.
+*Overload resolution* is used to select one entity to be called from a set of
+candidates if a name to call refers to a *overload declaration* (see
+:ref:`Overload resolution for Overload Declarations`).
+
+*Signature resolution* is used to select one entity to be called from a set of
+candidates if a name to call refers to a *declaration with overload signatures*
+(see :ref:`Signature resolution for Overload Signatures`).
+
+Both resolution schemes use the first match textual order to make the
+resolution process straightforward.
+
+TBD: A :index:`compile-time warning` is issued if the order of entities in *overload
+declarations* implies that some overloaded entities can never be selected for the call.
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1 (p: number) {}
+    function f2 (p: string) {}
+    function f3 (p: number|string) {}
+    overload foo {f1, f2, f3}  // f3 will never be called as foo()
+
+    foo (5)                    // f1() is called
+    foo ("5")                  // f2() is called
 
 |
 
-.. _Overload Resolution:
+.. _Signature resolution for Overload Signatures:
 
-Overload Resolution
-===================
+Signature resolution for Overload Signatures
+============================================
 
 .. meta:
     frontend_status: None
 
-*Overload resolution* is used to select one entity to call from a set of
-candidates if a name to call refers to a *declaration with overload signatures*
-(see :ref:`Declarations with Overload Signatures`)
-or a *overload declaration* (see :ref:`Overload Declarations`).
+*Overload signatures* allows allows specifying a function, or method, or
+constructor that can have several signatures and one *implementation body*
+with its own fixed *implementation siganture* (see
+:ref:`Overload Signatures Implementation Body`). At the call site, call
+arguments are checked against these several signatures in their declaration
+order: the first one that is appropriate for the given arguments means that
+the call is valid. If no appropriate signature found then a
+:index:`compile-time error` occurs.
 
-*Overload signatures* allows allows specifying an entity
-(function, method or constructor) that can have several signatures and
-one *implementation body*. An *implementation body* cannot be called directly.
-At the call site, signatures to use is checked in the declaration order: the first
-signature that is appropriate for the call arguments is used.
+.. code-block:: typescript
+   :linenos:
+
+    function foo(s: string)            // signature #1
+    function foo(s: string, n: number) // signature #2
+    function foo(...x: Any[]): Any {}  // implementation signature
+
+    foo("1")     // call fits signature #1
+    foo("1", 5)  // call fits signature #2
+    foo(1, 2, 3) // compile-time error - no appropriate signature for the call
+                 // implementation signature is not accessible at call sites
+
+|
+
+.. _Overload resolution for Overload Declarations:
+
+Overload resolution for Overload Declarations
+=============================================
+
+.. meta:
+    frontend_status: None
 
 *Overload declarations* defines an ordered set of entities, at the call site
-the first entity from this set with appropriate signature is used to call.
-The *first match* algorithm gives a developer with
+the first *accessible* entity from this set with appropriate signature
+is used to call. The *first match* algorithm gives a developer with
 full control over selecting specific entity to call.
 That's why this approach is called *managed overloading*.
+
+This example illustrates the developer control over calls:
+
+.. code-block:: typescript
+   :linenos:
+
+    function max2i(a: int, b: int): int
+        return  a > b ? a : b
+    }
+    function max2d(a: double, b: double): double {
+        return  a > b ? a : b
+    }
+    function maxN(...a: double[]): double {
+        // returns max element in array 'a'
+    }
+    overload max {max2i, max2d, maxN}
+
+    let i = 1
+    let j = 2
+    let pi = 3.14
+
+    max(i, j) // max2i is used
+    max(i, pi) // max2d is used
+    max(i, pi, 4) // maxN is used
+    max(1) // maxN is used
+    max(false, true) // compile-time error, no appropriate signature
 
 |
 

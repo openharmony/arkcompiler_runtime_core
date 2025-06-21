@@ -190,6 +190,11 @@ Grammar Summary
         '<' type (',' type)* '>'
         ;
 
+    overloadFunctionDeclaration:
+        'overload' identifier '{' qualifiedName (',' qualifiedName)* ','? '}'
+        ;
+
+
     expression:
         primaryExpression
         | castExpression
@@ -628,11 +633,14 @@ Grammar Summary
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
+        | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
+        | overloadMethodDeclaration
         | classAccessorDeclaration
         )
         ;
+
 
     staticBlock:
         'static' block
@@ -671,6 +679,14 @@ Grammar Summary
         | 'async'
         ;
 
+    overloadMethodDeclaration:
+        overloadMethodModifier*
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+        ;
+
+    overloadMethodModifier: 'static' | 'async';
+
+
     classAccessorDeclaration:
         accessorModifier*
         ( 'get' identifier '(' ')' returnType block?
@@ -689,10 +705,14 @@ Grammar Summary
         'constructor' parameters constructorBody
         ;
 
-
     constructorBody:
         '{' statement* '}'
         ;
+
+    overloadConstructorDeclaration:
+        'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
+        ;
+
 
     interfaceDeclaration:
         'interface' identifier typeParameters?
@@ -703,10 +723,11 @@ Grammar Summary
         'extends' interfaceTypeList
         ;
 
-    interfaceMember:
-        annotationUsage?
+    interfaceMember
+        : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
+        | overloadInterfaceMethodDeclaration
         )
         ;
 
@@ -719,6 +740,10 @@ Grammar Summary
     interfaceMethodDeclaration:
         identifier signature
         | interfaceDefaultMethodDeclaration
+        ;
+
+    overloadInterfaceMethodDeclaration:
+        'overload' identifier '{' identifier (',' identifier)* ','? '}'
         ;
 
     enumDeclaration:
@@ -797,6 +822,7 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration

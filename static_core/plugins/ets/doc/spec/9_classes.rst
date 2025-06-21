@@ -255,6 +255,7 @@ clause, is assumed to have the ``extends Object`` clause.
 .. index::
    class
    Object
+   Any
    extends clause
    base class
    derived class
@@ -273,17 +274,16 @@ The syntax of *class extension clause* is presented below:
 
 A :index:`compile-time error` occurs if:
 
--  An ``extends`` clause appears in the definition of the class ``Object``,
-   which is the top of type hierarchy, and has no superclass.
+-  ``typeReference`` refers directly to, or is an alias of any
+   non-class type, e.g., of interface, enumeration, union, function,
+   or utility type.
 
 -  Class type named by ``typeReference`` is not accessible (see
    :ref:`Accessible`).
 
--  The ``extends`` graph has a cycle.
+-  An ``extends`` clause appears in the definition of the class ``Object``.
 
--  ``typeReference`` refers directly to, or is an alias of interface, or of any
-   non-class type, e.g., of primitive, array, string, enumeration, union,
-   function, or utility type.
+-  The ``extends`` graph has a cycle.
 
 *Class extension* implies that a class inherits all members of the direct
 superclass.
@@ -295,10 +295,10 @@ accessible (see :ref:`Accessible`) within subclasses:
    class
    extends clause
    Object
+   Any
    superclass
    type
    enum type
-   primitive type
    class type
    class extension
    extends clause
@@ -686,8 +686,10 @@ The syntax is presented below:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
+        | overloadConstructorDeclaration
         | classFieldDeclaration
         | classMethodDeclaration
+        | overloadMethodDeclaration
         | classAccessorDeclaration
         )
         ;

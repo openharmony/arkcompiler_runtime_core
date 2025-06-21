@@ -168,7 +168,6 @@ also non-nullish.
    type parameter
    keyword extends
    type reference
-   union normalization
    union type normalization
    object
    compatibility

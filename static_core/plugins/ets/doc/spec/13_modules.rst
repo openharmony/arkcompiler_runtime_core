@@ -366,9 +366,29 @@ is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
 If an *identifier* denotes an *overload alias* (see
-:ref:`Function Overload Declarations`), then all its overloaded functions,
-either imported or not, are considered in :ref:`Overload Resolution` for the
-call.
+:ref:`Function Overload Declarations`), then all its accessible overloaded
+functions, either they are imported or not, are considered in 
+:ref:`Overload Resolution for Overload Declarations` for the call validity.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    export function f1(p: number) {}
+    export function f2(p: string) {}
+    export overload foo {f1, f2}
+
+    // File2
+    import {foo} from "File1"  // Note: f1 and f2 are not mandatory imported
+    foo(5)                     // f1() is called
+    foo("a string")            // f2() is called
+
+    // File3
+    import {foo, f1} from "File1"  // Note: f1 is accessible as well
+    f1(5)                          // f1() is called
+    foo(6)                         // f1() is called
+    foo("a string")                // f2() is called
+
 
 *Selective binding* that uses exported entities is represented in the examples
 below:
@@ -891,6 +911,7 @@ The syntax of *top-level declarations* is presented below:
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | overloadFunctionDeclaration
         | functionWithReceiverDeclaration
         | accessorWithReceiverDeclaration
         | namespaceDeclaration
