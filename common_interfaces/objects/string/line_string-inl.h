@@ -16,6 +16,8 @@
 #ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 #define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
+#include "common_components/base/globals.h"
+#include "common_components/base_runtime/hooks.h"
 #include "common_interfaces/objects/string/base_string_declare.h"
 #include "common_interfaces/objects/string/line_string.h"
 
@@ -69,6 +71,28 @@ inline void LineString::Set(uint32_t index, uint16_t src)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         *(GetData() + index) = src;
     }
+}
+
+inline void LineString::Trim(uint32_t newLength)
+{
+    ASSERT(IsLineString());
+    uint32_t oldLength = GetLength();
+    ASSERT(oldLength >= newLength);
+    if (newLength == oldLength) return;
+    bool isUtf8 = IsUtf8();
+    size_t sizeNew = isUtf8 ?
+        LineString::ComputeSizeUtf8(newLength): LineString::ComputeSizeUtf16(newLength);
+    size_t sizeOld = isUtf8 ?
+        LineString::ComputeSizeUtf8(oldLength): LineString::ComputeSizeUtf16(oldLength);
+    sizeNew = common::AlignUp(sizeNew, ALIGNMENT_8_BYTES);
+    sizeOld = common::AlignUp(sizeOld, ALIGNMENT_8_BYTES);
+    size_t trimBytes = sizeOld - sizeNew;
+    if (trimBytes > 0) {
+        uintptr_t newEndAddr = ToUintPtr(this) + sizeNew;
+        ASSERT_PRINT((newEndAddr % ALIGNMENT_8_BYTES) == 0, "Alignment failed");
+        FillFreeObject(reinterpret_cast<void*>(newEndAddr), trimBytes);
+    }
+    InitLengthAndFlags(newLength, isUtf8);
 }
 }
 #endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
