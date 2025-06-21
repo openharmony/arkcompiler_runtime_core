@@ -22,7 +22,7 @@
 
 namespace ark::intrinsics {
 ObjectHeader *AnyLdbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame, ObjectHeader *thisObj,
-                          [[maybe_unused]] FileEntityId id)
+                          [[maybe_unused]] uint32_t id)
 {
     if (thisObj == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
@@ -49,7 +49,7 @@ ObjectHeader *AnyLdbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused
 }
 
 void AnyStbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame, ObjectHeader *thisObj,
-                 [[maybe_unused]]FileEntityId id, [[maybe_unused]] ObjectHeader *val)
+                 [[maybe_unused]]uint32_t id, [[maybe_unused]] ObjectHeader *val)
 {
     if (thisObj == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
@@ -260,7 +260,7 @@ ObjectHeader *AnyCallShort(ManagedThread *thread, ObjectHeader *func, ObjectHead
 }
 
 static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame,
-                                        ObjectHeader *thisObj, [[maybe_unused]] FileEntityId name,
+                                        ObjectHeader *thisObj, [[maybe_unused]] uint32_t name,
                                         [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
 {
     if (thisObj == nullptr) {
@@ -289,14 +289,14 @@ static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, 
 }
 
 extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                      FileEntityId name)
+                                      uint32_t name)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     return AnyCallThis(thread, frame, thisObj, name, Span<VMHandle<ObjectHeader>>());
 }
 
 extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          FileEntityId name, uint8_t argStart, uint8_t argc)
+                                          uint32_t name, uint8_t argStart, uint8_t argc)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
@@ -307,7 +307,7 @@ extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, O
 }
 
 extern "C" ObjectHeader *AnyCallThisShort(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          FileEntityId name, ObjectHeader *arg)
+                                          uint32_t name, ObjectHeader *arg)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
