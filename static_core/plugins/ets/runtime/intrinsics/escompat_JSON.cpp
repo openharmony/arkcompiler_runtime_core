@@ -15,6 +15,7 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "helpers/json_helper.h"
 
 namespace ark::ets::intrinsics {
 
@@ -137,6 +138,18 @@ EtsString *EscompatJSONGetJSONRenameByName(EtsClass *cls, EtsString *name)
         }
     });
     return retStrHandle.GetPtr();
+}
+
+extern "C" EtsString *EscompatJSONStringifyFast(EtsObject *value)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro->HasPendingException() == false);
+
+    EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> valueHandle(coro, value);
+
+    helpers::JSONStringifier stringifier;
+    return stringifier.Stringify(valueHandle);
 }
 
 }  // namespace ark::ets::intrinsics
