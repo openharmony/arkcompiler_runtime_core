@@ -1,4 +1,12 @@
-#FailKind.ABORT_FAIL - 1 tests:
+#FailKind.SEGFAULT_FAIL - 2 tests:
+regression/26215_0.ets
+regression/26215_1.ets
+#FailKind.DECLGEN_ETS2TS_FAIL - 3 tests:
+regression/25423/25423.ets
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
+#FailKind.ABORT_FAIL - 5 tests:
+spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
 spec/11.Enumerations/issue14636.ets
@@ -151,3 +159,22 @@ std/core/std_core_typedarrays__Float64Array_001.ets
 std/core/std_core_typedarrays__Int16Array.ets
 std/core/std_core_typedarrays__Int32Array.ets
 std/core/std_core_typedarrays__Int8Array.ets
+escompat/JsonReplacerTest.ets
+regression/23623.ets
+regression/23735.ets
+std/core/DeepCopyTest.ets
+std/core/json/JsonElementParseTest.ets
+std/core/std_core_char_static_Char_charsToCodePoint.ets
+std/core/std_core_char_static_Char_codeUnitsToEncode.ets
+std/core/std_core_char_static_Char_getHighSurrogate.ets
+std/core/std_core_char_static_Char_getLowSurrogate.ets
+std/core/std_core_char_static_Char_isInBasicMultilingualPlane_002.ets
+std/core/std_core_char_static_Char_isValidCodePoint.ets
+std/core/std_core_string_String_charCodeAt_int.ets
+std/core/std_core_string_String_getLength.ets
+std/core/std_core_string_String_indexOf_String_int.ets
+std/core/std_core_string_String_indexOf_String_number.ets
+std/core/std_core_string_String_indexOf_char_int.ets
+std/core/std_core_string_String_lastIndexOf_String_int.ets
+std/core/std_core_string_String_lastIndexOf_char_int.ets
+std/core/std_core_string_String_search_String.ets

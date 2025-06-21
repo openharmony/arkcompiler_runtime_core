@@ -1,5 +1,6 @@
 #FailKind.SEGFAULT_FAIL - 32 tests:
 02.lexical_elements/07.keywords/hard_13.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_example_literals.ets
 03.types/11.type_undefined/undefined_incorrect_usage_1.ets
 03.types/19.union_types/united_switch_ext_1.ets
 04.names_declarations_and_scopes/04.scopes/unique_decl_name_0.ets
@@ -35,9 +36,12 @@
 03.types/18.function_types/incorrect_function_name_61.ets
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_neg_1.ets
 09.classes/06.method_declarations/01.static_methods/static_method_declaration_with_keywords_1.ets
+13.compilation_units/05.declaration_modules/struct_declaration_n _1.ets
 17.experimental_features/09.native_functions_and_methods/01.native_functions/nat4.ets
 17.experimental_features/10.final_classes_and_methods/02.final_methods/final_declaration_with_modifiers_negative_1.ets
 #FailKind.ABORT_FAIL - 38 tests:
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
+13.compilation_units/08.namespace_declarations/namespace_declarations_neg15.ets
 13.compilation_units/03.import_directives/04.default_import_binding/import_defaultExport_selectiveBindings.ets
 03.types/18.function_types/incorrect_function_name_45.ets
 03.types/18.function_types/incorrect_function_name_46.ets
@@ -78,6 +82,10 @@
 17.experimental_features/10.final_classes_and_methods/02.final_methods/fm_7.ets
 #FailKind.DECLGEN_ETS2TS_FAIL - 3 tests:
 03.types/18.function_types/incorrect_function_name_43.ets
+13.compilation_units/05.declaration_modules/struct_declaration_n_1.ets
+13.compilation_units/05.declaration_modules/struct_declaration_n_2.ets
+13.compilation_units/05.declaration_modules/struct_declaration_n_3.ets
+13.compilation_units/09.export_directives/01.selective_export_directive/negative_selective_exports_3.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_0.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_1.ets
 #FailKind.TSC_FAIL - 1009 tests:
@@ -1150,3 +1158,43 @@
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a3_10.ets
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_1.ets
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_2.ets
+02.lexical_elements/07.keywords/types_17.ets
+02.lexical_elements/07.keywords/types_22.ets
+02.lexical_elements/07.keywords/types_25.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_anchor_boundaries.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_basic_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_flags_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_groups_capturing.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_0.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_1.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_10.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_11.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_12.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_13.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_14.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_15.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_16.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_17.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_18.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_19.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_2.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_20.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_21.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_22.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_23.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_24.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_25.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_26.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_3.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_4.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_5.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_7.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_8.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_invalid_literal_9.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
+02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
+09.classes/01.class_declaration/03.class_extension_clause/valid_type_reference_2.ets
+13.compilation_units/09.export_directives/04.re-export_directive/module_b_re-export.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_neg_0.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_primitive_4.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_36.ets
