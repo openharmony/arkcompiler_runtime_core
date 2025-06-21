@@ -1741,6 +1741,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      */
     public native toLocaleLowerCase(locale: String): String;
 
+    public toLocaleLowerCase(locale: String[]): String {
+        if (locale.length != 0) {
+            return this.toLocaleLowerCase(locale[0]);
+        }
+        return this.toLocaleLowerCase("");
+    }
+
     public toLocaleLowerCase(): String {
         return this.toLocaleLowerCase("");
     }
@@ -1750,6 +1757,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      * according to any locale-specific case mappings.
      */
     public native toLocaleUpperCase(locale: String): String;
+
+    public toLocaleUpperCase(locale: String[]): String {
+        if (locale.length != 0) {
+            return this.toLocaleUpperCase(locale[0]);
+        }
+        return this.toLocaleUpperCase("");
+    }
 
     public toLocaleUpperCase(): String {
         return this.toLocaleUpperCase("");
