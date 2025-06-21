@@ -50,12 +50,12 @@ function(:StringConcat2Tlab,
     # any of the strings is uncompressed (resulted string is uncompressed)
     has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
 
-    count1 := ShrI(length1).Imm(1).u32
-    count2 := ShrI(length2).Imm(1).u32
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
     size := Add(count1, count2).u32
     data_size := Shl(size, has_uncompressed).u32
-    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
     new_str := allocate_string_tlab(klass, data_size)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -123,13 +123,13 @@ function(:StringConcat3Tlab,
 
     has_uncompressed := AndI(Or(length3, Or(length1, length2).u32).u32).Imm(1).u32
 
-    count1 := ShrI(length1).Imm(1).u32
-    count2 := ShrI(length2).Imm(1).u32
-    count3 := ShrI(length3).Imm(1).u32
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count3 := ShrI(length3).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
     size := Add(count1, Add(count2, count3).u32).u32
     data_size := Shl(size, has_uncompressed).u32
-    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
     new_str := allocate_string_tlab(klass, data_size)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -215,14 +215,14 @@ function(:StringConcat4Tlab,
     has_uncompressed := Or(length3, Or(length1, length2).u32).u32
     has_uncompressed := AndI(Or(length4, has_uncompressed).u32).Imm(1).u32
 
-    count1 := ShrI(length1).Imm(1).u32
-    count2 := ShrI(length2).Imm(1).u32
-    count3 := ShrI(length3).Imm(1).u32
-    count4 := ShrI(length4).Imm(1).u32
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count3 := ShrI(length3).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count4 := ShrI(length4).Imm(Constants::STRING_LENGTH_SHIFT).u32
 
     size := Add(count1, Add(count2, Add(count3, count4).u32).u32).u32
     data_size := Shl(size, has_uncompressed).u32
-    length := Or(ShlI(size).Imm(1).u32, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
     new_str := allocate_string_tlab(klass, data_size)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -333,7 +333,7 @@ function(:StringCompareTo,
   buf2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
 
   # get the least length in chars
-  length := ShrI(Cast(Min(length1, length2).i32).u64).Imm(1).u64
+  length := ShrI(Cast(Min(length1, length2).i32).u64).Imm(Constants::STRING_LENGTH_SHIFT).u64
 
   utf_1 := AndI(length1).Imm(1).u32
   utf_2 := AndI(length2).Imm(1).u32

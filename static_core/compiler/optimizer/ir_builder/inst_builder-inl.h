@@ -19,6 +19,7 @@
 #include "inst_builder.h"
 #include "macros.h"
 #include "optimizer/code_generator/encode.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -373,8 +374,8 @@ void InstBuilder::BuildStringLengthIntrinsic(const BytecodeInstruction *bcInst, 
 
     Inst *stringLength;
     if (graph_->GetRuntime()->IsCompressedStringsEnabled()) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;
@@ -1599,8 +1600,8 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
 
     Inst *stringLength = nullptr;
     if (compressionEnabled) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;

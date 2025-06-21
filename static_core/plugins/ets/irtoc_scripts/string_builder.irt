@@ -414,19 +414,19 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
   # 7. Update 'length' field
   length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
   if num_args > 0
-    length0 := ShrI(length0).Imm(1).i32
+    length0 := ShrI(length0).Imm(Constants::STRING_LENGTH_SHIFT).i32
     length := Add(length, length0).i32
   end
   if num_args > 1
-    length1 := ShrI(length1).Imm(1).i32
+    length1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).i32
     length := Add(length, length1).i32
   end
   if num_args > 2
-    length2 := ShrI(length2).Imm(1).i32
+    length2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).i32
     length := Add(length, length2).i32
   end
   if num_args > 3
-    length3 := ShrI(length3).Imm(1).i32
+    length3 := ShrI(length3).Imm(Constants::STRING_LENGTH_SHIFT).i32
     length := Add(length, length3).i32
   end
 
@@ -486,20 +486,23 @@ function(:StringBuilderToString,
 
   # Compute data size and length of a new string.
   n_chars := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).u32
-  len_compressed := ShlI(n_chars).Imm(1).u32  # set 'uncompressed' bit to 0
   sb_compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
-  If(sb_compress, 0).EQ.Unlikely.b {
-    size := len_compressed
-    len_uncompressed := OrI(len_compressed).Imm(1).u32  # set 'uncompressed' bit to 1
+  If(sb_compress, 1).EQ.Likely.b {
+    data_size1 := Cast(n_chars).word
+  } Else {
+    data_size2 := Cast(ShlI(n_chars).Imm(1).u32).word
   }
-  data_size := Phi(n_chars, size).u32
-  packed_length := Phi(len_compressed, len_uncompressed).u32
+  data_size := Phi(data_size1, data_size2).u32
   # Allocate a string
   new_str := allocate_string_tlab(string_klass, Cast(data_size).word)
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # Set new string's length
-  StoreI(new_str,packed_length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  If(sb_compress, 1).EQ.Likely.b {
+   StoreI(new_str, ShlI(n_chars).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  } Else {
+   StoreI(new_str, OrI(ShlI(n_chars).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  }
   # Set new string's hashcode to 0, so as not to spend time on its computation
   StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
   # If string is empty, then there is nothing to do anymore
@@ -527,7 +530,7 @@ Label(:ForEachBufferSlot)
   # -------------------
   str_len := LoadI(obj).Imm(Constants::STRING_LENGTH_OFFSET).i32
   src_data := AddI(Cast(obj).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
-  src_len := ShrI(str_len).Imm(1).i32
+  src_len := ShrI(str_len).Imm(Constants::STRING_LENGTH_SHIFT).i32
   If(sb_compress, 0).EQ.Unlikely.b {
     Goto(:DoNotCompressString)
   }

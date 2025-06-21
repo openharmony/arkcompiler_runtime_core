@@ -16,6 +16,7 @@
 #include "optimizer/code_generator/encode.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "bytecode_instruction-inl.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 /*
@@ -449,9 +450,10 @@ void InstBuilder::BuildStringSizeInBytes(const BytecodeInstruction *bcInst, bool
     auto graph = GetGraph();
     auto offset = FindOrCreateConstant(runtime->GetStringLengthOffset(graph->GetArch()));
     auto one = FindOrCreateConstant(1U);
+    auto two = FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
 
     auto len = graph->CreateInstLoadNative(DataType::INT32, bcAddr, str, offset);
-    auto size = graph->CreateInstShr(DataType::INT32, bcAddr, len, one);
+    auto size = graph->CreateInstShr(DataType::INT32, bcAddr, len, two);
     auto shift = graph->CreateInstAnd(DataType::INT32, bcAddr, len, one);
     auto add = graph->CreateInstAdd(DataType::INT32, bcAddr, size, shift);
     auto result = graph->CreateInstShl(DataType::INT32, bcAddr, add, shift);

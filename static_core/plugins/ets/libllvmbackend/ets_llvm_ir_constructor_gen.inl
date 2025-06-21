@@ -274,7 +274,7 @@ void LLVMIrConstructor::StringBuilderAppendStringMain(Inst *inst, llvm::Value *s
     auto strLengthOffset =
         builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), str, runtime->GetStringLengthOffset(arch));
     auto strLength = builder_.CreateLoad(builder_.getInt32Ty(), strLengthOffset);
-    auto strLengthShr = builder_.CreateLShr(strLength, builder_.getInt32(1));
+    auto strLengthShr = builder_.CreateLShr(strLength, builder_.getInt32(ark::coretypes::String::STRING_LENGTH_SHIFT));
     auto strLengthZero = builder_.CreateICmpEQ(strLengthShr, builder_.getInt32(0));
     builder_.CreateCondBr(strLengthZero, contBb, mainBb);
 

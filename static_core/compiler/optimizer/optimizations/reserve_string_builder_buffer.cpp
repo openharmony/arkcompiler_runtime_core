@@ -25,6 +25,7 @@
 
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/string_builder_utils.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -258,7 +259,7 @@ Inst *CreateStringBuilderConstructorArgumentLength(Graph *graph, Inst *arg, Inst
 
     auto argLength = graph->CreateInstShr(DataType::INT32, ctorCall->GetPc());
     argLength->SetInput(ARG_IDX_0, lenArray);
-    argLength->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(1));
+    argLength->SetInput(ARG_IDX_1, graph->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT));
     InsertBeforeWithSaveState(argLength, ctorCall->GetSaveState());
 
     return argLength;
