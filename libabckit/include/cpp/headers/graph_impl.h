@@ -17,8 +17,8 @@
 #define CPP_ABCKIT_GRAPH_IMPL_H
 
 #include <cstdint>
-#include "./graph.h"
-#include "./dynamic_isa.h"
+#include "graph.h"
+#include "dynamic_isa.h"
 #include "basic_block.h"
 #include "config.h"
 

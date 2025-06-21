@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_IMPL_H
 #define CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_IMPL_H
 
-#include "./annotation_element.h"
-#include "./annotation.h"
+#include "annotation_element.h"
+#include "annotation.h"
 
 namespace abckit::core {
 

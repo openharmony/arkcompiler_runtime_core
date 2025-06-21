@@ -18,8 +18,8 @@
 
 #include "../core/module.h"
 #include "../base_concepts.h"
-#include "./import_descriptor.h"
-#include "./export_descriptor.h"
+#include "import_descriptor.h"
+#include "export_descriptor.h"
 
 #include <string_view>
 

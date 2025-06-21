@@ -18,9 +18,9 @@
 
 #include "../core/module.h"
 #include "../base_concepts.h"
-#include "./import_descriptor.h"
-#include "./export_descriptor.h"
-#include "./annotation_interface.h"
+#include "import_descriptor.h"
+#include "export_descriptor.h"
+#include "annotation_interface.h"
 
 #include <string_view>
 

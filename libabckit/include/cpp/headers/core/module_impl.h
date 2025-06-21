@@ -16,13 +16,13 @@
 #ifndef CPP_ABCKIT_CORE_MODULE_IMPL_H
 #define CPP_ABCKIT_CORE_MODULE_IMPL_H
 
-#include "./module.h"
-#include "./class.h"
-#include "./function.h"
-#include "./annotation_interface.h"
-#include "./namespace.h"
-#include "./import_descriptor.h"
-#include "./export_descriptor.h"
+#include "module.h"
+#include "class.h"
+#include "function.h"
+#include "annotation_interface.h"
+#include "namespace.h"
+#include "import_descriptor.h"
+#include "export_descriptor.h"
 
 namespace abckit::core {
 

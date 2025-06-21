@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 
-#include "./import_descriptor.h"
-#include "./function.h"
-#include "./module.h"
+#include "import_descriptor.h"
+#include "function.h"
+#include "module.h"
 namespace abckit::core {
 
 inline const File *ImportDescriptor::GetFile() const

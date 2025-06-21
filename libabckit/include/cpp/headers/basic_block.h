@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_BASIC_BLOCK_H
 #define CPP_ABCKIT_BASIC_BLOCK_H
 
-#include "./base_classes.h"
-#include "./instruction.h"
+#include "base_classes.h"
+#include "instruction.h"
 
 #include <cstdint>
 #include <vector>

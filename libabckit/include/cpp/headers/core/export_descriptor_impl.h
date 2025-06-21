@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_EXPORT_DESCRIPTOR_IMPL_H
 #define CPP_ABCKIT_CORE_EXPORT_DESCRIPTOR_IMPL_H
 
-#include "./export_descriptor.h"
+#include "export_descriptor.h"
 #include "module.h"
 
 namespace abckit::core {

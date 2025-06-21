@@ -23,7 +23,7 @@
 #include "../../c/extensions/arkts/metadata_arkts.h"
 #include "../../c/extensions/js/metadata_js.h"
 
-#include "./utils.h"
+#include "utils.h"
 
 #include <cstdint>
 #include <memory>

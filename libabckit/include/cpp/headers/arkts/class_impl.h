@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_CLASS_IMPL_H
 #define CPP_ABCKIT_ARKTS_CLASS_IMPL_H
 
-#include "./class.h"
-#include "./annotation.h"
+#include "class.h"
+#include "annotation.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {

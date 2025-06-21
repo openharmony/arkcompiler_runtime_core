@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_IMPL_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_IMPL_H
 
-#include "./annotation_interface.h"
-#include "./module.h"
+#include "annotation_interface.h"
+#include "module.h"
 
 namespace abckit::core {
 

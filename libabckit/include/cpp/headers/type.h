@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_TYPE_H
 #define CPP_ABCKIT_TYPE_H
 
-#include "./base_classes.h"
-#include "./core/class.h"
+#include "base_classes.h"
+#include "core/class.h"
 
 namespace abckit {
 

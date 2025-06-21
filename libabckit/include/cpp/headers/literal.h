@@ -17,9 +17,9 @@
 #define CPP_ABCKIT_LITERAL_H
 
 #include <string>
-#include "./base_classes.h"
-#include "./core/function.h"
-#include "./literal_array.h"
+#include "base_classes.h"
+#include "core/function.h"
+#include "literal_array.h"
 
 namespace abckit {
 

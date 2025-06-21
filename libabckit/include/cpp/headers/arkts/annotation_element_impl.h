@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
 
-#include "./annotation_element.h"
+#include "annotation_element.h"
 
 namespace abckit::arkts {
 

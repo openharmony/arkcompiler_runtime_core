@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_BASE_CLASSES_H
 #define CPP_ABCKIT_BASE_CLASSES_H
 
-#include "./config.h"
+#include "config.h"
 
 #include <memory>
 #include <type_traits>

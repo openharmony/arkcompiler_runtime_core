@@ -17,8 +17,8 @@
 #define CPP_ABCKIT_BASIC_BLOCK_IMPL_H
 
 #include <cstdint>
-#include "./basic_block.h"
-#include "./instruction.h"
+#include "basic_block.h"
+#include "instruction.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit {

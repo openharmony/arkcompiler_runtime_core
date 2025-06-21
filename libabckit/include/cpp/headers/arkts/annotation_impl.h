@@ -16,8 +16,8 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_IMPL_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_IMPL_H
 
-#include "./annotation.h"
-#include "./annotation_element.h"
+#include "annotation.h"
+#include "annotation_element.h"
 #include "../value.h"
 #include "../core/annotation_element.h"
 

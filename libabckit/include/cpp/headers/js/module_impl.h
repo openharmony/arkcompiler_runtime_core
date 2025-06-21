@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_JS_MODULE_IMPL_H
 #define CPP_ABCKIT_JS_MODULE_IMPL_H
 
-#include "./module.h"
+#include "module.h"
 
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::js {

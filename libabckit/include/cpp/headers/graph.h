@@ -16,10 +16,10 @@
 #ifndef CPP_ABCKIT_GRAPH_H
 #define CPP_ABCKIT_GRAPH_H
 
-#include "./base_classes.h"
-#include "./basic_block.h"
-#include "./dynamic_isa.h"
-#include "./instruction.h"
+#include "base_classes.h"
+#include "basic_block.h"
+#include "dynamic_isa.h"
+#include "instruction.h"
 #include "../../../src/include_v2/cpp/headers/static_isa.h"
 
 #include <memory>
