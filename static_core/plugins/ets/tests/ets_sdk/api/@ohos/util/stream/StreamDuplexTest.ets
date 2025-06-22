@@ -106,7 +106,7 @@ function testStreamDuplexOn001() {
     let duplexStream = new stream.Duplex();
     let callback: CallbackFnType = (...params: Object[]) => {};
     duplexStream.on("data", callback);
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }
 
 // this test case will be completed future
@@ -114,21 +114,27 @@ function testStreamDuplexOff001() {
     let duplexStream = new stream.Duplex();
     let callback: CallbackFnType = (...params: Object[]) => {};
     duplexStream.off("data", callback);
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamDuplexDoInitialize001() {
     let duplexStream = new stream.Duplex();
     duplexStream.doInitialize(() => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamDuplexDoRead001() {
-    let duplexStream = new stream.Duplex();
+    class DuplexStream extends stream.Duplex {
+        constructor() {
+            super();
+        }
+        doRead(size: number) {}
+    }
+    let duplexStream = new DuplexStream();
     duplexStream.doRead(1);
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }
 
 // this test case will be completed future
@@ -170,12 +176,12 @@ function testStreamDuplexUncrok001() {
 function testStreamDuplexDoWrite001() {
     let duplexStream = new stream.Duplex();
     duplexStream.doWrite("test", "utf8", () => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamDuplexDoWritev001() {
     let duplexStream = new stream.Duplex();
     duplexStream.doWritev(["test"], () => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(duplexStream, undefined);
 }

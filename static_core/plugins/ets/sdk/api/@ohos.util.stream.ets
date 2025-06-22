@@ -15,8 +15,7 @@
 
 import { BusinessError } from '@ohos.base';
 import { util } from './@ohos.util';
-
-type CallbackFnType = (...params: Object[]) => void;
+import buffer from '@ohos.buffer';
 
 /**
  * The stream module provides a comprehensive set of stream processing capabilities, including four types of streams:
@@ -39,6 +38,13 @@ export namespace stream {
         'windows-1253', 'windows-1254', 'windows-1255', 'windows-1256',
         'windows-1257', 'windows-1258', 'big5', 'euc-jp', 'iso-2022-jp',
         'shift_jis', 'euc-kr', 'x-mac-cyrillic', 'utf-16be', 'utf-16le');
+    const onceState: OnceState = {
+        fired: false,
+        wrapFn: undefined,
+        target: undefined,
+        event: undefined,
+        callback: undefined
+    };
 
     // BusinessError
     const ERR_INCORRECT_PARAMETER: BusinessError =
@@ -87,17 +93,90 @@ export namespace stream {
         });
     }
 
+    function processErrOrClose(stream: Readable, err: Error, sync: boolean = false): void {
+        // If the readable stream is disabled, return directly
+        if (stream.closed) {
+            return;
+        }
+
+        if (err) {
+            stream.errored = true;
+            stream.closed = true;
+            if (sync) {
+                Promise.resolve().then((): void => {
+                    emitError(stream, err);
+                    emitClose(stream);
+                });
+            } else {
+                emitError(stream, err);
+                emitClose(stream);
+            }
+        }
+    }
+
+    function emitError(stream: Readable, err: Error): void {
+        if(stream.errorEmitted) {
+            return;
+        }
+        stream.errorEmitted = true;
+        stream.listener?.emit(ReadableEvent.ERROR, err);
+    }
+
+    function emitClose(stream: Readable): void {
+        if(stream.closedEmitted) {
+            return;
+        }
+        stream.closedEmitted = true;
+        stream.listener?.emit(ReadableEvent.CLOSE);
+    }
+
+    function onceWrapper(state: OnceState) {
+        if (!state.fired) {
+            state.target!.off(state.event!, state.wrapFn!);
+            state.fired = true;
+            return state.callback!.unsafeCall(state.target);
+        } else {
+            const func = (): void => {};
+            return func;
+        }
+    }
+
+    function _onceWrap(target: EventEmitter, event: string, callback: Function): Function {
+        onceState.fired = false;
+        onceState.wrapFn = undefined;
+        onceState.target = target;
+        onceState.event = event;
+        onceState.callback = callback;
+
+        const wrapped = () => {
+            return onceWrapper(onceState);
+        };
+
+        onceState.wrapFn = wrapped;
+
+        return wrapped;
+    }
+
+    function advanceListener(stream: Writable, event: WritableEvent, callback: Function): void {
+        if (!stream.listener?.handlers || !stream.listener?.handlers.has(event)) {
+            stream.on(event, callback);
+        } else {
+            stream.listener?.handlers.get(event)?.push(callback);
+        }
+    }
+
+    interface OnceState {
+        fired: boolean;
+        wrapFn: Function | undefined;
+        target: EventEmitter | undefined;
+        event: string | undefined;
+        callback: Function | undefined;
+    }
+
     interface WritableBuffer {
         encoding?: string;
         chunk: string | Uint8Array;
         callback: Function;
-    }
-
-    export interface ReadablePipeStream {
-        write: Writable;
-        dataCallback: CallbackFnType;
-        drainCallback: CallbackFnType;
-        endCallback: CallbackFnType;
     }
 
     /**
@@ -117,8 +196,6 @@ export namespace stream {
          *
          */
         encoding?: string;
-        highWatermark?: number;
-        doRead?: (size: number) => void;
     }
 
     /**
@@ -254,7 +331,7 @@ export namespace stream {
          */
         constructor() {
             this.listener = new EventEmitter();
-            this.writableHighWatermarkInner = DEFAULT_HIGH_WATER_MARK as number;
+            this.writableHighWatermarkInner = DEFAULT_HIGH_WATER_MARK;
             this.writableObjectModeInner = false;
             this.writableLengthInner = 0;
             this.writableBufferLength = 0;
@@ -322,7 +399,7 @@ export namespace stream {
                         this.throwError(param[0] as Error);
                         return;
                     }
-                    callback?.unsafeCall(param);
+                    callback?.unsafeCall();
                     this.writableLengthInner = this.writableLengthInner! - chunkLength;
                     this.writing = false;
                     this.writableCb --;
@@ -388,7 +465,7 @@ export namespace stream {
                     if (param.length > 0) {
                         this.erroredInner = param[0] as Error;
                     }
-                    callback?.unsafeCall(param);
+                    callback?.unsafeCall();
                     this.writableLengthInner = this.writableLengthInner! - chunkLength;
                     this.writing = false;
                     this.writableCb --;
@@ -410,7 +487,7 @@ export namespace stream {
                     }
                     this.afterWrite();
                 } else {
-                    Promise.resolve().then(():void => {
+                    Promise.resolve().then((): void => {
                         this.emitErrorOnce(ERR_MULTIPLE_CALLBACK, true);
                     });
                 }
@@ -512,7 +589,7 @@ export namespace stream {
                         }
                         this.afterWrite();
                     } else {
-                        Promise.resolve().then(():void => {
+                        Promise.resolve().then((): void => {
                             this.listener?.emit(WritableEvent.ERROR, ERR_MULTIPLE_CALLBACK);
                         });
                     }
@@ -941,43 +1018,107 @@ export namespace stream {
      * @syscap SystemCapability.Utils.Lang
      */
     export class Readable {
-        protected encoder = new util.TextEncoder();
-        protected stringDecoder = new util.StringDecoder();
+        public listener: EventEmitter | undefined;
+        public errorEmitted: boolean;
+        public closedEmitted: boolean;
 
-        private buf: Uint8Array;
-        private listener: EventEmitter | undefined;
-        private callbacks: Map<string, Array<CallbackFnType>>;
+        protected encoder = new util.TextEncoder();
+        protected stringDecoderInner = new util.StringDecoder();
+
+        private buf: Array<buffer.Buffer | string | null>;
+        private bufIndex: number;
+        private awaitDrainWriters: Set<Writable>;
+        private callbacks: Map<string, Array<Function>>;
+        private readableDecoder: boolean;
         private isInitialized: boolean;
         private pauseInner: boolean;
-        private pipeWritableArrayInner: Array<ReadablePipeStream>;
-        private readableObjectModeInner: boolean | undefined;
+        private pipeWritableArrayInner: Array<Writable>;
+        private readableObjectModeInner: boolean;
         private readableInner: boolean;
         private readableHighWatermarkInner: number;
-        private readableFlowingInner: boolean;
+        private readableFlowingInner: boolean | null;
         private readableLengthInner: number;
-        private readableEncodingInner: string;
+        private readableEncodingInner: string | null;
         private readableEndedInner: boolean;
-        private erroredInner: Error | undefined;
+        private erroredInner: boolean;
+        private erroredValueInner: Error | undefined;
         private closedInner: boolean | undefined;
-        private doReadFunc: ((size: number) => void) | null;
+        private dataListenning: boolean | undefined;
+        private readableListenning: boolean | undefined;
+        private readableHasFlowingInner: boolean;
+        private readableEndEmitted: boolean;
+        private readableNeedReadable: boolean | undefined;
+        private readableEmittedReadable: boolean;
+        private isReading: boolean | undefined;
+        private readableEmittedResume: boolean;
+        private readableSync: boolean;
+        private isReadingMore: boolean;
+        private multiAwaitDrain: boolean;
+
+        /**
+         * The Readable constructor.
+         *
+         */
+        constructor() {
+            this.initializeMembers();
+        }
+
+        /**
+         * The Readable constructor.
+         *
+         * @param { ReadableOptions } options - Provide options.
+         * @throws { BusinessError } 401 - Parameter error.
+         */
+        constructor(options: ReadableOptions) {
+            this.initializeMembers();
+
+            if (options.encoding) {
+                this.readableEncodingInner = options.encoding!;
+                if (this.readableEncodingInner!.toLowerCase() === 'utf8') {
+                    this.readableEncodingInner = DEFAULT_ENCODING;
+                }
+
+                if (ENCODING_SET.findIndex((element) => element === this.readableEncodingInner!.toLowerCase()) === -1) {
+                    throw ERR_INCORRECT_PARAMETER;
+                }
+
+                this.stringDecoder = new util.StringDecoder(this.readableEncodingInner!);
+            }
+        }
 
         private initializeMembers(): void {
-            this.buf = new Uint8Array();
             this.listener = new EventEmitter();
-            this.callbacks = new Map<string, Array<CallbackFnType>>();
+            this.errorEmitted = false;
+            this.closedEmitted = false;
+            this.buf = new Array<buffer.Buffer | string | null>();
+            this.bufIndex = 0;
+            this.awaitDrainWriters = new Set<Writable>();
+            this.callbacks = new Map<string, Array<Function>>();
+            this.readableDecoder = false;
             this.isInitialized = false;
             this.pauseInner = false;
-            this.pipeWritableArrayInner = new Array<ReadablePipeStream>();
+            this.pipeWritableArrayInner = new Array<Writable>();
             this.readableObjectModeInner = false;
             this.readableInner = true;
             this.readableHighWatermarkInner = DEFAULT_HIGH_WATER_MARK;
-            this.readableFlowingInner = true;
+            this.readableFlowingInner = null;
             this.readableLengthInner = 0;
-            this.readableEncodingInner = DEFAULT_ENCODING;
+            this.readableEncodingInner = null;
             this.readableEndedInner = false;
-            this.erroredInner = undefined;
+            this.erroredInner = false;
+            this.erroredValueInner = undefined;
             this.closedInner = undefined;
-            this.doReadFunc = (size: number): void => {};
+            this.dataListenning = false;
+            this.readableListenning = undefined;
+            this.readableHasFlowingInner = false;
+            this.readableEndEmitted = false;
+            this.readableNeedReadable = false;
+            this.readableEmittedReadable = false;
+            this.isReading = undefined;
+            this.readableEmittedResume = false;
+            this.readableSync = false;
+            this.isReadingMore = false;
+            this.multiAwaitDrain = false;
         }
 
         private computeNewReadableHighWatermark(readSize: number): number {
@@ -991,8 +1132,333 @@ export namespace stream {
             return readSize;
         }
 
+        private flowInner(stream: Readable): void {
+            while (this.readableFlowing && stream.read() !== null);
+        }
+
+        private emitReadableNextCycle(stream: Readable): void {
+            stream.read(0)
+        }
+
+        private emitReadableNow(stream: Readable): void {
+            stream.readableNeedReadable = false;
+            if (!stream.readableEmittedReadable) {
+                stream.readableEmittedReadable = true;
+                Promise.resolve().then((): void => {
+                    stream.emitReadableInner(stream);
+                });
+            }
+        }
+
+        private emitReadableEnd(stream: Readable): void {
+            if (!stream.readableEndEmitted) {
+                stream.readableEndedInner = true;
+                Promise.resolve().then((): void => {
+                    this.emitReadableEndNextCycle(stream);
+                });
+            }
+        }
+
+        private emitReadableEndNextCycle(stream: Readable): void {
+            if (!stream.erroredInner && !stream.closedInner
+                && !stream.readableEndEmitted && stream.readableLengthInner === 0) {
+                stream.readableEndEmitted = true;
+                stream.listener?.emit(ReadableEvent.END);
+            }
+        }
+
+        private emitReadableInner(stream: Readable): void {
+            if (!stream.erroredInner && (stream.readableLengthInner || stream.readableEndedInner)) {
+                stream.listener?.emit(ReadableEvent.READABLE);
+                stream.readableEmittedReadable = false;
+            }
+            if (!stream.readableFlowingInner && !stream.readableEndedInner
+                && stream.readableLengthInner <= stream.readableHighWatermarkInner) {
+                stream.readableNeedReadable = true;
+            } else {
+                stream.readableNeedReadable = false;
+            }
+            stream.flowInner(stream)
+        }
+
+        private resumeInner(stream: Readable): void {
+            if (!this.isReading) {
+                stream.read(0);
+            }
+            stream.readableEmittedResume = false;
+            stream.listener?.emit(ReadableEvent.RESUME);
+            this.flowInner(stream);
+            if (stream.readableFlowingInner && !stream.isReading) {
+                stream.read(0);
+            }
+        }
+
+        private endOfFlow(stream: Readable): void {
+            if (stream.readableEndedInner) {
+                return;
+            }
+            const stringDecoder = stream.readableDecoder ? stream.stringDecoderInner : null;
+            if (stringDecoder) {
+                const chunk = stringDecoder.end();
+                if(chunk?.length) {
+                    stream.buf.push(chunk);
+                    stream.readableLengthInner += stream.readableObjectModeInner ? 1 : chunk.length;
+                }
+            }
+            stream.readableEndedInner = true;
+
+            if (stream.readableSync) {
+                stream.emitReadableNow(stream);
+            } else {
+                stream.readableNeedReadable = false;
+                stream.readableEmittedReadable = true;
+                stream.emitReadableInner(stream);
+            }
+        }
+
+        private canBeReadMore(stream: Readable): void {
+            if (!stream.isReadingMore) {
+                stream.isReadingMore = true;
+                Promise.resolve().then((): void => {
+                    while ((!stream.isReading && !stream.readableEndedInner) &&
+                        (stream.readableLengthInner < stream.readableHighWatermarkInner
+                        || (stream.readableFlowingInner && stream.readableLengthInner === 0))) {
+                        const preLen = stream.readableLengthInner;
+                        stream.read(0);
+                        if (preLen === stream.readableLengthInner) {
+                            break;
+                        }
+                        stream.isReadingMore = false;
+                    }
+                })
+            }
+        }
+
+        private bufHasSpace(stream: Readable): boolean {
+            return !stream.readableEndedInner &&
+                (stream.readableLengthInner < stream.readableHighWatermarkInner ||
+                stream.readableLengthInner === 0)
+        }
+
+        private pushChunkInner(stream: Readable, chunk: buffer.Buffer | string): void {
+            if (stream.readableFlowingInner && stream.dataListenning
+                && !stream.readableSync && stream.readableLengthInner === 0) {
+                this.awaitDrainWriters.clear();
+                stream.listener?.emit(ReadableEvent.DATA, chunk);
+            } else {
+                if (chunk instanceof buffer.Buffer && (chunk as buffer.Buffer).length) {
+                    stream.readableLengthInner += (chunk as buffer.Buffer).length;
+                    stream.buf.push(chunk);
+                } else if (chunk instanceof string && (chunk as string).length) {
+                    stream.readableLengthInner += (chunk as string).length;
+                    stream.buf.push(chunk);
+                }
+                if (stream.readableNeedReadable) {
+                    this.emitReadableNow(stream);
+                }
+            }
+            stream.canBeReadMore(stream);
+        }
+
+        private pushByteModeChunk(stream: Readable, chunk: Uint8Array | string | null, encoding?: string): boolean {
+            if (chunk === null) {
+                stream.isReading = false;
+                stream.endOfFlow(stream);
+                return false;
+            }
+
+            let chunkBuffer: buffer.Buffer | undefined = undefined;
+            let chunkString: string | undefined = undefined;
+            let chunkIsBuffer: boolean = false;
+            if (chunk instanceof string) {
+                if (!encoding) {
+                    encoding = DEFAULT_ENCODING;
+                }
+                if (stream.readableEncodingInner !== encoding) {
+                    chunkBuffer = buffer.from(chunk, encoding as buffer.BufferEncoding);
+                    chunkIsBuffer = true;
+                    encoding = '';
+                } else {
+                    chunkString = chunk as string;
+                }
+            } else if (chunk instanceof Uint8Array) {
+                chunkBuffer = buffer.from(chunk);
+                chunkIsBuffer = true;
+                encoding = '';
+            }
+
+            if ((chunkIsBuffer && chunkBuffer!.length < 0) || (!chunkIsBuffer && chunk!.length < 0)) {
+                stream.isReading = false;
+                stream.canBeReadMore(stream);
+                return stream.bufHasSpace(stream);
+            }
+
+            if (stream.readableEndedInner) {
+                processErrOrClose(stream, ERR_WRITE_AFTER_END);
+                return false;
+            }
+
+            if (stream.erroredInner) {
+                return false;
+            }
+
+            stream.isReading = false;
+            if (stream.readableDecoder && !encoding) {
+                if (chunkIsBuffer) {
+                    chunkString = stream.stringDecoderInner.write(new Uint8Array(chunkBuffer!.buffer));
+                    chunkIsBuffer = false;
+                }
+                if (chunkString!.length === 0) {
+                    stream.canBeReadMore(stream);
+                    return stream.bufHasSpace(stream);
+                }
+            }
+
+            if (chunkIsBuffer) {
+                stream.pushChunkInner(stream, chunkBuffer!);
+            } else {
+                stream.pushChunkInner(stream, chunkString!);
+            }
+            return stream.bufHasSpace(stream);
+        }
+
+        private calculateReadSize(size: number): number {
+            if (size <= 0 || (this.readableLengthInner === 0 && this.readableEndedInner)) {
+                return 0;
+            }
+
+            if (this.readableObjectModeInner) {
+                return 1;
+            }
+
+            if (Number.isNaN(size)) {
+                if(this.readableFlowingInner && this.readableLengthInner) {
+                    const entry = this.buf[this.bufIndex];
+                    if (entry instanceof buffer.Buffer) {
+                        return (entry as buffer.Buffer).length;
+                    } else if (entry instanceof string) {
+                        return (entry as string).length;
+                    } else {
+                        return 0;
+                    }
+                }
+                return this.readableLengthInner;
+            }
+
+            if (size <= this.readableLengthInner) {
+                return size;
+            }
+            return this.readableEndedInner ? this.readableLengthInner : 0;
+        }
+
+        private readDataFromBuf(size: number): buffer.Buffer | string | null {
+            if (this.readableLengthInner === 0) {
+                return null;
+            }
+
+            let num: number = this.bufIndex;
+            let res: buffer.Buffer | string | null = null;
+
+            const buf = this.buf;
+            const len = buf.length;
+
+            if (this.readableObjectModeInner) {
+                res = buf[num];
+                buf[num++] = null;
+            } else if (!size || size >= this.readableLengthInner) {
+                if (this.readableDecoder) {
+                    res = '';
+                    while (num < len) {
+                        res = (res as string) + buf[num];
+                        buf[num++] = null;
+                    }
+                } else if (len - num === 0) {
+                    res = buffer.alloc(0);
+                } else if (len - num === 1) {
+                    res = buf[num];
+                    buf[num++] = null;
+                } else {
+                    res = buffer.allocUninitializedFromPool(this.readableLengthInner);
+                    let index = 0;
+                    while (num < len) {
+                        (buf[num] as buffer.Buffer).copy(res, index, 0 ,(buf[num] as buffer.Buffer).length);
+                        index += (buf[num] as buffer.Buffer).length;
+                        buf[num++] = null;
+                    }
+                }
+            } else if (size < (buf[num] as buffer.Buffer).length) {
+                res = (buf[num] as buffer.Buffer).subarray(0, size);
+                buf[num] = (buf[num] as buffer.Buffer).subarray(size);
+            } else if (size === (buf[num] as buffer.Buffer).length) {
+                res = buf[num];
+                buf[num++] = null;
+            } else if (this.readableDecoder) {
+                res = '';
+                while (num < len) {
+                    const str: buffer.Buffer | string | null = buf[num];
+                    if (size > (str as string).length) {
+                        res = (res as string) + (str as string);
+                        size -= (str as string).length;
+                        buf[num++] = null;
+                    } else {
+                        if (size === (buf[num] as string).length) {
+                            res = (res as string) + (str as string);
+                            buf[num++] = null;
+                        } else {
+                            res = (res as string) + (str as buffer.Buffer).subarray(0, size);
+                            buf[num] = (str as buffer.Buffer).subarray(size);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                res = buffer.allocUninitializedFromPool(size);
+
+                const nRetLen = size;
+                while (num < len) {
+                    const data = buf[num];
+                    if (size > (data as buffer.Buffer).length) {
+                        (data as buffer.Buffer).copy(res, nRetLen - size, 0, (data as buffer.Buffer).length);
+                        size -= (data as buffer.Buffer).length;
+                        buf[num++] = null;
+                    } else {
+                        if (size === (data as buffer.Buffer).length) {
+                            (data as buffer.Buffer).copy(res, nRetLen - size, 0, (data as buffer.Buffer).length);
+                            buf[num++] = null;
+                        } else {
+                            (data as buffer.Buffer).copy(res, nRetLen - size, 0, size);
+                            let RemainBuf = buffer.allocUninitializedFromPool((data as buffer.Buffer).length - size);
+                            (data as buffer.Buffer).copy(RemainBuf, nRetLen - size, 0, size);
+                            buf[num] = RemainBuf;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (num === len) {
+                this.buf.length = 0;
+                this.bufIndex = 0;
+            } else if (num > 1024) {
+                this.buf.splice(0, num);
+                this.bufIndex = 0;
+            } else {
+                this.bufIndex = num;
+            }
+
+            return res;
+        }
+
+        setEndType(): void {
+            Promise.resolve().then((): void => {
+                this.readableInner = false;
+                this.readableEndedInner = true;
+                this.listener?.emit(ReadableEvent.END);
+            });
+        }
+
         private throwError(error: Error): void {
-            this.erroredInner = error;
+            this.erroredValueInner = error;
             if (this.listener !== undefined && this.listener!.listenerCount(WritableEvent.ERROR) > 0) {
                 setTimeout((): void => {
                     this.listener!.emit(WritableEvent.ERROR, error);
@@ -1002,196 +1468,108 @@ export namespace stream {
             }
         }
 
-        setEndType(): void {
-            Promise.resolve().then((): void => {
-                this.readableInner = false;
-                this.readableEndedInner = true;
-                if (this.listener !== undefined) {
-                    this.listener!.emit(ReadableEvent.END);
-                }
-            });
-        }
-
-        /**
-         * The Readable constructor.
-         *
-         */
-        constructor() {
-            this.initializeMembers();
-            if (ENCODING_SET.findIndex((element) => element === this.readableEncodingInner.toLowerCase()) === -1) {
-                throw ERR_INCORRECT_PARAMETER;
-            }
-            this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
-            this.encoder = new util.TextEncoder(this.readableEncodingInner);
-        }
-
-        /**
-         * The Readable constructor.
-         *
-         * @param { ReadableOptions } options - Provide options.
-         * @throws { BusinessError } 401 - Parameter error. Possible causes:
-         *     1.Mandatory parameters are left unspecified;
-         *     2.Incorrect parameter types;
-         *     3.Parameter verification failed.
-         */
-        constructor(options: ReadableOptions) {
-            this.initializeMembers();
-            if (options.doRead !== undefined) {
-                this.doReadFunc = options.doRead!;
-            }
-
-            if (options.encoding !== null && options.encoding!.toLowerCase() !== 'utf8') {
-                this.readableEncodingInner = options.encoding!;
-            }
-
-            if (options.highWatermark !== undefined) {
-                this.readableHighWatermarkInner = options.highWatermark!;
-            }
-
-            if (ENCODING_SET.findIndex((element) => element === this.readableEncodingInner.toLowerCase()) === -1) {
-                throw ERR_INCORRECT_PARAMETER;
-            }
-            this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
-            this.encoder = new util.TextEncoder(this.readableEncodingInner);
-        }
-
-        /**
-         * Returns boolean indicating whether it is in ObjectMode.
-         */
-        get readableObjectMode(): boolean | undefined {
-            return this.readableObjectModeInner;
-        }
-
-        /**
-         * Is true if it is safe to call readable.read(), which means
-         * the stream has not been destroyed or emitted 'error' or 'end'.
-         */
-        get readable(): boolean {
-            if (!this.readableInner && this.readableEndedInner) {
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * Returns the value of highWatermark passed when creating this Readable.
-         */
-        get readableHighWatermark(): number {
-            return this.readableHighWatermarkInner;
-        }
-
-        /**
-         * This property reflects the current state of the readable stream null/true/false.
-         */
-        get readableFlowing(): boolean {
-            return this.readableFlowingInner;
-        }
-
-        /**
-         * Size of the data that can be read, in bytes or objects.
-         */
-        get readableLength(): number {
-            return this.readableLengthInner;
-        }
-
-        /**
-         * Getter for the property encoding of a given Readable stream. The encoding property can be set using the
-         * readable.setEncoding() method.
-         */
-        get readableEncoding(): string | null {
-            return this.readableEncodingInner;
-        }
-
-        /**
-         * Whether all data has been generated.
-         */
-        get readableEnded(): boolean {
-            return this.readableEndedInner;
-        }
-
-        /**
-         * Returns error if the stream has been destroyed with an error.
-         */
-        get errored(): Error | undefined {
-            return this.erroredInner;
-        }
-
-        /**
-         * Readable completes destroyfile and returns true, otherwise returns false.
-         */
-        get closed(): boolean {
-            return this.closedInner === undefined? false : this.closedInner!;
-        }
-
         /**
          * Reads a buffer of a specified size from the buffer. If the available buffer is sufficient, the result
          * of the specified size is returned. Otherwise, if Readable has ended, all remaining buffers are returned.
          *
          * @param { number } size - Expected length of the data to be read.
-         * @returns { string | null } If no data is available to read, null is returned.
+         * @returns { Any } The return value is of the buffer and string types.
          * @throws { BusinessError } 401 - Parameter error. Possible causes:
          *     1.Mandatory parameters are left unspecified;
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          * @throws { BusinessError } 10200038 - The doRead method has not been implemented.
          */
-        read(size?: number): string | null {
-            if (this.doReadFunc === null && this.readableInner) {
-                this.readableInner = false;
-                Promise.resolve().then(() => {
-                    this.closedInner = true;
-                    this.erroredInner = ERR_DOREAD_NOT_IMPLEMENTED;
-                    if (this.listener !== undefined) {
-                        this.listener!.emit(ReadableEvent.ERROR, this.erroredInner!);
-                        this.listener!.emit(ReadableEvent.CLOSE);
-                    }
-                });
-                return null;
+        read(size?: number): buffer.Buffer | string | null {
+            if (size === undefined) {
+                size = NaN;
             }
 
-            if (size === undefined) {
-                size = this.readableLengthInner;
-            }
+            const originSize = size;
 
             if (size > this.readableHighWatermarkInner) {
                 this.readableHighWatermarkInner = this.computeNewReadableHighWatermark(size);
             }
 
-            if (size > this.readableLengthInner) {
-                if (!this.readableFlowingInner) {
-                    return null;
+            if (size !== 0) {
+                this.readableEmittedReadable = false;
+            }
+
+            if (size === 0 && this.readableNeedReadable && ((this.readableHighWatermarkInner ?
+                this.readableLengthInner >= this.readableHighWatermarkInner :
+                this.readableLengthInner > 0) || this.readableEndedInner)) {
+                if (this.readableLengthInner === 0 && this.readableEndedInner) {
+                    this.emitReadableEnd(this);
                 } else {
-                    size = this.readableLengthInner;
+                    this.emitReadableNow(this);
                 }
-            }
-
-            let buffer: string | null = null;
-            if (size > 0 && size <= this.readableLengthInner) {
-                this.readableLengthInner -= size;
-                buffer = this.stringDecoder.write(this.buf.slice(0 as int, size));
-                this.buf = this.buf.slice(size);
-                if (this.doReadFunc !== null && this.listener !== undefined) {
-                    this.listener!.emit(ReadableEvent.DATA, buffer);
-                }
-            }
-
-            if ((!this.readableInner || size <= -1) && this.readableFlowingInner) {
                 return null;
             }
 
-            if (this.readableFlowingInner) {
+            size = this.calculateReadSize(size);
+
+            if (size === 0 && this.readableEndedInner) {
+                if (this.readableLengthInner === 0) {
+                    this.emitReadableEnd(this);
+                }
+                return null;
+            }
+
+            let needDoRead = this.readableNeedReadable;
+
+            if (this.readableLengthInner === 0 || this.readableLengthInner - size < this.readableHighWatermarkInner) {
+                needDoRead = true;
+            }
+
+            if (this.isReading || this.readableEndedInner || this.erroredInner) {
+                needDoRead = false;
+            } else if (needDoRead) {
+                this.isReading = true;
+                this.readableSync = true;
+                if (this.readableLengthInner === 0) {
+                    this.readableNeedReadable = true;
+                }
+
                 try {
                     this.doRead(this.readableHighWatermarkInner);
                 } catch (error) {
-                    this.readableInner = false;
-                    this.readableEndedInner = true;
-                    if (this.listener !== undefined) {
-                        this.listener!.emit(ReadableEvent.ERROR, error);
-                        this.listener!.emit(ReadableEvent.CLOSE);
-                    }
+                    processErrOrClose(this, error as Error, false);
+                }
+                this.readableSync = false;
+
+                if (!this.isReading) {
+                    size = this.calculateReadSize(originSize);
                 }
             }
-            return buffer;
+
+            let res : buffer.Buffer | string | null = null;
+            if (size > 0) {
+                res = this.readDataFromBuf(size);
+            }
+
+            if (res === null) {
+                this.readableNeedReadable = this.readableLengthInner <= this.readableHighWatermarkInner ? true : false;
+                size = 0;
+            } else {
+                this.readableLengthInner -= size;
+                this.awaitDrainWriters.clear();
+            }
+
+            if (this.readableLengthInner === 0) {
+                if (!this.readableEndedInner) {
+                    this.readableNeedReadable = true;
+                }
+
+                if (originSize !== size && this.readableEndedInner) {
+                    this.emitReadableEnd(this);
+                }
+            }
+
+            if (res !== null && !this.erroredInner && !this.closedInner) {
+                this.listener?.emit(ReadableEvent.DATA, res);
+            }
+
+            return res;
         }
 
         /**
@@ -1200,6 +1578,17 @@ export namespace stream {
          * @returns { Readable } Return this object.
          */
         resume(): Readable {
+            if (!this.readableFlowingInner) {
+                this.readableHasFlowingInner = true;
+                this.readableFlowingInner = this.readableListenning ? false : true;
+                if (!this.readableEmittedResume) {
+                    this.readableEmittedResume = true;
+                    Promise.resolve().then((): void => {
+                        this.resumeInner(this);
+                    });
+                }
+            }
+            this.pauseInner = false;
             return this;
         }
 
@@ -1209,6 +1598,12 @@ export namespace stream {
          * @returns { Readable } Return this object.
          */
         pause(): Readable {
+            if (!this.readableHasFlowingInner || (this.readableHasFlowingInner && this.readableFlowingInner)) {
+                this.readableHasFlowingInner = true;
+                this.readableFlowingInner = false;
+                this.listener?.emit(ReadableEvent.PAUSE);
+            }
+            this.pauseInner = true;
             return this;
         }
 
@@ -1222,44 +1617,46 @@ export namespace stream {
          *     2.Incorrect parameter types.
          */
         setEncoding(encoding?: string): boolean {
-            if(this.readableEncodingInner === encoding) {
-                return true;
+            let res: boolean = true;
+            if (!encoding) {
+                encoding = DEFAULT_ENCODING;
+                res = false;
             }
-
-            if (encoding === undefined) {
-                this.readableEncodingInner = DEFAULT_ENCODING;
-                this.encoder = new util.TextEncoder(this.readableEncodingInner);
-                this.stringDecoder = new util.StringDecoder(this.readableEncodingInner);
-                return false;
-            }
-
-            if (encoding!.toLowerCase() === 'utf8') {
+            if (encoding.toLowerCase() === 'utf8') {
                 encoding = DEFAULT_ENCODING;
             }
 
-            if (this.buf.length !== 0) {
-                console.error('stream: The buffer also has data, and encoding is not allowed');
-                return false;
-            }
-
-            let encodingLowCase = encoding!.toLowerCase();
+            let encodingLowCase = encoding.toLowerCase();
             if (ENCODING_SET.indexOf(encodingLowCase) !== -1) {
                 try {
-                    this.encoder = new util.TextEncoder(encoding);
                     this.stringDecoder = new util.StringDecoder(encoding);
                     this.readableEncodingInner = encodingLowCase;
+
+                    // Iterate over current buffer to convert already stored Buffers:
+                    let currentBuffer = "";
+                    for (let i = 0; i < this.buf.length; i++) {
+                        const decoder = this.stringDecoder as util.StringDecoder;
+                        if (this.buf[i] instanceof string) {
+                            currentBuffer += decoder.write(this.buf[i] as string);
+                        } else {
+                            currentBuffer += decoder.write(new Uint8Array((this.buf[i] as buffer.Buffer).buffer));
+                        }
+                    }
+                    this.buf.length = 0;
+                    this.bufIndex = 0;
+
+                    if (currentBuffer != "") {
+                        this.buf.push(currentBuffer);
+                    }
+                    this.readableLengthInner = currentBuffer.length;
                 } catch (e) {
                     this.throwError(e as Error);
-                    return false;
                 }
-                return true;
             } else {
-                let err = new BusinessError();
-                err.name='BusinessError';
-                err.message = `Parameter error. The type of ${encoding} must be string.`;
-                this.throwError(err);
-                return false;
+                this.throwError(ERR_INCORRECT_PARAMETER);
+                res = false;
             }
+            return res;
         }
 
         /**
@@ -1268,7 +1665,7 @@ export namespace stream {
          * @returns { boolean } Pause state returns true, otherwise returns false.
          */
         isPaused(): boolean {
-            return false;
+            return this.pauseInner || (this.readableHasFlowingInner && !this.readableFlowingInner);
         }
 
         /**
@@ -1283,7 +1680,96 @@ export namespace stream {
          *     3.Parameter verification failed.
          */
         pipe(destination: Writable, options?: Object): Writable {
-            return new Writable();
+            const src: Readable = this;
+
+            if (src.pipeWritableArrayInner.length === 1 && !src.multiAwaitDrain) {
+                src.multiAwaitDrain = true;
+            }
+
+            src.pipeWritableArrayInner.push(destination);
+
+            // Writeable streams are automatically turned off when readable streams are turned off
+            const endCallback = (): void => {
+                destination.end();
+            };
+            if (src.readableEndEmitted) {
+                Promise.resolve().then((): void => {
+                    endCallback();
+                });
+            } else {
+                src.listener?.on(ReadableEvent.END, _onceWrap(src.listener!, ReadableEvent.END, endCallback));
+            }
+
+            const unpipeCallback = (readable: Readable): void => {};
+            destination.on(WritableEvent.UNPIPE, unpipeCallback)
+
+            let ondrainCallback: undefined | Function;
+            let cleand: boolean = false;
+
+            const pause = (): void => {
+                if (!cleand) {
+                    if (src.pipeWritableArrayInner.length === 1 && src.pipeWritableArrayInner[0] === destination) {
+                        src.awaitDrainWriters.add(destination);
+                        src.multiAwaitDrain = false;
+                    } else if (src.pipeWritableArrayInner.length > 1) {
+                        const objIdx: number =
+                            src.pipeWritableArrayInner.findIndex((value: Writable) => value === destination);
+                        if (objIdx !== -1) {
+                            src.awaitDrainWriters.add(destination);
+                        }
+                    }
+                    src.pause();
+                }
+                if (!ondrainCallback) {
+                    const ondrainFunc: Function = (): void => {
+                        src.awaitDrainWriters.delete(destination);
+                        if (src.awaitDrainWriters.size == 0 && src.dataListenning) {
+                            src.resume();
+                        }
+                    };
+                    ondrainCallback = ondrainFunc;
+                    destination.on(WritableEvent.DRAIN, ondrainCallback!);
+                }
+            };
+
+            const dataCallback = (data: Any): void => {
+                const writeData = new Uint8Array((data as buffer.Buffer).buffer);
+                const res = destination.write(writeData);
+                if (res === false) {
+                    pause();
+                }
+            };
+
+            const errorCallBack = (): void => {
+                destination.listener?.clear(WritableEvent.ERROR);
+                src.unpipe(destination);
+            };
+
+            const closeCallBack = (destination: Writable, src: Readable): void => {
+                destination.listener?.clear(WritableEvent.FINISH);
+                src.unpipe(destination);
+            }
+
+            const finishCallback = (destination: Writable, src: Readable): void => {
+                destination.listener?.clear(WritableEvent.CLOSE);
+                src.unpipe(destination);
+            }
+
+            src.on(ReadableEvent.DATA, dataCallback);
+
+            advanceListener(destination, WritableEvent.ERROR, errorCallBack);
+            destination.listener?.on(WritableEvent.CLOSE, _onceWrap(destination.listener!,
+                WritableEvent.CLOSE, closeCallBack));
+            destination.listener?.on(WritableEvent.FINISH, _onceWrap(destination.listener!,
+                WritableEvent.FINISH, finishCallback));
+            destination.listener?.emit(WritableEvent.PIPE, src);
+
+            if (destination.writableNeedDrain) {
+                pause();
+            } else if (!src.readableFlowingInner) {
+                src.resume();
+            }
+            return destination;
         }
 
         /**
@@ -1297,6 +1783,34 @@ export namespace stream {
          *     3.Parameter verification failed.
          */
         unpipe(destination?: Writable): Readable {
+            if (this.pipeWritableArrayInner.length === 0) {
+                return this;
+            }
+
+            if (!destination) {
+                // remove all pipelines
+                const destinations = this.pipeWritableArrayInner;
+                this.pipeWritableArrayInner = [];
+                this.pause();
+
+                for (let i = 0; i < destinations.length; i++) {
+                    destinations[i].listener?.emit(WritableEvent.UNPIPE, this);
+                }
+                return this;
+            }
+
+            const objIdx: number = this.pipeWritableArrayInner.findIndex((value: Writable) => value === destination);
+
+            if(objIdx === -1) {
+                return this;
+            }
+
+            this.pipeWritableArrayInner.splice(objIdx, 1);
+            if (this.pipeWritableArrayInner.length === 0) {
+                this.pause();
+            }
+            destination.listener?.emit(WritableEvent.UNPIPE, this);
+
             return this;
         }
 
@@ -1309,7 +1823,48 @@ export namespace stream {
          *     1.Mandatory parameters are left unspecified;
          *     2.Incorrect parameter types.
          */
-        on(event: string, callback: CallbackFnType): void {}
+        on(event: string, callback: Function): void {
+            if (!this.isInitialized) {
+                this.isInitialized = true;
+                this.doInitialize((...data: Object[]): void => {});
+            }
+
+            if (!this.callbacks.has(event)) {
+                const callbackList = new Array<Function>();
+                this.callbacks.set(event, callbackList);
+            }
+
+            this.callbacks.get(event)!.push(callback);
+            this.listener?.on(event, callback);
+
+            if (event === ReadableEvent.DATA as string) {
+                this.dataListenning = true;
+                if(this.callbacks.has(ReadableEvent.READABLE) &&
+                    this.callbacks.get(ReadableEvent.READABLE)!.length > 0) {
+                    this.readableListenning = true;
+                } else {
+                    this.readableListenning = false;
+                }
+                if (!this.readableHasFlowingInner || (this.readableHasFlowingInner && this.readableFlowingInner)) {
+                    this.resume();
+                }
+            } else if (event === ReadableEvent.READABLE as string) {
+                if (!this.readableEndEmitted || !this.readableListenning) {
+                    this.readableHasFlowingInner = true;
+                    this.readableListenning = true;
+                    this.readableNeedReadable = true;
+                    this.readableFlowingInner = false;
+                    this.readableEmittedReadable =  false;
+                    if (this.readableLengthInner) {
+                        this.emitReadableNow(this);
+                    } else if (!this.isReading) {
+                        Promise.resolve().then((): void => {
+                            this.emitReadableNextCycle(this)
+                        });
+                    }
+                }
+            }
+        }
 
         /**
          * Cancel event message.
@@ -1320,7 +1875,25 @@ export namespace stream {
          *     1.Mandatory parameters are left unspecified;
          *     2.Incorrect parameter types.
          */
-        off(event: string, callback?: CallbackFnType): void {}
+        off(event: string, callback?: Function): void {
+            if (callback !== undefined) {
+                if (this.callbacks.has(event)) {
+                    const callbackList = this.callbacks.get(event);
+                    callbackList!.forEach((callbackFunc: Function) => {
+                        if (callbackFunc === callback) {
+                            this.listener?.off(event, callbackFunc);
+                        }
+                    })
+                }
+            } else {
+                if (this.callbacks.has(event)) {
+                    const calbackList = this.callbacks.get(event);
+                    calbackList!.forEach((callbackFunc: Function) => {
+                        this.listener?.off(event, callbackFunc);
+                    })
+                }
+            }
+        }
 
         /**
          * It may be implemented by child classes, and if so, will be called by the Readable class methods only.
@@ -1332,7 +1905,7 @@ export namespace stream {
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          */
-        doInitialize(callback: () => void): void {}
+        doInitialize(callback: Function): void {}
 
         /**
          * The specific implementation of data production. It must not be actively called.
@@ -1346,9 +1919,7 @@ export namespace stream {
          *     3.Parameter verification failed.
          */
         doRead(size: number): void {
-            if (this.doReadFunc !== null) {
-                this.doReadFunc!(size);
-            }
+            throw ERR_DOREAD_NOT_IMPLEMENTED;
         }
 
         /**
@@ -1364,68 +1935,106 @@ export namespace stream {
          *     2.Incorrect parameter types.
          */
         push(chunk: Uint8Array | string | null, encoding?: string): boolean {
-            let bufferArr: Uint8Array;
-            if (encoding !== undefined) {
-                this.setEncoding(encoding!);
+            return this.pushByteModeChunk(this, chunk, encoding);
+        }
+
+        /**
+         * Returns boolean indicating whether it is in ObjectMode.
+         *
+         */
+        get readableObjectMode(): boolean | undefined {
+            return this.readableObjectModeInner;
+        }
+
+        /**
+         * Is true if it is safe to call readable.read(), which means
+         * the stream has not been destroyed or emitted 'error' or 'end'.
+         *
+         */
+        get readable(): boolean {
+            if (this.readableInner) {
+                return this.readableInner && !this.errorEmitted && !this.readableEndEmitted;
+            } else if (!this.readableInner && this.readableEndedInner) {
+                return false;
             }
+            return true;
+        }
 
-            if (chunk instanceof string || chunk instanceof Uint8Array) {
-                if (chunk instanceof string) {
-                    return false;
-                } else if (chunk instanceof Uint8Array) {
-                    this.buf = chunk;
-                    this.readableLengthInner += chunk.length;
-                }
+        /**
+         * Returns the value of highWatermark passed when creating this Readable.
+         *
+         */
+        get readableHighWatermark(): number {
+            return this.readableHighWatermarkInner;
+        }
 
-                const highWaterMark = this.readableLengthInner <= this.readableHighWatermarkInner;
-                Promise.resolve().then((): void => {
-                    try {
-                        if (this.readableFlowingInner) {
-                            !this.pauseInner && this.read(highWaterMark ? this.readableLengthInner : -1);
-                        } else {
-                            if (highWaterMark && this.doReadFunc !== null) {
-                                this.doRead(this.readableHighWatermarkInner);
-                            }
-                        }
-                    } catch (error) {
-                        if (this.listener !== undefined) {
-                            this.listener!.emit(ReadableEvent.ERROR, error);
-                            this.listener!.emit(ReadableEvent.CLOSE);
-                        }
-                    }
-                    if (this.listener !== undefined) {
-                        this.listener!.emit(ReadableEvent.READABLE);
-                    }
-                });
-                return this.readableLengthInner < this.readableHighWatermarkInner;
-            } else if (chunk === null) {
-                if (!this.readableEndedInner && this.readableInner) {
-                    if (!this.readableFlowingInner && this.listener !== undefined) {
-                        this.listener!.emit(ReadableEvent.READABLE);
-                    }
+        /**
+         * This property reflects the current state of the readable stream true/false.
+         *
+         */
+        get readableFlowing(): boolean | null {
+            return this.readableFlowingInner;
+        }
 
-                    this.readableInner = false;
-                    Promise.resolve().then((): void => {
-                        this.readableEndedInner = true;
-                        this.pauseInner = true;
-                        this.closedInner = true;
-                        if (this.listener !== undefined) {
-                            this.listener!.emit(ReadableEvent.END);
-                            this.listener!.emit(ReadableEvent.CLOSE);
-                        }
-                    });
-                }
-                return false;
+        /**
+         * Size of the data that can be read, in bytes or objects.
+         *
+         */
+        get readableLength(): number {
+            return this.readableLengthInner;
+        }
+
+        /**
+         * Getter for the property encoding of a given Readable stream. The encoding property can be set using the
+         * readable.setEncoding() method.
+         *
+         */
+        get readableEncoding(): string | null {
+            return this.readableEncodingInner;
+        }
+
+        /**
+         * Whether all data has been generated.
+         *
+         */
+        get readableEnded(): boolean {
+            return this.readableEndEmitted;
+        }
+
+        /**
+         * Returns error if the stream has been destroyed with an error.
+         *
+         */
+        get errored(): boolean {
+            return this.erroredInner;
+        }
+
+        set errored(value: boolean) {
+            this.erroredInner = value;
+        }
+
+        /**
+         * Readable completes destroyfile and returns true, otherwise returns false.
+         *
+         */
+        get closed(): boolean {
+            return this.closedInner === undefined ? false : this.closedInner!;
+        }
+
+        set closed(value: boolean) {
+            this.closedInner = value;
+        }
+
+        get stringDecoder(): Any {
+            return this.readableDecoder ? this.stringDecoderInner : null;
+        }
+
+        set stringDecoder(value: util.StringDecoder | null) {
+            if (value) {
+                this.stringDecoderInner = value;
+                this.readableDecoder = true;
             } else {
-                this.readableInner = false;
-                let err = new BusinessError();
-                err.name='BusinessError';
-                err.message = 'ERR_INVALID_ARG_TYPE';
-                this.erroredInner = err;
-                if (this.listener !== undefined) {
-                    this.listener!.emit(ReadableEvent.ERROR, this.erroredInner!);
-                }
-                return false;
+                this.readableDecoder = false;
             }
         }
     }
@@ -1442,7 +2051,7 @@ export namespace stream {
     export class Duplex extends Readable {
         private _writable: Writable;
         /**
-        * The Duplex constructor.
+         * The Duplex constructor.
          *
          */
         constructor() {}
