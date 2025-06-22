@@ -74,3 +74,63 @@ cases:
       tags: [compile-only, negative]
       use: |-
           arktest.assertTrue( Enum1.first != Enum2.first )
+
+    - decl: |-
+          enum Enum { first, second, third = 0 }
+      use: |-
+          arktest.assertTrue(Enum.first !== Enum.second && Enum.second !== Enum.third && Enum.first === Enum.third)
+
+    - decl: |-
+          enum Enum { first = 11, second = 11, third = 11 }
+      use: |-
+          arktest.assertTrue(Enum.first === Enum.second && Enum.second === Enum.third && Enum.first === Enum.third)
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "A" }
+      use: |-
+          arktest.assertTrue(Enum.first !== Enum.second && Enum.second !== Enum.third && Enum.first === Enum.third)
+
+    - decl: |-
+          enum Enum { first = "ABC", second = "ABC", third = "ABC" }
+      use: |-
+          arktest.assertTrue(Enum.first === Enum.second && Enum.second === Enum.third && Enum.first === Enum.third)
+
+    - decl: |-
+          enum Enum { first, second, third = 0 }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          arktest.assertTrue(foo(0) !== foo(1) && foo(1) !== arr[2] && foo(0) === Enum.third)
+
+    - decl: |-
+          enum Enum { first = 11, second = 11, third = 11 }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          arktest.assertTrue(foo(0) === foo(1) && foo(1) === arr[2] && foo(0) === Enum.third)
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "A" }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          arktest.assertTrue(foo(0) !== foo(1) && foo(1) !== arr[2] && foo(0) === Enum.third)
+
+    - decl: |-
+          enum Enum { first = "ABC", second = "ABC", third = "ABC" }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          arktest.assertTrue(foo(0) === foo(1) && foo(1) === arr[2] && foo(0) === Enum.third)
+
+    - decl: |-
+          enum Enum1 { first }
+          enum Enum2 { first }
+      use: |-
+          arktest.assertEQ( Enum1.first, Enum2.first )
+
+    - decl: |-
+          enum Enum1 { first = "A" }
+          enum Enum2 { first = "A" }
+      use: |-
+          arktest.assertEQ( Enum1.first, Enum2.first )

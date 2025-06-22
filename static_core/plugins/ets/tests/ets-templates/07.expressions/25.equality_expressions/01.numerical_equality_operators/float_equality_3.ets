@@ -21,6 +21,8 @@ function main(): void {
     let a = 0.1;
     let b = 0.0;
 
-    arktest.assertNE( a, b )
-    arktest.assertNE( b, a )
+    arktest.assertFalse( a == b )
+    arktest.assertFalse( b == a )
+    arktest.assertFalse( a === b )
+    arktest.assertFalse( b === a )
 }

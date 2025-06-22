@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Floating number equality
+desc: >-
+    If both operands refer to the same function object, then the comparison returns true. Otherwise, it is false.
 ---*/
 
+{{c.decl}}
+
 function main(): void {
-    let a = 0.1;
-    let b = -log(0);
-    let c = log(0);
-    arktest.assertFalse( a == b )
-    arktest.assertFalse( b == a )
-    arktest.assertFalse( a == c )
-    arktest.assertFalse( c == a )
-    arktest.assertFalse( a === b )
-    arktest.assertFalse( b === a )
-    arktest.assertFalse( a === c )
-    arktest.assertFalse( c === a )
+    assertFalse({{c.value}} == {{c.value2}})
+    assertTrue({{c.value}} != {{c.value2}})
+    assertFalse({{c.value}} === {{c.value2}})
+    assertTrue({{c.value}} !== {{c.value2}})
 }
+{% endfor %}

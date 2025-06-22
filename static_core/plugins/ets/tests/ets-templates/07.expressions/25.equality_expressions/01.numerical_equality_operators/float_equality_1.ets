@@ -19,5 +19,6 @@ desc: Floating number equality
 
 function main(): void {
     let a = sqrt(-1);
-    arktest.assertNE( a, a )
+    arktest.assertFalse( a == a )
+    arktest.assertFalse( a === a )
 }
