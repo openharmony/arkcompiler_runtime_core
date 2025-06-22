@@ -650,10 +650,6 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_en
         jsProps.emplace_back(item.second);
     }
 
-    if (UNLIKELY(!IsEtsGlobalClass() && etsCtorLink_.GetUnresolved() == nullptr)) {
-        InteropCtx::Fatal("Class " + etsClass_->GetRuntimeClass()->GetName() + " has no constructor");
-    }
-
     return jsProps;
 }
 
@@ -945,6 +941,12 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
             return nullptr;
         }
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
+        return nullptr;
+    }
+
+    if (!etsClassWrapper->etsCtorLink_.IsResolved() && etsClassWrapper->etsCtorLink_.GetUnresolved() == nullptr) {
+        InteropCtx::ThrowJSError(env,
+                                 etsClassWrapper->GetEtsClass()->GetRuntimeClass()->GetName() + " has no constructor");
         return nullptr;
     }
 
