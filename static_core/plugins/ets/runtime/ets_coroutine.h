@@ -137,6 +137,9 @@ public:
     // event handlers
     void OnHostWorkerChanged() override;
 
+    /// @brief print stack and exit the program
+    [[noreturn]] void HandleUncaughtException() override;
+
     static constexpr CoroutinePriority ASYNC_CALL = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority PROMISE_CALLBACK = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority TIMER_CALLBACK = CoroutinePriority::MEDIUM_PRIORITY;

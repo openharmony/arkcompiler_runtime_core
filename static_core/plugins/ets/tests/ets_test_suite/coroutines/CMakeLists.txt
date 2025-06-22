@@ -267,6 +267,15 @@ if (NOT PANDA_TARGET_ARM32)
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
+
+    add_ets_coroutines_test(FILE eworker_unlimited.ets
+                            SKIP_ARM32_COMPILER
+                            OPTIONS "--coroutine-e-workers-limit=100500"
+                            IMPL "STACKFUL"
+                            OPTION_SETS_STACKFUL "DEFAULT"
+                            WORKERS "ONE"
+                            MODE "INT"
+    )
 endif()
 
 add_ets_coroutines_test(FILE eworker_id.ets
@@ -332,14 +341,6 @@ add_ets_coroutines_test(FILE stats.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "STATS"
-                        WORKERS "AUTO"
-                        MODE "INT"
-)
-
-add_ets_coroutines_test(FILE elauncher_id.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT"
 )
@@ -430,4 +431,12 @@ add_ets_coroutines_test(FILE await_async_return_reject_promise.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE eworker_post_to_main.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
 )

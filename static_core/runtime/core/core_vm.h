@@ -165,7 +165,7 @@ protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
                                                        const std::vector<std::string> &args) override;
-    void HandleUncaughtException() override;
+    [[noreturn]] void HandleUncaughtException() override;
 
 private:
     explicit PandaCoreVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);

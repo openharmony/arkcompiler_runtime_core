@@ -141,7 +141,9 @@ void EtsCoroutine::RequestJobCompletion(mem::Reference *jobRef, Value returnValu
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
-        ClearException();
+        if (!HasAbortFlag()) {
+            ClearException();
+        }
         LOG(INFO, COROUTINES) << "Coroutine \"" << GetName()
                               << "\" completed with an exception: " << exc->ClassAddr<Class>()->GetName();
         EtsJob::EtsJobFail(hjob.GetPtr(), EtsObject::FromCoreType(exc));
@@ -257,6 +259,13 @@ void EtsCoroutine::OnHostWorkerChanged()
     auto *worker = GetWorker();
     auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+}
+
+[[noreturn]] void EtsCoroutine::HandleUncaughtException()
+{
+    ASSERT(HasPendingException());
+    GetPandaVM()->HandleUncaughtException();
+    UNREACHABLE();
 }
 
 void EtsCoroutine::ListUnhandledJobs()

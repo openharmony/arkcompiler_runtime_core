@@ -380,42 +380,42 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     return static_cast<ani_boolean>(ark::os::kill_process::Kill(integerPid, signal) == 0);
 }
 
-static ani_double GetTid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetTid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetCurrentThreadId();
 }
 
-static ani_double GetPid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetPid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetPid();
 }
 
-static ani_double GetPPid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetPPid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetPPid();
 }
 
-static ani_double GetUid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetUid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetUid();
 }
 
-static ani_double GetEuid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetEuid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetEuid();
 }
 
-static ani_double GetGid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetGid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetGid();
 }
 
-static ani_double GetEgid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetEgid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetEgid();
 }
 
-static ani_array_double GetGroupIDs(ani_env *env, [[maybe_unused]] ani_object process)
+static ani_array_double GetGroupIDs(ani_env *env)
 {
     auto groups = ark::os::thread::GetGroups();
     auto groupIds = std::vector<ani_double>(groups.begin(), groups.end());
@@ -433,41 +433,41 @@ static ani_array_double GetGroupIDs(ani_env *env, [[maybe_unused]] ani_object pr
     return result;
 }
 
-static ani_boolean Is64BitProcess([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_boolean Is64BitProcess([[maybe_unused]] ani_env *env)
 {
     constexpr int SIZE_OF_64_BIT_PTR = 8;
     return static_cast<ani_boolean>(sizeof(char *) == SIZE_OF_64_BIT_PTR);
 }
 
-static ani_double GetProcessStartRealTime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetProcessStartRealTime([[maybe_unused]] ani_env *env)
 {
     return ark::os::time::GetStartRealTime<std::chrono::milliseconds>();
 }
 
-static ani_double GetProcessPastCpuTime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetProcessPastCpuTime([[maybe_unused]] ani_env *env)
 {
     constexpr int PROCESS_CLOCK = 2;
     return ark::os::time::GetClockTime<std::chrono::milliseconds>(PROCESS_CLOCK);
 }
 
-static void AbortProcess([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static void AbortProcess([[maybe_unused]] ani_env *env)
 {
     std::abort();
 }
 
-static ani_string GetCurrentWorkingDirectory(ani_env *env, [[maybe_unused]] ani_object process)
+static ani_string GetCurrentWorkingDirectory(ani_env *env)
 {
     auto workDir = ark::os::GetCurrentWorkingDirectory();
     return CreateUtf8String(env, workDir.data(), workDir.size());
 }
 
-static void ChangeCurrentWorkingDirectory(ani_env *env, [[maybe_unused]] ani_object process, ani_string path)
+static void ChangeCurrentWorkingDirectory(ani_env *env, ani_string path)
 {
     auto str = ConvertFromAniString(env, path);
     os::ChangeCurrentWorkingDirectory(str);
 }
 
-static ani_double GetSystemUptime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
+static ani_double GetSystemUptime([[maybe_unused]] ani_env *env)
 {
     constexpr int BOOTTIME_CLOCK = 7;
     return ark::os::time::GetClockTime<std::chrono::milliseconds>(BOOTTIME_CLOCK);
@@ -494,14 +494,14 @@ void RegisterProcessNativeMethods(ani_env *env)
     };
 
     const auto processImpls = std::array {
-        ani_native_function {"getTidImpl", ":D", reinterpret_cast<void *>(GetTid)},
-        ani_native_function {"getPidImpl", ":D", reinterpret_cast<void *>(GetPid)},
-        ani_native_function {"getPpidImpl", ":D", reinterpret_cast<void *>(GetPPid)},
-        ani_native_function {"getUidImpl", ":D", reinterpret_cast<void *>(GetUid)},
-        ani_native_function {"getEuidImpl", ":D", reinterpret_cast<void *>(GetEuid)},
-        ani_native_function {"getGidImpl", ":D", reinterpret_cast<void *>(GetGid)},
-        ani_native_function {"getEgidImpl", ":D", reinterpret_cast<void *>(GetEgid)},
-        ani_native_function {"getGroupsImpl", ":[D", reinterpret_cast<void *>(GetGroupIDs)},
+        ani_native_function {"tid", ":D", reinterpret_cast<void *>(GetTid)},
+        ani_native_function {"pid", ":D", reinterpret_cast<void *>(GetPid)},
+        ani_native_function {"ppid", ":D", reinterpret_cast<void *>(GetPPid)},
+        ani_native_function {"uid", ":D", reinterpret_cast<void *>(GetUid)},
+        ani_native_function {"euid", ":D", reinterpret_cast<void *>(GetEuid)},
+        ani_native_function {"gid", ":D", reinterpret_cast<void *>(GetGid)},
+        ani_native_function {"egid", ":D", reinterpret_cast<void *>(GetEgid)},
+        ani_native_function {"groups", ":[D", reinterpret_cast<void *>(GetGroupIDs)},
         ani_native_function {"is64Bit", ":Z", reinterpret_cast<void *>(Is64BitProcess)},
         ani_native_function {"getStartRealtime", ":D", reinterpret_cast<void *>(GetProcessStartRealTime)},
         ani_native_function {"getPastCpuTime", ":D", reinterpret_cast<void *>(GetProcessPastCpuTime)},
@@ -520,9 +520,10 @@ void RegisterProcessNativeMethods(ani_env *env)
     ANI_FATAL_IF_ERROR(
         env->Class_BindNativeMethods(processManagerKlass, processManagerImpls.data(), processManagerImpls.size()));
 
-    ani_class processKlass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/process;", &processKlass));
-    ANI_FATAL_IF_ERROR(env->Class_BindNativeMethods(processKlass, processImpls.data(), processImpls.size()));
+    ani_namespace ns {};
+    ANI_FATAL_IF_ERROR(env->FindNamespace("Lescompat/StdProcess;", &ns));
+
+    ANI_FATAL_IF_ERROR(env->Namespace_BindNativeFunctions(ns, processImpls.data(), processImpls.size()));
 }
 
 }  // namespace ark::ets::stdlib

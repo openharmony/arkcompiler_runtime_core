@@ -113,8 +113,8 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto launchMode =
             coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
         auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
-        [[maybe_unused]] bool launchResult =
-            coroManager->Launch(event, cleanup, std::move(args), launchMode, CoroutinePriority::DEFAULT_PRIORITY);
+        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode,
+                                                                 CoroutinePriority::DEFAULT_PRIORITY, false);
         ASSERT(launchResult);
     }
 }

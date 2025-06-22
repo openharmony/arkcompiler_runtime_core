@@ -152,3 +152,9 @@ panda_ets_napi_add_gtest(
     NAME test_exception
     CPP_SOURCE test_exception.cpp
 )
+
+panda_ets_napi_add_gtest(
+    NAME abort_flag_launch
+    CPP_SOURCE abort_flag_launch_test.cpp
+    ETS_SOURCE AbortFlagLaunchTest.ets
+)
