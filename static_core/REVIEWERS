@@ -182,18 +182,18 @@ static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^i
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya ^ivagin ^hufeng20 ^Prof1983 @zenghang11
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 
-/abc2program/ @oatuwwutao @hufeng20 @chenqy930
+/abc2program/ @oatuwwutao @hufeng20
 /assembler/ @ctw-ian
 /bytecode_optimizer/ @ctw-ian
 /common_interfaces/ @wuzhefengh @weng-changcheng @igelhaus @dmitriitr ^yingguofeng ^Prof1983
 /compiler/ @ctw-ian
 /disassembler/ @oatuwwutao @hufeng20
-/isa/ @ctw-ian @chenqy930
+/isa/ @ctw-ian @oatuwwutao
 /ldscripts/ @gitee-dakeQI
 /libabckit/ @nazarovkonstantin @oatuwwutao @hufeng20
 /libark_defect_scan_aux/ @gitee-dakeQI @oatuwwutao @hufeng20
 /libpandabase/ @gitee-dakeQI
-/libpandafile/ @gitee-dakeQI @chenqy930
+/libpandafile/ @gitee-dakeQI @oatuwwutao
 /libziparchive/ @gitee-dakeQI
 /panda/ @gitee-dakeQI
 /panda_guard/ @zenghang11 @hufeng20 @oatuwwutao
