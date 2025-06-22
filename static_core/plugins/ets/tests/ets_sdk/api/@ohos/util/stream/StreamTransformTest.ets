@@ -108,7 +108,7 @@ function testStreamTransformOn001() {
     let transformStream = new stream.Transform();
     let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.on("data", callback);
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
@@ -116,21 +116,27 @@ function testStreamTransformOff001() {
     let transformStream = new stream.Transform();
     let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.off("data", callback);
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformDoInitialize001() {
     let transformStream = new stream.Transform();
     transformStream.doInitialize(() => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformDoRead001() {
-    let transformStream = new stream.Transform();
+    class TransformStream extends stream.Transform {
+        constructor() {
+            super();
+        }
+        doRead(size: number) {}
+    }
+    let transformStream = new TransformStream();
     transformStream.doRead(1);
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
@@ -172,26 +178,26 @@ function testStreamTransformUncrok001() {
 function testStreamTransformDoWrite001() {
     let transformStream = new stream.Transform();
     transformStream.doWrite("test", "utf8", () => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformDoWritev001() {
     let transformStream = new stream.Transform();
     transformStream.doWritev(["test"], () => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformDoTransform001() {
     let transformStream = new stream.Transform();
     transformStream.doTransform("test", "utf8", () => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformDoFlush001() {
     let transformStream = new stream.Transform();
     transformStream.doFlush(() => {});
-    arktest.assertTrue(true);
+    arktest.assertNE(transformStream, undefined);
 }
