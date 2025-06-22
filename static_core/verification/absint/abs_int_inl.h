@@ -3429,6 +3429,10 @@ public:
     bool HandleAnyCall0()
     {
         LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3436,56 +3440,84 @@ public:
     bool HandleAnyCallRange()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallShort()
     {
-        LOG_INST();
-        return false;
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallThis0()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallThisRange()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallThisShort()
     {
-        LOG_INST();
-        return false;
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallNew0()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallNewRange()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallNewShort()
     {
         LOG_INST();
-        return false;
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -3589,7 +3621,8 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3599,7 +3632,9 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
+        SetReg(vOut, refType_);
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3609,7 +3644,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3619,7 +3654,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3629,7 +3664,8 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3639,7 +3675,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3649,7 +3685,8 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3659,7 +3696,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        // NOTE: handle it
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
@@ -3669,6 +3706,9 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
+        SetAcc(u1_);
+
+        MoveToNextInst<FORMAT>();
         return true;
     }
 
