@@ -312,9 +312,17 @@ cases:
           arktest.assertTrue(v instanceof Integral)
           arktest.assertTrue((v as Integral).toByte() == 127)
 
+          v = new Byte(0x7F as byte)
+          arktest.assertTrue(v instanceof Integral)
+          arktest.assertTrue((v as Integral).byteValue() == 127)
+
           v = new Number(2.5)
           arktest.assertTrue(v instanceof Floating)
           arktest.assertTrue((v as Floating).toDouble() == 2.5)
+
+          v = new Number(2.5)
+          arktest.assertTrue(v instanceof Floating)
+          arktest.assertTrue((v as Floating).doubleValue() == 2.5)
 
     # Enums
     - decl: |-

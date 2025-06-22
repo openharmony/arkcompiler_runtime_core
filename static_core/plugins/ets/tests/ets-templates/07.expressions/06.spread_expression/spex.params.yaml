@@ -241,6 +241,14 @@ cases:
           arktest.assertTrue(res == 42.0)
 
     - use: |-
+          // union of types in result array
+          let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
+          let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
+          let res = 0.0
+          for (let el of ar) res += (el as Numeric).doubleValue()
+          arktest.assertTrue(res == 42.0)
+
+    - use: |-
           // union of reference types in result array
           let a1: (Object|undefined)[] = [new Int(), new Int(), undefined]
           let a2: (Number|undefined)[] = [42.0, 42.0, undefined]

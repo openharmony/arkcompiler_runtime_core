@@ -226,15 +226,15 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 
 #24006 Array literal type inference needs to be improved
-07.expressions/06.spread_expression/spex_lmbd_35.ets
-07.expressions/06.spread_expression/spex_lmbd_37.ets
+07.expressions/06.spread_expression/spex_lmbd_36.ets
+07.expressions/06.spread_expression/spex_lmbd_38.ets
 
 #20371 Unexpected Type Error on string array
-07.expressions/06.spread_expression/spex_lmbd_31.ets
-07.expressions/06.spread_expression/spex_32.ets
+07.expressions/06.spread_expression/spex_lmbd_32.ets
+07.expressions/06.spread_expression/spex_33.ets
 
 #25901
-07.expressions/06.spread_expression/spex_lmbd_46.ets
+07.expressions/06.spread_expression/spex_lmbd_47.ets
 
 #20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.ets
@@ -265,6 +265,7 @@
 07.expressions/06.spread_expression/spex_lmbd_28.ets
 07.expressions/06.spread_expression/spex_lmbd_29.ets
 07.expressions/06.spread_expression/spex_lmbd_30.ets
+07.expressions/06.spread_expression/spex_lmbd_31.ets
 
 #23996
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
@@ -883,18 +884,19 @@
 08.statements/15.try_statements/try_2.ets
 
 #59 verifier in lambda
-07.expressions/06.spread_expression/spex_lmbd_32.ets
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_34.ets
-07.expressions/06.spread_expression/spex_lmbd_36.ets
-07.expressions/06.spread_expression/spex_lmbd_38.ets
+07.expressions/06.spread_expression/spex_lmbd_35.ets
+07.expressions/06.spread_expression/spex_lmbd_37.ets
+07.expressions/06.spread_expression/spex_lmbd_39.ets
 07.expressions/06.spread_expression/spex_lmbd_40.ets
 07.expressions/06.spread_expression/spex_lmbd_41.ets
 07.expressions/06.spread_expression/spex_lmbd_42.ets
 07.expressions/06.spread_expression/spex_lmbd_43.ets
 07.expressions/06.spread_expression/spex_lmbd_44.ets
 07.expressions/06.spread_expression/spex_lmbd_45.ets
-07.expressions/06.spread_expression/spex_lmbd_47.ets
+07.expressions/06.spread_expression/spex_lmbd_46.ets
+07.expressions/06.spread_expression/spex_lmbd_48.ets
 
 # #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets

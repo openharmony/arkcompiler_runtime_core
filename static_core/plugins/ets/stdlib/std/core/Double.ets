@@ -204,11 +204,35 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     * @tag arkts
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      * @tag arkts
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     * @tag arkts
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -224,11 +248,35 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     * @tag arkts
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      * @tag arkts
      */
     public override toLong(): long {
         return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as long
+     * @tag arkts
+     */
+    public override longValue(): long {
+        return this.toLong();
     }
 
     /**
@@ -244,11 +292,35 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as float
+     * @tag arkts
+     */
+    public override floatValue(): float {
+        return this.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as double
      * @tag arkts
      */
     public override toDouble(): double {
         return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     * @tag arkts
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**

@@ -171,6 +171,13 @@ class B extends Numeric {
     public toLong(): long { return 1 };
     public toFloat(): float { return 1.1f };
     public toDouble(): double { return 1.1 };
+
+    public byteValue(): byte { return this.toByte() };
+    public intValue(): int { return this.toInt() };
+    public shortValue(): short { return this.toShort() };
+    public longValue(): long { return this.toLong() };
+    public floatValue(): float { return this.toFloat() };
+    public doubleValue(): double { return this.toDouble() };
 }
 
 function testClass() {

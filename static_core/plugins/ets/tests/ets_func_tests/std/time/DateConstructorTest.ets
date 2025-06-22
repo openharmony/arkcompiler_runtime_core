@@ -143,6 +143,8 @@ function testDoubleMsConstructor(): void {
     for(let i: int = 0; i < doubleYears.length; i++) {
         let cd = new Date(doubleYears[i]);
         arktest.assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
+        let cd2 = new Date(doubleYears[i]);
+        arktest.assertEQ(Double.valueOf(doubleYears[i]).intValue(), cd2.valueOf())
     }
 }
 

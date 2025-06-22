@@ -24,6 +24,7 @@ cases:
       - { type: char, expr: "c'A'", op: '!=' }
       - { type: 'Boolean|null', expr: new Boolean(false), op: '!==' }
       - { type: 'Byte|null', expr: new Byte(new Int(1).toByte()), op: '!==' }
+      - { type: 'Byte|null', expr: new Byte(new Int(1).byteValue()), op: '!==' }
       - { type: 'Char|null', expr: new Char(c'A'), op: '!==' }
       - { type: 'Error|null', expr: new Error("msg"), op: '!==' }
       - { type: 'Barfunc|null', expr: bar, op: '!==' }

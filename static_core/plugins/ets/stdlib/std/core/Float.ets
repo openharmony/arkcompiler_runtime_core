@@ -136,10 +136,32 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
+    public override byteValue(): byte {
+        return this.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
+    public override shortValue(): short {
+        return this.toShort();
     }
 
     /**
@@ -154,10 +176,32 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
+    public override intValue(): int {
+        return this.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as long
      */
     public override toLong(): long {
         return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
+    public override longValue(): long {
+        return this.toLong();
     }
 
     /**
@@ -172,10 +216,33 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Returns value of this instance
      *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
+    }
+
+    /**
+     * Returns value of this instance
+     *
      * @returns value as double
      */
     public override toDouble(): double {
         return this.value.toDouble();
+    }
+
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
     }
 
     /**
