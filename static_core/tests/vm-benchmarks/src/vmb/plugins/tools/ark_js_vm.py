@@ -44,7 +44,7 @@ class Tool(ToolBase):
         aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
-            f'{aot}{self.custom} ./{name}.abc',
+            f'{aot}{self.custom} {name}.abc',
             cwd=str(bu_path))
         bu.parse_run_output(res)
 
