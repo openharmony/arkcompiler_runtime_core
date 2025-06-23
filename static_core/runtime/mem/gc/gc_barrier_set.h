@@ -27,8 +27,10 @@ namespace ark::mem {
 class GCBarrierSet {
 public:
     GCBarrierSet() = delete;
-    GCBarrierSet(mem::InternalAllocatorPtr allocator, BarrierType preType, BarrierType postType)
-        : preType_(preType),
+    GCBarrierSet(mem::InternalAllocatorPtr allocator, BarrierType preReadType, BarrierType preType,
+                 BarrierType postType)
+        : preReadType_(preReadType),
+          preType_(preType),
           postType_(postType),
           preOperands_(allocator->Adapter()),
           postOperands_(allocator->Adapter())
@@ -38,6 +40,12 @@ public:
     NO_COPY_SEMANTIC(GCBarrierSet);
     NO_MOVE_SEMANTIC(GCBarrierSet);
     virtual ~GCBarrierSet() = 0;
+
+    BarrierType GetPreReadType() const
+    {
+        ASSERT(IsPreBarrier(preReadType_));
+        return preReadType_;
+    }
 
     BarrierType GetPreType() const
     {
@@ -49,6 +57,11 @@ public:
     {
         ASSERT(IsPostBarrier(postType_));
         return postType_;
+    }
+
+    virtual bool IsPreReadBarrierEnabled()
+    {
+        return !mem::IsEmptyBarrier(preReadType_);
     }
 
     virtual bool IsPreBarrierEnabled()
@@ -88,11 +101,6 @@ public:
 
     BarrierOperand GetPostBarrierOperand(std::string_view name);
 
-    virtual bool IsPreReadBarrierEnabled()
-    {
-        return false;
-    }
-
     virtual void *PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
     {
         UNREACHABLE();
@@ -118,8 +126,9 @@ protected:
     }
 
 private:
-    BarrierType preType_;   // Type of PRE barrier.
-    BarrierType postType_;  // Type of POST barrier.
+    BarrierType preReadType_;  // Type of PRE-Read barrier
+    BarrierType preType_;      // Type of PRE-Write barrier.
+    BarrierType postType_;     // Type of POST-Write barrier.
     PandaMap<PandaString, BarrierOperand> preOperands_;
     PandaMap<PandaString, BarrierOperand> postOperands_;
 };
@@ -128,7 +137,7 @@ private:
 class GCDummyBarrierSet : public GCBarrierSet {
 public:
     explicit GCDummyBarrierSet(mem::InternalAllocatorPtr allocator)
-        : GCBarrierSet(allocator, BarrierType::PRE_WRB_NONE, BarrierType::POST_WRB_NONE)
+        : GCBarrierSet(allocator, BarrierType::PRE_RB_NONE, BarrierType::PRE_WRB_NONE, BarrierType::POST_WRB_NONE)
     {
     }
 
@@ -154,7 +163,8 @@ public:
     GCGenBarrierSet(mem::InternalAllocatorPtr allocator,
                     /* POST ARGS: */
                     CardTable *cardTable, uint8_t cardBits, uint8_t dirtyCardValue)
-        : GCBarrierSet(allocator, BarrierType::PRE_WRB_NONE, BarrierType::POST_INTERGENERATIONAL_BARRIER),
+        : GCBarrierSet(allocator, BarrierType::PRE_RB_NONE, BarrierType::PRE_WRB_NONE,
+                       BarrierType::POST_INTERGENERATIONAL_BARRIER),
           minAddr_(ToVoidPtr(cardTable->GetMinAddress())),
           cardTableAddr_(reinterpret_cast<uint8_t *>(*cardTable->begin())),
           cardBits_(cardBits),
@@ -209,7 +219,8 @@ public:
                    // POST ARGS:
                    ObjTwoRefProcessFunc postFunc, uint8_t regionSizeBitsCount, CardTable *cardTable,
                    ThreadLocalCardQueues *updatedRefsQueue, os::memory::Mutex *queueLock)
-        : GCBarrierSet(allocator, BarrierType::PRE_SATB_BARRIER, BarrierType::POST_INTERREGION_BARRIER),
+        : GCBarrierSet(allocator, BarrierType::PRE_RB_NONE, BarrierType::PRE_SATB_BARRIER,
+                       BarrierType::POST_INTERREGION_BARRIER),
           preStoreFunc_(preStoreFunc),
           postFunc_(postFunc),
           regionSizeBitsCount_(regionSizeBitsCount),
@@ -280,7 +291,8 @@ private:
 class GCCMCBarrierSet : public GCBarrierSet {
 public:
     explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
-        : GCBarrierSet(allocator, BarrierType::PRE_WRB_NONE, BarrierType::POST_CMC_WRITE_BARRIER)
+        : GCBarrierSet(allocator, BarrierType::PRE_CMC_READ_BARRIER, BarrierType::PRE_WRB_NONE,
+                       BarrierType::POST_CMC_WRITE_BARRIER)
     {
     }
 

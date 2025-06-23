@@ -744,11 +744,19 @@ ark_gen("arkruntime_gen_entrypoints") {
 action("substitute_icu_path") {
   script = "templates/substitute_icu_path.rb"
   outputs = [ "$target_gen_dir/init_icu_gen.cpp" ]
-  args = [
-    rebase_path("templates/init_icu_gen.cpp.erb"),
-    rebase_path("$target_gen_dir/init_icu_gen.cpp"),
-    rebase_path(ark_third_party_root),
-  ]
+  if (ark_standalone_build) {
+    args = [
+      rebase_path("templates/init_icu_gen.cpp.erb"),
+      rebase_path("$target_gen_dir/init_icu_gen.cpp"),
+      rebase_path("//third_party"),
+    ]
+  } else {
+    args = [
+      rebase_path("templates/init_icu_gen.cpp.erb"),
+      rebase_path("$target_gen_dir/init_icu_gen.cpp"),
+      rebase_path(ark_third_party_root),
+    ]
+  }
 }
 
 ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
