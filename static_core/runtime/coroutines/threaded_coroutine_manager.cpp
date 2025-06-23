@@ -186,7 +186,10 @@ bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
     bool result = LaunchImpl(std::move(epInfo), entrypoint->GetFullName(), priority);
     if (!result) {
-        ThrowOutOfMemoryError("Launch failed");
+        // let's count all launch failures as "limit exceeded" for now.
+        // Later on we can think of throwing different errors for different reasons.
+        ThrowCoroutinesLimitExceedError(
+            "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
     }
 
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch finished";
