@@ -47,12 +47,6 @@ cases:
       assertEQ(type_of_Array_promise.toString(), "escompat.Array");
   - desc: How to get User[] via reflection.
     logic: |-
-      class User {
-        name: string;
-        constructor(name: string) {
-            this.name = name;
-        }
-      }
       let type_of_Array_UserClass: Type = Type.from<User[]>();
       assertEQ(type_of_Array_UserClass.toString(), "escompat.Array");
   - desc: How to get Boolean via reflection.
@@ -77,12 +71,8 @@ cases:
       assertEQ(type_of_int.toString(), "int");
   - desc: How to get SomeInterface via reflection.
     logic: |-
-      interface SomeInterface {
-        name: string;
-        age: number;
-      }
       let type_of_SomeInterface: Type = Type.from<SomeInterface>();
-      assertEQ(type_of_SomeInterface.toString(), "how_to_get_type_via_reflection_ext_14.ETSGLOBAL.SomeInterface");
+      assertEQ(type_of_SomeInterface.toString(), "how_to_get_type_via_reflection_ext_14.SomeInterface");
   - desc: How to get Map via reflection.
     logic: |-
       let type_of_Map: Type = Type.from<Map<number, string>>();
@@ -126,14 +116,8 @@ cases:
       assertEQ(type_of_Undefined.toString(), "undefined");
   - desc: How to get User via reflection.
     logic: |-
-      class User {
-        name: string;
-        constructor(name: string) {
-            this.name = name;
-        }
-      }
       let type_of_UserClass: Type = Type.from<User>();
-      assertEQ(type_of_UserClass.toString(), "how_to_get_type_via_reflection_ext_25.ETSGLOBAL.$0User");
+      assertEQ(type_of_UserClass.toString(), "how_to_get_type_via_reflection_ext_25.User");
   - desc: How to get void via reflection.
     logic: |-
       let type_of_void: Type = Type.from<void>();
@@ -160,10 +144,6 @@ cases:
       assertEQ(type_of_Array_int.toString(), "escompat.Array");
   - desc: How to get SomeInterface[] via reflection.
     logic: |-
-      interface SomeInterface {
-        name: string;
-        age: number;
-      }
       let type_of_Array_Interface: Type = Type.from<SomeInterface[]>();
       assertEQ(type_of_Array_Interface.toString(), "escompat.Array");
   - desc: How to get Map[] via reflection.

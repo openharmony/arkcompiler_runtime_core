@@ -228,13 +228,13 @@ function checkGetPropertyByName(): boolean {
     return val.toNumber() == 2;
 }
 
+class StaticObjectA {
+    aaa: string = '';
+}
 // getProperty(name: string): ESValue
 function checkGetPropertyStaticObj(): boolean {
-    class staticObjectA {
-        aaa: string = ""
-    }
-    let sObj = new staticObjectA();
-    sObj.aaa = "bbb";
+    let sObj = new StaticObjectA();
+    sObj.aaa = 'bbb';
     let obj = ESValue.wrap(sObj);
     let value = obj.getPropertySafe("aaa");
     return value.toString() == "bbb";
@@ -530,9 +530,9 @@ function checkEntries(): boolean {
     return true;
 }
 
+class TestObj {}
 function checkInstanceOfStaticObj(): boolean {
-    class testObj {};
-    let staticObj = new testObj();
+    let staticObj = new TestObj();
     let obj = ESValue.wrap(staticObj);
     return obj.instanceOf(Type.of(staticObj));
 }

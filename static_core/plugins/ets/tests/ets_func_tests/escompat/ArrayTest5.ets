@@ -24,8 +24,8 @@ function main(): int {
     return check(failures, "All tests run");
 }
 
+class Handler<T> extends DefaultArrayProxyHandler<T> {}
 function newProxy<T>(a: Array<T>): Array<T> {
-    class Handler<T> extends DefaultArrayProxyHandler<T> {}
 
     return Proxy.create<T>(a, new Handler<T>())
 }

@@ -23,10 +23,10 @@ import {
     instanceChildAgeNameUnionClass,
 } from 'main_js';
 
+class IntersectionWrong {
+    age = tsNumber;
+}
 function checkArgFuFromSts(): boolean {
-    class IntersectionWrong {
-        age = tsNumber;
-    }
 
     return checkUnionType(new IntersectionWrong()) as boolean == false;
 }

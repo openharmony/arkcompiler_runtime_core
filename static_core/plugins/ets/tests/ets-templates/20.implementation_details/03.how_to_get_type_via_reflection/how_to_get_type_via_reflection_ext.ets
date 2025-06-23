@@ -19,8 +19,21 @@
 desc: {{c.desc}}
 ---*/
 
+class User {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+
+interface SomeInterface {
+    name: string;
+    age: number;
+}
+
 function main(): void {
   {{c.logic}}
 }
 
 {% endfor %}
+

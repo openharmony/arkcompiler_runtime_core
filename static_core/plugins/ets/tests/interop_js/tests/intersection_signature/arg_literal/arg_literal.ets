@@ -28,11 +28,11 @@ import {
 } from 'main_js';
 
 
+class Intersection {
+    age = tsNumber;
+    name = tsString;
+}
 function checkArgFuFromSts(): boolean {
-    class Intersection {
-        age = tsNumber;
-        name = tsString;
-    }
 
     return checkLiteralType(new Intersection()) as boolean;
 }
