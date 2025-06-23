@@ -54,6 +54,38 @@ export namespace StdProcess {
 
     const DEFAULT_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => { console.error("Unhandled Job fail:", reason) };
     const DEFAULT_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => { console.error("Unhandled Promise rejection:", reason) };
+    const DEFAULT_ERROR_HANDLER_CALLBACK = (error: Object): void => {
+        console.error('Unhandled exception:', Class.of(error).getName());
+        let out = new String();
+        let toStr = new String();
+        let stack = new String();
+        if (error instanceof Error) {
+            error = error as Error;
+            try {
+                toStr = error.toString() as string;
+            } catch (e) {
+                toStr = 'invoke toString failed';
+            }
+            out += toStr;
+            try {
+                stack = error.stack as string;
+            } catch (e) {
+                stack = 'exception dump failed';
+            }
+            out += '\n' + stack;
+        } else if (error instanceof Exception) {
+            error = error as Exception;
+            try {
+                toStr = error.toString() as string;
+            } catch (e) {
+                toStr = 'invoke toString failed';
+            }
+            out += toStr;
+        } else {
+            throw new Error('unknown error type');
+        }
+        console.error(out);
+    };
 
     /**
      * @class Represents child process created by executing process.runCmd()
@@ -400,6 +432,11 @@ export namespace StdProcess {
             setRejectedPromiseHandler(listener);
             return;
         }
+        if (type == "uncaughtError") {
+            listener = listener as UncaughtErrorListener;
+            setErrorHandler(listener);
+            return;
+        }
         throw new Error("not implemented");
     }
 
@@ -418,6 +455,10 @@ export namespace StdProcess {
         }
         if (type == "unhandledPromiseRejection") {
             setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+            return true;
+        }
+        if (type == "uncaughtError") {
+            setErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
             return true;
         }
         throw new Error("not implemented");
@@ -510,6 +551,15 @@ export namespace StdProcess {
         rejectedPromiseHandler.reset(listener);
     }
 
+    /**
+    * This method updates handler that is applied to uncaught error
+    *     right before abnormal program termination
+    *
+    * @param { EventListener } listener user-provided handler
+    */
+    function setErrorHandler(listener: UncaughtErrorListener) : void {
+        errorHandler.reset(listener);
+    }
 
     /**
     * This method applies default or user-provided handler to
@@ -541,6 +591,19 @@ export namespace StdProcess {
         }
     }
 
+    /**
+     *
+     * Thist is noreturn function.
+     * Applies default or user-provided handler to an uncaught error and exits the program.
+     *
+     * @param { Object } error Uncaught error
+     *
+     */
+    function HandleUncaughtError(error: Object) {
+        errorHandler.handleUncaughtError(error);
+    }
+
     let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+    let errorHandler: ErrorHandler = new ErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
 }

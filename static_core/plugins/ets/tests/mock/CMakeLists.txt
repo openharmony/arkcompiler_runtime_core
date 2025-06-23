@@ -147,6 +147,12 @@ panda_ets_napi_add_gtest(
     ETS_SOURCE UnhandledRejectionRecursiveTest.ets
 )
 
+panda_ets_napi_add_gtest(
+    NAME uncaught_error_handler
+    CPP_SOURCE uncaught_error_handler_test.cpp
+    ETS_SOURCE UncaughtErrorHandlerTest.ets
+)
+
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     panda_ets_napi_add_gtest(
         NAME register_native_allocation_test

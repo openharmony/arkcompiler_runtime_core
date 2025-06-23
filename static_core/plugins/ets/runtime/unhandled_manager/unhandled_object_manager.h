@@ -61,11 +61,15 @@ public:
     /// @brief Visits objects as GC roots
     void VisitObjects(const GCRootVisitor &visitor);
 
+    /// @brief Applies handler to the exception and exits the program
+    [[noreturn]] void InvokeErrorHandlerAndExit(EtsCoroutine *coro, EtsHandle<EtsObject> exception);
+
 private:
-    PandaEtsVM *vm_;
-    mutable os::memory::Mutex mutex_;
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
     PandaUnorderedSet<EtsObject *> rejectedPromises_ GUARDED_BY(mutex_);
+
+    mutable os::memory::Mutex mutex_;
+    PandaEtsVM *vm_;
 };
 }  // namespace ark::ets
 

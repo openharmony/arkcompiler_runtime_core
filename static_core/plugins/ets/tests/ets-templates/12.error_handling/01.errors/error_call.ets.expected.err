@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/runtime: Unhandled exception: error_call.TestError
-E/runtime: Error
-E/runtime: 	at escompat.Error.<ctor> (etsstdlib.ets:45:0)
-E/runtime: 	at error_call.TestError.<ctor> (error_call.ets:26:0)
-E/runtime: 	at error_call.ETSGLOBAL.main (error_call.ets:29:0)
-E/runtime:
+Unhandled exception: error_call.TestError
+Error
+	at escompat.Error.<ctor> (etsstdlib.ets:45:0)
+	at error_call.TestError.<ctor> (error_call.ets:26:0)
+	at error_call.ETSGLOBAL.main (error_call.ets:29:0)

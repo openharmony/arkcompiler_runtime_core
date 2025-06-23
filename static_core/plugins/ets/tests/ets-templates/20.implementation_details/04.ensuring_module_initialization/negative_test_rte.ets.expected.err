@@ -12,12 +12,11 @@
 # limitations under the License.
 #
 E/runtime: Cannot initialize class 'negative_test_rte.ETSGLOBAL'
-E/runtime: Unhandled exception: std.core.ArithmeticError
-E/runtime: ArithmeticError: / by zero
-E/runtime: 	at std.core.ArithmeticError.<ctor> (etsstdlib.ets:104:0)
-E/runtime: 	at negative_test_rte_module.ETSGLOBAL.foo (negative_test_rte_module.ets:27:0)
-E/runtime: 	at negative_test_rte_module.ETSGLOBAL._$init$_ (negative_test_rte_module.ets:29:0)
-E/runtime: 	at negative_test_rte_module.ETSGLOBAL.<cctor> (negative_test_rte_module.ets:1:0)
-E/runtime: 	at negative_test_rte.ETSGLOBAL._$init$_ (negative_test_rte.ets:1:0)
-E/runtime: 	at negative_test_rte.ETSGLOBAL.<cctor> (negative_test_rte.ets:1:0)
-E/runtime:
+Unhandled exception: std.core.ArithmeticError
+ArithmeticError: / by zero
+	at std.core.ArithmeticError.<ctor> (etsstdlib.ets:104:0)
+	at negative_test_rte_module.ETSGLOBAL.foo (negative_test_rte_module.ets:27:0)
+	at negative_test_rte_module.ETSGLOBAL._$init$_ (negative_test_rte_module.ets:29:0)
+	at negative_test_rte_module.ETSGLOBAL.<cctor> (negative_test_rte_module.ets:1:0)
+	at negative_test_rte.ETSGLOBAL._$init$_ (negative_test_rte.ets:1:0)
+	at negative_test_rte.ETSGLOBAL.<cctor> (negative_test_rte.ets:1:0)
