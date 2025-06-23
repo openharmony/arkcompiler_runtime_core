@@ -19,7 +19,7 @@ import {
 } from 'main_js';
 
 function checkOptionalOperatorWithValue(): boolean {
-    return new String(Obj?.name) == new String(Obj.name);
+    return Obj?.name?.toString() == Obj.name?.toString();
 }
 
 function checkOptionalOperatorReturnUndefined(): boolean {
@@ -39,7 +39,7 @@ function checkOptionalOperatorReturnUndefined(): boolean {
 // }
 
 function checkOptionalOperatorInsideObjectWithValue(): boolean {
-    return new String(Obj.inside?.name) == new String(Obj.inside.name);
+    return new Obj.inside?.name?.toString() == Obj.inside.name?.toString();
 }
 
 function checkOptionalOperatorInsideObjectReturnUndefined(): boolean {

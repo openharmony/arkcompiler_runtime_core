@@ -20,11 +20,11 @@ import {
 } from 'main_js';
 
 function checkCallMethodForValue(): boolean {
-    return new String(Obj?.name).toUpperCase() === "TEST";
+    return Obj?.name?.toString().toUpperCase() === 'TEST';
 }
 
 function checkCallMethodForValueWithOptionalOperator(): boolean {
-    return new String(Obj?.name).toUpperCase() === "TEST";
+    return Obj?.name?.toString().toUpperCase() === 'TEST';
 }
 // NOTE (alexanderpolenov) issue(18449) enable this after fix non null operator
 // function checkCallMethodForValueWithNotNullishOperator(): boolean {
