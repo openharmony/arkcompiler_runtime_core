@@ -140,8 +140,10 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postTo
     bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
                                                             EtsCoroutine::LAUNCH, abortFlag);
     if (UNLIKELY(!launchResult)) {
+        // Launch failed. The exception in the current coro should be already set by Launch(),
+        // just return null as the result and clean up the allocated resources.
+        ASSERT(coro->HasPendingException());
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
-        ThrowOutOfMemoryError("OOM");
         return nullptr;
     }
 

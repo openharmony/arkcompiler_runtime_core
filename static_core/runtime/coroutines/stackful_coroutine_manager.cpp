@@ -732,7 +732,10 @@ bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo
         result = LaunchImpl(std::move(epInfo), std::move(coroName), mode, priority, abortFlag);
     }
     if (!result) {
-        ThrowOutOfMemoryError("LaunchWithMode failed");
+        // let's count all launch failures as "limit exceeded" for now.
+        // Later on we can think of throwing different errors for different reasons.
+        ThrowCoroutinesLimitExceedError(
+            "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
     }
 
     Tracer::Count(Tracer::LAUNCH, 1U);

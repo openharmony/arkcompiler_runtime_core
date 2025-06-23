@@ -174,18 +174,20 @@ function body(): Object {
 
 function testOOM(): boolean {
     try {
-        for (let i = 0; i < 50000; ++i) {
+        const veryBigNumberOfCoroutines: int = 500000000;
+        for (let i = 0; i < veryBigNumberOfCoroutines; ++i) {
             launch<Object, ()=>Object>(body);
         }
     } catch (e) {
-        if (e instanceof OutOfMemoryError) {
+        if (e instanceof CoroutinesLimitExceedError) {
+            StdDebug.Logger.log("Successfully caught: " + e);
             return true;
         } else {
-            console.println("Wrong exception thrown!");
+            StdDebug.Logger.log("Wrong exception thrown: " + e);
             return false;
         }
     }
-    console.println("No exception thrown but should be!");
+    StdDebug.Logger.log("No exception thrown but should be!");
     return false;
 }
 
