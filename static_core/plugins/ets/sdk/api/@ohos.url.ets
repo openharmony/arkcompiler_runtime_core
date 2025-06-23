@@ -33,6 +33,8 @@ function createBusinessError(code: number, message: string) {
 */
 export namespace url {
 
+    export type UrlCbFn = (value: string, key: string, searchParams: URLParams) => void;
+
     /**
     * Store some constants and arrays
     * @class Helper
@@ -2190,9 +2192,7 @@ export namespace url {
         * @param { function } callbackFn - callbackFn value Current traversal key value,
         * key Indicates the name of the key that is traversed.
         */
-        forEach(
-            objfun: (value: string, key: string, param: URLParams) => void
-        ) {
+        forEach(objfun: UrlCbFn) {
             let array = this.urlClass.getArray();
             if (array.length == 0) {
                 return;

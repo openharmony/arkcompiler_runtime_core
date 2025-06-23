@@ -19,6 +19,8 @@ const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 const EmptyContainerErrorCodeId: number = 10200010;
 
+export type LinkedListForEachCb<T> = (value: T, index: number, linkedList: LinkedList<T>) => void;
+
 /**
  * Represents a node in the linked list.
  */
@@ -142,7 +144,7 @@ export class LinkedList<T> implements Iterable<T> {
     * @param callbackfn.index - The index of the current element being processed in the linked list.
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.
     */
-    public forEach(callbackfn: (value: T, index: number, linkedList: LinkedList<T>) => void): void {
+    public forEach(callbackfn: LinkedListForEachCb<T>): void {
         let index: number = 0;
         let currentNode: ListNode<T> | undefined = this.head;
         while (currentNode !== undefined) {

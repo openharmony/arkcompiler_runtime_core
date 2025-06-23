@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
+
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
@@ -201,7 +203,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      *
      * @param callbackFn to apply
      */
-    forEach(callbackFn: (value: V, key: K, map: LightWeightMap<K, V>) => void): void {
+    forEach(callbackFn: LightWeightMapCbFn<K, V>): void {
         const iter = this.entries();
         let res = iter.next();
         while (!res.done) {

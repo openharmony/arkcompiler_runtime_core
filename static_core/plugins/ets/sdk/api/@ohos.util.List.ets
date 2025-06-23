@@ -19,6 +19,9 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
+export type ListForEachCb<T> = (value: T, index: number, list: List<T>) => void;
+export type ListReplaceCb<T> = (value: T, index: number, list: List<T>) => T;
+
 export class List<T> implements Iterable<T> {
     private buffer: LinkedList<T>;
 
@@ -100,7 +103,7 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The function to execute on each element, taking the value, index, and List as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, list: List<T>) => void): void {
+    public forEach(callbackfn: ListForEachCb<T>): void {
         this.buffer.forEach((value: T, index: number) => {
             callbackfn(value, index, this);
         })
@@ -250,7 +253,7 @@ export class List<T> implements Iterable<T> {
      * @param callbackfn - The callback function taking the value, index, and the List as arguments.
      *
      */
-    public replaceAllElements(callbackfn: (value: T, index: number, list: List<T>) => T): void {
+    public replaceAllElements(callbackfn: ListReplaceCb<T>): void {
         let currentNode: ListNode<T> | undefined = this.buffer.head
         let index: number = 0;
         while (currentNode !== undefined) {
