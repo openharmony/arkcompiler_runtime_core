@@ -69,36 +69,36 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyRead1 extends stream.Readable {
+    doReadCalled = true;
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        this.push(null);
+        this.doReadCalled = true;
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableConstructorSetMethods001
 function testReadableStreamResumeBehavior() {
-    let doReadCalled = true;
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            this.push(null);
-            doReadCalled = true;
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead1();
     readable.resume();
-    arktest.assertTrue(doReadCalled);
+    arktest.assertTrue(readable.doReadCalled);
 }
 
+class MyRead2 extends stream.Readable {
+    dataSource = new Array<string>("x");
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        let data = this.dataSource.shift();
+        this.push(data as string);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableData002
 function testReadableStreamDataEventBehavior() {
-    let dataSource = new Array<string>("x");
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            let data = dataSource.shift();
-            this.push(data as string);
-        }
-    }
-    let readableStream = new MyRead();
+    let readableStream = new MyRead2();
     readableStream.on('data', (chunk: string): void => {
         arktest.assertEQ(chunk.toString(), 'x');
     });
@@ -151,21 +151,21 @@ function testReadableStreamEmitReadableShortStreamBehavior() {
     readableStream.push(null);
 }
 
+class MyRead3 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        arktest.assertFalse(this.readableEnded, "readableEnded should be false");
+        this.push('asd');
+        arktest.assertFalse(this.readableEnded, "readableEnded should be false");
+        this.push(null);
+        arktest.assertFalse(this.readableEnded, "readableEnded should be false");
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableEnded002
 function testReadableStreamReadableEndedBehavior() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            arktest.assertFalse(this.readableEnded, "readableEnded should be false");
-            this.push('asd');
-            arktest.assertFalse(this.readableEnded, "readableEnded should be false");
-            this.push(null);
-            arktest.assertFalse(this.readableEnded, "readableEnded should be false");
-        }
-    }
-    let readableStream = new MyRead();
+    let readableStream = new MyRead3();
     readableStream.on('end', (): void => {
         arktest.assertTrue(readableStream.readableEnded, "readableEnded should be true");
     });
@@ -189,25 +189,26 @@ function testReadableStreamReadableEndedEdgeCase() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyRead4 extends stream.Readable {
+    count = 5;
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        setTimeout(() => {
+            if (this.count--) {
+                this.push('a');
+            } else {
+                this.push(null);
+            }
+        }, 0);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableHwm0Async001
 function testReadableStreamHighWaterMarkAsyncBehavior() {
-    let count = 5;
     let dataTimes = 0;
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            setTimeout(() => {
-                if (count--) {
-                    this.push('a');
-                } else {
-                    this.push(null);
-                }
-            }, 0);
-        }
-    }
-    let readable = new MyRead();
+
+    let readable = new MyRead4();
     readable.on('end', (): void => {
         arktest.assertEQ(dataTimes, 5);
     });

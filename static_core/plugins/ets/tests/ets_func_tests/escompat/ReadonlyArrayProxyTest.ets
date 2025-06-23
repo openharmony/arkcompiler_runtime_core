@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
+class ProxyHandler extends proxy.DefaultReadonlyArrayProxyHandler<string> {
+    getTrapped = false
+
+    override get(target: ReadonlyArray<string>, index: int): string {
+        this.getTrapped = true
+        return super.get(target, index)
+    }
+}
+
 function testReadonlyArrayProxyOps(): void {
     const array: ReadonlyArray<string> = Array.of<string>("I", "II", "III")
-
-    class ProxyHandler extends proxy.DefaultReadonlyArrayProxyHandler<string> {
-        getTrapped = false
-
-        override get(target: ReadonlyArray<string>, index: int): string {
-            this.getTrapped = true
-            return super.get(target, index)
-        }
-    }
-
     const handler = new ProxyHandler()
     const arrayProxy = proxy.Proxy.create(array, handler)
 
@@ -40,3 +39,4 @@ function main(): int {
 
     return suite.run()
 }
+

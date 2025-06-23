@@ -73,85 +73,85 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyDuplex1 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '测试');
+            arktest.assertEQ(encoding, 'gb18030');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding019
 function testDuplexStreamEndEncodingGb18030() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '测试');
-                arktest.assertEQ(encoding, 'gb18030');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex1();
     duplex.end('测试', 'gb18030', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex2 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '测试');
+            arktest.assertEQ(encoding, 'gbk');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding020
 function testDuplexStreamEndEncodingGbk() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '测试');
-                arktest.assertEQ(encoding, 'gbk');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex2();
     duplex.end('测试', 'gbk', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex3 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(chunk, '测试');
+            arktest.assertEQ(encoding, 'gb2312');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding021
 function testDuplexStreamEndEncodingGb2312() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(chunk, '测试');
-                arktest.assertEQ(encoding, 'gb2312');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex3();
     duplex.end('测试', 'gb2312', mustCall());
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex4 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(encoding, 'gb18030');
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallUint8Array(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamEncoding022
 function testDuplexStreamSetDefaultEncodingGb18030() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(encoding, 'gb18030');
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallUint8Array(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex4();
     let result = duplex.setDefaultEncoding('gb18030');
     duplex.write('你好');
     arktest.assertTrue(result);

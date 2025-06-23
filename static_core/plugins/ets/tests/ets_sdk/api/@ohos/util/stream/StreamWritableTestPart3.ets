@@ -65,17 +65,17 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyWritable1 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall(new Error('write test error'));
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish001
 function testWritableWritevFinish() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall(new Error('write test error'));
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable1();
     writableStream.on('finish', mustNotCall());
     writableStream.on('prefinish', mustNotCall());
     writableStream.on('error', mustCall((error: Error): void => {
@@ -85,19 +85,19 @@ function testWritableWritevFinish() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable2 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        setTimeout(() => {
+            callback.unsafeCall(new Error('write error'));
+        });
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish002
 function testWritableWritevError() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            setTimeout(() => {
-                callback.unsafeCall(new Error('write error'));
-            });
-        }
-    }
-    let writable = new MyWritable();
+    let writable = new MyWritable2();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());
     writable.on('error', mustCall((error: Error): void => {
@@ -107,21 +107,21 @@ function testWritableWritevError() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable3 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall(new Error('write error'));
+    }
+    doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
+        callback.unsafeCall(new Error('writev error'));
+    }
+
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish003
 function testWritableWritevErrorScenarioOne() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall(new Error('write error'));
-        }
-        doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
-            callback.unsafeCall(new Error('writev error'));
-        }
-
-    }
-    let writable = new MyWritable();
+    let writable = new MyWritable3();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());
     writable.on('error', mustCall((error: Error): void => {
@@ -135,25 +135,25 @@ function testWritableWritevErrorScenarioOne() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable4 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        setTimeout(() => {
+            callback.unsafeCall(new Error('write error'));
+        });
+    }
+    doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
+        setTimeout(() => {
+            callback.unsafeCall(new Error('writev error'));
+        });
+    }
+
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableWritevFinish004
 function testWritableWritevErrorScenarioTwo() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            setTimeout(() => {
-                callback.unsafeCall(new Error('write error'));
-            });
-        }
-        doWritev(chunks: string[] | Uint8Array[], callback: Function): void {
-            setTimeout(() => {
-                callback.unsafeCall(new Error('writev error'));
-            });
-        }
-
-    }
-    let writable = new MyWritable();
+    let writable = new MyWritable4();
     writable.on('finish', mustNotCall());
     writable.on('prefinish', mustNotCall());
     writable.on('error', mustCall((error: Error): void => {

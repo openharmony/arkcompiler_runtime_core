@@ -176,17 +176,18 @@ function testReadableDefaultProperty() {
     arktest.assertTrue(readable.readable, "readable should be true");
 }
 
+class MyRead1 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        throw new Error('Simulated error');
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties003
 function testReadableErrorHandling() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            throw new Error('Simulated error');
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead1();
     readable.push('test');
     arktest.assertTrue(readable.readable, "readable should be true");
     readable.on('error', mustCall((): void => {
@@ -201,31 +202,31 @@ function testReadableHighWatermarkProperty() {
     arktest.assertEQ(readable.readableHighWatermark, 16 * 1024);
 }
 
+class MyRead2 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties005
 function testReadableFlowingState() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead2();
     readable.on('data', (): void => {
     });
     arktest.assertEQ(readable.readableFlowing, true);
 }
 
+class MyRead3 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties006
 function testReadableResumeFlowingState() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead3();
     readable.resume();
     arktest.assertEQ(readable.readableFlowing, true);
 }
@@ -236,31 +237,31 @@ function testReadableLengthEmpty() {
     arktest.assertEQ(readable.readableLength, 0);
 }
 
+class MyRead4 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties008
 function testReadableLengthWithData() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead4();
     let testData = 'Hello world';
     readable.push(testData);
     arktest.assertEQ(readable.readableLength, testData.length);
 }
 
+class MyRead5 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties009
 function testReadableLengthPartialRead() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead5();
     let testData = 'Hello world!';
     readable.push(testData);
     let chunk = readable.read(testData.length / 2);
@@ -273,16 +274,16 @@ function testReadableLengthPartialRead() {
     arktest.assertEQ(readable.readableLength, 0);
 }
 
+class MyRead6 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties010
 function testReadableLengthAfterEnd() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead6();
     readable.push('Some data');
     readable.push(null);
     readable.on('data', (): void => {
@@ -292,16 +293,16 @@ function testReadableLengthAfterEnd() {
     });
 }
 
+class MyRead7 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties011
 function testReadableLengthMultiplePushes() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead7();
     let testData1 = 'First part';
     let testData2 = 'Second part';
     readable.push(testData1);
@@ -310,16 +311,16 @@ function testReadableLengthMultiplePushes() {
     arktest.assertEQ(readable.readableLength, testData1.length + testData2.length);
 }
 
+class MyRead8 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties012
 function testReadableEndedNotFinished() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead8();
     readable.push('test data');
     readable.read();
     arktest.assertFalse(readable.readableEnded, "readableEnded should be false");
@@ -333,43 +334,43 @@ function testReadableDefaultState() {
     arktest.assertTrue(readable.readable, "readable should be true");
 }
 
+class MyRead9 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties014
 function testReadableFlowingWithData() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead9();
     readable.push('test data');
     arktest.assertEQ(readable.readableFlowing, null);
 }
 
+class MyRead10 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties015
 function testReadableEndedDefaultState() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead10();
     arktest.assertFalse(readable.readableEnded, "readableEnded should be false");
 }
 
+class MyRead11 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties016
 function testReadableEndedAfterFinish() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead11();
     readable.push('Some data');
     readable.push(null);
     readable.on('finished', mustCall((): void => {
@@ -378,16 +379,16 @@ function testReadableEndedAfterFinish() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyRead12 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties017
 function testReadablePauseAndResumeState() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead12();
     readable.pause();
     arktest.assertTrue(readable.readable, "readable should be true");
     readable.resume();

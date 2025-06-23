@@ -58,11 +58,12 @@ function testConstructorWithCustomComparatorAndAddElements() {
     arktest.assertEQ(treeSet.length, 3);
 }
 
+class TestEntry {
+    id: number = 0;
+}
+
 //Test cases ported from ArkTS 1.0:TREESET_0300
 function testConstructorWithCustomObjectsAndCustomComparator() {
-    class TestEntry {
-        id: number = 0;
-    }
 
     let ts1: TreeSet<TestEntry> = new TreeSet<TestEntry>((t1: TestEntry, t2: TestEntry): number => {
         return t1.id - t2.id;
@@ -80,10 +81,6 @@ function testConstructorWithCustomObjectsAndCustomComparator() {
 
 //Test cases ported from ArkTS 1.0:TREESET_0400
 function testConstructorWithCustomObjectsAndDefaultComparator() {
-    class TestEntry {
-        id: number = 0;
-    }
-
     let ts1 = new TreeSet<TestEntry>();
     let entry1: TestEntry = {
         id: 0

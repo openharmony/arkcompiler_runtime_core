@@ -105,17 +105,17 @@ function mustCallNoArgs(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyDuplex1 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplexEnd001
 function testDuplexFinishEventNotTriggered() {
     let finishCalled = false;
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex1();
     duplex.on('finish', () => {
         finishCalled = true;
     })
@@ -124,18 +124,18 @@ function testDuplexFinishEventNotTriggered() {
     arktest.assertFalse(finishCalled);
 }
 
+class MyDuplex2 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        arktest.assertFalse(this.writableFinished, "writableFinished should be false");
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplexWritableFinished002
 function testDuplexWritableFinishedState() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            arktest.assertFalse(this.writableFinished, "writableFinished should be false");
-            callback.unsafeCall();
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex2();
     let func: Function =  mustCallNoArgs((): void => {
         arktest.assertTrue(duplex.writableFinished, "writableFinished should be true");
     })
@@ -146,22 +146,22 @@ function testDuplexWritableFinishedState() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex3 extends stream.Duplex {
+    written: string | Uint8Array = "";
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        this.written = chunk;
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplex001
 function testDuplexBasicReadWrite() {
-    let written: string | Uint8Array;
     let read: Object;
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            written = chunk;
-            callback.unsafeCall();
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex3();
     arktest.assertTrue(duplex instanceof stream.Duplex, "duplex instanceof Duplex should be true");
     duplex.on('data', (...param: Object[]): void => {
         if (param.length > 0 && param[0] instanceof Object) {
@@ -172,30 +172,30 @@ function testDuplexBasicReadWrite() {
     duplex.end('written');
     setTimeout(() => {
         arktest.assertEQ(read.toString(), 'read');
-        arktest.assertEQ(written, 'written');
+        arktest.assertEQ(duplex.written, 'written');
     }, 0);
 }
 
+class MyDuplex4 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        let fn = (size: number) => {
+            arktest.assertEQ(size, 16384);
+            this.push('duplex test');
+            this.push(null);
+        }
+        let wrappedFn = mustCallArgSize(fn);
+        wrappedFn(size);
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplex002
 function testDuplexReadWithValidSize() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            let fn = (size: number) => {
-                arktest.assertEQ(size, 16384);
-                this.push('duplex test');
-                this.push(null);
-            }
-            let wrappedFn = mustCallArgSize(fn);
-            wrappedFn(size);
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            callback.unsafeCall();
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex4();
     duplex.write('duplex test', 'utf8', mustCallObjectArray((...param: Object[]): void => {
         if (param.length > 0 && param[0] instanceof Error) {
             const err = param[0] as Error;
@@ -211,17 +211,17 @@ function testDuplexReadWithValidSize() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex5 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        callback.unsafeCall(new Error('Write error'));
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplex003
 function testDuplexErrorHandlingOnWrite() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            callback.unsafeCall(new Error('Write error'));
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex5();
     let func: Function = (err: Error) => {
         arktest.assertEQ(err.message, "Write error", "err.message is valid");
         arktest.assertFalse(duplex.writable, "writable should be false");
@@ -232,23 +232,23 @@ function testDuplexErrorHandlingOnWrite() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyDuplex6 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        setTimeout(() => {
+            callback.unsafeCall();
+        }, 20);
+    }
+    doRead(size: number) {
+        this.push('Sync data');
+        this.push(null);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplex004
 function testDuplexReadWriteWithSyncData() {
-    class MyDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            setTimeout(() => {
-                callback.unsafeCall();
-            }, 20);
-        }
-        doRead(size: number) {
-            this.push('Sync data');
-            this.push(null);
-        }
-    }
-    let duplex = new MyDuplex();
+    let duplex = new MyDuplex6();
     duplex.on('data', (...chunk: Object[]): void => {
         if (chunk.length > 0 && chunk[0] instanceof string) {
             arktest.assertEQ(chunk[0].toString(), "Sync data");

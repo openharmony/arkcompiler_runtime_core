@@ -35,10 +35,10 @@ function testConstructorCreatesDefaultEmptyHashSet() {
     arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
+class Tmp {
+    name: number = 0
+}
 function testConstructorWithCustomTypeData() {
-    class Tmp {
-        name: number = 0
-    }
     let hashSet: HashSet<Tmp> = new HashSet<Tmp>();
     let param: Tmp = {
         name: 1

@@ -85,80 +85,82 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyRead1 extends TestReadable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        this.push('Some data');
+        this.push(null);
+    }
+}
+class MyWrite1 extends CustomWritable {
+    str = "{\"0\":83,\"1\":111,\"2\":109,\"3\":101,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
+            arktest.assertEQ(JSON.stringify(chunk as Uint8Array), this.str);
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallFnWrite(fn);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamPipe004
 function testPipeReadableAndWritableStreams() {
-    const str = "{\"0\":83,\"1\":111,\"2\":109,\"3\":101,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
-    class MyRead extends TestReadable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            this.push('Some data');
-            this.push(null);
-        }
-    }
-    class MyWrite extends CustomWritable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(JSON.stringify(chunk as Uint8Array), str);
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallFnWrite(fn);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let readable = new MyRead();
-    let writable = new MyWrite();
+    let readable = new MyRead1();
+    let writable = new MyWrite1();
     readable.pipe(writable);
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyRead2 extends stream.Readable {
+    sumData = 0;
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+        const onceData = 8 * 1024;
+        if ((this.sumData + onceData) < 41000) {
+            this.sumData += onceData;
+            this.push('a'.repeat(onceData));
+        } else if (this.sumData === 41000) {
+            this.push(null);
+        } else {
+            this.push('a'.repeat(41000 - this.sumData));
+            this.sumData += (41000 - this.sumData);
+        }
+    }
+}
+class MyWrite2 extends stream.Writable {
+    sum = 0;
+    callCount = 0;
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string, encoding: string, callback: Function): void {
+        let fn = (chunk: string, encoding: string, callback: Function) => {
+            this.sum += chunk.length;
+            this.callCount++;
+            if (this.callCount === 6) {
+                arktest.assertEQ(this.sum, 41000);
+            }
+            setTimeout(() => {
+                callback.unsafeCall()
+            }, 100)
+        }
+        let wrappedFn = mustCallFn(fn, 6);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
+
 // Test cases ported from ArkTS 1.0:testStreamPipe005
 function testPipeLargeDataTransferValidation() {
-    let sumData = 0;
-    let sum = 0;
-    let callCount = 0;
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-            const onceData = 8 * 1024;
-            if ((sumData + onceData) < 41000) {
-                sumData += onceData;
-                this.push('a'.repeat(onceData));
-            } else if (sumData === 41000) {
-                this.push(null);
-            } else {
-                this.push('a'.repeat(41000 - sumData));
-                sumData += (41000 - sumData);
-            }
-        }
-    }
-    class MyWrite extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string, encoding: string, callback: Function): void {
-            let fn = (chunk: string, encoding: string, callback: Function) => {
-                sum += chunk.length;
-                callCount++;
-                if (callCount === 6) {
-                    arktest.assertEQ(sum, 41000);
-                }
-                setTimeout(() => {
-                    callback.unsafeCall()
-                }, 100)
-            }
-            let wrappedFn = mustCallFn(fn, 6);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let readable = new MyRead();
-    let writable = new MyWrite();
+    let readable = new MyRead2();
+    let writable = new MyWrite2();
     readable.pipe(writable);
     readable.unpipe(writable);
     readable.pipe(writable);

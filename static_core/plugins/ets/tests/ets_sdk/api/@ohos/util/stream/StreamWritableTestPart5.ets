@@ -111,19 +111,19 @@ function testWritableFinishState() {
     writableStream.end();
 }
 
+class MyWritable1 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        setTimeout(() => {
+            callback.unsafeCall();
+        });
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties005
 function testWritableLengthDuringWrite() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            setTimeout(() => {
-                callback.unsafeCall();
-            });
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable1();
     writableStream.write('hello');
     arktest.assertEQ(writableStream.writableLength, 5);
 }
@@ -159,20 +159,20 @@ function testWritableLengthAfterFinish() {
     arktest.assertEQ(customWritable.writableLength, 0);
 }
 
+class MyWritable2 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        setTimeout(() => {
+            callback.unsafeCall();
+        }, 10);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties010
 function testWritableWriteLargeData() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            setTimeout(() => {
-                callback.unsafeCall();
-            }, 10);
-        }
-    }
     const largeData = 'ab'.repeat(Math.floor(16384 / 2));
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable2();
     let writeResult = writableStream.write(largeData);
     arktest.assertFalse(writeResult);
 }

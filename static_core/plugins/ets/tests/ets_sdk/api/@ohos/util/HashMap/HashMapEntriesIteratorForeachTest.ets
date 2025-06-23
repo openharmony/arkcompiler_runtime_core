@@ -271,13 +271,12 @@ function testForeachCbThreeParams() {
     });
 }
 
+class Temp {
+    age: number = 0
+    name: string = ""
+}
 //Test cases ported from ArkTS 1.0:HASHMAP_CUSTOM_0100
 function testCustomTypeOps() {
-    class Temp {
-        age: number = 0
-        name: string = ""
-    }
-
     const hashMap = new HashMap<number, Temp>();
     let temp: Temp = {
         age: 18, name: "zhang san"

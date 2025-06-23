@@ -23,8 +23,8 @@ function checkRestOfString(f: JSValue): boolean {
     return ESValue.wrap(f).invoke(['aa', 'bb', 'cc'], 'aa', 'bb', 'cc').toBoolean();
 }
 
+class A{}
 function checkRestOfObject(f: JSValue): boolean {
-    class A{}
     let a = new A();
     interface B{name: string}
     let b: B = {name: "bbb"};

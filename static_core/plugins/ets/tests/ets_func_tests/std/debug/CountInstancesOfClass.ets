@@ -15,8 +15,8 @@
 
 let keepAlive: object[] = [];
 
+class TestClassA1 {}
 function testCountInstancesOfClass() {
-  class TestClassA1 {}
   let type = Type.from<TestClassA1>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestClassA1());
@@ -26,9 +26,9 @@ function testCountInstancesOfClass() {
   arktest.assertLE(count, init + 2);
 }
 
+class TestClassA2 {}
+class TestSubClassB2 extends TestClassA2 {}
 function testInheritanceBaseClassCount() {
-  class TestClassA2 {}
-  class TestSubClassB2 extends TestClassA2 {}
   let type = Type.from<TestClassA2>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestClassA2());
@@ -39,9 +39,9 @@ function testInheritanceBaseClassCount() {
   arktest.assertLE(count, init + 2);
 }
 
+class TestClassA3 {}
+class TestSubClassB3 extends TestClassA3 {}
 function testInheritanceSubClassCount() {
-  class TestClassA3 {}
-  class TestSubClassB3 extends TestClassA3 {}
   let type = Type.from<TestSubClassB3>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestSubClassB3());
@@ -52,8 +52,8 @@ function testInheritanceSubClassCount() {
   arktest.assertLE(count, init + 2);
 }
 
+class TestUnusedClassC4 {}
 function testZeroInstanceCase() {
-  class TestUnusedClassC4 {}
   let type = Type.from<TestUnusedClassC4>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestUnusedClassC4());
@@ -62,9 +62,9 @@ function testZeroInstanceCase() {
   arktest.assertLE(count, init + 1);
 }
 
+class IsolatedA {}
+class IsolatedB {}
 function testMultipleClassIsolation() {
-  class IsolatedA {}
-  class IsolatedB {}
   let typeA = Type.from<IsolatedA>() as ClassType;
   let typeB = Type.from<IsolatedB>() as ClassType;
   let initA = RuntimeDebug.countInstancesOfClass(typeA);
@@ -80,14 +80,15 @@ function testMultipleClassIsolation() {
   arktest.assertLE(countB, initB + 1);
 }
 
-function testNestedObjectCount() {
-  class Inner {}
-  class Outer {
-    field: Inner;
-    constructor() {
-      this.field = new Inner();
-    }
+class Inner {}
+class Outer {
+  field: Inner;
+  constructor() {
+    this.field = new Inner();
   }
+}
+ 
+function testNestedObjectCount() {
   let type = Type.from<Inner>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new Outer());
@@ -97,24 +98,25 @@ function testNestedObjectCount() {
   arktest.assertLE(count, init + 2);
 }
 
-function testGenericClassCount() {
-  class Box<T> {
-    value: T;
-    constructor(v: T) {
-      this.value = v;
-    }
+class Box1<T> {
+  value: T;
+  constructor(v: T) {
+    this.value = v;
   }
-  let type = Type.from<Box<string>>() as ClassType;
+}
+
+function testGenericClassCount() {
+  let type = Type.from<Box1<string>>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
-  keepAlive.push(new Box<string>('a'));
-  keepAlive.push(new Box<string>('b'));
+  keepAlive.push(new Box1<string>('a'));
+  keepAlive.push(new Box1<string>('b'));
   let count = RuntimeDebug.countInstancesOfClass(type);
   arktest.assertLE(2, count);
   arktest.assertLE(count, init + 2);
 }
 
+class NamedAnonymousLike {}
 function testAnonymousClassCount() {
-  class NamedAnonymousLike {}
   let type = Type.from<NamedAnonymousLike>() as ClassType;
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new NamedAnonymousLike());
@@ -132,7 +134,7 @@ function main(): int {
   suite.addTest('Zero-instance', testZeroInstanceCase);
   suite.addTest('Multiple classes: IsolatedA vs IsolatedB', testMultipleClassIsolation);
   suite.addTest('Nested object field', testNestedObjectCount);
-  suite.addTest('Generic type: Box<string>', testGenericClassCount);
+  suite.addTest('Generic type: Box1<string>', testGenericClassCount);
   suite.addTest('Anonymous class pattern', testAnonymousClassCount);
   keepAlive = [];
   GC.startGC(GC.Cause.FULL);
