@@ -86,8 +86,45 @@ export final class AsyncLock {
      */
     public lockAsync<T, U>(callback: AsyncLockCallback<T>, mode: AsyncLockMode, options: AsyncLockOptions<U>): Promise<T> {
         let callerCID = CoroutineExtras.getCoroutineId();
+        let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
+
         let wrapped = (l: AsyncLock) => { return l.wrapper<T, U>(callback, callerCID, mode, options); }
+        if (this.canAcquireLock(mode, callerCID, asyncLockInfo)) {
+            wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, asyncLockInfo); }
+        } else {
+            ConcurrencyHelpers.mutexLock(this.mutex);
+            this.pending.add(asyncLockInfo);
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
+        }
+
         return AsyncLock.launchPromise(wrapped, this);
+    }
+
+    private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        try {
+            if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
+                this.counter = 1;
+                this.held.add(asyncLockInfo);
+                this.holderCID = callerCID;
+                this.mode = mode;
+                return true;
+            }
+            if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED && this.holderCID == callerCID) {
+                this.counter++;
+                this.held.add(asyncLockInfo);
+                this.holderCID = callerCID;
+                this.mode = mode;
+                return true;
+            }
+            return false;
+        } finally {
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
+        }
+    }
+
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, asyncLockInfo: AsyncLockInfo) : Promise<T> {
+        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
     }
 
     private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
@@ -111,12 +148,7 @@ export final class AsyncLock {
 
     private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>) : Promise<T> {
         let asyncLockInfo = new AsyncLockInfo(this.name, mode, callerCID);
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        this.pending.add(asyncLockInfo);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-
         this.lock<U>(callerCID, mode, asyncLockInfo, options);
-
         return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
     }
 
@@ -132,8 +164,8 @@ export final class AsyncLock {
         }
 
         while (isDone == false) {
-             if (options.signal != null && options.signal!.aborted == true) {
-                 throw new Error("Aborted");
+            if (options.signal != null && options.signal!.aborted == true) {
+                throw new Error("Aborted");
             }
 
             if(isTimeoutExec == true) {
