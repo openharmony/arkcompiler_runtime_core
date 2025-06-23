@@ -38,7 +38,7 @@ static bool EnsureBootContext()
 }
 
 template <typename T>
-static T UnsafeMemoryRead(void *addr)
+static T UnsafeMemoryRead(EtsLong addr)
 {
     if (EnsureBootContext()) {
         return *reinterpret_cast<T *>(addr);
@@ -47,89 +47,89 @@ static T UnsafeMemoryRead(void *addr)
 }
 
 template <typename T>
-static void UnsafeMemoryWrite(void *addr, T val)
+static void UnsafeMemoryWrite(EtsLong addr, T val)
 {
     if (EnsureBootContext()) {
         *reinterpret_cast<T *>(addr) = val;
     }
 }
 
-extern "C" EtsByte UnsafeMemoryReadBoolean(void *addr)
+extern "C" EtsByte UnsafeMemoryReadBoolean(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsByte>(addr);
 }
 
-extern "C" EtsByte UnsafeMemoryReadInt8(void *addr)
+extern "C" EtsByte UnsafeMemoryReadInt8(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsByte>(addr);
 }
 
-extern "C" EtsShort UnsafeMemoryReadInt16(void *addr)
+extern "C" EtsShort UnsafeMemoryReadInt16(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsShort>(addr);
 }
 
-extern "C" EtsInt UnsafeMemoryReadInt32(void *addr)
+extern "C" EtsInt UnsafeMemoryReadInt32(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsInt>(addr);
 }
 
-extern "C" EtsLong UnsafeMemoryReadInt64(void *addr)
+extern "C" EtsLong UnsafeMemoryReadInt64(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsLong>(addr);
 }
 
-extern "C" EtsFloat UnsafeMemoryReadFloat32(void *addr)
+extern "C" EtsFloat UnsafeMemoryReadFloat32(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsFloat>(addr);
 }
 
-extern "C" EtsDouble UnsafeMemoryReadFloat64(void *addr)
+extern "C" EtsDouble UnsafeMemoryReadFloat64(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsDouble>(addr);
 }
 
-extern "C" EtsDouble UnsafeMemoryReadNumber(void *addr)
+extern "C" EtsDouble UnsafeMemoryReadNumber(EtsLong addr)
 {
     return UnsafeMemoryRead<EtsDouble>(addr);
 }
 
-extern "C" void UnsafeMemoryWriteBoolean(void *addr, EtsBoolean val)
+extern "C" void UnsafeMemoryWriteBoolean(EtsLong addr, EtsBoolean val)
 {
     UnsafeMemoryWrite<EtsByte>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteInt8(void *addr, EtsByte val)
+extern "C" void UnsafeMemoryWriteInt8(EtsLong addr, EtsByte val)
 {
     UnsafeMemoryWrite<EtsByte>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteInt16(void *addr, EtsShort val)
+extern "C" void UnsafeMemoryWriteInt16(EtsLong addr, EtsShort val)
 {
     UnsafeMemoryWrite<EtsShort>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteInt32(void *addr, EtsInt val)
+extern "C" void UnsafeMemoryWriteInt32(EtsLong addr, EtsInt val)
 {
     UnsafeMemoryWrite<EtsInt>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteInt64(void *addr, EtsLong val)
+extern "C" void UnsafeMemoryWriteInt64(EtsLong addr, EtsLong val)
 {
     UnsafeMemoryWrite<EtsLong>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteFloat32(void *addr, EtsFloat val)
+extern "C" void UnsafeMemoryWriteFloat32(EtsLong addr, EtsFloat val)
 {
     UnsafeMemoryWrite<EtsFloat>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteFloat64(void *addr, EtsDouble val)
+extern "C" void UnsafeMemoryWriteFloat64(EtsLong addr, EtsDouble val)
 {
     UnsafeMemoryWrite<EtsDouble>(addr, val);
 }
 
-extern "C" void UnsafeMemoryWriteNumber(void *addr, EtsDouble val)
+extern "C" void UnsafeMemoryWriteNumber(EtsLong addr, EtsDouble val)
 {
     UnsafeMemoryWrite<EtsDouble>(addr, val);
 }
@@ -158,7 +158,7 @@ extern "C" int UnsafeMemoryStringGetSizeInBytes(EtsString *str)
 
 static constexpr uint16_t UTF16_BOM = 0xFEFF;
 
-extern "C" EtsString *UnsafeMemoryReadString(void *buf, int len)
+extern "C" EtsString *UnsafeMemoryReadString(EtsLong buf, int len)
 {
     if (!EnsureBootContext()) {
         return nullptr;
@@ -183,7 +183,7 @@ extern "C" EtsString *UnsafeMemoryReadString(void *buf, int len)
     return reinterpret_cast<EtsString *>(res);
 }
 
-extern "C" int UnsafeMemoryWriteString(void *addr, EtsString *str)
+extern "C" int UnsafeMemoryWriteString(EtsLong addrEts, EtsString *str)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -195,6 +195,7 @@ extern "C" int UnsafeMemoryWriteString(void *addr, EtsString *str)
 
     str = handle.GetPtr();
 
+    auto addr = reinterpret_cast<char *>(addrEts);
     auto size = static_cast<uint32_t>(str->GetLength());
     if (str->IsUtf16()) {
         *reinterpret_cast<uint16_t *>(addr) = UTF16_BOM;

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+//! CHECKER       Unsafe memory access, INT
+//! RUN           options: "--compiler-enable-jit=false", entry: 'unsafe_memory.ETSGLOBAL::main'
+
 //! CHECKER       Unsafe memory access, JIT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-regex='.*test.*' --compiler-hotness-threshold=0", entry: 'unsafe_memory.ETSGLOBAL::main'
