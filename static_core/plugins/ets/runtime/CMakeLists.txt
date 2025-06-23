@@ -14,6 +14,7 @@
 set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 
 set(ETS_RUNTIME_SOURCES
+    ${PANDA_ETS_PLUGIN_SOURCE}/dfx/heap_helpers.cpp
     ${ETS_EXT_SOURCES}/ani/ani_interaction_api.cpp
     ${ETS_EXT_SOURCES}/ani/ani_mangle.cpp
     ${ETS_EXT_SOURCES}/ani/ani_vm_api.cpp
@@ -85,6 +86,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
+    ${ETS_EXT_SOURCES}/mem/ets_gc_stat.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_helpers.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_invoke_interface.cpp

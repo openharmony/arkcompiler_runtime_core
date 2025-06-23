@@ -102,6 +102,7 @@ arkruntime_deps = [
 arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
 
 srcs_runtime = [
+  "dfx/heap_helpers.cpp",
   "runtime/ani/ani_interaction_api.cpp",
   "runtime/ani/ani_mangle.cpp",
   "runtime/ani/ani_vm_api.cpp",
@@ -178,6 +179,7 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",
   "runtime/intrinsics/helpers/ets_to_string_cache.cpp",
   "runtime/intrinsics/helpers/json_helper.cpp",
+  "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
   "runtime/napi/ets_napi_helpers.cpp",
   "runtime/napi/ets_napi_invoke_interface.cpp",
