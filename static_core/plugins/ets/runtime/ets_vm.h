@@ -408,12 +408,6 @@ public:
         return fullGCLongTimeListener_->GetFullGCLongTimeCount();
     }
 
-    /// @brief Invokes managed method to apply custom handler on stored failed jobs
-    void ListUnhandledFailedJobs();
-
-    /// @brief Invokes managed method to apply custom handler on stored rejected promises
-    void ListUnhandledRejectedPromises();
-
     PANDA_PUBLIC_API void AddRootProvider(mem::RootProvider *provider);
     PANDA_PUBLIC_API void RemoveRootProvider(mem::RootProvider *provider);
 

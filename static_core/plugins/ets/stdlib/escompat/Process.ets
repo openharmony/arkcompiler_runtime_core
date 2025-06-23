@@ -52,8 +52,8 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
-    const DEFAULT_JOB_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Job fail:", error) };
-    const DEFAULT_PROMISE_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Promise rejection: ", error) };
+    const DEFAULT_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => { console.error("Unhandled Job fail:", reason) };
+    const DEFAULT_PROMISE_HANDLER_CALLBACK = (reason: Error, promise: Object) => { console.error("Unhandled Promise rejection:", reason) };
 
     /**
      * @class Represents child process created by executing process.runCmd()
@@ -268,7 +268,10 @@ export namespace StdProcess {
         native kill(signal: number, pid: number): boolean;
     }
 
-    export type EventListener = (evt: Object) => void;
+    export type RejectedObjectListener = (reason: Error, obj: Object) => void;
+    export type UncaughtErrorListener = (error: Object) => void;
+
+    export type EventListener = RejectedObjectListener | UncaughtErrorListener;
 
     /**
     * Get effective group id of the current process
@@ -388,10 +391,12 @@ export namespace StdProcess {
     */
     export function on(type: string, listener: EventListener): void {
         if (type == "unhandledJobRejection") {
+            listener = listener as RejectedObjectListener;
             setFailedJobHandler(listener);
             return;
         }
         if (type == "unhandledPromiseRejection") {
+            listener = listener as RejectedObjectListener;
             setRejectedPromiseHandler(listener);
             return;
         }
@@ -487,10 +492,10 @@ export namespace StdProcess {
     * This method updates handler that is applied to
     * unhandled failed jobs at the program exit
     *
-    * @param { EventListener } listener user-provided handler
+    * @param { RejectedObjectListener } listener user-provided handler
     *
     */
-    function setFailedJobHandler(listener: EventListener): void {
+    function setFailedJobHandler(listener: RejectedObjectListener): void {
         failedJobHandler.reset(listener);
     }
 
@@ -498,10 +503,10 @@ export namespace StdProcess {
     * This method updates handler that is applied to
     * unhandled rejected promises at the program exit
     *
-    * @param { EventListener } listener user-provided handler
+    * @param { RejectedObjectListener } listener user-provided handler
     *
     */
-    function setRejectedPromiseHandler(listener: EventListener): void {
+    function setRejectedPromiseHandler(listener: RejectedObjectListener): void {
         rejectedPromiseHandler.reset(listener);
     }
 
@@ -510,12 +515,14 @@ export namespace StdProcess {
     * This method applies default or user-provided handler to
     * all unhandled failed job results
     *
-    * @param { Object[] } errors results of failed jobs
+    * @param { Object[][] } objs array of pairs of fail results and failed jobs
     *
     */
-    function listUnhandledJobs(errors: Object[]): void {
-        for (let error of errors) {
-            failedJobHandler.apply(error);
+    function listUnhandledJobs(objs: Object[][]): void {
+        for (let objAndReason of objs) {
+            let reason = objAndReason[0] as Error;
+            let obj = objAndReason[1];
+            failedJobHandler.apply(reason, obj);
         }
     }
 
@@ -523,16 +530,14 @@ export namespace StdProcess {
     * This method applies default or user-provided handler to
     * all unhandled rejected promise results
     *
-    * @param { Object[] } errors results of rejected promises
+    * @param { Object[][] } objs array of pairs of rejection results and rejected promises
     *
     */
-    export function listUnhandledPromises(errors: NullishType[]): void {
-        for (let error of errors) {
-            if (error instanceof Object) {
-                rejectedPromiseHandler.apply(error);
-            } else {
-                rejectedPromiseHandler.apply(new Error());
-            }
+    function listUnhandledPromises(objs: Object[][]): void {
+        for (let objAndReason of objs) {
+            let reason = objAndReason[0] as Error;
+            let obj = objAndReason[1];
+            rejectedPromiseHandler.apply(reason, obj);
         }
     }
 

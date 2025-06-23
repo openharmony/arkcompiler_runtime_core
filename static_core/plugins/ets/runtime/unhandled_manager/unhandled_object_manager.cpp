@@ -16,12 +16,12 @@
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
-#include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
+#include "runtime/include/method.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 
@@ -79,43 +79,83 @@ static void RemoveObjectImpl(PandaUnorderedSet<EtsObject *> &objects, EtsObject 
     objects.erase(object);
 }
 
-template <typename T>
-static EtsEscompatArray *CreateEtsObjectArrayFromNativeSet(EtsCoroutine *coro,
-                                                           const PandaUnorderedSet<EtsObject *> &objects)
+static PandaVector<EtsHandle<EtsObject>> TransformToVectorOfHandles(EtsCoroutine *coro,
+                                                                    const PandaUnorderedSet<EtsObject *> &objects)
 {
-    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
-    const auto objCount = objects.size();
-    auto *array = EtsEscompatArray::Create(objCount);
-    ASSERT(array != nullptr);
-    size_t i = 0;
+    ASSERT(coro != nullptr);
+    PandaVector<EtsHandle<EtsObject>> handleVec;
+    handleVec.reserve(objects.size());
     for (auto *obj : objects) {
-        ASSERT(obj != nullptr);
         ASSERT(!obj->GetCoreType()->IsForwarded());
-        array->SetRef(i, T::FromEtsObject(obj)->GetValue(coro));
-        ++i;
+        handleVec.emplace_back(coro, obj);
     }
-    return array;
+    return handleVec;
 }
 
 template <typename T>
-static void ListObjectsImpl(EtsClassLinker *etsClassLinker, napi::ScopedManagedCodeFix *s, EtsEscompatArray *errors)
+static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsCoroutine *coro,
+                                                                   const PandaVector<EtsHandle<EtsObject>> &handles)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
-    auto *coro = s->Coroutine();
-    EtsHandle<EtsEscompatArray> herrors(coro, errors);
+    ASSERT(coro != nullptr);
+    auto *array = EtsEscompatArray::Create(handles.size());
+    ASSERT(array != nullptr);
+    EtsHandle<EtsEscompatArray> harray(coro, array);
+    size_t i = 0;
+    for (auto hobj : handles) {
+        ASSERT(hobj.GetPtr() != nullptr);
+        ASSERT(!hobj->GetCoreType()->IsForwarded());
+
+        auto *objAndReason = EtsEscompatArray::Create(2U);
+        ASSERT(objAndReason != nullptr);
+        objAndReason->SetRef(0, T::FromEtsObject(hobj.GetPtr())->GetValue(coro));
+        objAndReason->SetRef(1, hobj.GetPtr());
+
+        harray->SetRef(i, objAndReason);
+        ++i;
+    }
+    return harray;
+}
+
+template <typename T>
+static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine *coro,
+                                    EtsHandle<EtsEscompatArray> &hobjects)
+{
+    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
-    EtsMethod *method {};
+    Method *method {};
     if constexpr (std::is_same_v<T, EtsJob>) {
-        method = platformTypes->escompatProcessListUnhandledJobs;
+        method = platformTypes->escompatProcessListUnhandledJobs->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled failed jobs";
     } else if (std::is_same_v<T, EtsPromise>) {
-        method = platformTypes->escompatProcessListUnhandledPromises;
+        method = platformTypes->escompatProcessListUnhandledPromises->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
-    std::array args = {Value(herrors->GetCoreType())};
-    method->InvokeVoid(s, args.data());
+    std::array args = {Value(hobjects->GetCoreType())};
+    method->InvokeVoid(coro, args.data());
     LOG(DEBUG, COROUTINES) << "List unhandled rejections end";
+}
+
+template <typename T>
+static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro,
+                                     const PandaUnorderedSet<EtsObject *> &objects)
+{
+    static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
+    ASSERT(coro != nullptr);
+    ASSERT(etsClassLinker != nullptr);
+    {
+        [[maybe_unused]] ScopedManagedCodeThread s(coro);
+        [[maybe_unused]] EtsHandleScope scope(coro);
+
+        auto handles = TransformToVectorOfHandles(coro, objects);
+        auto hEtsArray = CreateEtsObjectArrayFromHandles<T>(coro, handles);
+        ListObjectsFromEtsArray<T>(etsClassLinker, coro, hEtsArray);
+    }
+    if (coro->HasPendingException()) {
+        coro->HandleUncaughtException();
+        UNREACHABLE();
+    }
 }
 
 void UnhandledObjectManager::AddFailedJob(EtsJob *job)
@@ -133,18 +173,15 @@ void UnhandledObjectManager::RemoveFailedJob(EtsJob *job)
 void UnhandledObjectManager::ListFailedJobs(EtsCoroutine *coro)
 {
     ASSERT(coro != nullptr);
-    os::memory::LockHolder lh(mutex_);
-    if (failedJobs_.empty()) {
-        return;
-    }
+    PandaUnorderedSet<EtsObject *> unhandledObjects {};
     {
-        [[maybe_unused]] napi::ScopedManagedCodeFix s(coro->GetEtsNapiEnv());
-        [[maybe_unused]] EtsHandleScope scope(coro);
-
-        auto *errors = CreateEtsObjectArrayFromNativeSet<EtsJob>(coro, failedJobs_);
-        ListObjectsImpl<EtsJob>(vm_->GetClassLinker(), &s, errors);
-        failedJobs_.clear();
+        os::memory::LockHolder lh(mutex_);
+        if (failedJobs_.empty()) {
+            return;
+        }
+        unhandledObjects.swap(failedJobs_);
     }
+    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), coro, unhandledObjects);
 }
 
 void UnhandledObjectManager::AddRejectedPromise(EtsPromise *promise)
@@ -161,18 +198,22 @@ void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise)
 
 void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro)
 {
-    os::memory::LockHolder lh(mutex_);
-    if (rejectedPromises_.empty()) {
-        return;
-    }
+    ASSERT(coro != nullptr);
+    PandaUnorderedSet<EtsObject *> unhandledObjects {};
     {
-        [[maybe_unused]] napi::ScopedManagedCodeFix s(coro->GetEtsNapiEnv());
-        [[maybe_unused]] EtsHandleScope scope(coro);
-
-        auto *errors = CreateEtsObjectArrayFromNativeSet<EtsPromise>(coro, rejectedPromises_);
-        ListObjectsImpl<EtsPromise>(vm_->GetClassLinker(), &s, errors);
-        rejectedPromises_.clear();
+        os::memory::LockHolder lh(mutex_);
+        if (rejectedPromises_.empty()) {
+            return;
+        }
+        unhandledObjects.swap(rejectedPromises_);
     }
+    ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), coro, unhandledObjects);
+}
+
+bool UnhandledObjectManager::HasObjects() const
+{
+    os::memory::LockHolder lh(mutex_);
+    return !(rejectedPromises_.empty() && failedJobs_.empty());
 }
 
 }  // namespace ark::ets

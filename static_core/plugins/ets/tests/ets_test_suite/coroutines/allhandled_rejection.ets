@@ -28,23 +28,26 @@ function SingleRejectedJob(): null {
 }
 
 function testAllhandledRejection(): void {
-    StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertTrue(false, 'Job handler not switched');
     });
-    
-    StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
+
+    StdProcess.on('unhandledPromiseRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Promise');
         arktest.assertTrue(false, 'All promises should be handled');
     });
-    
-     StdProcess.on('unhandledJobRejection', (obj: Object): void => {
-        arktest.assertTrue(obj instanceof Error, 'not Erorr is not expected');
-        arktest.assertEQ((obj as Error).message, "This is a single rejected job");
 
-        StdProcess.on('unhandledJobRejection', (obj: Object): void => {
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
+        arktest.assertEQ(reason.message, 'This is a single rejected job');
+
+        StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+            arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
             arktest.assertTrue(false, 'All jobs should be handled');
         });
     });
-    
+
     let g = launch<string, () => string>(Failing);
 
     try {
