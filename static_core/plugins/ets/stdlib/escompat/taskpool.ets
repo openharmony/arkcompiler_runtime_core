@@ -58,6 +58,7 @@ export namespace taskpool {
     const TASKPOOL_ERROR_NO_PARAMS: number = 10200101;
     const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP: number = 10200102;
     const TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER: number = 10200103;
+    const TASKPOOL_IO_DURATION_PRECISION: number = 3;
 
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
@@ -476,7 +477,21 @@ export namespace taskpool {
                 // Save duration stats
                 this.cpuDuration = (Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS;
                 this.totalDuration = this.getDuration();
-                this.ioDuration = this.totalDuration - this.cpuDuration;
+
+                // We can't calculate exactly the io duration for a Task no matter it contains 
+                // io job or not, which can only be implemented in native C++ level as to ArkTs 1.0.
+                // For further information, see Task::StoreTaskDuration 
+                // https://gitee.com/openharmony/commonlibrary_ets_utils/blob/master/js_concurrent_module/taskpool/task.cpp
+                // So here, we assume that when the duration between total duration and cpu duration is smaller than 3ms,
+                // it contains no io job. Further mature solution for io duration calculation is recommended.
+                // Note: This is an approximation and may not be accurate for short IO operations.                
+                let dura: number = this.totalDuration - this.cpuDuration;
+                if (dura < TASKPOOL_IO_DURATION_PRECISION) {
+                    this.ioDuration = 0;
+                } else {
+                    this.ioDuration = dura;
+                }
+
                 // Process the task finishing
                 const notCanceled: boolean = taskFinished(this);
                 this.notifyDependencies();
