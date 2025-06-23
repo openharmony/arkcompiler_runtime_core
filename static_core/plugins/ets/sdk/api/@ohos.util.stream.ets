@@ -1287,7 +1287,7 @@ export namespace stream {
                 encoding = '';
             }
 
-            if ((chunkIsBuffer && chunkBuffer!.length < 0) || (!chunkIsBuffer && chunk!.length < 0)) {
+            if ((chunkIsBuffer && chunkBuffer!.length < 0) || (!chunkIsBuffer && (chunk as string).length < 0)) {
                 stream.isReading = false;
                 stream.canBeReadMore(stream);
                 return stream.bufHasSpace(stream);
@@ -2049,12 +2049,18 @@ export namespace stream {
      * @since 12
      */
     export class Duplex extends Readable {
-        private _writable: Writable;
+        _writable: Writable;
+
         /**
          * The Duplex constructor.
          *
          */
-        constructor() {}
+        constructor() {
+            super();
+            this._writable = new Writable();
+            this._writable.doWriteFunc = this.doWrite;
+            this._writable.doWritevFunc = this.doWritev;
+        }
 
         /**
          * writes a chunk to Writable and invokes callback when the chunk is flushed. The return value indicates
@@ -2076,8 +2082,8 @@ export namespace stream {
          * @throws { BusinessError } 10200039 - The doTransform method has not been implemented for
          * a class that inherits from Transform.
          */
-        write(chunk?: string | Uint8Array, encoding?: string, callback?: () => void): boolean {
-            return false;
+        write(chunk?: string | Uint8Array, encoding?: string, callback?: Function): boolean {
+            return this._writable.write(chunk, encoding, callback);
         }
 
         /**
@@ -2094,8 +2100,23 @@ export namespace stream {
          * @throws { BusinessError } 10200039 - The doTransform method has not been implemented for
          * a class that inherits from Transform.
          */
-        end(chunk?: string | Uint8Array, encoding?: string, callback?: () => void): Writable {
-            return new Writable();
+        end(chunk?: string | Uint8Array, encoding?: string, callback?: Function): Writable {
+            super.setEndType();
+            return this._writable.end(chunk, encoding, callback);
+        }
+
+        on(event: string, callback: Function): void {
+            super.on(event, callback);
+            this._writable.on(event, callback);
+        }
+
+        off(event: string, callback?: Function): void {
+            super.off(event);
+            this._writable.off(event, callback);
+        }
+
+        getListener(): EventEmitter | undefined {
+            return this._writable.listener;
         }
 
         /**
@@ -2109,7 +2130,7 @@ export namespace stream {
          *     3.Parameter verification failed.
          */
         setDefaultEncoding(encoding?: string): boolean {
-            return false;
+            return this._writable.setDefaultEncoding(encoding);
         }
 
         /**
@@ -2118,7 +2139,7 @@ export namespace stream {
          * @returns { boolean } Setting successful returns true, setting failed returns false.
          */
         cork(): boolean {
-            return false;
+            return this._writable.cork();
         }
 
         /**
@@ -2127,10 +2148,13 @@ export namespace stream {
          * @returns { boolean } Setting successful returns true, setting failed returns false.
          */
         uncork(): boolean {
-            return false;
+            return this._writable.uncork();
         }
 
-        doInitialize(callback: Function): void {}
+        doInitialize(callback: Function): void {
+            super.doInitialize(callback);
+            this._writable.doInitialize(callback);
+        }
 
         /**
          * Implemented by subclass inheritance. The implementation logic of flushing chunks in the buffer must not be
@@ -2144,7 +2168,9 @@ export namespace stream {
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          */
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: () => void): void {}
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+            this._writable.noWriteOpes(chunk, encoding, callback);
+        }
 
         /**
          * The implementation logic of flushing chunks in the buffer in batches should not be actively called.
@@ -2157,38 +2183,70 @@ export namespace stream {
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          */
-        doWritev(chunks: string[] | Uint8Array[], callback: () => void): void {}
+        doWritev(chunks: string[] | Uint8Array[], callback: Function): void {}
 
         get writableObjectMode(): boolean {
-            return false;
+            if (this._writable.writableObjectMode !== undefined) {
+                return this._writable.writableObjectMode as boolean
+            } else {
+                return false
+            }
         }
 
         get writableHighWatermark(): number {
-            return 0;
+            if (this._writable.writableHighWatermark !== undefined) {
+                return this._writable.writableHighWatermark as number
+            } else {
+                return 0
+            }
         }
 
         get writable(): boolean {
-            return false;
+            if (this._writable.writable !== undefined) {
+                return this._writable.writable as boolean
+            } else {
+                return false
+            }
         }
 
         get writableLength(): number {
-            return 0;
+            if (this._writable.writableLength !== undefined) {
+                return this._writable.writableLength as number
+            } else {
+                return 0
+            }
         }
 
         get writableNeedDrain(): boolean {
-            return false;
+            if (this._writable.writableNeedDrain !== undefined) {
+                return this._writable.writableNeedDrain as boolean
+            } else {
+                return false
+            }
         }
 
         get writableCorked(): number {
-            return 0;
+            if (this._writable.writableCorked !== undefined) {
+                return this._writable.writableCorked as number
+            } else {
+                return 0
+            }
         }
 
         get writableEnded(): boolean {
-            return false;
+            if (this._writable.writableEnded !== undefined) {
+                return this._writable.writableEnded as boolean
+            } else {
+                return false
+            }
         }
 
         get writableFinished(): boolean {
-            return false;
+            if (this._writable.writableFinished !== undefined) {
+                return this._writable.writableFinished as boolean
+            } else {
+                return false
+            }
         }
     }
 
@@ -2203,7 +2261,51 @@ export namespace stream {
          * The Transform constructor.
          *
          */
-        constructor() {}
+        constructor() {
+            super();
+            this._writable.doWriteFunc = this.doWrite;
+            this._writable.doWritevFunc = this.doWritev;
+        }
+
+        on(event: string, callback: Function): void {
+            super.on(event, callback);
+        }
+
+        end(chunk?: string | Uint8Array, encoding?: string, callback?: Function): Writable {
+            if (!this.doTransform) {
+                throw ERR_DOTRANSFORM_NOT_IMPLEMENTED;
+            }
+            if (chunk instanceof Uint8Array) {
+                const chunkString = (this.stringDecoder as util.StringDecoder).write(chunk);
+                let encodingVal: string = encoding ? encoding : 'utf8'
+                let callbackVal: Function = callback ? callback : (...param: Object[]) => {}
+                this.doTransform(chunkString, encodingVal, callbackVal);
+            } else if (chunk instanceof string) {
+                let encodingVal: string = encoding ? encoding : 'utf8'
+                let callbackVal: Function = callback ? callback : (...param: Object[]) => {}
+                this.doTransform(chunk as string, encodingVal, callbackVal);
+            }
+            this.doFlush((...param: Object[]): void => {
+                if (param.length > 0) {
+                    for (let idx: int = 0; idx < param.length; idx++) {
+                        const val = param[idx];
+                        if (val instanceof Uint8Array) {
+                            this.push(val as Uint8Array, encoding);
+                        } else if (val instanceof string) {
+                            this.push(val as string, encoding);
+                        } else {
+                            this.push('', encoding);
+                        }
+                    }
+                }
+            });
+            const write: Writable = super.end(chunk, encoding, callback);
+            return write;
+        }
+
+        push(chunk: Uint8Array | string | null, encoding?: string): boolean {
+            return super.push(chunk, encoding);
+        }
 
         /**
          * Convert the input data. After the conversion,
@@ -2219,7 +2321,9 @@ export namespace stream {
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          */
-        doTransform(chunk: string, encoding: string, callback: () => void): void {}
+        doTransform(chunk: string, encoding: string, callback: Function): void {
+            throw ERR_DOTRANSFORM_NOT_IMPLEMENTED;
+        }
 
         /**
          * After all data is flushed to the write stream,
@@ -2232,6 +2336,34 @@ export namespace stream {
          *     2.Incorrect parameter types;
          *     3.Parameter verification failed.
          */
-        doFlush(callback: () => void): void {}
+        doFlush(callback: Function): void {}
+
+        write(chunk?: string | Uint8Array, encoding?: string, callback?: Function): boolean {
+            if (chunk instanceof string) {
+                let executed = false;
+                const callBackFunction = (...param: Object[]): void => {
+                    if (!executed) {
+                        executed = true;
+                        if (param.length > 0 && param[0] instanceof Error) {
+                            this.getListener()?.emit(WritableEvent.ERROR, param[0] as Error);
+                        }
+                    } else {
+                        Promise.resolve().then(():void => {
+                            this.getListener()?.emit(WritableEvent.ERROR, ERR_MULTIPLE_CALLBACK);
+                        });
+                    }
+                };
+                let chunkVal: string = chunk ? chunk as string : ''
+                let encodingVal: string = encoding ? encoding : 'utf8'
+                this.doTransform(chunkVal, encodingVal, callBackFunction);
+            }
+            return super.write(chunk, encoding, callback);
+        }
+
+        doRead(size: number): void {}
+
+        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+            super.doWrite(chunk, encoding, callback);
+        }
     }
 }

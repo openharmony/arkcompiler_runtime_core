@@ -87,7 +87,7 @@ function mustCall(fn?: Function, times: number = 1) {
 
 // Test cases ported from ArkTS 1.0:testStreamPipe004
 function testPipeReadableAndWritableStreams() {
-    const str = "83,111,109,101,32,100,97,116,97";
+    const str = "{\"0\":83,\"1\":111,\"2\":109,\"3\":101,\"4\":32,\"5\":100,\"6\":97,\"7\":116,\"8\":97}";
     class MyRead extends TestReadable {
         constructor() {
             super();
@@ -103,7 +103,7 @@ function testPipeReadableAndWritableStreams() {
         }
         doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
             let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => {
-                arktest.assertEQ(JSON.stringify(chunk), str);
+                arktest.assertEQ(JSON.stringify(chunk as Uint8Array), str);
                 callback.unsafeCall();
             }
             let wrappedFn = mustCallFnWrite(fn);

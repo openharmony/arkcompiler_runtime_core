@@ -1,0 +1,176 @@
+/*
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the 'License')
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { BusinessError } from "@ohos.base";
+import { stream } from "@ohos.util.stream";
+
+const mustChecks: Array<Function> = new Array<Function>();
+function main(): int {
+    const suite = new arktest.ArkTestsuite("Stream API tests")
+
+    suite.addTest("Duplex writableObjectMode property validation", testDuplexWritableObjectModeProperty);
+    suite.addTest("Duplex writableHighWatermark property validation", testDuplexWritableHighWatermarkProperty);
+    suite.addTest("Duplex readableHighWatermark property validation", testDuplexReadableHighWatermarkProperty);
+    suite.addTest("Duplex doWritev concatenates chunks correctly", testDuplexDoWritevConcatenatesChunks);
+    suite.addTest("Duplex doWritev error handling", testDuplexDoWritevErrorHandling);
+    suite.addTest("Duplex doWritev callback multiple calls handling", testDuplexDoWritevCallbackMultipleCalls);
+
+    return suite.run();
+}
+
+async function mustCallCheckAll() {
+    return new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+            try {
+                mustChecks.forEach(check => {
+                    check.unsafeCall();
+                });
+                mustChecks.length = 0;
+                resolve(undefined);
+            } catch (e: Error) {
+                reject(e)
+            }
+        }, 2000)
+    })
+}
+
+function mustCallTwoArgs(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn = (chunks: string[] | Uint8Array[], callback: Function) => {
+        callCount++;
+        fn?.unsafeCall(chunks, callback);
+    }
+    mustChecks.push(() => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times.`);
+        }
+    });
+    return wrappedFn;
+}
+
+function mustCall(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn: Function = (err: Error | undefined | null): void => {
+        callCount++;
+        fn?.unsafeCall(err);
+    }
+
+    mustChecks.push((): void => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+        }
+    });
+    return wrappedFn;
+}
+
+function mustCallNoArgs(fn?: Function, times: number = 1) {
+    let callCount = 0;
+    let wrappedFn: Function = (): void => {
+        callCount++;
+        fn?.unsafeCall();
+    }
+
+    mustChecks.push((): void => {
+        if (callCount !== times) {
+            throw new Error(`Function was expected to be called ${times} times, but was called ${callCount} times. `);
+        }
+    });
+    return wrappedFn;
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexProperties001
+function testDuplexWritableObjectModeProperty() {
+    let duplex = new stream.Duplex();
+    arktest.assertFalse(duplex.writableObjectMode, "writableObjectMode should be false");
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexProperties002
+function testDuplexWritableHighWatermarkProperty() {
+    let duplex = new stream.Duplex();
+    arktest.assertEQ(duplex.writableHighWatermark, 16 * 1024);
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexProperties003
+function testDuplexReadableHighWatermarkProperty() {
+    let duplex = new stream.Duplex();
+    arktest.assertEQ(duplex.readableHighWatermark, 16 * 1024);
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev001
+function testDuplexDoWritevConcatenatesChunks() {
+    class CustomDuplex extends stream.Duplex {
+        data: string;
+        constructor() {
+            super();
+            this.data = '';
+        }
+        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+            for (const chunk of chunks) {
+                this.data += chunk
+            }
+            callback.unsafeCall();
+        }
+    }
+    let duplex = new CustomDuplex();
+    let func: Function = mustCallNoArgs((): void => {
+        arktest.assertEQ(duplex.data, 'Hello World');
+    })
+    duplex.write('Hello ');
+    duplex.write('World', 'utf8', func);
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev002
+function testDuplexDoWritevErrorHandling() {
+    class CustomDuplex extends stream.Duplex {
+        constructor() {
+            super();
+        }
+        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+            callback.unsafeCall(new Error('dowritev error'));
+        }
+    }
+    let duplex = new CustomDuplex();
+    duplex.write('Hello ');
+    duplex.on('error', mustCall((err: Error): void => {
+        arktest.assertEQ(err.message, 'dowritev error');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}
+
+// Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev003
+function testDuplexDoWritevCallbackMultipleCalls() {
+    class CustomDuplex extends stream.Duplex {
+        constructor() {
+            super();
+        }
+        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+            let fn = (chunks: string[] | Uint8Array[], callback: Function) => {
+                callback.unsafeCall();
+                callback.unsafeCall();
+            }
+            let wrappedFn = mustCallTwoArgs(fn);
+            wrappedFn(chunks, callback);
+        }
+    }
+
+    let duplex = new CustomDuplex();
+    duplex.write('test', 'utf8', mustCallNoArgs());
+    duplex.on('error', mustCall((error: Error): void => {
+        arktest.assertEQ(error.name, 'BusinessError');
+        arktest.assertEQ(error.message, 'Callback called multiple times');
+    }));
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+}

@@ -20,6 +20,7 @@ const mustChecks: Array<Function> = new Array<Function>();
 function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests")
 
+    suite.addTest("Transform stream encoding validation (gb2312).", testTransformStreamWriteEncodingGb2312)
     suite.addTest("Readable stream flowing state validation.", testReadableStreamReadableFlowingState)
     suite.addTest("Readable event triggers validation (3 events).", testReadableStreamOnReadableEventCount3)
     suite.addTest("Readable event triggers validation (4 events).", testReadableStreamOnReadableEventCount4)
@@ -116,6 +117,28 @@ function mustCall(fn?: Function, times: number = 1) {
         }
     });
     return wrappedFn;
+}
+
+// Test cases ported from ArkTS 1.0:testStreamEncoding027
+function testTransformStreamWriteEncodingGb2312() {
+    class MyTransform extends stream.Transform {
+        constructor() {
+            super()
+        }
+        doTransform(chunk: string, encoding: string, callback: Function): void {
+            let fn = (chunk: string, encoding: string, callback: Function) => {
+                arktest.assertEQ(encoding, 'gb2312');
+                arktest.assertEQ(chunk, '你好123');
+                callback.unsafeCall();
+            }
+            let wrappedFn = mustCallFn(fn);
+            wrappedFn(chunk, encoding, callback);
+        }
+    }
+    let transform = new MyTransform();
+    transform.write('你好123', 'gb2312');
+    transform.end();
+    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamEncoding031
