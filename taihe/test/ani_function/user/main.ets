@@ -92,7 +92,7 @@ function test_from_callback() {
         });
     });
     let res: int;
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {
         res = await p;
     } catch (e) {

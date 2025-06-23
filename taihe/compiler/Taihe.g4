@@ -23,14 +23,6 @@ spec
       EOF
     ;
 
-scopeAttr
-    : AT EXCLAMATION TOKEN_name = ID (LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS)?
-    ;
-
-declAttr
-    : AT TOKEN_name = ID (LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS)?
-    ;
-
 use
     : KW_USE PkgName_pkg_name = pkgName (KW_AS TOKENOpt_pkg_alias = ID)? SEMICOLON # usePackage
     | KW_FROM PkgName_pkg_name = pkgName KW_USE DeclAliasPairLst_decl_alias_pairs += declAliasPair (COMMA DeclAliasPairLst_decl_alias_pairs += declAliasPair)* SEMICOLON # useSymbol
@@ -65,7 +57,7 @@ specField
 
 enumItem
     : (DeclAttrLst_forward_attrs += declAttr)*
-      TOKEN_name = ID (ASSIGN_TO AttrValOpt_val = attrVal)? # enumProperty
+      TOKEN_name = ID (ASSIGN_TO AnyExprOpt_val = anyExpr)? # enumProperty
     ;
 
 structField
@@ -100,16 +92,17 @@ parameter
 // Attribute //
 ///////////////
 
-attrItem
-    : TOKEN_name = ID (ASSIGN_TO AttrValOpt_val = attrVal)? # simpleAttrItem
-    | TOKEN_name = ID LEFT_PARENTHESIS (AttrValLst_vals += attrVal (COMMA AttrValLst_vals += attrVal)* COMMA?)? RIGHT_PARENTHESIS # tupleAttrItem
+scopeAttr
+    : AT EXCLAMATION TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
     ;
 
-attrVal
-    : StringExpr_expr = stringExpr # stringAttrVal
-    | IntExpr_expr = intExpr # intAttrVal
-    | FloatExpr_expr = floatExpr # floatAttrVal
-    | BoolExpr_expr = boolExpr # boolAttrVal
+declAttr
+    : AT TOKEN_name = ID (LEFT_PARENTHESIS (AttrArgLst_args += attrArg (COMMA AttrArgLst_args += attrArg)* COMMA?)? RIGHT_PARENTHESIS)?
+    ;
+
+attrArg
+    : AnyExpr_val = anyExpr # unnamedAttrArg
+    | TOKEN_name = ID ASSIGN_TO AnyExpr_val = anyExpr # namedAttrArg
     ;
 
 //////////
@@ -131,6 +124,13 @@ type
 ////////////////
 // Expression //
 ////////////////
+
+anyExpr
+    : StringExpr_expr = stringExpr # stringAnyExpr
+    | IntExpr_expr = intExpr # intAnyExpr
+    | FloatExpr_expr = floatExpr # floatAnyExpr
+    | BoolExpr_expr = boolExpr # boolAnyExpr
+    ;
 
 floatExpr
     : TOKEN_val = FLOAT_LITERAL # literalFloatExpr

@@ -35,14 +35,16 @@ class StsWriter(FileWriter):
 
     @override
     def write_prologue(self, f: TextIO):
-        for import_name, module_name in self.import_dict.items():
-            module_name, type_name = module_name
-            if type_name is None:
+        for import_name, decl_pair in self.import_dict.items():
+            module_name, decl_name = decl_pair
+            if decl_name is None:
                 import_str = f"* as {import_name}"
-            elif type_name == import_name:
-                import_str = f"{{{type_name}}}"
+            elif decl_name == "default":
+                import_str = import_name
+            elif decl_name == import_name:
+                import_str = f"{{{decl_name}}}"
             else:
-                import_str = f"{{{type_name} as {import_name}}}"
+                import_str = f"{{{decl_name} as {import_name}}}"
             f.write(f"import {import_str} from '{module_name}';\n")
 
     def add_import_module(
@@ -52,22 +54,31 @@ class StsWriter(FileWriter):
     ):
         self._add_import(import_name, (module_name, None))
 
-    def add_import_type(
+    def add_import_default(
         self,
         module_name: str,
-        type_name: str,
+        import_name: str,
+    ):
+        self._add_import(import_name, (module_name, "default"))
+
+    def add_import_decl(
+        self,
+        module_name: str,
+        decl_name: str,
         import_name: str | None = None,
     ):
         if import_name is None:
-            import_name = type_name
-        self._add_import(import_name, (module_name, type_name))
+            import_name = decl_name
+        self._add_import(import_name, (module_name, decl_name))
 
     def _add_import(
         self,
-        module_name: str,
+        import_name: str,
         new_pair: tuple[str, str | None],
     ):
-        if (old_pair := self.import_dict.setdefault(module_name, new_pair)) != new_pair:
+        import_dict = self.import_dict
+        old_pair = import_dict.setdefault(import_name, new_pair)
+        if old_pair != new_pair:
             raise ValueError(
-                f"Duplicate import for {module_name!r}: {old_pair} vs {new_pair}"
+                f"Duplicate import for {import_name!r}: {old_pair} vs {new_pair}"
             )

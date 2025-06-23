@@ -44,7 +44,7 @@ public:
             node_t *current = m_handle->bucket[i];
             while (current) {
                 node_t *next = current->next;
-                std::size_t index = taihe::hash(current->item) % cap;
+                std::size_t index = hash(current->item) % cap;
                 current->next = bucket[index];
                 bucket[index] = current;
                 current = next;
@@ -85,10 +85,10 @@ public:
     template <bool cover = false>
     std::pair<item_t *, bool> emplace(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
+        std::size_t index = hash(key) % m_handle->cap;
         node_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (taihe::same((*current_ptr)->item, key)) {
+            if (same((*current_ptr)->item, key)) {
                 if (cover) {
                     node_t *replaced = new node_t {
                         .item = key,
@@ -117,10 +117,10 @@ public:
 
     item_t *find_item(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
+        std::size_t index = hash(key) % m_handle->cap;
         node_t *current = m_handle->bucket[index];
         while (current) {
-            if (taihe::same(current->item, key)) {
+            if (same(current->item, key)) {
                 return &current->item;
             }
             current = current->next;
@@ -139,10 +139,10 @@ public:
 
     bool erase(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
+        std::size_t index = hash(key) % m_handle->cap;
         node_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (taihe::same((*current_ptr)->item, key)) {
+            if (same((*current_ptr)->item, key)) {
                 node_t *current = *current_ptr;
                 *current_ptr = (*current_ptr)->next;
                 delete current;
@@ -270,8 +270,8 @@ private:
 
     friend struct set<K>;
 
-    friend bool taihe::same_impl(adl_helper_t, set_view lhs, set_view rhs);
-    friend std::size_t taihe::hash_impl(adl_helper_t, set_view val);
+    friend bool taihe::same_adl(adl_tag_t, set_view lhs, set_view rhs);
+    friend std::size_t taihe::hash_adl(adl_tag_t, set_view val);
 };
 
 template <typename K>
@@ -328,13 +328,13 @@ private:
 };
 
 template <typename K>
-inline bool same_impl(adl_helper_t, set_view<K> lhs, set_view<K> rhs)
+inline bool same_adl(adl_tag_t, set_view<K> lhs, set_view<K> rhs)
 {
     return lhs.m_handle == rhs.m_handle;
 }
 
 template <typename K>
-inline std::size_t hash_impl(adl_helper_t, set_view<K> val)
+inline std::size_t hash_adl(adl_tag_t, set_view<K> val)
 {
     return reinterpret_cast<std::size_t>(val.m_handle);
 }

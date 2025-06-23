@@ -24,7 +24,7 @@ let sResPara: SceneTest.SceneResourceParameters = SceneTest.getSceneResourcePara
 function test_ani_graphics3d_scene_createCamera() {
     let param = sNodePara;
     let info = SceneTest.getCamera();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createCameraPro(param);
     } catch (e) {
@@ -38,7 +38,7 @@ function test_ani_graphics3d_scene_createCamera() {
 function test_ani_graphics3d_scene_createCamera_promise() {
     let param = sNodePara;
     let info = SceneTest.getCamera();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createCamera(param);
     } catch (e) {
@@ -62,7 +62,7 @@ function test_ani_graphics3d_scene_createCamera_sync() {
     });
     
     let info = SceneTest.getCamera();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -77,7 +77,7 @@ function test_ani_graphics3d_scene_createLight() {
     let param = sNodePara;
     let lightType = SceneTest.LightType.SPOT;
     let info = SceneTest.getLight();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createLightPro(param, lightType);
     } catch (e) {
@@ -92,7 +92,7 @@ function test_ani_graphics3d_scene_createLight_promise() {
     let param = sNodePara;
     let lightType = SceneTest.LightType.SPOT;
     let info = SceneTest.getLight();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createLight(param, lightType);
     } catch (e) {
@@ -117,7 +117,7 @@ function test_ani_graphics3d_scene_createLight_sync() {
     });
 
     let info = SceneTest.getLight();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -131,7 +131,7 @@ function test_ani_graphics3d_scene_createLight_sync() {
 function test_ani_graphics3d_scene_createNode() {
     let param = sNodePara;
     let info = SceneTest.getNode();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createNodePro(param);
     } catch (e) {
@@ -145,7 +145,7 @@ function test_ani_graphics3d_scene_createNode() {
 function test_ani_graphics3d_scene_createNode_promise() {
     let param = sNodePara;
     let info = SceneTest.getNode();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createNode(param);
     } catch (e) {
@@ -169,7 +169,7 @@ function test_ani_graphics3d_scene_createNode_sync() {
     });
 
     let info = SceneTest.getNode();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -184,7 +184,7 @@ function test_ani_graphics3d_scene_createMaterial() {
     let param = sResPara;
     let materialType = SceneTest.MaterialType.SHADER;
     let info = SceneTest.getMaterial();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createMaterialPro(param, materialType);
     } catch (e) {
@@ -199,7 +199,7 @@ function test_ani_graphics3d_scene_createMaterial_promise() {
     let param = sResPara;
     let materialType = SceneTest.MaterialType.SHADER;
     let info = SceneTest.getMaterial();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createMaterial(param, materialType);
     } catch (e) {
@@ -224,7 +224,7 @@ function test_ani_graphics3d_scene_createMaterial_sync() {
     });
 
     let info = SceneTest.getMaterial();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -238,7 +238,7 @@ function test_ani_graphics3d_scene_createMaterial_sync() {
 function test_ani_graphics3d_scene_createShader() {
     let param = sResPara;
     let info = SceneTest.getShader();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createShaderPro(param);
     } catch (e) {
@@ -252,7 +252,7 @@ function test_ani_graphics3d_scene_createShader() {
 function test_ani_graphics3d_scene_createShader_promise() {
     let param = sResPara;
     let info = SceneTest.getShader();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createShader(param);
     } catch (e) {
@@ -276,7 +276,7 @@ function test_ani_graphics3d_scene_createShader_sync() {
     });
 
     let info = SceneTest.getShader();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -290,7 +290,7 @@ function test_ani_graphics3d_scene_createShader_sync() {
 function test_ani_graphics3d_scene_createImage() {
     let param = sResPara;
     let info = SceneTest.getImage();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createImagePro(param);
     } catch (e) {
@@ -304,7 +304,7 @@ function test_ani_graphics3d_scene_createImage() {
 function test_ani_graphics3d_scene_createImage_promise() {
     let param = sResPara;
     let info = SceneTest.getImage();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createImage(param);
     } catch (e) {
@@ -328,7 +328,7 @@ function test_ani_graphics3d_scene_createImage_sync() {
     });
 
     let info = SceneTest.getImage();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
@@ -342,7 +342,7 @@ function test_ani_graphics3d_scene_createImage_sync() {
 function test_ani_graphics3d_scene_createEnvironment() {
     let param = sResPara;
     let info = SceneTest.getEnvironment();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = sResFactory.createEnvironmentPro(param);
     } catch (e) {
@@ -356,7 +356,7 @@ function test_ani_graphics3d_scene_createEnvironment() {
 function test_ani_graphics3d_scene_createEnvironment_promise() {
     let param = sResPara;
     let info = SceneTest.getEnvironment();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await sResFactory.createEnvironment(param);
     } catch (e) {
@@ -380,7 +380,7 @@ function test_ani_graphics3d_scene_createEnvironment_sync() {
     });
 
     let info = SceneTest.getEnvironment();
-    let err: BusinessError;
+    let err: BusinessError = new BusinessError();
     try {   
         info = await promise;
     } catch (e) {
