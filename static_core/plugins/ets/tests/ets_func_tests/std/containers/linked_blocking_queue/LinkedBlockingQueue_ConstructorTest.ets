@@ -23,13 +23,13 @@ function main(): int {
 
     LinkedBlockingQueueTestsuite.addTest("ConstructorTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         arktest.assertEQ(queueInt.isEmpty(), true);
         arktest.assertEQ(queueInt.size, 0);
     });
     LinkedBlockingQueueTestsuite.addTest("ConstructorTest002", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
         arktest.assertEQ(queueInt.isEmpty(), true);
         arktest.assertEQ(queueInt.size, 0);
         arktest.assertEQ(queueInt.capacity, elementsNum);
@@ -37,14 +37,14 @@ function main(): int {
     LinkedBlockingQueueTestsuite.addTest("ConstructorTest003", () =>
     {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
         let iter = ConcurrentSetTest.keys();
-        let queueInt: LinkedBlockingQueue<number> = new LinkedBlockingQueue<number>(iter);
+        let queueInt: containers.LinkedBlockingQueue<number> = new containers.LinkedBlockingQueue<number>(iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.pop(), i);
         }
@@ -53,14 +53,14 @@ function main(): int {
     LinkedBlockingQueueTestsuite.addTest("ConstructorTest004", () =>
     {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
         let iter = ConcurrentSetTest.keys();
-        let queueInt: LinkedBlockingQueue<number> = new LinkedBlockingQueue<number>(10, iter);
+        let queueInt: containers.LinkedBlockingQueue<number> = new containers.LinkedBlockingQueue<number>(10, iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.pop(), i);
         }

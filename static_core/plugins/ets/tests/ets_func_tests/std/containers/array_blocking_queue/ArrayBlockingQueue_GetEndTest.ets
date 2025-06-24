@@ -20,7 +20,7 @@ let b1: int | null = 0;
 let b2: int | null = 0;
 let backNum: int | null = 0;
 
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetEndTest");

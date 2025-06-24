@@ -20,7 +20,7 @@ function main(): int {
 
     LinkedBlockingQueueTestsuite.addTest("IsEmptyStressTest006", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }

@@ -24,9 +24,9 @@ interface Filler {
 }
 
 class StaticWorker0 implements Filler {
-    private tasks: BlockingQueue<long>;
+    private tasks: containers.BlockingQueue<long>;
     constructor () {
-        this.tasks = new LinkedBlockingQueue<long>()
+        this.tasks = new containers.LinkedBlockingQueue<long>()
     }
 
     push(value: long) {
@@ -35,7 +35,7 @@ class StaticWorker0 implements Filler {
 }
 
 class StaticWorker1 implements Filler {
-    private tasks: BlockingQueue<long> = new LinkedBlockingQueue<long>()
+    private tasks: containers.BlockingQueue<long> = new containers.LinkedBlockingQueue<long>()
     push(value: long) {
         this.tasks.push(value)
     }

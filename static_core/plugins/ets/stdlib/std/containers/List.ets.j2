@@ -15,78 +15,81 @@
 
 package std.containers;
 
-/**
- * List interface
- */
-export interface List{{T}} {
-    /**
-     * Pushes a value to the begin of the List
-     *
-     * @param e value to push
-     */
-    pushFront(e: {{T}}): void;
+export namespace containers {
 
     /**
-     * Pops a value from the begin of the List
-     *
-     * @returns popped value
-     */
-    popFront(): {{T}};
+    * List interface
+    */
+    export interface List{{T}} {
+        /**
+        * Pushes a value to the begin of the List
+        *
+        * @param e value to push
+        */
+        pushFront(e: {{T}}): void;
 
-    /**
-     * Pushes a value to the end of the List
-     *
-     * @param e value to push
-     */
-    pushBack(e: {{T}}): void;
+        /**
+        * Pops a value from the begin of the List
+        *
+        * @returns popped value
+        */
+        popFront(): {{T}};
 
-    /**
-     * Pops a value from the end of the List
-     *
-     * @returns popped value
-     */
-    popBack(): {{T}};
+        /**
+        * Pushes a value to the end of the List
+        *
+        * @param e value to push
+        */
+        pushBack(e: {{T}}): void;
 
-    /**
-     * Returns number of elements in the List
-     *
-     * @returns number of elements in the List
-     */
-    size(): int;
+        /**
+        * Pops a value from the end of the List
+        *
+        * @returns popped value
+        */
+        popBack(): {{T}};
 
-    /**
-     * Returns an element at the specified index
-     *
-     * @param index element position
-     *
-     * @returns an element
-     */
-    at(index: int): {{T}};
+        /**
+        * Returns number of elements in the List
+        *
+        * @returns number of elements in the List
+        */
+        size(): int;
 
-    /**
-     * Sets an element at the specified index
-     *
-     * @param index element position
-     *
-     * @param e new value
-     */
-    set(index: int, e: {{T}}): void;
+        /**
+        * Returns an element at the specified index
+        *
+        * @param index element position
+        *
+        * @returns an element
+        */
+        at(index: int): {{T}};
 
-    /**
-     * Checks if an element is in the List
-     *
-     * @param e value to find
-     *
-     * @returns true if value present, false otherwise
-     */
-    has(e: {{T}}): boolean;
+        /**
+        * Sets an element at the specified index
+        *
+        * @param index element position
+        *
+        * @param e new value
+        */
+        set(index: int, e: {{T}}): void;
 
-/*  Code below is blocked by internal issue with lambdas #9994
-    forEach(fn: (e: {{T}}): {{T}}): List{{T}};
-    map{{U}}{{LU}}(fn: (e: {{T}}): {{U}}): {{LU}};
-    fold(combine: (lhs: {{T}}, rhs: {{T}}): {{T}}): {{T}};
-    foldWith{{U}}(combine: (lhs: {{T}}, rhs: {{T}}): {{U}}, initVal: {{U}}): {{U}};
-    filter(filterCond: (e: {{T}}): boolean): List{{T}};
-    sort(comparator: (lhs: {{T}}, rhs: {{T}}): boolean): List{{T}};
-*/
+        /**
+        * Checks if an element is in the List
+        *
+        * @param e value to find
+        *
+        * @returns true if value present, false otherwise
+        */
+        has(e: {{T}}): boolean;
+
+    /*  Code below is blocked by internal issue with lambdas #9994
+        forEach(fn: (e: {{T}}): {{T}}): List{{T}};
+        map{{U}}{{LU}}(fn: (e: {{T}}): {{U}}): {{LU}};
+        fold(combine: (lhs: {{T}}, rhs: {{T}}): {{T}}): {{T}};
+        foldWith{{U}}(combine: (lhs: {{T}}, rhs: {{T}}): {{U}}, initVal: {{U}}): {{U}};
+        filter(filterCond: (e: {{T}}): boolean): List{{T}};
+        sort(comparator: (lhs: {{T}}, rhs: {{T}}): boolean): List{{T}};
+    */
+    }
 }

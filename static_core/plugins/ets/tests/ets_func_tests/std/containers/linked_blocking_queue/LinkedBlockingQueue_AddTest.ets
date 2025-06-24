@@ -20,15 +20,15 @@ const elementsNum: int = 10;
 const testNum: int = 20;
 const stressNum: int = 100;
 
-let mQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
-let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+let mQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
+let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
     let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueAddTest");
 
     LinkedBlockingQueueTestsuite.addTest("AddTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -37,7 +37,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddTest002", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(elementsNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -118,7 +118,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndPopTest002", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -134,7 +134,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndPollTest003", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -148,7 +148,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndGetFirstAndPollTest004", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -162,7 +162,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPushAndGetFirstAndIsEnTest005", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -178,7 +178,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPopAndPollTest012", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 20; i++) {
             queueInt.add(i);
         }
@@ -197,7 +197,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddAndPopAndPollAndGetSizeTest014", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 20; i++) {
             queueInt.add(i);
         }
@@ -215,7 +215,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("AddStressTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }

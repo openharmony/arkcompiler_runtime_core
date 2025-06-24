@@ -26,7 +26,7 @@ let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", 
 
 let strAll: string = "0,zero,1,one,2,two,3,three,4,four,5,five,6,six,7,seven,8,eight,9,nine";
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -38,7 +38,7 @@ function main(): int {
 
     concurrentHashMapForEachTestsuite.addTest("forEachTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let flagCounter: int = 0;
         concurrentHashMap.forEach((): void => {
             flagCounter++
@@ -47,7 +47,7 @@ function main(): int {
     });
     concurrentHashMapForEachTestsuite.addTest("forEachTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let flagCounter: int = 0;
         concurrentHashMap.forEach((val: string) => {
             arktest.assertEQ(val, arrValues[flagCounter]);
@@ -56,7 +56,7 @@ function main(): int {
     });
     concurrentHashMapForEachTestsuite.addTest("forEachTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         let flagCounter: int = 0;
         concurrentHashMap.forEach((val: string, key: number) => {
             arktest.assertEQ(key, arrKeys[flagCounter]);
@@ -76,8 +76,8 @@ function main(): int {
             mapp.set(arrKeys[i], arrValues[i]);
         }
         let flagCounter: int = 0;
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(mapp);
-        concurrentHashMap.forEach((val: string, key: number, map: ConcurrentHashMap<number, string>) => {
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(mapp);
+        concurrentHashMap.forEach((val: string, key: number, map: containers.ConcurrentHashMap<number, string>) => {
             arktest.assertEQ(val, map.get(key));
             arktest.assertEQ(key, arrKeys[flagCounter]);
             arktest.assertEQ(val, arrValues[flagCounter]);
@@ -89,12 +89,12 @@ function main(): int {
     concurrentHashMapForEachTestsuite.addTest("forEachTest_005", () =>
     {
         let flagCounter: int = 0;
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         for (let i = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }
         arktest.assertEQ(concurrentHashMap.size, 10);
-        concurrentHashMap.forEach((val: number, key: string, map: ConcurrentHashMap<string, number>) => {
+        concurrentHashMap.forEach((val: number, key: string, map: containers.ConcurrentHashMap<string, number>) => {
             arktest.assertEQ(val, map.get(key));
             arktest.assertEQ(key, arrValues[flagCounter]);
             arktest.assertEQ(val, arrKeys[flagCounter]);
@@ -375,7 +375,7 @@ function forEachTwo() {
 }
 
 function forEachThree() {
-    concurrentHashMapOne.forEach((val: string, key: number, map: ConcurrentHashMap<number, string>) => {
+    concurrentHashMapOne.forEach((val: string, key: number, map: containers.ConcurrentHashMap<number, string>) => {
         let index = Atomics.load(flag, 0).toInt();
         arrKeysTest[index] = key;
         arrValuesTest[index] = val;

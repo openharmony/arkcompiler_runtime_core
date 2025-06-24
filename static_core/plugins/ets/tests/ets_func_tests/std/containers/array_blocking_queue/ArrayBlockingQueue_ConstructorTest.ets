@@ -21,21 +21,21 @@ function main() {
 
     ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt001", () =>
     {
-        let queueIntA: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueIntA: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         arktest.assertEQ(queueIntA.isEmpty(), true);
         arktest.assertEQ(queueIntA.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt002", () =>
     {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
+        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
         arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
         let iter = ConcurrentSetTest.keys();
-        let queueIntA: ArrayBlockingQueue<number> = new ArrayBlockingQueue<number>(200, iter);
+        let queueIntA: containers.ArrayBlockingQueue<number> = new containers.ArrayBlockingQueue<number>(200, iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueIntA.pop(), i);
         }

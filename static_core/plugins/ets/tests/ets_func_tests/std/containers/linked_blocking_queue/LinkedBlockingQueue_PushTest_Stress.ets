@@ -19,7 +19,7 @@ import { Job } from "std/core"
 const testNum: int = 20;
 const stressNum: int = 100;
 
-let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
     let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePushTest");

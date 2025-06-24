@@ -22,7 +22,7 @@ let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six",
 let arrKeysTest: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
 
@@ -178,7 +178,7 @@ function forEachTwo() {
 }
 
 function forEachThree() {
-    concurrentHashMapOne.forEach((val: string, key: number, map: ConcurrentHashMap<number, string>) => {
+    concurrentHashMapOne.forEach((val: string, key: number, map: containers.ConcurrentHashMap<number, string>) => {
         arrKeysTest[flag] = key;
         arrValuesTest[flag++] = val;
     });

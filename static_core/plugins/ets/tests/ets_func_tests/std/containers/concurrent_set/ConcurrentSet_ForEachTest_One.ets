@@ -20,14 +20,14 @@ let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrKeysZero: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
     let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetForEachTest");
 
     ConcurrentSetTestsuite.addTest("TestForEach002", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         ConcurrentSetTest.add(arrValues[0]);
         ConcurrentSetTest.add(arrValues[1]);
         let iterValues: IterableIterator<string> = ConcurrentSetTest.values();

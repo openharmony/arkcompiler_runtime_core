@@ -20,7 +20,7 @@ let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six",
 let arrKeysTest: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
 
-let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
@@ -32,13 +32,13 @@ function main(): int {
 
     concurrentHashMapTestsuite.addTest("removeTest_001", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         arktest.assertEQ(concurrentHashMap.remove(0), undefined);
         arktest.assertEQ(concurrentHashMap.remove(1), undefined);
     });
     concurrentHashMapTestsuite.addTest("removeTest_002", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertEQ(concurrentHashMap.remove(0), "zero");
         arktest.assertEQ(concurrentHashMap.remove(0), undefined);
         arktest.assertEQ(concurrentHashMap.remove(1), "one");
@@ -46,13 +46,13 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("removeTest_003", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertEQ(concurrentHashMap.remove(10), undefined);
         arktest.assertEQ(concurrentHashMap.remove(11), undefined);
     });
     concurrentHashMapTestsuite.addTest("removeTest_004", () =>
     {
-        let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
+        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);

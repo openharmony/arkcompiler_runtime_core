@@ -22,7 +22,7 @@ import { Job } from "std/core"
 const NUMBER_OF_FREE_REGIONS = 2;
 
 class TestHumongousStress {
-    private static GARBAGE = new LinkedBlockingQueue<Object>();
+    private static GARBAGE = new containers.LinkedBlockingQueue<Object>();
 
     regionSize: int;
     humongousSize: int;
@@ -43,7 +43,7 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
+            TestHumongousStress.GARBAGE = new containers.LinkedBlockingQueue<Object>();
             try {
                 GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
@@ -104,7 +104,7 @@ class TestHumongousStress {
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
+        TestHumongousStress.GARBAGE = new containers.LinkedBlockingQueue<Object>();
         try {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
@@ -115,7 +115,7 @@ class TestHumongousStress {
 }
 
 function main(): void {
-    let tests = new ArrayAsListObject();
+    let tests = new containers.ArrayAsListObject();
 
     tests.pushBack(new TestHumongousStress(4, 3, 1.1));
     tests.pushBack(new TestHumongousStress(16, 5, 2.1));

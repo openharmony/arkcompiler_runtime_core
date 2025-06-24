@@ -19,14 +19,14 @@ import { Job } from "std/core"
 const elementsNum: int = 10;
 const stressNum: int = 100;
 
-let sMTQueueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(stressNum);
+let sMTQueueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
 
 function main(): int {
     let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePollTest");
 
     ArrayBlockingQueueTestsuite.addTest("PollTest001", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -43,7 +43,7 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("PollStressTest004", () =>
     {
-        let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(stressNum);
+        let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
         }

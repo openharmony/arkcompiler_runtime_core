@@ -767,7 +767,7 @@ export final class String extends Object implements Comparable<String>, JSONable
             }
             return [(this)]
         }
-        let splittedStrings = new UndefinableStringArray(s)
+        let splittedStrings = new containers.UndefinableStringArray(s)
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < s;) {
             let separatorRight = String.splitMatch(this, lastEnd, separator)
@@ -1632,7 +1632,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     public replaceAll(searchValue: String, replaceValue: String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
-        let matchPositions = new ArrayAsListInt();
+        let matchPositions = new containers.ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
             matchPositions.pushBack(position.toInt())
@@ -1687,7 +1687,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     public replaceAll(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
-        let matchPositions = new ArrayAsListInt();
+        let matchPositions = new containers.ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
             matchPositions.pushBack(position.toInt())
@@ -1699,7 +1699,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i].unboxed()
             let preserved = this.substring(endOfLastMatch, p)
-            let args = new UndefinableObjectArray(2)
+            let args = new containers.UndefinableObjectArray(2)
             args.pushBack(Double.valueOf(p))
             args.pushBack(this)
             let replacement = replacer(searchValue, args.toArray() as Object[])

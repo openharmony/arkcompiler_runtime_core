@@ -15,102 +15,63 @@
 
 package std.containers
 
-type Undefinable{{T}} = {{T}} | undefined
+export namespace containers {
 
-export class Undefinable{{T}}Array {
-    /* const */ static ArrayInitSize : int = 16
+    type Undefinable{{T}} = {{T}} | undefined
 
-    private init(capacity: int, val: Undefinable{{T}}): void {
-        this.data = new Undefinable{{T}}[capacity]
-        for (let i = 0; i < this.data.length; ++i) {
-            this.data[i] = val
-        }
-        this.curSize = capacity
-    }
+    export class Undefinable{{T}}Array {
+        /* const */ static ArrayInitSize : int = 16
 
-    /**
-     * Constructs new Undefinable{{T}}Array with respect to capacity and initial value
-     *
-     * @param capacity
-     *
-     * @param val
-     */
-    constructor(capacity: int, val: Undefinable{{T}}) {
-        this.init(capacity, val)
-    }
-
-    /**
-     * Constructs new Undefinable{{T}}Array with required capacity
-     *
-     * @param capacity
-     */
-    constructor(capacity: int) {
-        this.data = new Undefinable{{T}}[capacity]
-        this.curSize = 0
-    }
-
-    /**
-     * Constructs new empty Undefinable{{T}}Array
-     */
-    constructor() {
-        this(Undefinable{{T}}Array.ArrayInitSize)
-    }
-
-    /**
-     * Increases capacity if passed argument is greater than current capacity
-     *
-     * @param capacity
-     */
-    public reserve(capacity: int): void {
-        if (this.data.length < capacity) {
-            let newData = new Undefinable{{T}}[capacity]
-            for (let i = 0; i < this.curSize; ++i) {
-               newData[i] = this.data[i]
+        private init(capacity: int, val: Undefinable{{T}}): void {
+            this.data = new Undefinable{{T}}[capacity]
+            for (let i = 0; i < this.data.length; ++i) {
+                this.data[i] = val
             }
-            this.data = newData
+            this.curSize = capacity
         }
-    }
 
-    /**
-     * Gets the underlying array
-     *
-     * @returns the underlying array
-     */
-    public toArray(): {{T}}[] {
-        let newData = new {{T}}[this.curSize]
-        for (let i = 0; i < this.curSize; ++i) {
-            newData[i] = this.data[i]!
+        /**
+        * Constructs new Undefinable{{T}}Array with respect to capacity and initial value
+        *
+        * @param capacity
+        *
+        * @param val
+        */
+        constructor(capacity: int, val: Undefinable{{T}}) {
+            this.init(capacity, val)
         }
-        return newData
-    }
 
-    private static getNewCapacity(currentCapacity: int): int {
-        const fastGrowThreshold = 8192
-        const multiplier = 2
-        if (currentCapacity < fastGrowThreshold) {
-            // Adding 4 to jump over 0
-            return (currentCapacity + 4) * multiplier * 2
-        } else {
-            return currentCapacity * multiplier
+        /**
+        * Constructs new Undefinable{{T}}Array with required capacity
+        *
+        * @param capacity
+        */
+        constructor(capacity: int) {
+            this.data = new Undefinable{{T}}[capacity]
+            this.curSize = 0
         }
-    }
 
-    /**
-     * Pushes a value to the end of the array
-     *
-     * @param e value to push
-     */
-    public pushBack(e: Undefinable{{T}}): void {
-        if (this.curSize == this.data.length) {
-            let newData = new Undefinable{{T}}[Undefinable{{T}}Array.getNewCapacity(this.data.length)]
-            for (let i = 0; i < this.curSize; ++i) {
+        /**
+        * Constructs new empty Undefinable{{T}}Array
+        */
+        constructor() {
+            this(Undefinable{{T}}Array.ArrayInitSize)
+        }
+
+        /**
+        * Increases capacity if passed argument is greater than current capacity
+        *
+        * @param capacity
+        */
+        public reserve(capacity: int): void {
+            if (this.data.length < capacity) {
+                let newData = new Undefinable{{T}}[capacity]
+                for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
+                }
+                this.data = newData
             }
-            this.data = newData
         }
-        this.data[this.curSize] = e
-        ++this.curSize
-    }
 
     /**
      * Pops a value from the end of the List
@@ -123,35 +84,75 @@ export class Undefinable{{T}}Array {
         return this.data[this.curSize]
     }
 
-    /**
-     * Returns number of elements in the List
-     */
-    public size(): int {
-        return this.curSize
-    }
+        private static getNewCapacity(currentCapacity: int): int {
+            const fastGrowThreshold = 8192
+            const multiplier = 2
+            if (currentCapacity < fastGrowThreshold) {
+                // Adding 4 to jump over 0
+                return (currentCapacity + 4) * multiplier * 2
+            } else {
+                return currentCapacity * multiplier
+            }
+        }
 
-    /**
-     * Returns an element at the specified index
-     *
-     * @param index element position
-     *
-     * @returns an element
-     */
-    public at(index: int): Undefinable{{T}} {
-        return this.data[index]
-    }
+        /**
+        * Pushes a value to the end of the array
+        *
+        * @param e value to push
+        */
+        public pushBack(e: Undefinable{{T}}): void {
+            if (this.curSize == this.data.length) {
+                let newData = new Undefinable{{T}}[Undefinable{{T}}Array.getNewCapacity(this.data.length)]
+                for (let i = 0; i < this.curSize; ++i) {
+                    newData[i] = this.data[i]
+                }
+                this.data = newData
+            }
+            this.data[this.curSize] = e
+            ++this.curSize
+        }
 
-    /**
-     * Sets an element at the specified index
-     *
-     * @param index element position
-     *
-     * @param e new value
-     */
-    public set(index: int, e: Undefinable{{T}}): void {
-        this.data[index] = e
-    }
+        /**
+        * Pops a value from the end of the List
+        *
+        * @returns popped value
+        */
+        public popBack(): Undefinable{{T}} {
+            assertLT(0, this.curSize, "No data to popBack in Undefinable{{T}}Array!")
+            --this.curSize
+            return this.data[this.curSize]
+        }
 
-    private data: Undefinable{{T}}[] = []
-    private curSize: int
+        /**
+        * Returns number of elements in the List
+        */
+        public size(): int {
+            return this.curSize
+        }
+
+        /**
+        * Returns an element at the specified index
+        *
+        * @param index element position
+        *
+        * @returns an element
+        */
+        public at(index: int): Undefinable{{T}} {
+            return this.data[index]
+        }
+
+        /**
+        * Sets an element at the specified index
+        *
+        * @param index element position
+        *
+        * @param e new value
+        */
+        public set(index: int, e: Undefinable{{T}}): void {
+            this.data[index] = e
+        }
+
+        private data: Undefinable{{T}}[] = []
+        private curSize: int
+    }
 }

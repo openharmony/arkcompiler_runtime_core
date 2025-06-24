@@ -22,7 +22,7 @@ function main(): int {
 
     LinkedBlockingQueueTestsuite.addTest("SizeTest001", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
         }
@@ -36,7 +36,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("SizeAndPopAndPollTest008", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>();
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
         }
@@ -55,7 +55,7 @@ function main(): int {
     });
     LinkedBlockingQueueTestsuite.addTest("GetSizeStressTest007", () =>
     {
-        let queueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
+        let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             arktest.assertEQ(queueInt.size, i);
             queueInt.add(i);
