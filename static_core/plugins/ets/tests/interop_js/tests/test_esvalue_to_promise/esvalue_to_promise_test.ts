@@ -27,7 +27,7 @@ export async function sleepRetNumber(ms: number): Promise<number> {
     return 0xcafe;
 }
 
-async function main() {
+async function main(): Promise<void> {
     await checkToPromise();
 }
 
