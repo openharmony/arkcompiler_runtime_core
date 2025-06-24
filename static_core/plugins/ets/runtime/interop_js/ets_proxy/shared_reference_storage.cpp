@@ -194,6 +194,23 @@ bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCt
     return false;
 }
 
+#if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
+static napi_value ProxObjectAttachCb([[maybe_unused]] napi_env env, void *data)
+{
+    auto *coro = Coroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *ctx = InteropCtx::Current(coro);
+    ASSERT(ctx != nullptr);
+    auto *ref = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
+    ScopedManagedCodeThread v(coro);
+    EtsObject *etsObject = ref->GetEtsObject();
+    auto klass = etsObject->GetClass()->GetRuntimeClass();
+    JSRefConvert *refConv = JSRefConvertResolve<true>(ctx, klass);
+    napi_value res = refConv->Wrap(ctx, etsObject);
+    return res;
+}
+#endif
+
 static void DeleteSharedReferenceRefCallback([[maybe_unused]] napi_env env, void *data, [[maybe_unused]] void *hint)
 {
     delete static_cast<SharedReference **>(data);
@@ -220,7 +237,7 @@ static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_r
     }
     napi_status status = napi_ok;
 #if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
-    status = napi_wrap_with_xref(env, jsObject, refRef, DeleteSharedReferenceRefCallback, result);
+    status = napi_wrap_with_xref(env, jsObject, refRef, DeleteSharedReferenceRefCallback, ProxObjectAttachCb, result);
 #else
     status = napi_wrap(env, jsObject, refRef, DeleteSharedReferenceRefCallback, nullptr, nullptr);
     if (status == napi_ok) {

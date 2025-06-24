@@ -30,7 +30,16 @@
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_wrap_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
                     [[maybe_unused]] void *native_object, [[maybe_unused]] napi_finalize finalize_cb,
-                    [[maybe_unused]] napi_ref *result)
+                    [[maybe_unused]] proxy_object_attach_cb proxy_cb, [[maybe_unused]] napi_ref *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_mark_attach_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
+                           [[maybe_unused]] void *attach_data, [[maybe_unused]] proxy_object_attach_cb attach_cb)
 {
     INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
                        << " is implemented in later versions of OHOS, please update." << std::endl;

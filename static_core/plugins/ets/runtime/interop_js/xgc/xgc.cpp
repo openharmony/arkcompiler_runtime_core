@@ -341,7 +341,9 @@ void XGC::IterateEtsObjectXRef(EtsObject *etsObj, const panda::RefFieldVisitor &
 
 void XGC::MarkFromObject([[maybe_unused]] void *data)
 {
-    ASSERT(data != nullptr);
+    if (data == nullptr) {
+        return;
+    }
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     auto *nativeRef = static_cast<NativeReference *>(data);
     auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
