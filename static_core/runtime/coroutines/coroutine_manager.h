@@ -141,9 +141,10 @@ public:
      * value to the language-level entities)
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
+     * @param abortFlag if true, finishing with an exception will abort the program
      */
     virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        CoroutineLaunchMode mode, CoroutinePriority priority) = 0;
+                        CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -154,7 +155,7 @@ public:
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   CoroutineLaunchMode mode, CoroutinePriority priority) = 0;
+                                   CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) = 0;
 
     /**
      * @brief The public coroutine creation and execution interface with native entrypoint.
@@ -165,7 +166,7 @@ public:
      * NOTE: native function can have Managed scopes
      */
     virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                              CoroutinePriority priority) = 0;
+                              CoroutinePriority priority, bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**

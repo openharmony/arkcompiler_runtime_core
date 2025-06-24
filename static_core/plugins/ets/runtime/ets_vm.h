@@ -413,11 +413,13 @@ public:
     /// @brief Create application `AbcRuntimeLinker` in managed scope.
     ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
+    /// @brief print stack and exit the program
+    [[noreturn]] void HandleUncaughtException() override;
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
                                                        const std::vector<std::string> &args) override;
-    void HandleUncaughtException() override;
 
 private:
     /**

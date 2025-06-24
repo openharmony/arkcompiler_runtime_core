@@ -25,8 +25,15 @@ type Task = () => void;
  * All child coroutines will be scheduled on the same worker.
  * A JS runtime is also created if the needInterop parameter is set to true
  */
-export class ExclusiveLauncher {
-    public static elaunch(task: Task, needInterop: boolean = false): void {
+class ExclusiveLauncher {
+    /**
+     * Run task in exclusive mode
+     * Creates a new worker
+     *
+     * @param { Task } task will be scheduled on created worker
+     * @param { boolean } [needInterop=false] true if need to create JS runtime
+     */
+    internal static elaunch(task: Task, needInterop: boolean = false): void {
         let eTask = needInterop ? () => { ExclusiveLauncher.asyncCall(task); } : task;
         ExclusiveLauncher.elaunch(eTask as Object, needInterop);
     }
@@ -37,6 +44,7 @@ export class ExclusiveLauncher {
 
     private static native elaunch(task: Object, needInterop: boolean): void;
 };
+
 
 /**
  * Helper class for ExclusiveLauncher that allows to use
@@ -56,6 +64,31 @@ export class EAWorker {
     public run<R> (task: Function, ...args: FixedArray<NullishType>): Job<R> {
         return this.worker.run<R>(task, ...args);
     }
+
+    public static postToMain<R>(
+        coroFun: Function,
+        ...args: FixedArray<NullishType>
+    ) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, false);
+    }
+
+    public static postToMain<R>(
+        coroFun: Function,
+        launchParams: LaunchParams,
+        ...args: FixedArray<NullishType>
+    ) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag);
+    }
+
+    /**
+     * Post task to main worker
+     * Note: it has no effect if EAWorker was stoped
+     */
+    private native static postTaskToMain<R>(
+      coroFun: Object,
+      args: FixedArray<NullishType>,
+      abortFlag: boolean
+    ) : Job<R>;
 
     /**
      * Stop EAWorker
@@ -173,6 +206,7 @@ class StaticWorker implements InternalWorker {
     public join() {
         this.tasks.push(StaticWorker.closingTask);
     }
+
 
     private body() {
         while (true) {

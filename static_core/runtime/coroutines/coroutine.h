@@ -312,6 +312,9 @@ public:
         immediateLauncher_ = il;
     }
 
+    /// Possibly noreturn. Call this if the coroutine got an unexpected exception.
+    virtual void HandleUncaughtException() {};
+
     /* event handlers */
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
@@ -324,6 +327,21 @@ public:
 #endif
 
     void LinkToExternalHolder(bool useSharedHolder);
+
+    /**
+     * Set a coroutine parameter abortFlag
+     * meaning that the coroutine could abort the program in an uncaugh exeption occured
+     */
+    void SetAbortFlag(bool abortFlag)
+    {
+        abortFlag_ = abortFlag;
+    }
+
+    /// Check if the abortFlag is set
+    bool HasAbortFlag() const
+    {
+        return abortFlag_;
+    }
 
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
@@ -382,6 +400,7 @@ private:
     CoroutineManager *manager_ = nullptr;
     // NOTE(konstanting, #IAD5MH): check if we still need this functionality
     bool startSuspended_ = false;
+    bool abortFlag_ = false;
     Type type_ = Type::MUTATOR;
     CoroutinePriority priority_;
     /**

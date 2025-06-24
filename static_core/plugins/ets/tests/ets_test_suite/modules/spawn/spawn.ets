@@ -24,11 +24,13 @@ import { Ability } from "./ability";
 native function getAppAbcFiles(): string[];
 
 function getNativeLibName(): string {
-    return StdProcess.ProcessManager.getEnvironmentVar("NATIVE_LIB_NAME");
+    let procManager = new StdProcess.ProcessManager();
+    return procManager.getEnvironmentVar("NATIVE_LIB_NAME");
 }
 
 function getAppMainAbilityClassName(): string {
-    return StdProcess.ProcessManager.getEnvironmentVar("APP_MAIN_ABILITY_CLASS");
+    let procManager = new StdProcess.ProcessManager();
+    return procManager.getEnvironmentVar("APP_MAIN_ABILITY_CLASS");
 }
 
 function loadAndInvokeAbility(mainAbilityClassName: string): void {

@@ -599,7 +599,7 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
     }
 }
 
-void PandaEtsVM::HandleUncaughtException()
+[[noreturn]] void PandaEtsVM::HandleUncaughtException()
 {
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
