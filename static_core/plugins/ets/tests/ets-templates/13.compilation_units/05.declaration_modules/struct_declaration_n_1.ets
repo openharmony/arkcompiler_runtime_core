@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL, TypeError, Structs are only used to define UI components, it should be translated at 'plugin after parser' phase.
+desc: ES2PANDA_FAIL, TypeError, Structs are only used to define UI components, 
+  it should be translated at 'plugin after parser' phase.
 tags: [compile-only, negative]
 ---*/
 
