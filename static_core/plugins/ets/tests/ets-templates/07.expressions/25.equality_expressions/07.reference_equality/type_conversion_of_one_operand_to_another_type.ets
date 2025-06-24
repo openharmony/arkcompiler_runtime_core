@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: A compile-time error occurs if casting conversion cannot convert the type of either operand to the type of the other.
+desc: A compile-time error occurs if casting conversion cannot convert the type
+      of either operand to the type of the other.
 tags: [compile-only, negative]
 ---*/
 
@@ -24,5 +25,5 @@ class B {}
 function main() {
   let a: A = new A();
   let b: B = new B();
-  assertTrue(a != b)   // CTE expected, A cannot be cast to B
+  arktest.assertTrue(a != b) //CTE expected, A cannot be cast to B
 }
