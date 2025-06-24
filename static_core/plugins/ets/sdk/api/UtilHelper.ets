@@ -25,5 +25,7 @@ class UtilHelper {
 
     internal static native generateRandomUUID(entropyCache: boolean): string
 
+    internal static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
+
 }  // class UtilHelper
 } // namespace util

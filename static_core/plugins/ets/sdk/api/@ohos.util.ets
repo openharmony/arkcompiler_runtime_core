@@ -17,6 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
 const percentRate = 100;
+const syntaxErrorCode: number = 10200002;
 
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
@@ -1109,6 +1110,8 @@ export namespace util {
 
         static native generateRandomUUID(entropyCache: boolean): string
 
+        static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
+
     internal static objectToString(obj: Object, full: boolean = false): string {
             return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
         }
@@ -1643,5 +1646,33 @@ export namespace util {
     export function getHash(obj: object): number {
         let result: number = obj.$_hashCode();
         return result;
+    }
+
+    /**
+    * Generates a random binary UUID.
+    * @param { boolean } entropyCache - Whether to use cached UUIDs for generation
+    * @returns { Uint8Array | undefined } A Uint8Array containing the generated binary UUID, or undefined on failure.
+    */
+    export function generateRandomBinaryUUID(entropyCache?: boolean): Uint8Array | undefined {
+        let arr = UtilHelper.generateRandomBinaryUUID((entropyCache == undefined) ? false : entropyCache)
+        return arr;
+    }
+
+    /**
+    * Parses a UUID string into a binary representation (Uint8Array).
+    * @param { string } uuid - The UUID string to parse
+    * @returns { Uint8Array } A Uint8Array containing the 16-byte binary representation of the UUID.
+    */
+    export function parseUUID(uuid: string): Uint8Array {
+        const format = new RegExp("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        if (!format.test(uuid)) {
+            throw new BusinessError(syntaxErrorCode, new Error(`Syntax Error.Invalid ${uuid} string`));
+        }
+        const hex = uuid.replace(new RegExp('-', 'g'), '');
+        const uuidArray = new Uint8Array(16);
+        for (let i = 0; i < 16; i++) {
+            uuidArray[i] = parseInt(hex.substr(i * 2, 2), 16);
+        }
+        return uuidArray;
     }
 }
