@@ -120,6 +120,7 @@ srcs_runtime = [
   "runtime/intrinsics/compiler_intrinsics.cpp",
   "runtime/intrinsics/debugger_api.cpp",
   "runtime/intrinsics/escompat_Date.cpp",
+  "runtime/intrinsics/escompat_JSON.cpp",
   "runtime/intrinsics/escompat_RegExp.cpp",
   "runtime/intrinsics/escompat_taskpool.cpp",
   "runtime/intrinsics/escompat_Reflect.cpp",

@@ -30,6 +30,31 @@ export class JsonReplacerTemp implements JsonReplacer {
     }
 }
 
+export @interface JSONRename {
+    newName: string
+}
+
+export @interface JSONStringifyIgnore {
+}
+
+export @interface JSONParseIgnore {
+}
+
+class JSONAPI {
+    /*
+        JSON intrinsics
+    */
+    native static getJSONStringifyIgnoreByIdx(cls: Class, idx: long): boolean
+
+    native static getJSONStringifyIgnoreByName(cls: Class, name: string): boolean
+
+    native static getJSONParseIgnoreFromAnnotation(cls: Class, idx: long): boolean
+
+    native static getJSONRenameByIdx(cls: Class, idx: long): string | undefined
+
+    native static getJSONRenameByName(cls: Class, name: string): string | undefined
+}
+
 export class JSON {
     /**
      * Converts byte to JSON format
@@ -925,8 +950,20 @@ class JSONWriter {
         return fieldDumped
     }
 
+    private checkSameRename(field: Field, fields: Array<[Field, Value]>): boolean {
+        return fields.some((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+            => {return value[0].getName() == field.getName()});
+    }
+
+    private findKeyIndex(field: Field, fields: Array<[Field, Value]>): number {
+        return fields.findIndex((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+            => {return value[0].getName() == field.getName()});
+    }
+
     private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, Value]> {
         const writableFields = new Array<[Field, Value]>()
+        let hasJsonIgnore: boolean = false
+        let fieldRename : string | undefined = undefined
 
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
@@ -936,10 +973,22 @@ class JSONWriter {
                 }
 
                 const fieldType = classType.getFieldByName(fieldName)
-                if (!this.isWritableFieldType(fieldType)) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(classType.cls, fieldName);
+                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
                     continue
                 }
 
+                fieldRename = JSONAPI.getJSONRenameByName(classType.cls, fieldName);
+                if (fieldRename != undefined) {
+                    if (classType.hasField(fieldRename)) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                    } else {
+                        fieldType.name = fieldRename
+                    }
+                    if (this.checkSameRename(fieldType, writableFields)) {
+                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    }
+                }
                 const fieldValue = classValue.getFieldByName(fieldName)
 
                 const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
@@ -949,14 +998,31 @@ class JSONWriter {
             const fieldsCount = classValue.getFieldsNum()
             for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
                 const fieldType = classType.getField(fieldIdx)
-                if (!this.isWritableFieldType(fieldType)) {
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, fieldIdx)
+                if (hasJsonIgnore || !this.isWritableFieldType(fieldType)) {
                     continue
                 }
 
+                const index: number = this.findKeyIndex(fieldType, writableFields)
+                fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, fieldIdx);
+                if (fieldRename != undefined) {
+                    if (classType.hasField(fieldRename)) {
+                        throw new Error("Cannot rename " + fieldRename + " in keys of " + classType.getName())
+                    } else {
+                        fieldType.name = fieldRename
+                    }
+                    if (this.checkSameRename(fieldType, writableFields)) {
+                        throw new Error("Cannot double rename " + fieldType.getName() + " in keys of " + classType.getName())
+                    }
+                }
                 const fieldValue = classValue.getField(fieldIdx)
 
                 const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
-                writableFields.push(fieldTypeValuePair)
+                if (fieldRename != undefined || index == -1) {
+                    writableFields.push(fieldTypeValuePair)
+                } else {
+                    writableFields[index] = fieldTypeValuePair
+                }
             }
         }
 
@@ -1447,16 +1513,30 @@ class JSONValueParser {
 
         let obj = classType.make()
         let classVal = Value.of(obj) as ClassValue
+        let hasJsonParseIgnore: boolean = false
+        let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
         for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
             let classField = classType.getField(field_num)
-            if (classField.isStatic()) {
+            hasJsonParseIgnore = JSONAPI.getJSONParseIgnoreFromAnnotation(classType.cls, field_num);
+            if (hasJsonParseIgnore || classField.isStatic()) {
                 continue
             }
 
-            const jsonFieldVal = jsonObjFields.get(classField.getName())
+            let jsonFieldVal = jsonObjFields.get(classField.getName())
             if (jsonFieldVal === undefined) {
-                throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
+                hasJsonStringifyIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, field_num);
+                if (hasJsonStringifyIgnore) {
+                    continue
+                }
+                let fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, field_num);
+                if (fieldRename == undefined) {
+                    throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
+                }
+                jsonFieldVal = jsonObjFields.get(fieldRename)
+                if (jsonFieldVal === undefined) {
+                    throw new Error("Cannot find rename " + fieldRename + " in keys of " + classType.getName())
+                }
             }
 
             const classFieldVal = this.parse(jsonFieldVal, classField.getType())
