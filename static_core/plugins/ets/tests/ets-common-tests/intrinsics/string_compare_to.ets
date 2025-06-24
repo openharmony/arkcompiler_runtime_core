@@ -20,7 +20,7 @@ function finder(s: String) {
 }
 
 function testLatin() {
-    let strs = new Array<String>;
+    let strs: String[] = [];
     let n = 5000;
     for (let i = 0; i < n; i += 10) {
         strs.push(`${i}ww`);

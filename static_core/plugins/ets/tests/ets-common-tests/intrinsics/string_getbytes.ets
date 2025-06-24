@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let str: String = new String('abcΣΨΩ0123456789!');
+let str: String = 'abcΣΨΩ0123456789!';
 let bytes: byte[] = [97, 98, 99, -93, -88, -87, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 33]
 
 function equals(val: byte[], exp: byte[], offset: int): boolean {

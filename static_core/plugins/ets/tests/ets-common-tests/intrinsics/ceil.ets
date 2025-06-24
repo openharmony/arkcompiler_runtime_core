@@ -23,31 +23,31 @@ function main(): int {
     if (Double.toString(ceil(Double.NaN)) != Double.toString(Double.NaN)) {
         return 3;
     }
-    if (ceil(0.) != 0.) {
+    if (ceil(0.0) != 0.0) {
         return 4;
     }
-    if (ceil(1.) != 1.) {
+    if (ceil(1.0) != 1.0) {
         return 5;
     }
-    if (ceil(-1.) != -1.) {
+    if (ceil(-1.0) != -1.0) {
         return 6;
     }
-    if (ceil(1.5) != 2.) {
+    if (ceil(1.5) != 2.0) {
         return 7;
     }
-    if (ceil(1.6) != 2.) {
+    if (ceil(1.6) != 2.0) {
         return 8;
     }
-    if (ceil(1.4) != 2.) {
+    if (ceil(1.4) != 2.0) {
         return 9;
     }
-    if (ceil(-1.5) != -1.) {
+    if (ceil(-1.5) != -1.0) {
         return 10;
     }
-    if (ceil(-1.6) != -1.) {
+    if (ceil(-1.6) != -1.0) {
         return 11;
     }
-    if (ceil(-1.4) != -1.) {
+    if (ceil(-1.4) != -1.0) {
         return 12;
     }
     return 0;

@@ -23,31 +23,31 @@ function main(): int {
     if (Double.toString(floor(Double.NaN)) != Double.toString(Double.NaN)) {
         return 3;
     }
-    if (floor(0.) != 0.) {
+    if (floor(0.0) != 0.0) {
         return 4;
     }
-    if (floor(1.) != 1.) {
+    if (floor(1.0) != 1.0) {
         return 5;
     }
-    if (floor(-1.) != -1.) {
+    if (floor(-1.0) != -1.0) {
         return 6;
     }
-    if (floor(1.5) != 1.) {
+    if (floor(1.5) != 1.0) {
         return 7;
     }
-    if (floor(1.6) != 1.) {
+    if (floor(1.6) != 1.0) {
         return 8;
     }
-    if (floor(1.4) != 1.) {
+    if (floor(1.4) != 1.0) {
         return 9;
     }
-    if (floor(-1.5) != -2.) {
+    if (floor(-1.5) != -2.0) {
         return 10;
     }
-    if (floor(-1.6) != -2.) {
+    if (floor(-1.6) != -2.0) {
         return 11;
     }
-    if (floor(-1.4) != -2.) {
+    if (floor(-1.4) != -2.0) {
         return 12;
     }
     return 0;

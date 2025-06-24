@@ -15,7 +15,7 @@
 
 const DUMP: boolean = false;
 const HITS_EXPECTED: int = 40;
-let golden: String = new String('abc\u03a3\u03a8\u03a90123456789!');
+let golden: String = 'abc\u03a3\u03a8\u03a90123456789!';
 let strlenPlus1: int = golden.getLength() + 1;
 let hits: int = 0;
 
