@@ -837,6 +837,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength
     }
 
+    private pushSingle(value: T): void {
+        this.push(value)
+    }
+
     /**
      * Adds the specified elements to the end of an array and returns the new length of the array.
      *

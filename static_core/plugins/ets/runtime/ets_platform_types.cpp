@@ -174,6 +174,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
                "[Lstd/core/WeakRef;I:V", true);
 
     findType(&EtsPlatformTypes::escompatArray, ARRAY);
+    findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
+    findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
     findType(&EtsPlatformTypes::escompatArrayBuffer, ARRAY_BUFFER);
     findType(&EtsPlatformTypes::containersArrayAsListInt, ARRAY_AS_LIST_INT);
     findType(&EtsPlatformTypes::escompatRecord, RECORD);

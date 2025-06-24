@@ -80,12 +80,12 @@ static void RemoveObjectImpl(PandaUnorderedSet<EtsObject *> &objects, EtsObject 
 }
 
 template <typename T>
-static EtsArrayObject<EtsObject> *CreateEtsObjectArrayFromNativeSet(EtsCoroutine *coro,
-                                                                    const PandaUnorderedSet<EtsObject *> &objects)
+static EtsEscompatArray *CreateEtsObjectArrayFromNativeSet(EtsCoroutine *coro,
+                                                           const PandaUnorderedSet<EtsObject *> &objects)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     const auto objCount = objects.size();
-    auto *array = EtsArrayObject<EtsObject>::Create(objCount);
+    auto *array = EtsEscompatArray::Create(objCount);
     ASSERT(array != nullptr);
     size_t i = 0;
     for (auto *obj : objects) {
@@ -98,12 +98,11 @@ static EtsArrayObject<EtsObject> *CreateEtsObjectArrayFromNativeSet(EtsCoroutine
 }
 
 template <typename T>
-static void ListObjectsImpl(EtsClassLinker *etsClassLinker, napi::ScopedManagedCodeFix *s,
-                            EtsArrayObject<EtsObject> *errors)
+static void ListObjectsImpl(EtsClassLinker *etsClassLinker, napi::ScopedManagedCodeFix *s, EtsEscompatArray *errors)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     auto *coro = s->Coroutine();
-    EtsHandle<EtsArrayObject<EtsObject>> herrors(coro, errors);
+    EtsHandle<EtsEscompatArray> herrors(coro, errors);
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
     EtsMethod *method {};
     if constexpr (std::is_same_v<T, EtsJob>) {

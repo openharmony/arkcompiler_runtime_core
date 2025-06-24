@@ -884,7 +884,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     auto *klass = PlatformTypes(this)->coreAbcRuntimeLinker;
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
 
-    EtsHandle<EtsArrayObject<EtsObject>> pathsHandle(coro, EtsArrayObject<EtsObject>::Create(abcFiles.size()));
+    EtsHandle<EtsEscompatArray> pathsHandle(coro, EtsEscompatArray::Create(abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
         auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), abcFiles[idx].length());
         if (UNLIKELY(str == nullptr)) {

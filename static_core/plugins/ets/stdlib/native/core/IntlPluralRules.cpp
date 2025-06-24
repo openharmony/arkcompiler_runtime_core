@@ -207,11 +207,11 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     auto first = StdStrToAni(env, categories[0]);
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/String;", &stringClass));
-    ani_array_ref array;
+    ani_fixedarray_ref array;
     ANI_FATAL_IF_ERROR(env->FixedArray_New_Ref(stringClass, categories.size(), first, &array));
     for (size_t i = 1; i < categories.size(); ++i) {
         auto item = StdStrToAni(env, categories[i]);
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(array, i, item));
+        ANI_FATAL_IF_ERROR(env->FixedArray_Set_Ref(array, i, item));
     }
     return array;
 }

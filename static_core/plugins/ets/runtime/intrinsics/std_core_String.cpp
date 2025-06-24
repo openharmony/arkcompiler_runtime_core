@@ -472,7 +472,7 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 EtsString *StdCoreStringFromCharCode(ObjectHeader *array)
 {
     ASSERT(array != nullptr);
-    auto *charCodes = EtsBoxedDoubleArray::FromEtsObject(EtsObject::FromCoreType(array));
+    auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
     ASSERT(charCodes->GetData() != nullptr);
     return EtsString::CreateNewStringFromCharCode(charCodes->GetData());
 }

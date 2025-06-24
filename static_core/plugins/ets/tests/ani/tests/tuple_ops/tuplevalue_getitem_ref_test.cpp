@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ani.h"
 #include "ani_gtest_tuple_ops.h"
 
 namespace ark::ets::ani::testing {
@@ -52,15 +53,27 @@ protected:
 
     void CheckDoubleValue(ani_tuple_value tupleValue, const ani_size index, const std::array<double, 5U> &array)
     {
+        ani_class doubleClass;
+        ASSERT_EQ(env_->FindClass("Lstd/core/Double;", &doubleClass), ANI_OK);
+        ASSERT(doubleClass != nullptr);
+        ani_method doubleUnbox;
+        env_->Class_FindMethod(doubleClass, "unboxed", ":D", &doubleUnbox);
+        ASSERT(doubleClass != nullptr);
+
         ani_ref result {};
         ASSERT_EQ(env_->TupleValue_GetItem_Ref(tupleValue, index, &result), ANI_OK);
-        auto internalArr = reinterpret_cast<ani_array_double>(result);
+        auto internalArr = reinterpret_cast<ani_array>(result);
 
-        std::vector<double> elem(array.size());
-        ASSERT_EQ(env_->Array_GetRegion_Double(internalArr, 0, elem.size(), elem.data()), ANI_OK);
+        std::vector<ani_ref> elem(array.size());
 
         for (size_t idx = 0; idx < array.size(); ++idx) {
-            ASSERT_EQ(elem[idx], array[idx]);
+            ASSERT_EQ(env_->Array_Get(internalArr, idx, &elem[idx]), ANI_OK);
+            ani_double unboxedDouble = -1;
+            ASSERT_EQ(
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+                env_->Object_CallMethod_Double(reinterpret_cast<ani_object>(elem[idx]), doubleUnbox, &unboxedDouble),
+                ANI_OK);
+            ASSERT_EQ(unboxedDouble, array[idx]);
         }
     }
 };
@@ -132,12 +145,24 @@ TEST_F(TupleValueGetItemRefTest, tupleValueGetItemIntCompositeScene)
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 0U, &result), ANI_OK);
     CompareStringWithRef("Hello", result);
 
+    ani_class doubleClass;
+    ASSERT_EQ(env_->FindClass("Lstd/core/Double;", &doubleClass), ANI_OK);
+    ASSERT(doubleClass != nullptr);
+    ani_method doubleUnbox;
+    env_->Class_FindMethod(doubleClass, "unboxed", ":D", &doubleUnbox);
+    ASSERT(doubleClass != nullptr);
+
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 1U, &result), ANI_OK);
-    auto internalArray = reinterpret_cast<ani_array_double>(result);
-    std::array<ani_double, 5U> nativeBuffer = {0.0};
-    ASSERT_EQ(env_->Array_GetRegion_Double(internalArray, 0, 5U, nativeBuffer.data()), ANI_OK);
+    auto internalArray = reinterpret_cast<ani_array>(result);
+    std::array<ani_ref, 5U> nativeBuffer {};
     for (size_t i = 0; i < expectedArrayValues.size(); ++i) {
-        ASSERT_EQ(nativeBuffer[i], expectedArrayValues[i]);
+        ASSERT_EQ(env_->Array_Get(internalArray, i, &nativeBuffer[i]), ANI_OK);
+        ani_double unboxedDouble = -1;
+        ASSERT_EQ(
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+            env_->Object_CallMethod_Double(reinterpret_cast<ani_object>(nativeBuffer[i]), doubleUnbox, &unboxedDouble),
+            ANI_OK);
+        ASSERT_EQ(unboxedDouble, expectedArrayValues[i]);
     }
 
     ASSERT_EQ(env_->TupleValue_GetItem_Ref(tuple, 2U, &result), ANI_OK);
@@ -185,8 +210,7 @@ TEST_F(TupleValueGetItemRefTest, referenceTuple)
     ASSERT_EQ(env_->TupleValue_SetItem_Ref(tuple, 0U, string), ANI_OK);
     CheckStringValue(tuple, 0U, STR_VIEW1);
 
-    const auto array =
-        static_cast<ani_array_double>(CallEtsFunction<ani_ref>("tuplevalue_getitem_ref_test", "getArray"));
+    const auto array = static_cast<ani_array>(CallEtsFunction<ani_ref>("tuplevalue_getitem_ref_test", "getArray"));
     ASSERT_EQ(env_->TupleValue_SetItem_Ref(tuple, 1U, array), ANI_OK);
 
     constexpr std::array<double, 5U> EXPECTED_DOUBLE_ARRAY = {100.1, 200.2, 300.3, 400.4, 500.5};

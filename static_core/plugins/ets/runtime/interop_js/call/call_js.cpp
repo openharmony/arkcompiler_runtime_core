@@ -157,7 +157,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
     auto *klass = ref->template ClassAddr<Class>();
     if (!klass->IsArrayClass()) {
         ASSERT(klass == ctx_->GetArrayClass());
-        VMHandle<EtsArrayObject<EtsObject>> etsArr(coro_, ref);
+        VMHandle<EtsEscompatArray> etsArr(coro_, ref);
         auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
         for (uint32_t el = 0; el < jsargs.size(); ++el) {
             allJsArgs[el] = jsargs[el];

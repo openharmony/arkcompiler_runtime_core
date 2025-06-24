@@ -90,6 +90,8 @@ public:
 
     /* Containers */
     EtsClass *escompatArray {};
+    EtsMethod *escompatArrayPush {};
+    EtsMethod *escompatArrayPop {};
     EtsClass *escompatArrayBuffer {};
     EtsClass *containersArrayAsListInt {};
     EtsClass *escompatRecord {};

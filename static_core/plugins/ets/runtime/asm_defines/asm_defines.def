@@ -21,9 +21,9 @@ DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoub
 
 DEFINE_VALUE(ETS_CLASS_RUNTIME_CLASS_OFFSET, ark::ets::EtsClass::GetRuntimeClassOffset())
 
-DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsArrayObject<ark::ets::EtsObject>::GetBufferOffset())
+DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatArray::GetBufferOffset())
 DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
-             ark::ets::EtsArrayObject<ark::ets::EtsObject>::GetActualLengthOffset())
+             ark::ets::EtsEscompatArray::GetActualLengthOffset())
 
 DEFINE_VALUE(TYPED_ARRAY_CLASS_SIZE, ark::ets::EtsEscompatTypedArrayBase::GetClassSize())
 DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetBufferOffset())

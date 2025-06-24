@@ -104,20 +104,6 @@ static std::nullptr_t ThrowInternalError(ani_env *env, const std::string &messag
     return nullptr;
 }
 
-static ani_array_ref ANIArrayNewRef(ani_env *env, const char *elemClsName, ani_size size)
-{
-    ani_class elemCls = nullptr;
-    ANI_FATAL_IF_ERROR(env->FindClass(elemClsName, &elemCls));
-
-    ani_ref undefRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefRef));
-
-    ani_array_ref arrRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(elemCls, size, undefRef, &arrRef));
-
-    return arrRef;
-}
-
 static std::unique_ptr<icu::Locale> ToICULocale(ani_env *env, ani_object self)
 {
     ani_ref localeRef = nullptr;
@@ -614,7 +600,7 @@ static ani_string StdCoreIntlDateTimeFormatFormatImpl(ani_env *env, ani_object s
     return CreateUtf16String(env, formattedDateChars, icuFormattedDate.length());
 }
 
-static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double timestamp)
+static ani_array StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double timestamp)
 {
     std::unique_ptr<icu::DateFormat> dateFormat = CreateICUDateFormat(env, self);
     if (!dateFormat) {
@@ -661,7 +647,9 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, an
     ani_method fmtPartImplCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(fmtPartImplCls, "<ctor>", DTF_PART_IMPL_CTOR_SIGNATURE, &fmtPartImplCtor));
 
-    ani_array_ref formattedDateParts = ANIArrayNewRef(env, "Lstd/core/Intl/DateTimeFormatPart;", parts.size());
+    ani_array formattedDateParts {};
+    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), nullptr, &formattedDateParts));
+
     for (size_t partIdx = 0; partIdx < parts.size(); partIdx++) {
         const auto &part = parts[partIdx];
 
@@ -674,7 +662,7 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatToPartsImpl(ani_env *env, an
         ani_object fmtPartImpl = nullptr;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_FATAL_IF_ERROR(env->Object_New(fmtPartImplCls, fmtPartImplCtor, &fmtPartImpl, partType, partValue));
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(formattedDateParts, partIdx, fmtPartImpl));
+        ANI_FATAL_IF_ERROR(env->Array_Set(formattedDateParts, partIdx, fmtPartImpl));
     }
 
     return formattedDateParts;
@@ -744,7 +732,7 @@ static ani_object StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl(ani_env *en
     return resolvedOpts;
 }
 
-static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array_ref partsArr,
+static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array partsArr,
                                              const std::vector<std::tuple<UStr, UStr, UStr>> &parts)
 {
     ani_class partImplCls = nullptr;
@@ -768,7 +756,7 @@ static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array_ref partsAr
         ani_object partImpl = nullptr;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_FATAL_IF_ERROR(env->Object_New(partImplCls, partImplCtor, &partImpl, partTypeStr, partValStr, partSrcStr));
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(partsArr, partIdx, partImpl));
+        ANI_FATAL_IF_ERROR(env->Array_Set(partsArr, partIdx, partImpl));
     }
 }
 
@@ -853,8 +841,8 @@ static ani_string StdCoreIntlDateTimeFormatFormatRangeImpl(ani_env *env, ani_obj
     return CreateUtf16String(env, formattedIntervalChars, formattedInterval.length());
 }
 
-static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *env, ani_object self, ani_double start,
-                                                                     ani_double end)
+static ani_array StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *env, ani_object self, ani_double start,
+                                                                 ani_double end)
 {
     auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
 
@@ -911,7 +899,9 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *en
         }
     }
 
-    ani_array_ref partsArr = ANIArrayNewRef(env, "Lstd/core/Intl/DateTimeRangeFormatPart;", parts.size());
+    ani_array partsArr {};
+    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), nullptr, &partsArr));
+
     FillDateTimeRangeFormatPartArray(env, partsArr, parts);
 
     return partsArr;
@@ -925,11 +915,11 @@ ani_status RegisterIntlDateTimeFormatMethods(ani_env *env)
     std::array dtfMethods {
         ani_native_function {"formatImpl", "D:Lstd/core/String;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatImpl)},
-        ani_native_function {"formatToPartsImpl", "D:[Lstd/core/Intl/DateTimeFormatPart;",
+        ani_native_function {"formatToPartsImpl", "D:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatToPartsImpl)},
         ani_native_function {"formatRangeImpl", "DD:Lstd/core/String;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeImpl)},
-        ani_native_function {"formatRangeToPartsImpl", "DD:[Lstd/core/Intl/DateTimeRangeFormatPart;",
+        ani_native_function {"formatRangeToPartsImpl", "DD:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatRangeToPartsImpl)},
         ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedDateTimeFormatOptions;",
                              reinterpret_cast<void *>(StdCoreIntlDateTimeFormatFormatResolvedOptionsImpl)},

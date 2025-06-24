@@ -476,7 +476,9 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lobject_new_test/Mixture;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    const char *name = "Lstd/core/Object;[I[BIFDZJSLstd/core/String;Lobject_new_test/Animal;:Lobject_new_test/Mixture;";
+    const char *name =
+        "Lstd/core/Object;Lescompat/Array;Lescompat/Array;IFDZJSLstd/core/String;Lobject_new_test/"
+        "Animal;:Lobject_new_test/Mixture;";
     ani_method newMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newMixtureObject", name, &newMethod), ANI_OK);
     ASSERT_NE(newMethod, nullptr);
@@ -486,8 +488,9 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ASSERT_NE(checkMethod, nullptr);
 
     auto ref = CallEtsFunction<ani_ref>("object_new_test", "getNull");
-    const auto intArray = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
-    const auto byteArray = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
+    const auto intArray = static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
+    const auto byteArray =
+        static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
 
     ani_string tag {};
     GetTestString(&tag);

@@ -218,7 +218,7 @@ static std::string LookupLocale(const std::string &locTag, const icu::Locale *av
     return std::string();
 }
 
-ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_array locales)
 {
     UErrorCode success = U_ZERO_ERROR;
     ani_ref locale;
@@ -233,7 +233,7 @@ ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klas
     ANI_FATAL_IF_ERROR(env->Array_GetLength(locales, &len));
 
     for (ani_size i = 0; i < len; i++) {
-        ANI_FATAL_IF_ERROR(env->Array_Get_Ref(locales, i, &locale));
+        ANI_FATAL_IF_ERROR(env->Array_Get(locales, i, &locale));
 
         auto locTag = ConvertFromAniString(env, reinterpret_cast<ani_string>(locale));
         if (!intl::IsStructurallyValidLanguageTag(locTag)) {
@@ -272,13 +272,13 @@ ani_array_ref StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class 
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)
 {
-    const auto methods = std::array {ani_native_function {"bestFitLocale", "[Lstd/core/String;:Lstd/core/String;",
+    const auto methods = std::array {ani_native_function {"bestFitLocale", "Lescompat/Array;:Lstd/core/String;",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocale)},
-                                     ani_native_function {"lookupLocale", "[Lstd/core/String;:Lstd/core/String;",
+                                     ani_native_function {"lookupLocale", "Lescompat/Array;:Lstd/core/String;",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocale)},
-                                     ani_native_function {"bestFitLocales", "[Lstd/core/String;:[Lstd/core/String;",
+                                     ani_native_function {"bestFitLocales", "Lescompat/Array;:Lescompat/Array;",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocales)},
-                                     ani_native_function {"lookupLocales", "[Lstd/core/String;:[Lstd/core/String;",
+                                     ani_native_function {"lookupLocales", "Lescompat/Array;:Lescompat/Array;",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocales)}};
 
     ani_class localeMatchClass;

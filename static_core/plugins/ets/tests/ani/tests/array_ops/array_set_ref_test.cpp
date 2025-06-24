@@ -14,13 +14,13 @@
  */
 
 #include "ani.h"
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetRefTest : public AniGTestArrayOps {};
+class ArraySetRefTest : public ArrayHelperTest {};
 
 // ninja ani_test_array_setref_gtests
 TEST_F(ArraySetRefTest, SetRefErrorTests)
@@ -46,7 +46,7 @@ TEST_F(ArraySetRefTest, FixedSetRefErrorTests)
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
     ani_ref ref = nullptr;
     const ani_size index = 0;
     const ani_size invalidIndex = 5;
@@ -91,7 +91,7 @@ TEST_F(ArraySetRefTest, FixedSetRefErrorValueToArrayTest)
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
     const ani_size errorIndex = -1;
     ASSERT_EQ(env_->Array_Set_Ref(array, errorIndex, nullptr), ANI_OUT_OF_RANGE);
@@ -102,7 +102,7 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
     const ani_size index1 = 1;
@@ -151,7 +151,7 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
-    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
     ani_ref ref1 = nullptr;
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
     const ani_size index1 = 1;

@@ -116,7 +116,7 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
     bool isSuccessful = false;
     buffer_ += "[";
 
-    auto array = EtsHandle<EtsArrayObject<EtsObject>>(coro, EtsArrayObject<EtsObject>::FromEtsObject(value.GetPtr()));
+    auto array = EtsHandle<EtsEscompatArray>(coro, EtsEscompatArray::FromEtsObject(value.GetPtr()));
     auto realArray = EtsHandle<EtsObjectArray>(coro, array->GetData());
     auto length = array->GetActualLength();
 

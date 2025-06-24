@@ -267,8 +267,8 @@ static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_obje
     return output;
 }
 
-static ani_array_ref StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double value,
-                                                                    ani_string unit)
+static ani_array StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env, ani_object self, ani_double value,
+                                                                ani_string unit)
 {
     ani_string formatted = StdCoreIntlRelativeTimeFormatFormatImpl(env, self, value, unit);
     if (formatted == nullptr) {
@@ -283,8 +283,8 @@ static ani_array_ref StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ANI_FATAL_IF_ERROR(env->Object_New(cls, ctor, &part));
 
-    ani_array_ref result;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(cls, 1, nullptr, &result));
+    ani_array result;
+    ANI_FATAL_IF_ERROR(env->Array_New(1, nullptr, &result));
 
     ani_string typeStr;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
@@ -295,7 +295,7 @@ static ani_array_ref StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env
 
     ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Ref(part, "type", typeStr));
     ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Ref(part, "value", formatted));
-    ANI_FATAL_IF_ERROR(env->Array_Set_Ref(result, 0, part));
+    ANI_FATAL_IF_ERROR(env->Array_Set(result, 0, part));
     return result;
 }
 
@@ -304,7 +304,7 @@ ani_status RegisterIntlRelativeTimeFormatMethods(ani_env *env)
     std::array methods = {
         ani_native_function {"formatImpl", "DLstd/core/String;:Lstd/core/String;",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatImpl)},
-        ani_native_function {"formatToPartsImpl", "DLstd/core/String;:[Lstd/core/Intl/RelativeTimeFormatPart;",
+        ani_native_function {"formatToPartsImpl", "DLstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatToPartsImpl)},
         ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedRelativeTimeFormatOptions;",
                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatResolvedOptionsImpl)}};

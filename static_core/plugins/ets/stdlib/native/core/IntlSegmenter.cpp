@@ -133,8 +133,8 @@ ani_boolean IntlCurrentClusterIsWordLike(std::unique_ptr<icu::BreakIterator> &br
  * @return Array of IntlCluster objects representing the segments, nullptr if operation fails
  * @throws RuntimeException if locale creation or break iterator initialization fails
  */
-ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
-                           ani_string localeStr)
+ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFactory factory, ani_string str,
+                       ani_string localeStr)
 {
     std::optional<icu::Locale> locale = EtsToLocale(env, localeStr);
     if (!locale) {
@@ -180,12 +180,12 @@ ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, Break
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Cluster;", &clusterClass));
 
     // Create array of the correct size
-    ani_array_ref resultArray;
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(clusterClass, clusters.size(), nullptr, &resultArray));
+    ani_array resultArray;
+    ANI_FATAL_IF_ERROR(env->Array_New(clusters.size(), nullptr, &resultArray));
 
     // Fill the array with cluster objects
     for (size_t i = 0; i < clusters.size(); ++i) {
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(resultArray, i, clusters[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, clusters[i]));
     }
 
     return resultArray;
@@ -199,7 +199,7 @@ ani_array_ref IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, Break
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing grapheme clusters
  */
-ani_array_ref StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createCharacterInstance, str, localeStr);
 }
@@ -212,7 +212,7 @@ ani_array_ref StdCoreIntlGraphemeClusters(ani_env *env, ani_class klass, ani_str
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing word clusters
  */
-ani_array_ref StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createWordInstance, str, localeStr);
 }
@@ -225,7 +225,7 @@ ani_array_ref StdCoreIntlWordClusters(ani_env *env, ani_class klass, ani_string 
  * @param localeStr BCP47 language tag string for locale-specific segmentation
  * @return Array of IntlCluster objects representing sentence clusters
  */
-ani_array_ref StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
+ani_array StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string str, ani_string localeStr)
 {
     return IntlClusters(env, klass, icu::BreakIterator::createSentenceInstance, str, localeStr);
 }
@@ -238,11 +238,11 @@ ani_array_ref StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_str
 ani_status RegisterIntlSegmenter(ani_env *env)
 {
     const auto methods = std::array {
-        ani_native_function {"graphemeClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"graphemeClusters", "Lstd/core/String;Lstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlGraphemeClusters)},
-        ani_native_function {"wordClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"wordClusters", "Lstd/core/String;Lstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlWordClusters)},
-        ani_native_function {"sentenceClusters", "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/Cluster;",
+        ani_native_function {"sentenceClusters", "Lstd/core/String;Lstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(StdCoreIntlSentenceClusters)},
     };
 

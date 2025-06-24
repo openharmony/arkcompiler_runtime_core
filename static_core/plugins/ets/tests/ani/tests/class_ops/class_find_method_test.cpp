@@ -231,11 +231,11 @@ TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
         CheckClassFindMethod<true>("LC;", "imethod_tuple", nullptr, &args, TEST_EXPECTED_VALUE1);
     }
     {
-        ani_array_int params;
+        ani_fixedarray_int params;
         ASSERT_EQ(env_->FixedArray_New_Int(2U, &params), ANI_OK);
         ani_int nativeParams[] = {TEST_NATIVE_PARAM1, TEST_NATIVE_PARAM2};
         const ani_size offset = 0;
-        ASSERT_EQ(env_->Array_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
+        ASSERT_EQ(env_->FixedArray_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
 
         args.r = params;
         CheckClassFindMethod<true>("LC;", "method_rest", nullptr, &args, TEST_EXPECTED_VALUE1);
@@ -467,7 +467,7 @@ TEST_F(ClassFindMethodTest, has_static_method_1)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":[Lstd/core/String;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":Lescompat/Array;", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 

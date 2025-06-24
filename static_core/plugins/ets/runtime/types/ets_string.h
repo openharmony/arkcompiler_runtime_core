@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/string-inl.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets {
 
@@ -105,7 +106,7 @@ public:
         return reinterpret_cast<EtsString *>(s);
     }
 
-    using CharCodeArray = EtsTypedObjectArray<EtsBoxPrimitive<EtsDouble>>;
+    using CharCodeArray = EtsObjectArray;
 
     static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes)
     {
@@ -125,7 +126,9 @@ public:
             }
 
             for (size_t i = 0; i < codes->GetLength(); ++i) {
-                if (!IsASCIICharacter(CodeToChar(codes->Get(i)->GetValue()))) {
+                if (!IsASCIICharacter(
+                        // CC-OFFNXT(G.FMT.06-CPP) project code style
+                        CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue()))) {
                     return false;
                 }
             }
@@ -135,7 +138,7 @@ public:
         auto copyCharsIntoString = [](CharCodeArray *codes, auto *dstData) {
             Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, codes->GetLength());
             for (size_t i = 0; i < codes->GetLength(); ++i) {
-                to[i] = CodeToChar(codes->Get(i)->GetValue());
+                to[i] = CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue());
             }
         };
 
