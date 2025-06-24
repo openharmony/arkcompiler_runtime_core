@@ -59,5 +59,5 @@ export final class Class {
     /**
      * Get internal string descriptor
      */
-    public native getDescriptor(): string
+    internal native getDescriptor(): string
 }

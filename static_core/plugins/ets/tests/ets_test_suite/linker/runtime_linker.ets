@@ -53,8 +53,6 @@ class Test {
         let objCls = Class.of(obj);
         let clsCls = Class.of(objCls);
         arktest.assertEQ(Class.of(clsCls), clsCls);
-        arktest.assertEQ(objCls.getDescriptor(), "Lstd/core/Object;");
-        arktest.assertEQ(clsCls.getDescriptor(), "Lstd/core/Class;");
         arktest.assertEQ(objCls.getSuper(), undefined, "std.core.Object must have no super class");
         arktest.assertEQ(clsCls.getSuper(), objCls, "std.core.Class must extend std.core.Object");
     }
