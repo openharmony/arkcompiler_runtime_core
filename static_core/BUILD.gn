@@ -305,7 +305,11 @@ config("ark_config") {
 
   if (is_asan) {
     cflags_cc += [ "-g" ]
-    defines += [ "__SANITIZE_ADDRESS__" ]
+    if (defined(use_hwasan) && use_hwasan) {
+      defines += [ "__SANITIZE_HWADDRESS__" ]
+    } else {
+      defines += [ "__SANITIZE_ADDRESS__" ]
+    }
     print("ASAN is enabled")
   }
 

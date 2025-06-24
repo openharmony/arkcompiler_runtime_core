@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,6 +289,7 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define NO_UB_SANITIZE
 #endif  // USE_UB_SANITIZER
 
+#ifndef __SANITIZE_HWADDRESS__
 // for clang
 #if defined(__has_feature)
 #if __has_feature(address_sanitizer)
@@ -298,6 +299,9 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 // for gnu compiler
 #if defined(__SANITIZE_ADDRESS__)
 #define USE_ADDRESS_SANITIZER
+#endif
+#else
+#define NO_ADDRESS_SANITIZE
 #endif
 
 #if defined(USE_ADDRESS_SANITIZER)
