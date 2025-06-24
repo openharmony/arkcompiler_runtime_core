@@ -42,6 +42,22 @@ config("arkfile_public_config") {
   }
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("libpandafile_headers") {
+    include_dirs = [
+      "$ark_root/libpandafile",
+      "$ark_root/libziparchive",
+      "$target_gen_dir",
+      "$target_gen_dir/include",
+    ]
+    if (ark_standalone_build) {
+      include_dirs += [ "//third_party/zlib/contrib/minizip" ]
+    }
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 libarkfile_sources = [
   "annotation_data_accessor.cpp",
   "bytecode_emitter.cpp",

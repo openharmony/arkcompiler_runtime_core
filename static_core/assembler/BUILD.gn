@@ -45,6 +45,20 @@ config("arkassembler_public_config") {
   configs = [ "$ark_root/runtime:profiling_gen_public_config" ]
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("assembler_headers") {
+    include_dirs = [
+      "$ark_root/assembler",
+      "$target_gen_dir",
+      "$target_gen_dir/include",
+      "$ark_root_gen_dir",
+      "$ark_root",
+    ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 libarkassembler_sources = [
   "$target_gen_dir/ins_to_string.cpp",
   "annotation.cpp",
