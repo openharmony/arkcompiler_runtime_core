@@ -61,6 +61,7 @@ public:
     EtsClass *coreFunction {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
+    EtsClass *coreTuple {};
     EtsClass *coreTupleN {};
 
     /* Runtime linkage classes */
@@ -118,7 +119,6 @@ public:
     EtsMethod *escompatProcessListUnhandledJobs {};
     EtsMethod *escompatProcessListUnhandledPromises {};
 
-    EtsClass *coreTuple {};
     EtsClass *escompatRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};
 
