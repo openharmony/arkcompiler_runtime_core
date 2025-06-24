@@ -1384,9 +1384,7 @@ void EncodeVisitor::VisitLoadResolvedObjectFieldStatic(GraphVisitor *visitor, In
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto load = inst->CastToLoadResolvedObjectFieldStatic();
-    if (load->GetNeedBarrier()) {
-        // Insert barriers for GC
-    }
+
     auto type = inst->GetType();
     auto fieldAddr = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);

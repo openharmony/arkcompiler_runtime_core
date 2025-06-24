@@ -1070,17 +1070,36 @@ public:
                 return nullptr;
         }
     }
+
+    template <Opcode OPCODE, typename... Args>
+    [[nodiscard]] BaseTypeOf<OPCODE> *CreateInst(Args &&...args) const
+    {
+        auto *inst = Inst::New<BaseTypeOf<OPCODE>>(allocator_, OPCODE, std::forward<Args>(args)...);
+        inst->SetId(instrCurrentId_++);
+        if (IsAbcKit()) {
+            SetAbcKitFlags(inst);
+        }
+        if constexpr (inst_flags::HasFlag(OPCODE, inst_flags::READ_BARRIER)) {
+            bool needsBarrier = GetRuntime()->NeedsPreReadBarrier();
+            if (needsBarrier && inst->GetType() == DataType::REFERENCE) {
+                inst->SetNeedBarrier(true);
+            }
+        }
+        if constexpr (inst_flags::HasFlag(OPCODE, inst_flags::WRITE_BARRIER)) {
+            bool needsBarrier = GetRuntime()->NeedsPreWriteBarrier() || GetRuntime()->NeedsPostWriteBarrier();
+            if (needsBarrier && inst->GetType() == DataType::REFERENCE) {
+                inst->SetNeedBarrier(true);
+            }
+        }
+        return inst;
+    }
+
     /// Define creation methods for all opcodes
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define RETURN_INST(OPCODE, BASE, ...)                                                         \
-    template <typename... Args>                                                                \
-    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {                             \
-        auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE, std::forward<Args>(args)...);  \
-        inst->SetId(instrCurrentId_++);                                                        \
-        if (IsAbcKit()) {                                                                      \
-            SetAbcKitFlags(inst);                                                              \
-        }                                                                                      \
-        return inst;                                                                           \
+#define RETURN_INST(OPCODE, BASE, ...)                                  \
+    template <typename... Args>                                         \
+    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {      \
+        return CreateInst<Opcode::OPCODE>(std::forward<Args>(args)...); \
     }
     OPCODE_LIST(RETURN_INST)
 
