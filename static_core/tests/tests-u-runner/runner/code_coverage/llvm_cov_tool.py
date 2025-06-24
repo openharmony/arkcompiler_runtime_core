@@ -135,7 +135,7 @@ class LlvmCovTool():
 
         command.extend(llvm_cov_export_command_args)
 
-        with open(_dot_info_file_path, 'w', encoding='utf-8') as file:
+        with os.fdopen(os.open(_dot_info_file_path, os.O_WRONLY | os.O_CREAT, 0o755), 'w', encoding='utf-8') as file:
             self.cmd_executor.run_command(command, stdout=file)
 
     def export_to_info_file_by_components(self, exclude_regex: Optional[str] = None) -> None:
