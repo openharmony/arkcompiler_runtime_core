@@ -64,6 +64,10 @@ public:
     static void RequestGC(GcType type);
     static void WaitForGCFinish();
     static bool ForEachObj(HeapVisitor& visitor, bool safe);
+    static void NotifyNativeAllocation(size_t bytes);
+    static void NotifyNativeFree(size_t bytes);
+    static void NotifyNativeReset(size_t oldBytes, size_t newBytes);
+    static size_t GetNotifiedNativeSize();
 
     HeapParam &GetHeapParam()
     {
