@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-import { Decimal, DecimalValue } from "@arkts.math.Decimal";
+import { Decimal, Value } from '@arkts.math.Decimal';
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Decimal min and max API tests");
-    suite.addTest("Decimal min and max with default config", testMinAndMaxWithDefaultConfig001);
-    suite.addTest("Decimal min and max with default config", testMinAndMaxWithDefaultConfig002);
-    suite.addTest("Decimal min and max with default config", testMinAndMaxWithDefaultConfig003);
+    const suite = new arktest.ArkTestsuite('Decimal min and max API tests');
+    suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig001);
+    suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig002);
+    suite.addTest('Decimal min and max with default config', testMinAndMaxWithDefaultConfig003);
     return suite.run();
 }
 
-function checkResultIsNaN(...n: DecimalValue[]) {
+function checkResultIsNaN(...n: Value[]) {
     arktest.assertTrue(Number.isNaN(Decimal.max(...n).toNumber()));
     arktest.assertTrue(Number.isNaN(Decimal.min(...n).toNumber()));
 }
 
-function checkResultValues(min: number | string, max: number | string, ...n: DecimalValue[]) {
+function checkResultValues(min: number | string, max: number | string, ...n: Value[]) {
     arktest.assertEQ(new Decimal(min).valueOf(), Decimal.min(...n).valueOf());
     arktest.assertEQ(new Decimal(max).valueOf(), Decimal.max(...n).valueOf());
 }
