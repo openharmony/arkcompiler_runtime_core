@@ -3959,17 +3959,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreFloatToDouble
     safe_intrinsic: true
 
-  - name: StdCoreFloatToChar
-    space: ets
-    class_name: std.core.Float
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f32 ]
-    impl: ark::ets::intrinsics::StdCoreFloatToChar
-    safe_intrinsic: true
-
 ###################
 # std.core.Double #
 ###################
@@ -4179,17 +4168,6 @@ intrinsics:
       ret: f32
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToFloat
-    safe_intrinsic: true
-
-  - name: StdCoreDoubleToChar
-    space: ets
-    class_name: std.core.Double
-    method_name: toChar
-    static: true
-    signature:
-      ret: u16
-      args: [ f64 ]
-    impl: ark::ets::intrinsics::StdCoreDoubleToChar
     safe_intrinsic: true
 
 ##############

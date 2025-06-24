@@ -324,16 +324,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Returns value of this instance
-     *
-     * @returns value as char
-     * @tag arkts
-     */
-    public toChar(): char {
-        return this.value.toChar();
-    }
-
-    /**
      * Returns the primitive as double value
      *
      * @param value value to cast
@@ -343,16 +333,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static toDouble(value: double): double {
         return value;
     }
-
-    /**
-     * Returns the primitive as char value
-     *
-     * @param value value to cast
-     *
-     * @returns casted value
-     */
-    public static native toChar(value: double): char;
-
 
     /**
      * Returns the primitive as byte value
