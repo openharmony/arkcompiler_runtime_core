@@ -53,8 +53,8 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
   }
 
   for (let i = 0; i < actual.indices.length; i++) {
-    let actInd = (Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
-    let expInd = (Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+    let actInd = (reflect.Value.of(actual.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
+    let expInd = (reflect.Value.of(expected.indices) as ArrayValue).getElement(i).getData() as FixedArray<number>
     for (let j = 0; j < actInd.length; j++) {
       if (actInd[j] != expInd[j]) {
         console.println("check index: " + i);

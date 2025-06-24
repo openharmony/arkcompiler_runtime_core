@@ -747,7 +747,7 @@ class JSONWriter {
             else if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objType instanceof ArrayType) {
-                this.writeArrayValue(Value.of(obj) as ArrayValue, objType as ArrayType)
+                this.writeArrayValue(reflect.Value.of(obj) as ArrayValue, objType as ArrayType)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
@@ -775,7 +775,7 @@ class JSONWriter {
 
         const objType = Type.of(obj) as ClassType
 
-        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -801,7 +801,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private writeTupleElements(tupleFields: Array<[Field, Value]>): boolean {
+    private writeTupleElements(tupleFields: Array<[Field, reflect.Value]>): boolean {
         const FIELD_VALUE = 1
 
         let fieldDumped = false
@@ -941,7 +941,7 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+        const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -998,7 +998,7 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeClassFields(writableFields: Array<[Field, Value]>): boolean {
+    private writeClassFields(writableFields: Array<[Field, reflect.Value]>): boolean {
         const FIELD_TYPE = 0
         const FIELD_VALUE = 1
 
@@ -1007,7 +1007,7 @@ class JSONWriter {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
             const objField = fieldTypeValuePair[0] as Field
-            const objFieldValue = fieldTypeValuePair[1] as Value
+            const objFieldValue = fieldTypeValuePair[1] as reflect.Value
 
             const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
             fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
@@ -1016,18 +1016,18 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private checkSameRename(field: Field, fields: Array<[Field, Value]>): boolean {
-        return fields.some((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+    private checkSameRename(field: Field, fields: Array<[Field, reflect.Value]>): boolean {
+        return fields.some((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
             => {return value[0].getName() == field.getName()});
     }
 
-    private findKeyIndex(field: Field, fields: Array<[Field, Value]>): number {
-        return fields.findIndex((value: [Field, Value], index: number, array:Array<[Field, Value]>)
+    private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
+        return fields.findIndex((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
             => {return value[0].getName() == field.getName()});
     }
 
-    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, Value]> {
-        const writableFields = new Array<[Field, Value]>()
+    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
+        const writableFields = new Array<[Field, reflect.Value]>()
         let hasJsonIgnore: boolean = false
         let fieldRename : string | undefined = undefined
 
@@ -1057,7 +1057,7 @@ class JSONWriter {
 
                 const fieldValue = classValue.getFieldByName(fieldName)
 
-                const fieldTypeValuePair: [Field, Value] = [field, fieldValue]
+                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
                 writableFields.push(fieldTypeValuePair)
             }
         } else {
@@ -1083,7 +1083,7 @@ class JSONWriter {
 
                 const fieldValue = classValue.getField(fieldIdx)
 
-                const fieldTypeValuePair: [Field, Value] = [field, fieldValue]
+                const fieldTypeValuePair: [Field, reflect.Value] = [field, fieldValue]
                 if (fieldRename != undefined || index == -1) {
                     writableFields.push(fieldTypeValuePair)
                 } else {
@@ -1135,7 +1135,7 @@ class JSONWriter {
         this.buffer.append("]")
     }
 
-    private writeArrayElementValue(elemValue: Value, elemIndex: int): void {
+    private writeArrayElementValue(elemValue: reflect.Value, elemIndex: int): void {
         this.writeObjectsArrayElement(elemValue.getData(), elemIndex)
     }
 
@@ -1720,11 +1720,11 @@ class JSONValueParser {
     }
 
     private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
-        classVal.setFieldByName(fieldName, Value.of(fieldVal))
+        classVal.setFieldByName(fieldName, reflect.Value.of(fieldVal))
     }
 
     private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
-        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, Value.of(fv)) }
+        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, reflect.Value.of(fv)) }
 
         if (this.reviver != undefined) {
             setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: NullishType): void => {
@@ -1732,13 +1732,13 @@ class JSONValueParser {
 
                 // setFieldByName doesn't allow null/undefined values
                 if (revivedVal != null) {
-                    classVal.setFieldByName(fieldName, Value.of(revivedVal))
+                    classVal.setFieldByName(fieldName, reflect.Value.of(revivedVal))
                 }
             }
         }
 
         let obj = classType.make()
-        let classVal = Value.of(obj) as ClassValue
+        let classVal = reflect.Value.of(obj) as ClassValue
         let hasJsonParseIgnore: boolean = false
         let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()

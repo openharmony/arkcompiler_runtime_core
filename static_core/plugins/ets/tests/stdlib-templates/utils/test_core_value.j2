@@ -20,16 +20,16 @@ function main(): int {
     let actualValue : {{.item.value_name}}Value;
     {% for init_value in item.init_values %}
       variable = {{.init_value}};
-      actualValue = Value.of(variable) as {{.item.value_name}}Value;
+      actualValue = reflect.Value.of(variable) as {{.item.value_name}}Value;
       {% if item.primitive %}
       testResult = checkTestResult(actualValue.getValueData() as {{.item.name}}, variable as {{.item.name}});
       {% else %}
       testResult = checkTestResult(actualValue.getData() as {{.item.name}}, variable as {{.item.name}});
       {% endif %}
-      printTestVerdict(testResult, "Value.of({{.item.name}}).getData()");
+      printTestVerdict(testResult, "reflect.Value.of({{.item.name}}).getData()");
       failCounter += testResult;
       testResult = checkTestResult(actualValue.getType(), Type.of(variable));
-      printTestVerdict(testResult, "Value.of({{.item.name}}}).getType() == {{.item.name}}");
+      printTestVerdict(testResult, "reflect.Value.of({{.item.name}}}).getType() == {{.item.name}}");
       failCounter += testResult;
     {% endfor %}
     if (failCounter > 0) return 1

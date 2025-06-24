@@ -63,7 +63,7 @@ export class Object {
     * @returns result of the conversion
     */
     public toString(): String {
-        return Value.of(this).toString()
+        return reflect.Value.of(this).toString()
     }
 
     /**
@@ -72,7 +72,7 @@ export class Object {
     * @returns result of the conversion
     */
     public toLocaleString(): String {
-        return Value.of(this).toLocaleString()
+        return reflect.Value.of(this).toLocaleString()
     }
 
     /**
@@ -160,7 +160,7 @@ export class Object {
             }
             return res
         } else if (t instanceof ArrayType) {
-            const av = Value.of(o) as ArrayValue
+            const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
                 return new string[0]
@@ -232,7 +232,7 @@ export class Object {
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
-            const cv = Value.of(o) as ClassValue
+            const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
                 return new NullishType[0]
             }
@@ -244,7 +244,7 @@ export class Object {
             }
             return res
         } else if (t instanceof ArrayType) {
-            const av = Value.of(o) as ArrayValue
+            const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
                 return new NullishType[0]
@@ -321,7 +321,7 @@ export class Object {
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
-            const cv = Value.of(o) as ClassValue
+            const cv = reflect.Value.of(o) as ClassValue
             if (cv.getFieldsNum() == 0) {
                 return new NullishEntryType[0]
             }
@@ -333,7 +333,7 @@ export class Object {
             }
             return res
         } else if (t instanceof ArrayType) {
-            const av = Value.of(o) as ArrayValue
+            const av = reflect.Value.of(o) as ArrayValue
             const len = av.getLength()
             if (len == 0) {
                 return new NullishEntryType[0]
@@ -444,7 +444,7 @@ export class Object {
         }
         const t = Type.of(this)
         if (t instanceof ArrayType) {
-            const av = Value.of(this) as ArrayValue
+            const av = reflect.Value.of(this) as ArrayValue
             const len = av.getLength()
             const idx = index.toLong()
             return (0 <= idx && idx < len)

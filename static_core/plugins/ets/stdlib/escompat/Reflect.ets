@@ -50,7 +50,7 @@ export class Reflect {
         const t = Type.of(target)
         if (t instanceof ClassType) {
             if (t.hasField(key)) {
-                const classVal = Value.of(target) as ClassValue
+                const classVal = reflect.Value.of(target) as ClassValue
                 return classVal.getFieldByName(key).getData()
             } else {
                 const getter = Reflect.findMethod(t, Reflect.GETTER_PREFIX + key)
@@ -62,7 +62,7 @@ export class Reflect {
             }
         } else if (t instanceof ArrayType) {
             if (key == ARRAY_LENGTH_MEMBER_NAME) {
-                return new Number((Value.of(target) as ArrayValue).getLength())
+                return new Number((reflect.Value.of(target) as ArrayValue).getLength())
             }
         } else if (t instanceof LambdaType) {
             if (key == FUNCTION_LENGTH_MEMBER_NAME) {
@@ -122,7 +122,7 @@ export class Reflect {
         }
         let t = Type.of(target)
         if (t instanceof ArrayType) {
-            let av = Value.of(target) as ArrayValue
+            let av = reflect.Value.of(target) as ArrayValue
             return __narrowAny<object | undefined>(av.getElement(index.toLong()).getData())
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
@@ -152,13 +152,13 @@ export class Reflect {
         if (!Reflect.has(target, key)) {
             return false
         }
-        let v = Value.of(target)
+        let v = reflect.Value.of(target)
         let vt = v.getType()
         if (vt instanceof ClassType) {
             let cv = v as ClassValue
             if (vt.hasField(key)) {
                 try {
-                    cv.setFieldByName(key, Value.of(value))
+                    cv.setFieldByName(key, reflect.Value.of(value))
                     return true
                 } catch (e: Error) {
                     return false
@@ -215,7 +215,7 @@ export class Reflect {
     * @returns a boolean indicating whether or not setting the element was successful
     */
     public static set(target: Object, index: number, value: Object): Boolean {
-        let v = Value.of(target)
+        let v = reflect.Value.of(target)
         let vt = v.getType()
         if (vt instanceof ArrayType) {
             if (!Reflect.has(target, index)) {
@@ -223,7 +223,7 @@ export class Reflect {
             }
             let av = v as ArrayValue
             try {
-                av.setElement(index.toLong(), Value.of(value))
+                av.setElement(index.toLong(), reflect.Value.of(value))
             } catch (e: Error) {
                 return false
             }
