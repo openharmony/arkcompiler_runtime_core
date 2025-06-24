@@ -3632,7 +3632,7 @@ SRC_GRAPH(SplitDeoptimizationP8, Graph *graph)
     }
 }
 
-SRC_GRAPH(SplitDeoptimizationN1, Graph *graph, uint32_t callInstId, uint32_t ss1Id, uint32_t ss2Id)
+SRC_GRAPH(SplitDeoptimizationP9, Graph *graph, uint32_t callInstId, uint32_t ss1Id, uint32_t ss2Id)
 {
     GRAPH(graph)
     {
@@ -3662,6 +3662,226 @@ SRC_GRAPH(SplitDeoptimizationN1, Graph *graph, uint32_t callInstId, uint32_t ss1
         BASIC_BLOCK(4U, -1L)
         {
             INST(16U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP10, Graph *graph, uint32_t callInstId, uint32_t ss1Id, uint32_t ss2Id)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInstId, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ss1Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(ss2Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, ss1Id);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, ss2Id);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(16U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP10, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState);
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(17U, Opcode::SaveState);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 17U);
+            INST(18U, Opcode::SaveState).Inputs(7U).SrcVregs({1U});
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 18U);
+
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(11U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, 11U);
+            INST(13U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, 13U);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(16U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationP11, Graph *graph, uint32_t callInst1Id, uint32_t callInst2Id, uint32_t ssId)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInst2Id, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ssId, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInst1Id, Opcode::CallStatic).v0id().InputsAutoType(ssId).Inlined();
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(ssId);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, ssId);
+            INST(16U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(17U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(SplitDeoptimizationP11, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::SaveState);
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(17U, Opcode::SaveState);
+            INST(22U, Opcode::NewObject).ref().Inputs(6U, 17U);
+            INST(18U, Opcode::SaveState).Inputs(22U).SrcVregs({1U});
+            INST(20U, Opcode::NewObject).ref().Inputs(3U, 18U);
+
+            INST(9U, Opcode::SaveState).Inputs(20U, 22U).SrcVregs({0U, 1U});
+            INST(19U, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(11U, Opcode::SaveState).Inputs(20U, 22U).SrcVregs({0U, 1U});
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(11U).Inlined();
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(11U);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, 11U);
+            INST(16U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(21U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationN1, Graph *graph, uint32_t callInst1Id, uint32_t callInst2Id, uint32_t ss1Id,
+          uint32_t ss2Id)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInst1Id, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ss1Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInst2Id, Opcode::CallStatic).v0id().InputsAutoType(ss1Id).Inlined();
+            INST(ss2Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, ss2Id);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, ss1Id);
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(ss1Id);
+            INST(16U, Opcode::ReturnInlined).v0id().Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(17U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+SRC_GRAPH(SplitDeoptimizationN2, Graph *graph, uint32_t callInstId, uint32_t ssId)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(6U, Opcode::LoadAndInitClass).ref().Inputs(5U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInstId, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ssId, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(15U, Opcode::ReturnInlined).v0id().Inputs(9U);
+            INST(14U, Opcode::DeoptimizeIf).Inputs(0U, ssId);
+            INST(16U, Opcode::SaveState).SrcVregs({4U, 7U}).Inputs(0U, 1U);
+            INST(17U, Opcode::NullCheck).ref().Inputs(7U, 16U);
+            INST(18U, Opcode::LoadObject).u64().Inputs(17U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(13U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -3744,7 +3964,7 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP7)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-// Positive Test 8 : Deoptimization inst is the last inst in one basic block
+// Positive Test 8 - Deoptimization inst is the last inst in one basic block
 TEST_F(EscapeAnalysisTest, SplitDeoptimizationP8)
 {
     src_graph::SplitDeoptimizationP8::CREATE(GetGraph());
@@ -3755,22 +3975,86 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP8)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-// Negative Test 1 : Deoptimization's savestate inst is in an inlined func
-TEST_F(EscapeAnalysisTest, SplitDeoptimizationN1)
+// Positive Test 9 - Deoptimization's savestate inst is in a matched inlined func
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP9)
 {
     static constexpr uint32_t CALL_INST_ID = 10;
     static constexpr uint32_t SS1_ID = 11;
     static constexpr uint32_t SS2_ID = 13;
-    src_graph::SplitDeoptimizationN1::CREATE(GetGraph(), CALL_INST_ID, SS1_ID, SS2_ID);
+    src_graph::SplitDeoptimizationP9::CREATE(GetGraph(), CALL_INST_ID, SS1_ID, SS2_ID);
     INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 10 - Just no inlined call inst is between deopt inst and its savestate inst
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP10)
+{
+    static constexpr uint32_t CALL_INST_ID = 10;
+    static constexpr uint32_t SS1_ID = 11;
+    static constexpr uint32_t SS2_ID = 13;
+    src_graph::SplitDeoptimizationP10::CREATE(GetGraph(), CALL_INST_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP10::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Positive Test 11 - Call.Inlined and ReturnInlined is match between deopt inst and its savestate inst
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationP11)
+{
+    static constexpr uint32_t CALL_INST1_ID = 10;
+    static constexpr uint32_t CALL_INST2_ID = 18;
+    static constexpr uint32_t SS_ID = 11;
+    src_graph::SplitDeoptimizationP11::CREATE(GetGraph(), CALL_INST1_ID, CALL_INST2_ID, SS_ID);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SplitDeoptimizationP11::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Negative Test 1 - Call.Inlined is mismatch between deopt inst and its savestate inst
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationN1)
+{
+    static constexpr uint32_t CALL_INST1_ID = 10;
+    static constexpr uint32_t CALL_INST2_ID = 18;
+    static constexpr uint32_t SS1_ID = 11;
+    static constexpr uint32_t SS2_ID = 13;
+    src_graph::SplitDeoptimizationN1::CREATE(GetGraph(), CALL_INST1_ID, CALL_INST2_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST1_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
 
     EscapeAnalysis::DecomposeAnalysis da {GetGraph()};
 
     auto graph = CreateEmptyGraph();
-    src_graph::SplitDeoptimizationN1::CREATE(graph, CALL_INST_ID, SS1_ID, SS2_ID);
-    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
-    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    src_graph::SplitDeoptimizationN1::CREATE(graph, CALL_INST1_ID, CALL_INST2_ID, SS1_ID, SS2_ID);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+// Negative Test 2 - ReturnInlined is mismatch between deopt inst and its savestate inst
+TEST_F(EscapeAnalysisTest, SplitDeoptimizationN2)
+{
+    static constexpr uint32_t CALL_INST_ID = 10;
+    static constexpr uint32_t SS_ID = 11;
+    src_graph::SplitDeoptimizationN2::CREATE(GetGraph(), CALL_INST_ID, SS_ID);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+
+    EscapeAnalysis::DecomposeAnalysis da {GetGraph()};
+
+    auto graph = CreateEmptyGraph();
+    src_graph::SplitDeoptimizationN2::CREATE(graph, CALL_INST_ID, SS_ID);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
