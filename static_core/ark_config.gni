@@ -95,8 +95,20 @@ ark_plugin_options_yaml = "$concat_gen_dir/plugin_options.yaml"
 isa_gen_dir = get_label_info("$ark_root/isa:isa_combine", "target_gen_dir")
 ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
+# chipset will set runtime_core_enable_codegen as false, not need codegen for it
+declare_args() {
+    runtime_core_enable_codegen = true
+}
+
 enable_irtoc = true
 enable_codegen = true
+if (!runtime_core_enable_codegen) {
+  # Disable irtoc and codegen for:
+  # - !runtime_core_enable_codegen in chipset
+  enable_irtoc = false
+  enable_codegen = false
+}
+
 if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
