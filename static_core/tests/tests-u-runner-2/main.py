@@ -73,6 +73,9 @@ def main_cycle(config: Config, logger: Log) -> int:
 
     failed_tests = 0
 
+    if config.general.coverage.use_lcov and config.general.coverage.clean_gcda_before_run:
+        runner.test_env.coverage.lcov_tool.clear_gcda_files()
+
     if config.test_suite.repeats_by_time == 0:
         for repeat in range(1, config.test_suite.repeats + 1):
             repeat_str = f"Run #{repeat} of {config.test_suite.repeats}"
@@ -108,7 +111,7 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     Log.all(logger, pretty_divider())
     failed_tests += runner.summarize()
     Log.default(logger, f"{repeat_str}: Runner {runner.name}: {failed_tests} failed tests")
-    if config.general.coverage.use_llvm_cov:
+    if config.general.coverage.use_llvm_cov or config.general.coverage.use_lcov:
         runner.create_coverage_html()
     return failed_tests
 

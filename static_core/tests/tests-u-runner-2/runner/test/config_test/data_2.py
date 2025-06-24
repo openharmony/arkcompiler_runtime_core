@@ -100,6 +100,11 @@ args = {
     'runner.enable-time-report': True,
     'runner.time-edges': [1, 10, 100, 500],
     'runner.use-llvm-cov': True,
-    'runner.profdata-files-dir': Path.cwd().resolve().as_posix(),
-    'runner.coverage-html-report-dir': Path.cwd().resolve().as_posix()
+    'runner.use-lcov': True,
+    'runner.coverage-per-binary': True,
+    'runner.profdata-files-dir': Path.cwd().resolve(),
+    'runner.coverage-html-report-dir': Path.cwd().resolve(),
+    'runner.llvm-cov-exclude': ['/tmp', '*.h'],
+    'runner.lcov-exclude': ['/tmp', '*.h'],
+    'runner.clean-gcda-before-run': True
 }

@@ -76,12 +76,26 @@ class TestSuiteConfigTest1(unittest.TestCase):
 
     def test_args_urunner(self) -> None:
         args = [
-            "--show-progress", "--verbose", "short",
-            "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
+            "--show-progress",
+            "--verbose", "short",
+            "--processes", "12",
+            "--detailed-report",
+            "--detailed-report-file", "my-report",
             "--report-dir", "my-report-dir",
-            "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
+            "--verbose-filter", "ignored",
+            "--enable-time-report",
+            "--qemu", "arm64",
             "--report-dir", "my-report-dir",
-            "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
+            "--use-llvm-cov",
+            "--use-lcov",
+            "--llvm-cov-exclude", "/tmp",
+            "--llvm-cov-exclude", "*.h",
+            "--lcov-exclude", "/tmp",
+            "--lcov-exclude", "*.h",
+            "--profdata-files-dir", ".", 
+            "--coverage-html-report-dir", ".",
+            "--coverage-per-binary",
+            "--clean-gcda-before-run",
             "--time-edges", "1,10,100,500"]
 
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)

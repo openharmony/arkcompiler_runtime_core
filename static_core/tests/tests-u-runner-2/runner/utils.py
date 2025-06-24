@@ -150,13 +150,25 @@ def read_file(file_path: Path | str) -> str:
     return text
 
 
-def write_2_file(file_path: Path | str, content: str) -> None:
+def get_opener(mode: int) -> Callable[[str | Path, int], int]:
+    def opener(path_name: str | Path, flags: int) -> int:
+        return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+    return opener
+
+
+def write_2_file(file_path: Path | str, content: str | list, mode: int = 0o644) -> None:
     """
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
     makedirs(path.dirname(file_path), exist_ok=True)
-    with open(file_path, mode='w+', encoding="utf-8") as f_handle:
-        f_handle.write(content)
+
+    processed_content = content
+    if isinstance(content, list):
+        processed_content = '\n'.join(str(entity) for entity in content)
+
+    custom_opener = get_opener(mode)
+    with open(file_path, mode='w+', encoding='utf-8', opener=custom_opener) as f_handle:
+        f_handle.write(str(processed_content))
 
 
 def purify(line: str) -> str:
@@ -296,11 +308,10 @@ class UiUpdater:
         self.__in_progress(self.__timer, future)
 
 
-def make_dir_if_not_exist(arg: str) -> str:
-    if not path.isdir(path.abspath(arg)):
-        makedirs(arg)
-
-    return str(path.abspath(arg))
+def make_dir_if_not_exist(dir_path: str) -> Path:
+    path_obj = Path(dir_path).absolute()
+    path_obj.mkdir(parents=True, exist_ok=True)
+    return path_obj
 
 
 def is_file(arg: str) -> str:
