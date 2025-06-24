@@ -2959,7 +2959,7 @@ export final class UnionType extends Type {
         throw new Error("not implemented")
     }
 
-    public make(defaultValue: Value): Object {
+    public make(defaultValue: reflect.Value): Object {
         // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }

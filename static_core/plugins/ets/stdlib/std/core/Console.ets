@@ -111,7 +111,7 @@ export final class Console {
     }
 
     private static NullishTypeToPrint(o: NullishType): String {
-        return Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH)
+        return reflect.Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH)
     }
 
     /**
@@ -779,7 +779,7 @@ class DataFrame {
     private static getObjectInfoForTable(obj: NullishType): Map<string, string> {
         const mapping = new Map<string, string>();
         const objType = Type.of(obj);
-        const objValue = Value.of(obj);
+        const objValue = reflect.Value.of(obj);
 
         // Handle primitive types
         if (obj === null) {

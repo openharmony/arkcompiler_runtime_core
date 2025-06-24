@@ -132,6 +132,8 @@ native function ValueAPIGetElementLong(obj: Object, i: long): long
 
 native function ValueAPIGetElementObject(obj: Object, i: long): Object
 
+export namespace reflect {
+
 /**
  * Represents abstract value
  */
@@ -266,11 +268,13 @@ export abstract class Value extends Object {
     public abstract toPrint(depth: int): string
 }
 
+} // namespace reflect
+
 
 /**
  * Represents value of object of class type
  */
-export final class ClassValue extends Value {
+export final class ClassValue extends reflect.Value {
     private typ: ClassType
     private data: Object
 
@@ -303,9 +307,9 @@ export final class ClassValue extends Value {
      *
      * @throws error when i greater then field's number
      *
-     * @returns field {@link Value}
+     * @returns field {@link reflect.Value}
      */
-    public getField(i: long): Value {
+    public getField(i: long): reflect.Value {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -330,10 +334,10 @@ export final class ClassValue extends Value {
                 return new LongValue(ft as LongType, ValueAPIGetFieldLong(this.data, i))
             }
         }
-        return Value.of(ValueAPIGetFieldObject(this.data, i))
+        return reflect.Value.of(ValueAPIGetFieldObject(this.data, i))
     }
 
-    public getFieldByName(name: string): Value {
+    public getFieldByName(name: string): reflect.Value {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -359,7 +363,7 @@ export final class ClassValue extends Value {
             }
             throw new AssertionError("Type " + f.getType() + " is not a (un)boxed primitive")
         }
-        return Value.of(ValueAPIGetFieldByNameObject(this.data, name))
+        return reflect.Value.of(ValueAPIGetFieldByNameObject(this.data, name))
     }
 
     /**
@@ -367,12 +371,12 @@ export final class ClassValue extends Value {
      *
      * @param name of field
      *
-     * @param val @{link Value}
+     * @param val @{link reflect.Value}
      *
      * @throws error if this value doesn't have field with {@link name}
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setFieldByName(name: string, val: Value) {
+    public setFieldByName(name: string, val: reflect.Value) {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -446,7 +450,7 @@ export final class ClassValue extends Value {
         }
     }
 
-    private isAssignableToObject(v: Value): boolean {
+    private isAssignableToObject(v: reflect.Value): boolean {
         return v instanceof ClassValue
             || v instanceof LambdaValue
             || v instanceof StringValue
@@ -458,12 +462,12 @@ export final class ClassValue extends Value {
      *
      * @param i of field
      *
-     * @param val @{link Value}
+     * @param val @{link reflect.Value}
      *
      * @throws error if this value doesn't have field with {@link index}'th index
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setField(i: long, val: Value) {
+    public setField(i: long, val: reflect.Value) {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -550,7 +554,7 @@ export final class ClassValue extends Value {
 /**
  * Represents array value
  */
-export final class ArrayValue extends Value {
+export final class ArrayValue extends reflect.Value {
     private typ: ArrayType
     private data: Object
 
@@ -571,7 +575,7 @@ export final class ArrayValue extends Value {
         return ValueAPIGetArrayLength(this.data)
     }
 
-    public getElement(i: long): Value {
+    public getElement(i: long): reflect.Value {
         const et = this.typ.getElementType()
         if (!et.isReference()) {
             if (et instanceof BooleanType) {
@@ -593,7 +597,7 @@ export final class ArrayValue extends Value {
             }
             throw new AssertionError("Type " + et + " is not a (un)boxed primitive")
         }
-        return Value.of(ValueAPIGetElementObject(this.data, i))
+        return reflect.Value.of(ValueAPIGetElementObject(this.data, i))
     }
 
     /**
@@ -601,11 +605,11 @@ export final class ArrayValue extends Value {
      *
      * @param i index
      *
-     * @param val {@link Value} to be set
+     * @param val {@link reflect.Value} to be set
      *
      * @throws error if of {@link val} cannot be assign to i'th element of array
      */
-    public setElement(i: long, val: Value) {
+    public setElement(i: long, val: reflect.Value) {
         let et = this.typ.getElementType()
         let vt = val.getType()
         if (!et.assignableFrom(vt)) {
@@ -688,7 +692,7 @@ export final class ArrayValue extends Value {
     }
 }
 
-export final class LambdaValue extends Value {
+export final class LambdaValue extends reflect.Value {
     private typ: LambdaType
     private data: Object
 
@@ -726,7 +730,7 @@ export final class LambdaValue extends Value {
 /**
  * Represents boolean value
  */
-export final class BooleanValue extends Value {
+export final class BooleanValue extends reflect.Value {
     private typ: BooleanType
     private data: boolean
 
@@ -763,7 +767,7 @@ export final class BooleanValue extends Value {
 /**
  * Represents byte value
  */
-export final class ByteValue extends Value {
+export final class ByteValue extends reflect.Value {
     private typ: ByteType
     private data: byte
 
@@ -800,7 +804,7 @@ export final class ByteValue extends Value {
 /**
  * Represents short value
  */
-export final class ShortValue extends Value {
+export final class ShortValue extends reflect.Value {
     private typ: ShortType
     private data: short
 
@@ -837,7 +841,7 @@ export final class ShortValue extends Value {
 /**
  * Represents char value
  */
-export final class CharValue extends Value {
+export final class CharValue extends reflect.Value {
     private typ: CharType
     private data: char
 
@@ -874,7 +878,7 @@ export final class CharValue extends Value {
 /**
  * Represents int value
  */
-export final class IntValue extends Value {
+export final class IntValue extends reflect.Value {
     private typ: IntType
     private data: int
 
@@ -911,7 +915,7 @@ export final class IntValue extends Value {
 /**
  * Represents float value
  */
-export final class FloatValue extends Value {
+export final class FloatValue extends reflect.Value {
     private typ: FloatType
     private data: float
 
@@ -948,7 +952,7 @@ export final class FloatValue extends Value {
 /**
  * Represents double value
  */
-export final class DoubleValue extends Value {
+export final class DoubleValue extends reflect.Value {
     private typ: DoubleType
     private data: double
 
@@ -985,7 +989,7 @@ export final class DoubleValue extends Value {
 /**
  * Represents long value
  */
-export final class LongValue extends Value {
+export final class LongValue extends reflect.Value {
     private typ: LongType
     private data: long
 
@@ -1022,7 +1026,7 @@ export final class LongValue extends Value {
 /**
  * Represents string value
  */
-export final class StringValue extends Value {
+export final class StringValue extends reflect.Value {
     private typ: StringType
     private data: string
 
@@ -1055,7 +1059,7 @@ export final class StringValue extends Value {
 /**
  * Represents null value
  */
-export final class NullValue extends Value {
+export final class NullValue extends reflect.Value {
     public static readonly INSTANCE = new NullValue()
 
     public override getType(): Type {
@@ -1084,7 +1088,7 @@ export final class NullValue extends Value {
 /**
  * Represents undefined value
  */
-export final class UndefinedValue extends Value {
+export final class UndefinedValue extends reflect.Value {
     public static readonly INSTANCE = new UndefinedValue()
 
     public override getType(): Type {
@@ -1113,7 +1117,7 @@ export final class UndefinedValue extends Value {
 /**
  * Represents void value
  */
-export final class VoidValue extends Value {
+export final class VoidValue extends reflect.Value {
     public static readonly INSTANCE = new VoidValue()
 
     public override getType(): Type {

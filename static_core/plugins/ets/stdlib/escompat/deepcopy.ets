@@ -140,7 +140,7 @@ class DeepCloner {
 		const objCopy = objType.make()
 		this.copies.set(obj, objCopy)
 
-		const objCopyValue = Value.of(objCopy) as ClassValue
+		const objCopyValue = reflect.Value.of(objCopy) as ClassValue
 
 		const objEntries = Object.entries(obj)
 		for (const objEntry of objEntries) {
@@ -149,7 +149,7 @@ class DeepCloner {
 
 			const objFieldValueCopy = this.clone<Object>(__narrowAny(objEntry![DeepCloner.OBJ_ENTRY_VALUE]))
 			if (field.getType().assignableFrom(Type.of(objFieldValueCopy))) {
-				objCopyValue.setFieldByName(fieldName as string, Value.of(objFieldValueCopy) as Value)
+				objCopyValue.setFieldByName(fieldName as string, reflect.Value.of(objFieldValueCopy) as reflect.Value)
 			}
 		}
 
@@ -164,18 +164,18 @@ class DeepCloner {
 			return array
 		}
 
-		const arrayValue = Value.of(array) as ArrayValue
+		const arrayValue = reflect.Value.of(array) as ArrayValue
 		const arrayLength: int = arrayValue.getLength().toInt()
 
 		const arrayCopy = arrayType.make(arrayLength)
 		this.copies.set(array, arrayCopy)
 
-		const arrayCopyValue = Value.of(arrayCopy) as ArrayValue
+		const arrayCopyValue = reflect.Value.of(arrayCopy) as ArrayValue
 		for (let i = 0; i < arrayLength; i++) {
 			const arrayElementValue = arrayValue.getElement(i)
 
 			const arrayElementCopy = this.clone<Object>(__narrowAny(arrayElementValue.getData()))
-			arrayCopyValue.setElement(i, Value.of(__narrowAny(arrayElementCopy)))
+			arrayCopyValue.setElement(i, reflect.Value.of(__narrowAny(arrayElementCopy)))
 		}
 
 		this.currentDepth--

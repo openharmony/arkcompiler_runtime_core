@@ -57,7 +57,7 @@ function __value_rewrap_builtin_array(a: NullishType): NullishType {
   if (!(Type.of(a) instanceof ArrayType)) {
     return a;
   }
-  return new ArrayValueIterator(Value.of(a) as ArrayValue)
+  return new ArrayValueIterator(reflect.Value.of(a) as ArrayValue)
 }
 
 class IterableData {
@@ -171,8 +171,8 @@ function __check_value(a: NullishType, b: NullishType): void {
     return
   }
 
-  __fail_description += "\ngot " + Value.of(a).toPrint(10) + " of type " + Type.of(a).toString();
-  __fail_description += "\nexp " + Value.of(b).toPrint(10) + " of type " + Type.of(b).toString();
+  __fail_description += "\ngot " + reflect.Value.of(a).toPrint(10) + " of type " + Type.of(a).toString();
+  __fail_description += "\nexp " + reflect.Value.of(b).toPrint(10) + " of type " + Type.of(b).toString();
 
   __fail();
 }
