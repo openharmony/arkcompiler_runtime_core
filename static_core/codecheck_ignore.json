@@ -48,6 +48,7 @@
   "plugins/ets/runtime/interpreter/any_opcodes.inc": {"G.INC.02": "*"},
   "plugins/ets/runtime/ani/docs/ani.md": "*",
   "plugins/ets/runtime/napi": "*",
+  "plugins/ets/runtime/interop_js/logger.h": "*",
   "plugins/ets/sdk/api": "*",
   "plugins/ets/sdk/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/snippet_verifier": "*",

@@ -16,15 +16,17 @@
 
 import os
 import shutil
+import sys
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
-from typing import ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple, cast
 from unittest import TestCase
 from unittest.mock import patch
 
 import pytz
 
+from runner import utils
 from runner.code_coverage.coverage_manager import CoverageManager
 from runner.enum_types.params import TestEnv
 from runner.options.cli_options import get_args
@@ -241,6 +243,180 @@ class OptionsTest(TestCase):
                     self.check_boot_panda_files(
                         ['intermediate/test2_dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
                         boot_panda_files)
+
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222223")
+    def test_reproduce_str_short_cli(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+
+        short_cli = test.get_short_cli()
+        test_data = {"workflow": sys.argv[1],
+                     "test_suite": sys.argv[2],
+                     "test-file": test.test_id}
+
+        self.assertIn(test.test_id, short_cli)
+        self.assertIn(test_data["workflow"], short_cli)
+        self.assertIn(test_data["test_suite"], short_cli)
+
+        # check there are no additional unexpected args in short cli
+        short_cli_items = [item for item in short_cli.split(" ")[1:] if item]
+
+        for val in test_data.values():
+            short_cli_items.remove(val)
+
+        short_cli_items.remove("--test-file")
+
+        assert len(short_cli_items) == 0
+
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222224")
+    def test_reproduce_str_full_cli(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+
+        full_cli = test.get_full_cli()
+        workflow_name = sys.argv[1]
+        test_suite_name = sys.argv[2]
+
+        self.assertIn(test.test_id, full_cli)
+        self.assertIn(workflow_name, full_cli)
+        self.assertIn(test_suite_name, full_cli)
+
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--force-generate", "--extension=ets"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222225")
+    def test_reproduce_str_redefine_option_from_ts(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets",
+        )
+
+        short_cli = test.get_short_cli()
+        full_cli = test.get_full_cli()
+        extension = sys.argv[4]
+
+        self.assertIn(extension, short_cli)
+        self.assertIn(" ".join(sys.argv[4].split("=")), full_cli)
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda2", "test_suite1", "--force-generate", "--extension=ets",
+                        "--es2panda-timeout=60"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222226")
+    def test_reproduce_str_redefine_option_from_wf(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets",
+        )
+
+        short_cli = test.get_short_cli()
+        full_cli = test.get_full_cli()
+        panda_timeout = sys.argv[5]
+        self.assertIn(panda_timeout, short_cli)
+
+        timeout = sys.argv[5].split("=")
+        self.assertIn(" ".join(timeout), full_cli)
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda2", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222227")
+    def test_reproduce_str_full_cli_option_default(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets",
+        )
+
+        full_cli = test.get_full_cli()
+        workflow_name = sys.argv[1] + ".yaml"
+        workflow_data = utils.load_config(OptionsTest.data_folder / workflow_name)
+
+        for key, val in cast(dict, workflow_data['parameters']).items():
+            if not val:
+                continue
+
+            if str(val).startswith("$"):
+                self.assertIn(key, full_cli)
+            else:
+                self.assertIn(f"--{key} {val}", full_cli)
 
         # clear up
         shutil.rmtree(work_dir.root, ignore_errors=True)

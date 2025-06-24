@@ -370,7 +370,7 @@ def get_config_test_suite_folder() -> Path:
 
 
 def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
-    __cfg_type = "type"
+    cfg_type = "type"
     config_from_file = {}
     if config_path is not None:
         with open(config_path, encoding="utf-8") as stream:
@@ -379,8 +379,8 @@ def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
             except yaml.YAMLError as exc:
                 message = f"{exc}, {yaml.YAMLError}"
                 raise YamlException(message) from exc
-        if __cfg_type not in config_from_file:
-            error = f"Cannot detect type of config '{config_path}'. Have you specified key '{__cfg_type}'?"
+        if cfg_type not in config_from_file:
+            error = f"Cannot detect type of config '{config_path}'. Have you specified key '{cfg_type}'?"
             raise YamlException(error)
     return config_from_file
 
@@ -434,3 +434,55 @@ def detect_operating_system() -> OSKind:
     if system == "windows":
         return OSKind.WIN
     return OSKind.MAC
+
+
+def delete_filtering_options_nested_keys(params: dict) -> dict:
+    filtering_options = ["--filter", "--groups", "--group-number", "--chapters", "--test-list"]
+    nested_keys = ["--es2panda-args", "--ark-args"]
+    for option in filtering_options + nested_keys:
+        params.pop(option, None)
+    return params
+
+
+def convert_dict_params_into_list(params: dict) -> list:
+    output_list = []
+
+    for key, val in params.items():
+        if not isinstance(val, list):
+            output_list.extend([f'{key}', val])
+            continue
+
+        for item in val:
+            if item and not check_item_in_params(params, item):
+                output_list.append(f"{key}={item}")
+
+    output_list = replace_special_keys(output_list)
+    return [str(item) for item in output_list]
+
+
+def check_item_in_params(params: dict, item: str | list[str]) -> bool:
+    items = [item] if isinstance(item, str) else item
+
+    for sub_item in items:
+        if '=' in sub_item:
+            key, _ = sub_item.split('=', 1)
+        else:
+            key = sub_item
+
+        if key in params:
+            return True
+
+    return False
+
+
+def replace_special_keys(params_list: list) -> list:
+    keys_to_replace = {'--es2panda-full-args': '--es2panda-args',
+                       '--ark-full-args': '--ark-args',
+                       '--ark-extra-args': '--ark-args'}
+
+    for i, param in enumerate(params_list):
+        if isinstance(param, str):
+            for key, val in keys_to_replace.items():
+                params_list[i] = param.replace(key, val) if key in param else param
+
+    return params_list

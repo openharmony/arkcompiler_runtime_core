@@ -127,7 +127,6 @@ class TestSuiteConfigTest2(unittest.TestCase):
         actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         self.assertTrue(actual.get('test_suite2.parameters.with-js'))
 
-
     def test_option_with_test_suite_option3(self) -> None:
         args = [
             "--validator", "a.b.c"

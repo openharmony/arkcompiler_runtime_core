@@ -38,7 +38,7 @@ class ETSOptions(IOptions):
     __COMPARE_FILES_ITERATIONS = "compare-files-iterations"
     __DEFAULT_COMPARE_FILES_ITERATIONS = 2
 
-    def __init__(self, parameters: dict[str, Any]): # type: ignore[explicit-any]
+    def __init__(self, parameters: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(parameters)
         self.__parameters = parameters
 
@@ -46,11 +46,24 @@ class ETSOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
+    def str2bool(val: str | bool) -> bool:
+        if isinstance(val, bool):
+            return val
+        if val.lower() == "true":
+            return True
+        if val.lower() == "false":
+            return False
+
+        raise argparse.ArgumentTypeError("Boolean value expected.")
+
+    @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         parser.add_argument(
             f'--{ETSOptionsConsts.FORCE_GENERATE.value}',
-            action='store_true',
+            nargs='?',
+            const=True,
             default=False,
+            type=ETSOptions.str2bool,
             dest=f"{dest}{ETSOptionsConsts.FORCE_GENERATE.value}",
             help='force generating the ETS test cases from templates')
         parser.add_argument(

@@ -65,7 +65,6 @@ class InitCLIRunnerTest(TestCase):
             if require_exist:
                 shutil.rmtree(folder, ignore_errors=True)
 
-
     @patch('sys.argv', ["runner.sh", "init", "--home"])
     @patch.dict(os.environ, {}, clear=True)
     @patch('pathlib.Path.home', lambda: InitCLIRunnerTest.local_home)

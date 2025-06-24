@@ -102,7 +102,7 @@ class WorkflowOptions(IOptions):
 
         return options_str
 
-    def get_parameter(self, key: str, default: Any | None = None) -> Any | None: # type: ignore[explicit-any]
+    def get_parameter(self, key: str, default: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
     def check_binary_artifacts(self) -> None:

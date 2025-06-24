@@ -17,7 +17,7 @@
 import argparse
 from glob import glob
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 from runner import utils
 from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
@@ -33,7 +33,6 @@ _LOGGER = Log.get_logger(__file__)
 CliOptionType = str | int | float | bool | list
 OptionType = CliOptionType | dict | Path | None
 ArgListType = list[str]
-
 
 
 class CliOptions:
@@ -400,7 +399,7 @@ class CliOptionsParser:
         self.default_test_suite_parser = default_test_suite_parser
         self.workflow_parser = workflow_parser
         self.argv = argv
-        self.full_options: dict[str, Any] = {} # type: ignore[explicit-any]
+        self.full_options: dict[str, OptionType] = {}
 
     def parse_args(self) -> None:
         usage_wf_configs = (f'WORKFLOW - workflow config name, one of '
@@ -423,7 +422,9 @@ class CliOptionsParser:
 
 
 def get_args() -> dict[str, OptionType]:
-    usage = "Urunner should be run with at least two options: WORKFLOW_NAME, TEST_SUITE"
+    usage = ("Urunner should be run with at least two options: WORKFLOW_NAME, TEST_SUITE."
+             "\nIn order to explore possible workflow and test suite options "
+             "please run 'runner.sh workflow_name test_suite_name --help'")
     parser = argparse.ArgumentParser(description="Urunner arg parser", usage=usage)
 
     parser.add_argument("workflow_name", help="Workflow name")
@@ -444,6 +445,8 @@ def get_args() -> dict[str, OptionType]:
                             parser_builder.create_parser_for_default_test_suite(),
                             workflow_parser, *args.other_args)
     cli.parse_args()
+
+    cli.full_options[f"{CliOptionsConsts.CFG_RUNNER.value}.cli_options"] = args.other_args
 
     parsed_options = cli.full_options
     parsed_options = cli_utils.restore_duplicated_options(configs_loader, parsed_options)

@@ -116,7 +116,8 @@ class TestMetadata:     # type: ignore[explicit-any]
             return cls.create_empty_metadata(path)
 
     @classmethod
-    def create_filled_metadata(cls, metadata: dict[str, Any], path: Path) -> 'TestMetadata':# type: ignore[explicit-any]
+    def create_filled_metadata(cls, metadata: dict[str, Any],       # type: ignore[explicit-any]
+                               path: Path) -> 'TestMetadata':
         metadata['tags'] = Tags(metadata.get('tags'))
         if 'assert' in metadata:
             metadata['assertion'] = metadata.get('assert')

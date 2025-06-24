@@ -65,7 +65,7 @@ class TestSuiteOptions(IOptions):
             raise InvalidConfiguration(
                 "Incorrect configuration: test suite parent is not GeneralOptions")
         self._parent: GeneralOptions = parent
-        self.__parameters: dict[str, Any] = self.__process_parameters(args) # type: ignore[explicit-any]
+        self.__parameters: dict[str, Any] = self.__process_parameters(args)  # type: ignore[explicit-any]
         self.__data = args[f"{self.__name}.data"]
         self.__default_list_root: Path = self._parent.static_core_root / 'tests' / 'tests-u-runner' / 'test-lists'
         self.__list_root: str | None = self.__data[self.__LIST_ROOT] \
@@ -168,7 +168,7 @@ class TestSuiteOptions(IOptions):
         return str(self.__parameters.get(self.__FILTER, self.__DEFAULT_FILTER))
 
     @cached_property
-    def parameters(self) -> dict[str, Any]: # type: ignore[explicit-any]
+    def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]
         return self.__parameters
 
     def extension(self, collection: CollectionsOptions | None = None) -> str:

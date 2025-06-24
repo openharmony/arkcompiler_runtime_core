@@ -72,6 +72,6 @@ steps:
             load-runtimes: ${parameters.load-runtimes}
             compiler-enable-jit: "false"
             ark-args:
-                - ${parameters.ark-full-args}
+                - ${parameters.ark-args}
                 - "--aot-files=${parameters.paoc-output-file}"
                 - "--enable-an:force"

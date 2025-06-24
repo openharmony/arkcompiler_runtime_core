@@ -373,7 +373,6 @@ class UtilASTChecker:
         _LOGGER.all(f'Failed {failed_tests} tests')
         return False
 
-
     def check_remaining_errors(self, actual_errors: AstCheckerErrorsSet, failed_tests: int) -> int:
         for actual_error in actual_errors:
             if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():

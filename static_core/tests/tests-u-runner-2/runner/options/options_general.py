@@ -125,7 +125,6 @@ class GeneralOptions(IOptions):
         TimeReportOptions.add_cli_args(parser, dest)
         CoverageOptions.add_cli_args(parser, dest)
 
-
     @cached_property
     def processes(self) -> int:
         procs = self.__parameters.get(self.__PROCESSES, self.__DEFAULT_PROCESSES)
@@ -201,6 +200,10 @@ class GeneralOptions(IOptions):
     @cached_property
     def gn_build(self) -> bool:
         return cast(bool, self.__parameters.get(self.__GN_BUILD, self.__DEFAULT_GN_BUILD))
+
+    @cached_property
+    def cli_options(self) -> list:
+        return cast(list, self.__parameters.get("cli-options", []))
 
     def get_command_line(self) -> str:
         options = [

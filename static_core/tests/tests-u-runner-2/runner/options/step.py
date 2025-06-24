@@ -49,7 +49,7 @@ class Step(IOptions):
     enabled: bool = True
     executable_path: Path | None = None
     can_be_instrumented: bool = False
-    DEFAULT_TIMEOUT = 30
+    default_timeout: int = 30
 
     __MIN_ARG_LENGTH = 15
     __MAX_ARG_LENGTH = 150
@@ -61,7 +61,7 @@ class Step(IOptions):
         super().__init__()
         self.name = name
         self.executable_path = self.__get_path_property(step_body, 'executable-path')
-        self.timeout = self.__get_int_property(step_body, 'timeout', self.DEFAULT_TIMEOUT)
+        self.timeout = self.__get_int_property(step_body, 'timeout', self.default_timeout)
         self.can_be_instrumented = self.__get_bool_property(step_body, 'can-be-instrumented', False)
         self.enabled = self.__get_bool_property(step_body, 'enabled', True)
         self.step_kind = self.__get_kind_property(step_body, 'step-type', StepKind.OTHER)
