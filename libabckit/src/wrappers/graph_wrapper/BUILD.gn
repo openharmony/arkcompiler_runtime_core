@@ -61,6 +61,10 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     "$ark_root_static/../libabckit/include",
   ]
 
+  if (ark_use_cmc_gc) {
+    include_dirs += [ "$ark_root_static/../common_interfaces" ]
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/object_header.h"
+#include "runtime/include/thread_scopes.h"
 #include "runtime/mem/bump-allocator-inl.h"
 #include "runtime/mem/freelist_allocator-inl.h"
 #include "runtime/mem/internal_allocator-inl.h"
@@ -83,6 +84,15 @@ void ObjectAllocatorBase::ObjectMemoryInit(void *mem, size_t size) const
     size_t sizeToInit = size - ObjectHeader::ObjectHeaderSize();
     void *memToInit = ToVoidPtr(ToUintPtr(mem) + ObjectHeader::ObjectHeaderSize());
     MemoryInitialize(memToInit, sizeToInit);
+}
+
+void ObjectAllocatorBase::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
+{
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ScopedChangeThreadStatus ets(thread, ThreadStatus::RUNNING);
+    ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
+    IterateOverObjects(objectVisitor);
 }
 
 template <MTModeT MT_MODE>

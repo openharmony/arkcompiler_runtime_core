@@ -17,6 +17,8 @@
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_USE_CMC_GC)
+#include "base_runtime.h"
+#include "objects/base_object.h"
 #include "heap/heap_allocator.h"
 #include "objects/base_state_word.h"
 #endif
@@ -52,6 +54,19 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
     return reinterpret_cast<ObjectHeader *>(panda::HeapAllocator::AllocateInNonmove(size, panda::Language::STATIC));
 #else
     return nullptr;
+#endif
+}
+
+template <MTModeT MT_MODE>
+void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
+{
+#if defined(ARK_USE_CMC_GC)
+    auto visitor = [&](panda::BaseObject *obj) {
+        if (obj->IsStatic()) {
+            objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
+        }
+    };
+    panda::BaseRuntime::ForEachObj(visitor, true);
 #endif
 }
 

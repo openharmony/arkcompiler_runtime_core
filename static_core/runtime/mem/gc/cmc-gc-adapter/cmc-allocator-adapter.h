@@ -38,6 +38,8 @@ public:
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                            ObjectAllocatorBase::ObjMemInitPolicy objInit) override;
+
+    void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) override;
 };
 
 }  // namespace ark::mem
