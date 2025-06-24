@@ -16,15 +16,15 @@
                 "./test_path/aaa/c.d.ets"
             ]
         },
-        "dynamicPaths": {
+        "dependencies": {
             "dynamic_import_tests/a": {
                 "language": "js",
-                "declPath": "./test_path/aaa/a.d.ets",
+                "path": "./test_path/aaa/a.d.ets",
                 "ohmUrl": "./test_path/aaa/a.d.ets"
             },
             "dynamic_import_tests/xxx": {
                 "language": "js",
-                "declPath": "./test_path/aaa/foo.d.ets",
+                "path": "./test_path/aaa/foo.d.ets",
                 "ohmUrl": "./test_path/aaa/foo.d.ets"
             }
         }

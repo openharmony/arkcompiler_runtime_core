@@ -9,6 +9,7 @@ build-sdk/sdk/linux_host_tools/bin/es2panda
 build-sdk/sdk/linux_host_tools/bin/verifier
 build-sdk/sdk/linux_host_tools/lib
 build-sdk/sdk/linux_host_tools/lib/libLLVM-15.so
+build-sdk/sdk/linux_host_tools/lib/libabc2program.so
 build-sdk/sdk/linux_host_tools/lib/libarkaotmanager.so
 build-sdk/sdk/linux_host_tools/lib/libarkassembler.so
 build-sdk/sdk/linux_host_tools/lib/libarkbase.so

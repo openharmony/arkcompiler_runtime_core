@@ -9,10 +9,10 @@
           "${PANDA_ROOT}/plugins/ets/stdlib/std"
         ]
       },
-      "dynamicPaths": {
+      "dependencies": {
         "testDecl" : {
             "language": "js",
-            "declPath": "${CMAKE_CURRENT_SOURCE_DIR}/testDecl.d.ets",
+            "path": "${CMAKE_CURRENT_SOURCE_DIR}/testDecl.d.ets",
             "ohmUrl": "../../plugins/ets/tests/interop_js/tests/test_general_purpose_types/test_dynamic"
         }
       }

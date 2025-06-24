@@ -75,7 +75,7 @@ enum class FieldTag : uint8_t {
 
 PANDA_PUBLIC_API bool IsDynamicLanguage(ark::panda_file::SourceLang lang);
 PANDA_PUBLIC_API std::optional<ark::panda_file::SourceLang> LanguageFromString(std::string_view lang);
-const char *LanguageToString(ark::panda_file::SourceLang lang);
+PANDA_PUBLIC_API const char *LanguageToString(ark::panda_file::SourceLang lang);
 PANDA_PUBLIC_API const char *GetCtorName(ark::panda_file::SourceLang lang);
 PANDA_PUBLIC_API const char *GetCctorName(ark::panda_file::SourceLang lang);
 PANDA_PUBLIC_API const char *GetStringClassDescriptor(ark::panda_file::SourceLang lang);
@@ -1844,13 +1844,6 @@ public:
         return std::get<T>(value_);
     }
 
-    // NOTE: fix in follow-up patch (#24481)
-    template <class T>
-    void SetValueUnsafe(T value)
-    {
-        std::get<T>(value_) = value;
-    }
-
     size_t CalculateSize() const override;
 
     size_t Alignment() override;
@@ -1888,12 +1881,6 @@ public:
     PANDA_PUBLIC_API void AddItems(const std::vector<LiteralItem> &item);
 
     const std::vector<LiteralItem> &GetItems() const
-    {
-        return items_;
-    }
-
-    // NOTE: fix in follow-up patch (#24481)
-    std::vector<LiteralItem> &GetItemsUnsafe()
     {
         return items_;
     }

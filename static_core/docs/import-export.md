@@ -59,9 +59,9 @@ Which paths included in this list are stored in a vector that can be retrieved v
       "escompat": ["path/to/runtime_core/static_core/plugins/ets/stdlib/escompat"],
       ...
     },
-    "dynamicPaths": {
+    "dependencies": {
       "dynamic_js_import_tests": {"language": "js"},
-      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "declPath": "path/to/ets/declaration"}
+      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "path": "path/to/ets/declaration"}
     }
   }
 }
@@ -227,7 +227,7 @@ The *importPath* is a string literal which can be points to a module (separate m
 Resolving these paths within the compiler is the responsibility of the *importPathManager*. In the process of parsing an import path, the string literal will be passed to the importPathManager which will resolve it as an absolute path and adds it to an own list, called *parseList_.*
 The latter list serves to let the compiler know what still needs to be parsed (handle and avoid duplications), and this list will be requested and traversed during the *ParseSources* call. The importPathManager also handles errors that can be caught before parsing, for example non-existent, incorrectly specified import paths, but not errors that can only be found after parsing (for example, the package folder should contains only package files that use the same package directive, etc.)
 
-The importPath with the resolved path and two additional information - which is the language information and whether the imported element has a declaration or not - , will be stored in an ImportSource instance. The latter two information can be set under the dynamicPaths tag in arktsconfig.json, otherwise they will be assigned a default value (the lang member will be specified from the extension, hasDecl member will be true). This instance will be passed as a parameter during the allocation of the *ETSImportDeclaration* AST node, as well as the specifiers list resolved from the binding forms explained in the next section and the import kind (type or value).
+The importPath with the resolved path and two additional information - which is the language information and whether the imported element has a declaration or not - , will be stored in an ImportSource instance. The latter two information can be set under the dependencies tag in arktsconfig.json, otherwise they will be assigned a default value (the lang member will be specified from the extension, hasDecl member will be true). This instance will be passed as a parameter during the allocation of the *ETSImportDeclaration* AST node, as well as the specifiers list resolved from the binding forms explained in the next section and the import kind (type or value).
 
 ## 5.2. Handle binding forms (allBinding|selectiveBindings|defaultBinding|typeBinding)
 

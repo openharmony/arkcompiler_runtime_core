@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-/*---
-    tags: [not-a-test]
-    arktsconfig: ../../../../arktsconfig.json
----*/
+import { foo } from "@panda/lib"
 
-export class C {}
+function main() {
+    arktest.assertEQ(foo(), 42);
+}

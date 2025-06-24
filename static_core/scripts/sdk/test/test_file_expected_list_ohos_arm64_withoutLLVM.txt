@@ -4,6 +4,7 @@ build-sdk/sdk/ohos_arm64/bin/ark
 build-sdk/sdk/ohos_arm64/bin/ark_aot
 build-sdk/sdk/ohos_arm64/bin/aspt_converter
 build-sdk/sdk/ohos_arm64/include
+build-sdk/sdk/ohos_arm64/include/abc2program
 build-sdk/sdk/ohos_arm64/include/compiler
 build-sdk/sdk/ohos_arm64/include/libpandabase
 build-sdk/sdk/ohos_arm64/include/libpandafile
@@ -15,6 +16,7 @@ build-sdk/sdk/ohos_arm64/include/third_party
 build-sdk/sdk/ohos_arm64/include/tools
 build-sdk/sdk/ohos_arm64/include/verification
 build-sdk/sdk/ohos_arm64/lib
+build-sdk/sdk/ohos_arm64/lib/libabc2program.so
 build-sdk/sdk/ohos_arm64/lib/libani_helpers.so
 build-sdk/sdk/ohos_arm64/lib/libarkaotmanager.so
 build-sdk/sdk/ohos_arm64/lib/libarkassembler.so

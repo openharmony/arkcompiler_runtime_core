@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ public:
     std::string GetFullFunctionNameById(const panda_file::File::EntityId &methodId) const;
     ark::panda_file::SourceLang GetFileLanguage() const;
     void SetFileLanguage(ark::panda_file::SourceLang language);
+    std::string GetLiteralArrayIdName(uint32_t literalArrayId);
 
 private:
     inline bool IsSystemType(const std::string &typeName) const;

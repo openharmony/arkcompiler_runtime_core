@@ -3,6 +3,7 @@ build-sdk/sdk/ohos_arm32/bin
 build-sdk/sdk/ohos_arm32/bin/ark
 build-sdk/sdk/ohos_arm32/bin/aspt_converter
 build-sdk/sdk/ohos_arm32/lib
+build-sdk/sdk/ohos_arm32/lib/libabc2program.so
 build-sdk/sdk/ohos_arm32/lib/libarkaotmanager.so
 build-sdk/sdk/ohos_arm32/lib/libarkassembler.so
 build-sdk/sdk/ohos_arm32/lib/libarkbase.so

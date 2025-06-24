@@ -13,13 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-    tags: [not-a-test]
-    files: [../../../../../C/src/main/ets/pages/c.ets]
-    arktsconfig: ../../../../arktsconfig.json
----*/
-
-import {C} from 'HarC/pages/c'
-export class B {
-    public x: C = new C()
+export function foo() {
+    return 42;
 }

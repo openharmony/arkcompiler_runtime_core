@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "abc_method_processor.h"
 #include "abc_field_processor.h"
 #include "mangling.h"
+#include "abc_annotation_processor.h"
 
 namespace ark::abc2program {
 
@@ -45,12 +46,24 @@ void AbcClassProcessor::FillRecord()
     program_->recordTable.emplace(name, std::move(record));
 }
 
+void AbcClassProcessor::FillRecordAnnotations(pandasm::Record &record)
+{
+    classDataAccessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotationId) {
+        AbcAnnotationProcessor annotationProcessor(annotationId, keyData_, record);
+        annotationProcessor.FillProgramData();
+    });
+}
+
 void AbcClassProcessor::FillRecordData(pandasm::Record &record)
 {
     classDataAccessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entityId_);
     FillFields(record);
     FillFunctions();
     FillRecordSourceFile(record);
+#ifndef ENABLE_LIBABCKIT
+    // annotations are not supported in abckit
+    FillRecordAnnotations(record);
+#endif
 }
 
 void AbcClassProcessor::FillRecordMetaData(pandasm::Record &record)
