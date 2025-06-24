@@ -142,8 +142,12 @@ protected:
 
     friend struct vector<T>;
 
-    friend bool taihe::same_adl(adl_tag_t, vector_view lhs, vector_view rhs);
-    friend std::size_t taihe::hash_adl(adl_tag_t, vector_view val);
+    friend struct std::hash<vector<T>>;
+
+    friend bool operator==(vector_view lhs, vector_view rhs)
+    {
+        return lhs.m_handle == rhs.m_handle;
+    }
 };
 
 template <typename T>
@@ -198,18 +202,6 @@ private:
 };
 
 template <typename T>
-inline bool same_adl(adl_tag_t, vector_view<T> lhs, vector_view<T> rhs)
-{
-    return lhs.m_handle == rhs.m_handle;
-}
-
-template <typename T>
-inline std::size_t hash_adl(adl_tag_t, vector_view<T> val)
-{
-    return reinterpret_cast<std::size_t>(val.m_handle);
-}
-
-template <typename T>
 struct as_abi<vector<T>> {
     using type = void *;
 };
@@ -224,6 +216,14 @@ struct as_param<vector<T>> {
     using type = vector_view<T>;
 };
 }  // namespace taihe
+
+template <typename T>
+struct std::hash<taihe::vector<T>> {
+    std::size_t operator()(taihe::vector_view<T> val) const noexcept
+    {
+        return reinterpret_cast<std::size_t>(val.m_handle);
+    }
+};
 
 #ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR

@@ -42,7 +42,7 @@ function test_struct_dbase5() {
 function test_struct_ebigint() {
     let str: StructTest.EBigint = {
         param1: true,
-        param2: 16.32,
+        param2: 16.32f,
         param3: 32.16,
         param4: 641632,
     };

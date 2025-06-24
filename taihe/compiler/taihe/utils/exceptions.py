@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from typing_extensions import override
@@ -43,10 +44,9 @@ class DeclRedefNote(DiagNote):
         super().__init__(loc=prev.loc)
         self.prev = prev
 
-    @property
     @override
-    def format_msg(self) -> str:
-        return f"conflict with {self.prev.description}"
+    def describe(self) -> str:
+        return "previously defined here"
 
 
 @dataclass
@@ -59,9 +59,8 @@ class DeclRedefError(DiagError):
         self.prev = prev
         self.current = current
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"redefinition of {self.current.description}"
 
     @override
@@ -74,9 +73,8 @@ class DeclRedefError(DiagError):
 class IDLSyntaxError(DiagError):
     token: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"unexpected {self.token!r}"
 
 
@@ -84,9 +82,8 @@ class IDLSyntaxError(DiagError):
 class PackageNotExistError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"package {self.name!r} not exist"
 
 
@@ -94,9 +91,8 @@ class PackageNotExistError(DiagError):
 class DeclNotExistError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"declaration {self.name!r} not exist"
 
 
@@ -104,9 +100,8 @@ class DeclNotExistError(DiagError):
 class NotATypeError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"{self.name!r} is not a type name"
 
 
@@ -114,9 +109,8 @@ class NotATypeError(DiagError):
 class DeclarationNotInScopeError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return (
             f"declaration name {self.name!r} is not declared or imported in this scope"
         )
@@ -126,9 +120,8 @@ class DeclarationNotInScopeError(DiagError):
 class PackageNotInScopeError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"package name {self.name!r} is not imported in this scope"
 
 
@@ -136,26 +129,53 @@ class PackageNotInScopeError(DiagError):
 class GenericArgumentsError(DiagError):
     name: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"Invalid generic arguments in {self.name!r}"
+
+
+@dataclass
+class SymbolConflictWithNamespaceNote(DiagNote):
+    name: str
+    package: "PackageDecl"
+
+    def __init__(
+        self,
+        name: str,
+        package: "PackageDecl",
+    ):
+        super().__init__(loc=package.loc)
+        self.name = name
+        self.package = package
+
+    def describe(self) -> str:
+        return f"namespace {self.name!r} is implied by {self.package.description}"
 
 
 @dataclass
 class SymbolConflictWithNamespaceError(DiagError):
     decl: "PackageLevelDecl"
-    pkg: "PackageDecl"
+    name: str
+    packages: list["PackageDecl"]
 
-    def __init__(self, decl: "PackageLevelDecl", pkg: "PackageDecl"):
+    def __init__(
+        self,
+        decl: "PackageLevelDecl",
+        name: str,
+        packages: list["PackageDecl"],
+    ):
         super().__init__(loc=decl.loc)
         self.decl = decl
-        self.pkg = pkg
+        self.name = name
+        self.packages = packages
 
-    @property
     @override
-    def format_msg(self) -> str:
-        return f"declaration of {self.decl.description} in {self.pkg.description} shadows a file-level declaration"
+    def describe(self) -> str:
+        return f"declaration of {self.decl.description} conflicts with namespace {self.name!r}"
+
+    def notes(self):
+        for pkg in self.packages:
+            yield SymbolConflictWithNamespaceNote(self.name, pkg)
 
 
 @dataclass
@@ -167,9 +187,8 @@ class TypeUsageError(DiagError):
         pass
         self.ty = ty_ref.maybe_resolved_ty
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"{self.ty.signature} cannot be used in this context"
 
 
@@ -183,18 +202,16 @@ class EnumValueError(DiagError):
         self.item = item
         self.enum = enum
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         pass
         return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({self.enum.ty_ref.maybe_resolved_ty.signature})"
 
 
 @dataclass
 class DuplicateExtendsNote(DiagNote):
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return "previously extended here"
 
 
@@ -204,9 +221,8 @@ class DuplicateExtendsWarn(DiagWarn):
     parent_iface: "IfaceDecl"
     prev_loc: SourceLocation | None = field(kw_only=True)
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"{self.parent_iface.description} is extended multiple times by {self.iface.description}"
 
     @override
@@ -226,9 +242,8 @@ class RecursiveReferenceNote(DiagNote):
         super().__init__(loc=last[1].loc)
         self.decl = last[0]
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"referenced by {self.decl.description}"
 
 
@@ -246,9 +261,8 @@ class RecursiveReferenceError(DiagError):
         self.decl = last[0]
         self.other = other
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return f"cycle detected in {self.decl.description}"
 
     @override
@@ -257,13 +271,35 @@ class RecursiveReferenceError(DiagError):
             yield RecursiveReferenceNote(n)
 
 
+class IgnoredFileReason(Enum):
+    IS_DIRECTORY = "subdirectories are ignored"
+    EXTENSION_MISMATCH = "unexpected file extension"
+
+
+@dataclass
+class IgnoredFileWarn(DiagWarn):
+    reason: IgnoredFileReason
+
+    @override
+    def describe(self) -> str:
+        return f"unrecognized file: {self.reason.value}"
+
+
+@dataclass
+class InvalidPackageNameError(DiagError):
+    name: str
+
+    @override
+    def describe(self) -> str:
+        return f"invalid package name {self.name!r}"
+
+
 @dataclass
 class AdhocNote(DiagNote):
     msg: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return self.msg
 
 
@@ -271,9 +307,8 @@ class AdhocNote(DiagNote):
 class AdhocWarn(DiagWarn):
     msg: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return self.msg
 
 
@@ -281,9 +316,8 @@ class AdhocWarn(DiagWarn):
 class AdhocError(DiagError):
     msg: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return self.msg
 
 
@@ -291,7 +325,6 @@ class AdhocError(DiagError):
 class AdhocFatalError(DiagFatalError):
     msg: str
 
-    @property
     @override
-    def format_msg(self) -> str:
+    def describe(self) -> str:
         return self.msg

@@ -237,7 +237,7 @@ function test_10param2() {
     let arri16: short[] = [1, 2, 3, 4];
     let arri32: int[] = [1, 2, 3, 4, 5];
     let arrbool: boolean[] = [true, false];
-    let arrf32: float[] = [1.1, 2.2];
+    let arrf32: float[] = [1.1f, 2.2f];
     let arrf64: double[] = [1.11111, 2.22222];
     let arrstring: String[] = ["hello", "world"];
 

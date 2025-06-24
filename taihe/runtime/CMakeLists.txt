@@ -29,8 +29,8 @@ set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-set(TH_SOURCE src/string.c
-              src/object.c 
+set(TH_SOURCE src/string.cpp
+              src/object.cpp
               src/runtime.cpp)
 
 add_library(taihe_runtime STATIC ${TH_SOURCE})

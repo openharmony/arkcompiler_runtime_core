@@ -452,7 +452,7 @@ function testCaseBaseFunc18() {
 }
 
 function testCaseBaseFunc19() {
-    let floatArray: float[] = [3.14159, 123.0, -45678.5454, 0.052, 0.01];
+    let floatArray: float[] = [3.14159f, 123.0f, -45678.5454f, 0.052f, 0.01f];
     let doubleArray: double[] = [
         10086.123456, -156.45678945, 3.141592345454545, 9223372036.854775807,
         -922337203.6854775808

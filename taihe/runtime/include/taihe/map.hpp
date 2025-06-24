@@ -44,7 +44,7 @@ public:
             node_t *current = m_handle->bucket[i];
             while (current) {
                 node_t *next = current->next;
-                std::size_t index = hash(current->item.first) % cap;
+                std::size_t index = std::hash<K>()(current->item.first) % cap;
                 current->next = bucket[index];
                 bucket[index] = current;
                 current = next;
@@ -85,10 +85,10 @@ public:
     template <bool cover = false, typename... Args>
     std::pair<item_t *, bool> emplace(as_param_t<K> key, Args &&...args) const
     {
-        std::size_t index = hash(key) % m_handle->cap;
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
         node_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (same((*current_ptr)->item.first, key)) {
+            if ((*current_ptr)->item.first == key) {
                 if (cover) {
                     node_t *replaced = new node_t {
                         .item = {key, V {std::forward<Args>(args)...}},
@@ -117,10 +117,10 @@ public:
 
     item_t *find_item(as_param_t<K> key) const
     {
-        std::size_t index = hash(key) % m_handle->cap;
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
         node_t *current = m_handle->bucket[index];
         while (current) {
-            if (same(current->item.first, key)) {
+            if (current->item.first == key) {
                 return &current->item;
             }
             current = current->next;
@@ -128,6 +128,7 @@ public:
         return nullptr;
     }
 
+    // TODO: Change the return type to item_t *
     V *find(as_param_t<K> key) const
     {
         item_t *item = find_item(key);
@@ -139,10 +140,10 @@ public:
 
     bool erase(as_param_t<K> key) const
     {
-        std::size_t index = hash(key) % m_handle->cap;
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
         node_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (same((*current_ptr)->item.first, key)) {
+            if ((*current_ptr)->item.first == key) {
                 node_t *current = *current_ptr;
                 *current_ptr = (*current_ptr)->next;
                 delete current;
@@ -270,8 +271,12 @@ private:
 
     friend struct map<K, V>;
 
-    friend bool taihe::same_adl(adl_tag_t, map_view lhs, map_view rhs);
-    friend std::size_t taihe::hash_adl(adl_tag_t, map_view val);
+    friend struct std::hash<map<K, V>>;
+
+    friend bool operator==(map_view lhs, map_view rhs)
+    {
+        return lhs.m_handle == rhs.m_handle;
+    }
 };
 
 template <typename K, typename V>
@@ -328,18 +333,6 @@ private:
 };
 
 template <typename K, typename V>
-inline bool same_adl(adl_tag_t, map_view<K, V> lhs, map_view<K, V> rhs)
-{
-    return lhs.m_handle == rhs.m_handle;
-}
-
-template <typename K, typename V>
-inline std::size_t hash_adl(adl_tag_t, map_view<K, V> val)
-{
-    return reinterpret_cast<std::size_t>(val.m_handle);
-}
-
-template <typename K, typename V>
 struct as_abi<map<K, V>> {
     using type = void *;
 };
@@ -354,6 +347,14 @@ struct as_param<map<K, V>> {
     using type = map_view<K, V>;
 };
 }  // namespace taihe
+
+template <typename K, typename V>
+struct std::hash<taihe::map<K, V>> {
+    std::size_t operator()(taihe::map_view<K, V> val) const noexcept
+    {
+        return reinterpret_cast<std::size_t>(val.m_handle);
+    }
+};
 
 #ifdef MAP_GROWTH_FACTOR
 #undef MAP_GROWTH_FACTOR
