@@ -22,5 +22,5 @@ which should be enclosed in backticks (\`)\u2029`
 
 function main() {
     let sentence = "This is an example of multi-line string,\nwhich should be enclosed in backticks (\`)\u2029"
-    assertEQ( sentence, sentence2)
+    arktest.assertEQ( sentence, sentence2)
 }

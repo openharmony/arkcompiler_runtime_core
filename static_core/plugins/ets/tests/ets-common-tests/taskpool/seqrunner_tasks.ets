@@ -49,7 +49,7 @@ function testDelayFunc(): NullishType {
     let task = new taskpool.Task(max, 80, 90);
     let res = await taskpool.executeDelayed(50.0, task);
     let runner = new taskpool.SequenceRunner();
-    expectError(() => {
+    arktest.expectError(() => {
         runner.execute(task);
     }, new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     return res;
@@ -67,7 +67,7 @@ function executeDelayedTest(): void {
     let runner = new taskpool.SequenceRunner();
     let task = new taskpool.Task(sum, 25, 35);
     await runner.execute(task);
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executeDelayed(100.0, task);
     }, new Error("taskpool:: seqRunnerTask cannot executeDelayed outside"));
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
@@ -78,7 +78,7 @@ function executePeriodicallyTest(): void {
     let runner = new taskpool.SequenceRunner();
     let task1 = new taskpool.Task(returnAbc);
     await runner.execute(task1);
-    expectError(() => {
+    arktest.expectError(() => {
         taskpool.executePeriodically(100.0, task1);
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
     try {
@@ -103,7 +103,7 @@ function testPeriodFunc(): NullishType {
         delayWithYield(50);
     }
     let runner = new taskpool.SequenceRunner();
-    expectError(() => {
+    arktest.expectError(() => {
         runner.execute(task);
     }, new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     return "success";
@@ -153,7 +153,7 @@ function main(): int {
         let runner = new taskpool.SequenceRunner();
         let task = new taskpool.Task(returnAbc);
         taskpool.execute(task);
-        expectError(() => { runner.execute(task) },
+        arktest.expectError(() => { runner.execute(task) },
                     new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     });
     seqRunnerSuite.addTest("ExecuteSeqRunnerTaskTest", (): void throws =>
@@ -162,7 +162,7 @@ function main(): int {
         let runner2 = new taskpool.SequenceRunner();
         let task = new taskpool.Task(returnAbc);
         runner1.execute(task);
-        expectError(() => { runner2.execute(task) },
+        arktest.expectError(() => { runner2.execute(task) },
                     new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     });
     seqRunnerSuite.addTest("ExecuteGroupTaskTest", (): void throws => {
@@ -170,14 +170,14 @@ function main(): int {
         let group = new taskpool.TaskGroup();
         let task = new taskpool.Task(returnAbc);
         group.addTask(task);
-        expectError(() => { runner.execute(task) },
+        arktest.expectError(() => { runner.execute(task) },
                     new Error("taskpool:: sequenceRunner cannot execute groupTask"));
     });
     seqRunnerSuite.addTest("CancelNonStartedTaskTest", (): void throws =>
     {
         let task = new taskpool.Task(returnAbc);
         let runner = new taskpool.SequenceRunner();
-        expectError(() => {
+        arktest.expectError(() => {
             taskpool.cancel(task);
             runner.execute(task);
         }, new Error("taskpool:: task is not executed or has been executed"));
@@ -200,13 +200,13 @@ function main(): int {
             arktest.assertEQ(e.message, "taskpool:: sequenceRunner task has been executed");
             return;
         }
-        expectError(() => { let res = await p; }, new Error("taskpool:: sequenceRunner task has been canceled"));
+        arktest.expectError(() => { let res = await p; }, new Error("taskpool:: sequenceRunner task has been canceled"));
     });
     seqRunnerSuite.addTest("CancelExecutedTaskTest", (): void throws =>
     {
         let task = new taskpool.Task(returnAbc);
         let runner = new taskpool.SequenceRunner();
-        expectError(() => {
+        arktest.expectError(() => {
             await runner.execute(task);
             taskpool.cancel(task);
         }, new Error("taskpool:: sequenceRunner task has been executed"));
@@ -224,7 +224,7 @@ function main(): int {
         let task2 = new taskpool.Task(returnAbc);
         task1.addDependency(task2);
         let runner = new taskpool.SequenceRunner();
-        expectError(() => { runner.execute(task1) }, new Error("taskpool:: sequenceRunner dependent task not allowed."));
+        arktest.expectError(() => { runner.execute(task1) }, new Error("taskpool:: sequenceRunner dependent task not allowed."));
     });
     seqRunnerSuite.addTest("AddDependencyExecutedTaskTest", (): void throws =>
     {
@@ -232,8 +232,8 @@ function main(): int {
         let task2 = new taskpool.Task(returnAbc);
         let runner = new taskpool.SequenceRunner();
         runner.execute(task2);
-        expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
-        expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
+        arktest.expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
+        arktest.expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
     });
     seqRunnerSuite.addTest("TaskWithDifferentParamsTest", (): void throws =>
     {

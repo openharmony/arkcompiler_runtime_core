@@ -21,7 +21,7 @@ desc: |-
     {{c.desc}} - "{{c.name}}"
 ---*/
 
-assertEQ(t, "{{c.name}}")
+arktest.assertEQ(t, "{{c.name}}")
 
 {{c.decl}}
 

@@ -52,17 +52,17 @@ class D extends AD{
 }
 
 function main(): void{
-    assertEQ({{kwd}}, 1)
+    arktest.assertEQ({{kwd}}, 1)
     let ca = new A()
     ca.{{kwd}} = 2
-    assertEQ(ca.{{kwd}}, 2)
+    arktest.assertEQ(ca.{{kwd}}, 2)
     let cb = new B() 
-    assertEQ(cb.{{kwd}}, 1)
+    arktest.assertEQ(cb.{{kwd}}, 1)
     let cc = new C()
-    assertEQ(cc.test("test"), "test")
+    arktest.assertEQ(cc.test("test"), "test")
     let cd = new D()
-    assertEQ(cd.test("test"), "test")
-    assertEQ(cd.{{kwd}}, 1)
+    arktest.assertEQ(cd.test("test"), "test")
+    arktest.assertEQ(cd.{{kwd}}, 1)
 }
 
 {% endfor %}

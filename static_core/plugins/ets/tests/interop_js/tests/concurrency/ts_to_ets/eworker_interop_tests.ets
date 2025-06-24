@@ -184,13 +184,13 @@ function testArrowFuncInvoke() {
 function testOptionalParams() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
-        assertTrue(module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
-        assertTrue(module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true)).toBoolean());
-        assertTrue(module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2)).toBoolean());
+        arktest.assertTrue(module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
+        arktest.assertTrue(module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true)).toBoolean());
+        arktest.assertTrue(module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2)).toBoolean());
 
-        assertTrue(module.getProperty('fun1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
-        assertTrue(module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false)).toBoolean());
-        assertTrue(module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
+        arktest.assertTrue(module.getProperty('fun1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
+        arktest.assertTrue(module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false)).toBoolean());
+        arktest.assertTrue(module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
     }
     eaw.run<void>(callback).Await();
 }
@@ -295,7 +295,7 @@ function testEAWorkerInteropLoop() {
 }
 
 function eworkerInteropTest() {
-    let eworkerInteropSuite = new ArkTestsuite('eworker.InteropTest');
+    let eworkerInteropSuite = new arktest.ArkTestsuite('eworker.InteropTest');
     eworkerInteropSuite.addTest('testProcessInput', testProcessInput);
     eworkerInteropSuite.addTest('testCreateArray', testCreateArray);
     eworkerInteropSuite.addTest('testGetUser', testGetUser);

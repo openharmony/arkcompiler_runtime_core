@@ -431,7 +431,7 @@ function testParseWithWhitespace(): void {
 }
 
 function expectJsonParseError(func: () => void throws): void {
-    expectThrow(func, (e: Error | Exception) => { return (e instanceof JsonParseError) });
+    arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof JsonParseError) });
 }
 
 function testParseErrorHandling(): void {

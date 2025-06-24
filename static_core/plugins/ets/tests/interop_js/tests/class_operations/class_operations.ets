@@ -74,7 +74,7 @@ function testJSONStringifyESObjectInstance(): boolean {
     arktest.assertEQ(JSON.stringify(esObj), `{"id":1,"name":"Nora","male":false}`)
 
     esObj.setProperty("self", esObj)
-    expectError(() => {
+    arktest.expectError(() => {
         JSON.stringify(esObj)
     }, "cyclic object value")
     esObj.setProperty("self", ESObject.instantiateEmptyObject())
@@ -111,7 +111,7 @@ function testJSONStringifyESObjectArray(): boolean {
     arktest.assertEQ(JSON.stringify(arrEsObj), "[1,3,7]")
 
     arrEsObj.setProperty(3, arrEsObj)
-    expectError(() => {
+    arktest.expectError(() => {
         JSON.stringify(arrEsObj)
     }, "cyclic object value")
 

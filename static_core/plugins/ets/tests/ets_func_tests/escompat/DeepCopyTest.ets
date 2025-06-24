@@ -210,7 +210,7 @@ function testWeakRefClone(): void {
 	const obj = new Obj(6, "ref")
 	const ref = new WeakRef<Obj>(obj)
 
-	expectError(() => { 
+	arktest.expectError(() => { 
 		const refCopy = deepcopy(ref) 
 	}, "class std.core.WeakRef doesn't have default constructor")
 }
@@ -222,7 +222,7 @@ async function fn(): Promise<string> {
 function testPromiseClone(): void {
 	const promise: Promise<string> = fn()
 
-	expectError(() => {
+	arktest.expectError(() => {
 		const promiseCopy = deepcopy(promise)
 	}, "class std.core.Promise doesn't have default constructor")
 }

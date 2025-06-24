@@ -55,10 +55,10 @@ function testLookupLocaleMatchList() {
 }
 
 function negativeTestLanguageTag() {
-    expectError((): void => { intlBestFitLocale(badLocale) })
-    expectError((): void => { intlBestFitLocales(badLocale) })
-    expectError((): void => { intlBestFitLocales([badLocale]) })
-    expectError((): void => { intlLookUpLocale(badLocale) })
-    expectError((): void => { intlLookUpLocales(badLocale) })
-    expectError((): void => { intlLookUpLocales([badLocale]) })
+    arktest.expectError((): void => { intlBestFitLocale(badLocale) })
+    arktest.expectError((): void => { intlBestFitLocales(badLocale) })
+    arktest.expectError((): void => { intlBestFitLocales([badLocale]) })
+    arktest.expectError((): void => { intlLookUpLocale(badLocale) })
+    arktest.expectError((): void => { intlLookUpLocales(badLocale) })
+    arktest.expectError((): void => { intlLookUpLocales([badLocale]) })
 }

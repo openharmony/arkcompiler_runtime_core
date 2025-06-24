@@ -245,10 +245,10 @@ function testJsonElementArrayOperations(): void {
 }
 
 function expectJsonError(func: () => void throws): void {
-    expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonError) });
+    arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonError) });
 }
 function expectJsonTypeError(func: () => void throws): void {
-    expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonTypeError) });
+    arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonTypeError) });
 }
 function testJsonElementErrorHandlingGet(): void {
     // forall e, i: int: e.jsonKind != Array => e[i] throws
@@ -262,7 +262,7 @@ function testJsonElementErrorHandlingGet(): void {
     //   e.jsonKind == Array
     //   i < 0 || i > |e| - 1
     //      => e[i] throws RangeError
-    expectThrow(
+    arktest.expectThrow(
         (): void throws => {
             let u = jsonx.JsonElement.createArray([]);
             u[0]
@@ -293,7 +293,7 @@ function testJsonElementErrorHandlingGet(): void {
     // forall e, k: string:
     //   k not in e.maybeObjectValues.Keys
     //      => e[k] throws RangeError
-    expectThrow(
+    arktest.expectThrow(
         (): void throws => {
             let u = jsonx.JsonElement.createObject({});
             u["key"]
@@ -303,7 +303,7 @@ function testJsonElementErrorHandlingGet(): void {
         }
     );
     // the same for getElement
-    expectThrow(
+    arktest.expectThrow(
         (): void throws => {
             let u = jsonx.JsonElement.createObject({});
             u.getElement("key")

@@ -42,8 +42,8 @@ function main() {
     addBoo(cboo)
     addFoo(cfoo)
 
-    assertEQ("Hello", hello)
-    assertEQ("World", world)
+    arktest.assertEQ("Hello", hello)
+    arktest.assertEQ("World", world)
 
     cfoo = cboo;
 }

@@ -31,7 +31,7 @@ function erasedM(recv: NullishType, args: FixedArray<NullishType>): NullishType 
 }
 
 function erased(recv: NullishType, args: FixedArray<NullishType>): NullishType {
-	assertEQ( args.length, 3)
+	arktest.assertEQ( args.length, 3)
 	const a1: int = args[0] as int
 	const a2: long = args[1] as long
 	const c: boolean = args[2] as boolean

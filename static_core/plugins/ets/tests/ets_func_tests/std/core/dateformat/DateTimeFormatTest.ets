@@ -76,7 +76,7 @@ function dateFormatWithInvalidTimeZone(): void {
     const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "invalid" }
     const dateFormat = new Intl.DateTimeFormat("ru-RU", options)
 
-    expectError(() => {
+    arktest.expectError(() => {
         dateFormat.format(new Date("2021-04-04T20:30:45Z"))
     }, "Invalid time zone specified: invalid")
 }

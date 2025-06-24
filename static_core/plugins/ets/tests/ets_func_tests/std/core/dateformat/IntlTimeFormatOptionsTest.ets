@@ -62,7 +62,7 @@ function testTimeFormatWithLocaleAndOptions(): void {
 
 function testTimeFormatWithInvalidFractionalSecondDigitsOption(): void {
     const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 10 }
-    expectError(() => {
+    arktest.expectError(() => {
         const formatter = new Intl.DateTimeFormat("en-US", options)
     }, "invalid digits value: 10")
 }

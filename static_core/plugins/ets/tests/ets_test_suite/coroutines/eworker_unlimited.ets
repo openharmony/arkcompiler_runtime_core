@@ -44,7 +44,7 @@ function LoadWorkers(workers: Array<EAWorker>): Array<Job<int>> {
     for (let i = 0; i < NUM_EWORKERS; i++) {
         let job = workers[i].run<int>(():int => {
             let runId = CoroutineExtras.getWorkerId();
-            assertNE(runId, mainId);
+            arktest.assertNE(runId, mainId);
             return runId;
         });
         jobs.push(job);
@@ -72,7 +72,7 @@ function JoinWorkers(workers: Array<EAWorker>) {
 
 function CheckUnique(arr: Array<int>) {
     let s = new Set<int>(arr);
-    assertEQ(s.size, arr.length);
+    arktest.assertEQ(s.size, arr.length);
 }
 
 function main() {
@@ -80,7 +80,7 @@ function main() {
 
     if (!CheckLimitReached()) {
         JoinWorkers(workers);
-        assertTrue(false, 'EAWorkers limit should be reached before');
+        arktest.assertTrue(false, 'EAWorkers limit should be reached before');
     }
 
     let jobs = LoadWorkers(workers);

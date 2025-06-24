@@ -42,11 +42,11 @@ function testSub() {
             Atomics.store(ta, j, 48)
 
             let old = Atomics.sub(ta, j, 12)
-            assertEQ(old, 48)
+            arktest.assertEQ(old, 48)
 
             for (let k = 0; k < arraySize; k++) {
                 let re = (k === j) ? 36 : 0
-                assertEQ(Atomics.load(ta, k), re)
+                arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
             Atomics.store(ta, j, 0)
@@ -55,7 +55,7 @@ function testSub() {
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
     suite.addTest('Function testSub', testSub)
     return suite.run()
 }

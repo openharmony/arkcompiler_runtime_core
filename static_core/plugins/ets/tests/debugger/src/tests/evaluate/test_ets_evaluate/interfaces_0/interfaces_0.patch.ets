@@ -14,4 +14,4 @@
  */
 
 let b = new B();
-assertEQ(b.foo(123.321), 123.321);
+arktest.assertEQ(b.foo(123.321), 123.321);

@@ -22,9 +22,9 @@ desc: >-
 {{c.decl}}
 
 function main(): void {
-    assertFalse({{c.value}} == {{c.value2}})
-    assertTrue({{c.value}} != {{c.value2}})
-    assertFalse({{c.value}} === {{c.value2}})
-    assertTrue({{c.value}} !== {{c.value2}})
+    arktest.assertFalse({{c.value}} == {{c.value2}})
+    arktest.assertTrue({{c.value}} != {{c.value2}})
+    arktest.assertFalse({{c.value}} === {{c.value2}})
+    arktest.assertTrue({{c.value}} !== {{c.value2}})
 }
 {% endfor %}

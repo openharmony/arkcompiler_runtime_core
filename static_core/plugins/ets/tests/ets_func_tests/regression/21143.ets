@@ -41,5 +41,5 @@ function main() {
     const bar = new Bar<String>();
     bar.bar("12")
 
-    assertEQ(1, x)
+    arktest.assertEQ(1, x)
 }

@@ -46,7 +46,7 @@ statements:
             case 2: { arktest.assertEQ( x, 2 ); break; }
           default: { arktest.assertTrue( false ); break; }
           }
-  - block: 'assertTrue( true )'
+  - block: 'arktest.assertTrue( true )'
   - block: |-
           class Ex extends Error {}
           try {

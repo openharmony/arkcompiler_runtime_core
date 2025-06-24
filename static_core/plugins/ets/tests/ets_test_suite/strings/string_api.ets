@@ -143,15 +143,15 @@ function main(): void {
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof StringIndexOutOfBoundsError);
     }
-    expectThrow(() => {
+    arktest.expectThrow(() => {
         let i = -1;
         let failedCase = str4[i];
-        assertTrue(false, "")
+        arktest.assertTrue(false, "")
     }, exceptionCheck);
 
-    expectThrow(() => {
+    arktest.expectThrow(() => {
         let failedCase = str4[str4.length];
-        assertTrue(false, "")
+        arktest.assertTrue(false, "")
     }, exceptionCheck);
 
     let str5: String = "函数式编程";

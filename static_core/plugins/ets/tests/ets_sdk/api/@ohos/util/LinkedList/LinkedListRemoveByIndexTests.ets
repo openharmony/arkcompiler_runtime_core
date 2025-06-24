@@ -145,7 +145,7 @@ function testRemoveLastFromNonEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == EmptyContainerErrorCodeId);
     }
-    expectThrow(() => {linkedList.removeLast()}, exceptionCheck);
+    arktest.expectThrow(() => {linkedList.removeLast()}, exceptionCheck);
 }
 
 function testRemoveUniqueElement() {

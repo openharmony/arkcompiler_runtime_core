@@ -64,7 +64,7 @@ function test_without_init() {
 }
 
 function main() {
-    const testSuite = new ArkTestsuite("WorkerLocalTest");
+    const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
     testSuite.addTest("test_init", test_init);
     testSuite.addTest("test_without_init", test_without_init);
     testSuite.run();

@@ -109,11 +109,11 @@ function next4(t : Int8ArrayIteratorEntries1) : IteratorResult<[Number, Number]>
 
 function main(): void {
     for (let i = 0; i < 200; i++) {
-        assertEQ(__noinline__next2('maybe', i < 100 ? 0 : 1), 'maybeok');
-        assertEQ(__noinline__next3("abcde"), "abcde", "Wrong at next3")
+        arktest.assertEQ(__noinline__next2('maybe', i < 100 ? 0 : 1), 'maybeok');
+        arktest.assertEQ(__noinline__next3("abcde"), "abcde", "Wrong at next3")
     }
     let arr = new Int8Array([1, 2, 3]);
     let iter : Int8ArrayIteratorEntries1 = new Int8ArrayIteratorEntries1(arr)
-    assertEQ(iter.next().done, false);
-    assertEQ(next4(iter).done, false);
+    arktest.assertEQ(iter.next().done, false);
+    arktest.assertEQ(next4(iter).done, false);
 }

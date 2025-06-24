@@ -25,9 +25,9 @@ desc: >-
 let nullable: null|{{c.type}} = {{c.value}}
 
 function main(): void {
-    assertTrue(nullable == {{c.value2 if c.value2 else c.value}})
-    assertFalse(nullable != {{c.value2 if c.value2 else c.value}})
-    assertTrue(nullable === {{c.value2 if c.value2 else c.value}})
-    assertFalse(nullable !== {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(nullable == {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(nullable != {{c.value2 if c.value2 else c.value}})
+    arktest.assertTrue(nullable === {{c.value2 if c.value2 else c.value}})
+    arktest.assertFalse(nullable !== {{c.value2 if c.value2 else c.value}})
 }
 {% endfor %}

@@ -41,11 +41,11 @@ function testCompareExchange() {
         for (let j = 1; j < arraySize; j++) {
             Atomics.store(ta, j, 7)
             let old = Atomics.compareExchange(ta, j, 7, 12)
-            assertEQ(old, 7)
+            arktest.assertEQ(old, 7)
 
             for (let k = 0; k < arraySize; k++) {
                 let re = (k === j) ? 12 : 0
-                assertEQ(Atomics.load(ta, k), re)
+                arktest.assertEQ(Atomics.load(ta, k), re)
             }
 
             Atomics.store(ta, j, 0)
@@ -54,7 +54,7 @@ function testCompareExchange() {
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Atomics baseOperator tests')
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
     suite.addTest('Function testCompareExchange', testCompareExchange)
     return suite.run()
 }
