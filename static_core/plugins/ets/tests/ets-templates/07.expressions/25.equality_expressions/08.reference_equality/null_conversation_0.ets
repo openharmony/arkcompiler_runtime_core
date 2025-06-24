@@ -20,7 +20,7 @@ desc: The result of === at runtime is true if both operand values are null
 class A {}
 
 function main(): void {
-  let b: A|null = null;
-  let c: A|null = null;
+  let b: A | null = null;
+  let c: A | null = null;
   arktest.assertTrue( b === c && b == c )
 }
