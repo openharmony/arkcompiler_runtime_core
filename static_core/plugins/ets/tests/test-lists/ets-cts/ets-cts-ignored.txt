@@ -33,6 +33,9 @@
 03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
 03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
 
+#27134
+03.types/14.type_string/string_length_type.ets
+
 #25512
 03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets

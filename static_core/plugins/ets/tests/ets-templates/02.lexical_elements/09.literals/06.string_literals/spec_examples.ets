@@ -34,4 +34,12 @@ function main(): void {
     arktest.assertTrue(f instanceof string)
     arktest.assertTrue(g instanceof string)
     arktest.assertTrue(h instanceof string)
+
+	arktest.assertEQ(b.length, 13)
+	arktest.assertEQ(c.length, 13)
+	arktest.assertEQ(d.length, 1)
+	arktest.assertEQ(e.length, 0)
+	arktest.assertEQ(f.length, 11)
+	arktest.assertEQ(g.length, 11)
+	arktest.assertEQ(h.length, 11)
 }
