@@ -125,7 +125,7 @@ function objectKeys(): int {
     let sh: short = 20
     let i: int = 30
     let lo: long = 40
-    let fl: float = 50.0
+    let fl: float = 50.0f
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
@@ -156,6 +156,12 @@ function objectKeys(): int {
 
     result += strArraysAreEqual(Object.keys(lambda), emptyArr) ? 0 : 1
 
+    let arr2 = new Array<number>()
+    result += strArraysAreEqual(Object.keys(arr2), emptyArr) ? 0 : 1
+
+    let arr3 = new Array<number>(5)
+    result += strArraysAreEqual(Object.keys(arr3), ['0', '1', '2', '3', '4']) ? 0 : 1
+
     return result
 }
 
@@ -168,7 +174,7 @@ function objectValues(): int {
     let sh: short = 20
     let i: int = 30
     let lo: long = 40
-    let fl: float = 50.0
+    let fl: float = 50.0f
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
@@ -214,7 +220,7 @@ function objectEntries(): int {
     let sh: short = 20
     let i: int = 30
     let lo: long = 40
-    let fl: float = 50.0
+    let fl: float = 50.0f
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
@@ -269,7 +275,7 @@ function objectGetOwnPropertyNames(): int {
     let sh: short = 20
     let i: int = 30
     let lo: long = 40
-    let fl: float = 50.0
+    let fl: float = 50.0f
     let dou: double = 60.0
 
     let arr: FixedArray<number> = [10, 20, 30]
@@ -298,6 +304,12 @@ function objectGetOwnPropertyNames(): int {
     result += strArraysAreEqual(Object.getOwnPropertyNames(cl), ["x", "y", "z"]) ? 0 : 1
 
     result += strArraysAreEqual(Object.getOwnPropertyNames(lambda), ["length", "name"]) ? 0 : 1
+
+    let arr2 = new Array<number>()
+    result += strArraysAreEqual(Object.getOwnPropertyNames(arr2), ['length']) ? 0 : 1
+
+    let arr3 = new Array<number>(5)
+    result += strArraysAreEqual(Object.getOwnPropertyNames(arr3), ['0', '1', '2', '3', '4', 'length']) ? 0 : 1
 
     return result
 }
