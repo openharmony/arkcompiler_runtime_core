@@ -270,7 +270,7 @@ function checkTsToBoolean(): boolean {
     try {
         module.getProperty('base').toBoolean();
     } catch (e: Error) {
-        res = e.message === 'StdlibBoolean expected';
+        res = e.message === 'Boolean expected';
     }
     return res;
 }

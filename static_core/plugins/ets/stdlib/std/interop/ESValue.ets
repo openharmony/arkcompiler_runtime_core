@@ -168,13 +168,10 @@ export final class ESValue {
     }
 
     public toBoolean(): boolean {
-        if(this.isObject()) {
-            return JSRuntime.getValueObject(this.ev, ESValue.BOOLEAN_CLASS) as boolean;
-        }
         if (!this.isBoolean()) {
-            throw new TypeError("Boolaen expected");
+            throw new TypeError("Boolean expected");
         }
-        return JSRuntime.getValueBoolean(this.ev);
+        return JSRuntime.getValueObject(this.ev, ESValue.BOOLEAN_CLASS) as boolean;
     }
 
     public toString(): string {
@@ -188,13 +185,10 @@ export final class ESValue {
     }
 
     public toNumber(): number {
-        if(this.isObject()) {
-            return JSRuntime.getValueObject(this.ev, ESValue.NUMBER_CLASS) as number;
-        }
         if (!this.isNumber()) {
             throw new TypeError("Number expected");
         }
-        return JSRuntime.getValueDouble(this.ev);
+        return JSRuntime.getValueObject(this.ev, ESValue.NUMBER_CLASS) as number;
     }
 
     public toBigInt(): bigint {
