@@ -60,13 +60,13 @@ function main(): int {
     ];
 
     for (let i: int = 0; i < compressableStringsTable.length; i++) {
-        let tmp = new String(compressableStringsTable[i]);
+        let tmp = compressableStringsTable[i];
         if (tmp != compressableStringsTable[i]) {
             return 1;
         }
     }
     for (let i: int = 0; i < uncompressableStringsTable.length; i++) {
-        let tmp = new String(uncompressableStringsTable[i]);
+        let tmp = uncompressableStringsTable[i];
         if (tmp != uncompressableStringsTable[i]) {
             return 2;
         }

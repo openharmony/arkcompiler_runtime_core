@@ -58,19 +58,19 @@ function main() : int {
     if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
         return 22;
     }
-    if (min(0. as float, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
+    if (min(0.0 as float, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) {
         return 23;
     }
-    if (min(0. as float, Float.MIN_VALUE) != 0. as float) {
+    if (min(0.0 as float, Float.MIN_VALUE) != 0.0 as float) {
         return 24;
     }
     if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) {
         return 25;
     }
-    if (min(0. as float, 2. as float) != 0. as float) {
+    if (min(0.0 as float, 2.0 as float) != 0.0 as float) {
         return 26;
     }
-    if (min(0. as float, -4. as float) != -4. as float) {
+    if (min(0.0 as float, -4.0 as float) != -4.0 as float) {
         return 27;
     }
     if (min(1.e-10 as float, 2.e+12 as float) != 1.e-10 as float) {
