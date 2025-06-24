@@ -775,8 +775,25 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
             return EtsString::CreateFromMUtf8("string");
         case napi_symbol:
             return EtsString::CreateFromMUtf8("object");
-        case napi_object:
+        case napi_object: {
+            auto coro = EtsCoroutine::GetCurrent();
+            auto ctx = InteropCtx::Current(coro);
+            INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+            auto env = ctx->GetJSEnv();
+            NapiScope jsHandleScope(env);
+            napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+            // (note: need to use JS_TYPE, #ICIFWJ)
+            if (IsConstructor(env, jsValue, "Number")) {
+                return EtsString::CreateFromMUtf8("number");
+            }
+            if (IsConstructor(env, jsValue, "Boolean")) {
+                return EtsString::CreateFromMUtf8("boolean");
+            }
+            if (IsConstructor(env, jsValue, "String")) {
+                return EtsString::CreateFromMUtf8("string");
+            }
             return EtsString::CreateFromMUtf8("object");
+        }
         case napi_function:
             return EtsString::CreateFromMUtf8("function");
         case napi_external:
