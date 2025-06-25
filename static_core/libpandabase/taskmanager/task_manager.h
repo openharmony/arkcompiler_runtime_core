@@ -73,6 +73,7 @@ public:
     static PANDA_PUBLIC_API void DestroyTaskQueue(TaskQueueInterface *queue);
     /**
      * @brief Method chages count of currect workers.
+     *  - if new count is more then MAX_WORKER_COUNT, method uses count equel to MAX_WORKER_COUNT
      *  - if new count is more then current one, method will create new workers;
      *  - if new count is less then current one, method will wait for finish excess workers;
      *  - if new count is equel to current one, method to nothing;
