@@ -14,9 +14,11 @@
  */
 
 #include "IntlLanguageTag.h"
+#include "libpandabase/macros.h"
 
 #include <algorithm>
 #include <locale>
+#include <sstream>
 #include <string_view>
 
 namespace ark::ets::stdlib::intl {
@@ -41,14 +43,11 @@ static bool IsAlphaNum(std::string_view str)
 
 static bool IsVariant(std::string_view subtag)
 {
-    const size_t minSize = 4;
-    const size_t maxSize = 8;
-
     auto size = subtag.size();
-    if (size == minSize) {
+    if (size == INTL_INDEX_FOUR) {
         return IsNum(subtag.substr(0, 1)) && IsAlphaNum(subtag.substr(1));
     }
-    if (minSize + 1 <= size && size <= maxSize) {
+    if (INTL_INDEX_FOUR + 1 <= size && size <= INTL_INDEX_EIGHT) {
         return IsAlphaNum(subtag);
     }
     return false;
@@ -56,13 +55,10 @@ static bool IsVariant(std::string_view subtag)
 
 static bool IsRegion(std::string_view subtag)
 {
-    const size_t countryCodeSize = 2;
-    const size_t regionCodeSize = 3;
-
-    if (subtag.size() == countryCodeSize) {
+    if (subtag.size() == INTL_INDEX_TWO) {
         return IsAlpha(subtag);
     }
-    if (subtag.size() == regionCodeSize) {
+    if (subtag.size() == INTL_INDEX_THREE) {
         return IsNum(subtag);
     }
     return false;
@@ -70,9 +66,7 @@ static bool IsRegion(std::string_view subtag)
 
 static bool IsScript(std::string_view subtag)
 {
-    const size_t exactSize = 4;
-
-    if (subtag.size() == exactSize) {
+    if (subtag.size() == INTL_INDEX_FOUR) {
         return IsAlpha(subtag);
     }
     return false;
@@ -88,14 +82,18 @@ static bool IsExtension(std::string_view subtag)
 
 static bool IsLanguage(std::string_view subtag)
 {
-    const size_t minSizeIso639 = 2;
-    const size_t maxSizeIso639 = 3;
-    const size_t minSizeBcp47 = 5;
-    const size_t maxSizeBcp47 = 8;
-
     auto size = subtag.size();
-    if ((minSizeIso639 <= size && size <= maxSizeIso639) || (minSizeBcp47 <= size && size <= maxSizeBcp47)) {
+    if ((INTL_INDEX_TWO <= size && size <= INTL_INDEX_THREE) || (INTL_INDEX_FIVE <= size && size <= INTL_INDEX_EIGHT)) {
         return IsAlpha(subtag);
+    }
+    return false;
+}
+
+bool IsPrivateSubTag(const std::string &result, size_t &len)
+{
+    if ((len > 1) && (result[1] == '-')) {
+        ASSERT(result[0] == 'x' || result[0] == 'i');
+        return true;
     }
     return false;
 }
@@ -203,6 +201,53 @@ bool IsStructurallyValidLanguageTag(const std::string &tag)
         }
     }
     return true;
+}
+
+std::string ToStdStringLanguageTag(const icu::Locale &locale)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    auto result = locale.toLanguageTag<std::string>(status);
+    if (U_FAILURE(status) != 0) {
+        return "";
+    }
+    size_t findBeginning = result.find("-u-");
+    std::string finalRes;
+    std::string tempRes;
+    if (findBeginning == std::string::npos) {
+        return result;
+    }
+    size_t specialBeginning = findBeginning + INTL_INDEX_THREE;
+    size_t specialCount = 0;
+    while ((specialBeginning < result.size()) && (result[specialBeginning] != '-')) {
+        specialCount++;
+        specialBeginning++;
+    }
+    if (findBeginning != std::string::npos) {
+        // It begin with "-u-xx" or with more elements.
+        tempRes = result.substr(0, findBeginning + INTL_INDEX_THREE + specialCount);
+        if (result.size() <= findBeginning + INTL_INDEX_THREE + specialCount) {
+            return result;
+        }
+        std::string leftStr = result.substr(findBeginning + INTL_INDEX_THREE + specialCount + 1);
+        std::istringstream temp(leftStr);
+        std::string buffer;
+        std::vector<std::string> resContainer;
+        while (getline(temp, buffer, '-')) {
+            if (buffer != "true" && buffer != "yes") {
+                resContainer.push_back(buffer);
+            }
+        }
+        for (auto &it : resContainer) {
+            std::string tag = "-";
+            tag += it;
+            finalRes += tag;
+        }
+    }
+    if (!finalRes.empty()) {
+        tempRes += finalRes;
+    }
+    result = tempRes;
+    return result;
 }
 
 }  // namespace ark::ets::stdlib::intl

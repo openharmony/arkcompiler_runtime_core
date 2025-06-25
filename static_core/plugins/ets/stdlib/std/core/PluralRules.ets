@@ -99,9 +99,19 @@ export namespace Intl {
             return PluralRules.selectDouble(value, options) as LDMLPluralRule
         }
 
-        public static supportedLocalesOf(locales: string | FixedArray<string>, options?: SupportedLocalesOfOptions): string[] {
-            const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
+        public static supportedLocalesOf(locales: string | FixedArray<string> | Array<string>, options?: SupportedLocalesOfOptions | PluralRulesOptions): string[] {
+            const arr = PluralRules.toArray(locales)
             return options?.localeMatcher === "lookup" ? intlLookUpLocales(arr) : intlBestFitLocales(arr)
+        }
+
+        private static toArray(locales: string | FixedArray<string> | Array<string>): string[] {
+            if (locales instanceof FixedArray<string>) {
+                return Array.from(locales)
+            } else if (locales instanceof string) {
+                return [locales]
+            } else {
+                return locales
+            }
         }
 
         private static native selectDouble(value: double, options: Object): string
