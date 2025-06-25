@@ -4,17 +4,17 @@
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_interface.ets
 
 #14338
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_9.ets
+15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_9.ets
 
 #17965 ERRNO: 12 (Cannot allocate memory)
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_45.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_46.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_47.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_48.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_45.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_46.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_47.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_48.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_45.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_46.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_47.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_48.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_45.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_46.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_47.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_48.ets
 
 #26235
 07.expressions/06.spread_expression/spex_meth_13.ets
