@@ -18,7 +18,6 @@ from typing import Any, cast
 
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.error.ErrorListener import ErrorListener
-from antlr4.FileStream import FileStream
 from antlr4.InputStream import InputStream
 from antlr4.ParserRuleContext import ParserRuleContext
 from antlr4.Token import Token
@@ -31,24 +30,21 @@ from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import IDLSyntaxError
 from taihe.utils.sources import (
     SourceBase,
-    SourceBuffer,
-    SourceFile,
     SourceLocation,
     TextPosition,
-    TextRange,
+    TextSpan,
 )
 
 
 class SourceCodeLocator:
     def __init__(self, source: SourceBase) -> None:
         self.source = source
-        self._cache: dict[Tree | Token, TextRange | None] = {}
+        self._cache: dict[Tree | Token, TextSpan | None] = {}
 
-    def get_range(self, ctx: Tree | Token) -> TextRange | None:
-        pos = self._cache.get(ctx, KeyError())
-        if not isinstance(pos, KeyError):
-            return pos
-        elif isinstance(ctx, Token):
+    def get_span(self, ctx: Tree | Token) -> TextSpan | None:
+        if ctx in self._cache:
+            return self._cache[ctx]
+        if isinstance(ctx, Token):
             text = cast(str, ctx.text).splitlines()  # type: ignore
             row = cast(int, ctx.line)
             col = cast(int, ctx.column)
@@ -62,26 +58,26 @@ class SourceCodeLocator:
                 row + row_offset,
                 col + col_offset if row_offset == 0 else col_offset,
             )
-            pos = TextRange(beg, end)
+            span = TextSpan(beg, end)
         elif isinstance(ctx, TerminalNodeImpl | ErrorNodeImpl):
-            pos = self.get_range(ctx.symbol)
+            span = self.get_span(ctx.symbol)
         elif isinstance(ctx, ParserRuleContext):
-            text_ranges: list[TextRange] = []
+            span = None
             children = cast(list[Tree | Token], ctx.children) or []
             for child in children:
-                self.get_range(child)
-                if (pair := self._cache.get(child)) is not None:
-                    text_ranges.append(pair)
-            if not text_ranges:
-                pos = None
-            else:
-                pos = TextRange(text_ranges[0].start, text_ranges[-1].stop)
+                part = self.get_span(child)
+                if part is None:
+                    continue
+                if span is None:
+                    span = part
+                else:
+                    span = span | part
         else:
             raise TypeError(f"Unsupported type {type(ctx)} for ASTRecorder.get_pos()")
-        return self._cache.setdefault(ctx, pos)
+        return self._cache.setdefault(ctx, span)
 
     def get_loc(self, ctx: Tree | Token) -> SourceLocation:
-        return SourceLocation(self.source, self.get_range(ctx))
+        return SourceLocation(self.source, self.get_span(ctx))
 
 
 class TaiheErrorListener(ErrorListener):
@@ -154,12 +150,7 @@ class TaiheASTConverter:
 
 
 def generate_ast(source: SourceBase, diag: DiagnosticsManager) -> TaiheAST.Spec:
-    if isinstance(source, SourceBuffer):
-        input_stream = InputStream(source.buf)
-    elif isinstance(source, SourceFile):
-        input_stream = FileStream(source.source_identifier, encoding="utf-8")
-    else:
-        raise NotImplementedError
+    input_stream = InputStream(source.read())
 
     lexer = TaiheLexer(input_stream)
     token_stream = CommonTokenStream(lexer)

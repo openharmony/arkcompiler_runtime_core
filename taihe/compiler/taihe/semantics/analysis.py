@@ -81,12 +81,12 @@ def _check_decl_confilct_with_namespace(
     diag: DiagnosticsManager,
 ):
     """Checks for declarations conflicts with namespaces."""
-    namespaces: set[str] = set()
+    namespaces: dict[str, list[PackageDecl]] = {}
     for pkg in pg.packages:
         pkg_name = pkg.name
         # package "a.b.c" -> namespaces ["a.b.c", "a.b", "a"]
         while True:
-            namespaces.add(pkg_name)
+            namespaces.setdefault(pkg_name, []).append(pkg)
             splited = pkg_name.rsplit(".", maxsplit=1)
             if len(splited) == 2:
                 pkg_name = splited[0]
@@ -96,8 +96,8 @@ def _check_decl_confilct_with_namespace(
     for p in pg.packages:
         for d in p.declarations:
             name = p.name + "." + d.name
-            if name in namespaces:
-                diag.emit(SymbolConflictWithNamespaceError(d, p))
+            if packages := namespaces.get(name, []):
+                diag.emit(SymbolConflictWithNamespaceError(d, name, packages))
 
 
 class _ResolveImportsPass(RecursiveDeclVisitor):

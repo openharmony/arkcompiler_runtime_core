@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
 #include <taihe/runtime.hpp>
-#include "ani.h"
+
+#include <iostream>
 
 namespace taihe {
 ani_vm *global_vm = nullptr;
@@ -28,35 +28,6 @@ ani_vm *get_vm()
 {
     return global_vm;
 }
-
-ani_env *get_env()
-{
-    ani_env *env = nullptr;
-    global_vm->GetEnv(ANI_VERSION_1, &env);
-    return env;
-}
-
-env_guard::env_guard()
-{
-    is_attached = global_vm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env) == ANI_OK;
-    if (!is_attached) {
-        global_vm->GetEnv(ANI_VERSION_1, &env);
-    }
-}
-
-env_guard::~env_guard()
-{
-    if (is_attached) {
-        global_vm->DetachCurrentThread();
-    }
-}
-
-ref_guard::ref_guard(ani_env *env, ani_ref val)
-{
-    env->GlobalReference_Create(val, &ref);
-}
-
-ref_guard::~ref_guard(){}
 
 static ani_error create_ani_error(ani_env *env, taihe::string_view msg)
 {
@@ -106,7 +77,7 @@ static ani_error create_ani_business_error(ani_env *env, int32_t err_code, taihe
 
     ani_error businessErrObj;
     if (ANI_OK != env->Object_New(errCls, errCtor, reinterpret_cast<ani_object *>(&businessErrObj),
-                                  (ani_double)err_code, errObj)) {
+                                  static_cast<ani_double>(err_code), errObj)) {
         std::cerr << "Create Object Failed'" << className << "'" << std::endl;
         return nullptr;
     }

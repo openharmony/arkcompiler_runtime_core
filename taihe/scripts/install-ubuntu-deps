@@ -245,7 +245,6 @@ main() {
             sudo "$0" install_pkg
             "$0" update_pip_mirror
             "$0" setup_compiler_env "$script_dir"
-            exit 1
             ;;
     esac
 }

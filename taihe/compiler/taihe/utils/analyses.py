@@ -22,9 +22,11 @@ avoiding redundant computation or memory usage.
 from abc import ABC, abstractmethod
 from collections.abc import Hashable
 from dataclasses import dataclass
-from typing import Any, Generic, NoReturn, ParamSpec, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, NoReturn, ParamSpec, TypeVar, cast
 
-from taihe.utils.diagnostics import DiagnosticsManager
+if TYPE_CHECKING:
+    from taihe.driver.contexts import CompilerInvocation
+    from taihe.utils.diagnostics import DiagnosticsManager
 
 P = ParamSpec("P")
 A = TypeVar("A", bound="AbstractAnalysis[Any]")
@@ -74,10 +76,17 @@ class AbstractAnalysis(ABC, Generic[P]):
 class AnalysisManager:
     """Manages caching and retrieval of analysis instances."""
 
-    diagnostics_manager: DiagnosticsManager
+    # TODO: maybe remove these
+    compiler_invocation: "CompilerInvocation"
+    diagnostics_manager: "DiagnosticsManager"
 
-    def __init__(self, diagnostics_manager: DiagnosticsManager) -> None:
+    def __init__(
+        self,
+        compiler_invocation: "CompilerInvocation",
+        diagnostics_manager: "DiagnosticsManager",
+    ) -> None:
         self._cache: dict[CacheKey, AbstractAnalysis[Any]] = {}
+        self.compiler_invocation = compiler_invocation
         self.diagnostics_manager = diagnostics_manager
 
     def get_or_create(self, analysis_type: type[A], *args: Any, **kwargs: Any) -> A:
