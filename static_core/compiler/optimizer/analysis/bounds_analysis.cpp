@@ -412,12 +412,10 @@ BoundsRange BoundsRange::FitInType(DataType::Type type) const
 {
     auto typeMin = BoundsRange::GetMin(type);
     auto typeMax = BoundsRange::GetMax(type);
-    BoundsRange res = *this;
     if (left_ < typeMin || left_ > typeMax || right_ < typeMin || right_ > typeMax) {
-        res = BoundsRange(typeMin, typeMax);
-        res.SetActualLengthLoop(GetActualLengthLoop());
+        return BoundsRange(typeMin, typeMax);
     }
-    return res;
+    return *this;
 }
 
 BoundsRange BoundsRange::Union(const ArenaVector<BoundsRange> &ranges)
@@ -744,7 +742,7 @@ void BoundsRangeInfo::SetBoundsRange(const BasicBlock *block, const Inst *inst, 
     ASSERT(inst->GetType() == DataType::REFERENCE || DataType::GetCommonType(inst->GetType()) == DataType::INT64);
     ASSERT(range.GetLeft() >= BoundsRange::GetMin(inst->GetType()));
     ASSERT(range.GetRight() <= BoundsRange::GetMax(inst->GetType()));
-    if (!range.IsMaxRange() || range.GetLenArray() != nullptr || range.HasActualLengthLoop()) {
+    if (!range.IsMaxRange() || range.GetLenArray() != nullptr) {
         if (boundsRangeInfo_.find(block) == boundsRangeInfo_.end()) {
             auto it1 = boundsRangeInfo_.emplace(block, aa_.Adapter());
             ASSERT(it1.second);
@@ -752,9 +750,6 @@ void BoundsRangeInfo::SetBoundsRange(const BasicBlock *block, const Inst *inst, 
         } else if (boundsRangeInfo_.at(block).find(inst) == boundsRangeInfo_.at(block).end()) {
             boundsRangeInfo_.at(block).emplace(inst, range);
         } else {
-            if (boundsRangeInfo_.at(block).at(inst).HasActualLengthLoop() && !range.HasActualLengthLoop()) {
-                range.SetActualLengthLoop(boundsRangeInfo_.at(block).at(inst).GetActualLengthLoop());
-            }
             boundsRangeInfo_.at(block).at(inst) = range;
         }
     }
@@ -918,31 +913,12 @@ void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
     auto boundsAnalysis = static_cast<BoundsAnalysis *>(v);
     auto bri = boundsAnalysis->GetBoundsRangeInfo();
     auto phi = inst->CastToPhi();
-    auto setPhiArrayIndexRange = [&bri](Inst *phiInst) {
-        Loop *loop = phiInst->GetBasicBlock()->GetLoop();
-        if (loop->IsRoot()) {
-            return;
-        }
-        if (loop->GetArrayIndexVariable() != phiInst) {
-            return;
-        }
-        if (loop->GetHeader() != phiInst->GetBasicBlock()) {
-            return;
-        }
-        auto loopBodyBlock = phiInst->GetBasicBlock()->GetFalseSuccessor();
-        auto range = bri->FindBoundsRange(loopBodyBlock, phiInst);
-        range.SetRange(0, BoundsRange::ACTUAL_LENGTH_VALUE - 1);
-        range.SetActualLengthLoop(loop);
-        bri->SetBoundsRange(loopBodyBlock, phiInst, range);
-    };
     // for phi in a countable loop
     if (inst->GetType() != DataType::REFERENCE && boundsAnalysis->ProcessCountableLoop(phi, bri)) {
-        setPhiArrayIndexRange(inst);
         return;
     }
     // for other phis
     MergePhiPredecessors(phi, bri);
-    setPhiArrayIndexRange(inst);
 }
 
 template <bool CHECK_TYPE>
@@ -1312,63 +1288,6 @@ void BoundsAnalysis::ProcessNullCheck(GraphVisitor *v, const Inst *checkInst, co
     }
 }
 
-void BoundsAnalysis::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
-{
-    Loop *thisLoop = inst->GetBasicBlock()->GetLoop();
-    if (thisLoop->IsRoot()) {
-        return;
-    }
-    Inst *lenArrayInst = inst->GetInput(0).GetInst();
-    auto opcode = lenArrayInst->GetOpcode();
-    if (opcode != Opcode::LenArray && opcode != Opcode::LoadObject) {
-        return;
-    }
-    auto boundsAnalysis = static_cast<BoundsAnalysis *>(v);
-    auto bri = boundsAnalysis->GetBoundsRangeInfo();
-    auto indexRange = bri->FindBoundsRange(inst->GetBasicBlock(), inst->GetInput(1).GetInst());
-    Loop *actualLengthLoop = indexRange.GetActualLengthLoop();
-    // Within actualLengthLoop and its inner loops, the bounds range can be propagated.
-    if (actualLengthLoop == nullptr || (thisLoop != actualLengthLoop && !thisLoop->IsInside(actualLengthLoop))) {
-        return;
-    }
-    Inst *arrayOriginRef = actualLengthLoop->GetArrayOriginRef();
-    if (opcode == Opcode::LenArray &&
-        !CheckArrayField(RuntimeInterface::ArrayField::BUFFER, lenArrayInst, arrayOriginRef)) {
-        return;
-    }
-    if (opcode == Opcode::LoadObject &&
-        !CheckArrayField(RuntimeInterface::ArrayField::ACTUAL_LENGTH, lenArrayInst, arrayOriginRef)) {
-        return;
-    }
-    auto saveState = inst->GetSaveState();
-    ASSERT(saveState != nullptr);
-    auto callerInst = saveState->GetCallerInst();
-    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
-    RuntimeInterface::MethodPtr method = nullptr;
-    if (callerInst != nullptr) {
-        method = callerInst->GetCallMethod();
-    } else {
-        method = inst->GetBasicBlock()->GetGraph()->GetMethod();
-    }
-    // only support bounds check opt for array methods
-    if (!runtime->IsClassEscompatArray(runtime->GetClass(method))) {
-        indexRange = BoundsRange(inst->GetInput(1).GetInst()->GetType());
-        bri->SetBoundsRange(inst->GetBasicBlock(), inst->GetInput(1).GetInst(), indexRange);
-    }
-    bri->SetBoundsRange(inst->GetBasicBlock(), inst, indexRange);
-}
-
-void BoundsAnalysis::VisitLoadObject(GraphVisitor *v, Inst *inst)
-{
-    Inst *arrayOriginRef = nullptr;
-    if (CheckArrayField(RuntimeInterface::ArrayField::ACTUAL_LENGTH, inst, arrayOriginRef)) {
-        auto boundsAnalysis = static_cast<BoundsAnalysis *>(v);
-        auto bri = boundsAnalysis->GetBoundsRangeInfo();
-        auto range = BoundsRange(BoundsRange::ACTUAL_LENGTH_VALUE);
-        bri->SetBoundsRange(inst->GetBasicBlock(), inst, range);
-    }
-}
-
 void BoundsAnalysis::CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *isInstance, IfImmInst *ifImm)
 {
     ASSERT(isInstance == ifImm->GetInput(0).GetInst());
@@ -1410,18 +1329,8 @@ void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *b
         } else if (rightRange.GetLenArray() != nullptr) {
             ranges.second.SetLenArray(rightRange.GetLenArray());
         }
-        if (leftRange.HasActualLengthLoop()) {
-            ranges.first.SetActualLengthLoop(leftRange.GetActualLengthLoop());
-        }
-        if (rightRange.HasActualLengthLoop()) {
-            ranges.second.SetActualLengthLoop(rightRange.GetActualLengthLoop());
-        }
-        if (!bri->FindBoundsRange(tgtBlock, left).HasActualLengthLoop()) {
-            bri->SetBoundsRange(tgtBlock, left, ranges.first.FitInType(left->GetType()));
-        }
-        if (!bri->FindBoundsRange(tgtBlock, right).HasActualLengthLoop()) {
-            bri->SetBoundsRange(tgtBlock, right, ranges.second.FitInType(right->GetType()));
-        }
+        bri->SetBoundsRange(tgtBlock, left, ranges.first.FitInType(left->GetType()));
+        bri->SetBoundsRange(tgtBlock, right, ranges.second.FitInType(right->GetType()));
     }
 }
 
@@ -1435,21 +1344,17 @@ void BoundsAnalysis::CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst)
     auto input0 = inst->GetInput(0).GetInst();
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     BoundsRange range;
-    Loop *loop = nullptr;
     // clang-format off
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (OPC == Opcode::Neg) {
             range = range0.Neg();
-            loop = range0.GetActualLengthLoop();
         // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
         } else if constexpr (OPC == Opcode::Abs) {
             range = range0.Abs();
-            loop = range0.GetActualLengthLoop();
         } else {
             UNREACHABLE();
         }
     // clang-format on
-    range.SetActualLengthLoop(loop);
     bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
 }
 
@@ -1474,11 +1379,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeAdd(const BoundsRangeInfo *bri, co
             range.SetLenArray(input1);
         }
     }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
     return range;
 }
 
@@ -1497,11 +1397,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeSub(const BoundsRangeInfo *bri, co
         } else if (IsLenArray(input0) && range1.IsMore(BoundsRange(0))) {
             range.SetLenArray(input0);
         }
-    }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
     }
     return range;
 }
@@ -1524,11 +1419,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeMod(const BoundsRangeInfo *bri, co
     } else if (IsLenArray(input1)) {
         range.SetLenArray(input1);
     }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
     return range;
 }
 
@@ -1538,16 +1428,10 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeMul(const BoundsRangeInfo *bri, co
     auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
-    BoundsRange range;
     if (!range0.IsMaxRange() || !range1.IsMaxRange()) {
-        range = range0.Mul(range1);
+        return range0.Mul(range1);
     }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
-    return range;
+    return BoundsRange();
 }
 
 BoundsRange BoundsAnalysis::CalcNewBoundsRangeDiv(const BoundsRangeInfo *bri, const Inst *inst)
@@ -1561,11 +1445,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeDiv(const BoundsRangeInfo *bri, co
     BoundsRange range = range0.Div(range1);
     if (range0.IsNotNegative() && range1.IsNotNegative() && lenArray0 != nullptr) {
         range.SetLenArray(lenArray0);
-    }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
     }
     return range;
 }
@@ -1582,11 +1461,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeShr(const BoundsRangeInfo *bri, co
     if (range0.IsNotNegative() && lenArray0 != nullptr) {
         range.SetLenArray(lenArray0);
     }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
     return range;
 }
 
@@ -1602,11 +1476,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeAShr(const BoundsRangeInfo *bri, c
     if (lenArray0 != nullptr) {
         range.SetLenArray(lenArray0);
     }
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
     return range;
 }
 
@@ -1617,13 +1486,7 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeShl(const BoundsRangeInfo *bri, co
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
 
-    BoundsRange range = range0.Shl(range1, inst->GetType());
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
-    return range;
+    return range0.Shl(range1, inst->GetType());
 }
 
 BoundsRange BoundsAnalysis::CalcNewBoundsRangeAnd(const BoundsRangeInfo *bri, const Inst *inst)
@@ -1633,13 +1496,7 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeAnd(const BoundsRangeInfo *bri, co
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
 
-    BoundsRange range = range0.And(range1);
-    if (range0.HasActualLengthLoop() && (range1.IsConst() || range1.HasActualLengthLoop())) {
-        range.SetActualLengthLoop(range0.GetActualLengthLoop());
-    } else if (range1.HasActualLengthLoop() && range0.IsConst()) {
-        range.SetActualLengthLoop(range1.GetActualLengthLoop());
-    }
-    return range;
+    return range0.And(range1);
 }
 
 bool BoundsAnalysis::CheckBoundsRange(const BoundsRangeInfo *bri, const Inst *inst)

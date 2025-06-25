@@ -95,8 +95,6 @@ public:
 
     enum class InteropCallKind { UNKNOWN = 0, CALL, CALL_BY_VALUE, NEW_INSTANCE, COUNT };
 
-    enum class ArrayField { UNKNOWN = 0, ACTUAL_LENGTH, BUFFER };
-
     RuntimeInterface() = default;
     virtual ~RuntimeInterface() = default;
 
@@ -447,11 +445,6 @@ public:
         return false;
     }
 
-    virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
-    {
-        return false;
-    }
-
     virtual bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -488,21 +481,6 @@ public:
     }
 
     virtual bool IsFieldStringBuilderIndex([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArrayActualLength([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArrayBuffer([[maybe_unused]] FieldPtr field) const
-    {
-        return false;
-    }
-
-    virtual bool IsFieldArray([[maybe_unused]] ArrayField kind, [[maybe_unused]] FieldPtr field) const
     {
         return false;
     }

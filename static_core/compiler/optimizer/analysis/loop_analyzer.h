@@ -151,29 +151,6 @@ public:
     {
         return isRoot_;
     }
-
-    void CheckActualLengthAsLoopInitOrBound();
-
-    void SetArrayIndexVariable(Inst *inst)
-    {
-        arrayIndexVariable_ = inst;
-    }
-
-    Inst *GetArrayIndexVariable() const
-    {
-        return arrayIndexVariable_;
-    }
-
-    void SetArrayOriginRef(Inst *inst)
-    {
-        arrayOriginRef_ = inst;
-    }
-
-    Inst *GetArrayOriginRef() const
-    {
-        return arrayOriginRef_;
-    }
-
     uint32_t GetId() const
     {
         return id_;
@@ -194,11 +171,6 @@ public:
 
 private:
     void CheckInfinity();
-    bool CheckUpdateAndInitForBound(CompareInst *cmpInst, PhiInst *phiInst);
-    void CheckActualLengthAsLoopBound(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst);
-    void CheckActualLengthVariantAsLoopInit(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst);
-    void CheckActualLengthVariantAsLoopBound(Inst *&loadObject, CompareInst *cmpInst, PhiInst *phiInst);
-    bool PrecheckInst(CompareInst *&cmpInst, PhiInst *&phiInst);
 
     void SetDepth(uint32_t depth)
     {
@@ -223,8 +195,6 @@ private:
     bool isIrreducible_ {false};
     bool isInfinite_ {false};
     bool isRoot_ {false};
-    Inst *arrayIndexVariable_ {nullptr};
-    Inst *arrayOriginRef_ {nullptr};
 
     friend class LoopAnalyzer;
 };
@@ -259,7 +229,6 @@ private:
     void PopulateIrreducibleLoop(Loop *loop);
     void NaturalLoopSearch(Loop *loop, BasicBlock *block);
     void SetLoopProperties(Loop *loop, uint32_t depth);
-    void CheckActualLengthAsLoopInitOrBound(Loop *loop);
 
 private:
     Marker blackMarker_ {};

@@ -74,6 +74,44 @@ void InstBuilder::BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool 
     UpdateDefinitionAcc(res);
 }
 
+void InstBuilder::BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto *obj = GetArgDefinition(bcInst, 0, accRead);
+    auto *pos = GetArgDefinition(bcInst, 1, accRead);
+
+    auto *runtime = GetGraph()->GetRuntime();
+    auto *arrayClass = runtime->GetEscompatArrayClass();
+    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+
+    auto buffer = GetGraph()->CreateInstLoadObject(
+        DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
+        bufferField, runtime->IsFieldVolatile(bufferField));
+    AddInstruction(buffer);
+    auto *result = GetGraph()->CreateInstLoadArray(DataType::REFERENCE, bcAddr, buffer, pos);
+    AddInstruction(result);
+    UpdateDefinitionAcc(result);
+}
+
+void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto *obj = GetArgDefinition(bcInst, 0, accRead);
+    auto *pos = GetArgDefinition(bcInst, 1, accRead);
+    auto *value = GetArgDefinition(bcInst, 2, accRead);
+
+    auto *runtime = GetGraph()->GetRuntime();
+    auto *arrayClass = runtime->GetEscompatArrayClass();
+    auto *bufferField = runtime->GetEscompatArrayBuffer(arrayClass);
+
+    auto buffer = GetGraph()->CreateInstLoadObject(
+        DataType::REFERENCE, bcAddr, obj, TypeIdMixin {runtime->GetFieldId(bufferField), GetGraph()->GetMethod()},
+        bufferField, runtime->IsFieldVolatile(bufferField));
+    AddInstruction(buffer);
+    auto *result = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, pos, value, true);
+    AddInstruction(result);
+}
+
 void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst,
                                                      ark::compiler::DataType::Type type, bool accRead)
 {

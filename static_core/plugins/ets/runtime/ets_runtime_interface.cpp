@@ -309,31 +309,6 @@ bool EtsRuntimeInterface::IsFieldStringBuilderIndex(FieldPtr field) const
     return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == "index";
 }
 
-bool EtsRuntimeInterface::IsFieldArrayActualLength(FieldPtr field) const
-{
-    return IsClassEscompatArray(FieldCast(field)->GetClass()) && GetFieldName(field) == "actualLength";
-}
-
-bool EtsRuntimeInterface::IsFieldArrayBuffer(FieldPtr field) const
-{
-    return IsClassEscompatArray(FieldCast(field)->GetClass()) && GetFieldName(field) == "buffer";
-}
-
-bool EtsRuntimeInterface::IsFieldArray(ArrayField kind, FieldPtr field) const
-{
-    if (!HasFieldMetadata(field)) {
-        return false;
-    }
-    switch (kind) {
-        case ArrayField::ACTUAL_LENGTH:
-            return IsFieldArrayActualLength(field);
-        case ArrayField::BUFFER:
-            return IsFieldArrayBuffer(field);
-        default:
-            return false;
-    }
-}
-
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
 {
     return id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_TO_STRING;

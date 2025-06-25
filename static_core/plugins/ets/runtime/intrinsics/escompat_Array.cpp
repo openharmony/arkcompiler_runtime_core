@@ -836,4 +836,22 @@ extern "C" ark::ets::EtsString *EtsEscompatArrayJoinInternal(ObjectHeader *array
 
     return EtsEscompatArrayJoinUtf8(buffer, actualLength, res, ptypes, separatorHandle);
 }
+
+extern "C" EtsObject *EtsEscompatArrayGetUnsafe(ObjectHeader *arrayHeader, int32_t index)
+{
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    [[maybe_unused]] auto length = array->GetData()->GetLength();
+    ASSERT(static_cast<uint32_t>(index) < length);
+    return array->GetData()->Get(index);
+}
+
+extern "C" void EtsEscompatArraySetUnsafe(ObjectHeader *arrayHeader, int32_t index, EtsObject *value)
+{
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    [[maybe_unused]] auto actualLength = array->GetActualLength();
+    ASSERT(static_cast<uint32_t>(index) < actualLength);
+    array->GetData()->Set(index, value);
+}
 }  // namespace ark::ets::intrinsics
