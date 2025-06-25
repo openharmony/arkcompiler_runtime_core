@@ -16,7 +16,7 @@
 function testReadonlyArrayProxyOps(): void {
     const array: ReadonlyArray<string> = Array.of<string>("I", "II", "III")
 
-    class ProxyHandler extends DefaultReadonlyArrayProxyHandler<string> {
+    class ProxyHandler extends proxy.DefaultReadonlyArrayProxyHandler<string> {
         getTrapped = false
 
         override get(target: ReadonlyArray<string>, index: int): string {
@@ -26,7 +26,7 @@ function testReadonlyArrayProxyOps(): void {
     }
 
     const handler = new ProxyHandler()
-    const arrayProxy = Proxy.create(array, handler)
+    const arrayProxy = proxy.Proxy.create(array, handler)
 
     arktest.assertEQ(arrayProxy.length, 3, "unexpected ReadonlyArray proxy length")
     arktest.assertEQ(arrayProxy[0], "I", "ReadonlyArray proxy first element unexpected value")
