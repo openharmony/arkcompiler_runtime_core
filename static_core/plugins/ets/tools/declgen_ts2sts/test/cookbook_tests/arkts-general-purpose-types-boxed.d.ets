@@ -15,4 +15,4 @@
  */
 export declare let a: number;
 export declare let b: number;
-export declare let c: ESObject;
+export declare let c: Any;
