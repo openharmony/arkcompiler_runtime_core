@@ -720,4 +720,38 @@ void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
     }
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_WITH_INT(Name, Type)                                                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                         \
+    void Codegen::Create##Name##ArrayWith([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)           \
+    {                                                                                                           \
+        auto entrypointId = EntrypointId::Type##_ARRAY_WITH;                                                    \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                  \
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]); \
+    }
+
+CODEGEN_TYPED_ARRAY_WITH_INT(Int8, INT8)
+CODEGEN_TYPED_ARRAY_WITH_INT(Int16, INT16)
+CODEGEN_TYPED_ARRAY_WITH_INT(Int32, INT32)
+CODEGEN_TYPED_ARRAY_WITH_INT(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint8Clamped, UINT8_CLAMPED)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_WITH_INT(BigUint64, BIG_UINT64)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_WITH_FLOAT(Name, Type, InType)                                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                   \
+    void Codegen::Create##Name##ArrayWith([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)     \
+    {                                                                                                     \
+        ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::InType, GetArch()));                     \
+        GetEncoder()->EncodeMov(tmp, src[THIRD_OPERAND]);                                                 \
+        auto entrypointId = EntrypointId::Type##_ARRAY_WITH;                                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], tmp.GetReg()); \
+    }
+
+CODEGEN_TYPED_ARRAY_WITH_FLOAT(Float32, FLOAT32, UINT32)
+CODEGEN_TYPED_ARRAY_WITH_FLOAT(Float64, FLOAT64, UINT64)
 }  // namespace ark::compiler

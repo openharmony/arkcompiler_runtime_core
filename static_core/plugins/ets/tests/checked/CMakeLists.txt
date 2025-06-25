@@ -195,6 +195,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         # Causes regalloc verification failure on ARM32
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays.ets)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_reverse.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_with.ets)
         # Issue 26080 (work only with disabled jit)
         # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_fill.ets)
     endif()

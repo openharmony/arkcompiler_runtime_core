@@ -485,3 +485,39 @@ bool LLVMIrConstructor::EmitWriteString(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::WRITE_STRING_TO_MEM, 2U);
 }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_WITH_INT(Name, Type)                                  \
+    /* CC-OFFNXT(G.PRE.02) name part */                                        \
+    bool LLVMIrConstructor::Emit##Name##ArrayWith(Inst *inst)                  \
+    {                                                                          \
+        auto entrypointId = RuntimeInterface::EntrypointId::Type##_ARRAY_WITH; \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                 \
+        return EmitFastPath(inst, entrypointId, 3U);                           \
+    }
+
+EMIT_TYPED_ARRAY_WITH_INT(Int8, INT8)
+EMIT_TYPED_ARRAY_WITH_INT(Int16, INT16)
+EMIT_TYPED_ARRAY_WITH_INT(Int32, INT32)
+EMIT_TYPED_ARRAY_WITH_INT(BigInt64, BIG_INT64)
+EMIT_TYPED_ARRAY_WITH_INT(Uint8Clamped, UINT8_CLAMPED)
+EMIT_TYPED_ARRAY_WITH_INT(Uint8, UINT8)
+EMIT_TYPED_ARRAY_WITH_INT(Uint16, UINT16)
+EMIT_TYPED_ARRAY_WITH_INT(Uint32, UINT32)
+EMIT_TYPED_ARRAY_WITH_INT(BigUint64, BIG_UINT64)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_WITH_FLOAT(Name, Type, InType)                                                            \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                            \
+    bool LLVMIrConstructor::Emit##Name##ArrayWith(Inst *inst)                                                      \
+    {                                                                                                              \
+        auto val = builder_.CreateSExtOrBitCast(GetInputValue(inst, 2), builder_.get##InType##Ty());               \
+        auto entrypointId = RuntimeInterface::EntrypointId::Type##_ARRAY_WITH;                                     \
+        auto call = CreateFastPathCall(inst, entrypointId, {GetInputValue(inst, 0), GetInputValue(inst, 1), val}); \
+        ValueMapAdd(inst, call);                                                                                   \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                     \
+        return true;                                                                                               \
+    }
+
+EMIT_TYPED_ARRAY_WITH_FLOAT(Float32, FLOAT32, Int32)
+EMIT_TYPED_ARRAY_WITH_FLOAT(Float64, FLOAT64, Int64)
