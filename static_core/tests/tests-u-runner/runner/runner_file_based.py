@@ -333,6 +333,8 @@ class RunnerFileBased(Runner):
             full_template_name += "(-DI)?"
         if self.config.es2panda.is_fullastverifier():
             full_template_name += "(-FULLASTV)?"
+        if self.config.es2panda.is_simultaneous():
+            full_template_name += "(-SIMULTANEOUS)?"
         if self.conf_kind == ConfigurationKind.JIT and self.config.ark.jit.num_repeats > 1:
             full_template_name += "(-(repeats|REPEATS))?"
         full_template_name += f"(-{self.build_type.value})?"
@@ -350,7 +352,7 @@ class RunnerFileBased(Runner):
             glob(glob_expression, recursive=True)
         ))
 
-        Log.all(_LOGGER, f"Loading {kind} test lists: {test_lists}")
+        Log.default(_LOGGER, f"Loading {kind} test lists: {test_lists}")
 
         return test_lists
 
