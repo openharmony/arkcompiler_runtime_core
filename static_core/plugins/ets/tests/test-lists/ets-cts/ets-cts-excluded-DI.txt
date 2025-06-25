@@ -24,7 +24,7 @@
 08.statements/15.try_statements/01.catch_clauses/catch_2.ets
 17.experimental_features/16.packages/02.internal_access_modifier/Test/internal_constructor_access_in_package.ets
 17.experimental_features/16.packages/02.internal_access_modifier/Test/internal_member_access_in_package_0.ets
-13.compilation_units/10.top-level_statements/block_declaration_13.ets
+13.compilation_units/08.top-level_statements/block_declaration_13.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_1.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_5.ets
 15.semantic_rules/07.type_inference/02.smart_types/cond_expr_9.ets
@@ -203,5 +203,5 @@
 07.expressions/03.named_reference/qualified_name_0.ets
 07.expressions/03.named_reference/qualified_name_1.ets
 07.expressions/25.equality_expressions/eq_19.ets
-13.compilation_units/10.top-level_statements/block_declaration_3.ets
-13.compilation_units/10.top-level_statements/block_declaration_5.ets
+13.compilation_units/08.top-level_statements/block_declaration_3.ets
+13.compilation_units/08.top-level_statements/block_declaration_5.ets

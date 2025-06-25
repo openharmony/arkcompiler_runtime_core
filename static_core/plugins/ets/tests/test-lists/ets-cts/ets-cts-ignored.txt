@@ -466,22 +466,22 @@
 09.classes/07.constructor_declaration/throws_clause_2.ets
 
 #16840
-10.interfaces/04.interface_members/methods_overriding.ets
-10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
-10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
+10.interfaces/03.interface_members/methods_overriding.ets
+10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
+10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature.ets
 
 #25498
-10.interfaces/06.interface_method_declarations/throws_clause_1.ets
-10.interfaces/06.interface_method_declarations/throws_clause_2.ets
+10.interfaces/05.interface_method_declarations/throws_clause_1.ets
+10.interfaces/05.interface_method_declarations/throws_clause_2.ets
 
 #23856
-13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
-13.compilation_units/09.export_directives/01.selective_export_directive/t02/d.ets
-13.compilation_units/09.export_directives/01.selective_export_directive/t03/d.ets
-13.compilation_units/09.export_directives/01.selective_export_directive/t04/d.ets
-13.compilation_units/09.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
-13.compilation_units/09.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
-13.compilation_units/09.export_directives/04.re-export_directive/pkg03_re-export_all.ets
+13.compilation_units/07.export_directives/01.selective_export_directive/t01/c.ets
+13.compilation_units/07.export_directives/01.selective_export_directive/t02/d.ets
+13.compilation_units/07.export_directives/01.selective_export_directive/t03/d.ets
+13.compilation_units/07.export_directives/01.selective_export_directive/t04/d.ets
+13.compilation_units/07.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
+13.compilation_units/07.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
+13.compilation_units/07.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
 #25195 Subtyping for funtions doesn't work with return type void
 15.semantic_rules/02.subtyping/04.subtyping_for_function_types/positive_3.ets

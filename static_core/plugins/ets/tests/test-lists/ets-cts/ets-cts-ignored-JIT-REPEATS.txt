@@ -34,10 +34,10 @@
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_4.ets
 
 #26038
-10.interfaces/07.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
+10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
 
 #24200 test behavior need to corrected for JIT mode.
-13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
+17.experimental_features/16.packages/init_once/test.ets
 
 #26027
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.ets
