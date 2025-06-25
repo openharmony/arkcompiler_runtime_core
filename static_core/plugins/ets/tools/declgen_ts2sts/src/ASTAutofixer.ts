@@ -1622,7 +1622,8 @@ function getUpdatedType(
   const isBigint = isBigintType(v);
   const isBoolean = isBooleanType(v);
 
-  if (isBigint && nodeFlag === ts.NodeFlags.Const) {
+  const allowedFlags = [ts.NodeFlags.Const, ts.NodeFlags.Let];
+  if (isBigint && allowedFlags.includes(nodeFlag)) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword);
   } else if (isBoolean) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
