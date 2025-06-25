@@ -28,15 +28,23 @@ enum class WorkStatus {
 };
 
 class AsyncWork;
+using EventCallback = void (*)(void *data);
 using ExecuteCallback = void (*)(ani_env *env, void *data);
 using CompleteCallback = void (*)(ani_env *env, WorkStatus status, void *data);
+using AniWorkerId = ani_int;
 
+// *_async_work equivalents
 __attribute__((visibility("default"))) WorkStatus CreateAsyncWork(ani_env *env, ExecuteCallback execute,
                                                                   CompleteCallback complete, void *data,
                                                                   AsyncWork **result);
 __attribute__((visibility("default"))) WorkStatus QueueAsyncWork(ani_env *env, AsyncWork *work);
 __attribute__((visibility("default"))) WorkStatus CancelAsyncWork(ani_env *env, AsyncWork *work);
 __attribute__((visibility("default"))) WorkStatus DeleteAsyncWork(ani_env *env, AsyncWork *work);
+
+// *_send_event equivalents
+__attribute__((visibility("default"))) AniWorkerId GetWorkerId(ani_env *env);
+__attribute__((visibility("default"))) WorkStatus SendEvent(ani_env *env, AniWorkerId worker, EventCallback event,
+                                                            void *data, ani_long timeout = 0);
 
 }  // namespace arkts::concurrency_helpers
 

@@ -5802,6 +5802,10 @@ intrinsics:
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU64
 
+############################################
+#   std.debug.concurrency.CoroutineExtras  #
+############################################
+
   - name: StdCoroutineGetWorkerId
     space: ets
     class_name: std.debug.concurrency.CoroutineExtras
@@ -5902,6 +5906,10 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemIncreaseTaskpoolWorkersToN
 
+####################################
+# std.debug.concurrency.AtomicFlag #
+####################################
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag
@@ -5921,6 +5929,7 @@ intrinsics:
       ret: u1
       args: []
     impl: ark::ets::intrinsics::StdSystemAtomicFlagGet
+
 ####################
 # std.core.Runtime #
 ####################
@@ -8141,6 +8150,10 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+#########################################
+# std.concurrency.NativeAsyncWorkHelper #
+#########################################
+
   - name: stdConcurrencyNativeAsyncWorkHelperAsyncWorkNativeInvoke
     space: ets
     class_name: std.concurrency.NativeAsyncWorkHelper
@@ -8150,6 +8163,30 @@ intrinsics:
       ret: void
       args: [ i64, i64, u1 ]
     impl: ark::ets::intrinsics::AsyncWorkNativeInvoke
+
+  - name: stdConcurrencyNativeAsyncWorkHelperEventNativeInvoke
+    space: ets
+    class_name: std.concurrency.NativeAsyncWorkHelper
+    method_name: eventNativeInvoke
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64, u1 ]
+    impl: ark::ets::intrinsics::EventNativeInvoke
+
+######################################
+# std.concurrency.WorkerGroup        #
+######################################
+
+  - name: StdConcurrencyWorkerGroupGenerateGroupIdImpl
+    space: ets
+    class_name: std.concurrency.WorkerGroup
+    method_name: generateGroupIdImpl
+    static: true
+    signature:
+      ret: i64
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
 
 ###############################
 # std.core.ExclusiveLauncher #
@@ -8233,6 +8270,7 @@ intrinsics:
         - std.core.Object
         - std.core.Object[]
         - u1
+        - i64
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
 
   - name: EtsLaunchOnTheSameWorker

@@ -22,20 +22,17 @@
 namespace ark {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
-                                                 ScheduleLoopType type, PandaString name, size_t id)
-    : CoroutineWorker(runtime, vm),
+                                                 ScheduleLoopType type, PandaString name, Id id, bool isMainWorker)
+    : CoroutineWorker(runtime, vm, name, id, isMainWorker),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
       workerCompletionEvent_(coroManager),
-      stats_(name),
-      name_(std::move(name)),
-      id_(id)
+      stats_(std::move(name))
 {
-    ASSERT(id <= stackful_coroutines::MAX_WORKER_ID);
-    LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << id_ << " name=" << name_;
+    LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
     if (type == ScheduleLoopType::THREAD) {
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
-        os::thread::SetThreadName(t.native_handle(), name_.c_str());
+        os::thread::SetThreadName(t.native_handle(), GetName().c_str());
         t.detach();
         // will create the schedule loop coroutine in the thread proc in order to set the stack protector correctly
     } else {
@@ -545,9 +542,8 @@ void StackfulCoroutineWorker::MigrateCoroutinesImpl(StackfulCoroutineWorker *to,
             if ((*begin)->GetType() != Coroutine::Type::MUTATOR) {
                 continue;
             }
-            auto maskValue = (*begin)->template GetContext<StackfulCoroutineContext>()->GetAffinityMask();
-            std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
-            if (affinityBits.test(to->GetId())) {
+            auto mask = (*begin)->template GetContext<StackfulCoroutineContext>()->GetAffinityMask();
+            if (mask.IsWorkerAllowed(to->GetId())) {
                 LOG(DEBUG, COROUTINES) << "migrate coro " << (*begin)->GetCoroutineId() << " from " << GetId() << " to "
                                        << to->GetId();
                 to->AddRunnableCoroutine(*(*begin));
@@ -578,7 +574,7 @@ bool StackfulCoroutineWorker::IsPotentiallyBlocked()
     if (runnables_.Empty() || lastCtxSwitchTimeMillis_ == 0) {
         return false;
     }
-    if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION) {
+    if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION_MS) {
         LOG(DEBUG, COROUTINES) << "The current coroutine has been executed more than 6s.";
         return true;
     }

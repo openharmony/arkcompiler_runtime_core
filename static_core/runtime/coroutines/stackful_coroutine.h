@@ -18,7 +18,7 @@
 #include "runtime/fibers/fiber_context.h"
 #include "runtime/coroutines/coroutine_context.h"
 #include "runtime/include/panda_vm.h"
-#include "runtime/coroutines/stackful_common.h"
+#include "runtime/coroutines/affinity_mask.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
 namespace ark {
@@ -106,12 +106,12 @@ public:
     }
 
     /// @return current coroutine's affinity bits
-    stackful_coroutines::AffinityMask GetAffinityMask() const
+    AffinityMask GetAffinityMask() const
     {
         return affinityMask_;
     }
 
-    void SetAffinityMask(stackful_coroutines::AffinityMask mask)
+    void SetAffinityMask(const AffinityMask &mask)
     {
         affinityMask_ = mask;
     }
@@ -119,8 +119,7 @@ public:
     /// @return true if migration from worker is allowed
     bool IsMigrationAllowed() const
     {
-        std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(affinityMask_);
-        return mask.count() > 1;
+        return affinityMask_.NumAllowedWorkers() > 1;
     }
 
 protected:
@@ -182,7 +181,7 @@ private:
     size_t stackSizeBytes_ = 0;
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
-    stackful_coroutines::AffinityMask affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
+    AffinityMask affinityMask_ = AffinityMask::Empty();
 #if defined(PANDA_TSAN_ON)
     void *tsanFiberCtx_ {nullptr};
 #endif /* PANDA_TSAN_ON */

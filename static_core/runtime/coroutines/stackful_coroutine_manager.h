@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_MANAGER_H
 
 #include "runtime/coroutines/coroutine_manager.h"
-#include "runtime/coroutines/stackful_common.h"
+#include "runtime/coroutines/affinity_mask.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 #include "runtime/coroutines/coroutine_stats.h"
@@ -46,16 +46,16 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag,
+                CoroutineWorkerGroup::Id groupId) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                            CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                      CoroutinePriority priority, bool abortFlag) override;
+                      CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
 
-    bool IsMainWorker(Coroutine *co) const override;
     Coroutine *CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm) override;
     bool DestroyExclusiveWorker() override;
     bool IsExclusiveWorkersLimitReached() const override;
@@ -142,6 +142,12 @@ public:
     PandaUniquePtr<StackfulCoroutineStateInfoTable> GetAllWorkerFullStatus() const;
 
 protected:
+    static constexpr CoroutineWorker::Id MAIN_WORKER_ID = 0U;
+    // maximum worker id is bound by the number of bits in the affinity mask
+    static constexpr CoroutineWorker::Id MAX_WORKER_ID = AffinityMask::MAX_WORKERS_COUNT - 1U;
+    static_assert(MAIN_WORKER_ID != CoroutineWorker::INVALID_ID);
+    static_assert(MAX_WORKER_ID >= MAIN_WORKER_ID);
+
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
@@ -160,21 +166,20 @@ protected:
     void ReuseCoroutineInstance(Coroutine *co, EntrypointInfo &&epInfo, PandaString name, CoroutinePriority priority);
 
 private:
-    using WorkerId = uint32_t;
-
     StackfulCoroutineContext *CreateCoroutineContextImpl(bool needStack);
     StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co) REQUIRES(workersLock_);
-    stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
+    AffinityMask CalcAffinityMask(CoroutineLaunchMode mode,
+                                  CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID);
 
     Coroutine *GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                             CoroutinePriority priority, stackful_coroutines::AffinityMask affinityMask,
-                                             bool abortFlag);
+                                             CoroutinePriority priority, AffinityMask affinityMask, bool abortFlag);
     bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                    CoroutinePriority priority, bool abortFlag);
+                    CoroutinePriority priority, bool abortFlag, CoroutineWorkerGroup::Id groupId);
     bool LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
                                CoroutinePriority priority, bool abortFlag);
     bool LaunchWithMode(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                        CoroutinePriority priority, bool launchImmediately, bool abortFlag);
+                        CoroutinePriority priority, bool launchImmediately, bool abortFlag,
+                        CoroutineWorkerGroup::Id groupId = CoroutineWorkerGroup::ANY_ID);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.
@@ -190,7 +195,8 @@ private:
     void CreateMainCoroAndWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
     void OnWorkerStartupImpl(StackfulCoroutineWorker *worker) REQUIRES(workersLock_);
     StackfulCoroutineWorker *CreateWorker(Runtime *runtime, PandaVM *vm,
-                                          StackfulCoroutineWorker::ScheduleLoopType wType, PandaString workerName);
+                                          StackfulCoroutineWorker::ScheduleLoopType wType, PandaString workerName,
+                                          bool isMainWorker = false);
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co) REQUIRES(coroListLock_);
@@ -225,8 +231,8 @@ private:
     StackfulCoroutineWorker *ChooseWorkerForFinalization();
 
     void InitializeWorkerIdAllocator();
-    WorkerId AllocateWorkerId();
-    void ReleaseWorkerId(WorkerId workerId);
+    CoroutineWorker::Id AllocateWorkerId();
+    void ReleaseWorkerId(CoroutineWorker::Id workerId);
 
     /**
      * The EP for manager thread. The manager thread can only be created when coroutine migration is supported.
@@ -239,7 +245,8 @@ private:
 
     void CheckForBlockedWorkers();
     void MigrateCoroutinesInward(uint32_t &count);
-    StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, size_t maskValue) REQUIRES(workersLock_);
+    StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, AffinityMask maskValue)
+        REQUIRES(workersLock_);
 
     /**
      * @brief Calculate worker limits based on configuration
@@ -259,7 +266,7 @@ private:
     PandaList<StackfulCoroutineWorker *> workers_ GUARDED_BY(workersLock_);
     // allocator of worker ids
     os::memory::Mutex workerIdLock_;
-    PandaList<WorkerId> freeWorkerIds_ GUARDED_BY(workerIdLock_);
+    PandaList<CoroutineWorker::Id> freeWorkerIds_ GUARDED_BY(workerIdLock_);
     size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
     mutable os::memory::RecursiveMutex workersLock_;
     mutable os::memory::ConditionVariable workersCv_;

@@ -15,7 +15,7 @@
 
 package escompat;
 
-import {launch} from "std/concurrency"
+import {launch, CoroutineId, WorkerId} from "std/concurrency"
 
 export namespace taskpool {
     const TASKPOOL_ERROR_NOT_IN_TASKPOOL: number = 10200022;
@@ -893,11 +893,6 @@ export namespace taskpool {
         /// Array of taskpool tasks information
         taskInfos: TaskInfo[] = new TaskInfo[0];
     }
-
-    type CoroutineId = int;
-    type WorkerId = int;
-
-    // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
     /**
      * Create task and execute

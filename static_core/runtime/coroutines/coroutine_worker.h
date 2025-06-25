@@ -41,11 +41,17 @@ class CoroutineWorker {
 public:
     enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
+    using Id = int32_t;
+
+    static constexpr Id INVALID_ID = -1;
 
     NO_COPY_SEMANTIC(CoroutineWorker);
     NO_MOVE_SEMANTIC(CoroutineWorker);
 
-    CoroutineWorker(Runtime *runtime, PandaVM *vm) : runtime_(runtime), vm_(vm) {}
+    CoroutineWorker(Runtime *runtime, PandaVM *vm, PandaString name, Id id, bool isMainWorker)
+        : runtime_(runtime), vm_(vm), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
+    {
+    }
     virtual ~CoroutineWorker()
     {
         os::memory::LockHolder l(posterLock_);
@@ -62,6 +68,26 @@ public:
     PandaVM *GetPandaVM() const
     {
         return vm_;
+    }
+
+    Id GetId() const
+    {
+        return id_;
+    }
+
+    PandaString GetName() const
+    {
+        return name_;
+    }
+
+    void SetName(PandaString name)
+    {
+        name_ = std::move(name);
+    }
+
+    bool IsMainWorker() const
+    {
+        return isMainWorker_;
     }
 
     LocalStorage &GetLocalStorage()
@@ -94,6 +120,9 @@ public:
 private:
     Runtime *runtime_ = nullptr;
     PandaVM *vm_ = nullptr;
+    PandaString name_;
+    Id id_ = INVALID_ID;
+    bool isMainWorker_ = false;
     LocalStorage localStorage_;
     // event loop poster
     os::memory::Mutex posterLock_;
