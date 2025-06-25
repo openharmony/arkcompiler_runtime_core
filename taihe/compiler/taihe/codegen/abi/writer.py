@@ -17,17 +17,24 @@ from typing import TextIO
 
 from typing_extensions import override
 
-from taihe.utils.outputs import DEFAULT_INDENT, FileWriter, OutputConfig
+from taihe.utils.outputs import DEFAULT_INDENT, FileKind, FileWriter, OutputManager
 
 
 class CSourceWriter(FileWriter):
     """Represents a C or C++ source file."""
 
     @override
-    def __init__(self, oc: OutputConfig, path: str, indent_unit: str = DEFAULT_INDENT):
+    def __init__(
+        self,
+        om: OutputManager,
+        relative_path: str,
+        file_kind: FileKind,
+        indent_unit: str = DEFAULT_INDENT,
+    ):
         super().__init__(
-            oc,
-            path=path,
+            om,
+            relative_path=relative_path,
+            file_kind=file_kind,
             default_indent=indent_unit,
             comment_prefix="// ",
         )
@@ -35,8 +42,18 @@ class CSourceWriter(FileWriter):
 
     @override
     def write_prologue(self, f: TextIO):
+        if self.desc.kind != FileKind.TEMPLATE:
+            f.write("#pragma clang diagnostic push\n")
+            f.write('#pragma clang diagnostic ignored "-Weverything"\n')
+            f.write('#pragma clang diagnostic warning "-Wextra"\n')
+            f.write('#pragma clang diagnostic warning "-Wall"\n')
         for header in self.headers:
             f.write(f'#include "{header}"\n')
+
+    @override
+    def write_epilogue(self, f: TextIO):
+        if self.desc.kind != FileKind.TEMPLATE:
+            f.write("#pragma clang diagnostic pop\n")
 
     def add_include(self, *headers: str):
         for header in headers:
@@ -48,5 +65,5 @@ class CHeaderWriter(CSourceWriter):
 
     @override
     def write_prologue(self, f: TextIO):
-        f.write(f"#pragma once\n")
+        f.write("#pragma once\n")
         super().write_prologue(f)

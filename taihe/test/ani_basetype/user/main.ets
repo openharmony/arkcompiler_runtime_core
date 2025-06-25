@@ -53,28 +53,28 @@ function integer_test() {
 function float_test() {
     const eps = 1e-5;
 
-    let a: float = 2.5;
-    let b: float = 3.5;
+    let a: float = 2.5f;
+    let b: float = 3.5f;
     let c: float = base_test.AddF32(a, b);
     arktest.assertLE(Math.abs(c - 6.0), eps);
 
-    let d: float = 4.3;
-    let e: float = 3.0;
+    let d: float = 4.3f;
+    let e: float = 3.0f;
     let f: float = base_test.SubF32(d, e);
     arktest.assertLE(Math.abs(f - 1.3), eps);
 
-    let h: float = 3.7;
-    let i: double = 5.3;
+    let h: float = 3.7f;
+    let i: double = 5.3f;
     let j: double = base_test.AddF64(h, i);
     arktest.assertLE(Math.abs(j - 9.0), eps);
 
-    let k: float = 3.5;
+    let k: float = 3.5f;
     let l: double = 1.0;
     let m: double = base_test.SubF64(k, l);
     arktest.assertLE(Math.abs(m - 2.5), eps);
 
-    let x: float = 2.5;
-    let y: float = 4.0;
+    let x: float = 2.5f;
+    let y: float = 4.0f;
     let z: double = base_test.MulF64(x, y);
     arktest.assertLE(Math.abs(z - 10.0), eps);
 }

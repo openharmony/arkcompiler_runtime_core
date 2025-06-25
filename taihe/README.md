@@ -39,6 +39,8 @@ int main() {
 
 ## 加入 Taihe 的开发
 
-Ubuntu 环境：运行 `./scripts/install-ubuntu-deps` 来一键安装环境
+Ubuntu 环境(>= 22.04)：运行 `./scripts/install-ubuntu-deps` 来一键安装环境
+
+运行 `python -m taihe.cli.tryit test -u sts /test/ani_array` 运行测试样例，检测环境是否可用
 
 开发和使用：参见 [文档索引](./docs/README.md)

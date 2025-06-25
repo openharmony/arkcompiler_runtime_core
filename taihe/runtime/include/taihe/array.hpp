@@ -67,12 +67,12 @@ struct array_view {
     {
     }
 
-    template <typename C, size_t N>
+    template <typename C, std::size_t N>
     array_view(std::array<C, N> &value) noexcept : array_view(value.data(), static_cast<size_type>(value.size()))
     {
     }
 
-    template <typename C, size_t N>
+    template <typename C, std::size_t N>
     array_view(std::array<C, N> const &value) noexcept : array_view(value.data(), static_cast<size_type>(value.size()))
     {
     }
@@ -280,33 +280,6 @@ struct array : public array_view<cpp_owner_t> {
 };
 
 template <typename cpp_owner_t>
-inline std::size_t hash_adl(adl_tag_t, array_view<cpp_owner_t> val)
-{
-    std::size_t seed = 0;
-    static constexpr std::size_t GOLDEN_RATIO_CONSTANT = 0x9e3779b9;
-    static constexpr std::size_t LEFT_SHIFT_BITS = 6;
-    static constexpr std::size_t RIGHT_SHIFT_BITS = 2;
-    for (std::size_t i = 0; i < val.size(); i++) {
-        seed ^= hash(val[i]) + GOLDEN_RATIO_CONSTANT + (seed << LEFT_SHIFT_BITS) + (seed >> RIGHT_SHIFT_BITS);
-    }
-    return seed;
-}
-
-template <typename cpp_owner_t>
-inline bool same_adl(adl_tag_t, array_view<cpp_owner_t> lhs, array_view<cpp_owner_t> rhs)
-{
-    if (lhs.size() != rhs.size()) {
-        return false;
-    }
-    for (std::size_t i = 0; i < lhs.size() && i < rhs.size(); i++) {
-        if (!same(lhs[i], rhs[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-template <typename cpp_owner_t>
 struct as_abi<array_view<cpp_owner_t>> {
     using type = TArray;
 };
@@ -321,5 +294,21 @@ struct as_param<array<cpp_owner_t>> {
     using type = array_view<cpp_owner_t>;
 };
 }  // namespace taihe
+
+template <typename cpp_owner_t>
+struct std::hash<taihe::array<cpp_owner_t>> {
+    std::size_t operator()(taihe::array_view<cpp_owner_t> val) const
+    {
+        std::size_t seed = 0;
+        static constexpr std::size_t GOLDEN_RATIO_CONSTANT = 0x9e3779b9;
+        static constexpr std::size_t LEFT_SHIFT_BITS = 6;
+        static constexpr std::size_t RIGHT_SHIFT_BITS = 2;
+        for (std::size_t i = 0; i < val.size(); i++) {
+            seed ^= (seed << LEFT_SHIFT_BITS) + (seed >> RIGHT_SHIFT_BITS) + GOLDEN_RATIO_CONSTANT +
+                    std::hash<cpp_owner_t>()(val[i]);
+        }
+        return seed;
+    }
+};
 // NOLINTEND
 #endif  // RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_

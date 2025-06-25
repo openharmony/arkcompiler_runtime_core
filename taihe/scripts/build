@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import shutil
 import subprocess
 import tarfile
@@ -21,164 +20,102 @@ from pathlib import Path
 import struct
 import argparse
 import zlib
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent / "../compiler"))
+from taihe.utils.resources import (
+    BUNDLE_PYTHON_RUNTIME_DIR_NAME,
+    DeploymentMode,
+    ResourceLocator,
+    ResourceType,
+)
 
 
 SYSTEM_TYPES = ["linux-x86_64", "windows-x86_64", "darwin-arm64", "darwin-x86_64"]
-PYTHON_REPO_URL = "https://gitee.com/ASeaSalt/python-multi-platform.git"
-PYTHON_REPO_BRANCH = "main"
 
 
 class TaiheBuilder:
     def __init__(self, project_dir: Path, system: str, version: str):
-        self.project_dir = project_dir
-        self.cache_dir = self.project_dir / ".cache" / "python-packages"
-        self.base_dist = self.project_dir / "dist"
-        self.compiler_dir = self.project_dir / "compiler"
-        self.include_dir = self.project_dir / "runtime" / "include"
-        self.src_dir = self.project_dir / "runtime" / "src"
-        self.doc_dir = self.project_dir / "cookbook"
-
         self.system = system
-        self.dist = self.base_dist / f"taihe-{system}" / "taihe"
-        self.dist_lib_dir = self.dist / "lib" / "taihe"
-        self.dist_bin_dir = self.dist / "bin"
-        self.dist_include_dir = self.dist / "include"
-        self.dist_src_dir = self.dist / "src" / "taihe" / "runtime"
-        self.dist_doc_dir = self.dist / "share" / "doc" / "taihe"
-        self.python_tar = self.cache_dir / f"{system}-python.tar.gz"
-
         self.version = version
 
-    def init_dirs(self):
+        self.project_dir = project_dir
+        self.compiler_dir = self.project_dir / "compiler"
+        self.resources = ResourceLocator.detect()
+
+        self.dist = self.project_dir / "dist" / f"taihe-{system}" / "taihe"
         if self.dist.exists():
             shutil.rmtree(self.dist)
-        self.dist.mkdir(parents=True, exist_ok=True)
-        self.dist_lib_dir.mkdir(parents=True, exist_ok=True)
-        self.dist_bin_dir.mkdir(parents=True, exist_ok=True)
-        self.dist_include_dir.mkdir(parents=True, exist_ok=True)
-        self.dist_src_dir.mkdir(parents=True, exist_ok=True)
-        self.dist_doc_dir.mkdir(parents=True, exist_ok=True)
+        self.dist_pyrt_dir = self.dist / "lib" / BUNDLE_PYTHON_RUNTIME_DIR_NAME
+        self.dist_bin_dir = self.dist / "bin"
+        self.dist_resources = ResourceLocator(DeploymentMode.BUNDLE, self.dist)
 
-    def copy_runtime(self):
-        print(f"Copying the runtime files for {self.system}")
-        shutil.copytree(
-            self.include_dir,
-            self.dist_include_dir,
-            dirs_exist_ok=True,
-        )
-        shutil.copytree(
-            self.src_dir,
-            self.dist_src_dir,
-            dirs_exist_ok=True,
-        )
+    def copy_resources(self):
+        for ty in ResourceType:
+            if ty.is_packagable():
+                shutil.copytree(
+                    self.resources.get(ty),
+                    self.dist_resources.get(ty),
+                    dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns("build", "generated"),
+                )
 
-    def copy_documentation(self):
-        print(f"Copying the documentation files for {self.system}")
-        shutil.copytree(
-            self.doc_dir,
-            self.dist_doc_dir,
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("build", "generated"),
-        )
-
-    def copy_compiler(self):
+    def install_compiler(self):
         print(f"Copying the compiler for {self.system}")
-        dist_compiler_dir = self.dist_lib_dir / "compiler"
-        compiler_dist_dir = self.compiler_dir / "dist"
+        site_packages_dir = next(self.dist_pyrt_dir.glob("lib/python*/site-packages"))
 
-        taihe_dir = dist_compiler_dir / "taihe"
-        taihe_dir.mkdir(parents=True, exist_ok=True)
-
-        if compiler_dist_dir.exists():
-            shutil.rmtree(compiler_dist_dir)
-        subprocess.run(["uv", "build"], check=True, cwd=self.compiler_dir)
-
-        for file in compiler_dist_dir.glob("taihe-*.gz"):
-            with tarfile.open(file, "r:gz") as tar:
-                tar.extractall(path=compiler_dist_dir)
-
-        extracted_dir = next(compiler_dist_dir.glob("taihe-*/taihe"))
-        shutil.copytree(extracted_dir, taihe_dir, dirs_exist_ok=True)
-
-        compiler_lib_dir = dist_compiler_dir / "lib"
-        compiler_lib_dir.mkdir(parents=True, exist_ok=True)
-
-        result = subprocess.run(
-            [sys.executable, "-c", "import site; print(site.getsitepackages()[0])"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        site_packages_dir = Path(result.stdout.strip())
-
-        for package in ["antlr4", "typing_extensions.py"]:
-            source = site_packages_dir / package
-            if source.exists():
-                if source.is_dir():
-                    shutil.copytree(
-                        source,
-                        compiler_lib_dir / package,
-                        dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns("__pycache__"),
-                    )
-                else:
-                    shutil.copy2(source, compiler_lib_dir)
-            else:
-                raise ValueError("Can't find antlr4 and typing_extensions!")
+        # TODO rm dummy scripts / fix shebang paths
+        uv_args = [
+            "uv",
+            "pip",
+            "install",
+            f"--target={site_packages_dir}",
+            "--",
+            str(self.compiler_dir),
+        ]
+        subprocess.run(uv_args, check=True, cwd=self.compiler_dir)
 
     def extract_python(self):
-        if not self.python_tar.exists():
-            print(f"Downloading Python for {self.system}...")
-            self.cache_dir.mkdir(parents=True, exist_ok=True)
-            subprocess.run(
-                [
-                    "git",
-                    "clone",
-                    "-q",
-                    "--branch",
-                    PYTHON_REPO_BRANCH,
-                    PYTHON_REPO_URL,
-                    self.cache_dir,
-                ],
-                check=True,
+        python_tar = (
+            self.resources.get(ResourceType.DEV_PYTHON_BUILD)
+            / f"{self.system}-python.tar.gz"
+        )
+        # First, extract to "dist/lib".
+        # It creates a sole directory named "python"
+        parent_dir = self.dist_pyrt_dir.parent
+        with tarfile.open(python_tar, "r:gz") as tar:
+            tar.extractall(parent_dir, filter="tar")
+        # Next, rename "dist/lib/python" to "dist/lib/pyrt"
+        old_dir = parent_dir / "python"
+        if self.dist_pyrt_dir.exists():
+            self.dist_pyrt_dir.rmdir()
+        old_dir.rename(self.dist_pyrt_dir)
+
+    def create_script(self, binary: str, pymod: str):
+        # TODO use absolute script path
+        is_windows = self.system.startswith("windows")
+        prog = self.dist_bin_dir / (f"{binary}.bat" if is_windows else binary)
+        if is_windows:
+            content = (
+                "@echo off\n"
+                "set TAIHE_ROOT=%~dp0..\n"
+                f'%TAIHE_ROOT%\\lib\\pyrt\\bin\\python3.11.exe -m "{pymod}" %*\n'
             )
-        print(f"Extracting Python for {self.system}")
-        with tarfile.open(self.python_tar, "r:gz") as tar:
-            tar.extractall(path=self.dist_lib_dir)
+        else:
+            content = (
+                "#!/bin/bash -eu\n"
+                'export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"\n'
+                f'exec "$TAIHE_ROOT/lib/pyrt/bin/python3" -m \'{pymod}\' "$@"\n'
+            )
+        prog.write_text(content)
+        prog.chmod(0o755)
 
     def create_taihec_script(self):
+        self.dist_bin_dir.mkdir()
         print(f"Creating taihec script for {self.system}")
         if self.system.startswith("linux"):
-            prog = self.dist_bin_dir / "taihe-tryit"
-            with open(prog, "w") as f:
-                f.write(
-                    "#!/bin/bash -eu\n"
-                    'export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"\n'
-                    'export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"\n'
-                    'exec "${TAIHE_ROOT}/lib/taihe/python/bin/python3" -c \'from taihe.cli.tryit import *; main(BuildConfig(for_distribution=True));\' "$@"\n'
-                )
-            prog.chmod(0o755)
-
-        if self.system.startswith("windows"):
-            prog = self.dist_bin_dir / "taihec.bat"
-            with open(prog, "w") as f:
-                f.write(
-                    "@echo off\n"
-                    "set TAIHE_ROOT=%~dp0..\n"
-                    "set PYTHONPATH=%TAIHE_ROOT%\\lib\\taihe\\compiler;%TAIHE_ROOT%\\lib\\taihe\\compiler\\lib;%PYTHONPATH%\n"
-                    "%TAIHE_ROOT%\\lib\\taihe\\python\\bin\\python3.11.exe -m taihe.cli.compiler %*\n"
-                )
-            prog.chmod(0o755)
-        else:
-            prog = self.dist_bin_dir / "taihec"
-            with open(prog, "w") as f:
-                f.write(
-                    "#!/bin/bash -eu\n"
-                    'export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"\n'
-                    'export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"\n'
-                    'exec "${TAIHE_ROOT}/lib/taihe/python/bin/python3" -m taihe.cli.compiler "$@"\n'
-                )
-            prog.chmod(0o755)
+            self.create_script("taihe-tryit", "taihe.cli.tryit")
+        self.create_script("taihec", "taihe.cli.compiler")
 
     def write_version(self):
         print(f"Writing version information for {self.system}")
@@ -254,11 +191,9 @@ class TaiheBuilder:
         print(f"Created package for {self.system}: {zip_path}")
 
     def build(self):
-        self.init_dirs()
-        self.copy_runtime()
-        self.copy_documentation()
-        self.copy_compiler()
         self.extract_python()
+        self.install_compiler()
+        self.copy_resources()
         self.create_taihec_script()
         self.write_version()
         self.create_package()
@@ -277,6 +212,7 @@ def main():
 
     project_dir = Path(__file__).parent.parent
 
+    # TODO detect version use uv / hatch
     try:
         version = subprocess.run(
             ["git", "describe", "--tags", "--abbrev=0"],

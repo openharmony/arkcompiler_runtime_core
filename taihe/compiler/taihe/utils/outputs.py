@@ -15,19 +15,22 @@
 
 """Manage output files."""
 
-import os
-import os.path
 import sys
+from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum, auto
 from io import StringIO
+from os import path, sep
 from pathlib import Path
 from types import FrameType, TracebackType
-from typing import TextIO
+from typing import TYPE_CHECKING, TextIO
 
-from typing_extensions import Self
+from typing_extensions import Self, override
+
+if TYPE_CHECKING:
+    from taihe.driver.contexts import CompilerInstance
 
 DEFAULT_INDENT = "    "  # Four spaces
 
@@ -47,12 +50,20 @@ class DebugLevel(Enum):
     """Besides CONSICE, also prints code snippet. Could be slow."""
 
 
-@dataclass
-class OutputConfig:
-    """Manages the creation and saving of output files."""
+class FileKind(str, Enum):
+    C_HEADER = "c_header"
+    C_SOURCE = "c_source"
+    CPP_HEADER = "cpp_header"
+    CPP_SOURCE = "cpp_source"
+    TEMPLATE = "template"
+    ETS = "ets"
+    OTHER = "other"
 
-    dst_dir: Path | None = None
-    debug_level: DebugLevel = DebugLevel.NONE
+
+@dataclass
+class FileDescriptor:
+    relative_path: str  # e.g., "include/foo.h"
+    kind: FileKind
 
 
 class BaseWriter:
@@ -72,9 +83,6 @@ class BaseWriter:
             default_indent: The default indentation string for each level of indentation
             debug_level: see `DebugLevel` for details
         """
-        if not hasattr(out, "write"):
-            raise ValueError("output_stream must be writable")
-
         self._out = out
         self._default_indent = default_indent
         self._current_indent = ""
@@ -85,7 +93,10 @@ class BaseWriter:
         """Writes a newline character."""
         self._out.write("\n")
 
-    def writeln(self, line: str = ""):
+    def writeln(
+        self,
+        line: str = "",
+    ):
         """Writes a single-line string.
 
         Args:
@@ -109,7 +120,9 @@ class BaseWriter:
         """
         self._write_debug(skip=2)
         for line in lines:
-            self.writeln(line)
+            self.writeln(
+                line,
+            )
 
     def write_block(self, text_block: str):
         """Writes a potentially multi-line text block.
@@ -155,7 +168,9 @@ class BaseWriter:
         """
         self._write_debug(skip=3)
         if prologue is not None:
-            self.writeln(prologue)
+            self.writeln(
+                prologue,
+            )
         previous_indent = self._current_indent
         self._current_indent += self._default_indent if indent is None else indent
         try:
@@ -163,7 +178,9 @@ class BaseWriter:
         finally:
             self._current_indent = previous_indent
             if epilogue is not None:
-                self.writeln(epilogue)
+                self.writeln(
+                    epilogue,
+                )
 
     def _write_debug(self, *, skip: int):
         if self._debug_level == DebugLevel.NONE:
@@ -174,8 +191,9 @@ class BaseWriter:
 class FileWriter(BaseWriter):
     def __init__(
         self,
-        oc: OutputConfig,
-        path: str,
+        om: "OutputManager",
+        relative_path: str,
+        file_kind: FileKind,
         *,
         default_indent: str = DEFAULT_INDENT,
         comment_prefix: str,
@@ -184,9 +202,13 @@ class FileWriter(BaseWriter):
             out=StringIO(),
             default_indent=default_indent,
             comment_prefix=comment_prefix,
-            debug_level=oc.debug_level,
+            debug_level=om.debug_level,
         )
-        self._path = None if oc.dst_dir is None else oc.dst_dir / path
+        self._om = om
+        self.desc = FileDescriptor(
+            relative_path=relative_path,
+            kind=file_kind,
+        )
 
     def __enter__(self):
         return self
@@ -197,24 +219,19 @@ class FileWriter(BaseWriter):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> bool:
-        del exc_val, exc_tb
-
-        # Discard on exception
-        if not exc_type and self._path is not None:
-            self.save_as(self._path)
-
-        # Propagate the exception if exists
+        del exc_val, exc_tb, exc_type
+        self._om.save(self)
         return False
+
+    def write_body(self, f: TextIO):
+        pass
+        f.write(self._out.getvalue())
 
     def write_prologue(self, f: TextIO):
         del f
 
-    def save_as(self, file_path: Path):
-        file_path.parent.mkdir(exist_ok=True, parents=True)
-        with open(file_path, "w", encoding="utf-8") as dst:
-            pass
-            self.write_prologue(dst)
-            dst.write(self._out.getvalue())
+    def write_epilogue(self, f: TextIO):
+        del f
 
 
 def _format_frame(f: FrameType) -> str:
@@ -222,10 +239,303 @@ def _format_frame(f: FrameType) -> str:
     FILENAME_KEEP = 3
 
     file_name = f.f_code.co_filename
-    parts = file_name.split(os.sep)
+    parts = file_name.split(sep)
     if len(parts) > FILENAME_KEEP:
-        file_name = os.path.join(*parts[-FILENAME_KEEP:])
+        file_name = path.join(*parts[-FILENAME_KEEP:])
 
     base_format = f"CODEGEN-DEBUG: {f.f_code.co_name} in {file_name}:{f.f_lineno}"
 
     return base_format
+
+
+@dataclass
+class OutputConfig:
+    dst_dir: Path | None = None
+    debug_level: DebugLevel = DebugLevel.NONE
+
+    def construct(self, ci: "CompilerInstance") -> "OutputManager":
+        """Construct an OutputManager based on this configuration."""
+        return OutputManager(
+            dst_dir=self.dst_dir,
+            debug_level=self.debug_level,
+        )
+
+
+class OutputManager:
+    """Manages the creation and saving of output files."""
+
+    files: dict[str, FileDescriptor]
+    files_by_kind: dict[FileKind, list[FileDescriptor]]
+
+    dst_dir: Path | None
+
+    debug_level: DebugLevel
+
+    def __init__(
+        self,
+        dst_dir: Path | None = None,
+        debug_level: DebugLevel = DebugLevel.NONE,
+    ):
+        self.files: dict[str, FileDescriptor] = {}
+        self.files_by_kind: dict[FileKind, list[FileDescriptor]] = defaultdict(list)
+        self.dst_dir = dst_dir
+        self.debug_level = debug_level
+
+    def register(self, desc: FileDescriptor):
+        if (prev := self.files.setdefault(desc.relative_path, desc)) != desc:
+            raise ValueError(
+                f"File {desc.relative_path} is already registered as {prev.kind}, "
+                f"cannot re-register with {desc.kind}."
+            )
+        self.files_by_kind[desc.kind].append(desc)
+
+    def save(self, writer: FileWriter):
+        """Saves the content of a FileWriter to the output directory."""
+        self.register(writer.desc)
+
+        if self.dst_dir is None:
+            return
+
+        file_path = self.dst_dir / writer.desc.relative_path
+        file_path.parent.mkdir(exist_ok=True, parents=True)
+        with open(file_path, "w", encoding="utf-8") as dst:
+            writer.write_prologue(dst)
+            writer.write_body(dst)
+            writer.write_epilogue(dst)
+
+    def get_all_files(self) -> list[FileDescriptor]:
+        return list(self.files.values())
+
+    def get_files_by_kind(self, kind: FileKind) -> list[FileDescriptor]:
+        return self.files_by_kind.get(kind, [])
+
+    def post_generate(self) -> None:
+        pass
+
+
+#################################
+# Cmake code generation related #
+#################################
+
+
+class CMakeWriter(FileWriter):
+    """Represents a CMake file."""
+
+    @override
+    def __init__(
+        self,
+        om: OutputManager,
+        relative_path: str,
+        file_kind: FileKind,
+        indent_unit: str = DEFAULT_INDENT,
+    ):
+        super().__init__(
+            om,
+            relative_path=relative_path,
+            file_kind=file_kind,
+            default_indent=indent_unit,
+            comment_prefix="# ",
+        )
+        self.headers: dict[str, None] = {}
+
+
+class CMakeOutputConfig(OutputConfig):
+    runtime_include_dir: Path
+    runtime_src_dir: Path
+
+    def __init__(
+        self,
+        runtime_include_dir: Path,
+        runtime_src_dir: Path,
+        dst_dir: Path | None = None,
+        debug_level: DebugLevel = DebugLevel.NONE,
+    ):
+        super().__init__(dst_dir=dst_dir, debug_level=debug_level)
+        self.runtime_include_dir = runtime_include_dir
+        self.runtime_src_dir = runtime_src_dir
+
+    def construct(self, ci: "CompilerInstance") -> "CMakeOutputManager":
+        return CMakeOutputManager(
+            dst_dir=self.dst_dir,
+            debug_level=self.debug_level,
+            runtime_include_dir=self.runtime_include_dir,
+            runtime_src_dir=self.runtime_src_dir,
+        )
+
+
+class CMakeOutputManager(OutputManager):
+    """Manages the generation of CMake files for Taihe runtime."""
+
+    runtime_include_dir: Path
+    runtime_src_files: list[Path]
+
+    def __init__(
+        self,
+        dst_dir: Path | None = None,
+        debug_level: DebugLevel = DebugLevel.NONE,
+        *,
+        runtime_include_dir: Path,
+        runtime_src_dir: Path,
+    ):
+        super().__init__(dst_dir=dst_dir, debug_level=debug_level)
+        self.runtime_include_dir = runtime_include_dir
+        self.runtime_c_src_files = [
+            p for p in runtime_src_dir.rglob("*.c") if p.is_file()
+        ]
+        self.runtime_cxx_src_files = [
+            p for p in runtime_src_dir.rglob("*.cpp") if p.is_file()
+        ]
+
+    @override
+    def post_generate(self):
+        with CMakeWriter(
+            self,
+            "TaiheGenerated.cmake",
+            FileKind.OTHER,
+        ) as cmake_target:
+            self.emit_runtime_files_list(cmake_target)
+            self.emit_generated_dir("${CMAKE_CURRENT_LIST_DIR}", cmake_target)
+            self.emit_generated_includes(cmake_target)
+            self.emit_generated_sources(cmake_target)
+            self.emit_generated_ets_files(cmake_target)
+            self.emit_set_cpp_standard(cmake_target)
+
+    def emit_runtime_files_list(
+        self,
+        cmake_target: CMakeWriter,
+    ):
+        with cmake_target.indented(
+            f"if(NOT DEFINED TAIHE_RUNTIME_INCLUDE_INNER)",
+            f"endif()",
+        ):
+            with cmake_target.indented(
+                f"set(TAIHE_RUNTIME_INCLUDE_INNER",
+                f")",
+            ):
+                cmake_target.writelns(
+                    f"{self.runtime_include_dir}",
+                )
+        with cmake_target.indented(
+            f"if(NOT DEFINED TAIHE_RUNTIME_C_SRC_INNER)",
+            f"endif()",
+        ):
+            with cmake_target.indented(
+                f"set(TAIHE_RUNTIME_C_SRC_INNER",
+                f")",
+            ):
+                for runtime_src_file in self.runtime_c_src_files:
+                    cmake_target.writelns(
+                        f"{runtime_src_file}",
+                    )
+        with cmake_target.indented(
+            f"if(NOT DEFINED TAIHE_RUNTIME_CXX_SRC_INNER)",
+            f"endif()",
+        ):
+            with cmake_target.indented(
+                f"set(TAIHE_RUNTIME_CXX_SRC_INNER",
+                f")",
+            ):
+                for runtime_src_file in self.runtime_cxx_src_files:
+                    cmake_target.writelns(
+                        f"{runtime_src_file}",
+                    )
+        with cmake_target.indented(
+            f"set(TAIHE_RUNTIME_INCLUDE",
+            f")",
+        ):
+            cmake_target.writelns(
+                f"${{TAIHE_RUNTIME_INCLUDE_INNER}}",
+            )
+        with cmake_target.indented(
+            f"set(TAIHE_RUNTIME_SRC",
+            f")",
+        ):
+            cmake_target.writelns(
+                f"${{TAIHE_RUNTIME_C_SRC_INNER}}",
+                f"${{TAIHE_RUNTIME_CXX_SRC_INNER}}",
+            )
+
+    def emit_generated_dir(
+        self,
+        generated_path: str,
+        cmake_target: CMakeWriter,
+    ):
+        with cmake_target.indented(
+            f"if(NOT DEFINED TAIHE_GEN_DIR)",
+            f"endif()",
+        ):
+            with cmake_target.indented(
+                f"set(TAIHE_GEN_DIR",
+                f")",
+            ):
+                cmake_target.writelns(
+                    f"{generated_path}",
+                )
+
+    def emit_generated_includes(self, cmake_target: CMakeWriter):
+        with cmake_target.indented(
+            f"set(TAIHE_GEN_INCLUDE",
+            f")",
+        ):
+            cmake_target.writelns(
+                f"${{TAIHE_GEN_DIR}}/include",
+            )
+
+    def emit_generated_sources(
+        self,
+        cmake_target: CMakeWriter,
+    ):
+        with cmake_target.indented(
+            f"set(TAIHE_GEN_C_SRC",
+            f")",
+        ):
+            for file in self.get_files_by_kind(FileKind.C_SOURCE):
+                cmake_target.writelns(
+                    f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
+                )
+        with cmake_target.indented(
+            f"set(TAIHE_GEN_CXX_SRC",
+            f")",
+        ):
+            for file in self.get_files_by_kind(FileKind.CPP_SOURCE):
+                cmake_target.writelns(
+                    f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
+                )
+        with cmake_target.indented(
+            f"set(TAIHE_GEN_SRC",
+            f")",
+        ):
+            cmake_target.writelns(
+                f"${{TAIHE_GEN_C_SRC}}",
+                f"${{TAIHE_GEN_CXX_SRC}}",
+            )
+
+    def emit_generated_ets_files(
+        self,
+        cmake_target: CMakeWriter,
+    ):
+        with cmake_target.indented(
+            f"set(TAIHE_GEN_ETS_FILES",
+            f")",
+        ):
+            for file in self.get_files_by_kind(FileKind.ETS):
+                cmake_target.writelns(
+                    f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
+                )
+
+    def emit_set_cpp_standard(
+        self,
+        cmake_target: CMakeWriter,
+    ):
+        with cmake_target.indented(
+            f"set_source_files_properties(",
+            f")",
+        ):
+            cmake_target.writelns(
+                f"${{TAIHE_GEN_CXX_SRC}}",
+                f"${{TAIHE_RUNTIME_CXX_SRC_INNER}}",
+                # setting
+                f"PROPERTIES",
+                f"LANGUAGE CXX",
+                f'COMPILE_FLAGS "-std=c++17"',
+            )

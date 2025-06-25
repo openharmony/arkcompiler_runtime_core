@@ -19,6 +19,8 @@ from functools import cache
 from pathlib import Path
 from subprocess import check_call
 
+from taihe.utils.resources import ResourceLocator, ResourceType
+
 ANTLR_PKG = "taihe.parse.antlr"
 CURRENT_DIR = Path(__file__).parent.resolve()
 ANTLR_PATH = CURRENT_DIR / ANTLR_PKG.replace(".", "/")
@@ -167,15 +169,11 @@ def generate_visitor():
 
 
 def run_antlr():
-    args = [
-        "antlr4",
-        "-Dlanguage=Python3",
-        "-no-listener",
-        G4_FILE,
-        "-o",
-        ANTLR_PATH,
-    ]
-    check_call(args)
+    locator = ResourceLocator.detect()
+    jar = locator.get(ResourceType.DEV_ANTLR)
+    args = ["java", "-cp", str(jar), "org.antlr.v4.Tool"]
+    args += ["-Dlanguage=Python3", "-no-listener", G4_FILE, "-o", ANTLR_PATH]
+    check_call(args, env={})
 
 
 def main():

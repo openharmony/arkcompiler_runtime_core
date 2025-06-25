@@ -48,7 +48,6 @@ class Backend(ABC):
         - The transformation should be completed in the `post_process` stage.
         - The error reporting should be completed in the `validate` stage.
         """
-        pass
 
 
 class BackendConfig(ABC):
@@ -81,6 +80,9 @@ class BackendRegistry:
                 f"backend {name!r} cannot be registered as {factory.__name__} "
                 f"because it is already registered as {setted.__name__}"
             )
+
+    def get_backend_names(self) -> list[str]:
+        return list(self._factories.keys())
 
     def clear(self):
         self._factories.clear()

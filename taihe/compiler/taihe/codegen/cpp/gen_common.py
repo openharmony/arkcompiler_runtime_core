@@ -46,12 +46,12 @@ from taihe.semantics.types import (
     StringType,
 )
 from taihe.utils.analyses import AnalysisManager
-from taihe.utils.outputs import OutputConfig
+from taihe.utils.outputs import FileKind, OutputManager
 
 
 class CppHeadersGenerator:
-    def __init__(self, oc: OutputConfig, am: AnalysisManager):
-        self.oc = oc
+    def __init__(self, om: OutputManager, am: AnalysisManager):
+        self.om = om
         self.am = am
 
     def generate(self, pg: PackageGroup):
@@ -61,8 +61,9 @@ class CppHeadersGenerator:
     def gen_package_files(self, pkg: PackageDecl):
         pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{pkg_cpp_info.header}",
+            FileKind.CPP_HEADER,
         ) as pkg_cpp_target:
             for enum in pkg.enums:
                 enum_abi_info = EnumABIInfo.get(self.am, enum)
@@ -99,8 +100,9 @@ class CppHeadersGenerator:
         enum_cpp_info: EnumCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{enum_cpp_info.decl_header}",
+            FileKind.C_HEADER,
         ) as enum_cpp_decl_target:
             enum_cpp_decl_target.add_include("taihe/common.hpp")
             with enum_cpp_decl_target.indented(
@@ -144,8 +146,9 @@ class CppHeadersGenerator:
         enum_cpp_info: EnumCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{enum_cpp_info.defn_header}",
+            FileKind.C_HEADER,
         ) as enum_cpp_defn_target:
             enum_cpp_defn_target.add_include(enum_cpp_info.decl_header)
             self.gen_enum_defn(
@@ -366,12 +369,12 @@ class CppHeadersGenerator:
     ):
         # others
         with enum_cpp_defn_target.indented(
-            f"namespace taihe {{",
+            f"namespace {enum_cpp_info.namespace} {{",
             f"}}",
             indent="",
         ):
             with enum_cpp_defn_target.indented(
-                f"inline bool same_adl(adl_tag_t, {enum_cpp_info.full_name} lhs, {enum_cpp_info.full_name} rhs) {{",
+                f"inline bool operator==({enum_cpp_info.as_param} lhs, {enum_cpp_info.as_param} rhs) {{",
                 f"}}",
             ):
                 enum_cpp_defn_target.writelns(
@@ -386,16 +389,15 @@ class CppHeadersGenerator:
         enum_cpp_defn_target: CHeaderWriter,
     ):
         with enum_cpp_defn_target.indented(
-            f"namespace taihe {{",
-            f"}}",
-            indent="",
+            f"template<> struct ::std::hash<{enum_cpp_info.full_name}> {{",
+            f"}};",
         ):
             with enum_cpp_defn_target.indented(
-                f"inline ::std::size_t hash_adl(adl_tag_t, {enum_cpp_info.as_param} val) {{",
+                f"size_t operator()({enum_cpp_info.as_param} val) const {{",
                 f"}}",
             ):
                 enum_cpp_defn_target.writelns(
-                    f"return ::std::hash<{enum_abi_info.abi_type}>{{}}(({enum_abi_info.abi_type})val.get_key());",
+                    f"return ::std::hash<{enum_abi_info.abi_type}>()(({enum_abi_info.abi_type})val.get_key());",
                 )
 
     def gen_union_decl_file(
@@ -405,8 +407,9 @@ class CppHeadersGenerator:
         union_cpp_info: UnionCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{union_cpp_info.decl_header}",
+            FileKind.C_HEADER,
         ) as union_cpp_decl_target:
             union_cpp_decl_target.add_include("taihe/common.hpp")
             union_cpp_decl_target.add_include(union_abi_info.decl_header)
@@ -461,8 +464,9 @@ class CppHeadersGenerator:
         union_cpp_info: UnionCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{union_cpp_info.defn_header}",
+            FileKind.CPP_HEADER,
         ) as union_cpp_defn_target:
             union_cpp_defn_target.add_include(union_cpp_info.decl_header)
             union_cpp_defn_target.add_include(union_abi_info.defn_header)
@@ -1023,19 +1027,19 @@ class CppHeadersGenerator:
         union_cpp_defn_target: CHeaderWriter,
     ):
         with union_cpp_defn_target.indented(
-            f"namespace taihe {{",
+            f"namespace {union_cpp_info.namespace} {{",
             f"}}",
             indent="",
         ):
             with union_cpp_defn_target.indented(
-                f"inline bool same_adl(adl_tag_t, {union_cpp_info.as_param} lhs, {union_cpp_info.as_param} rhs) {{",
+                f"inline bool operator==({union_cpp_info.as_param} lhs, {union_cpp_info.as_param} rhs) {{",
                 f"}}",
             ):
                 result = "false"
                 for field in union.fields:
                     cond = f"lhs.holds_{field.name}() && rhs.holds_{field.name}()"
                     if field.ty_ref:
-                        cond = f"{cond} && same(lhs.get_{field.name}_ref(), rhs.get_{field.name}_ref())"
+                        cond = f"{cond} && lhs.get_{field.name}_ref() == rhs.get_{field.name}_ref()"
                     result = f"{result} || ({cond})"
                 union_cpp_defn_target.writelns(
                     f"return {result};",
@@ -1049,12 +1053,11 @@ class CppHeadersGenerator:
         union_cpp_defn_target: CHeaderWriter,
     ):
         with union_cpp_defn_target.indented(
-            f"namespace taihe {{",
-            f"}}",
-            indent="",
+            f"template<> struct ::std::hash<{union_cpp_info.full_name}> {{",
+            f"}};",
         ):
             with union_cpp_defn_target.indented(
-                f"inline ::std::size_t hash_adl(adl_tag_t, {union_cpp_info.as_param} val) {{",
+                f"size_t operator()({union_cpp_info.as_param} val) const {{",
                 f"}}",
             ):
                 with union_cpp_defn_target.indented(
@@ -1069,7 +1072,7 @@ class CppHeadersGenerator:
                         ):
                             val = "0x9e3779b9 + (seed << 6) + (seed >> 2)"
                             if field.ty_ref:
-                                val = f"{val} + hash(val.get_{field.name}_ref())"
+                                val = f"{val} + ::std::hash<{TypeCppInfo.get(self.am, field.ty_ref.resolved_ty).as_owner}>()(val.get_{field.name}_ref())"
                             val = f"seed ^ ({val})"
                             union_cpp_defn_target.writelns(
                                 f"::std::size_t seed = (::std::size_t){union_cpp_info.full_name}::tag_t::{field.name};",
@@ -1083,8 +1086,9 @@ class CppHeadersGenerator:
         union_cpp_info: UnionCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{union_cpp_info.impl_header}",
+            FileKind.C_HEADER,
         ) as union_cpp_impl_target:
             union_cpp_impl_target.add_include(union_cpp_info.defn_header)
             union_cpp_impl_target.add_include(union_abi_info.impl_header)
@@ -1101,8 +1105,9 @@ class CppHeadersGenerator:
         struct_cpp_info: StructCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{struct_cpp_info.decl_header}",
+            FileKind.C_HEADER,
         ) as struct_cpp_decl_target:
             struct_cpp_decl_target.add_include("taihe/common.hpp")
             struct_cpp_decl_target.add_include(struct_abi_info.decl_header)
@@ -1157,8 +1162,9 @@ class CppHeadersGenerator:
         struct_cpp_info: StructCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{struct_cpp_info.defn_header}",
+            FileKind.CPP_HEADER,
         ) as struct_cpp_defn_target:
             struct_cpp_defn_target.add_include(struct_cpp_info.decl_header)
             struct_cpp_defn_target.add_include(struct_abi_info.defn_header)
@@ -1214,17 +1220,17 @@ class CppHeadersGenerator:
         struct_cpp_defn_target: CHeaderWriter,
     ):
         with struct_cpp_defn_target.indented(
-            f"namespace taihe {{",
+            f"namespace {struct_cpp_info.namespace} {{",
             f"}}",
             indent="",
         ):
             with struct_cpp_defn_target.indented(
-                f"inline bool same_adl(adl_tag_t, {struct_cpp_info.as_param} lhs, {struct_cpp_info.as_param} rhs) {{",
+                f"inline bool operator==({struct_cpp_info.as_param} lhs, {struct_cpp_info.as_param} rhs) {{",
                 f"}}",
             ):
                 result = "true"
                 for field in struct.fields:
-                    result = f"{result} && same(lhs.{field.name}, rhs.{field.name})"
+                    result = f"{result} && lhs.{field.name} == rhs.{field.name}"
                 struct_cpp_defn_target.writelns(
                     f"return {result};",
                 )
@@ -1237,12 +1243,11 @@ class CppHeadersGenerator:
         struct_cpp_defn_target: CHeaderWriter,
     ):
         with struct_cpp_defn_target.indented(
-            f"namespace taihe {{",
-            f"}}",
-            indent="",
+            f"template<> struct ::std::hash<{struct_cpp_info.full_name}> {{",
+            f"}};",
         ):
             with struct_cpp_defn_target.indented(
-                f"inline ::std::size_t hash_adl(adl_tag_t, {struct_cpp_info.as_param} val) {{",
+                f"size_t operator()({struct_cpp_info.as_param} val) const {{",
                 f"}}",
             ):
                 struct_cpp_defn_target.writelns(
@@ -1250,7 +1255,7 @@ class CppHeadersGenerator:
                 )
                 for field in struct.fields:
                     struct_cpp_defn_target.writelns(
-                        f"seed ^= hash(val.{field.name}) + 0x9e3779b9 + (seed << 6) + (seed >> 2);",
+                        f"seed ^= ::std::hash<{TypeCppInfo.get(self.am, field.ty_ref.resolved_ty).as_owner}>()(val.{field.name}) + 0x9e3779b9 + (seed << 6) + (seed >> 2);",
                     )
                 struct_cpp_defn_target.writelns(
                     f"return seed;",
@@ -1263,8 +1268,9 @@ class CppHeadersGenerator:
         struct_cpp_info: StructCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{struct_cpp_info.impl_header}",
+            FileKind.C_HEADER,
         ) as struct_cpp_impl_target:
             struct_cpp_impl_target.add_include(struct_cpp_info.defn_header)
             struct_cpp_impl_target.add_include(struct_abi_info.impl_header)
@@ -1279,8 +1285,9 @@ class CppHeadersGenerator:
         iface_cpp_info: IfaceCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{iface_cpp_info.decl_header}",
+            FileKind.C_HEADER,
         ) as iface_cpp_decl_target:
             iface_cpp_decl_target.add_include("taihe/object.hpp")
             iface_cpp_decl_target.add_include(iface_abi_info.decl_header)
@@ -1343,8 +1350,9 @@ class CppHeadersGenerator:
         iface_cpp_info: IfaceCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{iface_cpp_info.defn_header}",
+            FileKind.CPP_HEADER,
         ) as iface_cpp_defn_target:
             iface_cpp_defn_target.add_include(iface_cpp_info.decl_header)
             iface_cpp_defn_target.add_include(iface_abi_info.defn_header)
@@ -1360,6 +1368,18 @@ class CppHeadersGenerator:
                 iface_cpp_defn_target,
             )
             self.gen_iface_holder_defn(
+                iface,
+                iface_abi_info,
+                iface_cpp_info,
+                iface_cpp_defn_target,
+            )
+            self.gen_iface_same(
+                iface,
+                iface_abi_info,
+                iface_cpp_info,
+                iface_cpp_defn_target,
+            )
+            self.gen_iface_hash(
                 iface,
                 iface_abi_info,
                 iface_cpp_info,
@@ -1789,6 +1809,45 @@ class CppHeadersGenerator:
                         f"std::exchange(this->m_handle.data_ptr, nullptr),",
                     )
 
+    def gen_iface_same(
+        self,
+        iface: IfaceDecl,
+        iface_abi_info: IfaceABIInfo,
+        iface_cpp_info: IfaceCppInfo,
+        iface_cpp_defn_target: CHeaderWriter,
+    ):
+        with iface_cpp_defn_target.indented(
+            f"namespace {iface_cpp_info.weakspace} {{",
+            f"}}",
+            indent="",
+        ):
+            with iface_cpp_defn_target.indented(
+                f"inline bool operator==({iface_cpp_info.as_param} lhs, {iface_cpp_info.as_param} rhs) {{",
+                f"}}",
+            ):
+                iface_cpp_defn_target.writelns(
+                    f"return ::taihe::data_view(lhs) == ::taihe::data_view(rhs);",
+                )
+
+    def gen_iface_hash(
+        self,
+        iface: IfaceDecl,
+        iface_abi_info: IfaceABIInfo,
+        iface_cpp_info: IfaceCppInfo,
+        iface_cpp_defn_target: CHeaderWriter,
+    ):
+        with iface_cpp_defn_target.indented(
+            f"template<> struct ::std::hash<{iface_cpp_info.full_norm_name}> {{",
+            f"}};",
+        ):
+            with iface_cpp_defn_target.indented(
+                f"size_t operator()({iface_cpp_info.as_param} val) const {{",
+                f"}}",
+            ):
+                iface_cpp_defn_target.writelns(
+                    f"return ::std::hash<::taihe::data_holder>()(val);",
+                )
+
     def gen_iface_impl_file(
         self,
         iface: IfaceDecl,
@@ -1796,8 +1855,9 @@ class CppHeadersGenerator:
         iface_cpp_info: IfaceCppInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{iface_cpp_info.impl_header}",
+            FileKind.CPP_HEADER,
         ) as iface_cpp_impl_target:
             iface_cpp_impl_target.add_include(iface_cpp_info.defn_header)
             iface_cpp_impl_target.add_include(iface_abi_info.impl_header)

@@ -198,12 +198,8 @@ struct string : public string_view {
 
 inline string concat(std::initializer_list<string_view> sv_list)
 {
-    struct TString tstr_list[sv_list.size()];
-    std::size_t i = 0;
-    for (auto it : sv_list) {
-        tstr_list[i++] = it.m_handle;
-    }
-    return string(tstr_concat(sv_list.size(), tstr_list));
+    static_assert(alignof(string_view) == alignof(struct TString));
+    return string(tstr_concat(sv_list.size(), reinterpret_cast<struct TString const *>(sv_list.begin())));
 }
 
 inline string operator+(string_view left, string_view right)
@@ -296,16 +292,6 @@ string to_string(T value)
     }
 }
 
-inline std::size_t hash_adl(adl_tag_t, string_view val)
-{
-    return std::hash<std::string_view> {}(val);
-}
-
-inline bool same_adl(adl_tag_t, string_view lhs, string_view rhs)
-{
-    return lhs == rhs;
-}
-
 template <>
 struct as_abi<string_view> {
     using type = TString;
@@ -321,5 +307,13 @@ struct as_param<string> {
     using type = string_view;
 };
 }  // namespace taihe
+
+template <>
+struct std::hash<taihe::string> {
+    std::size_t operator()(taihe::string_view sv) const noexcept
+    {
+        return std::hash<std::string_view>()(std::string_view(sv));
+    }
+};
 // NOLINTEND
 #endif  // RUNTIME_INCLUDE_TAIHE_STRING_HPP_
