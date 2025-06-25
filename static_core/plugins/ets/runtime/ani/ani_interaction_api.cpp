@@ -16,28 +16,30 @@
 #include <cstddef>
 #include <iostream>
 #include <limits>
-#include <ostream>
 #include <optional>
+#include <ostream>
 #include <string_view>
+
 #include "ani.h"
-#include "macros.h"
+#include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
-#include "runtime/coroutines/coroutine_scopes.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/ani_type_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_stubs.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
-#include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
-#include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
-#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "runtime/coroutines/coroutine_scopes.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -4054,11 +4056,11 @@ NO_UB_SANITIZE static ani_status Object_InstanceOf(ani_env *env, ani_object obje
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(type);
     CHECK_PTR_ARG(object);
+    CHECK_PTR_ARG(type);
     CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ScopedManagedCodeFix s(env);
     EtsClass *internalClass = s.ToInternalType(type);
     EtsObject *internalObject = s.ToInternalType(object);
 
@@ -6585,6 +6587,246 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(ani_env *env, ani_resolv
     return ANI_OK;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_InstanceOf(ani_env *env, ani_ref ref, ani_ref type, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(type);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coro = s.GetCoroutine();
+    EtsObject *lhsObj = s.ToInternalType(ref);
+    EtsObject *rhsObj = s.ToInternalType(type);
+
+    bool isInstance = EtsIsinstance(coro, lhsObj, rhsObj);
+    *result = isInstance ? ANI_TRUE : ANI_FALSE;
+    return ANI_OK;
+}
+
+template <typename T>
+static ani_status DoGetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref *result)
+{
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coro = s.GetCoroutine();
+    EtsObject *thisObj = s.ToInternalType(ref);
+    EtsObject *retObj = nullptr;
+
+    if constexpr (std::is_same_v<T, const char *>) {
+        panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(key))),
+                                                 utf::CStringAsMutf8(key)};
+        retObj = EtsLdbyname(coro, thisObj, propName);
+    } else if constexpr (std::is_same_v<T, ani_size>) {
+        retObj = EtsLdbyidx(coro, thisObj, key);
+    } else {
+        static_assert(std::is_same_v<T, ani_ref>);
+        ASSERT(key != nullptr);
+        EtsObject *keyObj = s.ToInternalType(key);
+        retObj = EtsLdbyval(coro, thisObj, keyObj);
+    }
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
+    return s.AddLocalRef(retObj, result);
+}
+
+template <typename T>
+static ani_status DoSetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref value)
+{
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coro = s.GetCoroutine();
+    EtsObject *thisObj = s.ToInternalType(ref);
+    EtsObject *valObj = s.ToInternalType(value);
+
+    bool ok = false;
+    if constexpr (std::is_same_v<T, const char *>) {
+        panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(key))),
+                                                 utf::CStringAsMutf8(key)};
+        EtsStbyname(coro, thisObj, propName, valObj);
+        ok = true;
+    } else if constexpr (std::is_same_v<T, ani_size>) {
+        ok = EtsStbyidx(coro, thisObj, key, valObj);
+    } else {
+        static_assert(std::is_same_v<T, ani_ref>);
+        CHECK_PTR_ARG(key);
+        EtsObject *keyObj = s.ToInternalType(key);
+        ok = EtsStbyval(coro, thisObj, keyObj, valObj);
+    }
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
+    return ok ? ANI_OK : ANI_ERROR;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_GetProperty(ani_env *env, ani_ref ref, const char *name, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(result);
+
+    return DoGetAnyProperty(env, ref, name, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_SetProperty(ani_env *env, ani_ref ref, const char *name, ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(value);
+
+    return DoSetAnyProperty(env, ref, name, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_GetByIndex(ani_env *env, ani_ref ref, ani_size index, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(result);
+
+    return DoGetAnyProperty(env, ref, index, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_SetByIndex(ani_env *env, ani_ref ref, ani_size index, ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(value);
+
+    return DoSetAnyProperty(env, ref, index, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_GetByValue(ani_env *env, ani_ref ref, ani_ref key, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(key);
+    CHECK_PTR_ARG(result);
+
+    return DoGetAnyProperty(env, ref, key, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_SetByValue(ani_env *env, ani_ref ref, ani_ref key, ani_ref value)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ref);
+    CHECK_PTR_ARG(key);
+    CHECK_PTR_ARG(value);
+
+    return DoSetAnyProperty(env, ref, key, value);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_Call(ani_env *env, ani_ref func, ani_size argc, ani_ref *argv, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(func);
+    if (argc > 0) {
+        CHECK_PTR_ARG(argv);
+    }
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsObject *funcObj = s.ToInternalType(func);
+
+    PandaVector<VMHandle<ObjectHeader>> argsVec;
+    if (argc > 0) {
+        argsVec.reserve(argc);
+        for (ani_size i = 0; i < argc; i++) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            EtsObject *argObj = s.ToInternalType(argv[i]);
+            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+        }
+    }
+    Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
+    EtsObject *res = EtsCall(coroutine, funcObj, internalArgs);
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
+
+    return s.AddLocalRef(res, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_CallMethod(ani_env *env, ani_ref self, const char *name, ani_size argc,
+                                                ani_ref *argv, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(self);
+    CHECK_PTR_ARG(name);
+    if (argc > 0) {
+        CHECK_PTR_ARG(argv);
+    }
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsObject *thisObj = s.ToInternalType(self);
+
+    PandaVector<VMHandle<ObjectHeader>> argsVec;
+    if (argc > 0) {
+        argsVec.reserve(argc);
+        for (ani_size i = 0; i < argc; i++) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            EtsObject *argObj = s.ToInternalType(argv[i]);
+            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+        }
+    }
+    Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
+    panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(name))),
+                                             utf::CStringAsMutf8(name)};
+    EtsObject *res = EtsCallThis(coroutine, thisObj, propName, internalArgs);
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
+    return s.AddLocalRef(res, result);
+}
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Any_New(ani_env *env, ani_ref ctor, ani_size argc, ani_ref *argv, ani_ref *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(ctor);
+    if (argc > 0) {
+        CHECK_PTR_ARG(argv);
+    }
+    CHECK_PTR_ARG(result);
+    ScopedManagedCodeFix s(env);
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsObject *ctorObj = s.ToInternalType(ctor);
+
+    std::vector<VMHandle<ObjectHeader>> argsVec;
+    if (argc > 0) {
+        argsVec.reserve(argc);
+        for (ani_size i = 0; i < argc; i++) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            EtsObject *argObj = s.ToInternalType(argv[i]);
+            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+        }
+    }
+
+    Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
+
+    EtsObject *newObj = EtsCallNew(coroutine, ctorObj, internalArgs);
+    ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
+    if (newObj == nullptr) {
+        return ANI_ERROR;
+    }
+    return s.AddLocalRef(newObj, result);
+}
+
 // clang-format off
 const __ani_interaction_api INTERACTION_API = {
     nullptr,
@@ -7008,7 +7250,17 @@ const __ani_interaction_api INTERACTION_API = {
     ArrayBuffer_GetInfo,
     Promise_New,
     PromiseResolver_Resolve,
-    PromiseResolver_Reject
+    PromiseResolver_Reject,
+    Any_InstanceOf,
+    Any_GetProperty,
+    Any_SetProperty,
+    Any_GetByIndex,
+    Any_SetByIndex,
+    Any_GetByValue,
+    Any_SetByValue,
+    Any_Call,
+    Any_CallMethod,
+    Any_New,
 };
 // clang-format on
 
