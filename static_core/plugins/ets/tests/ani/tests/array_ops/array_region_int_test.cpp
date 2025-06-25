@@ -103,7 +103,7 @@ TEST_F(ArraySetGetRegionIntTest, SetRegionIntTest)
 TEST_F(ArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_int_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_int_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -132,7 +132,7 @@ TEST_F(ArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
 TEST_F(ArraySetGetRegionIntTest, CheckChangeFromApiRegionIntTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_int_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_int_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

@@ -40,7 +40,7 @@ public:
     {
         ani_namespace ns = nullptr;
         ani_function func = nullptr;
-        GetFunctionFromModule(&ns, &func, "throwError", "I:I");
+        GetFunctionFromModule(&ns, &func, "throwError", "i:i");
         return func;
     }
 
@@ -48,13 +48,13 @@ public:
     {
         ani_namespace ns = nullptr;
         ani_function func = nullptr;
-        GetFunctionFromModule(&ns, &func, "throwErrorNested", "I:I");
+        GetFunctionFromModule(&ns, &func, "throwErrorNested", "i:i");
         return func;
     }
 
     void GetThrowErrorThroughNative(ani_namespace *ns, ani_function *func)
     {
-        GetFunctionFromModule(ns, func, "throwErrorThroughNative", "I:I");
+        GetFunctionFromModule(ns, func, "throwErrorThroughNative", "i:i");
     }
 
 private:
@@ -68,8 +68,9 @@ private:
     }
 };
 
+// CC-OFFNXT(G.FMT.10-CPP) project code style
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-const std::string ErrorHandlingTest::NAMESPACE_DESCRIPTOR = "Lerror_handling_test/" + std::string(NAMESPACE_NAME) + ";";
+const std::string ErrorHandlingTest::NAMESPACE_DESCRIPTOR = "error_handling_test." + std::string(NAMESPACE_NAME);
 
 TEST_F(ErrorHandlingTest, exist_unhandled_error_test)
 {
@@ -240,7 +241,7 @@ static ani_long callThroughNative([[maybe_unused]] ani_env *env, ani_int a)
 
     std::string_view methodName = "throwToNativeCaller";
     ani_function func = nullptr;
-    status = env->Namespace_FindFunction(ns, methodName.data(), "I:I", &func);
+    status = env->Namespace_FindFunction(ns, methodName.data(), "i:i", &func);
     ASSERT(status == ANI_OK);
 
     ani_int result = 0;
@@ -454,11 +455,11 @@ TEST_F(ErrorHandlingTest, throw_multiple_call_test)
 TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
 {
     ani_class errorClass {};
-    ASSERT_EQ(env_->FindClass("Lescompat/Error;", &errorClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("escompat.Error", &errorClass), ANI_OK);
     ASSERT_NE(errorClass, nullptr);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "Lstd/core/String;:V", &constructor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &constructor), ANI_OK);
     ASSERT_NE(constructor, nullptr);
 
     ani_string errorMessage {};

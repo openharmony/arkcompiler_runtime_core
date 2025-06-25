@@ -42,14 +42,14 @@ public:
 TEST_F(ModuleFindFunctionTest, find_int_function)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValue", ":I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValue", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     CheckFunIntValue(fn, 0);  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "Lstd/core/String;:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "C{std.core.String}:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     const std::string example {"example"};
     ani_string string = nullptr;
@@ -57,11 +57,11 @@ TEST_F(ModuleFindFunctionTest, find_int_function)
     ASSERT_EQ(status, ANI_OK);
     const int stringReturnValue = 1;                  // 1 function getIntValue(string): int, return 1
     CheckFunIntValue(fn, stringReturnValue, string);  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "I:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "i:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     const int intValue = 0;             // 0 function getIntValue(int): int, return 0
     CheckFunIntValue(fn, intValue, 0);  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", ":I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     const int value = 2;          // 2 function getIntValue(): int, return 2
     CheckFunIntValue(fn, value);  // NOLINT(cppcoreguidelines-pro-type-vararg)
@@ -70,11 +70,11 @@ TEST_F(ModuleFindFunctionTest, find_int_function)
 TEST_F(ModuleFindFunctionTest, find_ref_function)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":Lstd/core/String;", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std.core.String}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     CheckFunStringValue(fn, "a");
 }
@@ -82,17 +82,17 @@ TEST_F(ModuleFindFunctionTest, find_ref_function)
 TEST_F(ModuleFindFunctionTest, invalid_arg_moduleName)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialBool", ":Lstd/core/String;", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialBool", ":C{std.core.String}", &fn), ANI_NOT_FOUND);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_signature)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
@@ -102,53 +102,54 @@ TEST_F(ModuleFindFunctionTest, invalid_arg_signature)
 TEST_F(ModuleFindFunctionTest, invalid_arg_module)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(nullptr, "getInitialStringValue", ":Lstd/core/String;", &fn), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindFunction(nullptr, "getInitialStringValue", ":C{std.core.String}", &fn),
+              ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_name)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "", ":Lstd/core/String;", &fn), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Module_FindFunction(module, nullptr, ":Lstd/core/String;", &fn), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindFunction(module, "", ":C{std.core.String}", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, nullptr, ":C{std.core.String}", &fn), ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_name_in_namespace)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValueOps", ":I", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValueOps", ":i", &fn), ANI_NOT_FOUND);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_arg_result)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":Lstd/core/String;", nullptr),
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialStringValue", ":C{std.core.String}", nullptr),
               ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindFunctionTest, invalid_env)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_function fn {};
-    ASSERT_EQ(env_->c_api->Module_FindFunction(nullptr, module, "getInitialStringValue", ":Lstd/core/String;", &fn),
+    ASSERT_EQ(env_->c_api->Module_FindFunction(nullptr, module, "getInitialStringValue", ":C{std.core.String}", &fn),
               ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindFunctionTest, duplicate_no_signature)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
@@ -158,22 +159,22 @@ TEST_F(ModuleFindFunctionTest, duplicate_no_signature)
 TEST_F(ModuleFindFunctionTest, find_function)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
     ani_function fn1 {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValue", ":I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValue", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     fn1 = fn;
-    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValuexxxx", ":I", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getInitialIntValuexxxx", ":i", &fn), ANI_NOT_FOUND);
     ASSERT_EQ(fn, fn1);
 }
 
 TEST_F(ModuleFindFunctionTest, many_descriptor)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_function fn {};
     char end = 'J';
@@ -181,7 +182,7 @@ TEST_F(ModuleFindFunctionTest, many_descriptor)
     for (int i = 0; i < loopCount; i++) {
         std::string str = "getIntValue";
         str += static_cast<char>(random() % (end - 'A') + 'A');
-        ASSERT_EQ(env_->Module_FindFunction(module, str.c_str(), "I:V", &fn), ANI_OK);
+        ASSERT_EQ(env_->Module_FindFunction(module, str.c_str(), "i:", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
     }
 }
@@ -189,39 +190,39 @@ TEST_F(ModuleFindFunctionTest, many_descriptor)
 TEST_F(ModuleFindFunctionTest, find_func_all_Type)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "I:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValue", "i:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
     fn = nullptr;
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 
     ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(kclass, "addIntValue", "II:I", &staticMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(kclass, "addIntValue", "ii:i", &staticMethod), ANI_OK);
     ASSERT_NE(staticMethod, nullptr);
     fn = nullptr;
-    ASSERT_EQ(env_->Module_FindFunction(module, "async_f", "I:Lstd/core/Promise;", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "async_f", "i:C{std.core.Promise}", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 
 TEST_F(ModuleFindFunctionTest, find_func_B_in_namespace_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_function_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_function_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValueOps", ":I", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindFunction(module, "getIntValueOps", ":i", &fn), ANI_NOT_FOUND);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getIntValueOps", ":I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "getIntValueOps", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 }
 

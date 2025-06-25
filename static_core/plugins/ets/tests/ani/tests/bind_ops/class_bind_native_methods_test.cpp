@@ -23,7 +23,7 @@ namespace ark::ets::ani::testing {
 
 class ClassBindNativeMethodsTest : public AniTest {};
 
-constexpr std::string_view MODULE_NAME = "L@defModule/class_bind_native_methods_test;";
+constexpr std::string_view MODULE_NAME = "@defModule.class_bind_native_methods_test";
 
 // NOLINTNEXTLINE(readability-named-parameter)
 static ani_int NativeMethodsFooNative(ani_env *, ani_class)
@@ -52,7 +52,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -67,7 +67,7 @@ TEST_F(ClassBindNativeMethodsTest, already_binded_method)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -83,7 +83,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -102,15 +102,15 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
     ani_namespace ns {};
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest002A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test002A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest002B;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test002B", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(result, "LTestA002;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(result, "TestA002", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -149,7 +149,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_003)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestB003;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestB003", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -188,7 +188,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_004)
     ani_class cls {};
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA004;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA004", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -228,7 +228,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_005)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA005;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA005", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -243,7 +243,7 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceBTest)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array method = {
@@ -278,7 +278,7 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceCTest)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array method = {
@@ -310,7 +310,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA006;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA006", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {

@@ -58,19 +58,19 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
 {
     ani_object objectA {};
     ani_class classA {};
-    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
+    GetMethodData(&objectA, &classA, "object_instance_of_test.A", "new_A", ":C{object_instance_of_test.A}");
 
     ani_object objectB {};
     ani_class classB {};
-    GetMethodData(&objectB, &classB, "Lobject_instance_of_test/B;", "new_B", ":Lobject_instance_of_test/B;");
+    GetMethodData(&objectB, &classB, "object_instance_of_test.B", "new_B", ":C{object_instance_of_test.B}");
 
     ani_object objectC {};
     ani_class classC {};
-    GetMethodData(&objectC, &classC, "Lobject_instance_of_test/C;", "new_C", ":Lobject_instance_of_test/C;");
+    GetMethodData(&objectC, &classC, "object_instance_of_test.C", "new_C", ":C{object_instance_of_test.C}");
 
     ani_object objectD {};
     ani_class classD {};
-    GetMethodData(&objectD, &classD, "Lobject_instance_of_test/D;", "new_D", ":Lobject_instance_of_test/D;");
+    GetMethodData(&objectD, &classD, "object_instance_of_test.D", "new_D", ":C{object_instance_of_test.D}");
 
     ani_type typeRefC = classC;
     ani_type typeRefA = classA;
@@ -100,7 +100,7 @@ TEST_F(ObjectInstanceOfTest, invalid_parameter)
     ani_object objectA {};
     ani_class classA {};
     ani_boolean res = ANI_FALSE;
-    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
+    GetMethodData(&objectA, &classA, "object_instance_of_test.A", "new_A", ":C{object_instance_of_test.A}");
 
     ani_type type = nullptr;
     ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_INVALID_ARGS);
@@ -115,15 +115,15 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_loop)
 {
     ani_object objectA {};
     ani_class classA {};
-    GetMethodData(&objectA, &classA, "Lobject_instance_of_test/A;", "new_A", ":Lobject_instance_of_test/A;");
+    GetMethodData(&objectA, &classA, "object_instance_of_test.A", "new_A", ":C{object_instance_of_test.A}");
 
     ani_object objectB {};
     ani_class classB {};
-    GetMethodData(&objectB, &classB, "Lobject_instance_of_test/B;", "new_B", ":Lobject_instance_of_test/B;");
+    GetMethodData(&objectB, &classB, "object_instance_of_test.B", "new_B", ":C{object_instance_of_test.B}");
 
     ani_object objectC {};
     ani_class classC {};
-    GetMethodData(&objectC, &classC, "Lobject_instance_of_test/C;", "new_C", ":Lobject_instance_of_test/C;");
+    GetMethodData(&objectC, &classC, "object_instance_of_test.C", "new_C", ":C{object_instance_of_test.C}");
 
     ani_type typeRefC = classC;
     ani_type typeRefA = classA;
@@ -145,11 +145,11 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_array)
 {
     ani_object objectArr;
     ani_class classA;
-    GetMethodData(&objectArr, &classA, "Lobject_instance_of_test/A;", "new_A_array", ":Lescompat/Array;");
+    GetMethodData(&objectArr, &classA, "object_instance_of_test.A", "new_A_array", ":C{escompat.Array}");
 
     ani_boolean res;
     ani_class arrayCls;
-    ASSERT_EQ(env_->FindClass("Lescompat/Array;", &arrayCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("escompat.Array", &arrayCls), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectArr, arrayCls, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }
@@ -158,18 +158,18 @@ TEST_F(ObjectInstanceOfTest, object_interface_instance_of)
 {
     ani_object objectI;
     ani_class classF;
-    GetMethodData(&objectI, &classF, "Lobject_instance_of_test/F;", "new_I", ":Lobject_instance_of_test/I;");
+    GetMethodData(&objectI, &classF, "object_instance_of_test.F", "new_I", ":C{object_instance_of_test.I}");
 
     ani_boolean res;
     ani_class interfaceI;
-    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/I;", &interfaceI), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_instance_of_test.I", &interfaceI), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectI, classF, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
     ASSERT_EQ(env_->Object_InstanceOf(objectI, interfaceI, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     ani_object objectF;
-    GetMethodData(&objectF, &classF, "Lobject_instance_of_test/F;", "new_F", ":Lobject_instance_of_test/F;");
+    GetMethodData(&objectF, &classF, "object_instance_of_test.F", "new_F", ":C{object_instance_of_test.F}");
     ASSERT_EQ(env_->Object_InstanceOf(objectF, classF, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
     ASSERT_EQ(env_->Object_InstanceOf(objectF, interfaceI, &res), ANI_OK);
@@ -180,11 +180,11 @@ TEST_F(ObjectInstanceOfTest, object_union_instance_of)
 {
     ani_object objectU;
     ani_class classF;
-    GetMethodData(&objectU, &classF, "Lobject_instance_of_test/F;", "new_Union", nullptr);
+    GetMethodData(&objectU, &classF, "object_instance_of_test.F", "new_Union", nullptr);
 
     ani_object objectU1;
     ani_class classD;
-    GetMethodData(&objectU1, &classD, "Lobject_instance_of_test/D;", "new_Union", nullptr);
+    GetMethodData(&objectU1, &classD, "object_instance_of_test.D", "new_Union", nullptr);
 
     ani_boolean res;
     ASSERT_EQ(env_->Object_InstanceOf(objectU, classF, &res), ANI_OK);
@@ -203,15 +203,15 @@ TEST_F(ObjectInstanceOfTest, pure_object_instance_of)
     ani_object objectD;
     ani_class classF;
     ani_class classD;
-    GetMethodData(&object, &classF, "Lobject_instance_of_test/F;", "new_Object", ":Lstd/core/Object;");
-    GetMethodData(&objectD, &classD, "Lobject_instance_of_test/D;", "new_D", ":Lobject_instance_of_test/D;");
+    GetMethodData(&object, &classF, "object_instance_of_test.F", "new_Object", ":C{std.core.Object}");
+    GetMethodData(&objectD, &classD, "object_instance_of_test.D", "new_D", ":C{object_instance_of_test.D}");
 
     ani_class classObject;
     ani_class interfaceI;
     ani_class classA;
-    ASSERT_EQ(env_->FindClass("Lstd/core/Object;", &classObject), ANI_OK);
-    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/I;", &interfaceI), ANI_OK);
-    ASSERT_EQ(env_->FindClass("Lobject_instance_of_test/A;", &classA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Object", &classObject), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_instance_of_test.I", &interfaceI), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_instance_of_test.A", &classA), ANI_OK);
 
     ani_boolean res;
     ASSERT_EQ(env_->Object_InstanceOf(objectD, classObject, &res), ANI_OK);
@@ -232,13 +232,13 @@ TEST_F(ObjectInstanceOfTest, object_boxed_primitive_instance_of)
 {
     ani_object objectInt;
     ani_class classF;
-    GetMethodData(&objectInt, &classF, "Lobject_instance_of_test/F;", "new_Boxed_Primitive", ":Lstd/core/Object;");
+    GetMethodData(&objectInt, &classF, "object_instance_of_test.F", "new_Boxed_Primitive", ":C{std.core.Object}");
 
     ani_boolean res;
     ani_class classInt;
     ani_class classObject;
-    ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &classInt), ANI_OK);
-    ASSERT_EQ(env_->FindClass("Lstd/core/Object;", &classObject), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Int", &classInt), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Object", &classObject), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectInt, classInt, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
     ASSERT_EQ(env_->Object_InstanceOf(objectInt, classObject, &res), ANI_OK);

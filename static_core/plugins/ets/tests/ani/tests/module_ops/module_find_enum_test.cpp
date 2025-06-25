@@ -46,24 +46,24 @@ void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resStri
 TEST_F(ModuleFindEnumTest, find_enum)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
     ani_enum aniEnum1 {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     CheckEnumValue(aniEnum, "RED", 0);  // 0 for test in sts
     aniEnum1 = aniEnum;
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColorAAA;", &aniEnum), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindEnum(module, "ColorAAA", &aniEnum), ANI_NOT_FOUND);
     ASSERT_EQ(aniEnum, aniEnum1);
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColorInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "ColorInt", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     const int value = 5;  // 5 for test in sts
     CheckEnumValue(aniEnumInt, "RED", value);
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColorString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "ColorString", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 }
 
@@ -71,31 +71,30 @@ TEST_F(ModuleFindEnumTest, invalid_args)
 {
     ani_enum aniEnum {};
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
-    ASSERT_EQ(env_->c_api->Module_FindEnum(nullptr, module, "LBColor;", &aniEnum), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Module_FindEnum(nullptr, "LBColor;", &aniEnum), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Module_FindEnum(nullptr, module, "BColor", &aniEnum), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindEnum(nullptr, "BColor", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, nullptr, &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, "", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, "#BColor;", &aniEnum), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Module_FindEnum(module, "LBColor;", &aniEnum), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindEnum(module, "BColor", &aniEnum), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Module_FindEnum(module, "LBColor", &aniEnum), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Module_FindEnum(module, "LBColor;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindEnum(module, "BColor", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindEnumTest, many_descriptor)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &aniEnum), ANI_OK);
     char end = 'C';
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
-        std::string str = "LColor";
+        std::string str = "Color";
         str += static_cast<char>(random() % (end - 'A') + 'A');
-        str += ";";
         ASSERT_EQ(env_->Module_FindEnum(module, str.c_str(), &aniEnum), ANI_OK);
         ASSERT_NE(aniEnum, nullptr);
     }
@@ -104,16 +103,16 @@ TEST_F(ModuleFindEnumTest, many_descriptor)
 TEST_F(ModuleFindEnumTest, find_enum_B_in_namespace_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColorAA;", &aniEnum), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindEnum(module, "ColorAA", &aniEnum), ANI_NOT_FOUND);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorAA;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorAA", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     const int value = 5;  // 5 for test in ets
     CheckEnumValue(aniEnum, "RED", value);
@@ -122,11 +121,11 @@ TEST_F(ModuleFindEnumTest, find_enum_B_in_namespace_A)
 TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -147,11 +146,11 @@ TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_001)
 TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_002)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -168,11 +167,11 @@ TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_002)
 TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_003)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_enum_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Module_FindEnum(module, "LColor;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

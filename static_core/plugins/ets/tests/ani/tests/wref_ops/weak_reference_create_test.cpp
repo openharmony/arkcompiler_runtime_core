@@ -76,10 +76,10 @@ TEST_F(WeakReferenceCreateTest, weak_reference_case2)
     const ani_int weight = 200;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lweak_reference_create_test/MobilePhone;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("weak_reference_create_test.MobilePhone", &cls), ANI_OK);
 
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;I:V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}i:", &ctor), ANI_OK);
 
     ani_string model {};
     ASSERT_EQ(env_->String_NewUTF8(m.data(), m.size(), &model), ANI_OK);

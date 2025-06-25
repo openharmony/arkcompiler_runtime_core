@@ -33,7 +33,7 @@ public:
         ASSERT_EQ(env_->Class_FindStaticMethod(cls, newClassName, signature, &newMethod), ANI_OK);
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, objectRef), ANI_OK);
 
-        const char *methodSignature = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
+        const char *methodSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
         ani_method concat {};
         ASSERT_EQ(env_->Class_FindMethod(cls, "concat", methodSignature, &concat), ANI_OK);
         ASSERT_NE(concat, nullptr);
@@ -149,11 +149,11 @@ TEST_F(ReferenceEqualsTest, check_object_and_method)
 {
     ani_ref objectARef = nullptr;
     ani_ref methodARef = nullptr;
-    GetMethodData(&objectARef, &methodARef, "Lreference_equals_test/A;", "new_A", ":Lreference_equals_test/A;");
+    GetMethodData(&objectARef, &methodARef, "reference_equals_test.A", "new_A", ":C{reference_equals_test.A}");
 
     ani_ref objectBRef = nullptr;
     ani_ref methodBRef = nullptr;
-    GetMethodData(&objectBRef, &methodBRef, "Lreference_equals_test/B;", "new_B", ":Lreference_equals_test/B;");
+    GetMethodData(&objectBRef, &methodBRef, "reference_equals_test.B", "new_B", ":C{reference_equals_test.B}");
 
     ani_boolean isEquals = ANI_TRUE;
     ASSERT_EQ(env_->Reference_Equals(objectARef, objectBRef, &isEquals), ANI_OK);

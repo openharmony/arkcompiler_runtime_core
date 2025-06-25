@@ -23,68 +23,68 @@ class ModuleFindClassTest : public AniTest {};
 TEST_F(ModuleFindClassTest, find_class)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LATest;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "ATest", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
-    ASSERT_EQ(env_->Module_FindClass(module, "LBTest;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "BTest", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
-    ASSERT_EQ(env_->Module_FindClass(module, "Lops/C;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "ops.C", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_interface)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LAA;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "AA", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(kclass, "foo", "D:D", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(kclass, "foo", "d:d", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
-    ASSERT_EQ(env_->Module_FindClass(module, "LBB;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "BB", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
-    ASSERT_EQ(env_->Class_FindMethod(kclass, "eat", "I:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(kclass, "eat", "i:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_abstract_class)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LPerson;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Person", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(kclass, "addMethod", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(kclass, "addMethod", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_final_class)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LChild;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Child", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(kclass, "addMethod", "II:I", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(kclass, "addMethod", "ii:i", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, invalid_arg_class)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
@@ -97,56 +97,54 @@ TEST_F(ModuleFindClassTest, invalid_arg_class)
 TEST_F(ModuleFindClassTest, invalid_arg_result)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
-    ASSERT_EQ(env_->Module_FindClass(module, "LATest;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindClass(module, "ATest", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ModuleFindClassTest, invalid_arg_descriptor)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
     ani_class kclass1 {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LATest;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "ATest", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass1 = kclass;
-    ASSERT_EQ(env_->Module_FindClass(module, "LAAAAAATest;", &kclass), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindClass(module, "AAAAAATest", &kclass), ANI_NOT_FOUND);
     ASSERT_EQ(kclass, kclass1);
 }
 
 TEST_F(ModuleFindClassTest, invalid_env)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_class kclass {};
-    ASSERT_EQ(env_->c_api->Module_FindClass(nullptr, module, "LATest;", &kclass), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Module_FindClass(nullptr, module, "ATest", &kclass), ANI_INVALID_ARGS);
     ASSERT_EQ(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, invalid_module)
 {
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(nullptr, "LATest;", &kclass), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindClass(nullptr, "ATest", &kclass), ANI_INVALID_ARGS);
     ASSERT_EQ(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, many_descriptor)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
     ani_class kclass {};
     char end = 'J';
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
-        std::string str = "L";
-        str += static_cast<char>(random() % (end - 'A') + 'A');
-        str += ";";
+        const std::string str = std::string(1, (random() % (end - 'A') + 'A'));
         ASSERT_EQ(env_->Module_FindClass(module, str.c_str(), &kclass), ANI_OK);
     }
 }
@@ -154,17 +152,17 @@ TEST_F(ModuleFindClassTest, many_descriptor)
 TEST_F(ModuleFindClassTest, allType)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LPerson;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Person", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass = nullptr;
-    ASSERT_EQ(env_->Module_FindClass(module, "LChild;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Child", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass = nullptr;
-    ASSERT_EQ(env_->Module_FindClass(module, "LStudent;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Student", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 
     ani_static_field field {};
@@ -180,71 +178,71 @@ TEST_F(ModuleFindClassTest, allType)
 TEST_F(ModuleFindClassTest, find_B_in_namespace_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LBBBTest;", &kclass), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindClass(module, "BBBTest", &kclass), ANI_NOT_FOUND);
     ASSERT_EQ(kclass, nullptr);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Laaa_test;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "aaa_test", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     kclass = nullptr;
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "LBBBTest;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "BBBTest", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_B_extends_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LChild;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Child", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass = nullptr;
-    ASSERT_EQ(env_->Module_FindClass(module, "LPerson;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Person", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_C_extends_B_extends_A)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LCT;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "CT", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass = nullptr;
-    ASSERT_EQ(env_->Module_FindClass(module, "LBT;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "BT", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     kclass = nullptr;
-    ASSERT_EQ(env_->Module_FindClass(module, "LAT;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "AT", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 }
 
 TEST_F(ModuleFindClassTest, find_generic_class)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/module_find_class_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_class_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "LContainer;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "Container", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     ani_method method {};
     // add(T), generic method
     ASSERT_EQ(env_->Class_FindMethod(kclass, "add", nullptr, &method), ANI_OK);
     ASSERT_NE(method, nullptr);
     // create ContainerTest object
-    ASSERT_EQ(env_->Module_FindClass(module, "LContainerTest;", &kclass), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "ContainerTest", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
     ani_method cMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(kclass, "<ctor>", "I:V", &cMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(kclass, "<ctor>", "i:", &cMethod), ANI_OK);
     ASSERT_NE(cMethod, nullptr);
 
     ani_object object {};
@@ -255,10 +253,10 @@ TEST_F(ModuleFindClassTest, find_generic_class)
     // create Int object
     ani_object testIntObject = {};
     ani_class intClass {};
-    ASSERT_EQ(env_->FindClass("Lstd/core/Int;", &intClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Int", &intClass), ANI_OK);
     ASSERT_NE(intClass, nullptr);
     ani_method intCMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(intClass, "<ctor>", "I:V", &intCMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(intClass, "<ctor>", "i:", &intCMethod), ANI_OK);
     ASSERT_NE(intCMethod, nullptr);
     const int32_t testIntValue = 1;
     ASSERT_EQ(env_->Object_New(intClass, intCMethod, &testIntObject, testIntValue), ANI_OK);

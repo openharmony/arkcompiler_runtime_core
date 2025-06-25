@@ -46,7 +46,7 @@ public:
             data[index] = expectedType;
             ani_byte value = 0;
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            ASSERT_EQ(env->Object_CallMethodByName_Byte(arrayBuffer, "at", "I:B", &value, index), ANI_OK);
+            ASSERT_EQ(env->Object_CallMethodByName_Byte(arrayBuffer, "at", "i:b", &value, index), ANI_OK);
             ani_boolean hasError = ANI_FALSE;
             ASSERT_EQ(env->ExistUnhandledError(&hasError), ANI_OK);
             ASSERT_EQ(hasError, ANI_FALSE);
@@ -72,7 +72,7 @@ public:
 
         const auto checkSetMethod = [arrayBuffer, data, env = env_](ani_int index, ani_byte expectedType) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            ASSERT_EQ(env->Object_CallMethodByName_Void(arrayBuffer, "set", "IB:V", index, expectedType), ANI_OK);
+            ASSERT_EQ(env->Object_CallMethodByName_Void(arrayBuffer, "set", "ib:", index, expectedType), ANI_OK);
             ani_boolean hasError = ANI_FALSE;
             ASSERT_EQ(env->ExistUnhandledError(&hasError), ANI_OK);
             ASSERT_EQ(hasError, ANI_FALSE);
@@ -93,7 +93,7 @@ public:
         const auto checkAtMethod = [arrayBuffer, env = env_](ani_int index) {
             ani_byte value = 0;
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            ASSERT_EQ(env->Object_CallMethodByName_Byte(arrayBuffer, "at", "I:B", &value, index), ANI_PENDING_ERROR);
+            ASSERT_EQ(env->Object_CallMethodByName_Byte(arrayBuffer, "at", "i:b", &value, index), ANI_PENDING_ERROR);
             ani_boolean hasError = ANI_FALSE;
             ASSERT_EQ(env->ExistUnhandledError(&hasError), ANI_OK);
             ASSERT_EQ(hasError, ANI_TRUE);
@@ -113,7 +113,7 @@ public:
     {
         const auto checkSetMethod = [arrayBuffer, env = env_](ani_int index) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            ASSERT_EQ(env->Object_CallMethodByName_Void(arrayBuffer, "set", "IB:V", index, 0), ANI_PENDING_ERROR);
+            ASSERT_EQ(env->Object_CallMethodByName_Void(arrayBuffer, "set", "ib:", index, 0), ANI_PENDING_ERROR);
             ani_boolean hasError = ANI_FALSE;
             ASSERT_EQ(env->ExistUnhandledError(&hasError), ANI_OK);
             ASSERT_EQ(hasError, ANI_TRUE);
