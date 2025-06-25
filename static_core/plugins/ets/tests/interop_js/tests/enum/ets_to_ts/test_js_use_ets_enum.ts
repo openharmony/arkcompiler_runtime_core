@@ -19,17 +19,17 @@ let Color = etsVm.getClass('Lets_enum/Color;');
 function main(): void {
     // test enum equal
     let green = Color.Green;
-    ASSERT_TRUE(green == Color.Green);
+    ASSERT_TRUE(green === Color.Green);
     ASSERT_TRUE(green === Color.Green);
 
     // test enum not equal
-    ASSERT_TRUE(green != Color.Red);
+    ASSERT_TRUE(green !== Color.Red);
 
     // test enum valueOf
-    ASSERT_TRUE(Color.Blue.valueOf() == 2);
+    ASSERT_TRUE(Color.Blue.valueOf() === 2);
 
     // test enum getName
-    ASSERT_TRUE(Color.Red.getName() == "Red");
+    ASSERT_TRUE(Color.Red.getName() === 'Red');
 }
 
 main();

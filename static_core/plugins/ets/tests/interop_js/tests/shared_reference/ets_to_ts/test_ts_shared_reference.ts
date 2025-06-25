@@ -28,7 +28,7 @@ const areURIErrorEqual = etsVm.getFunction('Lets_shared_reference/ETSGLOBAL;','a
 
 export let jsArray = ['foo', 1, true];
 export let o = {a:1};
-let bar = () =>{
+let bar = (): void => {
     print('hello');
 }
 
