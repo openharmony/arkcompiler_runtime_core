@@ -1635,6 +1635,26 @@ export namespace util {
         }
     }
 
+    export function promisify(original: Function): (...args: FixedArray<Any>) => Promise<Any> {
+        return (...args: FixedArray<Any>): Promise<Any> => {
+            return new Promise<Any>((resolve, reject) => {
+                let callback: Function = (err: Error | null, ...value: FixedArray<Any>) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                };
+                const newArgs: FixedArray<Any> = new Any[args.length + 1];
+                for (let i = 0; i < args.length; i++) {
+                    newArgs[i] = args[i];
+                }
+                newArgs[args.length] = callback;
+                original.unsafeCall(...newArgs);
+            });
+        };
+    }
+
     /**
      * Get the hash code of an object.
      * @param { object } [object] - The object that need to get hash code.
