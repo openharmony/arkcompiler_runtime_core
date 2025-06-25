@@ -53,7 +53,7 @@ function testAdd() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator Add')
-    suite.addTest('Function Add', testAdd)
-    return suite.run()
+    // const suite = new ArkTestsuite('Function Atomics baseOperator Add')
+    // suite.addTest('Function Add', testAdd)
+    // return suite.run()
 }

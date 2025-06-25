@@ -24,6 +24,9 @@ function main(): int {
     suite.addTest("Verify Map.$_iterator() is identified as MapIterator", testIsMapIterator004)
     suite.addTest("Verify Map is not identified as MapIterator", testIsMapIterator005)
     suite.addTest("Verify Array is not identified as MapIterator", testIsMapIterator006)
+    suite.addTest("Verify Map.keys() with elements is identified as MapIterator", testIsMapIterator007)
+    suite.addTest("Verify Map.values() with elements is identified as MapIterator", testIsMapIterator008)
+    suite.addTest("Verify Map.entries() with elements is identified as MapIterator", testIsMapIterator009)
 
     return suite.run()
 }
@@ -111,4 +114,28 @@ function testIsMapIterator006() {
   const array = new Array<int>();
   let result = proc.isMapIterator(array);
   arktest.assertTrue(result == false, "The Array should not be of the same type as the MapIterator");
+}
+
+function testIsMapIterator007() {
+    let proc = new util.types();
+    const map = new Map<int, int>();
+    map.set(1, 1);
+    let result = proc.isMapIterator(map.keys());
+    arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+}
+
+function testIsMapIterator008() {
+    let proc = new util.types();
+    const map = new Map<int, int>();
+    map.set(1, 1);
+    let result = proc.isMapIterator(map.values());
+    arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
+}
+
+function testIsMapIterator009() {
+    let proc = new util.types();
+    const map = new Map<int, int>();
+    map.set(1, 1);
+    let result = proc.isMapIterator(map.entries());
+    arktest.assertTrue(result, "The MapIterator should be of the same type as the MapIterator");
 }

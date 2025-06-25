@@ -87,7 +87,7 @@ final class MapEntry<K, V> {
     }
 }
 
-final class MapIterator<K, V, R> implements IterableIterator<R> {
+export final class MapIterator<K, V, R> implements IterableIterator<R> {
     private node: MapEntry<K, V>
     private tail: MapEntry<K, V>
 
@@ -113,7 +113,7 @@ final class MapIterator<K, V, R> implements IterableIterator<R> {
     }
 }
 
-final class EmptyMapIterator<R> implements IterableIterator<R> {
+export final class EmptyMapIterator<R> implements IterableIterator<R> {
     override next(): IteratorResult<R> {
         return new IteratorResult<R>()
     }

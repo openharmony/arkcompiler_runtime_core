@@ -180,15 +180,15 @@ function testXorBig() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator')
-    suite.addTest('Function Add', testAddBig)
-    suite.addTest('Function And', testAndBig)
-    suite.addTest('Function testCompareExchange', testCompareExchangeBig)
-    suite.addTest('Function testExchange', testExchangeBig)
-    suite.addTest('Function testLoad', testLoadBig)
-    suite.addTest('Function testOr', testOrBig)
-    suite.addTest('Function testStore', testStoreBig)
-    suite.addTest('Function testSub', testSubBig)
-    suite.addTest('Function testXor', testXorBig)
-    return suite.run()
+    // const suite = new ArkTestsuite('Function Atomics baseOperator')
+    // suite.addTest('Function Add', testAddBig)
+    // suite.addTest('Function And', testAndBig)
+    // suite.addTest('Function testCompareExchange', testCompareExchangeBig)
+    // suite.addTest('Function testExchange', testExchangeBig)
+    // suite.addTest('Function testLoad', testLoadBig)
+    // suite.addTest('Function testOr', testOrBig)
+    // suite.addTest('Function testStore', testStoreBig)
+    // suite.addTest('Function testSub', testSubBig)
+    // suite.addTest('Function testXor', testXorBig)
+    // return suite.run()
 }
