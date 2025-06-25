@@ -130,6 +130,30 @@ function test7(): int {
     return failure
 }
 
+function test8(): int {
+    let failure = 0
+    let pattern = "(?<fst>.)(?<snd>.)|(?<thd>x)"
+    for (let flags of ["", "u"]) {
+        let re = new RegExp(pattern, flags)
+        failure += checkTestResult("cd", "abcd".replace(re, "$<42$1>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<fth>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<$1>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<>"))
+        failure += checkTestResult("cd", "abcd".replace(re, "$<thd>"))
+        failure += checkTestResult("bacd", "abcd".replace(re, "$<snd>$<fst>"))
+    }
+    for (let flags of ["g", "gu"]) {
+        let re = new RegExp(pattern, flags)
+        failure += checkTestResult("", "abcd".replace(re, "$<42$1>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<fth>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<$1>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<>"))
+        failure += checkTestResult("", "abcd".replace(re, "$<thd>"))
+        failure += checkTestResult("badc", "abcd".replace(re, "$<snd>$<fst>"))
+    }
+    return failure
+}
+
 function main(): int {
     let str = "xaxbxcx"
     let failure = 0
@@ -138,8 +162,9 @@ function main(): int {
     failure += test3(str)
     failure += test4(str)
     failure += test5("abcd")
-    // failure += test6()
+    failure += test6()
     failure += test7()
+    failure += test8()
     console.println(failure)
     return failure
 }

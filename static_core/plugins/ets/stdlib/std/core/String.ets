@@ -1443,8 +1443,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         return this.substring(begin, end)
     }
 
-    //NOTE(kirill-mitkin): Replace namedCaptures type with record type when it will be possible
-    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Object | undefined, replacement: String) {
+    static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {
@@ -1519,12 +1518,11 @@ export final class String extends Object implements Comparable<String>, JSONable
                     for (; j < replacement.getLength() && replacement.charAt(j) != c'>'; ++j) {}
                     if (j < replacement.getLength()) {
                         let groupName = replacement.substring(i + 2, j);
-                        /*let capture = namedCaptures[groupName];
+                        let capture = namedCaptures[groupName];
                         if (capture != undefined) {
                             result += capture
                         }
-                        */
-                        i = j;
+                        i = j + 1;
                     } else {
                         result += "$<";
                         i += 2;
