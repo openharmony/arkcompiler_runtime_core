@@ -38,13 +38,17 @@ struct IdMapItem {
 // # Members
 // - `version`: A 64-bit unsigned integer representing the version of the type
 // information.
-// - `free`: A function pointer to a function that frees the data block.
+// - `free_fptr`: Pointer to function that frees the data block.
+// - `hash_fptr`: Pointer to function that computes the hash of a data block.
+// - `same_fptr`: Pointer to function that compares equality of two data blocks.
 // - `len`: A 64-bit unsigned integer representing the length of idmap.
 // - `idmap`: An array of IdMapItem structures representing the ID to vtable
 //   mapping.
 struct TypeInfo {
     uint64_t version;
-    void (*free)(struct DataBlockHead *);
+    void (*free_fptr)(struct DataBlockHead *);
+    size_t (*hash_fptr)(struct DataBlockHead *);
+    bool (*same_fptr)(struct DataBlockHead *, struct DataBlockHead *);
     uint64_t len;
     struct IdMapItem idmap[];
 };

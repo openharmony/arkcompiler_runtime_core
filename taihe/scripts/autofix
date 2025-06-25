@@ -57,7 +57,7 @@ fi
 
 # Python
 if "$run_python"; then
-    echo "--- Formatting Python code ---"
+    log_stage "Formatting Python code"
     removestar -i taihe tests || true
     black taihe tests
     ruff check taihe tests --fix
@@ -65,7 +65,7 @@ fi
 
 # Cpp, runtime and tests
 if "$run_cpp"; then
-    echo "--- Formatting C++ code ---"
+    log_stage "Formatting C++ code"
     # Cpp, runtime
     find ../runtime/include ../runtime/src -type f |
         clang-format-19 --verbose -i @/dev/stdin
@@ -79,9 +79,9 @@ fi
 
 # ArkTS
 if "$run_arkts"; then
-    echo "--- Formatting ArkTS code ---"
+    log_stage "Formatting ArkTS code"
     find ../test ../cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
-        echo "Formatting $file"
+        log_verbose "Formatting $file"
         clang-format-19 --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
     done
 fi

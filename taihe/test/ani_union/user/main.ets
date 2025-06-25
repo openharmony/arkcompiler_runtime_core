@@ -618,7 +618,7 @@ function test_union_with_makeAndShowTypedArrayUnion(){
 
 function test_union_with_makeAndShowArrayUnion(){
     //Array<f32> Array<f64>
-    let arrStruct: UnionTest.ArrayStruct = {float32Array: [1.23, -2.14, 3.16], float64Array: [1.234567, -2.145789, 3.161862]};
+    let arrStruct: UnionTest.ArrayStruct = {float32Array: [1.23f, -2.14f, 3.16f], float64Array: [1.234567, -2.145789, 3.161862]};
     let arrResult: UnionTest.ArrayUnion = UnionTest.makeAndShowArrayUnion(arrStruct);
     console.log("ArrayUnion arrResult a: ", (arrResult as UnionTest.ArrayStruct)!.float32Array);
     console.log("ArrayUnion arrResult b: ", (arrResult as UnionTest.ArrayStruct)!.float64Array);

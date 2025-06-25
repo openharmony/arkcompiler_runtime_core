@@ -16,13 +16,12 @@
 """Convert AST to IR."""
 
 from collections.abc import Iterable
-from dataclasses import dataclass
-from enum import Enum
 from typing import Any
 
 from typing_extensions import override
 
-from taihe.parse import Visitor, ast
+from taihe.parse.antlr.TaiheAST import TaiheAST as ast
+from taihe.parse.antlr.TaiheVisitor import TaiheVisitor as Visitor
 from taihe.parse.ast_generation import generate_ast
 from taihe.semantics.declarations import (
     AttrItemDecl,
@@ -47,59 +46,25 @@ from taihe.semantics.declarations import (
     UnionDecl,
     UnionFieldDecl,
 )
-from taihe.utils.diagnostics import (
-    DiagnosticsManager,
-    DiagNote,
-    DiagWarn,
-)
+from taihe.utils.diagnostics import DiagnosticsManager
+from taihe.utils.exceptions import InvalidPackageNameError
 from taihe.utils.sources import SourceBase, SourceLocation
-
-
-class IgnoredFileReason(Enum):
-    IS_DIRECTORY = "subdirectories are ignored"
-    EXTENSION_MISMATCH = "unexpected file extension"
-    INVALID_PKG_NAME = "invalid package name"
-
-
-@dataclass
-class IgnoredFileWarn(DiagWarn):
-    reason: IgnoredFileReason
-    note: DiagNote | None = None
-
-    @property
-    @override
-    def format_msg(self) -> str:
-        return f"unrecognized file: {self.reason.value}"
-
-    def notes(self):
-        if self.note:
-            yield self.note
-
-
-def normalize_pkg_name(name: str):
-    def is_allowed(char: str):
-        return char.isalnum() or char == "_"
-
-    def to_valid_identifier(s: str):
-        """Converts a string to valid, C-style identifier."""
-        # First, remove all non-alphanumeric characters, excluding "_".
-        s = "".join(char for char in s if is_allowed(char))
-        # Next, ensure that the segment doesn't begin with a digit.
-        if s and s[0].isnumeric():
-            # If so, we inject "_" in the beginning.
-            s = "_" + s
-        return s
-
-    # First, split the package name into segments.
-    segments = name.split(".")
-    # Next, make sure that each segment is valid.
-    translated_segments = (to_valid_identifier(s) for s in segments)
-    # Finally, reconstruct the package name.
-    return ".".join(s for s in translated_segments if s)
 
 
 def pkg2str(pkg_name: ast.PkgName) -> str:
     return ".".join(t.text for t in pkg_name.parts)
+
+
+def is_valid_pkg_name(name: str) -> bool:
+    """Checks if the package name is valid."""
+    for part in name.split("."):
+        if not part:
+            return False
+        if not all(c.isalpha() or c == "_" for c in part[:1]):
+            return False
+        if not all(c.isalnum() or c == "_" for c in part[1:]):
+            return False
+    return True
 
 
 class ExprEvaluator(Visitor):
@@ -482,6 +447,11 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_spec(self, node: ast.Spec) -> PackageDecl:
+        if not is_valid_pkg_name(self.source.pkg_name):
+            raise InvalidPackageNameError(
+                self.source.pkg_name,
+                loc=SourceLocation(self.source),
+            )
         pkg = PackageDecl(self.source.pkg_name, SourceLocation(self.source))
         for u in node.uses:
             self.diag.for_each(self.visit(u), pkg.add_import)
@@ -490,6 +460,14 @@ class AstConverter(ExprEvaluator):
         return pkg
 
     def convert(self) -> PackageDecl:
-        """Converts the whole source code buffer to a package."""
+        """Converts the whole source code buffer to a package.
+
+        Returns:
+            PackageDecl: The package declaration containing all declarations
+            and imports from the source code.
+
+        Raises:
+            InvalidPackageNameError: If the package name is invalid.
+        """
         ast_nodes = generate_ast(self.source, self.diag)
         return self.visit_spec(ast_nodes)

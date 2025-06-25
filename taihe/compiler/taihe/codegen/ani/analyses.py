@@ -34,6 +34,7 @@ from taihe.semantics.declarations import (
     GlobFuncDecl,
     IfaceDecl,
     IfaceMethodDecl,
+    IfaceParentDecl,
     PackageDecl,
     PackageGroup,
     ParamDecl,
@@ -236,22 +237,40 @@ ANI_MODULE = ANIScope("module", ANI_FUNCTION)
 ANI_NAMESPACE = ANIScope("namespace", ANI_FUNCTION)
 
 
+class Path:
+    def __init__(self, package: str | None = None, path: str | None = None) -> None:
+        self.package = package
+        self.path = path
+        self.ani_path = []
+        if self.package is not None:
+            self.ani_path.append(self.package)
+        if self.path is not None:
+            self.ani_path.extend(self.path.split("/"))
+
+
 class Namespace:
-    def __init__(self, name: str, parent: "Namespace | None" = None) -> None:
+    def __init__(self, name: str, parent: "Namespace | Path") -> None:
         self.name = name
         self.parent = parent
+
         self.children: dict[str, Namespace] = {}
         self.packages: list[PackageDecl] = []
         self.is_default = False
+        self.injected_heads: list[str] = []
+        self.injected_codes: list[str] = []
 
-    def is_module(self) -> bool:
-        return self.parent is None
+        if not isinstance(parent, Namespace):
+            self.module = self
+            self.path: list[str] = []
+            self.scope = ANI_MODULE
+            self.ani_path = [*parent.ani_path, *name.split(".")]
+        else:
+            self.module = parent.module
+            self.path: list[str] = [*parent.path, name]
+            self.scope = ANI_NAMESPACE
+            self.ani_path = [*parent.ani_path, name]
 
-    def get_path(self) -> tuple[str, list[str]]:
-        if self.parent is None:
-            return self.name, []
-        module_name, parent_path = self.parent.get_path()
-        return module_name, [*parent_path, self.name]
+        self.impl_desc = "L" + "/".join(self.ani_path) + ";"
 
     def add_path(
         self,
@@ -273,13 +292,13 @@ class Namespace:
         sts_name: str,
         member_is_default: bool,
     ) -> str:
-        if self.parent is None:
+        if not isinstance(self.parent, Namespace):
             scope_name = "__" + "".join(c if c.isalnum() else "_" for c in self.name)
             if member_is_default:
                 decl_name = f"{scope_name}_default"
-                target.add_import_default(f"./{self.name}", decl_name)  # TODO: Import
+                target.add_import_default(f"{self.name}", decl_name)
                 return decl_name
-            target.add_import_module(f"./{self.name}", scope_name)  # TODO: Import
+            target.add_import_module(f"./{self.name}", scope_name)  # TODO: Remove `./`
         else:
             scope_name = self.parent.get_member(target, self.name, self.is_default)
         return f"{scope_name}.{sts_name}"
@@ -294,6 +313,11 @@ class PackageGroupANIInfo(AbstractAnalysis[PackageGroup]):
         self.module_dict: dict[str, Namespace] = {}
         self.package_map: dict[PackageDecl, Namespace] = {}
 
+        self.path = Path(
+            self.am.compiler_invocation.arkts_module_prefix,
+            self.am.compiler_invocation.arkts_path_prefix,
+        )
+
         for pkg in pg.packages:
             if (namespace_attr := pkg.get_last_attr("namespace")) and check_attr_args(
                 am, namespace_attr, "ss*"
@@ -303,9 +327,24 @@ class PackageGroupANIInfo(AbstractAnalysis[PackageGroup]):
             else:
                 module_name = pkg.name
                 path = []
+
             is_default = pkg.get_last_attr("sts_export_default") is not None
-            mod = self.module_dict.setdefault(module_name, Namespace(module_name))
-            self.package_map[pkg] = mod.add_path(path, pkg, is_default)
+
+            mod = self.module_dict.setdefault(
+                module_name,
+                Namespace(module_name, self.path),
+            )
+            ns = self.package_map[pkg] = mod.add_path(path, pkg, is_default)
+
+            for sts_inject in pkg.get_all_attrs("sts_inject_into_module"):
+                if check_attr_args(am, sts_inject, "s"):
+                    (head,) = sts_inject.args
+                    mod.injected_heads.append(head)
+
+            for sts_inject in pkg.get_all_attrs("sts_inject"):
+                if check_attr_args(am, sts_inject, "s"):
+                    (code,) = sts_inject.args
+                    ns.injected_codes.append(code)
 
     def get_namespace(self, pkg: PackageDecl) -> Namespace:
         return self.package_map[pkg]
@@ -319,9 +358,9 @@ class ANINativeFuncInfo:
 
 @dataclass
 class ANIRegisterInfo:
+    parent_scope: ANIScope
     impl_desc: str
     member_infos: list[ANINativeFuncInfo]
-    parent_scope: ANIScope
 
 
 class PackageANIInfo(AbstractAnalysis[PackageDecl]):
@@ -335,27 +374,8 @@ class PackageANIInfo(AbstractAnalysis[PackageDecl]):
 
         self.cpp_ns = "::".join(p.segments)
 
-        self.namespace = PackageGroupANIInfo.get(am, p.parent_group).get_namespace(p)
-
-        module_name, path = self.namespace.get_path()
-        self.ani_path = "/".join(module_name.split(".") + path)
-        self.impl_desc = f"L{self.ani_path};"
-
-        self.injected_codes: list[str] = []
-        for injected in p.get_all_attrs("sts_inject"):
-            if check_attr_args(am, injected, "s"):
-                (code,) = injected.args
-                self.injected_codes.append(code)
-
-        self.module_injected_codes: list[str] = []
-        for module_injected in p.get_all_attrs("sts_inject_into_module"):
-            if check_attr_args(am, module_injected, "s"):
-                (code,) = module_injected.args
-                self.module_injected_codes.append(code)
-
-    @property
-    def scope(self):
-        return ANI_MODULE if self.namespace.is_module() else ANI_NAMESPACE
+        pg_ani_info = PackageGroupANIInfo.get(am, p.parent_group)
+        self.ns = pg_ani_info.get_namespace(p)
 
 
 class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
@@ -387,6 +407,8 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
 
         self.sts_params: list[ParamDecl] = []
         for param in f.params:
+            if param.get_last_attr("sts_this"):
+                continue
             self.sts_params.append(param)
 
     def resolve_ctor(self) -> bool:
@@ -503,7 +525,7 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
                 return True
             (func_name,) = overload_attr.args
         else:
-            if self.f.parent_pkg.get_last_attr("sts_keep_name"):
+            if self.am.compiler_invocation.sts_keep_name:
                 func_name = self.f.name
             else:
                 func_name = self.f.name[0].lower() + self.f.name[1:]
@@ -544,8 +566,14 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
             )
         return True
 
-    def call_native_with(self, sts_args: list[str]) -> str:
-        sts_native_args = sts_args
+    def call_native_with(self, sts_args: list[str], this: str = "this") -> str:
+        arg = iter(sts_args)
+        sts_native_args: list[str] = []
+        for param in self.f.params:
+            if param.get_last_attr("sts_this"):
+                sts_native_args.append(this)
+                continue
+            sts_native_args.append(next(arg))
         sts_native_args_str = ", ".join(sts_native_args)
         return f"{self.sts_native_name}({sts_native_args_str})"
 
@@ -681,7 +709,7 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
                 return True
             (method_name,) = overload_attr.args
         else:
-            if self.f.parent_pkg.get_last_attr("sts_keep_name"):
+            if self.am.compiler_invocation.sts_keep_name:
                 method_name = self.f.name
             else:
                 method_name = self.f.name[0].lower() + self.f.name[1:]
@@ -723,7 +751,7 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
             )
         return True
 
-    def call_native_with(self, this: str, sts_args: list[str]) -> str:
+    def call_native_with(self, sts_args: list[str], this: str = "this") -> str:
         arg = iter(sts_args)
         sts_native_args: list[str] = []
         for param in self.f.params:
@@ -739,9 +767,11 @@ class EnumANIInfo(AbstractAnalysis[EnumDecl]):
     def __init__(self, am: AnalysisManager, d: EnumDecl) -> None:
         super().__init__(am, d)
 
-        self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
+        self.parent_ns = PackageANIInfo.get(am, d.parent_pkg).ns
         self.sts_type_name = d.name
-        self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
+        self.type_desc = (
+            "L" + "/".join([*self.parent_ns.ani_path, self.sts_type_name]) + ";"
+        )
 
         self.const = d.get_last_attr("const") is not None
 
@@ -764,7 +794,7 @@ class EnumANIInfo(AbstractAnalysis[EnumDecl]):
         self.is_default = d.get_last_attr("sts_export_default") is not None
 
     def sts_type_in(self, target: StsWriter):
-        return self.pkg_ani_info.namespace.get_member(
+        return self.parent_ns.get_member(
             target,
             self.sts_type_name,
             self.is_default,
@@ -799,7 +829,7 @@ class UnionANIInfo(AbstractAnalysis[UnionDecl]):
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.ani.1.h"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.ani.2.h"
 
-        self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
+        self.parent_ns = PackageANIInfo.get(am, d.parent_pkg).ns
         self.sts_type_name = d.name
         self.type_desc = "Lstd/core/Object;"
 
@@ -816,7 +846,7 @@ class UnionANIInfo(AbstractAnalysis[UnionDecl]):
         self.is_default = d.get_last_attr("sts_export_default") is not None
 
     def sts_type_in(self, target: StsWriter):
-        return self.pkg_ani_info.namespace.get_member(
+        return self.parent_ns.get_member(
             target,
             self.sts_type_name,
             self.is_default,
@@ -835,14 +865,18 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.ani.1.h"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.ani.2.h"
 
-        self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
+        self.parent_ns = PackageANIInfo.get(am, d.parent_pkg).ns
         self.sts_type_name = d.name
         if d.get_last_attr("class"):
             self.sts_impl_name = f"{d.name}"
         else:
             self.sts_impl_name = f"{d.name}_inner"
-        self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
-        self.impl_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_impl_name};"
+        self.type_desc = (
+            "L" + "/".join([*self.parent_ns.ani_path, self.sts_type_name]) + ";"
+        )
+        self.impl_desc = (
+            "L" + "/".join([*self.parent_ns.ani_path, self.sts_impl_name]) + ";"
+        )
 
         self.interface_injected_codes: list[str] = []
         for iface_injected in d.get_all_attrs("sts_inject_into_interface"):
@@ -856,12 +890,11 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
                 self.class_injected_codes.append(code)
 
         self.sts_fields: list[StructFieldDecl] = []
-        self.sts_parents: list[StructFieldDecl] = []
+        self.sts_iface_parents: list[StructFieldDecl] = []
+        self.sts_class_parents: list[StructFieldDecl] = []
         self.sts_final_fields: list[list[StructFieldDecl]] = []
         for field in d.fields:
-            try:
-                if not field.get_last_attr("extends"):
-                    raise RuntimeError
+            if field.get_last_attr("extends"):
                 ty = field.ty_ref.resolved_ty
                 if not isinstance(ty, StructType):
                     raise_adhoc_error(
@@ -869,20 +902,16 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
                         "struct cannot extend non-struct type",
                         field.loc,
                     )
-                    raise RuntimeError
+                    continue
                 parent_ani_info = StructANIInfo.get(am, ty.ty_decl)
                 if parent_ani_info.is_class():
-                    raise_adhoc_error(
-                        am,
-                        "struct cannot extend an @class struct",
-                        field.loc,
-                    )
-                    raise RuntimeError
-                self.sts_parents.append(field)
+                    self.sts_class_parents.append(field)
+                else:
+                    self.sts_iface_parents.append(field)
                 self.sts_final_fields.extend(
                     [field, *parts] for parts in parent_ani_info.sts_final_fields
                 )
-            except RuntimeError:
+            else:
                 self.sts_fields.append(field)
                 self.sts_final_fields.append([field])
 
@@ -892,7 +921,7 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
         return self.sts_type_name == self.sts_impl_name
 
     def sts_type_in(self, target: StsWriter):
-        return self.pkg_ani_info.namespace.get_member(
+        return self.parent_ns.get_member(
             target,
             self.sts_type_name,
             self.is_default,
@@ -905,14 +934,18 @@ class IfaceANIInfo(AbstractAnalysis[IfaceDecl]):
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.ani.1.h"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.ani.2.h"
 
-        self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
+        self.parent_ns = PackageANIInfo.get(am, d.parent_pkg).ns
         self.sts_type_name = d.name
         if d.get_last_attr("class"):
             self.sts_impl_name = f"{d.name}"
         else:
             self.sts_impl_name = f"{d.name}_inner"
-        self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
-        self.impl_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_impl_name};"
+        self.type_desc = (
+            "L" + "/".join([*self.parent_ns.ani_path, self.sts_type_name]) + ";"
+        )
+        self.impl_desc = (
+            "L" + "/".join([*self.parent_ns.ani_path, self.sts_impl_name]) + ";"
+        )
 
         self.interface_injected_codes: list[str] = []
         for iface_injected in d.get_all_attrs("sts_inject_into_interface"):
@@ -925,28 +958,24 @@ class IfaceANIInfo(AbstractAnalysis[IfaceDecl]):
                 (code,) = class_injected.args
                 self.class_injected_codes.append(code)
 
+        self.sts_class_parents: list[IfaceParentDecl] = []
+        self.sts_iface_parents: list[IfaceParentDecl] = []
         for parent in d.parents:
             ty = parent.ty_ref.resolved_ty
             pass
             parent_ani_info = IfaceANIInfo.get(am, ty.ty_decl)
             if parent_ani_info.is_class():
-                raise_adhoc_error(
-                    am,
-                    "interface cannot extend an @class interface",
-                    parent.loc,
-                )
+                self.sts_class_parents.append(parent)
+            else:
+                self.sts_iface_parents.append(parent)
 
         self.is_default = d.get_last_attr("sts_export_default") is not None
-
-    @property
-    def scope(self):
-        return ANI_CLASS
 
     def is_class(self):
         return self.sts_type_name == self.sts_impl_name
 
     def sts_type_in(self, target: StsWriter):
-        return self.pkg_ani_info.namespace.get_member(
+        return self.parent_ns.get_member(
             target,
             self.sts_type_name,
             self.is_default,
@@ -1833,7 +1862,7 @@ class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         ani_length = f"{cpp_result}_length"
         target.writelns(
             f"ani_arraybuffer {ani_arrbuf};",
-            f'{env}->Function_Call_Ref(TH_ANI_FIND_{pkg_ani_info.scope.upper}_FUNCTION({env}, "{pkg_ani_info.impl_desc}", "__fromBigIntToArrayBuffer", nullptr), reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, sizeof({item_ty_cpp_info.as_owner}) / sizeof(char));'
+            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.module.impl_desc}", "__fromBigIntToArrayBuffer", nullptr), reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, sizeof({item_ty_cpp_info.as_owner}) / sizeof(char));'
             f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
             f"{env}->ArrayBuffer_GetInfo({ani_arrbuf}, reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
@@ -1858,7 +1887,7 @@ class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
             f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), reinterpret_cast<void**>(&{ani_data}), &{ani_arrbuf});",
             f"memcpy({ani_data}, {cpp_value}.data(), {cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
             f"ani_object {ani_result};",
-            f'{env}->Function_Call_Ref(TH_ANI_FIND_{pkg_ani_info.scope.upper}_FUNCTION({env}, "{pkg_ani_info.impl_desc}", "__fromArrayBufferToBigInt", nullptr), reinterpret_cast<ani_ref*>(&{ani_result}), {ani_arrbuf});',
+            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.module.impl_desc}", "__fromArrayBufferToBigInt", nullptr), reinterpret_cast<ani_ref*>(&{ani_result}), {ani_arrbuf});',
         )
 
 
@@ -2043,28 +2072,12 @@ class CallbackTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[CallbackType]):
     ):
         cpp_impl_class = f"{cpp_result}_cpp_impl_t"
         with target.indented(
-            f"struct {cpp_impl_class} {{",
+            f"struct {cpp_impl_class} : ::taihe::dref_guard {{",
             f"}};",
         ):
             target.writelns(
-                f"ani_ref ref;",
+                f"{cpp_impl_class}(ani_env* env, ani_ref val) : ::taihe::dref_guard(env, val) {{}}",
             )
-            with target.indented(
-                f"{cpp_impl_class}(ani_env* env, ani_fn_object obj) {{",
-                f"}}",
-            ):
-                target.writelns(
-                    f"env->GlobalReference_Create(obj, &this->ref);",
-                )
-            with target.indented(
-                f"~{cpp_impl_class}() {{",
-                f"}}",
-            ):
-                target.writelns(
-                    f"::taihe::env_guard guard;",
-                    f"ani_env *env = guard.get_env();",
-                    f"env->GlobalReference_Delete(this->ref);",
-                )
             inner_cpp_params = []
             inner_ani_args = []
             inner_cpp_args = []
@@ -2120,8 +2133,15 @@ class CallbackTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[CallbackType]):
                         f"env->FunctionalObject_Call(static_cast<ani_fn_object>(this->ref), {len(self.t.params_ty)}, ani_argv, &{inner_ani_res});",
                         f"return;",
                     )
+            with target.indented(
+                f"uintptr_t getGlobalReference() const {{",
+                f"}}",
+            ):
+                target.writelns(
+                    f"return reinterpret_cast<uintptr_t>(this->ref);",
+                )
         target.writelns(
-            f"{self.cpp_info.as_owner} {cpp_result} = ::taihe::make_holder<{cpp_impl_class}, {self.cpp_info.as_owner}>({env}, {ani_value});",
+            f"{self.cpp_info.as_owner} {cpp_result} = ::taihe::make_holder<{cpp_impl_class}, {self.cpp_info.as_owner}, ::taihe::platform::ani::AniObject>({env}, {ani_value});",
         )
 
     @override

@@ -38,7 +38,7 @@ from taihe.semantics.types import (
     IfaceType,
 )
 from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
-from taihe.utils.outputs import OutputConfig
+from taihe.utils.outputs import FileKind, OutputManager
 
 
 class PackageCppImplInfo(AbstractAnalysis[PackageDecl]):
@@ -55,8 +55,8 @@ class GlobFuncCppImplInfo(AbstractAnalysis[GlobFuncDecl]):
 
 
 class CppImplHeadersGenerator:
-    def __init__(self, oc: OutputConfig, am: AnalysisManager):
-        self.oc = oc
+    def __init__(self, om: OutputManager, am: AnalysisManager):
+        self.om = om
         self.am = am
 
     def generate(self, pg: PackageGroup):
@@ -67,8 +67,9 @@ class CppImplHeadersGenerator:
         pkg_abi_info = PackageABIInfo.get(self.am, pkg)
         pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, pkg)
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{pkg_cpp_impl_info.header}",
+            FileKind.CPP_HEADER,
         ) as pkg_cpp_impl_target:
             pkg_cpp_impl_target.add_include("taihe/common.hpp")
             pkg_cpp_impl_target.add_include(pkg_abi_info.header)
@@ -116,8 +117,8 @@ class CppImplHeadersGenerator:
 
 
 class CppImplSourcesGenerator:
-    def __init__(self, oc: OutputConfig, am: AnalysisManager):
-        self.oc = oc
+    def __init__(self, om: OutputManager, am: AnalysisManager):
+        self.om = om
         self.am = am
         self.using_namespaces: list[str] = []
 
@@ -153,8 +154,9 @@ class CppImplSourcesGenerator:
         pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
         pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, pkg)
         with CSourceWriter(
-            self.oc,
+            self.om,
             f"temp/{pkg_cpp_impl_info.source}",
+            FileKind.TEMPLATE,
         ) as pkg_cpp_impl_target:
             pkg_cpp_impl_target.add_include(pkg_cpp_info.header)
             pkg_cpp_impl_target.add_include(pkg_cpp_impl_info.header)

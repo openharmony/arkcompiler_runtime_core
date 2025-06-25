@@ -18,6 +18,7 @@ from taihe.codegen.abi.analyses import (
 )
 from taihe.codegen.abi.writer import CHeaderWriter, CSourceWriter
 from taihe.codegen.ani.analyses import (
+    ANI_CLASS,
     ANINativeFuncInfo,
     ANIRegisterInfo,
     GlobFuncANIInfo,
@@ -51,12 +52,12 @@ from taihe.semantics.types import (
     Type,
 )
 from taihe.utils.analyses import AnalysisManager
-from taihe.utils.outputs import OutputConfig
+from taihe.utils.outputs import FileKind, OutputManager
 
 
 class ANICodeGenerator:
-    def __init__(self, oc: OutputConfig, am: AnalysisManager):
-        self.oc = oc
+    def __init__(self, om: OutputManager, am: AnalysisManager):
+        self.om = om
         self.am = am
 
     def generate(self, pg: PackageGroup):
@@ -65,12 +66,20 @@ class ANICodeGenerator:
         self.gen_constructor(pg)
 
     def gen_constructor(self, pg: PackageGroup):
-        constructor_file = "ani_constructor.cpp"
         with CSourceWriter(
-            self.oc,
-            f"src/{constructor_file}",
+            self.om,
+            f"temp/ani_constructor.cpp",
+            FileKind.TEMPLATE,
         ) as constructor_target:
-            constructor_target.add_include("taihe/runtime.hpp")
+            constructor_target.writelns(
+                f"#if __has_include(<ani.h>)",
+                f"#include <ani.h>",
+                f"#elif __has_include(<ani/ani.h>)",
+                f"#include <ani/ani.h>",
+                f"#else",
+                f'#error "ani.h not found. Please ensure the Ani SDK is correctly installed."',
+                f"#endif",
+            )
             with constructor_target.indented(
                 f"ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {{",
                 f"}}",
@@ -121,10 +130,11 @@ class ANICodeGenerator:
         pkg_cpp_user_info: PackageCppUserInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{pkg_ani_info.header}",
+            FileKind.CPP_HEADER,
         ) as pkg_ani_header_target:
-            pkg_ani_header_target.add_include("taihe/runtime.hpp")
+            pkg_ani_header_target.add_include("taihe/platform/ani.hpp")
             with pkg_ani_header_target.indented(
                 f"namespace {pkg_ani_info.cpp_ns} {{",
                 f"}}",
@@ -141,8 +151,9 @@ class ANICodeGenerator:
         pkg_cpp_user_info: PackageCppUserInfo,
     ):
         with CSourceWriter(
-            self.oc,
+            self.om,
             f"src/{pkg_ani_info.source}",
+            FileKind.CPP_SOURCE,
         ) as pkg_ani_source_target:
             pkg_ani_source_target.add_include(pkg_ani_info.header)
             pkg_ani_source_target.add_include(pkg_cpp_user_info.header)
@@ -169,7 +180,8 @@ class ANICodeGenerator:
                                     ancestor,
                                     method.name,
                                 )
-                        self.gen_finalizer(pkg_ani_source_target, "static_finalize")
+                        self.gen_obj_drop(pkg_ani_source_target, "_obj_drop")
+                        self.gen_obj_dup(pkg_ani_source_target, "_obj_dup")
                 for func in pkg.functions:
                     self.gen_func(func, pkg_ani_source_target, func.name)
 
@@ -177,45 +189,46 @@ class ANICodeGenerator:
             register_infos: list[ANIRegisterInfo] = []
 
             pkg_register_info = ANIRegisterInfo(
-                impl_desc=pkg_ani_info.impl_desc,
+                parent_scope=pkg_ani_info.ns.scope,
+                impl_desc=pkg_ani_info.ns.impl_desc,
                 member_infos=[],
-                parent_scope=pkg_ani_info.scope,
             )
             register_infos.append(pkg_register_info)
             for func in pkg.functions:
-                full_name = f"local::{func.name}"
                 func_ani_info = GlobFuncANIInfo.get(self.am, func)
                 func_info = ANINativeFuncInfo(
                     sts_native_name=func_ani_info.sts_native_name,
-                    full_name=full_name,
+                    full_name=f"local::{func.name}",
                 )
                 pkg_register_info.member_infos.append(func_info)
             for iface in pkg.interfaces:
                 iface_abi_info = IfaceABIInfo.get(self.am, iface)
                 iface_ani_info = IfaceANIInfo.get(self.am, iface)
                 iface_register_info = ANIRegisterInfo(
+                    parent_scope=ANI_CLASS,
                     impl_desc=iface_ani_info.impl_desc,
                     member_infos=[],
-                    parent_scope=iface_ani_info.scope,
                 )
                 register_infos.append(iface_register_info)
                 for ancestor in iface_abi_info.ancestor_dict:
                     for method in ancestor.methods:
-                        full_name = f"local::{iface.name}::{method.name}"
                         method_ani_info = IfaceMethodANIInfo.get(self.am, method)
                         method_info = ANINativeFuncInfo(
                             sts_native_name=method_ani_info.sts_native_name,
-                            full_name=full_name,
+                            full_name=f"local::{iface.name}::{method.name}",
                         )
                         iface_register_info.member_infos.append(method_info)
-                # TODO: finalizer
                 pkg_ani_source_target.add_include("taihe/object.hpp")
-                full_name = f"local::{iface.name}::static_finalize"
-                finalizer_info = ANINativeFuncInfo(
-                    sts_native_name="_finalize",
-                    full_name=full_name,
+                obj_drop_info = ANINativeFuncInfo(
+                    sts_native_name="_obj_drop",
+                    full_name=f"local::{iface.name}::_obj_drop",
                 )
-                iface_register_info.member_infos.append(finalizer_info)
+                iface_register_info.member_infos.append(obj_drop_info)
+                obj_dup_info = ANINativeFuncInfo(
+                    sts_native_name="_obj_dup",
+                    full_name=f"local::{iface.name}::_obj_dup",
+                )
+                iface_register_info.member_infos.append(obj_dup_info)
 
             with pkg_ani_source_target.indented(
                 f"namespace {pkg_ani_info.cpp_ns} {{",
@@ -401,7 +414,7 @@ class ANICodeGenerator:
                     f"{ancestor_cpp_info.as_param}(cpp_iface)->{method_cpp_info.call_name}({cpp_args_str});",
                 )
 
-    def gen_finalizer(
+    def gen_obj_drop(
         self,
         pkg_ani_source_target: CSourceWriter,
         name: str,
@@ -411,7 +424,20 @@ class ANICodeGenerator:
             f"}}",
         ):
             pkg_ani_source_target.writelns(
-                f"::taihe::data_holder(reinterpret_cast<DataBlockHead*>(data_ptr));",
+                f"tobj_drop(reinterpret_cast<DataBlockHead*>(data_ptr));",
+            )
+
+    def gen_obj_dup(
+        self,
+        pkg_ani_source_target: CSourceWriter,
+        name: str,
+    ):
+        with pkg_ani_source_target.indented(
+            f"static ani_long {name}([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class clazz, ani_long data_ptr) {{",
+            f"}}",
+        ):
+            pkg_ani_source_target.writelns(
+                f"return reinterpret_cast<ani_long>(tobj_dup(reinterpret_cast<DataBlockHead*>(data_ptr)));",
             )
 
     def gen_iface_files(
@@ -442,10 +468,11 @@ class ANICodeGenerator:
         iface_ani_info: IfaceANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{iface_ani_info.decl_header}",
+            FileKind.C_HEADER,
         ) as iface_ani_decl_target:
-            iface_ani_decl_target.add_include("taihe/runtime.hpp")
+            iface_ani_decl_target.add_include("taihe/platform/ani.hpp")
             iface_ani_decl_target.add_include(iface_cpp_info.defn_header)
             with iface_ani_decl_target.indented(
                 f"template<> struct ::taihe::from_ani_t<{iface_cpp_info.as_owner}> {{",
@@ -470,8 +497,9 @@ class ANICodeGenerator:
         iface_ani_info: IfaceANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{iface_ani_info.impl_header}",
+            FileKind.C_HEADER,
         ) as iface_ani_impl_target:
             iface_ani_impl_target.add_include(iface_ani_info.decl_header)
             iface_ani_impl_target.add_include(iface_cpp_info.impl_header)
@@ -503,28 +531,12 @@ class ANICodeGenerator:
             f"}}",
         ):
             with iface_ani_impl_target.indented(
-                f"struct cpp_impl_t {{",
+                f"struct cpp_impl_t : ::taihe::dref_guard {{",
                 f"}};",
             ):
                 iface_ani_impl_target.writelns(
-                    f"ani_ref ref;",
+                    f"cpp_impl_t(ani_env* env, ani_ref val) : ::taihe::dref_guard(env, val) {{}}",
                 )
-                with iface_ani_impl_target.indented(
-                    f"cpp_impl_t(ani_env* env, ani_object obj) {{",
-                    f"}}",
-                ):
-                    iface_ani_impl_target.writelns(
-                        f"env->GlobalReference_Create(obj, &this->ref);",
-                    )
-                with iface_ani_impl_target.indented(
-                    f"~cpp_impl_t() {{",
-                    f"}}",
-                ):
-                    iface_ani_impl_target.writelns(
-                        f"::taihe::env_guard guard;",
-                        f"ani_env *env = guard.get_env();",
-                        f"env->GlobalReference_Delete(this->ref);",
-                    )
                 for ancestor in iface_abi_info.ancestor_dict:
                     for method in ancestor.methods:
                         method_cpp_info = IfaceMethodCppInfo.get(self.am, method)
@@ -600,8 +612,15 @@ class ANICodeGenerator:
                                 iface_ani_impl_target.writelns(
                                     f'env->Object_CallMethod_Void(static_cast<ani_object>(this->ref), TH_ANI_FIND_CLASS_METHOD(env, "{iface_ani_info.type_desc}", "{method_ani_info.ani_method_name}", nullptr){inner_ani_args_trailing});',
                                 )
+                with iface_ani_impl_target.indented(
+                    f"uintptr_t getGlobalReference() const {{",
+                    f"}}",
+                ):
+                    iface_ani_impl_target.writelns(
+                        f"return reinterpret_cast<uintptr_t>(this->ref);",
+                    )
             iface_ani_impl_target.writelns(
-                f"return ::taihe::make_holder<cpp_impl_t, {iface_cpp_info.as_owner}>(env, ani_obj);",
+                f"return ::taihe::make_holder<cpp_impl_t, {iface_cpp_info.as_owner}, ::taihe::platform::ani::AniObject>(env, ani_obj);",
             )
 
     def gen_iface_into_ani_func(
@@ -621,7 +640,7 @@ class ANICodeGenerator:
                 f"ani_long ani_data_ptr = reinterpret_cast<ani_long>(cpp_obj.m_handle.data_ptr);",
                 f"cpp_obj.m_handle.data_ptr = nullptr;",
                 f"ani_object ani_obj;",
-                f'env->Object_New(TH_ANI_FIND_CLASS(env, "{iface_ani_info.impl_desc}"), TH_ANI_FIND_CLASS_METHOD(env, "{iface_ani_info.impl_desc}", "<ctor>", "JJ:V"), &ani_obj, ani_vtbl_ptr, ani_data_ptr);',
+                f'env->Object_New(TH_ANI_FIND_CLASS(env, "{iface_ani_info.impl_desc}"), TH_ANI_FIND_CLASS_METHOD(env, "{iface_ani_info.impl_desc}", "_initialize", "JJ:V"), &ani_obj, ani_vtbl_ptr, ani_data_ptr);',
                 f"return ani_obj;",
             )
 
@@ -649,10 +668,11 @@ class ANICodeGenerator:
         struct_ani_info: StructANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{struct_ani_info.decl_header}",
+            FileKind.C_HEADER,
         ) as struct_ani_decl_target:
-            struct_ani_decl_target.add_include("taihe/runtime.hpp")
+            struct_ani_decl_target.add_include("taihe/platform/ani.hpp")
             struct_ani_decl_target.add_include(struct_cpp_info.defn_header)
             with struct_ani_decl_target.indented(
                 f"template<> struct ::taihe::from_ani_t<{struct_cpp_info.as_owner}> {{",
@@ -676,15 +696,12 @@ class ANICodeGenerator:
         struct_ani_info: StructANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{struct_ani_info.impl_header}",
+            FileKind.C_HEADER,
         ) as struct_ani_impl_target:
             struct_ani_impl_target.add_include(struct_ani_info.decl_header)
             struct_ani_impl_target.add_include(struct_cpp_info.impl_header)
-            # TODO: ignore compiler warning
-            struct_ani_impl_target.writelns(
-                '#pragma clang diagnostic ignored "-Wmissing-braces"',
-            )
             self.gen_struct_from_ani_func(
                 struct,
                 struct_cpp_info,
@@ -794,10 +811,11 @@ class ANICodeGenerator:
         union_ani_info: UnionANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{union_ani_info.decl_header}",
+            FileKind.C_HEADER,
         ) as union_ani_decl_target:
-            union_ani_decl_target.add_include("taihe/runtime.hpp")
+            union_ani_decl_target.add_include("taihe/platform/ani.hpp")
             union_ani_decl_target.add_include(union_cpp_info.defn_header)
             with union_ani_decl_target.indented(
                 f"template<> struct ::taihe::from_ani_t<{union_cpp_info.as_owner}> {{",
@@ -821,8 +839,9 @@ class ANICodeGenerator:
         union_ani_info: UnionANIInfo,
     ):
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{union_ani_info.impl_header}",
+            FileKind.C_HEADER,
         ) as union_ani_impl_target:
             union_ani_impl_target.add_include(union_ani_info.decl_header)
             union_ani_impl_target.add_include(union_cpp_info.impl_header)

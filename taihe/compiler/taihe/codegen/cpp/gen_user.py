@@ -30,12 +30,12 @@ from taihe.semantics.declarations import (
     PackageGroup,
 )
 from taihe.utils.analyses import AnalysisManager
-from taihe.utils.outputs import OutputConfig
+from taihe.utils.outputs import FileKind, OutputManager
 
 
 class CppUserHeadersGenerator:
-    def __init__(self, oc: OutputConfig, am: AnalysisManager):
-        self.oc = oc
+    def __init__(self, om: OutputManager, am: AnalysisManager):
+        self.om = om
         self.am = am
 
     def generate(self, pg: PackageGroup):
@@ -47,8 +47,9 @@ class CppUserHeadersGenerator:
         pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
         pkg_cpp_user_info = PackageCppUserInfo.get(self.am, pkg)
         with CHeaderWriter(
-            self.oc,
+            self.om,
             f"include/{pkg_cpp_user_info.header}",
+            FileKind.CPP_HEADER,
         ) as pkg_cpp_target:
             # types
             pkg_cpp_target.add_include(pkg_cpp_info.header)

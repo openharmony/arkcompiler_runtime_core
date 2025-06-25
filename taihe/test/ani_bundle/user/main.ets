@@ -1039,7 +1039,7 @@ function test_bundle_class_want_with_flags_noSet() {
 
 function test_bundle_class_want_with_flags() {
     let wantTest = new Want();
-    wantTest.flags = 16.08;
+    wantTest.flags = 16.08f;
     let info = wantTest.flags;
 
     assertEQ(info, 16.08 as float)

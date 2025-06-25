@@ -97,9 +97,6 @@ function GetAbilityInfo(bundleName: String, abilityName: String): void;
 
 interface OverloadInterface {
     @overload("getApplicationInfo")
-    GetApplicationInfo3param(bundleName: String, bundleFlags: i32, userId: i32): void;
-
-    @overload("getApplicationInfo")
     GetApplicationInfo2param(bundleName: String, bundleFlags: i32): void;
 
     @overload("getApplicationInfo")
