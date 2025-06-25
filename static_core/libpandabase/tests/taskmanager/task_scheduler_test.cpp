@@ -434,4 +434,32 @@ TEST_F(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
     TaskManager::Finish();
 }
 
+TEST_F(TaskSchedulerTest, ChangeCountOfWorkers)
+{
+    srand(GetSeed());
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
+    constexpr size_t THREADS_COUNT = 4U;
+    TaskManager::Start(THREADS_COUNT);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), THREADS_COUNT);
+
+    TaskManager::SetWorkersCount(0U);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), 0U);
+
+    TaskManager::SetWorkersCount(THREADS_COUNT);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), THREADS_COUNT);
+
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
+    constexpr size_t NEW_THREADS_COUNT = 6U;
+    TaskManager::SetWorkersCount(NEW_THREADS_COUNT);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), NEW_THREADS_COUNT);
+
+    TaskManager::SetWorkersCount(THREADS_COUNT);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), THREADS_COUNT);
+
+    TaskManager::SetWorkersCount(MAX_WORKER_COUNT + 1U);
+    ASSERT_EQ(TaskManager::GetWorkersCount(), MAX_WORKER_COUNT);
+
+    TaskManager::Finish();
+}
+
 }  // namespace ark::taskmanager
