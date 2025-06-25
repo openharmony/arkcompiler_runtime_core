@@ -29,6 +29,7 @@ public:
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
     static bool NotifyDebugMode(int tid, int32_t instanceId = 0, bool debugApp = false);
     static bool StopDebugger();
+    static bool IsDebugModeEnabled();
 
     ArkDebugNativeAPI() = delete;
     ~ArkDebugNativeAPI() = delete;
