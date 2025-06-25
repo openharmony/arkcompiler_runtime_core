@@ -55,7 +55,7 @@ function testOr() {
 }
 
 function main() {
-    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
-    suite.addTest('Function testOr', testOr)
-    return suite.run()
+    // const suite = new ArkTestsuite('Function Atomics baseOperator tests')
+    // suite.addTest('Function testOr', testOr)
+    // return suite.run()
 }

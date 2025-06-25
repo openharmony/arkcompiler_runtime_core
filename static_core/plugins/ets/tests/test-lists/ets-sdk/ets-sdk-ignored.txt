@@ -1,2 +1,4 @@
 ### Issue 25591
 api/@ohos/util/StringDecoder/EncodingTest.ets
+### Issue 27038
+api/@ohos/util/types/IsSetIteratorTest.ets

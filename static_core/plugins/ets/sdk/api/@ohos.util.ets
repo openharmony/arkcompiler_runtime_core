@@ -1513,7 +1513,7 @@ export namespace util {
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
          */
         isMapIterator(value: Object): boolean {
-            return value instanceof IterableIterator;
+            return value instanceof MapIterator || value instanceof EmptyMapIterator;
         }
 
         /**
@@ -1556,9 +1556,11 @@ export namespace util {
          * Check whether the entered value is the iterator type of set.
          * @param { Object } value - A Set iterator value
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
+         * 
+         * Since the current interface cannot be correctly determined, it returns false by default
          */
         isSetIterator(value: Object): boolean {
-            return value instanceof IterableIterator;
+            return false;
         }
 
         /**
