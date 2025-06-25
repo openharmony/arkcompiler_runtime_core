@@ -175,7 +175,9 @@ static ani_status BindUtilHelper(ani_env *env)
 
     const auto methods = std::array {
         ani_native_function {"generateRandomUUID", "Z:Lstd/core/String;",
-                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)}};
+                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)},
+        ani_native_function {"generateRandomBinaryUUID", "Z:Lescompat/Uint8Array;",
+                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)}};
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
