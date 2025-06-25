@@ -23,6 +23,24 @@ function test(): void {
     arktest.assertEQ(RegExp("\u{55555}", "u").test("abacaba"), false)
     arktest.assertEQ(RegExp("\u{12345}{3}", "u").test("\u{12345}\udf45\udf45"), false)
     arktest.assertEQ(RegExp("\u{12345}{3}").test("\u{12345}\udf45\udf45"), true)
+    arktest.assertEQ(RegExp("\\u0410").test("\\u0410"), false)
+    arktest.assertEQ(RegExp("\\u0410").test("\u0410"), true)
+    arktest.assertEQ(RegExp("\u0410").test("\\u0410"), false)
+    arktest.assertEQ(RegExp("\u0410").test("\u0410"), true)
+    arktest.assertEQ(RegExp("\\u0410").test("bb\\u0410"), false)
+    arktest.assertEQ(RegExp("\\u0410").test("bb\u0410"), true)
+    arktest.assertEQ(RegExp("\u0410").test("bb\\u0410"), false)
+    arktest.assertEQ(RegExp("\u0410").test("bb\u0410"), true)
+    arktest.assertEQ(RegExp("\\u0410").test("bb\\u0410bb"), false)
+    arktest.assertEQ(RegExp("\\u0410").test("bb\u0410bb"), true)
+    arktest.assertEQ(RegExp("\u0410").test("bb\\u0410bb"), false)
+    arktest.assertEQ(RegExp("\u0410").test("bb\u0410bb"), true)
+    arktest.assertEQ(RegExp("\\u0410").test("\\u0410bb"), false)
+    arktest.assertEQ(RegExp("\\u0410").test("\u0410bb"), true)
+    arktest.assertEQ(RegExp("\u0410").test("\\u0410bb"), false)
+    arktest.assertEQ(RegExp("\u0410").test("\u0410bb"), true)
+
+    arktest.assertEQ(RegExp("\\1(a)").test("aa"), true)
 }
 
 function main(): int {
