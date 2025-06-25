@@ -212,7 +212,8 @@
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/isa:isa_combine",
+                    "type": "none",
+                    "name": "//arkcompiler/runtime_core/static_core/isa:isa_combine_static_etc",
                     "header": {
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/isa"

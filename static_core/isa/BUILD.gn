@@ -29,3 +29,12 @@ action("isa_combine") {
     rebase_path(outputs[0], root_build_dir),
   ]
 }
+
+ohos_prebuilt_etc("isa_combine_static_etc") {
+  isa_combine_outputs = get_target_outputs(":isa_combine")
+  source = isa_combine_outputs[0]
+  deps = [ ":isa_combine" ]
+  install_enable = false
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}
