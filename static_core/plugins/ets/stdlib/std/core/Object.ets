@@ -103,6 +103,18 @@ export class Object {
         return keys
     }
 
+    private static generateKeyArray(length: Number): string[] {
+        const len = length.toInt();
+        if (len == 0) {
+            return new string[0]
+        }
+        let res: string[] = new string[len]
+        for (let i = 0; i < len; i++) {
+            res[i] = i.toString()
+        }
+        return res
+    }
+
     /**
     * Returns the names of the fields of an object
     *
@@ -124,17 +136,9 @@ export class Object {
         }
         // "Keys" for the string type is enumeration from 0 to str.length - 1
         if (o instanceof String) {
-            const sv = o as string
-            const len = sv.getLength()
-            if (len == 0) {
-                return new string[0]
-            }
-            let res: string[] = new string[len]
-            for (let i = 0; i < len; i++) {
-                // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
-                res[i] = new Int(i).toString()
-            }
-            return res
+            return Object.generateKeyArray(o.getLength())
+        } else if (o instanceof Array) {
+            return Object.generateKeyArray(o.length)
         }
         const t = Type.of(o)
         if (t instanceof ClassType) {
@@ -161,16 +165,7 @@ export class Object {
             return res
         } else if (t instanceof ArrayType) {
             const av = reflect.Value.of(o) as ArrayValue
-            const len = av.getLength()
-            if (len == 0) {
-                return new string[0]
-            }
-            let res: string[] = new string[len.toInt()]
-            for (let i = 0; i < len; i++) {
-                // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
-                res[i] = new Int(i).toString()
-            }
-            return res
+            return Object.generateKeyArray(av.getLength())
         } else if (t instanceof LambdaType) {
             return new string[0]
         } else if (t instanceof EnumType) {
@@ -382,7 +377,7 @@ export class Object {
             return new string[0]
         }
         const t = Type.of(o)
-        if (t instanceof StringType || t instanceof ArrayType) {
+        if (t instanceof StringType || t instanceof ArrayType || o instanceof Array) {
             const keys = Object.keys(o)
             const len = keys.length
             let res: string[] = new string[len + 1]
