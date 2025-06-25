@@ -37,6 +37,7 @@ class Command(StringEnum):
     ALL = 'all'
     VERSION = 'version'
     LIST = 'list'
+    LOG = 'log'
 
 
 def comma_separated_list(arg_val: str) -> Set[str]:
@@ -181,6 +182,11 @@ def add_presentation_opts(parser: argparse.ArgumentParser) -> None:
                         choices=('nano', 'auto', 'expo'), help='Number format')
 
 
+def add_logparser_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('--out', type=str, default='vmb-run.csv',
+                        metavar='FILE_NAME', help='Save log statistics as FILE_NAME')
+
+
 class _ArgumentParser(argparse.ArgumentParser):
 
     def __init__(self, command: Command) -> None:
@@ -200,6 +206,8 @@ class _ArgumentParser(argparse.ArgumentParser):
                           help='Abort run on first error')
         self.add_argument('--no-color', action='store_true',
                           help='Disable color logging')
+        self.add_argument('--timestamps', action='store_true',
+                          help='Print timestamps in console log')
         # Generator-specific options
         if command in (Command.GEN, Command.ALL):
             add_gen_opts(self, command)
@@ -214,6 +222,8 @@ class _ArgumentParser(argparse.ArgumentParser):
             add_report_opts(self)
             add_filter_opts(self)
             add_presentation_opts(self)
+        if command in (Command.LOG,):
+            add_logparser_opts(self)
 
     @staticmethod
     def __epilog() -> str:

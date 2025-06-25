@@ -249,6 +249,7 @@ class ColorFormatter(logging.Formatter):
     orange = "\x1b[33;20m"
     bold_blue = "\x1b[34;1m"
     fmt = '%(message)s'
+    ts = ''
 
     FORMATS = {
         TRACE_LOG_LEVEL: magenta + fmt + reset,
@@ -260,10 +261,15 @@ class ColorFormatter(logging.Formatter):
         logging.CRITICAL: bold_red + fmt + reset
     }
 
+    def __init__(self, timestamps: bool = False):
+        super().__init__()
+        if timestamps:
+            ColorFormatter.ts = '[%(asctime)s.000Z] '
+
     def format(self, record):
         """Format."""
         log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
+        formatter = logging.Formatter(ColorFormatter.ts + log_fmt, '%Y-%m-%dT%H:%M:%S')
         return formatter.format(record)
 
 

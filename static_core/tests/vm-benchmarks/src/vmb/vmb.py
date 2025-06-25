@@ -25,6 +25,7 @@ from vmb.helpers import ColorFormatter, \
 from vmb.generate import generate_main
 from vmb.run import VmbRunner
 from vmb.report import report_main
+from vmb.log import log_main
 from vmb.cli import Args, Command, LOG_LEVELS
 from vmb.platform import PlatformBase
 
@@ -69,7 +70,8 @@ def main() -> None:
         log_handler.setFormatter(
             logging.Formatter('[%(levelname)s] %(message)s'))
     else:
-        log_handler.setFormatter(ColorFormatter())
+        # pylint: disable-next=no-member
+        log_handler.setFormatter(ColorFormatter(timestamps=args.timestamps))
     log.addHandler(log_handler)
 
     if args.command == Command.VERSION:
@@ -82,6 +84,10 @@ def main() -> None:
 
     if args.command == Command.REPORT:
         report_main(args)
+        return
+
+    if args.command == Command.LOG:
+        log_main(args)
         return
 
     if args.command == Command.GEN:
