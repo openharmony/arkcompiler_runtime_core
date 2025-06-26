@@ -72,10 +72,10 @@ cases:
 
     - decl: |-
             function foo() {  // infer float
-                return 4.2 as float;
+                return 4.2f
             }
       call: |-
-            arktest.assertTrue(foo() == 4.2 as float);
+            arktest.assertTrue(foo() == 4.2f);
 
     - decl: |-
             function foo() {  // infer Float
@@ -210,10 +210,10 @@ cases:
       call: |-
             let i = foo(true);
             arktest.assertTrue(i instanceof A);
-            arktest.assertTrue(!(i instanceof B));
+            arktest.assertFalse(i instanceof B);
             let j = foo(false);
             arktest.assertTrue(j instanceof B);
-            arktest.assertTrue(!(j instanceof A));
+            arktest.assertFalse(j instanceof A);
 
     - decl: |-
             interface I {} // infer interface
@@ -230,10 +230,10 @@ cases:
       call: |-
             let i = foo(true);
             arktest.assertTrue(i instanceof II);
-            arktest.assertTrue(!(i instanceof III));
+            arktest.assertFalse(i instanceof III);
             let j = foo(false);
             arktest.assertTrue(j instanceof III);
-            arktest.assertTrue(!(j instanceof II));
+            arktest.assertFalse(j instanceof II);
 
     - decl: |-
             function foo() {  // infer std::Array
@@ -318,3 +318,195 @@ cases:
           arktest.assertTrue(foo(1) == "\u{D800}\u{D801}")
           arktest.assertTrue(foo(2) == "\u{A123}")
           arktest.assertTrue(foo(3) == "\u{00000069}")
+
+    - decl: |-
+        interface IPerson {
+          name: String
+          age: int
+        }
+        function foo() {  // infer object literal of interface type
+            return {name: 'Bob', age: 12}  as IPerson
+        }
+      call: |-
+        arktest.assertTrue(foo() instanceof IPerson);
+
+    - decl: |-
+        class Person {
+          name: String = 'username'
+          age: int = 0
+        }
+        function foo() {  // infer object literal of class type
+            return {name: 'Bob', age: 12} as Person
+        }
+      call: |-
+        arktest.assertTrue(foo() instanceof Person);
+
+    - decl: |-
+        class Person {
+          name: String = 'username'
+          age: int = 0
+          foo(): this {
+            return this;
+          }
+        }
+        function foo() {  // infer class type from this function
+            return new Person().foo()
+        }
+      call: |-
+        arktest.assertTrue(foo() instanceof Person);
+
+    - decl: |-
+        function foo() {  // infer object literal of Record type
+          let map: Record<string, number> = {'John': 25, 'Mary': 21}
+          return map;
+        }
+      call: |-
+        arktest.assertTrue(foo() instanceof Record);
+
+    - decl: |-
+        const lb: () => void = () => { throw new Error('never returns') }
+      call: |-
+        try {
+          lb()
+        } catch(e: Error) {
+          return;
+        }
+        throw new Error('Error to be here')
+
+    - decl: |-
+        class Person {
+          name: String = 'username'
+          age: int = 0
+        }
+
+      call: |-
+        const lb: () => Person = () => { return {name: 'Bob', age: 12} as Person }
+        arktest.assertTrue(lb() instanceof Person);
+
+    - decl: |-
+        interface IPerson {
+          foo(): this {
+            return this;
+          }
+        }
+        class Person implements IPerson {
+          name: String = 'username'
+          age: int = 0
+        }
+
+        function foo() {  // infer class type from this function
+            return new Person().foo()
+        }
+      call: |-
+        arktest.assertTrue(foo() instanceof Person);
+
+    - decl: |-
+
+        class Person  {
+          name: String = 'username'
+          age: int = 0
+          static build() {
+            return new Person()
+          }
+        }
+
+      call: |-
+        arktest.assertTrue(Person.build() instanceof Person);
+
+    - decl: |-
+
+        class Person  {
+          name: String = 'username'
+          age: int = 0
+          lb = () => { return this }
+        }
+
+      call: |-
+        arktest.assertTrue(new Person().lb() instanceof Person);
+
+    - decl: |-
+
+        class HighLevelFunctionClass  {
+          lb = () => { return 0 }
+          rtl() {
+            return this.lb
+          }     
+        }
+
+      call: |-
+        arktest.assertTrue(new HighLevelFunctionClass().rtl() instanceof Function);
+
+    - decl: |-
+
+        class HighLevelFunctionClass  {
+          lb = () => { return 0 }
+          static rts() {
+            return new HighLevelFunctionClass().lb
+          }
+        }
+
+      call: |-
+        arktest.assertTrue(HighLevelFunctionClass.rts() instanceof Function);
+
+    - decl: |-
+        interface IMy {}
+        class MyClass implements IMy {
+        }
+        
+        function getMyClass(...val: IMy[]) {
+          return val[0]
+        }
+
+      call: |-
+        let classes: IMy[] = [new MyClass, new MyClass]
+        arktest.assertTrue(getMyClass(...classes) instanceof MyClass);
+
+    - decl: |-
+        interface IMy {}
+        class MyClass implements IMy {
+        }
+        
+        function getArrayLength(...val: IMy[]) {
+          return val.length
+        }
+
+      call: |-
+        let classes: IMy[] = [new MyClass, new MyClass]
+        arktest.assertTrue(getArrayLength(...classes) instanceof number);
+
+    - decl: |-
+        const a: 'string literal' = 'string literal'
+        
+        function getASL() {
+          return a
+        }
+
+      call: |-
+        arktest.assertTrue(getASL() instanceof string);
+
+    - decl: |-
+        const a: 'string literal' = 'string literal'
+        function getSumASL() {
+          return a + a
+        }
+      call: |-
+
+        arktest.assertTrue(getSumASL() instanceof String);
+
+    - decl: |-
+        const a: 'string literal' = 'string literal'        
+        function getType() {
+          return typeof a
+        }
+      call: |-
+
+        arktest.assertTrue(getType() instanceof string);
+
+    - decl: |-
+        const a: 'string literal' = 'string literal'
+        function getInstanceofCheck() {
+          return  a instanceof string
+        }
+      call: |-
+
+        arktest.assertTrue(getInstanceofCheck() instanceof Boolean);
