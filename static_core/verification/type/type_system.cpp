@@ -15,6 +15,7 @@
 
 #include "verification/type/type_system.h"
 
+#include "assembler/assembly-type.h"
 #include "runtime/include/thread_scopes.h"
 #include "verification/jobs/job.h"
 #include "verification/jobs/service.h"
@@ -37,6 +38,11 @@ static PandaString ClassNameToDescriptorString(char const *name)
 
 static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, uint8_t const *descr)
 {
+    PandaString strDesc = utf::Mutf8AsCString(descr);
+    auto canonDesc = pandasm::Type::CanonicalizeDescriptor(strDesc);
+    if (canonDesc != std::string(strDesc)) {
+        LOG_VERIFIER_NOT_CANONICALIZED_UNION_TYPE(strDesc, canonDesc);
+    }
     Job::ErrorHandler handler;
     auto klass = linker->GetClass(descr, true, ctx, &handler);
     if (klass != nullptr) {

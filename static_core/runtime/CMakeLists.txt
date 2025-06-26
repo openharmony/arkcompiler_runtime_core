@@ -604,7 +604,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${VERIFIER_INCLUDE_DIR}
 )
 
-panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
+panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
 if (NOT PANDA_TARGET_OHOS)
   panda_target_link_libraries(arkruntime_obj atomic)
 endif()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1041,6 +1041,95 @@ TEST(emittertests, final_modifier)
 
         ASSERT_TRUE(cda.GetMethodsNumber() == 3);
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) { ASSERT_TRUE(mda.IsFinal()); });
+    }
+}
+
+TEST(emittertests, test_union_canonicalization)
+{
+    Parser p;
+    std::string source =
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UC,C,B,C,B} <external>\n"
+        ".record {UD,C,B,A} <external>\n"
+        ".record {UA,A,A,B} <external>\n"
+        ".record {UA,std.core.Double} <external>\n"
+        ".record {Ustd.core.Double,std.core.Double,std.core.Long} <external>\n"
+        ".record {Ustd.core.Double,std.core.Int,std.core.Long} <external>\n"
+        ".record {UA,B,C,B,A} <external>\n"
+        ".record {UA,D,D,D} <external>";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::vector<const char *> classDescriptors = {"{ULB;LC;}",
+                                                  "{ULA;LB;LC;LD;}",
+                                                  "{ULA;LB;}",
+                                                  "{ULA;Lstd/core/Double;}",
+                                                  "{ULstd/core/Double;Lstd/core/Long;}",
+                                                  "{ULstd/core/Double;Lstd/core/Int;Lstd/core/Long;}",
+                                                  "{ULA;LB;LC;}",
+                                                  "{ULA;LD;}"};
+
+    for (const auto &desc : classDescriptors) {
+        auto classId = pf->GetClassId(utf::CStringAsMutf8(desc));
+        ASSERT_TRUE(classId.IsValid());
+        ASSERT_TRUE(pf->IsExternal(classId));
+    }
+}
+
+TEST(emittertests, test_union_canonicalization_arrays)
+{
+    Parser p;
+    std::string source =
+        ".record std.core.Object <external>\n"
+        ".record A <extends=std.core.Object, access.record=public> {}\n"
+        ".record B <extends=std.core.Object, access.record=public> {}\n"
+        ".record C <extends=std.core.Object, access.record=public> {}\n"
+        ".record D <extends=std.core.Object, access.record=public> {}\n"
+
+        ".record {UB,C,{UA,D,std.core.Double}[],A} <external>\n"
+        ".record {U{UD,A,std.core.Int}[],{UA,D,std.core.Double}[],{Ustd.core.Long,D,A}[]} <external>\n"
+        ".record {UB,C,{UA,B}[],A} <external>\n"
+        ".record {UB,{UA,D}[],{UD,B}[],{UC,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[],{UD,B}[][],{UD,B}[],{UC,D}[]} <external>\n"
+        ".record {U{UA,D}[][],{UD,B}[]} <external>\n"
+        ".record {U{UD,C}[],{UC,B}[]} <external>\n"
+        ".record {U{UD,C}[],C,B} <external>\n"
+        ".record {U{Ustd.core.Int,std.core.Double}[],std.core.Long,std.core.Double} <external>\n"
+        ".record {U{Ustd.core.Int[],std.core.Double[]}[],std.core.Long[],std.core.Double[]} <external>";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::vector<const char *> classDescriptors = {
+        "{ULA;LB;LC;[{ULA;LD;Lstd/core/Double;}}",
+        "{U[{ULA;LD;Lstd/core/Double;}[{ULA;LD;Lstd/core/Int;}[{ULA;LD;Lstd/core/Long;}}",
+        "{ULA;LB;LC;[{ULA;LB;}}",
+        "{ULB;[{ULA;LD;}[{ULB;LC;}[{ULB;LD;}[{ULC;LD;}}",
+        "{U[{ULA;LD;}[{ULB;LD;}[{ULC;LD;}}",
+        "{U[{ULA;LD;}[{ULB;LD;}[[{ULB;LD;}[{ULC;LD;}}",
+        "{U[[{ULA;LD;}[{ULB;LD;}}",
+        "{U[{ULB;LC;}[{ULC;LD;}}",
+        "{ULB;LC;[{ULC;LD;}}",
+        "{ULstd/core/Double;Lstd/core/Long;[{ULstd/core/Double;Lstd/core/Int;}}",
+        "{U[Lstd/core/Double;[Lstd/core/Long;[{U[Lstd/core/Double;[Lstd/core/Int;}}"};
+
+    for (const auto &desc : classDescriptors) {
+        auto classId = pf->GetClassId(utf::CStringAsMutf8(desc));
+        ASSERT_TRUE(classId.IsValid());
+        ASSERT_TRUE(pf->IsExternal(classId));
     }
 }
 

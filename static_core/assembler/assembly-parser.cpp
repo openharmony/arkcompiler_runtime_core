@@ -104,7 +104,8 @@ bool Parser::ParseType(Type *type)
 {
     ASSERT(TypeValidName());
 
-    std::string componentName(context_.GiveToken());
+    std::string componentName;
+    GetName(&componentName);
     size_t rank = 0;
 
     ++context_;
@@ -1212,12 +1213,9 @@ bool Parser::ParamValidName()
     return context_.ValidateParameterName(currFunc_->GetParamsNum());
 }
 
-bool Parser::PrefixedValidName(BracketOptions options)
+bool Parser::PrefixedValidNameToken(BracketOptions options, bool isUnion)
 {
     auto s = context_.GiveToken();
-    if (!IsNonDigit(s[0])) {
-        return false;
-    }
     for (size_t i = 1; i < s.size(); ++i) {
         char const c = s[i];
         if (c == '.') {
@@ -1241,7 +1239,69 @@ bool Parser::PrefixedValidName(BracketOptions options)
         if (IsAllowAngleBrackets(options) && (c == '<' || c == '>')) {
             continue;
         }
+        return isUnion && (c == ',');
+    }
+    return true;
+}
+
+bool Parser::PrefixedValidUnionName(BracketOptions options)
+{
+    context_++;
+    while (*context_ != Token::Type::DEL_BRACE_R) {
+        if (*context_ == Token::Type::DEL_BRACE_L) {
+            if (!PrefixedValidUnionName(options)) {
+                return false;
+            }
+        } else {
+            if (!PrefixedValidNameToken(options, true)) {
+                return false;
+            }
+        }
+        context_++;
+    }
+    return true;
+}
+
+bool Parser::PrefixedValidName(BracketOptions options)
+{
+    if (!IsNonDigit(context_.GiveToken()[0])) {
         return false;
+    }
+    if (*context_ != Token::Type::DEL_BRACE_L) {
+        return PrefixedValidNameToken(options);
+    }
+    if (!PrefixedValidUnionName(options)) {
+        return false;
+    }
+    context_++;
+    if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L) {
+        // process '[' and ']'
+        if (!PrefixedValidNameToken(options)) {
+            return false;
+        }
+    } else {
+        context_--;
+    }
+
+    // move to the start of union name
+    auto idx = [&]() {
+        if (*context_ == Token::Type::DEL_BRACE_R) {
+            context_--;
+            return 1;
+        }
+        return 0;
+    }();
+    while (*context_ != Token::Type::DEL_BRACE_L || idx != 0) {
+        if (*context_ == Token::Type::DEL_BRACE_R) {
+            idx++;
+        }
+        if (*context_ == Token::Type::DEL_BRACE_L) {
+            idx--;
+            if (idx == 0) {
+                break;
+            }
+        }
+        context_--;
     }
     return true;
 }
@@ -1483,7 +1543,8 @@ bool Parser::ParseOperandSignatureTypesList(std::string *sign)
             return true;
         }
 
-        if (*context_ != Token::Type::DEL_COMMA && *context_ != Token::Type::ID) {
+        if (*context_ != Token::Type::DEL_COMMA && *context_ != Token::Type::ID &&
+            *context_ != Token::Type::DEL_BRACE_L) {
             break;
         }
 
@@ -1495,7 +1556,7 @@ bool Parser::ParseOperandSignatureTypesList(std::string *sign)
             return false;
         }
 
-        if (*context_ != Token::Type::ID) {
+        if (*context_ != Token::Type::ID && *context_ != Token::Type::DEL_BRACE_L) {
             context_.err = GetError("Expected signature arguments", Error::ErrorType::ERR_BAD_SIGNATURE_PARAMETERS);
             return false;
         }
@@ -2093,6 +2154,31 @@ bool Parser::ParseArrayFullSign()
     return true;
 }
 
+void Parser::GetUnionName(std::string *name)
+{
+    ASSERT(*context_ == Token::Type::DEL_BRACE_L);
+    context_++;
+    while (*context_ != Token::Type::DEL_BRACE_R) {
+        if (*context_ == Token::Type::DEL_BRACE_L) {
+            (*name) += std::string(context_.GiveToken());
+            GetUnionName(name);
+        } else {
+            (*name) += std::string(context_.GiveToken());
+        }
+        context_++;
+    }
+    (*name) += std::string(context_.GiveToken());
+}
+
+void Parser::GetName(std::string *name)
+{
+    auto isUnion = (*context_ == Token::Type::DEL_BRACE_L);
+    *name = std::string(context_.GiveToken());
+    if (isUnion) {
+        GetUnionName(name);
+    }
+}
+
 bool Parser::ParseRecordName()
 {
     LOG(DEBUG, ASSEMBLER) << "started searching for record name (line " << lineStric_
@@ -2106,8 +2192,8 @@ bool Parser::ParseRecordName()
         context_.err = GetError("Invalid name of the record.", Error::ErrorType::ERR_BAD_RECORD_NAME);
         return false;
     }
-
-    auto recordName = std::string(context_.GiveToken());
+    std::string recordName;
+    GetName(&recordName);
     context_++;
     if (*context_ == Token::Type::DEL_SQUARE_BRACKET_L) {
         auto dim = ParseMultiArrayHallmark();
@@ -2122,9 +2208,10 @@ bool Parser::ParseRecordName()
         context_--;
     }
 
-    auto iter = program_.recordTable.find(recordName);
+    auto recordType = Type::FromName(recordName);
+    auto iter = program_.recordTable.find(recordType.GetName());
     if (iter == program_.recordTable.end() || !iter->second.fileLocation->isDefined) {
-        SetRecordInformation(recordName);
+        SetRecordInformation(recordType.GetName());
     } else {
         context_.err = GetError("This record already exists.", Error::ErrorType::ERR_BAD_ID_RECORD);
         return false;
@@ -2267,7 +2354,8 @@ bool Parser::ParseFunctionReturn()
 
 bool Parser::TypeValidName()
 {
-    if (Type::GetId(context_.GiveToken()) != panda_file::Type::TypeId::REFERENCE) {
+    if (Type::GetId(context_.GiveToken()) != panda_file::Type::TypeId::REFERENCE &&
+        (*context_ != Token::Type::DEL_BRACE_L)) {
         return true;
     }
 
@@ -2276,7 +2364,7 @@ bool Parser::TypeValidName()
 
 bool Parser::ParseFunctionArg()
 {
-    if (*context_ != Token::Type::ID) {
+    if (*context_ != Token::Type::ID && *context_ != Token::Type::DEL_BRACE_L) {
         context_.err = GetError("Expected identifier.", Error::ErrorType::ERR_BAD_FUNCTION_PARAMETERS);
         return false;
     }
@@ -2347,7 +2435,8 @@ bool Parser::ParseFunctionArgs()
             return false;
         }
 
-        if (context_.id != Token::Type::DEL_COMMA && context_.id != Token::Type::ID) {
+        if (context_.id != Token::Type::DEL_COMMA && context_.id != Token::Type::ID &&
+            context_.id != Token::Type::DEL_BRACE_L) {
             break;
         }
 

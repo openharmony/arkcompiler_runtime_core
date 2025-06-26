@@ -1254,7 +1254,7 @@ std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &cl
     std::string name = StringDataToString(file_->GetStringData(classId));
 
     auto type = pandasm::Type::FromDescriptor(name);
-    type = pandasm::Type(type.GetComponentName(), type.GetRank());
+    type = pandasm::Type(type.GetNameWithoutRank(), type.GetRank());
 
     return type.GetPandasmName();
 }

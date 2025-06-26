@@ -58,6 +58,7 @@ public:
         MULTIPLE_OVERRIDE,
         MULTIPLE_IMPLEMENT,
         INVALID_LAMBDA_CLASS,
+        REDECL_BY_TYPE_SIG
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -344,6 +345,9 @@ private:
     bool LinkBootClass(Class *klass);
 
     Class *LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                          ClassLinkerErrorHandler *errorHandler);
+
+    Class *LoadUnionClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
                           ClassLinkerErrorHandler *errorHandler);
 
     Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
