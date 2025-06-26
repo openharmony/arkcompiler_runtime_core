@@ -12,6 +12,7 @@
 # limitations under the License.
 
 
+include(cmake/ani.cmake)
 include(cmake/ets_package.cmake)
 
 macro(SUBDIRLIST result curdir)

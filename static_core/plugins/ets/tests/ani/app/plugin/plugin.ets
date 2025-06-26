@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Ability } from "../interface/ability";
 
-#include "ani_gtest.h"
+class Plugin implements Ability {
+    static { loadLibrary("ani_app_lib") }
+    override invoke() {
+        let data = this.BuildData()
+        this.Apply(data!, (item: string) => { console.log(item); })
+    }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" ani_status ANI_CLIB_FindClass(ani_env *env, const char *classDescriptor, ani_class *result);
+    native BuildData(): string[] | undefined;
 
-namespace ark::ets::ani::testing {
-
-class FindClassTest : public AniTest {};
-
-TEST_F(FindClassTest, has_class)
-{
-    ani_class cls {};
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    auto status = ANI_CLIB_FindClass(env_, "ani_ctest.Point", &cls);
-    ASSERT_EQ(status, ANI_OK);
-    ASSERT_NE(cls, nullptr);
+    native Apply(data: string[], fn : (it: string) => void): void;
 }
-
-}  // namespace ark::ets::ani::testing
