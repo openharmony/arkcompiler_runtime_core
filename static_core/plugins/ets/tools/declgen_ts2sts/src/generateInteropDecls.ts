@@ -30,7 +30,7 @@ export interface RunnerParms {
 }
 
 export function generateInteropDecls(config: RunnerParms): string[] {
-  Logger.init(new SilentLogger())
+  Logger.init(new SilentLogger());
 
   const tsConfig: DeclgenCLIOptions = {
     outDir: config.outDir,
