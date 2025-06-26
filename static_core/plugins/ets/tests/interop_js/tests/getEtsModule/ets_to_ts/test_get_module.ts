@@ -43,3 +43,16 @@ ASSERT_TRUE(typeof entry2.A === 'function');
 const a3 = new entry2.A();
 ASSERT_TRUE(typeof a3.value === 'function' && a3.value() === 42);
 ASSERT_TRUE(entry2.D === undefined);
+
+function testLoadNotFoundModule() {
+    let result = false;
+    try {
+        etsVm.getModule('not_module');
+    } catch(e) {
+        result = e.toString().startsWith('LinkerClassNotFoundError')
+                 && e.message.startsWith('Cannot find class Lnot_module/ETSGLOBAL;');
+    }
+    ASSERT_TRUE(result);
+}
+
+testLoadNotFoundModule();

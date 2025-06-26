@@ -63,7 +63,7 @@ napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
 
     EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data(), true, ctx->LinkerCtx());
     if (UNLIKELY(etsKlass == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSClassImpl: unresolved klass " + std::string(classDescriptor));
+        ctx->ForwardEtsException(coro);
         return nullptr;
     }
 
@@ -216,7 +216,7 @@ napi_value GetETSModule(napi_env env, const std::string &moduleName)
     std::string descriptor = "L" + moduleName + "/ETSGLOBAL;";
     EtsClass *globalClass = coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.c_str(), true, ctx->LinkerCtx());
     if (globalClass == nullptr) {
-        InteropCtx::ThrowJSError(env, "Failed to resolve module class: " + descriptor);
+        ctx->ForwardEtsException(coro);
         return nullptr;
     }
 
