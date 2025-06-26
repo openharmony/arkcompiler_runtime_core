@@ -16,12 +16,12 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Decimal min and max API tests");
-    suite.addTest("Decimal min and max with default config", testMinAndMaxWithDefaultConfig);
+    const suite = new arktest.ArkTestsuite("Decimal sign API tests");
+    suite.addTest("Decimal sign with default config", testSignWithDefaultConfig);
     return suite.run();
 }
 
-function testMinAndMaxWithDefaultConfig() {
+function testSignWithDefaultConfig() {
     arktest.assertEQ(Decimal.sign(Infinity), 1);
     arktest.assertEQ(Decimal.sign(-Infinity), -1);
     arktest.assertEQ(Decimal.sign('Infinity'), 1);

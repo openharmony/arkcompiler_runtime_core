@@ -15,48 +15,51 @@
 
 import { Decimal } from "@arkts.math.Decimal";
 
-function t(n: string | number, expected: number) {
-    let v = new Decimal(n).toNumber();
-    arktest.assertEQ(expected, v, `Decimal(${n}).toNumber(), actual:${v} is not equal to ${expected}`);
+function testToNumber001() {
+    arktest.assertEQ(new Decimal('0').toNumber(), 0);
+    arktest.assertEQ(new Decimal('0.0').toNumber(), 0);
+    arktest.assertEQ(new Decimal('0.000000000000').toNumber(), 0);
+    arktest.assertEQ(new Decimal('0e+0').toNumber(), 0);
+    arktest.assertEQ(new Decimal('0e-0').toNumber(), 0);
 }
 
-function testToNumber() {
-    t('0', 0);
-    t('0.0', 0);
-    t('0.000000000000', 0);
-    t('0e+0', 0);
-    t('0e-0', 0);
+function testToNumber002() {
+    arktest.assertEQ(new Decimal('-0').toNumber(), -0);
+    arktest.assertEQ(new Decimal('-0.0').toNumber(), -0);
+    arktest.assertEQ(new Decimal('-0.000000000000').toNumber(), -0);
+    arktest.assertEQ(new Decimal('-0e+0').toNumber(), -0);
+    arktest.assertEQ(new Decimal('-0e-0').toNumber(), -0);
+}
 
-    t('-0', -0);
-    t('-0.0', -0);
-    t('-0.000000000000', -0);
-    t('-0e+0', -0);
-    t('-0e-0', -0);
+function testToNumber003() {
+    arktest.assertEQ(new Decimal(Infinity).toNumber(), Infinity);
+    arktest.assertEQ(new Decimal('Infinity').toNumber(), Infinity);
+    arktest.assertEQ(new Decimal(-Infinity).toNumber(), -Infinity);
+    arktest.assertEQ(new Decimal('-Infinity').toNumber(), -Infinity);
+}
 
-    t(Infinity, Infinity);
-    t('Infinity', Infinity);
-    t(-Infinity, -Infinity);
-    t('-Infinity', -Infinity);
+function testToNumber004() {
+    arktest.assertEQ(new Decimal(1).toNumber(), 1);
+    arktest.assertEQ(new Decimal('1').toNumber(), 1);
+    arktest.assertEQ(new Decimal('1.0').toNumber(), 1);
+    arktest.assertEQ(new Decimal('1e+0').toNumber(), 1);
+    arktest.assertEQ(new Decimal('1e-0').toNumber(), 1);
+}
 
-    t(1, 1);
-    t('1', 1);
-    t('1.0', 1);
-    t('1e+0', 1);
-    t('1e-0', 1);
+function testToNumber005() {
+    arktest.assertEQ(new Decimal(-1).toNumber(), -1);
+    arktest.assertEQ(new Decimal('-1').toNumber(), -1);
+    arktest.assertEQ(new Decimal('-1.0').toNumber(), -1);
+    arktest.assertEQ(new Decimal('-1e+0').toNumber(), -1);
+    arktest.assertEQ(new Decimal('-1e-0').toNumber(), -1);
+}
 
-    t(-1, -1);
-    t('-1', -1);
-    t('-1.0', -1);
-    t('-1e+0', -1);
-    t('-1e-0', -1);
-
-    t('123.456789876543', 123.456789876543);
-    t('-123.456789876543', -123.456789876543);
-
-    t('9007199254740991', 9007199254740991);
-    t('-9007199254740991', -9007199254740991);
-
-    t('1.7976931348623157e+308', 1.7976931348623157e+308);
+function testToNumber006() {
+    arktest.assertEQ(new Decimal('123.456789876543').toNumber(), 123.456789876543);
+    arktest.assertEQ(new Decimal('-123.456789876543').toNumber(), -123.456789876543);
+    arktest.assertEQ(new Decimal('9007199254740991').toNumber(), 9007199254740991);
+    arktest.assertEQ(new Decimal('-9007199254740991').toNumber(), -9007199254740991);
+    arktest.assertEQ(new Decimal('1.7976931348623157e+308').toNumber(), 1.7976931348623157e+308);
 }
 
 function config() {
@@ -70,7 +73,12 @@ function config() {
 
 function main() {
     const suite = new arktest.ArkTestsuite("Decimal toNumber API tests");
-    suite.addTest("Decimal toNumber 001", testToNumber);
+    suite.addTest("Decimal toNumber", testToNumber001);
+    suite.addTest("Decimal toNumber", testToNumber002);
+    suite.addTest("Decimal toNumber", testToNumber003);
+    suite.addTest("Decimal toNumber", testToNumber004);
+    suite.addTest("Decimal toNumber", testToNumber005);
+    suite.addTest("Decimal toNumber", testToNumber006);
     config();
     return suite.run();
 }

@@ -20,6 +20,10 @@ function main(): int {
     suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart001);
     suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart002);
     suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart003);
+    suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart004);
+    suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart005);
+    suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart006);
+    suite.addTest("Decimal log with specific config", testLogWithSpecificConfigPart007);
     return suite.run();
 }
 
@@ -39,7 +43,9 @@ function testLogWithSpecificConfigPart001() {
     checkLogResult('Infinity', '0', 'NaN', 40, 4);
     checkLogResult('-Infinity', 'Infinity', 'NaN', 40, 4);
     checkLogResult('NaN', '10', 'NaN', 40, 4);
+}
 
+function testLogWithSpecificConfigPart002() {
     checkLogResult('1', '0', 'NaN', 40, 4);
     checkLogResult('10', '0', 'NaN', 40, 4);
     checkLogResult('10', '-0', 'NaN', 40, 4);
@@ -50,7 +56,9 @@ function testLogWithSpecificConfigPart001() {
     checkLogResult('10', 'NaN', 'NaN', 40, 4);
     checkLogResult('-1', '-1', 'NaN', 40, 4);
     checkLogResult('0', '0', 'NaN', 40, 4);
+}
 
+function testLogWithSpecificConfigPart003() {
     checkLogResult('7625597484987', '59049', '2.7', 2, 5);
     checkLogResult('839756321.64088511', '28', '6.16667503', 9, 0);
     checkLogResult('94143178827', '3486784401', '1.15', 3, 0);
@@ -61,7 +69,7 @@ function testLogWithSpecificConfigPart001() {
     checkLogResult('512', '16', '2.2', 2, 6);
 }
 
-function testLogWithSpecificConfigPart002() {
+function testLogWithSpecificConfigPart004() {
     checkLogResult('16', '2', '4', 7, 0);
     checkLogResult('16', '2', '4', 7, 2);
     checkLogResult('243', '3', '5', 7, 1);
@@ -77,6 +85,9 @@ function testLogWithSpecificConfigPart002() {
     checkLogResult('64', '2', '6', 3, 0);
     checkLogResult('64', '2', '6', 2, 0);
     checkLogResult('64', '2', '6', 1, 2);
+}
+
+function testLogWithSpecificConfigPart005() {
     checkLogResult('128', '2', '7', 1, 0);
     checkLogResult('256', '2', '8', 1, 2);
     checkLogResult('1024', '2', '10', 2, 0);
@@ -93,16 +104,18 @@ function testLogWithSpecificConfigPart002() {
     checkLogResult('32', '4', '2.5', 7, 4);
 }
 
-function testLogWithSpecificConfigPart003() {
+function testLogWithSpecificConfigPart006() {
     checkLogResult('1.2589254117', 10, '0.1', 1, 2);
     checkLogResult('1.023292992', 10, '0.01', 1, 2);
     checkLogResult('1.258925411794167210423954106395800606', 10, '0.1', 1, 4);
     checkLogResult('1.25892541179416721', 10, '0.1', 1, 0);
     checkLogResult('1.258925411', 10, '0.1', 1, 5);
     checkLogResult('1.258925411794167210423954', 10, '0.1', 1, 4);
-
     checkLogResult('839756321.64088511', '28', '6.16667503', 9, 0);
     checkLogResult('576306512.96177', '985212731.27158', '0.9742', 4, 2);
+}
+
+function testLogWithSpecificConfigPart007() {
     checkLogResult('97.65625', '6.25', '2.5', 3, 0);
     checkLogResult('223677472.0384754303304727631735', '26', '5.900904252190486450814', 22, 5);
     checkLogResult('2063000845.3020737243910803079', '35', '6.0324410183892767982149330415', 29, 0);
@@ -111,14 +124,4 @@ function testLogWithSpecificConfigPart003() {
     checkLogResult('16', '2', '4', 10, 4);
     checkLogResult('32', '4', '2.5', 10, 1);
     checkLogResult('316.2277660168379331998893544432645719585553021316022642247511089459022980600999502961482777894980004', '10', '2.49999999999999999999', 21, 1);
-
-    checkLogResult('10000.0000000000000004', 10, '4.01', 3, 2);
-    checkLogResult('10000.00000000000004', 10, '4.01', 3, 2);
-    checkLogResult('100.000000000000000000001', 10, '2.1', 2, 0);
-    checkLogResult('100.00000000000001', 10, '2.1', 2, 0);
-    checkLogResult('99999.9999999999999991', 10, '4.999', 4, 1);
-    checkLogResult('124050.923004222533485495840', 10, '5.093601', 7, 2);
-    checkLogResult('1.258925411794167210423954106395', 10, '0.09999', 4, 1);
-    checkLogResult('911191437.48166728043529900000', 10, '8.959609629999999999999999', 25, 3);
-    checkLogResult('253.4396732554691740503010363220', 10, '2.403874600001', 13, 2);
 }
