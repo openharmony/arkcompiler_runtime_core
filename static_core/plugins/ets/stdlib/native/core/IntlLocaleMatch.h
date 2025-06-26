@@ -20,8 +20,11 @@
 #include "unicode/locid.h"
 #include <unicode/localematcher.h>
 #include <unicode/utypes.h>
+#include <vector>
+#include <string>
 
 namespace ark::ets::stdlib {
+std::vector<std::string> GetAvailableLocales();
 
 icu::Locale GetLocale(ani_env *env, std::string &locTag);
 ani_status RegisterIntlLocaleMatch(ani_env *env);
