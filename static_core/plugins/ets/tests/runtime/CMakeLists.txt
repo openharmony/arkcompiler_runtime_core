@@ -55,5 +55,17 @@ if (NOT PANDA_QEMU_BUILD)
     )
 endif()
 
+panda_ets_add_gtest(
+    NO_CORES
+    NAME static_type_converter_test
+    SOURCES static_type_converter_test.cpp
+    LIBRARIES arkbase arkfile arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
+    DEPS_TARGETS mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
 add_subdirectory(types)
 add_subdirectory(tooling)

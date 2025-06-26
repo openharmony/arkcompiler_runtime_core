@@ -205,6 +205,7 @@ srcs_runtime = [
   "runtime//types/ets_finalizable_weak_ref.cpp",
   "runtime/ets_utils.cpp",
   "runtime/static_object_accessor.cpp",
+  "runtime/static_type_converter.cpp",
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/escompat/Process.cpp",
   "stdlib/native/core/Intl.cpp",

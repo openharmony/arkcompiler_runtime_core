@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
-#define COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
+#ifndef PANDA_PLUGINS_ETS_STATIC_TYPE_CONVERTER_H
+#define PANDA_PLUGINS_ETS_STATIC_TYPE_CONVERTER_H
 
-#include "objects/base_type.h"
-#include "thread/thread_holder.h"
+#include "objects/base_object.h"
+#include "objects/static_type_converter_interface.h"
 
-namespace panda {
-// Type Converter implemented for dynamic vm.
-class DynamicTypeConverterInterface {
+namespace ark::ets {
+class StaticTypeConverter : public panda::StaticTypeConverterInterface {
 public:
-    // convert PandaType to JSTaggedValue
-    virtual JSTaggedValue WrapTagged(ThreadHolder *thread, PandaType value) = 0;
+    static void Initialize();
 
-    // convert JSTaggedValue to PandaType
-    virtual PandaType UnwrapTagged(JSTaggedValue value) = 0;
+    panda::BoxedValue PUBLIC_API WrapBoxed(panda::PandaType value) override;
+
+    panda::PandaType PUBLIC_API UnwrapBoxed(panda::BoxedValue value) override;
+
+private:
+    static StaticTypeConverter stcTypeConverter_;
 };
-}  // namespace panda
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
+}  // namespace ark::ets
+#endif  // PANDA_PLUGINS_ETS_STATIC_TYPE_CONVERTER_H
