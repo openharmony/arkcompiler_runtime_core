@@ -79,5 +79,10 @@ bool ArkDebugNativeAPI::StartDebuggerForSocketPair([[maybe_unused]] int tid, [[m
     }
     return ret;
 }
+bool ArkDebugNativeAPI::IsDebugModeEnabled()
+{
+    LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::IsDebugModeEnabled is " << ark::Runtime::GetCurrent()->IsDebugMode();
 
+    return ark::Runtime::GetCurrent()->IsDebugMode();
+}
 }  // namespace ark
