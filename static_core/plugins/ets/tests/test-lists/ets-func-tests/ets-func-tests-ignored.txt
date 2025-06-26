@@ -350,20 +350,6 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
 spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 
-#11544
-std/math/std_math_asin_double.ets
-std/math/std_math_atan2_double_double.ets
-std/math/std_math_cbrt_double.ets
-std/math/std_math_hypot_double_double.ets
-std/math/std_math_imul_float_float.ets
-std/math/std_math_log10_int.ets
-std/math/std_math_mod_double_double.ets
-std/math/std_math_power2_double.ets
-std/math/std_math_power_double_double.ets
-std/math/std_math_rem_double_double.ets
-std/math/std_math_sinh_double.ets
-std/math/std_math_tan_double.ets
-
 #10874
 std/math/std_math_clz64_long.ets
 
@@ -479,7 +465,7 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-03.ets
 std/core/NumberTest.ets
 
 # 9.
-# other fails 
+# other fails
 escompat/JsonStringifyTest.ets
 escompat/escompat_BigInt_instance_BigInt_toString_011.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets

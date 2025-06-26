@@ -13,7 +13,7 @@
 
 - {
     method_name: log,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:
       {v: "double"},
@@ -43,7 +43,7 @@
   }
 - {
     method_name: log10,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -74,7 +74,7 @@
   }
 - {
     method_name: log2,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -105,7 +105,7 @@
   }
 - {
     method_name: log1p,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "double"},
 
@@ -134,7 +134,7 @@
   }
 - {
     method_name: log10,
-    method_nature: function, 
+    method_nature: function,
     result_type: double,
     method_signature:  {v: "int"},
 
@@ -144,9 +144,7 @@
         test2: { v: 10,},
         test3: { v: 10 * 10, },
         test4: { v: 10 * 10 * 10, },
-        test5: { v: doubleNaN, },
-        test6: { v: doubleInf, },
-        test7: { v: doubleNegInf,},
+        test5: { v: doubleInf as int, },
       },
     method_expected_data:
      {
@@ -154,8 +152,6 @@
         test2:   1.0,
         test3:   2.0,
         test4:   3.0,
-        test5:  -doubleNaN,
-        test6:   doubleInf,
-        test7: -doubleNaN,
+        test5:   9.0,
       },
     }
