@@ -407,6 +407,8 @@ public:
 
     /**********************************************************************************/
     /// Thread information
+    ::ark::mem::BarrierType GetPreReadType() const override;
+
     ::ark::mem::BarrierType GetPreType() const override;
 
     ::ark::mem::BarrierType GetPostType() const override;

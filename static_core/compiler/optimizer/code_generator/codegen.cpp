@@ -2103,6 +2103,7 @@ void Codegen::CreateCmcReadViaBarrierCall(Inst *inst, MemRef mem, Reg dstReg, bo
 
 void Codegen::CreateReadViaBarrier(Inst *inst, MemRef mem, Reg dstReg, bool isVolatile, RegMask preserved)
 {
+    ASSERT(inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::ANY);
     if (!GetRuntime()->NeedsPreReadBarrier()) {
         // Fallback to load without barrier
         auto type = inst->GetType();

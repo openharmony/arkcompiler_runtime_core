@@ -929,6 +929,33 @@ public:
             case Opcode::LoadI:
                 inst->CastToLoadI()->SetNeedBarrier(needBarrier);
                 break;
+            case Opcode::LoadObject:
+                inst->CastToLoadObject()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadObjectPair:
+                inst->CastToLoadObjectPair()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadResolvedObjectField:
+                inst->CastToLoadResolvedObjectField()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadResolvedObjectFieldStatic:
+                inst->CastToLoadResolvedObjectFieldStatic()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArray:
+                inst->CastToLoadArray()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayI:
+                inst->CastToLoadArrayI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayPair:
+                inst->CastToLoadArrayPair()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadArrayPairI:
+                inst->CastToLoadArrayPairI()->SetNeedBarrier(needBarrier);
+                break;
+            case Opcode::LoadStatic:
+                inst->CastToLoadStatic()->SetNeedBarrier(needBarrier);
+                break;
             default:
                 UNREACHABLE();
         }

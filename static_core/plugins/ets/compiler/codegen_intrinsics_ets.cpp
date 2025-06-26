@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"
+#include "utils/regmask.h"
 
 namespace ark::compiler {
 
@@ -206,7 +207,12 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     auto labelFastPathDone = enc->CreateLabel();
     auto labelIncIndex = enc->CreateLabel();
     // Jump to slowPath if buffer is full and needs to be reallocated
-    enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    if (cg->GetRuntime()->NeedsPreReadBarrier()) {
+        cg->CreateReadViaBarrier(inst, args.SbBufferAddr(), reg0, false,
+                                 MakeMask(args.SbBufferAddr().GetBase().GetId(), args.Value().GetId()));
+    } else {
+        enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    }
     enc->EncodeLdr(reg1, false, MemRef(reg0, coretypes::Array::GetLengthOffset()));
     enc->EncodeLdr(reg2, false, args.SbIndexAddr());
     enc->EncodeJump(labelSlowPath, reg2, reg1, Condition::HS);

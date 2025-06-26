@@ -610,9 +610,7 @@ void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
     auto enc = static_cast<EncodeVisitor *>(visitor);
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
     ASSERT(instLoadArray->IsArray() || !runtime->IsCompressedStringsEnabled());
-    if (static_cast<LoadInst *>(inst)->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
+
     auto type = inst->GetType();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
@@ -627,7 +625,11 @@ void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
     encoder->EncodeAdd(tmp, src0, Imm(offset));
     auto mem = MemRef(tmp, src1, shift);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
+    if (instLoadArray->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst);
+    } else {
+        encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
+    }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
@@ -890,9 +892,6 @@ void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto loadObj = inst->CastToLoadObject();
-    if (loadObj->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
     auto type = inst->GetType();
     auto typeInput = inst->GetInput(0).GetInst()->GetType();
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), typeInput);  // obj
@@ -902,10 +901,14 @@ void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
     size_t offset = GetObjectOffset(graph, loadObj->GetObjectType(), field, loadObj->GetTypeId());
     auto mem = MemRef(src, offset);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    if (loadObj->GetVolatile()) {
-        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
+    if (loadObj->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, loadObj->GetVolatile());
     } else {
-        enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        if (loadObj->GetVolatile()) {
+            enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
+        } else {
+            enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        }
     }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
@@ -952,9 +955,14 @@ void EncodeVisitor::VisitLoadResolvedObjectField([[maybe_unused]] GraphVisitor *
     auto obj = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
     auto ofs = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::UINT32);     // field offset
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                  // load value
-    ScopedTmpReg tmpReg(enc->GetEncoder());
-    enc->GetEncoder()->EncodeAdd(tmpReg, obj, ofs);
-    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(tmpReg));
+    if (load->GetNeedBarrier()) {
+        auto mem = MemRef(obj, ofs, 0);
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, true);
+    } else {
+        ScopedTmpReg tmpReg(enc->GetEncoder());
+        enc->GetEncoder()->EncodeAdd(tmpReg, obj, ofs);
+        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(tmpReg));
+    }
 }
 
 void EncodeVisitor::VisitLoad(GraphVisitor *visitor, Inst *inst)
@@ -1325,9 +1333,7 @@ void EncodeVisitor::VisitLoadStatic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto loadStatic = inst->CastToLoadStatic();
-    if (loadStatic->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
+
     auto type = inst->GetType();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                   // load value
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // class
@@ -1335,10 +1341,14 @@ void EncodeVisitor::VisitLoadStatic(GraphVisitor *visitor, Inst *inst)
     auto field = loadStatic->GetObjField();
     auto offset = graph->GetRuntime()->GetFieldOffset(field);
     auto mem = MemRef(src0, offset);
-    if (loadStatic->GetVolatile()) {
-        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
+    if (loadStatic->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, loadStatic->GetVolatile());
     } else {
-        enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        if (loadStatic->GetVolatile()) {
+            enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), mem);
+        } else {
+            enc->GetEncoder()->EncodeLdr(dst, IsTypeSigned(type), mem);
+        }
     }
 }
 
@@ -1381,7 +1391,11 @@ void EncodeVisitor::VisitLoadResolvedObjectFieldStatic(GraphVisitor *visitor, In
     auto fieldAddr = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
     // Unknown load, assume it can be volatile
-    enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(fieldAddr));
+    if (load->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, MemRef(fieldAddr), dst, true);
+    } else {
+        enc->GetEncoder()->EncodeLdrAcquire(dst, IsTypeSigned(type), MemRef(fieldAddr));
+    }
 }
 
 void EncodeVisitor::VisitStoreStatic(GraphVisitor *visitor, Inst *inst)
@@ -2055,9 +2069,7 @@ void EncodeVisitor::VisitLoadArrayI(GraphVisitor *visitor, Inst *inst)
     auto instLoadArrayI = inst->CastToLoadArrayI();
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
     ASSERT(instLoadArrayI->IsArray() || !runtime->IsCompressedStringsEnabled());
-    if (instLoadArrayI->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
+
     auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0));
     uint32_t index = instLoadArrayI->GetImm();
     auto type = inst->GetType();
@@ -2071,7 +2083,11 @@ void EncodeVisitor::VisitLoadArrayI(GraphVisitor *visitor, Inst *inst)
     auto arch = enc->GetArch();
     ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
+    if (instLoadArrayI->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadViaBarrier(inst, mem, dst, false);
+    } else {
+        encoder->EncodeLdr(dst, IsTypeSigned(type), mem);
+    }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
@@ -2362,9 +2378,7 @@ void EncodeVisitor::VisitNegOverflowAndZeroCheck(GraphVisitor *visitor, Inst *in
 void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    if (inst->CastToLoadArrayPair()->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
+    auto *loadArr = inst->CastToLoadArrayPair();
     auto type = inst->GetType();
     auto array = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto index = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);
@@ -2379,7 +2393,12 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     enc->GetEncoder()->EncodeAdd(tmp, array, Shift(indexUpcasted, scale));
     auto mem = MemRef(tmp, offset);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+
+    if (loadArr->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadPairViaBarrier(inst, mem, dst0, dst1);
+    } else {
+        enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+    }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
@@ -2387,9 +2406,6 @@ void EncodeVisitor::VisitLoadObjectPair(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto loadObj = inst->CastToLoadObjectPair();
-    if (loadObj->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
     auto type = inst->GetType();
     auto typeInput = inst->GetInput(0).GetInst()->GetType();
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), typeInput);  // obj
@@ -2400,26 +2416,34 @@ void EncodeVisitor::VisitLoadObjectPair(GraphVisitor *visitor, Inst *inst)
     size_t offset0 = GetObjectOffset(graph, loadObj->GetObjectType(), field0, loadObj->GetTypeId0());
     auto mem = MemRef(src, offset0);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+
+    if (loadObj->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadPairViaBarrier(inst, mem, dst0, dst1);
+    } else {
+        enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+    }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
 void EncodeVisitor::VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    if (inst->CastToLoadArrayPairI()->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
+    auto *loadArr = inst->CastToLoadArrayPairI();
     auto type = inst->GetType();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto dst0 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(0), type);                 // first value
     auto dst1 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(1), type);                 // second value
-    uint64_t index = inst->CastToLoadArrayPairI()->GetImm();
+    uint64_t index = loadArr->GetImm();
     auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
                   (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     auto mem = MemRef(src0, offset);
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
-    enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+
+    if (loadArr->GetNeedBarrier()) {
+        enc->GetCodegen()->CreateReadPairViaBarrier(inst, mem, dst0, dst1);
+    } else {
+        enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+    }
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
