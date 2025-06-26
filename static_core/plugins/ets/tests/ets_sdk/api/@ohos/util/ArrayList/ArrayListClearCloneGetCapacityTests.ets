@@ -32,10 +32,10 @@ function main() {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber10: double | int = 10;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber6: int = 6;
+    static readonly testNumber10: int = 10;
     static readonly testNumber15: double = 15;
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly result3: Number[] = [3, 1, 2, 3, 4, 5, 3];

@@ -75,7 +75,7 @@ export final class Float extends Floating implements Comparable<Float> {
     /**
      * Maximal value that this type can have as a float
      */
-    public static readonly MAX_VALUE: float = 3.4028235e+38f;
+    public static readonly MAX_VALUE: float = 3.40282346638528860e+38f;
 
     /**
      * Maximal integer value that can be used as a float without loss of precision

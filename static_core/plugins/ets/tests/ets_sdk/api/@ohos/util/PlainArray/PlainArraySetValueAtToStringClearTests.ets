@@ -40,9 +40,9 @@ function initializePlainArray<T>(plainArray: PlainArray<T>, sourceArray: T[]) {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber6: int = 6;
     static readonly testString1: string = "0:0,1:2,2:2,3:3,4:4";
     static readonly testString2: string = "0:0,1:1,2:2,3:3,4:4";
     static readonly testString3: string = "0:6,1:2,2:2,3:3,4:6";

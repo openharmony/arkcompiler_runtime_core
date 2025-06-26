@@ -16,36 +16,36 @@
 namespace ops {
 function sub(c0: char, c1: char): char {
     let c: Char = new Char(c'0');
-    if (c0 > c1) {
-        c = (c0 - c1).toChar();
+    if (c0.compareTo(c1) > 0) {
+        c = (c0.toInt() - c1.toInt()).toChar();
     } else {
-        c = (c1 - c0).toChar();
+        c = (c1.toInt() - c0.toInt()).toChar();
     }
     return c as char;
 }
 }
 
 function moduleFunction(value1: char, value2: char): char {
-    return value1 > value2 ? value1 : value2;
+    return value1.compareTo(value2) > 0 ? value1 : value2;
 }
 
 function moduleFunction(value1: char, value2: char, value3: char): char {
-    return value1 < value2 ? value1 : value3;
+    return value1.compareTo(value2) < 0 ? value1 : value3;
 }
 
 namespace A {
     function charFunctionA(value1: char, value2: char): char {
-        return value1 > value2 ? value1 : value2;
+        return value1.compareTo(value2) > 0 ? value1 : value2;
     }
 
     function charFunctionA(value1: char, value2: char, value3: char): char {
-        return value1 > value2 ? value1 : value3;
+        return value1.compareTo(value2) > 0 ? value1 : value3;
     }
 
     function nestedFunction(value1: char, value2: char): char {
         let lambdaFunction: (p1: char, p2: char) => char =
             (param1: char, param2: char): char => {
-                return param1 > param2 ? param1 : param2;
+                return param1.compareTo(param2) > 0 ? param1 : param2;
         };
         return lambdaFunction(value1, value2);
     }
@@ -72,7 +72,7 @@ namespace A {
 
     namespace B {
         function charFunctionB(value1: char, value2: char): char {
-            return value1 > value2 ? value1 : value2;
+            return value1.compareTo(value2) > 0 ? value1 : value2;
         }
     }
 }

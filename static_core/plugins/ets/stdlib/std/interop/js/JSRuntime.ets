@@ -219,7 +219,7 @@ export final class JSRuntime {
     }
 
     public static newJSValueChar(value: char): JSValue {
-        return JSRuntime.newJSValueInt(value);
+        return JSRuntime.newJSValueInt(value.toInt());
     }
 
     public static newJSValueShort(value: short): JSValue {
@@ -341,7 +341,7 @@ export final class JSRuntime {
     }
 
     public static setPropertyChar(object: JSValue, name: String, value: char): void {
-        JSRuntime.setPropertyInt(object, name, value);
+        JSRuntime.setPropertyInt(object, name, value.toInt());
     }
 
     public static setPropertyShort(object: JSValue, name: String, value: short): void {
@@ -512,7 +512,7 @@ export final class JSRuntime {
     }
 
     public static setElementChar(object: JSValue, index: int, value: char): void {
-        JSRuntime.setElementInt(object, index, value);
+        JSRuntime.setElementInt(object, index, value.toInt());
     }
 
     public static setElementShort(object: JSValue, index: int, value: short): void {

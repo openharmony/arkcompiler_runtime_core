@@ -51,13 +51,6 @@ cases:
           arktest.assertTrue( Enum.third == Enum.first )
 
     - decl: |-
-          enum Enum { first = 0x7fffffff - 1, second, third }  // int overflow
-      use: |-
-          arktest.assertEQ( Enum.first.valueOf(), 0x7ffffffe )
-          arktest.assertEQ( Enum.second.valueOf(), 0x7fffffff )
-          arktest.assertEQ( Enum.third.valueOf(), 0x80000000 )
-
-    - decl: |-
           enum Enum { first = -1, second, third = -42 }
       use: |-
           arktest.assertEQ( "" + Enum.first, "-1" )

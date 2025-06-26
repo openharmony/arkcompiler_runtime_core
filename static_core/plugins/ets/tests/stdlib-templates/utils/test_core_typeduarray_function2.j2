@@ -14,11 +14,11 @@
  */
 
 
-const success: number = 0;
-const fail: number = 1;
+const success: int = 0;
+const fail: int = 1;
 
 function main(): int {
-  let failures: number = 0;
+  let failures: int = 0;
 
   failures += check(testSubarrayWithOutParam(), "Try to Array subarray() function");
   failures += check(testSubarrayOneParam(), "Try to Array subarray(1) function");
@@ -62,15 +62,7 @@ function main(): int {
   return success;
 }
 
-function check(result: int, message: String): number {
-  if (result == 0) {
-    return success;
-  }
-  console.log("\nFAILED: " + message);
-  return fail;
-}
-
-function check(result: number, message: String): number {
+function check(result: number, message: String): int {
   if (result == 0) {
     return success;
   }

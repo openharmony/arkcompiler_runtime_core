@@ -16,10 +16,10 @@
 class Operations {
     static sub(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -28,10 +28,10 @@ class Operations {
 class A {
     static funcA(a0: char, a1: char): char {
         let c: Char = new Char(c'0');
-        if (a0 > a1) {
-            c = (a0 - a1).toChar();
+        if (a0.compareTo(a1) > 0) {
+            c = (a0.toInt() - a1.toInt()).toChar();
         } else {
-            c = (a1 - a0).toChar();
+            c = (a1.toInt() - a0.toInt()).toChar();
         }
         return c as char;
     }
@@ -48,7 +48,7 @@ class A {
 class B extends A{
     static funcB(a0: char, a1: char): char {
         let c: Char = new Char(c'0');
-        c = (a0 + a1).toChar();
+        c = (a0.toInt() + a1.toInt()).toChar();
         return c as char;
     }
 }
@@ -59,7 +59,7 @@ class C extends A{
 class D extends A{
     static funcA(a0: char, a1: char): char {
         let c: Char = new Char(c'0');
-        c = (a0 + a1).toChar();
+        c = (a0.toInt() + a1.toInt()).toChar();
         return c as char;
     }
 }
@@ -72,8 +72,8 @@ class E extends A{
 
 class F {
     static increment(a0: char, a1: char): void {
-        F.count = (F.count + a0).toChar();
-        F.count = (F.count + a1).toChar();
+        F.count = (F.count.toInt() + a0.toInt()).toChar();
+        F.count = (F.count.toInt() + a1.toInt()).toChar();
     }
 
     static getCount(): char {
@@ -86,16 +86,16 @@ class F {
 class G {
     public static publicMethod(a0: char, a1: char): char {
         let c: Char = new Char(c'0');
-        c = (a0 + a1).toChar();
+        c = (a0.toInt() + a1.toInt()).toChar();
         return c as char;
     }
 
     private static privateMethod(a0: char, a1: char): char {
         let c: Char = new Char(c'0');
-        if (a0 > a1) {
-            c = (a0 - a1).toChar();
+        if (a0.compareTo(a1) > 0) {
+            c = (a0.toInt() - a1.toInt()).toChar();
         } else {
-            c = (a1 - a0).toChar();
+            c = (a1.toInt() - a0.toInt()).toChar();
         }
         return c as char;
     }

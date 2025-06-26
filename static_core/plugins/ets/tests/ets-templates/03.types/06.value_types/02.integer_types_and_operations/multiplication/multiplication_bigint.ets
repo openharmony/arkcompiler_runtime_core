@@ -19,8 +19,8 @@ desc: check multiplication of two bigints
 ---*/
 
 function main(): void {
-    const a: bigint = {{v.left}}
-    const b: bigint = {{v.right}}
+    let a: bigint = {{v.left}}
+    let b: bigint = {{v.right}}
     arktest.assertEQ(a * b, {{v.result}})
 }
 

@@ -40,8 +40,8 @@ class Car {
 }
 
 function newCarObject() {
-    let var1: char = 0
-    let var2: char = 0
+    let var1: char = Int.toChar(0)
+    let var2: char = Int.toChar(0)
     return new Car("Porsche", "Porsche 911", var1, var2);
 }
 
@@ -50,11 +50,11 @@ interface Iface {
 }
 
 class C1 implements Iface {
-    public prop: char = 0
+    public prop: char = Int.toChar(0)
 }
 
 class C2 implements Iface {
-    public classprop: char = 0
+    public classprop: char = Int.toChar(0)
 
     public get prop(): char {
         return this.classprop

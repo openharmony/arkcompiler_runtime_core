@@ -16,8 +16,6 @@
 import { collections } from "@arkts.collections"
 import { BusinessError } from "@ohos.base";
 
-const TypeErrorCodeId: int = 401;
-
 function main() {
     const suite = new arktest.ArkTestsuite("BitVector API tests");
 

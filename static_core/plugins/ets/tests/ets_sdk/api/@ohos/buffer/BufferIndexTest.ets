@@ -62,7 +62,7 @@ function testIndexerOutOfBounds() {
 function checkOutsideRangeError(buf: buffer.Buffer, index: int) {
     let errMsg = `The value of "length" is out of range. \
 It must be >= 0 and <= ${buf.length}. Received value is: ${index}`;
-    const OutOfBoundsErrorCodeId: number = 10200001;
+    const OutOfBoundsErrorCodeId: int = 10200001;
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
             ((e as BusinessError).message == errMsg) &&

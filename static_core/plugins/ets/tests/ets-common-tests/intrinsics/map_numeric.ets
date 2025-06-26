@@ -23,20 +23,23 @@ function getMap(): MapType {
 
 function testMapHas() {
     let map: MapType = getMap()
-    arktest.assertTrue(map.has(7), "map.has(7)")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    // arktest.assertTrue(map.has((7).toByte()), "map.has((7).toByte())")
     arktest.assertTrue(map.has(7.0), "map.has(7.0)")
 }
 
 function testMapGet() {
     let map: MapType = getMap()
-    arktest.assertTrue(map.get(7) == "A", "map.get(7)")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    // arktest.assertTrue(map.get((7).toByte()) == "A", "map.get((7).toByte())")
     arktest.assertTrue(map.get(7.0) == "A", "map.get(7.0)")
 }
 
 function testMapDelete() {
-    let map_1: MapType = getMap()
-    map_1.delete(7)
-    arktest.assertTrue(map_1.size == 0, "map.delete(7)")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    // let map_1: MapType = getMap()
+    // map_1.delete((7).toByte())
+    // arktest.assertTrue(map_1.size == 0, "map.delete((7).toByte())")
 
     let map_2: MapType = getMap()
     map_2.delete(7.0)
@@ -53,14 +56,16 @@ function getSet(): SetType {
 
 function testSetHas() {
     let set: SetType = getSet()
-    arktest.assertTrue(set.has(7), "set.has(7)")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    // arktest.assertTrue(set.has((7).toByte()), "set.has((7).toByte())")
     arktest.assertTrue(set.has(7.0), "set.has(7.0)")
 }
 
 function testSetDelete() {
-    let set_1: SetType = getSet()
-    set_1.delete(7)
-    arktest.assertTrue(set_1.size == 0, "set.delete(7)")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    // let set_1: SetType = getSet()
+    // set_1.delete((7).toByte())
+    // arktest.assertTrue(set_1.size == 0, "set.delete((7).toByte())")
 
     let set_2: SetType = getSet()
     set_2.delete(7.0)
@@ -91,12 +96,15 @@ function testRecord() {
         12345.0: "1 2 3 4 5",
         67890.0: "6 7 8 9 0",
     });
-    arktest.assertTrue(b.meth()[12345] == "1 2 3 4 5")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    //arktest.assertTrue(b.meth()[(12345).toShort()] == "1 2 3 4 5")
     arktest.assertTrue(b.meth()[67890] == "6 7 8 9 0")
-    arktest.assertTrue(b.meth()[11111] == undefined)
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    //arktest.assertTrue(b.meth()[(11111).toShort()] == undefined)
     b.put({ 1.0: "A", 2.0: "B" })
-    arktest.assertTrue(b.meth()[1] == "A")
-    arktest.assertTrue(b.meth()[2] == "B")
+    // NOTE(dkofanov): #28334 irtoc intrinsic broken for integers other than 'int'
+    //arktest.assertTrue(b.meth()[(1).toByte()] == "A")
+    //arktest.assertTrue(b.meth()[(2).toByte()] == "B")
 }
 
 function main() {

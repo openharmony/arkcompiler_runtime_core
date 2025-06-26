@@ -118,7 +118,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns result of the comparison
      */
     public override compareTo(other: Char): int {
-        return Char.toInt(this.value) - Char.toInt(other);
+        return this.toInt() - other.toInt();
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
@@ -292,8 +292,8 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns if the char is in Basic Multilingual Plane.
      */
     public static isInBasicMultilingualPlane(value: char): boolean {
-        if (value < Char.BMP_BORDER) {
-            return (value < Char.HIGH_SURROGATE_MIN) || (value > Char.LOW_SURROGATE_MAX);
+        if (value.toInt() < Char.BMP_BORDER) {
+            return (value.compareTo(Char.HIGH_SURROGATE_MIN) < 0) || (value.compareTo(Char.LOW_SURROGATE_MAX) > 0);
         }
         return false
     }
@@ -357,8 +357,8 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a high surrogate, false otherwise.
      */
     public static isHighSurrogate(value: char): boolean {
-        return Char.HIGH_SURROGATE_MIN <= value
-            && Char.HIGH_SURROGATE_MAX >= value;
+        return (Char.HIGH_SURROGATE_MIN.compareTo(value) <= 0)
+            && (Char.HIGH_SURROGATE_MAX.compareTo(value) >= 0);
     }
 
     /**
@@ -369,8 +369,8 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a low surrogate, false otherwise.
      */
     public static isLowSurrogate(value: char): boolean {
-        return Char.LOW_SURROGATE_MIN <= value
-            && Char.LOW_SURROGATE_MAX >= value;
+        return (Char.LOW_SURROGATE_MIN.compareTo(value) <= 0)
+            && (Char.LOW_SURROGATE_MAX.compareTo(value) >= 0);
     }
 
     /**
@@ -382,7 +382,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns the high surrogate, possibly malformed.
      */
     public static getHighSurrogate(value: UTF_16_CodePoint): char {
-        return Int.toChar(((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN)
+        return (((value - 0x10000) >>> 10) + Char.HIGH_SURROGATE_MIN.toInt()).toChar()
     }
 
     /**
@@ -394,7 +394,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns the low surrogate, possibly malformed.
      */
     public static getLowSurrogate(value: UTF_16_CodePoint): char {
-        return Int.toChar(((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN)
+        return (((value - 0x10000) & 0x3FF) + Char.LOW_SURROGATE_MIN.toInt()).toChar();
     }
 
     /**
@@ -423,7 +423,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns codepoint decoded from UTF-16.
      */
     public static charsToCodePoint(highValue: char, lowValue: char): UTF_16_CodePoint {
-        return ((highValue - Char.HIGH_SURROGATE_MIN) * 0x400) + (lowValue - Char.LOW_SURROGATE_MIN) + 0x10000;
+        return ((highValue.toInt() - Char.HIGH_SURROGATE_MIN.toInt()) * 0x400) + (lowValue.toInt() - Char.LOW_SURROGATE_MIN.toInt()) + 0x10000;
     }
 
     /**
@@ -434,7 +434,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a binary digit.
      */
     public static isBinDigit(value: char): boolean {
-        let diff: int = value - c'0';
+        let diff: int = value.toInt() - Char.toInt(c'0');
         return (0 == diff) || (diff == 1);
     }
 
@@ -455,7 +455,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a decimal digit.
      */
     public static isDecDigit(value: char): boolean {
-        let diff: int = value - c'0';
+        let diff: int = value.toInt() - Char.toInt(c'0');
         return (0 <= diff) && (diff <= 9);
     }
 
@@ -476,9 +476,9 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a hexadecimal digit.
      */
     public static isHexDigit(value: char): boolean {
-        let isDigit = (c'0' <= value) && (value <= c'9')
-        let isChar = ((c'a' <= value) && (value <= c'f'))
-                  || ((c'A' <= value) && (value <= c'F'))
+        let isDigit = (0 <= value.compareTo(c'0')) && (value.compareTo(c'9') <= 0)
+        let isChar = ((0 <= value.compareTo(c'a')) && (value.compareTo(c'f') <= 0))
+                  || ((0 <= value.compareTo(c'A')) && (value.compareTo(c'F') <= 0))
         return isDigit || isChar
     }
 
@@ -499,8 +499,8 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns true if the char is a letter.
      */
     public static isLetter(value: char): boolean {
-        return (c'A' <= value) && (value <= c'Z')
-            || (c'a' <= value) && (value <= c'z');
+        return (0 <= value.compareTo(c'A')) && (value.compareTo(c'Z') <= 0)
+            || (0 <= value.compareTo(c'a')) && (value.compareTo(c'z') <= 0);
     }
 
     /**

@@ -85,4 +85,4 @@ cases:
         # -max
       - { type: float, val: -3.4028234663852886e38f, val2: -3.4028234663852886e38f }
         # -min
-      - { type: float, val: -1.401298464324817e-45f, val2: -1.401298464324817e-45f }
+      - { type: float, val: -Float.MIN_VALUE, val2: -Float.MIN_VALUE }

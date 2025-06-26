@@ -333,36 +333,36 @@
       {
         test1:
           {
-            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            arr: "[c'\\x00', c'\\x01', c'\\x02', c'\\x03', c'\\x04', c'\\x05', c'\\x06', c'\\x07', c'\\x08', c'\\x09', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x0F']",
             fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return true}',
           },
           test2:
           {
-            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            arr: "[c'\\x00', c'\\x01', c'\\x02', c'\\x03', c'\\x04', c'\\x05', c'\\x06', c'\\x07', c'\\x08', c'\\x09', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x0F']",
             fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return false}',
           },
           test3:
           {
-            arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value > 1)}',
+            arr: "[c'\\x00', c'\\x01', c'\\x01', c'\\x01', c'\\x04', c'\\x05', c'\\x01', c'\\x07', c'\\x08', c'\\x01', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x01']",
+            fn: "(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value.compareTo(c'\\x01') > 0)}",
           },
           test4:
           {
-            arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+            arr: "[c'\\x00', c'\\x01', c'\\x02', c'\\x03', c'\\x04', c'\\x05', c'\\x06', c'\\x07', c'\\x08', c'\\x09', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x0F']",
             fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value >1)}',
+            fn: "(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value.compareTo(c'\\x01') > 0)}",
           },
       },
     method_expected_data:
       {
-        test1: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
+        test1: "[c'\\x00', c'\\x01', c'\\x02', c'\\x03', c'\\x04', c'\\x05', c'\\x06', c'\\x07', c'\\x08', c'\\x09', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x0F']",
         test2: "[]",
-        test3: "[4, 5, 7, 8, 10, 11, 12, 13, 14]",
-        test4: "[0, 2, 4, 6, 8, 10, 12, 14]",
+        test3: "[c'\\x04', c'\\x05', c'\\x07', c'\\x08', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E']",
+        test4: "[c'\\x00', c'\\x02', c'\\x04', c'\\x06', c'\\x08', c'\\x0A', c'\\x0C', c'\\x0E']",
         test5: "[]"
       },
   }

@@ -87,7 +87,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
             # Note(ivan-tyulyandin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
             add_custom_target(regenerate_and_check_stdlib
                 COMMAND ${CMAKE_COMMAND} -DETS_PLUGIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/GenerateStdLib.cmake)
-            add_dependencies(etsstdlib regenerate_and_check_stdlib)
+            add_dependencies(ets_tests regenerate_and_check_stdlib)
         endif()
     endif()
 

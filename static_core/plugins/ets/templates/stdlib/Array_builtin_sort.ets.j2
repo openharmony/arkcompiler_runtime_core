@@ -117,7 +117,9 @@ export function arr_sort_stable(arr: FixedArray<{{TT}}>, startIndex: int, endInd
 {%- if T == 'T' and arg == '' %}
 {%- continue %}
 {%- elif T == 'boolean' and arg == '' %}
-{%- set prec = '((%s) ? 1 : 0) < ((%s) ? 1 : 0)' %}
+{%- set prec = '(((%s) ? 1 : 0) < ((%s) ? 1 : 0))' %}
+{%- elif T == 'char' and arg == '' %}
+{%- set prec = '((%s.compareTo(%s)) < 0)' %}
 {%- endif %}
 
 {%- if T not in ['boolean', 'char'] and arg == '' %}
@@ -377,7 +379,7 @@ function quickSortImpl{{quickUpTo}}{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: 
 
         {%- if initIndex != '' %}
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !{{prec % ('arr[startIndex - 1]', 'arr[startIndex]')}}) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array

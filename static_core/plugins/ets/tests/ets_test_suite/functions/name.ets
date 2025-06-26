@@ -44,7 +44,8 @@ function main() {
     let x = () => {}
     let a: A = new A()
     let b: B = new C()
-    let def = true ? () => { } : null
+    let f = true;
+    let def = f ? () => { } : null
 
     arktest.assertEQ(foo.name, 'foo')
     arktest.assertEQ(x.name, 'x')
@@ -52,7 +53,8 @@ function main() {
     arktest.assertEQ(a.lambda.name, 'lambda')
     arktest.assertEQ(A.staticBar.name, 'staticBar')
     arktest.assertEQ(b.buzz.name, 'buzz')
-    arktest.assertEQ(def?.name, 'def')
+    // NOTE(dkofanov): #27259. Decide whether such case need to be supported (TS doesn't support).
+    // arktest.assertEQ(def?.name, 'def')
 
     arktest.assertEQ(returnFunctionName(foo), 'foo')
     arktest.assertEQ(returnFunctionName(x), 'x')
@@ -62,6 +64,7 @@ function main() {
     arktest.assertEQ(returnFunctionName(b.buzz), 'buzz')
     arktest.assertEQ(returnFunctionName(() => 1), '')
     if (def) {
-        arktest.assertEQ(returnFunctionName(def), 'def')
+        // NOTE(dkofanov): #27259. Decide whether such case need to be supported (TS doesn't support).
+        // arktest.assertEQ(returnFunctionName(def), 'def')
     }
 }

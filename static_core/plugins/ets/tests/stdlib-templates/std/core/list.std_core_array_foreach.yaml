@@ -257,24 +257,24 @@
        {
         test1:
           {
-            arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value * 2}',
+            arr: "[c'\\x00', c'\\x01', c'\\x02', c'\\x03', c'\\x04', c'\\x05', c'\\x06', c'\\x07', c'\\x08', c'\\x09', c'\\x0A', c'\\x0B', c'\\x0C', c'\\x0D', c'\\x0E', c'\\x0F']",
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = (value.toInt() * 2).toChar()}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value + index.toInt()}',
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = (value.toInt() + index.toInt()).toChar()}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = value + index.toInt()}',
+            fn: '(value:char,index:number,self:FixedArray<char>): void =>  {self[index.toInt()] = (value.toInt() + index.toInt()).toChar(0}',
           },
       },
       method_expected_data:
         {
-        test1: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
-        test2: "[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]",
+        test1: "[c'\\x00', c'\\x02', c'\\x04', c'\\x06', c'\\x08', c'\\x0A', c'\\x0C', c'\\x0E', c'\\x10', c'\\x12', c'\\x14', c'\\x16', c'\\x18', c'\\x1A', c'\\x1C', c'\\x1E']",
+        test2: "[c'\\x00', c'\\x02', c'\\x04', c'\\x06', c'\\x08', c'\\x0A', c'\\x0C', c'\\x0E', c'\\x10', c'\\x12', c'\\x14', c'\\x16', c'\\x18', c'\\x1A', c'\\x1C', c'\\x1E']",
         test3: "[]"
       },
   }
