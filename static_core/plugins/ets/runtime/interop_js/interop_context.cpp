@@ -566,6 +566,19 @@ void InteropCtx::ThrowJSValue(napi_env env, napi_value val)
 #endif
 }
 
+napi_value InteropCtx::CreateJSTypeError(napi_env env, const std::string &code, const std::string &msg)
+{
+    INTEROP_LOG(INFO) << "CreateJSTypeError: code: " << code << ", msg: " << msg;
+    ASSERT(!NapiIsExceptionPending(env));
+    napi_value errorCode;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, code.data(), code.size(), &errorCode));
+    napi_value errorMessage;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, msg.data(), msg.size(), &errorMessage));
+    napi_value error;
+    NAPI_CHECK_FATAL(napi_create_type_error(env, errorCode, errorMessage, &error));
+    return error;
+}
+
 void InteropCtx::InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker)
 {
     os::memory::LockHolder lock(InteropCtx::SharedEtsVmState::mutex_);

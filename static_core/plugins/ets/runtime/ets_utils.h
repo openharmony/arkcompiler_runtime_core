@@ -63,6 +63,10 @@ private:
     ManglingUtils() = default;
     ~ManglingUtils() = default;
 };
+
+PANDA_PUBLIC_API bool GetExportedClassDescriptorsFromModule(EtsClass *etsGlobalClass,
+                                                            std::vector<std::string> &outDescriptors);
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H

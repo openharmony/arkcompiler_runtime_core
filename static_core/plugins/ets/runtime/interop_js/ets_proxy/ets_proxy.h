@@ -26,6 +26,7 @@ namespace ark::ets::interop::js::ets_proxy {
 PANDA_PUBLIC_API napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
 PANDA_PUBLIC_API napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
 PANDA_PUBLIC_API napi_value GetETSInstance(napi_env env, std::string_view classDescriptor);
+PANDA_PUBLIC_API napi_value GetETSModule(napi_env env, const std::string &moduleName);
 
 }  // namespace ark::ets::interop::js::ets_proxy
 
