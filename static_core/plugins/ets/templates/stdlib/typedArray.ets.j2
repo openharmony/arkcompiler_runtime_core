@@ -1599,11 +1599,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns an {{N}}Array with replaced value on index
      */
-    public with(index: int, value: {{T}}): {{N}}Array {
-        let res = new {{N}}Array(this)
-        res.set(index, value)
-        return res
-    }
+    public final native with(index: int, value: {{T}}): {{N}}Array
 
     /// === with element lambda functions ===
     {#- NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}

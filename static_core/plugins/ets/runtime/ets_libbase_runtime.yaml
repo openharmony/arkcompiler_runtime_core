@@ -3428,6 +3428,153 @@ intrinsics:
       args: [i64, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayLastIndexOfLong
 
+################################
+# escompat.TypedArrays.with #
+################################
+
+  - name: Int8ArrayWith
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: [i32, i8]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt8ArrayWith
+    llvm_codegen_func: EmitInt8ArrayWith
+
+  - name: Int16ArrayWith
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: [i32, i16]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt16ArrayWith
+    llvm_codegen_func: EmitInt16ArrayWith
+
+  - name: Int32ArrayWith
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt32ArrayWith
+    llvm_codegen_func: EmitInt32ArrayWith
+
+  - name: BigInt64ArrayWith
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigInt64ArrayWith
+    llvm_codegen_func: EmitBigInt64ArrayWith
+
+  - name: Float32ArrayWith
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: [i32, f32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat32ArrayWith
+    llvm_codegen_func: EmitFloat32ArrayWith
+
+  - name: Float64ArrayWith
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: [i32, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat64ArrayWith
+    llvm_codegen_func: EmitFloat64ArrayWith
+
+  - name: UInt8ClampedArrayWith
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ClampedArrayWith
+    llvm_codegen_func: EmitUint8ClampedArrayWith
+
+  - name: UInt8ArrayWith
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ArrayWith
+    llvm_codegen_func: EmitUint8ArrayWith
+
+  - name: UInt16ArrayWith
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint16ArrayWith
+    llvm_codegen_func: EmitUint16ArrayWith
+
+  - name: UInt32ArrayWith
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint32ArrayWith
+    llvm_codegen_func: EmitUint32ArrayWith
+
+  - name: BigUInt64ArrayWith
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: with
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigUint64ArrayWith
+    llvm_codegen_func: EmitBigUint64ArrayWith
+
 ########################
 # escompat.taskpool #
 ########################
