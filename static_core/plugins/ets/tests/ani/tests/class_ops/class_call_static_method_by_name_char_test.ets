@@ -16,10 +16,10 @@
 class Operations {
     static sub(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -29,10 +29,10 @@ namespace na {
 class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -47,10 +47,10 @@ namespace nc {
 class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -62,10 +62,10 @@ namespace nd {
 class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1)) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -74,7 +74,7 @@ class A {
 class B extends A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        c = (c0 + c1).toChar();
+        c = (c0.toInt() + c1.toInt()).toChar();
         return c as char;
     }
 }
@@ -83,10 +83,10 @@ class B extends A {
 class A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }
@@ -103,7 +103,7 @@ class A {
 class B extends A {
     static funcB(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        c = (c0 + c1).toChar();
+        c = (c0.toInt() + c1.toInt()).toChar();
         return c as char;
     }
 }
@@ -114,7 +114,7 @@ class C extends A {
 class D extends A {
     static funcA(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        c = (c0 + c1).toChar();
+        c = (c0.toInt() + c1.toInt()).toChar();
         return c as char;
     }
 }
@@ -127,8 +127,8 @@ class E extends A {
 
 class F {
     static increment(c0: char, c1: char): void {
-        F.count = (F.count + c0).toChar();
-        F.count = (F.count + c1).toChar();
+        F.count = (F.count.toInt() + c0.toInt()).toChar();
+        F.count = (F.count.toInt() + c1.toInt()).toChar();
     }
 
     static getCount(): char {
@@ -141,16 +141,16 @@ class F {
 class G {
     public static publicMethod(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        c = (c0 + c1).toChar();
+        c = (c0.toInt() + c1.toInt()).toChar();
         return c as char;
     }
 
     private static privateMethod(c0: char, c1: char): char {
         let c: Char = new Char(c'0');
-        if (c0 > c1) {
-            c = (c0 - c1).toChar();
+        if (c0.compareTo(c1) > 0) {
+            c = (c0.toInt() - c1.toInt()).toChar();
         } else {
-            c = (c1 - c0).toChar();
+            c = (c1.toInt() - c0.toInt()).toChar();
         }
         return c as char;
     }

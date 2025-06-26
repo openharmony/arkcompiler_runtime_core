@@ -38,9 +38,9 @@ function initializeList(list: List<double>, sourceArray: Array<double>) {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber20: double | int = 20;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber20: int = 20;
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     static readonly arrayForNumber1 = Array.from<double>(TestData.forNumber1);
 }

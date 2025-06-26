@@ -68,3 +68,11 @@ cases:
     logic: |-
       let v: Enum1 = Enum1.first
       let q: Enum2 = v as Enum2
+  
+  - desc: |-
+      Checking int overflow
+    decl_variants:
+      - |-
+        enum Enum { first = 0x7fffffff - 1, second, third }
+      - |-
+        const enum Enum { first = 0x7fffffff - 1, second, third }

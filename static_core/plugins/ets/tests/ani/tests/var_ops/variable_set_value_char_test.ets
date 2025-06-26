@@ -19,9 +19,9 @@ namespace anyns {
     export let sum: char;
     class A {
         static val1: char = c'C';
-        static val2: char = 2;
+        static val2: char = Int.toChar(2);
         public static add(): char {
-            sum = (A.val1 + A.val2).toChar();
+            sum = (A.val1.toInt() + A.val2.toInt()).toChar();
             return sum;
         }
     }

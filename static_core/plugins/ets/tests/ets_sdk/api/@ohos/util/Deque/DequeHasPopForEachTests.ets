@@ -43,10 +43,10 @@ class Temp {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber6: int = 6;
     static readonly testNumber31: double = 31;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testString1: string = "string";

@@ -24,4 +24,4 @@ function main(): void {
 
   let b: double = 9223372036854775809;
   arktest.assertEQ(~b, -9223372036854775808);
-git}
+}

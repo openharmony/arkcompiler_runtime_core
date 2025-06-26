@@ -14,8 +14,8 @@
  */
 
 
-const success: number = 0;
-const fail: number = 1;
+const success: int = 0;
+const fail: int = 1;
 
 function main(): int {
   let failures: number = 0;
@@ -61,7 +61,7 @@ function main(): int {
   return success;
 }
 
-function check(result: int, message: String): number {
+function check(result: number, message: String): int {
   if (result == 0) {
     return success;
   }
@@ -69,13 +69,6 @@ function check(result: int, message: String): number {
   return fail;
 }
 
-function check(result: number, message: String): number {
-  if (result == 0) {
-    return success;
-  }
-  console.log("\nFAILED: " + message);
-  return fail;
-}
 
 const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
 const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};

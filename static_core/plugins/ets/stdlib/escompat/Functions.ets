@@ -20,24 +20,24 @@ const hexChars: char[];
 
 function fillInCommonURI(): boolean[] {
     const arr = new boolean[128]
-    for (let i = c'a'; i <= c'z'; i++) {
+    for (let i = Char.toInt(c'a'); i <= Char.toInt(c'z'); i++) {
         arr[i] = true
     }
-    for (let i = c'A'; i <= c'Z'; i++) {
+    for (let i = Char.toInt(c'A'); i <= Char.toInt(c'Z'); i++) {
         arr[i] = true
     }
-    for (let i = c'0'; i <= c'9'; i++) {
+    for (let i = Char.toInt(c'0'); i <= Char.toInt(c'9'); i++) {
         arr[i] = true
     }
-    arr[c'-'] = true
-    arr[c'_'] = true
-    arr[c'.'] = true
-    arr[c'!'] = true
-    arr[c'~'] = true
-    arr[c'*'] = true
-    arr[c'\''] = true
-    arr[c'('] = true
-    arr[c')'] = true
+    arr[Char.toInt(c'-')] = true
+    arr[Char.toInt(c'_')] = true
+    arr[Char.toInt(c'.')] = true
+    arr[Char.toInt(c'!')] = true
+    arr[Char.toInt(c'~')] = true
+    arr[Char.toInt(c'*')] = true
+    arr[Char.toInt(c'\'')] = true
+    arr[Char.toInt(c'(')] = true
+    arr[Char.toInt(c')')] = true
     return arr
 }
 
@@ -45,17 +45,17 @@ function fillInCommonURI(): boolean[] {
 const uriArray: boolean[];
 
 function fillInURISpecial(arr: boolean[]) {
-    arr[c';'] = true
-    arr[c'/'] = true
-    arr[c'?'] = true
-    arr[c':'] = true
-    arr[c'@'] = true
-    arr[c'&'] = true
-    arr[c'='] = true
-    arr[c'+'] = true
-    arr[c'$'] = true
-    arr[c','] = true
-    arr[c'#'] = true
+    arr[Char.toInt(c';')] = true
+    arr[Char.toInt(c'/')] = true
+    arr[Char.toInt(c'?')] = true
+    arr[Char.toInt(c':')] = true
+    arr[Char.toInt(c'@')] = true
+    arr[Char.toInt(c'&')] = true
+    arr[Char.toInt(c'=')] = true
+    arr[Char.toInt(c'+')] = true
+    arr[Char.toInt(c'$')] = true
+    arr[Char.toInt(c',')] = true
+    arr[Char.toInt(c'#')] = true
 }
 
 function createAndFillInURISpecial(): boolean[] {
@@ -150,7 +150,7 @@ function encodeURIImpl(uri: string, ok: boolean[]): string {
         if (Char.isLowSurrogate(c) || Char.isHighSurrogate(c)) {
             throw new URIError("malformed URI sequence")
         }
-        if (c < 128 && ok[c]) {
+        if (Char.toInt(c) < 128 && ok[Char.toInt(c)]) {
             ret.append(c)
         } else {
             encodeCharAsHexUtf8(ret, d)
@@ -234,7 +234,7 @@ export function escape(str: string): string {
     for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
         const c = d.toInt() & 0xffff
-        if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
+        if (c >= Char.toInt(c'a') && c <= Char.toInt(c'z') || c >= Char.toInt(c'A') && c <= Char.toInt(c'Z') || c >= Char.toInt(c'0') && c <= Char.toInt(c'9') || c >= 42 && c <= 47 && c != 44 || c == Char.toInt(c'_') || c == Char.toInt(c'@')) {
             ret.append(c.toChar())
         } else {
             encodeCharAsHex(ret, c)
@@ -244,14 +244,14 @@ export function escape(str: string): string {
 }
 
 function unhex(c: char): int {
-    if (c >= c'0' && c <= c'9') {
-        return c - c'0'
+    if ((c.compareTo(c'0') >= 0) && (c.compareTo(c'9') <= 0)) {
+        return c.compareTo(c'0')
     }
-    if (c >= c'A' && c <= c'F') {
-        return c - c'A' + 10
+    if ((c.compareTo(c'A') >= 0) && (c.compareTo(c'F') <= 0)) {
+        return c.compareTo(c'A') + 10
     }
-    if (c >= c'a' && c <= c'f') {
-        return c - c'a' + 10
+    if ((c.compareTo(c'a') >= 0) && (c.compareTo(c'f') <= 0)) {
+        return c.compareTo(c'a') + 10
     }
     throw new Error("invalid codepoint")
 }
@@ -282,7 +282,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         let chr0 = encodedURIHexAt(str, i);
         let chrsCnt: int
         if ((chr0 & 0x80) == 0) {
-            push(str, i, ret, chr0.toChar())
+            push(str, i, ret, chr0)
             i += 2
             continue
         } else if ((chr0 & 0xe0) == 0xc0) {
@@ -308,7 +308,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         i += chrsCnt * 3 - 1
 
         if (chr0 >= 0 && chr0 <= 0xd7ff || chr0 >= 0xe000 && chr0 <= 0xffff) {
-            push(str, i, ret, chr0.toChar())
+            push(str, i, ret, chr0)
         } else {
             ret.append(Char.getHighSurrogate(chr0))
             ret.append(Char.getLowSurrogate(chr0))

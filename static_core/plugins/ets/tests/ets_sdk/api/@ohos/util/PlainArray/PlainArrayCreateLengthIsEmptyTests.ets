@@ -45,13 +45,13 @@ class Temp {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber1w: double | int = 10000;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber4: int = 4;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber6: int = 6;
+    static readonly testNumber1w: int = 10000;
     static readonly testString1: string = "squirrel";
     static readonly testObject1: Temp = { age: 10, name: "li" };
     static readonly forNumber1: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];

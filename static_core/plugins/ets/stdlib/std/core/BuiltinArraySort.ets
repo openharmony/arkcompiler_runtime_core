@@ -511,7 +511,7 @@ function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int,
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+            while ((((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0))) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -521,14 +521,14 @@ function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int,
     }
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i]
-        if (((tmp) ? 1 : 0) < ((arr[startIndex]) ? 1 : 0)) {
+        if ((((tmp) ? 1 : 0) < ((arr[startIndex]) ? 1 : 0))) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+            while ((((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0))) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -892,7 +892,7 @@ function quickSortImpl40(arr: FixedArray<byte>, startIndex: int, endIndex: int, 
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -1443,7 +1443,7 @@ function quickSortImpl40(arr: FixedArray<short>, startIndex: int, endIndex: int,
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -1978,7 +1978,7 @@ function quickSortImpl40(arr: FixedArray<int>, startIndex: int, endIndex: int, m
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -2513,7 +2513,7 @@ function quickSortImpl40(arr: FixedArray<long>, startIndex: int, endIndex: int, 
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -3048,7 +3048,7 @@ function quickSortImpl40(arr: FixedArray<float>, startIndex: int, endIndex: int,
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -3583,7 +3583,7 @@ function quickSortImpl40(arr: FixedArray<double>, startIndex: int, endIndex: int
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
@@ -3897,7 +3897,7 @@ function insertionSort(arr: FixedArray<char>, startIndex: int, endIndex: int, in
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((tmp < arr[pos - 1])) {
+            while (((tmp.compareTo(arr[pos - 1])) < 0)) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3907,14 +3907,14 @@ function insertionSort(arr: FixedArray<char>, startIndex: int, endIndex: int, in
     }
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i]
-        if ((tmp < arr[startIndex])) {
+        if (((tmp.compareTo(arr[startIndex])) < 0)) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((tmp < arr[pos - 1])) {
+            while (((tmp.compareTo(arr[pos - 1])) < 0)) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3926,7 +3926,7 @@ function heapSortUp(arr: FixedArray<char>, idxFromStart: int, startIndex: int, h
     const tmp = arr[startIndex + idxFromStart]
     while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
-        if (!(arr[startIndex + p] < tmp)) {
+        if (!((arr[startIndex + p].compareTo(tmp)) < 0)) {
             break
         }
         arr[startIndex + idxFromStart] = arr[startIndex + p]
@@ -3943,7 +3943,7 @@ function heapSortDown(arr: FixedArray<char>, idxFromStart: int, startIndex: int,
     const tmp = arr[arrIndex]
     // Walk heap to bottom and pull max child up on each level
     while (childIndex + 1 < endIndex) {
-        if ((arr[childIndex] < arr[childIndex + 1])) {
+        if (((arr[childIndex].compareTo(arr[childIndex + 1])) < 0)) {
             childIndex++
         }
         arr[arrIndex] = arr[childIndex]
@@ -3975,18 +3975,18 @@ function heapSort(arr: FixedArray<char>, startIndex: int, endIndex: int): void {
 // Put median of three array elements to arr[index1]
 function median3(arr: FixedArray<char>, index1: int, index2: int, index3: int): void {
     let swap_idx = index2
-    if ((arr[index1] < arr[index2])) {
-        if ((arr[index3] < arr[index1])) {
+    if (((arr[index1].compareTo(arr[index2])) < 0)) {
+        if (((arr[index3].compareTo(arr[index1])) < 0)) {
             return
         }
-        if ((arr[index3] < arr[index2])) {
+        if (((arr[index3].compareTo(arr[index2])) < 0)) {
             swap_idx = index3
         }
     } else {
-        if (!(arr[index3] < arr[index1])) {
+        if (!((arr[index3].compareTo(arr[index1])) < 0)) {
             return
         }
-        if ((arr[index2] < arr[index3])) {
+        if (((arr[index2].compareTo(arr[index3])) < 0)) {
             swap_idx = index3
         }
     }
@@ -4000,25 +4000,25 @@ function quickSortSplit(arr: FixedArray<char>, startIndex: int, endIndex: int): 
     let i = startIndex + 1
     let j = endIndex - 1
     // No bounds check because pivot is median of three elements
-    while ((arr[i] < pivot)) {
+    while (((arr[i].compareTo(pivot)) < 0)) {
         i++
     }
     if (i == startIndex + 1) {
-        while (i < j && !(arr[j] < pivot)) {
+        while (i < j && !((arr[j].compareTo(pivot)) < 0)) {
             j--
         }
     } else {
-        while (!(arr[j] < pivot)) {
+        while (!((arr[j].compareTo(pivot)) < 0)) {
             j--
         }
     }
     while (i < j) {
-        // Here !(arr[i] < pivot) and (arr[j] < pivot) holds
+        // Here !((arr[i].compareTo(pivot)) < 0) and ((arr[j].compareTo(pivot)) < 0) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        while ((arr[++i] < pivot)) {}
-        while (!(arr[--j] < pivot)) {}
+        while (((arr[++i].compareTo(pivot)) < 0)) {}
+        while (!((arr[--j].compareTo(pivot)) < 0)) {}
     }
     let pivotIndex = i - 1
     arr[startIndex] = arr[pivotIndex]
@@ -4034,25 +4034,25 @@ function quickSortSplitLeft(arr: FixedArray<char>, startIndex: int, endIndex: in
     let i = startIndex + 1
     let j = endIndex - 1
     // No bounds check because pivot is median of three elements
-    while ((pivot < arr[j])) {
+    while (((pivot.compareTo(arr[j])) < 0)) {
         j--
     }
     if (j + 1 == endIndex) {
-        while (i < j && !(pivot < arr[i])) {
+        while (i < j && !((pivot.compareTo(arr[i])) < 0)) {
             i++
         }
     } else {
-        while (!(pivot < arr[i])) {
+        while (!((pivot.compareTo(arr[i])) < 0)) {
             i++
         }
     }
     while (i < j) {
-        // Here (pivot < arr[i]) and !(pivot < arr[j]) holds
+        // Here ((pivot.compareTo(arr[i])) < 0) and !((pivot.compareTo(arr[j])) < 0) holds
         let tmp = arr[i]
         arr[i] = arr[j]
         arr[j] = tmp
-        while (!(pivot < arr[++i])) {}
-        while ((pivot < arr[--j])) {}
+        while (!((pivot.compareTo(arr[++i])) < 0)) {}
+        while (((pivot.compareTo(arr[--j])) < 0)) {}
     }
     arr[startIndex] = arr[j]
     arr[j] = pivot
@@ -4067,7 +4067,7 @@ function quickSortImpl40(arr: FixedArray<char>, startIndex: int, endIndex: int, 
             return
         }
         // Here we assume that current interval is not the most left in the sorted range
-        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+        if ((startIndex != initIndex) && !((arr[startIndex - 1].compareTo(arr[startIndex])) < 0)) {
             // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
             // after that only the right part needs to be sorted
             // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array

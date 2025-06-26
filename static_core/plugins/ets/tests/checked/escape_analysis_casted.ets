@@ -82,7 +82,7 @@ function main_char(): int {
 class B {
     fld: Char
     constructor(p: int) {
-        this.fld = new Char(p.toByte());
+        this.fld = p.toByte().toChar();
         console.log("a side-effect to break LSE")
     }
 }

@@ -19,8 +19,8 @@ desc: check multiplication of two bytes
 ---*/
 
 function main(): void {
-    const a: byte = {{v.left}}
-    const b: byte = {{v.right}}
+    let a: byte = {{v.left}}
+    let b: byte = {{v.right}}
     arktest.assertEQ(a * b, {{v.result}})
 }
 

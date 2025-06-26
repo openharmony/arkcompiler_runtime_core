@@ -19,8 +19,8 @@ desc: check multiplication of two short integers
 ---*/
 
 function main(): void {
-    const a: short = {{v.left}}
-    const b: short = {{v.right}}
+    let a: short = {{v.left}}
+    let b: short = {{v.right}}
     arktest.assertEQ(a * b, {{v.result}})
 }
 

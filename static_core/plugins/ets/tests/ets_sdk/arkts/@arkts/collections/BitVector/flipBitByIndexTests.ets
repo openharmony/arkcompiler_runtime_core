@@ -16,8 +16,7 @@
 import { collections } from "@arkts.collections"
 import { BusinessError } from "@ohos.base";
 
-const OutOfBoundsErrorCodeId: number = 10200001;
-const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
     const suite = new arktest.ArkTestsuite("BitVector flipBitByIndex API tests");

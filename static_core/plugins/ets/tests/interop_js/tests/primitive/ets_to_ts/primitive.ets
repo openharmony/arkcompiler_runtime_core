@@ -91,7 +91,7 @@ function getCharPrimitive(): char {
 }
 
 function getCharPrimitiveNumber(): char {
-    return 49
+    return Int.toChar(49)
 }
 
 function getCharBoxed(): Char {
@@ -99,7 +99,7 @@ function getCharBoxed(): Char {
 }
 
 function getCharBoxedNumber(): Char {
-    return new Char(49 as char)
+    return new Char(Int.toChar(49))
 }
 
 

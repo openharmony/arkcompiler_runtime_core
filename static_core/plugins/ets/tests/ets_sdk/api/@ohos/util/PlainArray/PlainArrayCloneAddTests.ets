@@ -48,14 +48,14 @@ class Tmp {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber4: double | int = 4;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumberMax: double | int = 2147483647;
-    static readonly testNumberMin: double | int = -2147483648;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber4: int = 4;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber6: int = 6;
+    static readonly testNumberMax: int = 2147483647;
+    static readonly testNumberMin: int = -2147483648;
     static readonly testString1: string = "squirrel";
     static readonly testString2: string = "1:1,2:squirrel,3:false,4:[object Object],5:null,6:undefined";
     static readonly testString3: string = "1:1,2:1";

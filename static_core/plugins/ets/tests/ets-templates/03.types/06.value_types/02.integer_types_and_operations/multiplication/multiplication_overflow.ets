@@ -19,8 +19,8 @@ desc: check addition of two bytes
 ---*/
 
 function main(): void {
-    const a: {{v.type}} = {{v.left}}
-    const b: {{v.type}} = {{v.right}}
+    let a: {{v.type}} = {{v.left}}
+    let b: {{v.type}} = {{v.right}}
     let res: {{v.type}} = (a * b).to{{v.type}}()
     arktest.assertEQ(res, {{v.result}})
 }

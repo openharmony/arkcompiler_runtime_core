@@ -77,4 +77,4 @@ cases:
     # -max
   - { src_type: float, src_val: -3.4028234663852886e38f, dst_type: double, dst_val: -3.4028234663852886e38 }
     # -min
-  - { src_type: float, src_val: -1.401298464324817e-45f, dst_type: double, dst_val: -1.401298464324817e-45 }
+  - { src_type: float, src_val: -Float.MIN_VALUE, dst_type: double, dst_val: -1.401298464324817e-45 }

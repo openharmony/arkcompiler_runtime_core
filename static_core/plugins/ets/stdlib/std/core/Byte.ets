@@ -285,7 +285,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns result of the comparison
      */
     public override compareTo(other: Byte): int {
-        return (this.value - other.unboxed()) as int;
+        return this.toInt() - other.toInt();
     }
 
     /**
@@ -311,7 +311,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
             if (negative) {
                 remainder = -remainder;
             }
-            data[curPlace] = (remainder + c'0').toChar();
+            data[curPlace] = (remainder + c'0'.toInt()).toChar();
             val /= 10;
             curPlace -= 1;
         }
