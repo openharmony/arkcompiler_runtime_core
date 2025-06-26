@@ -106,18 +106,6 @@ static ani_array_ref ToAniArray(ani_env *env, std::vector<ani_string> strings)
     return array;
 }
 
-ani_string DefaultLocaleNative(ani_env *env, [[maybe_unused]] ani_class klass)
-{
-    auto defaultLocale = icu::Locale::getDefault();
-    auto status = UErrorCode::U_ZERO_ERROR;
-    auto tag = defaultLocale.toLanguageTag<std::string>(status);
-    if (UNLIKELY(U_FAILURE(status))) {
-        ThrowRangeError(env, "Error receiving default locale language tag: ", u_errorName(status));
-        return nullptr;
-    }
-    return StdStrToAni(env, tag);
-}
-
 ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref aniList, ani_string aniLocale,
                          ani_string aniStyle, ani_string aniType)
 {
@@ -178,8 +166,6 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
 ani_status RegisterIntlListFormat(ani_env *env)
 {
     std::array methods = {
-        ani_native_function {"defaultLocaleNative", ":Lstd/core/String;",
-                             reinterpret_cast<void *>(DefaultLocaleNative)},
         ani_native_function {"formatToPartsNative",
                              "[Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/Object;",
                              reinterpret_cast<void *>(FormatToParts)}};

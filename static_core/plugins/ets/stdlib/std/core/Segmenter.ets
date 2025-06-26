@@ -213,7 +213,7 @@ export class Segmenter {
         const picked = {localeMatcher: options?.localeMatcher} 
             as PickLocaleMatchSegmenterOptions;
         const supported = Segmenter.supportedLocalesOf(locales ?? "", picked);
-        this._locale = supported[0] ?? LocaleMatch.bestFitLocale("");
+        this._locale = supported.length > 0 ? supported[0] : Locale.defaultTag();
         this._granularity = options?.granularity ?? 'grapheme';
     }
 
@@ -291,11 +291,9 @@ export class Segmenter {
     {
         const matchingStrategy = options?.localeMatcher ?? 'best fit';
         try {
-            return [
-                matchingStrategy == 'lookup'
-                ? intlLookUpLocale(locales) 
-                : intlBestFitLocale(locales)
-            ]
+            return matchingStrategy == 'lookup'
+                ? intlLookUpLocales(locales) 
+                : intlBestFitLocales(locales)
         }
         catch(e) {
             if (e instanceof Error) throw e

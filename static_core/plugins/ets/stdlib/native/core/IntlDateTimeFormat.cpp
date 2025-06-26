@@ -321,7 +321,7 @@ static ani_status ConfigureLocaleOptions(ani_env *env, icu::Locale *locale, ani_
 
     UErrorCode icuStatus = U_ZERO_ERROR;
     if (hourCycleUndefined == ANI_TRUE) {
-        if (*locale != icu::Locale::getChinese()) {
+        if (strcmp(locale->getLanguage(), icu::Locale::getChinese().getLanguage()) != 0) {
             return ANI_OK;
         }
 

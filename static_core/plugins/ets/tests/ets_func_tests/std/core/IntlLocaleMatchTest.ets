@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,39 +13,52 @@
  * limitations under the License.
  */
 
-const en_US: string = intlBestFitLocale("en-US");
-const zh_CN: string = intlBestFitLocale("zh-CN");
-const ru_RU = intlBestFitLocale("ru-RU");
+const en_US: string = "en-US"
+const zh_CN: string = "zh-CN"
+const ru_RU = "ru-RU"
 const er_ER = "er-OR" // Fake locale
-const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US];
+const badLocale = "test"
+const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
 
 function main() throws {
-    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
-    // testBestFitLocaleMatchList()
+    testBestFitLocaleMatchList()
     testLookupLocaleMatchSingle()
     testLookupLocaleMatchList()
     negativeTestLanguageTag()
 }
 
 function testBestFitLocaleMatchList() {
-    const result = intlBestFitLocale(localeList);
-    // First existing locale should be selected
-    assertEQ(result, ru_RU)
+    arktest.assertEQ(intlBestFitLocale(localeList), ru_RU)
+
+    const result = intlBestFitLocales(localeList)
+    arktest.assertEQ(result.length, 3)
+    arktest.assertEQ(result[0], ru_RU)
+    arktest.assertEQ(result[1], zh_CN)
+    arktest.assertEQ(result[2], en_US)
 }
 
 function testLookupLocaleMatchSingle() {
-    const result = intlLookUpLocale(en_US);
-    assertEQ(result, en_US)
+    arktest.assertEQ(intlLookUpLocale(en_US), en_US)
+
+    const result = intlLookUpLocales(en_US)
+    arktest.assertEQ(result.length, 1)
+    arktest.assertEQ(result[0], en_US)
 }
 
 function testLookupLocaleMatchList() {
-    let result = intlLookUpLocale(localeList);
-    // First existing locale should be selected
-    assertEQ(result, ru_RU)
+    arktest.assertEQ(intlLookUpLocale(localeList), ru_RU)
+
+    let result = intlLookUpLocales(localeList)
+    arktest.assertEQ(result.length, 2)
+    arktest.assertEQ(result[0], ru_RU)
+    arktest.assertEQ(result[1], en_US)
 }
 
 function negativeTestLanguageTag() {
-    const err = new RangeError("Incorrect locale information provided")
-    expectError((): void => { intlBestFitLocale("test") }, err)
-    expectError((): void => { intlLookUpLocale("test") }, err)
+    expectError((): void => { intlBestFitLocale(badLocale) })
+    expectError((): void => { intlBestFitLocales(badLocale) })
+    expectError((): void => { intlBestFitLocales([badLocale]) })
+    expectError((): void => { intlLookUpLocale(badLocale) })
+    expectError((): void => { intlLookUpLocales(badLocale) })
+    expectError((): void => { intlLookUpLocales([badLocale]) })
 }

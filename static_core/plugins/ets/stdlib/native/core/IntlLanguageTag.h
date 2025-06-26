@@ -16,11 +16,36 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALETAG_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALETAG_H
 
+#include "unicode/locid.h"
+
 #include <string>
+#include <vector>
 
 namespace ark::ets::stdlib::intl {
 
 bool IsStructurallyValidLanguageTag(const std::string &tag);
+
+class LanguageTagListIterator : public icu::Locale::Iterator {
+public:
+    explicit LanguageTagListIterator(const std::vector<std::string> &tags) : tags_(tags), it_(tags.cbegin()) {}
+
+    UBool hasNext() const override
+    {
+        return static_cast<UBool>(it_ != tags_.cend());
+    }
+
+    const icu::Locale &next() override
+    {
+        auto status = UErrorCode::U_ZERO_ERROR;
+        locale_ = icu::Locale::forLanguageTag((it_++)->c_str(), status);
+        return locale_;
+    }
+
+private:
+    const std::vector<std::string> &tags_;
+    std::vector<std::string>::const_iterator it_;
+    icu::Locale locale_;
+};
 
 }  // namespace ark::ets::stdlib::intl
 
