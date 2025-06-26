@@ -28,6 +28,7 @@ std::string ExecuteDynamicAbc(const std::string &abcPath, const std::string &ent
 
     panda::RuntimeOption option;
     option.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::ERROR);
+    option.SetGcType(panda::RuntimeOption::GC_TYPE::STW);
     const size_t pause = 1000U;
     option.SetLongPauseTime(pause);
     panda::ecmascript::EcmaVM *vm = panda::JSNApi::CreateJSVM(option);
