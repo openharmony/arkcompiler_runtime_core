@@ -14,13 +14,13 @@
  */
 
 function getCharTuple(): [char, char, char, char, char] {
-    return [c'H', c'e', c'l', c'l', c'o'];
+    return [c'H', c'e', c'l', c'l', c'o']
 }
 
-function getReferenceTuple(): [String, double[], String] {
-    return [new String("Hello"), [1, 2, 3, 4, 5], "world"];
+function getReferenceTuple(): [string, double[], string] {
+    return ["Hello", [1, 2, 3, 4, 5], "world"]
 }
 
 function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
-    return [true, c'x', 127, 300, 500, 600, 100.0f, 400.0];
+    return [true, c'x', 127, 300, 500, 600, 100.0f, 400.0]
 }

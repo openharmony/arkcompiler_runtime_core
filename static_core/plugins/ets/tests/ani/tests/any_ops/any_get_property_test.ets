@@ -49,7 +49,7 @@ class Worker {
     }
 }
 
-function GetArray(): string[] {
+function getArray(): string[] {
     let a: string[] = ["Leechy", "Rocket", "Bird", "hello", "world"];
     return a;
 }

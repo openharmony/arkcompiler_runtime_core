@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: int[] = [1, 2, 3, 4, 5];
+    public static array: int[] = [1, 2, 3, 4, 5]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 222;
-        ArrayClass.array[4] = 444;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 222
+        ArrayClass.array[4] = 444
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0] == 1 &&
             ArrayClass.array[1] == 2 &&
@@ -32,13 +32,13 @@ class ArrayClass {
     }
 }
 
-function GetArray(): int[] {
-    let a : int[] = [1, 2, 3, 4, 5]
+function getArray(): int[] {
+    let a: int[] = [1, 2, 3, 4, 5]
     return a
 }
 
-function GetEscompatArray(): Array<int> {
-    let a : Array<int> = new Array<int>(5)
+function getEscompatArray(): Array<int> {
+    let a: Array<int> = new Array<int>(5)
     a[0] = 1
     a[1] = 2
     a[2] = 3
@@ -47,18 +47,18 @@ function GetEscompatArray(): Array<int> {
     return a
 }
 
-function CheckArray(a: int[]): boolean {
+function checkArray(a: int[]): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-function GetSpecialArray(): int[] {
+function getSpecialArray(): int[] {
 	let min: int = -2147483648
 	let max: int = 2147483647
-    let a : int[] = [min, max, 0, 0, 0]
+    let a: int[] = [min, max, 0, 0, 0]
     return a
 }
 
-function CheckEscompatArray(a: Array<int>): boolean {
+function checkEscompatArray(a: Array<int>): boolean {
     return a[0] == 1 &&
            a[1] == 2 &&
            a[2] == 30 &&

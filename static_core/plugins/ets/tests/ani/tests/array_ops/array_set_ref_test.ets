@@ -13,35 +13,38 @@
  * limitations under the License.
  */
 
-function GetArray(): (String | null)[] {
-    let a = [null, null , new String("Hello World!")];
-    return a;
+const string1 = 'New String 1!'
+const string2 = 'New String 2!'
+const helloWorld = 'Hello World!'
+
+function getArray(): (string | null)[] {
+    return [null, null, helloWorld]
 }
 
-function GetEscompatArray(): Array<String | null> {
-    let a : Array<String | null> = new Array<String | null>(3)
+function getEscompatArray(): Array<string | null> {
+    let a: Array<string | null> = new Array<string | null>(3)
     a[0] = null
     a[1] = null
-    a[2] = new String("Hello World!")
-    return a;
+    a[2] = helloWorld
+    return a
 }
 
-function GetNewString1(): String {
-    return new String("New String 1!");
+function getNewString1(): string {
+    return string1
 }
 
-function GetNewString2(): String {
-    return new String("New String 2!");
+function getNewString2(): string {
+    return string2
 }
 
-function CheckArray(array: (String | null)[]): boolean {
-    return array[0] == "New String 1!" && array[1] == null && array[2] == "New String 2!";
+function checkArray(array: (string | null)[]): boolean {
+    return array[0] == string1 && array[1] == null && array[2] == string2
 }
 
-function CheckEscompatArray(array: Array<String | null>): boolean {
-    return array[0] == "New String 1!" && array[1] == null && array[2] == "New String 2!";
+function checkEscompatArray(array: Array<string | null>): boolean {
+    return array[0] == string1 && array[1] == null && array[2] == string2
 }
 
-function GetObj(): Object {
-    return new Object();
+function getObj(): Object {
+    return new Object()
 }

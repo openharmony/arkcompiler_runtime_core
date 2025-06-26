@@ -29,9 +29,9 @@ TEST_F(CompatibilityTest, SetShortArrayRegionErrorTests)
     ASSERT_EQ(env_->FixedArray_New_Int(5U, &array), ANI_OK);
 
     const auto managedArray =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "GetArray"));
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getArray"));
     const auto escompatArray =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "GetEscompatArray"));
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getEscompatArray"));
 
     // Compare that int[] and FixedArray which is created in FixedArray_New_Int function is the same type
     // It would fail when frontend and spec would begin to match each other

@@ -67,7 +67,7 @@ TEST_F(ArraySetGetRegionBooleanTest, GetBooleanFixedArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getArray"));
     ani_boolean nativeBuffer[LENGTH_5] = {ANI_FALSE};
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
@@ -80,10 +80,10 @@ TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getArray"));
     const ani_boolean nativeBuffer1[LENGTH_5] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
@@ -106,7 +106,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
     ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[4U], ANI_TRUE);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
@@ -130,7 +130,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
@@ -199,7 +199,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetGetStabilityToArrayTest)
 TEST_F(ArraySetGetRegionBooleanTest, EscompatGetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
 
     ani_boolean nativeBuffer[5U] = {ANI_FALSE};
     const ani_size offset3 = 0;
@@ -215,18 +215,18 @@ TEST_F(ArraySetGetRegionBooleanTest, EscompatGetRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, EscompatSetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
     const ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset4, len4, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckEscompatArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "checkEscompatArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, EscompatInvalidBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
     ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     const ani_size offset4 = 3;
     const ani_size len4 = 3;

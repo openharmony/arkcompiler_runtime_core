@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<boolean> = [true, true, true, true, true];
+    public static array: FixedArray<boolean> = [true, true, true, true, true]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = false;
-        ArrayClass.array[4] = false;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = false
+        ArrayClass.array[4] = false
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0] == true &&
             ArrayClass.array[1] == true &&
@@ -32,11 +32,11 @@ class ArrayClass {
     }
 }
 
-function GetArray(): FixedArray<boolean> {
-    let a : FixedArray<boolean> = [true, true, true, true, true]
+function getArray(): FixedArray<boolean> {
+    let a: FixedArray<boolean> = [true, true, true, true, true]
     return a
 }
 
-function CheckArray(a: FixedArray<boolean>): boolean {
+function checkArray(a: FixedArray<boolean>): boolean {
     return a[0] == true && a[1] == true && a[2] == true && a[3] == false && a[4] == true
 }

@@ -87,7 +87,7 @@ TEST_F(FixedArraySetGetRegionCharTest, SetRegionCharChangeTest)
 TEST_F(FixedArraySetGetRegionCharTest, GetSpecialValueToArrayTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_char>(CallEtsFunction<ani_ref>("fixedarray_region_char_test", "GetSpecialArray"));
+        static_cast<ani_fixedarray_char>(CallEtsFunction<ani_ref>("fixedarray_region_char_test", "getSpecialArray"));
     std::array<ani_char, LENGTH_10> nativeBuffer = {};
     ASSERT_EQ(env_->FixedArray_GetRegion_Char(array, OFFSET_0, LENGTH_10, nativeBuffer.data()), ANI_OK);
     ASSERT_EQ(nativeBuffer[1U], '\0');

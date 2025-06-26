@@ -81,7 +81,7 @@ TEST_F(ArraySetGetRegionIntTest, GetIntFixedArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionIntTest, GetRegionIntTest)
 {
-    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetArray"));
+    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getArray"));
 
     ani_int nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
@@ -94,10 +94,10 @@ TEST_F(ArraySetGetRegionIntTest, GetRegionIntTest)
 
 TEST_F(ArraySetGetRegionIntTest, SetRegionIntTest)
 {
-    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetArray"));
+    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getArray"));
     ani_int nativeBuffer1[LENGTH_5] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     ASSERT_EQ(env_->Array_SetRegion_Int(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_int_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_int_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
@@ -120,7 +120,7 @@ TEST_F(ArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
     ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->Array_GetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
@@ -145,13 +145,13 @@ TEST_F(ArraySetGetRegionIntTest, CheckChangeFromApiRegionIntTest)
     ASSERT_EQ(env_->Array_SetRegion_Int(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionIntTest, GetSpecialValueToArrayTest)
 {
-    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetSpecialArray"));
+    const auto array = static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getSpecialArray"));
 
     std::array<ani_int, LENGTH_5> nativeBuffer = {};
     const ani_int minIntValue = -2147483648;
@@ -246,7 +246,7 @@ TEST_F(ArraySetGetRegionIntTest, SetGetStabilityToArrayTest)
 TEST_F(ArraySetGetRegionIntTest, EscompatGetRegionIntTest)
 {
     const auto array =
-        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetEscompatArray"));
+        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getEscompatArray"));
 
     ani_int nativeBuffer[5U] = {0};
     const ani_size offset3 = 0;
@@ -262,18 +262,18 @@ TEST_F(ArraySetGetRegionIntTest, EscompatGetRegionIntTest)
 TEST_F(ArraySetGetRegionIntTest, EscompatSetRegionIntTest)
 {
     const auto array =
-        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetEscompatArray"));
+        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getEscompatArray"));
     ani_int nativeBuffer1[5U] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Int(array, offset4, len4, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_int_test", "CheckEscompatArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_int_test", "checkEscompatArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionIntTest, EscompatInvalidIntTest)
 {
     const auto array =
-        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "GetEscompatArray"));
+        static_cast<ani_array_int>(CallEtsFunction<ani_ref>("array_region_int_test", "getEscompatArray"));
     ani_int nativeBuffer1[5U] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     const ani_size offset4 = 3;
     const ani_size len4 = 3;

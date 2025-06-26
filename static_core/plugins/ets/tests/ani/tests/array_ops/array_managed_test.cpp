@@ -27,12 +27,12 @@ TEST_F(ArrayManagedTest, GetLengthTest)
 {
     InitTest();
 
-    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "GetArray"));
+    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "getArray"));
     ani_size res1 {};
     ASSERT_EQ(env_->Array_GetLength(array1, &res1), ANI_OK);
     ASSERT_EQ(res1, 5U);
 
-    const auto array2 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "GetEmptyArray"));
+    const auto array2 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "getEmptyArray"));
     ani_size res2 {};
     ASSERT_EQ(env_->Array_GetLength(array2, &res2), ANI_OK);
     ASSERT_EQ(res2, 0);
@@ -44,7 +44,7 @@ TEST_F(ArrayManagedTest, GetSetTest)
 
     ani_size arrSize = 5U;
 
-    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "GetArray"));
+    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "getArray"));
     ani_size res1 {};
     ASSERT_EQ(env_->Array_GetLength(array1, &res1), ANI_OK);
     ASSERT_EQ(res1, arrSize);
@@ -60,7 +60,7 @@ TEST_F(ArrayManagedTest, GetSetTest)
         ASSERT_EQ(env_->Object_New(intClass, intCtor, &boxedInt, (it + 1) * 10U), ANI_OK);
         ASSERT_EQ(env_->Array_Set(array1, it, boxedInt), ANI_OK);
     }
-    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "CheckArray", array1);
+    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "checkArray", array1);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
@@ -70,7 +70,7 @@ TEST_F(ArrayManagedTest, PushTest)
 
     ani_size arrSize = 5U;
 
-    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "GetEmptyArray"));
+    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "getEmptyArray"));
     ani_size res1 {};
     ASSERT_EQ(env_->Array_GetLength(array1, &res1), ANI_OK);
     ASSERT_EQ(res1, 0U);
@@ -80,7 +80,7 @@ TEST_F(ArrayManagedTest, PushTest)
         ASSERT_EQ(env_->Object_New(intClass, intCtor, &boxedInt, (it + 1) * 10U), ANI_OK);
         ASSERT_EQ(env_->Array_Push(array1, boxedInt), ANI_OK);
     }
-    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "CheckArray", array1);
+    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "checkArray", array1);
     ASSERT_EQ(res, ANI_TRUE);
 }
 
@@ -90,7 +90,7 @@ TEST_F(ArrayManagedTest, PopTest)
 
     ani_size arrSize = 5U;
 
-    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "GetArray"));
+    const auto array1 = static_cast<ani_array>(CallEtsFunction<ani_ref>("array_managed_test", "getArray"));
     ani_size res1 {};
     ASSERT_EQ(env_->Array_GetLength(array1, &res1), ANI_OK);
     ASSERT_EQ(res1, 5U);
@@ -102,7 +102,7 @@ TEST_F(ArrayManagedTest, PopTest)
         ASSERT_EQ(env_->Object_CallMethod_Int(reinterpret_cast<ani_object>(boxedInt), intUnbox, &unboxedInt), ANI_OK);
         ASSERT_EQ(unboxedInt, 5U - it);
     }
-    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "CheckEmptyArray", array1);
+    const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "checkEmptyArray", array1);
     ASSERT_EQ(res, ANI_TRUE);
 }
 

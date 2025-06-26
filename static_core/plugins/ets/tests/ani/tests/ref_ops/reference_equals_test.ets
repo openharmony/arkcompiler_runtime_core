@@ -14,43 +14,43 @@
  */
 
 function GetNull(): null {
-    return null;
+    return null
 }
 
 function GetUndefined(): undefined {
-    return undefined;
+    return undefined
 }
 
-function GetObject(): Object {
-    return new String("Hello World!");
+function getObject(): Object {
+    return "Hello World!"
 }
 
 class Pack {
-    boolean_value: boolean = true;
-    string_value: string = "";
-    byte_value: byte = 0;
+    boolean_value: boolean = true
+    string_value: string = ""
+    byte_value: byte = 0
 }
 
 function newPackObject(): Pack {
-    return new Pack();
+    return new Pack()
 }
 
 class A {
     public static new_A(): A {
-        return new A();
+        return new A()
     }
 
-    concat(s0: String, s1: String): String {
-        return s0 + s1;
+    concat(s0: string, s1: string): string {
+        return s0 + s1
     }
 }
 
 class B extends A {
     public static new_B(): B {
-        return new B();
+        return new B()
     }
 
-    concat(s0: String, s1: String): String {
-        return s0 + "_" + s1;
+    concat(s0: string, s1: string): string {
+        return s0 + "_" + s1
     }
 }

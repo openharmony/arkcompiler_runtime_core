@@ -60,7 +60,7 @@ TEST_F(FixedArraySetGetRegionDoubleTest, GetDoubleArrayRegionErrorTests)
 TEST_F(FixedArraySetGetRegionDoubleTest, GetRegionDoubleTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("fixedarray_region_double_test", "GetArray"));
+        static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("fixedarray_region_double_test", "getArray"));
 
     ani_double nativeBuffer[LENGTH_5] = {0.0};
     const double epsilon = 1e-6;  // Define acceptable tolerance
@@ -76,10 +76,10 @@ TEST_F(FixedArraySetGetRegionDoubleTest, GetRegionDoubleTest)
 TEST_F(FixedArraySetGetRegionDoubleTest, SetRegionDoubleTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("fixedarray_region_double_test", "GetArray"));
+        static_cast<ani_fixedarray_double>(CallEtsFunction<ani_ref>("fixedarray_region_double_test", "getArray"));
     ani_double nativeBuffer1[LENGTH_5] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     ASSERT_EQ(env_->FixedArray_SetRegion_Double(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_double_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_double_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
@@ -105,7 +105,7 @@ TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromManagedRegionDoubleTest)
     ASSERT_NEAR(nativeBuffer[3U], TEST_VALUE_4, epsilon);
     ASSERT_NEAR(nativeBuffer[4U], TEST_VALUE_5, epsilon);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->FixedArray_GetRegion_Double(array, offset5, len5, nativeBuffer), ANI_OK);
     ASSERT_NEAR(nativeBuffer[0U], TEST_VALUE_1, epsilon);
     ASSERT_NEAR(nativeBuffer[1U], TEST_VALUE_2, epsilon);
@@ -129,14 +129,14 @@ TEST_F(FixedArraySetGetRegionDoubleTest, CheckChangeFromApiRegionDoubleTest)
     ASSERT_EQ(env_->FixedArray_SetRegion_Double(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionDoubleTest, GetSpecialValueToArrayTest)
 {
     const auto array = static_cast<ani_fixedarray_double>(
-        CallEtsFunction<ani_ref>("fixedarray_region_double_test", "GetSpecialArray"));
+        CallEtsFunction<ani_ref>("fixedarray_region_double_test", "getSpecialArray"));
     const ani_double max = 4.9406564584124654e-324;
     const ani_double min = 1.79769313486231570e+308;
     const ani_double minPositive = -1.79769313486231570e+308;

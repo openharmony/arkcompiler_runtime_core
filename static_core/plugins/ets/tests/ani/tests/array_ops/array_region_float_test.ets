@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f];
+    public static array: float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22.0 as float;
-        ArrayClass.array[4] = 44.0 as float;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22.0 as float
+        ArrayClass.array[4] = 44.0 as float
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0].toInt() == 1.0 &&
             ArrayClass.array[1].toInt() == 2.0 &&
@@ -33,13 +33,13 @@ class ArrayClass {
     }
 }
 
-function GetArray(): float[] {
-    let a : float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
+function getArray(): float[] {
+    let a: float[] = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
     return a
 }
 
-function GetEscompatArray(): Array<float> {
-    let a : Array<float> = new Array<float>(5)
+function getEscompatArray(): Array<float> {
+    let a: Array<float> = new Array<float>(5)
     a[0] = 1.0 as float
     a[1] = 2.0 as float
     a[2] = 3.0 as float
@@ -48,19 +48,19 @@ function GetEscompatArray(): Array<float> {
     return a
 }
 
-function CheckArray(a: float[]): boolean {
+function checkArray(a: float[]): boolean {
     return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function GetSpecialArray(): float[] {
+function getSpecialArray(): float[] {
 	let min: float = new Float(1.40129846432481707e-45)
 	let max: float = new Float(3.40282346638528860e+38)
 	let minus: float = new Float(-3.40282346638528860e+38)
-    let a : float[] = [min, max, minus, 0.0f, 0.0f, 0.0f]
+    let a: float[] = [min, max, minus, 0.0f, 0.0f, 0.0f]
     return a
 }
 
-function CheckEscompatArray(a: Array<float>): boolean {
+function checkEscompatArray(a: Array<float>): boolean {
     return a[0].toInt() == 1 &&
            a[1].toInt() == 2 &&
            a[2].toInt() == 30 &&

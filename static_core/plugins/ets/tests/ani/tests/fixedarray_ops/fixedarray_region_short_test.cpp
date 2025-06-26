@@ -60,7 +60,7 @@ TEST_F(FixedArraySetGetRegionShortTest, GetShortArrayRegionErrorTests)
 TEST_F(FixedArraySetGetRegionShortTest, GetRegionShortTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "GetArray"));
+        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "getArray"));
 
     ani_short nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->FixedArray_GetRegion_Short(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
@@ -74,10 +74,10 @@ TEST_F(FixedArraySetGetRegionShortTest, GetRegionShortTest)
 TEST_F(FixedArraySetGetRegionShortTest, SetRegionShortTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "GetArray"));
+        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "getArray"));
     ani_short nativeBuffer1[LENGTH_3] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     ASSERT_EQ(env_->FixedArray_SetRegion_Short(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_short_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_short_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionShortTest, CheckChangeFromManagedRegionShortTest)
@@ -100,7 +100,7 @@ TEST_F(FixedArraySetGetRegionShortTest, CheckChangeFromManagedRegionShortTest)
     ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->FixedArray_GetRegion_Short(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
@@ -125,14 +125,14 @@ TEST_F(FixedArraySetGetRegionShortTest, CheckChangeFromApiRegionShortTest)
     ASSERT_EQ(env_->FixedArray_SetRegion_Short(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionShortTest, GetSpecialValueToArrayTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "GetSpecialArray"));
+        static_cast<ani_fixedarray_short>(CallEtsFunction<ani_ref>("fixedarray_region_short_test", "getSpecialArray"));
     std::array<ani_short, LENGTH_5> nativeBuffer = {};
     const ani_short maxShortValue = 32767;
     const ani_short minShortValue = -32768;
