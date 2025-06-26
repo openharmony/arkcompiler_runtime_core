@@ -109,7 +109,6 @@ typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropNa
     PandaString propName = etsPropName->GetMutf8();
     auto res = JSValueGetByName<T>(ctx, etsJsValue, propName.c_str());
     if (UNLIKELY(!res)) {
-        ctx->ForwardJSException(coro);
         return {};
     }
     return res.value();
@@ -129,10 +128,7 @@ void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T:
     NapiScope jsHandleScope(env);
 
     PandaString propName = etsPropName->GetMutf8();
-    bool res = JSValueSetByName<T>(ctx, etsJsValue, propName.c_str(), etsPropVal);
-    if (UNLIKELY(!res)) {
-        ctx->ForwardJSException(coro);
-    }
+    JSValueSetByName<T>(ctx, etsJsValue, propName.c_str(), etsPropVal);
 }
 
 template <typename T>
@@ -150,14 +146,15 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
 
     napi_value result;
     napi_value jsVal = etsJsValue->GetNapiValue(env);
-
+    napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        auto rc = napi_get_element(env, jsVal, index, &result);
-        if (UNLIKELY(NapiThrownGeneric(rc))) {
-            ctx->ForwardJSException(coro);
-            return {};
-        }
+        jsStatus = napi_get_element(env, jsVal, index, &result);
+    }
+
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return {};
     }
 
     auto res = T::UnwrapWithNullCheck(ctx, env, result);
@@ -177,10 +174,14 @@ void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptyp
     INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
 
-    auto rec = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
-                                T::WrapWithNullCheck(env, value));
-    if (rec != napi_ok) {
+        jsStatus = napi_set_element(env, JSConvertJSValue::WrapWithNullCheck(env, etsJsValue), index,
+                                    T::WrapWithNullCheck(env, value));
+    }
+    if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
     }
 }

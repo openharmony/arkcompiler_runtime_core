@@ -268,7 +268,14 @@ EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsClass *clsObj)
         return nullptr;
     }
 
-    return refconv->Unwrap(ctx, jsVal);
+    auto res = refconv->Unwrap(ctx, jsVal);
+    if (UNLIKELY(!res)) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        res = nullptr;
+    }
+    return res;
 }
 
 JSValue *JSRuntimeGetUndefined()
@@ -512,8 +519,13 @@ uint8_t JSRuntimeHasProperty(JSValue *object, EtsString *name)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_has_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
-                                       JSConvertString::WrapWithNullCheck(env, name), &result));
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_has_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
+                                     JSConvertString::WrapWithNullCheck(env, name), &result);
+    }
+    CHECK_NAPI_STATUS(jsStatus, ctx, coro, result);
     return static_cast<uint8_t>(result);
 }
 
@@ -679,8 +691,13 @@ uint8_t JSRuntimeHasPropertyJSValue(JSValue *object, JSValue *property)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_has_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
-                                       JSConvertJSValue::WrapWithNullCheck(env, property), &result));
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_has_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
+                                     JSConvertJSValue::WrapWithNullCheck(env, property), &result);
+    }
+    CHECK_NAPI_STATUS(jsStatus, ctx, coro, result);
     return static_cast<uint8_t>(result);
 }
 
@@ -693,7 +710,12 @@ uint8_t JSRuntimeHasElement(JSValue *object, int index)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_has_element(env, JSConvertJSValue::WrapWithNullCheck(env, object), index, &result));
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_has_element(env, JSConvertJSValue::WrapWithNullCheck(env, object), index, &result);
+    }
+    CHECK_NAPI_STATUS(jsStatus, ctx, coro, result);
     return static_cast<uint8_t>(result);
 }
 
@@ -706,8 +728,13 @@ uint8_t JSRuntimeHasOwnProperty(JSValue *object, EtsString *name)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_has_own_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
-                                           JSConvertString::WrapWithNullCheck(env, name), &result));
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_has_own_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
+                                         JSConvertString::WrapWithNullCheck(env, name), &result);
+    }
+    CHECK_NAPI_STATUS(jsStatus, ctx, coro, result);
     return static_cast<uint8_t>(result);
 }
 
@@ -720,8 +747,13 @@ uint8_t JSRuntimeHasOwnPropertyJSValue(JSValue *object, JSValue *property)
     NapiScope jsHandleScope(env);
 
     bool result = false;
-    NAPI_CHECK_FATAL(napi_has_own_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
-                                           JSConvertJSValue::WrapWithNullCheck(env, property), &result));
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_has_own_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
+                                         JSConvertJSValue::WrapWithNullCheck(env, property), &result);
+    }
+    CHECK_NAPI_STATUS(jsStatus, ctx, coro, result);
     return static_cast<uint8_t>(result);
 }
 

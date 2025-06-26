@@ -115,6 +115,17 @@ void InteropTrace(const char *func, const char *file, int line);
         }                                   \
     } while (0)
 
+#define CHECK_NAPI_STATUS(jsStatus, ctx, coro, result)   \
+    do {                                                 \
+        napi_status local_status = (jsStatus);           \
+        if (local_status != napi_ok) {                   \
+            if ((ctx) != nullptr && (coro) != nullptr) { \
+                (ctx)->ForwardJSException(coro);         \
+            }                                            \
+            (result) = false;                            \
+        }                                                \
+    } while (0)
+
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 class NapiScope {
