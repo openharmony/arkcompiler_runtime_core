@@ -22,6 +22,10 @@ PyPDF2==3.0.1
 jinja2-cli==0.8.2
 tox == 4.20.0
 
+# normalize_yaml
+ruamel.yaml == 0.18.14
+numpy == 2.2.6
+
 # mypy
 mypy==1.15.0
 mypy-extensions==1.0.0
