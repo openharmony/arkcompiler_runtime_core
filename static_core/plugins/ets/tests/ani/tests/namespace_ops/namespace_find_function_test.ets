@@ -20,6 +20,7 @@ namespace Fnns {
     function getInitialStringValue(): String {
         return '';
     }
+    // Note: replace it to new overload once FE #ICIITH is solved
     function overloaded(i: int): int {
         return 0
     }

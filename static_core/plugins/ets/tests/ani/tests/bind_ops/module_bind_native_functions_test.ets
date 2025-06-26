@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+// Note: cannot invoke native foo in new overload until FE #ICIIPM solved
+export native function foo1(a: int, b: int): int;
+export native function foo2(a: int, b: int, c: int): int;
+export overload foo {foo1, foo2}
+
 export native function sum(a: int, b: int): int;
 export native function sum(a: int, b: int, c: int): int;
 export native function concat(s0: String, s1: String, s2: String): String;

@@ -245,6 +245,10 @@ static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
 static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
     "Lets/annotation/FunctionalReference;";
 
+// Annotation for function overload
+static constexpr std::string_view ANNOTATION_FUNCTIONAL_OVERLOAD       =
+    "Lets/annotation/FunctionOverload;";
+
 }  // namespace class_descriptors
 
 static constexpr std::string_view CCTOR = "<cctor>";

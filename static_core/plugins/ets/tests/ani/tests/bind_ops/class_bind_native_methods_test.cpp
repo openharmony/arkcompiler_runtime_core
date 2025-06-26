@@ -316,6 +316,8 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
     std::array methods = {
         ani_native_function {"foo", "II:I", reinterpret_cast<void *>(NativeMethodsFooNative)},
         ani_native_function {"foo", "III:I", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
+        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"sum", "III:I", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 
@@ -333,6 +335,47 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
 
     ani_method fooMethodOverride {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "foo", "III:I", &fooMethodOverride), ANI_OK);
+    ASSERT_NE(fooMethodOverride, nullptr);
+
+    ani_int result = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethod, &result, 0, 1), ANI_OK);
+    ASSERT_EQ(result, 42U);
+
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethodOverride, &result, 0, 1, 2U), ANI_OK);
+    ASSERT_EQ(result, 43U);
+}
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_008)
+{
+    ani_class cls {};
+
+    ani_module module;
+    ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "LTestA006;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo1", "II:I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"foo2", "III:I", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
+        ani_native_function {"sum1", "II:I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"sum2", "III:I", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method fooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo1", "II:I", &fooMethod), ANI_OK);
+    ASSERT_NE(fooMethod, nullptr);
+
+    ani_method fooMethodOverride {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo2", "III:I", &fooMethodOverride), ANI_OK);
     ASSERT_NE(fooMethodOverride, nullptr);
 
     ani_int result = 0;
