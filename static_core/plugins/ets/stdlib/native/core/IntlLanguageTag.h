@@ -22,8 +22,18 @@
 #include <vector>
 
 namespace ark::ets::stdlib::intl {
+constexpr size_t INTL_INDEX_TWO = 2;
+constexpr size_t INTL_INDEX_THREE = 3;
+constexpr size_t INTL_INDEX_FOUR = 4;
+constexpr size_t INTL_INDEX_FIVE = 5;
+constexpr size_t INTL_INDEX_EIGHT = 8;
+constexpr uint32_t FLAG = 0x20;
+
+std::string ToStdStringLanguageTag(const icu::Locale &locale);
 
 bool IsStructurallyValidLanguageTag(const std::string &tag);
+
+bool IsPrivateSubTag(const std::string &result, size_t &len);
 
 class LanguageTagListIterator : public icu::Locale::Iterator {
 public:
@@ -46,6 +56,11 @@ private:
     std::vector<std::string>::const_iterator it_;
     icu::Locale locale_;
 };
+
+inline constexpr int AsciiAlphaToLower(uint32_t c)
+{
+    return static_cast<int>(c | FLAG);
+}
 
 }  // namespace ark::ets::stdlib::intl
 
