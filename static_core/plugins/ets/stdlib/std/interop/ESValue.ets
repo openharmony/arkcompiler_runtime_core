@@ -467,7 +467,7 @@ export final class ESValue {
         return JSRuntime.isPromise(this.ev);
     }
 
-    public toPromise(): Promise<Any> {
+    public toPromise(): Promise<ESValue> {
         if (!this.isPromise()) {
             throw new TypeError("Promise expected");
         }
