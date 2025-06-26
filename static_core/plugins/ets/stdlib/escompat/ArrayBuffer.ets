@@ -411,149 +411,149 @@ export class ArrayBuffer extends Buffer
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
-    internal native atomicAddI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicAddI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicAndI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicAndI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicCompareExchangeI8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): byte;
+    internal native atomicCompareExchangeI8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): double;
 
-    internal native atomicExchangeI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicExchangeI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicLoadI8(index: int, byteOffset: int): byte;
+    internal native atomicLoadI8(index: int, byteOffset: int): double;
 
-    internal native atomicOrI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicOrI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicStoreI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicStoreI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicSubI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicSubI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicXorI8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicXorI8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicAddI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicAddI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicAndI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicAndI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicCompareExchangeI16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): short;
+    internal native atomicCompareExchangeI16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): double;
 
-    internal native atomicExchangeI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicExchangeI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicLoadI16(index: int, byteOffset: int): short;
+    internal native atomicLoadI16(index: int, byteOffset: int): double;
 
-    internal native atomicOrI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicOrI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicStoreI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicStoreI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicSubI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicSubI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicXorI16(index: int, byteOffset: int, value: short): short;
+    internal native atomicXorI16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicAddI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicAddI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicAndI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicAndI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicCompareExchangeI32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): int;
+    internal native atomicCompareExchangeI32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): double;
 
-    internal native atomicExchangeI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicExchangeI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicLoadI32(index: int, byteOffset: int): int;
+    internal native atomicLoadI32(index: int, byteOffset: int): double;
 
-    internal native atomicOrI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicOrI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicStoreI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicStoreI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicSubI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicSubI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicXorI32(index: int, byteOffset: int, value: int): int;
+    internal native atomicXorI32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicAddI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicAddI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicAndI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicAndI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicCompareExchangeI64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
+    internal native atomicCompareExchangeI64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): double;
 
-    internal native atomicExchangeI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicExchangeI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicLoadI64(index: int, byteOffset: int): long;
+    internal native atomicLoadI64(index: int, byteOffset: int): double;
 
-    internal native atomicOrI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicOrI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicStoreI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicStoreI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicSubI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicSubI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicXorI64(index: int, byteOffset: int, value: long): long;
+    internal native atomicXorI64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicAddU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicAddU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicAndU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicAndU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicCompareExchangeU8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): byte;
+    internal native atomicCompareExchangeU8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): double;
 
-    internal native atomicExchangeU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicExchangeU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicLoadU8(index: int, byteOffset: int): byte;
+    internal native atomicLoadU8(index: int, byteOffset: int): double;
 
-    internal native atomicOrU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicOrU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicStoreU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicStoreU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicSubU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicSubU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicXorU8(index: int, byteOffset: int, value: byte): byte;
+    internal native atomicXorU8(index: int, byteOffset: int, value: byte): double;
 
-    internal native atomicAddU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicAddU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicAndU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicAndU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicCompareExchangeU16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): short;
+    internal native atomicCompareExchangeU16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): double;
 
-    internal native atomicExchangeU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicExchangeU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicLoadU16(index: int, byteOffset: int): short;
+    internal native atomicLoadU16(index: int, byteOffset: int): double;
 
-    internal native atomicOrU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicOrU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicStoreU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicStoreU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicSubU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicSubU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicXorU16(index: int, byteOffset: int, value: short): short;
+    internal native atomicXorU16(index: int, byteOffset: int, value: short): double;
 
-    internal native atomicAddU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicAddU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicAndU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicAndU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicCompareExchangeU32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): int;
+    internal native atomicCompareExchangeU32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): double;
 
-    internal native atomicExchangeU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicExchangeU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicLoadU32(index: int, byteOffset: int): int;
+    internal native atomicLoadU32(index: int, byteOffset: int): double;
 
-    internal native atomicOrU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicOrU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicStoreU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicStoreU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicSubU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicSubU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicXorU32(index: int, byteOffset: int, value: int): int;
+    internal native atomicXorU32(index: int, byteOffset: int, value: int): double;
 
-    internal native atomicAddU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicAddU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicAndU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicAndU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicCompareExchangeU64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
+    internal native atomicCompareExchangeU64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): double;
 
-    internal native atomicExchangeU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicExchangeU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicLoadU64(index: int, byteOffset: int): long;
+    internal native atomicLoadU64(index: int, byteOffset: int): double;
 
-    internal native atomicOrU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicOrU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicStoreU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicStoreU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicSubU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicSubU64(index: int, byteOffset: int, value: long): double;
 
-    internal native atomicXorU64(index: int, byteOffset: int, value: long): long;
+    internal native atomicXorU64(index: int, byteOffset: int, value: long): double;
 }
 
 export type ArrayBufferLike = ArrayBuffer
