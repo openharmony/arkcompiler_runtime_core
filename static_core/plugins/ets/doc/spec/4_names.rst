@@ -322,10 +322,10 @@ The scope of an entity depends on the context the entity is declared in:
    -  A reference to the class instance for the names of instance entities; or
    -  Name of the class for static entities.
 
-   |LANG| supports using the same identifier as a name of static entity and
-   as a name of instance entity, as they are *distinguishable* by the context,
-   which is either a name of the class for static entities or
-   the expression that denotes an instance.
+   |LANG| supports using the same identifier as names of a static entity and
+   of an instance entity. The two names are *distinguishable* by the context,
+   which is either a name of a class for static entities or an expression
+   that denotes an instance.
 
 .. index::
    class level scope
@@ -1128,7 +1128,7 @@ Several parameters can be *optional*, allowing to omit
 corresponding arguments in a call (see :ref:`Optional Parameters`).
 
 A :index:`compile-time error` occurs if an *optional parameter* precedes a
-*required parameter* in the parameter list.
+*required parameter*.
 
 The last parameter of a function or a method can be a single *rest parameter*
 (see :ref:`Rest Parameter`).
@@ -1290,7 +1290,7 @@ The syntax of *rest parameter* is presented below:
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
--  Has a type that is neither an array type nor a tuple type nor a type
+-  Has a type that is not an array type, a tuple type, nor a type
    parameter constrained by an array or a tuple type.
 
 A call of entity with a rest parameter of array type ``T[]``
@@ -1388,6 +1388,23 @@ that are assignable (see :ref:`Assignability`) to the corresponding
     sum(1, 2, "a") // compile-time error: wrong type of the 3rd argument
     sum(1, 2, 3)   // returns 6
 
+It is legal though meaningless to declare a function with an optional
+parameter followed by a rest parameter of a tuple type.
+However, use of such function without explicitly set optional and
+rest parameters will cause compile-time error:
+
+.. code-block:: typescript
+   :linenos:
+
+    // optional tuple + rest tuple
+    function g(opt?: [number, string], ...tail: [number,string]) { // OK
+       // ...
+    }
+
+    g() // CTE - no rest tuple
+    g([1, "str"]) // CTE - no rest tuple
+    g([ 1, "str"], 1, "str") // OK
+
 If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
 is to be passed to a call of entity with the rest parameter,
 then a spread expression (see :ref:`Spread Expression`)
@@ -1438,8 +1455,8 @@ as a prefix before the fixed-size array argument:
        // returns 6
 
 
-In case of generics type parameter can be used as a rest parameter if it is
-constrained by array or tupel type.
+If constrained by an array or a tuple type, a type parameter can be used with
+generics as a *rest parameter*.
 
 .. code-block:: typescript
    :linenos:

@@ -111,14 +111,13 @@ Getting Type Via Reflection
 The |LANG| standard library (see :ref:`Standard Library`) provides a
 pseudogeneric static method ``Type.from<T>()`` to be processed by the compiler
 in a specific way during compilation. A call to this method allows getting a
-value of type ``Type`` that represents type ``T`` at runtime. 
+value of type ``Type`` that represents type ``T`` at runtime.
 
 .. code-block:: typescript
    :linenos:
 
     let type_of_int: Type = Type.from<int>()
     let type_of_string: Type = Type.from<String>()
-    let type_of_array_of_int: Type = Type.from<int[]>()
     let type_of_number: Type = Type.from<number>()
     let type_of_Object: Type = Type.from<Object>()
 
@@ -138,8 +137,15 @@ value of type ``Type`` that represents type ``T`` at runtime.
    variable
    runtime
 
-Restrictions apply to type ``T`` (see :ref:`Standard Library` for details).
+If type ``T`` used as type argument is affected by :ref:`Type Erasure`, then
+the function returns value of type ``Type`` for *effective type* of ``T``
+but not for ``T`` itself:
 
+.. code-block:: typescript
+   :linenos:
+
+    let type_of_array1: Type = Type.from<int[]>() // value of Type for Array<> 
+    let type_of_array2: Type = Type.from<Array<number>>() // the same Type value
 
 |
 
@@ -153,7 +159,7 @@ Ensuring Module Initialization
 
 The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
 function ``initModule()`` with one parameter of ``string`` type. A call to this
-function ensures that the module referred by the argument is available and its 
+function ensures that the module referred by the argument is available and its
 initialization (see :ref:`Static Initialization`) is performed. An argument
 should be a string literal otherwise a :index:`compile-time error` occurs. The
 current module has no access to the exported declarations of the module
@@ -245,16 +251,14 @@ Make a Bridge Method for Overriding Method
 .. meta:
     frontend_status: None
 
-There are cases where the compiler makes an additional
-*bridge* method for overriding method in a subclass of a generic class.
-As the overriding is based on *erased types* (see :ref:`Type Erasure`)
-a *bridge* method is required to provide type safe method call.
-
-The following example illustrates such case:
+Situations are possible where the compiler must create an additional bridge
+method to provide a type-safe call for the overriding method in a subclass of
+a generic class. Overriding is based on *erased types* (see :ref:`Type Erasure`).
+The situation is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
-   
+
     class B<T extends Object> {
         foo(p: T) {}
     }
@@ -262,19 +266,35 @@ The following example illustrates such case:
         foo(p: string> {} // original overriding method
     }
 
-For this example, the compiler generates a *bridge* method with 
-the name ``foo`` and signature ``(p: Object)``.
+In the example above, the compiler generates a *bridge* method with the name
+``foo`` and signature ``(p: Object)``. The *bridge* method acts as follows:
 
-A *bridge* method:
+-  Behaves as an ordinary method in most cases, but is not accessible from
+   the source code, and does not participate in overloading;
 
--  Behaves, in most cases, as ordinary method, but is not accessible from 
-   the source code and does not participate in overloading;
-   
--  In its body, it applies narrowing to argument types to match parameter types in the
-   original method and invokes the original method.
+-  Applies narrowing to argument types inside its body to match the parameter
+   types of the original method, and invokes the original method.
 
+The use of the *bridge* method is represented by the following code:
 
-**TBD** Provide more formal description.
+.. code-block:: typescript
+   :linenos:
+
+    let d = new D()
+    d.foo("aa") // original method from 'D' is called
+    let b: B<string> = d
+    b.foo("aa") // bridge method with signature (p: Object) is called
+    // its body calls original method, using (p as string) to check the type of the argument
+
+More formally, a bridge method ``m(C``:sub:`1` ``, ..., C``:sub:`n` ``)``
+is created in ``D``, in the following cases:
+
+- Class ``B`` comprises type parameters
+  ``B<T``:sub:`1` ``extends C``:sub:`1` ``, ..., T``:sub:`n` ``extends C``:sub:`n` ``>``;
+- Subclass ``D`` is defined as ``class D extends B<X``:sub:`1` ``, ..., X``:sub:`n` ``>``;
+- Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,
+  e.g., ``(T``:sub:`1` ``, ..., T``:sub:`n` ``)``;
+- Signature of the overriden method ``m`` is not ``(C``:sub:`1` ``, ..., C``:sub:`n` ``)``.
 
 .. raw:: pdf
 
