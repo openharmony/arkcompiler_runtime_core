@@ -398,7 +398,7 @@ ani_status RegisterIntlLocaleMatch(ani_env *env)
     ani_class localeMatchClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.LocaleMatch", &localeMatchClass));
 
-    return env->Class_BindNativeMethods(localeMatchClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(localeMatchClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib

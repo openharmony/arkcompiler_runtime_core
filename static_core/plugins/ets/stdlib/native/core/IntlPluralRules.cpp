@@ -229,7 +229,7 @@ ani_status RegisterIntlPluralRules(ani_env *env)
     ani_class pluralRulesClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRules", &pluralRulesClass));
 
-    return env->Class_BindNativeMethods(pluralRulesClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(pluralRulesClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

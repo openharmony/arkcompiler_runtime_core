@@ -14,7 +14,6 @@
  */
 
 #include "ani_gtest.h"
-#include <iostream>
 #include <array>
 #include <string_view>
 
@@ -384,6 +383,22 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_008)
 
     ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethodOverride, &result, 0, 1, 2U), ANI_OK);
     ASSERT_EQ(result, 43U);
+}
+
+static void Ctor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object) {}
+
+TEST_F(ClassBindNativeMethodsTest, bind_constructor)
+{
+    std::string_view className = "@defModule.class_bind_native_methods_test.D";
+
+    ani_class cls {};
+
+    ASSERT_EQ(env_->FindClass(className.data(), &cls), ANI_OK);
+
+    std::array methods = {
+        ani_native_function {"<ctor>", nullptr, reinterpret_cast<void *>(Ctor)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing

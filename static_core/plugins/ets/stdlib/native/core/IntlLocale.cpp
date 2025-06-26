@@ -320,12 +320,21 @@ ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
                              reinterpret_cast<void *>(StdCoreIntlLocaleIsTagValid)},
         ani_native_function {"parseTagImpl", "C{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)},
-        ani_native_function {"defaultTag", ":C{std.core.String}",
-                             reinterpret_cast<void *>(StdCoreIntlLocaleDefaultTag)}};
+    };
 
     ani_class localeClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Locale", &localeClass));
-    return env->Class_BindNativeMethods(localeClass, methods.data(), methods.size());
+    ani_status status = env->Class_BindNativeMethods(localeClass, methods.data(), methods.size());
+    if (status != ANI_OK) {
+        return status;
+    }
+
+    const std::array staticMethods = {
+        ani_native_function {"defaultTag", ":C{std.core.String}",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleDefaultTag)},
+    };
+
+    return env->Class_BindStaticNativeMethods(localeClass, staticMethods.data(), staticMethods.size());
 }
 
 ani_string StdCoreIntlLocaleDefaultBaseName(ani_env *env, [[maybe_unused]] ani_class klass)

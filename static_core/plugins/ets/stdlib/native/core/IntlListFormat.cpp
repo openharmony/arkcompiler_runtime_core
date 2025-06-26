@@ -175,7 +175,7 @@ ani_status RegisterIntlListFormat(ani_env *env)
     ani_class listFormatClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ListFormat", &listFormatClass));
 
-    return env->Class_BindNativeMethods(listFormatClass, methods.data(), methods.size());
+    return env->Class_BindStaticNativeMethods(listFormatClass, methods.data(), methods.size());
 }
 
 }  // namespace ark::ets::stdlib::intl

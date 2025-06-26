@@ -122,12 +122,19 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array methods = {
         ani_native_function {"bindNativeDecoder", "Lstd/core/String;I:V", reinterpret_cast<void *>(BindNativeDecoder)},
         ani_native_function {"decode", "Lescompat/Uint8Array;Z:Lstd/core/String;", reinterpret_cast<void *>(Decode)},
-        ani_native_function {"nativeDestroy", "J:V", reinterpret_cast<void *>(NativeDestroy)},
     };
-
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextDecoder:: Cannot bind native methods to className : %{public}s", className);
+        return ANI_ERROR;
+    }
+
+    std::array staticMethods = {
+        ani_native_function {"nativeDestroy", "J:V", reinterpret_cast<void *>(NativeDestroy)},
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_ERROR_SDK("TextDecoder:: Cannot bind static native methods to className : %{public}s", className);
         return ANI_ERROR;
     }
     return ANI_OK;
@@ -154,9 +161,9 @@ static ani_status BindTextDecoder(ani_env *env)
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };
-    if (ANI_OK != env->Class_BindNativeMethods(cls, barMethods.data(), barMethods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, barMethods.data(), barMethods.size())) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextEncoder:: Cannot bind native methods to %{public}s", className);
+        LOG_ERROR_SDK("TextEncoder:: Cannot static bind native methods to %{public}s", className);
         return ANI_ERROR;
     }
     SetOhosIcuDirectory();
@@ -179,8 +186,8 @@ static ani_status BindUtilHelper(ani_env *env)
         ani_native_function {"generateRandomBinaryUUID", "Z:Lescompat/Uint8Array;",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)}};
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        std::cerr << "Cannot bind static native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };
     return ANI_OK;

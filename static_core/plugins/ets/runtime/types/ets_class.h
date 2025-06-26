@@ -133,6 +133,8 @@ public:
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat = false);
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature, bool isANIFormat = false);
 
+    PANDA_PUBLIC_API EtsMethod *GetDirectStaticMethod(const char *name, const char *signature) const;
+    PANDA_PUBLIC_API EtsMethod *GetDirectStaticMethod(const char *name, bool *outIsUnique) const;
     PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
     {
         if (signature == nullptr) {
