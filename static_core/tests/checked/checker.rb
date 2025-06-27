@@ -284,7 +284,7 @@ class Checker
         @args << '--compiler-hotness-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
       when :force_profiling
         next unless value
-        @args << '--compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
+        @args << '--profiler-enabled=true --compiler-profiling-threshold=0 --compiler-enable-jit=false'
       when :pgo_emit_profdata
         next unless value
         @profdata_file = "#{@cwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.profdata"
