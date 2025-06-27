@@ -40,3 +40,37 @@ foreach(test ${strings_tests})
         add_dependencies(ets_test_suite_strings ${target}-ets-aot)
     endif()
 endforeach()
+
+#26986
+add_custom_target(ets_test_suite_strings_concat)
+
+set(strings_concat_tests
+    string_concat
+)
+
+foreach(test ${strings_concat_tests})
+    add_ets_test(ets_test_suite_strings_concat
+        FILE "${test}.ets"
+        TEST_NAME "ets_test_suite_strings_concat_true_${test}"
+        MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
+        COMPILER_EXTRA_OPTIONS "--ets-strings-concat=true"
+    )
+    add_ets_test(ets_test_suite_strings_concat
+        FILE "${test}.ets"
+        TEST_NAME "ets_test_suite_strings_concat_false_${test}"
+        MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
+        COMPILER_EXTRA_OPTIONS "--ets-strings-concat=false"
+    )
+endforeach()
+
+# test build stdlib
+add_custom_target(ets_test_suite_strings_concat_stdlib
+    COMMAND ${es2panda_bin}
+            --opt-level=2
+            --gen-stdlib=true
+            --ets-strings-concat=true
+            --extension=ets
+            --output ${strings_tests_out_dir}/etsstdlib.abc
+    DEPENDS ${es2panda_target}
+)
+add_dependencies(ets_test_suite_strings_concat ets_test_suite_strings_concat_stdlib)

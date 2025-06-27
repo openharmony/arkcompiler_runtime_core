@@ -26,6 +26,7 @@ namespace ark::abc2program {
 
 constexpr std::string_view FIELD_ABC_TEST_FILE_NAME = "ets/Field.abc";
 constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
+constexpr std::string_view FUNCTIONS_CONCAT_ABC_TEST_FILE_NAME = "ets/Functions_concat.abc";
 constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
 constexpr std::string_view INS_ABC_TEST_FILE_NAME = "ets/Ins.abc";
 constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "ets/LiteralArray.abc";
@@ -87,6 +88,15 @@ public:
     void SetUp() override
     {
         (void)driver.Compile(FUNCTIONS_ABC_TEST_FILE_NAME.data());
+        prog = &(driver.GetProgram());
+    }
+};
+
+class Abc2ProgramFunctionsConcatTest : public Abc2ProgramTest {
+public:
+    void SetUp() override
+    {
+        (void)driver.Compile(FUNCTIONS_CONCAT_ABC_TEST_FILE_NAME.data());
         prog = &(driver.GetProgram());
     }
 };
@@ -255,6 +265,43 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
         "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;",
+    };
+    std::set<std::string> existingFunctions {};
+    for (auto &it : prog->functionStaticTable) {
+        existingFunctions.insert(it.first);
+    }
+    for (auto &it : prog->functionInstanceTable) {
+        existingFunctions.insert(it.first);
+    }
+    EXPECT_THAT(existingFunctions, ::testing::ContainerEq(expectedFunctions));
+}
+
+TEST_F(Abc2ProgramFunctionsConcatTest, Functions)
+{
+    const std::string prefix = "Functions.LambdaObject-ETSGLOBAL$lambda$invoke";
+    const std::set<std::string> expectedFunctions = {
+        "Functions.Cls._ctor_:Functions.Cls;void;",
+        "Functions.Cls.func_f:Functions.Cls;i32;i32;",
+        "Functions.Cls.func_i:Functions.Cls;i32;i32;",
+        "Functions.Cls.func_s:i32;i32;",
+        "Functions.ETSGLOBAL._$init$_:void;",
+        "Functions.ETSGLOBAL._cctor_:void;",
+        "Functions.ETSGLOBAL.bar:f64;std.core.String;",
+        "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda$invoke$0:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.lambda$invoke$1:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.main:void;",
+        prefix + "$0.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.String;std.core.String;",
+        prefix + "$0._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;void;",
+        prefix + "$0.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$0;std.core.Object;std.core.Object;",
+        prefix + "$1.$_invoke:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.String;std.core.String;",
+        prefix + "$1._ctor_:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;void;",
+        prefix + "$1.invoke1:Functions.LambdaObject-ETSGLOBAL$lambda$invoke$1;std.core.Object;std.core.Object;",
+        "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
+        "std.core.Object._ctor_:std.core.Object;void;",
+        "std.core.Runtime.failedTypeCastException:std.core.Object;std.core.String;u1;std.core.ClassCastError;",
+        "std.core.StringBuilder.concatStrings:std.core.String;std.core.String;std.core.String;",
+        "std.core.StringBuilder.toString:f64;std.core.String;",
     };
     std::set<std::string> existingFunctions {};
     for (auto &it : prog->functionStaticTable) {
