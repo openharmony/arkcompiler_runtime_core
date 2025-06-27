@@ -41,9 +41,10 @@ def main() -> None:
     if init_runner.should_runner_initialize(sys.argv):
         init_runner.initialize(RunnerEnv.get_mandatory_props())
         sys.exit(0)
-    local_env = Path(__file__).with_name(".env")
-    urunner_path = Path(__file__).parent
-    RunnerEnv(local_env=local_env, urunner_path=urunner_path).load_environment()
+    RunnerEnv(
+        local_env=Path.cwd().with_name(".env"),
+        urunner_path=Path(__file__).parent,
+        global_env=init_runner.urunner_env_path).load_environment()
 
     args = get_args()
     logger = load_config(args)
@@ -112,7 +113,7 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     return failed_tests
 
 
-def load_config(args: dict[str, Any]) -> Log: # type: ignore[explicit-any]
+def load_config(args: dict[str, Any]) -> Log:  # type: ignore[explicit-any]
     runner_verbose = "runner.verbose"
     test_suite_const = "test-suite"
 

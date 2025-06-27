@@ -21,7 +21,8 @@ from typing import cast
 from unittest import TestCase
 from unittest.mock import patch
 
-from runner.environment import RunnerEnv
+from runner.environment import MandatoryPropDescription, RunnerEnv
+from runner.init_runner import InitRunner, MandatoryProp
 from runner.test.test_utils import assert_not_raise, random_suffix
 from runner.utils import write_2_file
 
@@ -47,10 +48,10 @@ class EnvironmentTest(TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_get_mandatory_props_empty(self) -> None:
         expected = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': (None, True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': (None, True),
-            'PANDA_BUILD': (None, True),
-            'WORK_DIR': (None, False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp(None, is_path=True, require_exist=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp(None, is_path=True, require_exist=True),
+            'PANDA_BUILD': MandatoryProp(None, is_path=True, require_exist=True),
+            'WORK_DIR': MandatoryProp(None, is_path=True, require_exist=False)
         }
         props = RunnerEnv.get_mandatory_props()
         self.assertIsInstance(props, dict)
@@ -64,10 +65,10 @@ class EnvironmentTest(TestCase):
     }, clear=True)
     def test_get_mandatory_props_full(self) -> None:
         expected = {
-            'ARKCOMPILER_RUNTIME_CORE_PATH': ("aaa", True),
-            'ARKCOMPILER_ETS_FRONTEND_PATH': ("bbb", True),
-            'PANDA_BUILD': ("ccc", True),
-            'WORK_DIR': ("ddd", False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': MandatoryProp("aaa", is_path=True, require_exist=True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': MandatoryProp("bbb", is_path=True, require_exist=True),
+            'PANDA_BUILD': MandatoryProp("ccc", is_path=True, require_exist=True),
+            'WORK_DIR': MandatoryProp("ddd", is_path=True, require_exist=False)
         }
         props = RunnerEnv.get_mandatory_props()
         self.assertIsInstance(props, dict)
@@ -78,8 +79,8 @@ class EnvironmentTest(TestCase):
         # test
         self.assertRaises(
             OSError,
-            RunnerEnv.check_expand_mandatory_prop,
-            'ARKCOMPILER_RUNTIME_CORE_PATH', must_exist=True)
+            RunnerEnv.expand_mandatory_prop,
+            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
 
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': non_existing_path_01,
@@ -88,8 +89,8 @@ class EnvironmentTest(TestCase):
         # test
         self.assertRaises(
             OSError,
-            RunnerEnv.check_expand_mandatory_prop,
-            'ARKCOMPILER_RUNTIME_CORE_PATH', must_exist=True)
+            RunnerEnv.expand_mandatory_prop,
+            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
 
     @patch.dict(os.environ, {
         'WORK_DIR': non_existing_path_01,
@@ -99,8 +100,8 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_expand_mandatory_prop,
-            params=['WORK_DIR', False])
+            function=RunnerEnv.expand_mandatory_prop,
+            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
 
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': existing_path_01,
@@ -112,8 +113,8 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_expand_mandatory_prop,
-            params=['ARKCOMPILER_RUNTIME_CORE_PATH', True])
+            function=RunnerEnv.expand_mandatory_prop,
+            params=[MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True)])
         # clear up
         self.clear_dir(Path(existing_path_01))
 
@@ -127,18 +128,19 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_expand_mandatory_prop,
-            params=['WORK_DIR', False])
+            function=RunnerEnv.expand_mandatory_prop,
+            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
         # clear up
         self.clear_dir(Path(existing_path_02))
 
     @patch.dict(os.environ, {}, clear=True)
     def test_load_local_env_not_set(self) -> None:
+        init_runner = InitRunner()
         # test
         assert_not_raise(
             test_case=self,
             cls=Exception,
-            function=RunnerEnv().load_local_env,
+            function=RunnerEnv(global_env=init_runner.urunner_env_path).load_local_env,
             params=[])
 
     @patch.dict(os.environ, {}, clear=True)
@@ -146,10 +148,11 @@ class EnvironmentTest(TestCase):
         # preparation
         local_env = Path(__file__).with_name(f".env.{random_suffix()}")
         # test
+        init_runner = InitRunner()
         assert_not_raise(
             test_case=self,
             cls=Exception,
-            function=RunnerEnv(local_env=local_env).load_local_env,
+            function=RunnerEnv(global_env=init_runner.urunner_env_path, local_env=local_env).load_local_env,
             params=[])
 
     @patch.dict(os.environ, {}, clear=True)
@@ -157,8 +160,9 @@ class EnvironmentTest(TestCase):
         # preparation
         local_env_path = Path(__file__).with_name(f".env.{random_suffix()}")
         write_2_file(local_env_path, "aaa=bbb")
+        init_runner = InitRunner()
         # test
-        runner_env = RunnerEnv(local_env=local_env_path)
+        runner_env = RunnerEnv(local_env=local_env_path, global_env=init_runner.urunner_env_path)
         self.assertIsNotNone(runner_env.local_env_path)
         self.assertEqual(cast(Path, runner_env.local_env_path).name, local_env_path.name)
         runner_env.load_local_env()
