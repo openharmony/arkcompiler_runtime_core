@@ -441,6 +441,9 @@ export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousV
 export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: number, array: FixedArray<boolean>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -1401,6 +1404,9 @@ export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValu
 export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: number, array: FixedArray<byte>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -2361,6 +2367,9 @@ export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousVal
 export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: number, array: FixedArray<short>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -3321,6 +3330,9 @@ export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue
 export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: number, array: FixedArray<int>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -4281,6 +4293,9 @@ export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValu
 export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: number, array: FixedArray<long>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -5241,6 +5256,9 @@ export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousVal
 export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: number, array: FixedArray<float>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -6209,6 +6227,9 @@ export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousVa
 export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: number, array: FixedArray<double>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
@@ -7177,6 +7198,9 @@ export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValu
 export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: number, array: FixedArray<char>) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
         callbackfn(self[i], i.toDouble(), self)
     }
 }
