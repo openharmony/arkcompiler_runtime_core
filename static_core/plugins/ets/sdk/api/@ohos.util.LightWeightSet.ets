@@ -90,11 +90,11 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @returns true if the value was added, false otherwise
      */
-    add(value: T): boolean {
-        if (this.buckets.hasKey(value)) {
+    add(obj: T): boolean {
+        if (this.buckets.hasKey(obj)) {
             return false;
         }
-        this.buckets.set(value, value);
+        this.buckets.set(obj, obj);
         return true;
     }
 
