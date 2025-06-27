@@ -1585,28 +1585,70 @@ static T *EtsEscompatTypedArraySliceImpl(T *thisArray, EtsInt begin, EtsInt end)
     return reinterpret_cast<T *>(dstArrayHandle.GetPtr());
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Type)                                      \
-    /* CC-OFFNXT(G.PRE.02) name part */                                           \
-    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArraySlice( \
-        ark::ets::EtsEscompat##Type##Array *thisArray, EtsInt begin, EtsInt end)  \
-    {                                                                             \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
-        return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);             \
-    }  // namespace ark::ets::intrinsics
+extern "C" ark::ets::EtsEscompatInt8Array *EtsEscompatInt8ArraySlice(ark::ets::EtsEscompatInt8Array *thisArray,
+                                                                     EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
 
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int8)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int16)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int32)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(BigInt64)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Float32)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Float64)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt8)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt16)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt32)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(BigUInt64)
-ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt8Clamped)
+extern "C" ark::ets::EtsEscompatInt16Array *EtsEscompatInt16ArraySlice(ark::ets::EtsEscompatInt16Array *thisArray,
+                                                                       EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
 
-#undef ETS_ESCOMPAT_TYPED_ARRAY_SLICE
+extern "C" ark::ets::EtsEscompatInt32Array *EtsEscompatInt32ArraySlice(ark::ets::EtsEscompatInt32Array *thisArray,
+                                                                       EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatBigInt64Array *EtsEscompatBigInt64ArraySlice(
+    ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatFloat32Array *EtsEscompatFloat32ArraySlice(ark::ets::EtsEscompatFloat32Array *thisArray,
+                                                                           EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatFloat64Array *EtsEscompatFloat64ArraySlice(ark::ets::EtsEscompatFloat64Array *thisArray,
+                                                                           EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatUInt8Array *EtsEscompatUInt8ArraySlice(ark::ets::EtsEscompatUInt8Array *thisArray,
+                                                                       EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatUInt16Array *EtsEscompatUInt16ArraySlice(ark::ets::EtsEscompatUInt16Array *thisArray,
+                                                                         EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatUInt32Array *EtsEscompatUInt32ArraySlice(ark::ets::EtsEscompatUInt32Array *thisArray,
+                                                                         EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatBigUInt64Array *EtsEscompatBigUInt64ArraySlice(
+    ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
+
+extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArraySlice(
+    ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt begin, EtsInt end)
+{
+    return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
+}
 
 }  // namespace ark::ets::intrinsics

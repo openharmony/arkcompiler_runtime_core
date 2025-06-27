@@ -125,26 +125,47 @@ bool EmitUint16ArrayWith(Inst *inst);
 bool EmitUint32ArrayWith(Inst *inst);
 bool EmitBigUint64ArrayWith(Inst *inst);
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define EMIT_TYPED_ARRAY_SLICE(Name, Type)                             \
-    /* CC-OFFNXT(G.PRE.02) name part */                                \
-    bool Emit##Name##ArraySlice(Inst *inst)                            \
-    {                                                                  \
-        auto eid = RuntimeInterface::EntrypointId::Type##_ARRAY_SLICE; \
-        /* CC-OFFNXT(G.PRE.05) function gen */                         \
-        return EmitFastPath(inst, eid, 3U);                            \
-    }
-
-EMIT_TYPED_ARRAY_SLICE(Int8, INT8)
-EMIT_TYPED_ARRAY_SLICE(Int16, INT16)
-EMIT_TYPED_ARRAY_SLICE(Int32, INT32)
-EMIT_TYPED_ARRAY_SLICE(BigInt64, BIG_INT64)
-EMIT_TYPED_ARRAY_SLICE(Float32, FLOAT32)
-EMIT_TYPED_ARRAY_SLICE(Float64, FLOAT64)
-EMIT_TYPED_ARRAY_SLICE(Uint8, UINT8)
-EMIT_TYPED_ARRAY_SLICE(Uint16, UINT16)
-EMIT_TYPED_ARRAY_SLICE(Uint32, UINT32)
-EMIT_TYPED_ARRAY_SLICE(BigUint64, BIG_UINT64)
-EMIT_TYPED_ARRAY_SLICE(Uint8Clamped, UINT8_CLAMPED)
-
-#undef EMIT_TYPED_ARRAY_SLICE
+bool EmitInt8ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_SLICE, 3U);
+}
+bool EmitInt16ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_SLICE, 3U);
+}
+bool EmitInt32ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_SLICE, 3U);
+}
+bool EmitBigInt64ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_SLICE, 3U);
+}
+bool EmitFloat32ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_SLICE, 3U);
+}
+bool EmitFloat64ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_SLICE, 3U);
+}
+bool EmitUint8ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_ARRAY_SLICE, 3U);
+}
+bool EmitUint16ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT16_ARRAY_SLICE, 3U);
+}
+bool EmitUint32ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT32_ARRAY_SLICE, 3U);
+}
+bool EmitBigUint64ArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_UINT64_ARRAY_SLICE, 3U);
+}
+bool EmitUint8ClampedArraySlice(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_CLAMPED_ARRAY_SLICE, 3U);
+}
