@@ -133,7 +133,9 @@ export namespace Intl {
         }
 
         formatToParts(value: number, unit: RelativeTimeFormatUnit): RelativeTimeFormatPart[] {
-            return this.formatToPartsImpl(value, unit)
+            let val = this.formatImpl(value, unit)
+            let part: RelativeTimeFormatPart = {type: 'literal', value: val}
+            return [part]
         }
 
         resolvedOptions(): ResolvedRelativeTimeFormatOptions {
@@ -152,7 +154,6 @@ export namespace Intl {
         }
 
         private native formatImpl(value: number, unit: string): string
-        private native formatToPartsImpl(value: number, unit: string): RelativeTimeFormatPart[]
         private native resolvedOptionsImpl(): ResolvedRelativeTimeFormatOptions
 
         private static supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[] {
