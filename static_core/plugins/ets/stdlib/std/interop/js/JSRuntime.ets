@@ -430,7 +430,7 @@ export final class JSRuntime {
 
     private static createFinalizationRegistry(): FinalizationRegistry<Object> {
         let fq = new FinalizationRegistry<Object>((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
-        if (JSRuntime.finQueue == null)
+        if (JSRuntime.finQueue == undefined)
         {
             JSRuntime.finQueue = fq;
         }
@@ -468,7 +468,7 @@ export final class JSRuntime {
     // As this field is used only in the tests, it is okay for now, because the Interop Context instances obtain
     // the correct finreg values during their initialization. But of course we should keep all the finreg references
     // here and use the tests to verify that they function correctly.
-    private static finQueue: FinalizationRegistry<Object> | null = null;
+    private static finQueue: FinalizationRegistry<Object> | undefined = undefined;
 
     public static CreateIterator(val: JSValue): MimicJSValueIteratableIterator {
         return new MimicJSValueIteratableIterator(val);
