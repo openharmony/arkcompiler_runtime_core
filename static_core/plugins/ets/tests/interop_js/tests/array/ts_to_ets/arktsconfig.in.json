@@ -12,6 +12,7 @@
         "dependencies": {
             "test_array_ts": {
                 "language": "js",
+                "path": "${CMAKE_CURRENT_SOURCE_DIR}/ts_array.d.ets",
                 "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/ts_array"
             }
         }

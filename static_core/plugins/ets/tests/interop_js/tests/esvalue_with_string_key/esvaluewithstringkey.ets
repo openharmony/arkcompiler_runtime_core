@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import {
-    A,
-} from 'esvaluewithstringkey_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/esvalue_with_string_key/esvaluewithstringkey')
+let etsA = module.getProperty('A');
 
 function checkFieldAccessByDot(): int {
-    let e: JSValue = new A();
-    let res = e.Ekko;
+    let e: ESValue = etsA.instantiate();
+    let res = e.getProperty('Ekko').toString();
     if (res === 'ekko') {
         return 0;
     } else {
@@ -28,8 +27,8 @@ function checkFieldAccessByDot(): int {
 }
 
 function checkEsvalueWithStringLiteral(): int {
-    let e: JSValue = new A();
-    let res = e['Ekko'];
+    let e: ESValue = etsA.instantiate();
+    let res = e.getProperty('Ekko').toString();
     if (res === 'ekko') {
         return 0;
     } else {
@@ -38,9 +37,9 @@ function checkEsvalueWithStringLiteral(): int {
 }
 
 function checkEsvalueWithStringKey() : int {
-    let e: JSValue = new A();
+    let e: ESValue = etsA.instantiate();
     let stringKey: string = 'Ekko';
-    let res = e[stringKey];
+    let res = e.getProperty(stringKey).toString();
     if (res === 'ekko') {
         return 0;
     } else {
@@ -48,12 +47,12 @@ function checkEsvalueWithStringKey() : int {
     }
 }
 
-function foo(es: JSValue, str: string): string {
-    return es[str];
+function foo(es: ESValue, str: string): string {
+    return es.getProperty(str).toString();
 }
 
 function checkEsvalueWithStringFromFoo() : int {
-    let es: JSValue = new A();
+    let es: ESValue = etsA.instantiate();
     let stringKey: string = 'Ekko';
     let res: string = foo(es, stringKey);
 
@@ -65,9 +64,9 @@ function checkEsvalueWithStringFromFoo() : int {
 }
 
 function checkEsvalueWithExpression(): int {
-    let es: JSValue = new A();
+    let es: ESValue = etsA.instantiate();
     let stringKey: string = 'Ekk';
-    let res = es[stringKey + 'o'];
+    let res = es.getProperty(stringKey + 'o').toString();
 
     if (res === 'ekko') {
         return 0;
@@ -77,8 +76,8 @@ function checkEsvalueWithExpression(): int {
 }
 
 function checkEsvalueWithExpressionStrLiterals(): int {
-    let es: JSValue = new A();
-    let res = es['Ekk' + 'o'];
+    let es: ESValue = etsA.instantiate();
+    let res = es.getProperty('Ekk' + 'o').toString();
 
     if (res === 'ekko') {
         return 0;
@@ -88,10 +87,10 @@ function checkEsvalueWithExpressionStrLiterals(): int {
 }
 
 function checkEsvalueWithExpressionStrings(): int {
-    let es: JSValue = new A();
+    let es: ESValue = etsA.instantiate();
     let stringKey1: string = 'Ekk';
     let stringKey2: string = 'o';
-    let res = es[stringKey1 + stringKey2];
+    let res = es.getProperty(stringKey1 + stringKey2).toString();
 
     if (res === 'ekko') {
         return 0;

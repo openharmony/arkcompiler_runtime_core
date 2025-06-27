@@ -33,7 +33,7 @@ function CheckCatchRangeError(fn: JSValue, message: string): boolean {
     let res: boolean;
     let ranErr = new RangeError(message);
     try {
-        fn();
+        ESValue.wrap(fn).invoke();
         res = false; 
     } catch (err) {
         res = ((err).toString() === ranErr.toString()) &&
@@ -48,7 +48,7 @@ function CheckCatchReferenceError(fn: JSValue, message: string): boolean {
     let res: boolean;
     let ranErr = new ReferenceError(message);
     try {
-        fn();
+        ESValue.wrap(fn).invoke();
         res = false; 
     } catch (err) {
         res = ((err).toString() === ranErr.toString()) &&
@@ -63,7 +63,7 @@ function CheckCatchSyntaxError(fn: JSValue, message: string): boolean {
     let res: boolean;
     let synErr = new SyntaxError(message);
     try {
-        fn();
+        ESValue.wrap(fn).invoke();
         res = false; 
     } catch (err) {
         res = ((err).toString() === synErr.toString()) &&
@@ -78,7 +78,7 @@ function CheckCatchURIError(fn: JSValue, message: string): boolean {
     let res: boolean;
     let uriErr = new URIError(message);
     try {
-        fn();
+        ESValue.wrap(fn).invoke();
         res = false; 
     } catch (err) {
         res = ((err).toString() === uriErr.toString()) &&
@@ -93,7 +93,7 @@ function CheckCatchTypeError(fn: JSValue, message: string): boolean {
     let res: boolean;
     let uriErr = new TypeError(message);
     try {
-        fn();
+        ESValue.wrap(fn).invoke();
         res = false; 
     } catch (err) {
         res = ((err).toString() === uriErr.toString()) &&

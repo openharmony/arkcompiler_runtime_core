@@ -15,84 +15,65 @@
 
 // Pass ArkTS object to JS (wrapping) (ArkTS calls TS)
 
-import {
-  updateObjectId,
-  getOuterObj,
-  testOuterObject,
-  testSecondObjCls,
-  testObjCls,
-  testObject,
-  getName,
-  getDetails,
-  changeName,
-  getEdu,
-  getObjectId,
-  getId,
-  getObjectName
-  } from 'js_import'
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/objects_passing/objects_passing')
+let updateObjectId = module.getProperty('updateObjectId');
+let getOuterObj = module.getProperty('getOuterObj');
+let testOuterObject = module.getProperty('testOuterObject');
+let testSecondObjCls = module.getProperty('testSecondObjCls');
+let testObjCls1 = module.getProperty('testObjCls1');
+let testObjCls2 = module.getProperty('testObjCls2');
+let testObject = module.getProperty('testObject');
+let getName = module.getProperty('getName');
+let getDetails = module.getProperty('getDetails');
+let changeName = module.getProperty('changeName');
+let getEdu = module.getProperty('getEdu');
+let getObjectId = module.getProperty('getObjectId');
+let getId = module.getProperty('getId');
+let getObjectName = module.getProperty('getObjectName');
 
 //Test 1 Get public property
- function getPublicProperty():string{
-    return getName(testObjCls)
+function getPublicProperty(): string {
+    return getName.invoke(testObjCls1, 'name').toString();
+}
 
- }
-
- // Test 2 Use public method
-
- function usePublicMethod():string{
-  return getDetails(testObjCls)
- }
+// Test 2 Use public method
+function usePublicMethod(): string {
+    return getDetails.invoke(testObjCls1).toString();
+}
 
 // Test 3 Change public propeerty
+function changePublicProperty(): string {
+    const newName = changeName.invoke(testObjCls2, 'NewTestName').toString();
+    return newName;
+}
 
- function changePublicProperty():string{
-  const newName = changeName(testObjCls, 'NewTestName')
-  changeName(testObjCls, 'TestName')
-  return newName
- }
+// Test 4 Get readonly property 
+function getReadonlyProperty(): string {
+    return getEdu.invoke(testObjCls1).toString();
+}
 
- // Test 4 Get readonly property 
+//Test 5 Get protected property
+function getProtectedProperty(): number {
+    return getObjectId.invoke(testSecondObjCls).toNumber();
+}
 
- function getReadonlyProperty():string{
-  return getEdu(testObjCls)
+//Test 6 Use protected method from subclass
+function useProtectedMethod(): number {
+    return getId.invoke(testSecondObjCls).toNumber();
+}
 
- }
+//Test 7 get property from object
+function getPropertyFromObject(): string {
+    return getObjectName.invoke(testObject).toString();
+}
 
+// Test 8 Test with outer object
+function getOuterObject(): number {
+    return getOuterObj.invoke(testOuterObject).toNumber();
+}
 
- //Test 5 Get protected property
-
- function getProtectedProperty():number{
-
-  return getObjectId(testSecondObjCls)
-
- }
-
- //Test 6 Use protected method from subclass
-
- function useProtectedMethod():number{
-
-  return getId(testSecondObjCls)
- }
-
- //Test 7 get property from object
-
- function getPropertyFromObject():string{
-
-  return getObjectName(testObject)
- }
-
- // Test 8 Test with outer object
-
- function getOuterObject():number{
- 
-   return getOuterObj(testOuterObject)
-
- }
-
- // Test 8 Update object value
-
- function updateObjectValue():number{
-  updateObjectId(testObject, 333)
-  return testObject.id
- }
-
+// Test 8 Update object value
+function updateObjectValue(): number {
+    updateObjectId.invoke(testObject, 333);
+    return testObject.getProperty('id').toNumber();
+}
