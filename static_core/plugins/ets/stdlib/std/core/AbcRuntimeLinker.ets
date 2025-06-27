@@ -21,11 +21,23 @@ package std.core;
 export class AbcRuntimeLinker extends RuntimeLinker {
     private parentLinker: RuntimeLinker;
     private abcFiles: FixedArray<AbcFile | undefined> = [];
+    private sharedLibraryLoaders: AbcRuntimeLinker[];
 
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super();
         this.parentLinker = parentLinker ?? getBootRuntimeLinker();
         this.abcFiles = new (AbcFile | undefined)[paths.length];
+        this.sharedLibraryLoaders = [];
+        for (let i = 0; i < paths.length; i++) {
+            this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
+        }
+    }
+
+    public constructor(parentLinker: RuntimeLinker | undefined, paths: string[], sharedLibraryLoaders: AbcRuntimeLinker[]) {
+        super();
+        this.parentLinker = parentLinker ?? getBootRuntimeLinker();
+        this.abcFiles = new (AbcFile | undefined)[paths.length];
+        this.sharedLibraryLoaders = sharedLibraryLoaders;
         for (let i = 0; i < paths.length; i++) {
             this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i]);
         }
@@ -62,6 +74,15 @@ export class AbcRuntimeLinker extends RuntimeLinker {
         let optClass = this.parentLinker.loadClassSafe(clsName, init);
         if (optClass) {
             return optClass;
+        }
+        for(let sharedLibraryLoader of this.sharedLibraryLoaders) {
+            if (sharedLibraryLoader == null) {
+                continue;
+            }
+            let sharedClass = sharedLibraryLoader.loadClassSafe(clsName, init);
+            if (sharedClass) {
+                return sharedClass;
+            }
         }
         return this.loadClassFromAbcFiles(clsName, init);
     }
