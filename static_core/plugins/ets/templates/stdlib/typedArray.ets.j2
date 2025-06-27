@@ -127,18 +127,29 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if N == 'BigInt64' %}
                 this.setUnsafe(i, arr.$_get(i).getLong())
+                {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafe(i, 0);
+                } else {
+                    this.setUnsafe(i, {{N}}Array.doubleToInt(temp));
+                }
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
+                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}());
                 {%- endif %}
             }
         } else {
-          let x = {{N}}Array.from(elements)
-          this.byteLength = x.byteLength
-          this.lengthInt = x.lengthInt
-          this.buffer = x.buffer
-          this.byteOffset = x.byteOffset
+            let x = {{N}}Array.from(elements)
+            this.byteLength = x.byteLength
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffset = x.byteOffset
         }
     }
+
+    {%- if N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+    public static native doubleToInt(d: double): {{T}};
+    {%- endif %}
 
     /**
      * Creates an {{N}}Array with respect to data, byteOffset and length.
@@ -867,7 +878,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length.toInt() - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length.toInt(); ++i) {
         {%- if (N == 'BigInt64') %}
             let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
             this.$_set(offset + i, truncatedVal{{fromElementCompat}})
@@ -897,8 +908,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- if argType == 'number' %}
             {%- if N == 'BigInt64' %}
             res.setUnsafe(i, items[i].toLong())
-            {%- elif (N != 'Float32') and (N != 'Float64') %}
-            res.setUnsafe(i, res.zeroIfInfinity(items[i]){{fromElementCompat}})
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            let temp: double = items[i];
+            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                res.setUnsafe(i, 0);
+            } else {
+                res.setUnsafe(i, {{N}}Array.doubleToInt(temp));
+            }
             {%- else %}
             res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T and T != 'double' else ''}})
             {%- endif %}

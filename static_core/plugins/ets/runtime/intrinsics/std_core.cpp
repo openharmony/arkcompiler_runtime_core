@@ -34,6 +34,10 @@
 #include "runtime/handle_scope-inl.h"
 #include "types/ets_primitives.h"
 
+#ifndef UINT8_MAX
+#define UINT8_MAX (255)
+#endif  // UINT8_MAX
+
 namespace ark::ets::intrinsics {
 
 extern "C" EtsInt CountInstancesOfClass(EtsTypeAPIType *paramType)
@@ -244,6 +248,18 @@ extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
 extern "C" EtsBoolean StdSystemAtomicFlagGet(EtsAtomicFlag *instance)
 {
     return instance->GetValue();
+}
+
+extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
+{
+    // Convert the double value to uint8_t with clamping
+    if (val <= 0 || std::isnan(val)) {
+        return 0;
+    }
+    if (val > UINT8_MAX) {
+        return UINT8_MAX;
+    }
+    return std::lrint(val);
 }
 
 }  // namespace ark::ets::intrinsics

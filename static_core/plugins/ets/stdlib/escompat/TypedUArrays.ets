@@ -102,6 +102,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public constructor() {
         this(0)
     }
+    public native static toUint8Clamped(val: double): int;
 
     /**
      * Creates an Uint8ClampedArray with respect to data accessed via Iterable<Number> interface
@@ -115,7 +116,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafeClamp(i, arr.$_get(i).toInt())
+                this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr.$_get(i)))
             }
         } else {
             let x = Uint8ClampedArray.from(elements)
@@ -714,7 +715,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), array[i].toInt())
         }
     }
@@ -1846,7 +1847,12 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).toInt())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafeClamp(i, 0);
+                } else {
+                    this.setUnsafeClamp(i, Uint8Array.doubleToInt(temp));
+                }
             }
         } else {
             let x = Uint8Array.from(elements)
@@ -1856,6 +1862,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteOffsetInt = x.byteOffsetInt
         }
     }
+    public static native doubleToInt(d: double): Int;
 
     /**
      * Creates an Uint8Array with respect to data, byteOffset and length.
@@ -2464,7 +2471,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
         }
@@ -3591,7 +3598,12 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).toInt())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafeClamp(i, 0);
+                } else {
+                    this.setUnsafeClamp(i, Uint16Array.doubleToInt(temp));
+                }
             }
         } else {
             let x = Uint16Array.from(elements)
@@ -3601,6 +3613,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteOffsetInt = x.byteOffsetInt
         }
     }
+    public static native doubleToInt(d: double): Int;
 
     /**
      * Creates an Uint16Array with respect to data, byteOffset and length.
@@ -4216,7 +4229,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toInt())
         }
@@ -5328,7 +5341,12 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).toLong())
+                let temp: double = arr.$_get(i);
+                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
+                    this.setUnsafeClamp(i, 0);
+                } else {
+                    this.setUnsafeClamp(i, Uint32Array.doubleToInt(temp));
+                }
             }
         } else {
             let x = Uint32Array.from(elements)
@@ -5338,6 +5356,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteOffsetInt = x.byteOffsetInt
         }
     }
+    public static native doubleToInt(d: double): Long;
 
     /**
      * Creates an Uint32Array with respect to data, byteOffset and length.
@@ -5973,7 +5992,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), v.toLong())
         }
@@ -7738,7 +7757,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = array.length - 1; i >= 0; --i) {
+        for (let i = 0; i < array.length; ++i) {
             this.setUnsafeClamp(insertPos.toInt() + i.toInt(), array[i].getULong())
         }
     }

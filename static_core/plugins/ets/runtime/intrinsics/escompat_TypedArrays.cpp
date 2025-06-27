@@ -25,6 +25,17 @@
 #include "cross_values.h"
 #include "types/ets_object.h"
 
+constexpr uint64_t DOUBLE_SIGNIFICAND_SIZE = 52;
+constexpr uint64_t DOUBLE_EXPONENT_BIAS = 1023;
+constexpr uint64_t DOUBLE_SIGN_MASK = 0x8000000000000000ULL;
+constexpr uint64_t DOUBLE_EXPONENT_MASK = (0x7FFULL << DOUBLE_SIGNIFICAND_SIZE);
+constexpr uint64_t DOUBLE_SIGNIFICAND_MASK = 0x000FFFFFFFFFFFFFULL;
+constexpr uint64_t DOUBLE_HIDDEN_BIT = (1ULL << DOUBLE_SIGNIFICAND_SIZE);
+#define INT64_BITS (64)
+#define INT8_BITS (8)
+#define INT16_BITS (16)
+#define INT32_BITS (32)
+
 namespace ark::ets::intrinsics {
 
 template <typename T>
@@ -833,9 +844,27 @@ T *EtsEscompatTypedArraySort(T *thisArray)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     Span<EtsByte> data(static_cast<EtsByte *>(dataPtr) + static_cast<size_t>(thisArray->GetByteOffset()), nBytes);
-    std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
-              reinterpret_cast<typename T::ElementType *>(data.end()));
-    return thisArray;
+    if constexpr (std::is_same_v<ElementType, EtsFloat> || std::is_same_v<ElementType, EtsDouble>) {
+        std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
+                  reinterpret_cast<typename T::ElementType *>(data.end()),
+                  [](const typename T::ElementType &a, const typename T::ElementType &b) {
+                      if (std::isnan(a) && std::isnan(b)) {
+                          return false;  // Keep order of NaN elements
+                      }
+                      if (std::isnan(a)) {
+                          return false;  // NaN is greater than any number
+                      }
+                      if (std::isnan(b)) {
+                          return true;  // Any number is less than NaN
+                      }
+                      return a < b;
+                  });
+        return thisArray;
+    } else {
+        std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
+                  reinterpret_cast<typename T::ElementType *>(data.end()));
+        return thisArray;
+    }
 }
 
 extern "C" ark::ets::EtsEscompatInt8Array *EtsEscompatInt8ArraySort(ark::ets::EtsEscompatInt8Array *thisArray)
@@ -1608,5 +1637,69 @@ ETS_ESCOMPAT_TYPED_ARRAY_SLICE(BigUInt64)
 ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt8Clamped)
 
 #undef ETS_ESCOMPAT_TYPED_ARRAY_SLICE
+
+extern "C" EtsInt TypedArrayDoubleToInt(EtsDouble val, uint32_t bits = INT32_BITS)
+{
+    int32_t ret = 0;
+    auto u64 = bit_cast<uint64_t>(val);
+    int exp = static_cast<int>((u64 & DOUBLE_EXPONENT_MASK) >> DOUBLE_SIGNIFICAND_SIZE) - DOUBLE_EXPONENT_BIAS;
+    if (exp < static_cast<int>(bits - 1)) {
+        // smaller than INT<bits>_MAX, fast conversion
+        ret = static_cast<int32_t>(val);
+    } else if (exp < static_cast<int>(bits + DOUBLE_SIGNIFICAND_SIZE)) {
+        // Still has significand bits after mod 2^<bits>
+        // Get low <bits> bits by shift left <64 - bits> and shift right <64 - bits>
+        uint64_t value = (((u64 & DOUBLE_SIGNIFICAND_MASK) | DOUBLE_HIDDEN_BIT)
+                          << (static_cast<uint32_t>(exp) - DOUBLE_SIGNIFICAND_SIZE + INT64_BITS - bits)) >>
+                         (INT64_BITS - bits);
+        ret = static_cast<int32_t>(value);
+        if ((u64 & DOUBLE_SIGN_MASK) == DOUBLE_SIGN_MASK && ret != INT32_MIN) {
+            ret = -ret;
+        }
+    } else {
+        // No significand bits after mod 2^<bits>, contains NaN and INF
+        ret = 0;
+    }
+    return ret;
+}
+
+extern "C" EtsInt TypedArrayDoubleToInt32(EtsDouble val)
+{
+    return TypedArrayDoubleToInt(val, INT32_BITS);
+}
+
+extern "C" EtsShort TypedArrayDoubleToInt16(EtsDouble val)
+{
+    return TypedArrayDoubleToInt(val, INT16_BITS);
+}
+
+extern "C" EtsByte TypedArrayDoubleToInt8(EtsDouble val)
+{
+    return TypedArrayDoubleToInt(val, INT8_BITS);
+}
+
+extern "C" EtsLong TypedArrayDoubleToUint32(EtsDouble val)
+{
+    // Convert to int32_t first, then cast to uint32_t
+    auto ret = TypedArrayDoubleToInt(val, INT32_BITS);
+    auto pTmp = reinterpret_cast<uint32_t *>(&ret);
+    return static_cast<EtsLong>(static_cast<uint32_t>(*pTmp));
+}
+
+extern "C" EtsInt TypedArrayDoubleToUint16(EtsDouble val)
+{
+    // Convert to int16_t first, then cast to uint16_t
+    auto ret = TypedArrayDoubleToInt(val, INT16_BITS);
+    auto pTmp = reinterpret_cast<int16_t *>(&ret);
+    return static_cast<EtsInt>(static_cast<uint16_t>(*pTmp));
+}
+
+extern "C" EtsInt TypedArrayDoubleToUint8(EtsDouble val)
+{
+    // Convert to int8_t first, then cast to uint8_t
+    auto ret = TypedArrayDoubleToInt(val, 8);
+    auto pTmp = reinterpret_cast<uint8_t *>(&ret);
+    return static_cast<EtsInt>(reinterpret_cast<uint8_t>(*pTmp));
+}
 
 }  // namespace ark::ets::intrinsics

@@ -3720,6 +3720,16 @@ intrinsics:
     codegen_func: CreateBigUint64ArrayWith
     llvm_codegen_func: EmitBigUint64ArrayWith
 
+  - name: Uint8ClampedArrayToUint8Clamped
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: toUint8Clamped
+    static: true
+    signature:
+      ret: i32
+      args: [f64]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayToUint8Clamped
+
 ########################
 # escompat.taskpool #
 ########################
@@ -4137,6 +4147,72 @@ intrinsics:
       ret: i32
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToInt
+    safe_intrinsic: true
+
+  - name: Int32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt32
+    safe_intrinsic: true
+  
+  - name: Int16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i16
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt16
+    safe_intrinsic: true
+
+  - name: Int8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i8
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToInt8
+    safe_intrinsic: true
+
+  - name: Uint32ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint32
+    safe_intrinsic: true
+  
+  - name: Uint16ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint16
+    safe_intrinsic: true
+
+  - name: Uint8ArrayDoubleToInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: doubleToInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::TypedArrayDoubleToUint8
     safe_intrinsic: true
 
   - name: StdCoreDoubleToLong
