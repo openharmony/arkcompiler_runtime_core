@@ -15,87 +15,76 @@
 import {uri} from "@ohos.uri"
 
 function IsAbsoluteTest001() {
-  let uri = new uri.UriEntry("f/tp://username:password@www.baidu.com:88/path?query#fagment");
-  let res: boolean = uri.isAbsolute();
-  arktest.assertFalse(res);
+  let muri = new uri.URI("f/tp://username:password@www.test.com:88/path?query#fagment");
+  arktest.assertFalse(muri.checkIsAbsolute());
 }
 
 function IsAbsoluteTest002() {
-  let uri = new uri.UriEntry("ftp://username:password@www.baidu.com:88/path?query#fagment");
-  let res: boolean = uri.isAbsolute();
-  arktest.assertTrue(res);
+  let muri = new uri.URI("ftp://username:password@www.test.com:88/path?query#fagment");
+  arktest.assertTrue(muri.checkIsAbsolute());
 }
 
 function IsAbsoluteTest003() {
-  let uri = new uri.UriEntry("htt/p://username:password@www.baidu.com:88/path?query#fagment");
-  let res: boolean = uri.isAbsolute();
-  arktest.assertFalse(res);
+  let muri = new uri.URI("htt/p://username:password@www.test.com:88/path?query#fagment");
+  arktest.assertFalse(muri.checkIsAbsolute());
 }
 
 function IsRelativeTest001() {
-  let uri = new uri.UriEntry("https://www.example.com/aaa");
-  let res = uri.isRelative();
-  arktest.assertFalse(res);
+  let muri = new uri.URI("https://www.example.com/aaa");
+  arktest.assertFalse(muri.checkRelative());
 }
 
 function IsRelativeTest002() {
-  let uri = new uri.UriEntry("/bbb");
-  let res = uri.isRelative();
-  arktest.assertTrue(res);
+  let muri = new uri.URI("/bbb");
+  arktest.assertTrue(muri.checkRelative());
 }
 
 function IsOpaqueTest001() {
-  let uri = new uri.UriEntry("aaa:user@example.com");
-  let res = uri.isOpaque();
-  arktest.assertTrue(res);
+  let muri = new uri.URI("aaa:user@example.com");
+  arktest.assertTrue(muri.checkOpaque());
 }
 
 function IsOpaqueTest002() {
-  let uri = new uri.UriEntry("content://com.example/bbb");
-  let res = uri.isOpaque();
-  arktest.assertFalse(res);
+  let muri = new uri.URI("content://com.example/bbb");
+  arktest.assertFalse(muri.checkOpaque());
 }
 
 function IsHierarchicalTest001() {
-  let uri = new uri.UriEntry("https://www.example.com/path/to/resource");
-  let res = uri.isHierarchical();
-  arktest.assertTrue(res);
+  let muri = new uri.URI("https://www.example.com/path/to/resource");
+  arktest.assertTrue(muri.checkHierarchical());
 }
 
 function IsHierarchicalTest002() {
-  let uri = new uri.UriEntry("/path/to/resource");
-  let res = uri.isHierarchical();
-  arktest.assertTrue(res);
+  let muri = new uri.URI("/path/to/resource");
+  arktest.assertTrue(muri.checkHierarchical());
 }
 
 function IsHierarchicalTest003() {
-  let uri = new uri.UriEntry("tel:123456789");
-  let res = uri.isHierarchical();
-  arktest.assertFalse(res);
+  let muri = new uri.URI("tel:123456789");
+  arktest.assertFalse(muri.checkHierarchical());
 }
 
 function AddQueryValueTest001() {
-  let uri = new uri.UriEntry("https://username:password@host:8080/file?aaa=1#myfragment");
-  let temp = uri.addQueryValue("bbb", "2");
-  arktest.assertEQ(temp, "https://username:password@host:8080/file?aaa=1&bbb=2#myfragment");
+  let muri = new uri.URI("https://username:password@host:8080/file?aaa=1#myfragment");
+  let temp = muri.addQueryValue("bbb", "2");
+  arktest.assertEQ(temp.toString(), "https://username:password@host:8080/file?aaa=1&bbb=2#myfragment");
 }
 
 function AddQueryValueTest002() {
-  let uri = new uri.UriEntry("mao:user@example.com");
-  let temp = uri.addQueryValue("bb", "cc");
-  arktest.assertEQ(temp, "mao:?bb=cc");
+  let muri = new uri.URI("mao:user@example.com");
+  let temp = muri.addQueryValue("bb", "cc");
+  arktest.assertEQ(temp.toString(), "mao:?bb=cc");
 }
 
 function ClearQueryTest001() {
-  let uri = new uri.UriEntry("https://username:password@host:8080/file?aaa=1#myfragment");
-  let temp = uri.clearQuery();
-  arktest.assertEQ(temp, "https://username:password@host:8080/file#myfragment");
+  let muri = new uri.URI("https://username:password@host:8080/file?aaa=1#myfragment");
+  let temp = muri.clearQuery();
+  arktest.assertEQ(temp.toString(), "https://username:password@host:8080/file#myfragment");
 }
 
 
 function main(): int {
   let suite = new arktest.ArkTestsuite("URI UT tests");
-
 
   suite.addTest("IsAbsoluteTest001", IsAbsoluteTest001);
   suite.addTest("IsAbsoluteTest002", IsAbsoluteTest002);

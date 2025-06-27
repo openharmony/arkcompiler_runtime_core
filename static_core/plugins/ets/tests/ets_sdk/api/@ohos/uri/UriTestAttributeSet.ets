@@ -403,10 +403,10 @@ function SetEncodedSsp() {
 }
 
 function UriSetNullAttribute() {
-    let gaogao = new uri.URI('http://gg:gaogao@www.baidu.com:99/path/path?query#fagment');
+    let gaogao = new uri.URI('http://gg:gaogao@www.test.com:99/path/path?query#fagment');
     arktest.assertEQ(gaogao.scheme, "http");
     arktest.assertEQ(gaogao.path, "/path/path");
-    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.baidu.com:99");
+    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.test.com:99");
     arktest.assertEQ(gaogao.userInfo, "gg:gaogao");
     arktest.assertEQ(gaogao.query, "query");
     arktest.assertEQ(gaogao.fragment, "fagment");
@@ -414,7 +414,7 @@ function UriSetNullAttribute() {
     arktest.assertEQ(gaogao.encodedPath, "/path/path");
     arktest.assertEQ(gaogao.encodedQuery, "query");
     arktest.assertEQ(gaogao.encodedFragment, "fagment");
-    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.baidu.com:99");
+    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.test.com:99");
 
     gaogao.scheme = null;
     gaogao.path = null;
@@ -431,7 +431,7 @@ function UriSetNullAttribute() {
 
     arktest.assertEQ(gaogao.scheme, "http");
     arktest.assertEQ(gaogao.path, "/path/path");
-    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.baidu.com:99");
+    arktest.assertEQ(gaogao.authority, "gg:gaogao@www.test.com:99");
     arktest.assertEQ(gaogao.userInfo, "gg:gaogao");
     arktest.assertEQ(gaogao.query, "query");
     arktest.assertEQ(gaogao.fragment, "fagment");
@@ -439,15 +439,15 @@ function UriSetNullAttribute() {
     arktest.assertEQ(gaogao.encodedPath, "/path/path");
     arktest.assertEQ(gaogao.encodedQuery, "query");
     arktest.assertEQ(gaogao.encodedFragment, "fagment");
-    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.baidu.com:99");
+    arktest.assertEQ(gaogao.encodedAuthority, "gg:gaogao@www.test.com:99");
 
     // NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.baidu.com:99/path/path?query");
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.baidu.com:99/path/path?query");
+    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");
+    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");
     // gaogao.ssp = null;
     // gaogao.encodedSSP = null;
-    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.baidu.com:99/path/path?query");
-    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.baidu.com:99/path/path?query");
+    // arktest.assertEQ(gaogao.ssp, "//gg:gaogao@www.test.com:99/path/path?query");
+    // arktest.assertEQ(gaogao.encodedSSP, "//gg:gaogao@www.test.com:99/path/path?query");
 }
 
 function main(): int {

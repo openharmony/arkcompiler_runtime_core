@@ -12,68 +12,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {uri} from "@ohos.uri";
+import { uri } from "@ohos.uri";
+import { BusinessError } from "@ohos.base";
 
 function ConstructorTest033() {
-  let uri = new uri.UriEntry("/username/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "/username/path/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function ConstructorTest034() {
-  let uri = new uri.UriEntry("http:/userna^me:password@www.baidu.com:99/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "http:/userna^me:password@www.test.com:99/path/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function ConstructorTest035() {
-  let uri = new uri.UriEntry("http://?query#fagment");
-  arktest.assertEQ(uri.getScheme(), "http");
+  let uri = new uri.URI("http://?query#fagment");
+  arktest.assertEQ(uri.scheme, "http");
 }
 
 function ConstructorTest036() {
-  let uri = new uri.UriEntry("http:/username:password@www.baidu.com:99/pa^th/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "http:/username:password@www.test.com:99/pa^th/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function ConstructorTest037() {
-  let uri = new uri.UriEntry("http:/username:password@www.baidu.com:9^9/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "http:/username:password@www.test.com:9^9/path/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function ConstructorTest038() {
-  let uri = new uri.UriEntry("http:/username:password@[1:0:0:1:2:1:2:1]:9^9/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "http:/username:password@[1:0:0:1:2:1:2:1]:9^9/path/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
+
+
 }
 
 function ConstructorTest039() {
-  let uri = new uri.UriEntry("http:/username:password@[1:0:0:1:2:1:2:1/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "");
+  let uriText = "http:/username:password@[1:0:0:1:2:1:2:1/path/path?query#fagment";
+  arktest.expectNoThrow(() => { new uri.URI(uriText) });
 }
 
 function ConstructorTest040() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:sfvs1:2:1:2:1]:99/path1?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "Ipv6 does not conform to the rule.");
+  let uriText = "http://gg:gaogao@[1:0:0:sfvs1:2:1:2:1]:99/path1?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Ipv6 does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
+
 function ConstructorTest041() {
-  let uri = new uri.UriEntry("http、:/username:password@www.baidu.com:99/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "Scheme does not conform to the rule.");
+  let uriText = "http、:/username:password@www.test.com:99/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest042() {
-  let uri = new uri.UriEntry("http://[ffff::1]:、99/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "Port does not conform to the rule.");
+  let uriText = "http://[ffff::1]:、99/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Port does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest043() {
-  let uri = new uri.UriEntry("http://[ffff::1:99/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "IPv6 is missing a closing bracket.");
+  let uriText = "http://[ffff::1:99/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The IPv6 is missing a closing bracket.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest044() {
-  let uri = new uri.UriEntry("http://ffff::1]:99/path/path?query#fagment");
-  arktest.assertEQ(uri.getErrStr(), "Host does not conform to the rule.");
+  let uriText = "http://ffff::1]:99/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Host does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
- 
+function testConstructorThrow(uriText: string, errText: string) {
+  let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).toString() == errText)
+  }
+  arktest.expectThrow((): void throws => { let that = new uri.URI(uriText); }, exceptionCheck)
+}
+
 
 function main(): int {
   let suite = new arktest.ArkTestsuite("URI UT tests");
