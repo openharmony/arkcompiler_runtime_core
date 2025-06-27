@@ -141,6 +141,10 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     escompatProcessListUnhandledJobs = FindMethod<true>(escompatProcess, "listUnhandledJobs", "Lescompat/Array;:V");
     escompatProcessListUnhandledPromises =
         FindMethod<true>(escompatProcess, "listUnhandledPromises", "Lescompat/Array;:V");
+
+    coreTuple = findType(TUPLE);
+    escompatRegExpExecArray = findType(REG_EXP_EXEC_ARRAY);
+    escompatJsonReplacer = findType(JSON_REPLACER);
 }
 
 }  // namespace ark::ets

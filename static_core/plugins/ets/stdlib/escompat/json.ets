@@ -243,8 +243,17 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: NullishType): String {
+        if (obj === undefined) {
+            return "undefined"
+        }
+        let output = JSON.stringifyFast(obj)
+        if (output !== undefined) {
+            return output
+        }
         return new JSONWriter().write(obj)
     }
+
+    private static native stringifyFast(obj: NullishType): String;
 
     public static stringify(obj: JsonReplacer): String {
         const record = obj.jsonReplacer();
