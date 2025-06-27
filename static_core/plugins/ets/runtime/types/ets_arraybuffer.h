@@ -203,6 +203,18 @@ public:
         return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
     }
 
+    /// Initializes ArrayBuffer with its own array.
+    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
+    {
+        ASSERT(array != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
+        byteLength_ = length;
+        nativeData_ =
+            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
+        ASSERT(nativeData_ != 0);
+        isResizable_ = ToEtsBoolean(false);
+    }
+
     template <typename T>
     T GetElement(uint32_t index, uint32_t offset);
     template <typename T>

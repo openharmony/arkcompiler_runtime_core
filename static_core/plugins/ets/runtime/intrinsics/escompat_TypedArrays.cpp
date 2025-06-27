@@ -1503,4 +1503,110 @@ TYPED_ARRAY_WITH_CALL_DECL(UInt16, EtsInt)
 TYPED_ARRAY_WITH_CALL_DECL(UInt32, EtsLong)
 TYPED_ARRAY_WITH_CALL_DECL(BigUInt64, EtsLong)
 
+static EtsEscompatArrayBuffer *CreateEtsEscompatArrayBuffer(EtsCoroutine *coro, PandaEtsVM *vm, size_t length,
+                                                            void **resultData)
+{
+    ASSERT((coro != nullptr) && (vm != nullptr));
+    auto *bufferClass = PlatformTypes(coro)->escompatArrayBuffer->GetRuntimeClass();
+    EtsHandle<EtsEscompatArrayBuffer> bufferHandle(
+        coro, reinterpret_cast<EtsEscompatArrayBuffer *>(vm->GetHeapManager()->AllocateObject(
+                  // CC-OFFNXT(G.FMT.06-CPP) project code style
+                  bufferClass, sizeof(EtsEscompatArrayBuffer), DEFAULT_ALIGNMENT, nullptr,
+                  mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, false)));
+    if (UNLIKELY(bufferHandle.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+
+    auto *packetClass = vm->GetClassLinker()->GetClassRoot(EtsClassRoot::BYTE_ARRAY)->GetRuntimeClass();
+    EtsHandle<EtsByteArray> packetHandle(coro, reinterpret_cast<EtsByteArray *>(ark::coretypes::Array::Create(
+                                                   // CC-OFFNXT(G.FMT.06-CPP) project code style
+                                                   packetClass, static_cast<ArraySizeT>(std::max(length, size_t(1))),
+                                                   ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, false)));
+    if (UNLIKELY(packetHandle.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+
+    bufferHandle->Initialize(coro, length, packetHandle.GetPtr());
+
+    if (resultData != nullptr) {
+        *resultData = bufferHandle->GetData();
+    }
+
+    return bufferHandle.GetPtr();
+}
+
+template <typename T>
+static T *EtsEscompatTypedArraySliceImpl(T *thisArray, EtsInt begin, EtsInt end)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    auto *vm = PandaEtsVM::GetCurrent();
+    EtsHandle<EtsObject> srcArrayHandle(coro, thisArray);
+    if (UNLIKELY((vm == nullptr) || (srcArrayHandle.GetPtr() == nullptr))) {
+        return nullptr;
+    }
+
+    auto srcLength = static_cast<EtsInt>(reinterpret_cast<T *>(srcArrayHandle.GetPtr())->GetLengthInt());
+    begin = NormalizeIndex(begin, srcLength);
+    end = NormalizeIndex(end, srcLength);
+    EtsInt lengthInt = begin <= end ? end - begin : EtsInt(0);
+    auto elementSize = static_cast<size_t>(reinterpret_cast<T *>(srcArrayHandle.GetPtr())->GetBytesPerElement());
+    auto byteLength = static_cast<size_t>(lengthInt) * elementSize;
+    auto byteOffset = static_cast<size_t>(reinterpret_cast<T *>(srcArrayHandle.GetPtr())->GetByteOffset());
+    auto *srcData = GetNativeData(reinterpret_cast<T *>(srcArrayHandle.GetPtr()));
+    if (UNLIKELY(srcData == nullptr)) {
+        return nullptr;
+    }
+
+    void *dst = nullptr;
+    EtsHandle<EtsEscompatArrayBuffer> bufferHandle(coro, CreateEtsEscompatArrayBuffer(coro, vm, byteLength, &dst));
+    if (UNLIKELY((bufferHandle.GetPtr() == nullptr) || (dst == nullptr))) {
+        return nullptr;
+    }
+
+    auto *arrayClass = reinterpret_cast<T *>(srcArrayHandle.GetPtr())->GetClass()->GetRuntimeClass();
+    EtsHandle<EtsObject> dstArrayHandle(coro, reinterpret_cast<T *>(vm->GetHeapManager()->AllocateObject(
+                                                  // CC-OFFNXT(G.FMT.06-CPP) project code style
+                                                  arrayClass, sizeof(T), DEFAULT_ALIGNMENT, nullptr,
+                                                  mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, false)));
+    if (UNLIKELY(dstArrayHandle.GetPtr() == nullptr)) {
+        return nullptr;
+    }
+
+    reinterpret_cast<T *>(dstArrayHandle.GetPtr())
+        ->Initialize(coro, lengthInt, elementSize, 0, bufferHandle.GetPtr(),
+                     reinterpret_cast<T *>(srcArrayHandle.GetPtr())->GetName());
+    if (byteLength != size_t(0)) {
+        auto *src = ToVoidPtr(ToUintPtr(srcData) + byteOffset + begin * elementSize);
+        [[maybe_unused]] auto error = memmove_s(dst, byteLength, src, byteLength);
+        ASSERT(error == EOK);
+    }
+
+    return reinterpret_cast<T *>(dstArrayHandle.GetPtr());
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Type)                                      \
+    /* CC-OFFNXT(G.PRE.02) name part */                                           \
+    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArraySlice( \
+        ark::ets::EtsEscompat##Type##Array *thisArray, EtsInt begin, EtsInt end)  \
+    {                                                                             \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                    \
+        return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);             \
+    }  // namespace ark::ets::intrinsics
+
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int8)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int16)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Int32)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(BigInt64)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Float32)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(Float64)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt8)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt16)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt32)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(BigUInt64)
+ETS_ESCOMPAT_TYPED_ARRAY_SLICE(UInt8Clamped)
+
+#undef ETS_ESCOMPAT_TYPED_ARRAY_SLICE
+
 }  // namespace ark::ets::intrinsics

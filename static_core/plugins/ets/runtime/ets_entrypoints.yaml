@@ -1737,3 +1737,335 @@
       - ark::ObjectHeader*  # deserialized string
       - void*               # serialization buffer
       - int32_t             # buffer length
+
+- name: Int8ArraySlice
+  entrypoint: Int8ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int8ArraySliceOddSaved
+  entrypoint: EtsEscompatInt8ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int8ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatInt8ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int16ArraySlice
+  entrypoint: Int16ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int16ArraySliceOddSaved
+  entrypoint: EtsEscompatInt16ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int16ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatInt16ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int32ArraySlice
+  entrypoint: Int32ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int32ArraySliceOddSaved
+  entrypoint: EtsEscompatInt32ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Int32ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatInt32ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigInt64ArraySlice
+  entrypoint: BigInt64ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigInt64ArraySliceOddSaved
+  entrypoint: EtsEscompatBigInt64ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigInt64ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatBigInt64ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float32ArraySlice
+  entrypoint: Float32ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float32ArraySliceOddSaved
+  entrypoint: EtsEscompatFloat32ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float32ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatFloat32ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float64ArraySlice
+  entrypoint: Float64ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float64ArraySliceOddSaved
+  entrypoint: EtsEscompatFloat64ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Float64ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatFloat64ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+
+
+- name: Uint8ArraySlice
+  entrypoint: Uint8ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint8ArraySliceOddSaved
+  entrypoint: EtsEscompatUInt8ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint8ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatUInt8ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint16ArraySlice
+  entrypoint: Uint16ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint16ArraySliceOddSaved
+  entrypoint: EtsEscompatUInt16ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint16ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatUInt16ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint32ArraySlice
+  entrypoint: Uint32ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint32ArraySliceOddSaved
+  entrypoint: EtsEscompatUInt32ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint32ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatUInt32ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigUint64ArraySlice
+  entrypoint: BigUint64ArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigUint64ArraySliceOddSaved
+  entrypoint: EtsEscompatBigUInt64ArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: BigUint64ArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatBigUInt64ArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint8ClampedArraySlice
+  entrypoint: Uint8ClampedArraySliceTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint8ClampedArraySliceOddSaved
+  entrypoint: EtsEscompatUInt8ClampedArraySlice
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx
+
+- name: Uint8ClampedArraySliceSlowPathOddSaved
+  entrypoint: EtsEscompatUInt8ClampedArraySlice
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array  
+    - int32_t                  # begin idx
+    - int32_t                  # end idx

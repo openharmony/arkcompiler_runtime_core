@@ -93,7 +93,7 @@ public:
         byteLength_ = byteLength;
     }
 
-    EtsDouble GetBytesPerElement() const
+    EtsInt GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
@@ -112,6 +112,19 @@ public:
     {
         return reinterpret_cast<EtsString *>(
             ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_)));
+    }
+
+    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset, EtsObject *buffer,
+                    EtsString *name)
+    {
+        ASSERT(buffer != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_),
+                                  name != nullptr ? name->GetCoreType() : nullptr);
+        bytesPerElement_ = bytesPerElement;
+        byteOffset_ = byteOffset;
+        byteLength_ = lengthInt * bytesPerElement;
+        lengthInt_ = lengthInt;
     }
 
 private:
