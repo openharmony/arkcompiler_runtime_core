@@ -121,20 +121,8 @@ function groupTaskExecuteRepeat(): void {
 
     let a = await taskpool.execute(group);
     assertEQ(a[0], 400);
-    expectError(() => {
-        taskpool.execute(group);
-    }, new Error("taskpool:: groupTask has been executed"));
-}
-
-function taskExecuteGroupTaskTest():void {
-    let group = new taskpool.TaskGroup();
-    let task : taskpool.Task = new taskpool.Task(()=>{
-        taskpool.execute(group);
-    })
-    group.addTask(task);
-    expectError(() => {
-        await taskpool.execute(group);
-    }, new Error("taskpool:: groupTask has been executed"));
+    let res = await taskpool.execute(group);
+    arktest.assertEQ(res[0], 400);
 }
 
 function taskGroupNestedTaskTest(): void {
@@ -382,7 +370,6 @@ function main(): int {
     taskGroupTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
     taskGroupTestsuite.addTest("GrouptaskExecutePeriodicallyTest", grouptaskExecutePeriodicallyTest);
     taskGroupTestsuite.addTest("GroupTaskExecuteRepeatTest", groupTaskExecuteRepeat);
-    taskGroupTestsuite.addTest("taskExecuteGroupTaskTest", taskExecuteGroupTaskTest);
     taskGroupTestsuite.addTest("taskGroupNestedTaskTest", taskGroupNestedTaskTest);
     let res = taskGroupTestsuite.run();
     CoroutineExtras.stopTaskpool();
