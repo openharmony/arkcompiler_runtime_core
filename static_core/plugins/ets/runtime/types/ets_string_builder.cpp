@@ -704,6 +704,10 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
     auto index = sbHandle->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto compress = sbHandle->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);
     EtsString *s = EtsString::AllocateNonInitializedString(length, compress);
+    if (UNLIKELY(coroutine->HasPendingException())) {
+        ASSERT(s == nullptr);
+        return nullptr;
+    }
     EtsClass *sKlass = EtsClass::FromRuntimeClass(s->GetCoreType()->ClassAddr<Class>());
     auto *buf = EtsObjectArray::FromCoreType(sbHandle->GetFieldObject(SB_BUFFER_OFFSET)->GetCoreType());
     if (compress) {

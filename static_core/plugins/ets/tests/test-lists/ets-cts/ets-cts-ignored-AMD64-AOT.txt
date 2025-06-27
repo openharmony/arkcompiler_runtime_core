@@ -19,3 +19,6 @@
 #26235
 07.expressions/06.spread_expression/spex_meth_13.ets
 07.expressions/06.spread_expression/spex_meth_15.ets
+
+#26913
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oom-string.ets
