@@ -71,7 +71,7 @@ function testWithTagValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: false, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -123,7 +123,7 @@ function testWithTagValueCbWithIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -172,7 +172,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -224,7 +224,7 @@ function testWithAttributeValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -254,7 +254,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 

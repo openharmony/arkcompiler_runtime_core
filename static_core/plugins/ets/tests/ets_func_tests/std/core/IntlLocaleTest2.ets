@@ -61,13 +61,13 @@ function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Loc
 
 function test2String() : int {
     {
-        const l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "buddhist"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("en-u-ca-gregory", {calendar : "buddhist"} as Intl.LocaleOptions)
         arktest.assertFalse(l.language == null)
         arktest.assertFalse(l.language == undefined)
         arktest.assertEQ(l.toString(), l.language!.toLowerCase() + "-u-ca-buddhist")
     }
     {
-        const l = new Intl.Locale("en-u-kn", {"numeric" : false} as Intl.LocaleOptions)
+        const l = new Intl.Locale("en-u-kn", {numeric : false} as Intl.LocaleOptions)
         arktest.assertFalse(l.language == null)
         arktest.assertFalse(l.language == undefined)
         arktest.assertEQ(l.toString(), l.language!.toLowerCase())
@@ -85,7 +85,7 @@ function test2String() : int {
 }
 
 function testMinimize() : int {
-    let l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "chinese"} as Intl.LocaleOptions)
+    let l = new Intl.Locale("en-u-ca-gregory", {calendar : "chinese"} as Intl.LocaleOptions)
     l = l.minimize()
     arktest.assertEQ(l.region, undefined)
     arktest.assertEQ(l.script, undefined)
@@ -125,51 +125,51 @@ function testMaximize() : int {
 function testTagAndOptions() : int {
     {
         // NOTE(ekaterinazaytseva) set collation in u-ext & in options
-        const l = new Intl.Locale("ru-u-co-emoji", {"collation" : "phonebk"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-co-emoji", {collation : "phonebk"} as Intl.LocaleOptions)
         arktest.assertEQ(l.collation, "phonebk")
     }
     {
         // NOTE(ekaterinazaytseva) set collation in u-ext & in options
-        const l = new Intl.Locale("ru-u-co-invalid", {"collation" : "phonebk"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-co-invalid", {collation : "phonebk"} as Intl.LocaleOptions)
         arktest.assertEQ(l.collation, "phonebk")
     }
     {
         // NOTE(ekaterinazaytseva) set numeric in u-ext & in options
-        const l = new Intl.Locale("ru-u-kn", {"numeric" : false} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-kn", {numeric : false} as Intl.LocaleOptions)
         arktest.assertFalse(l.numeric as boolean)
     }
     {
         // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
-        const l = new Intl.Locale("ru-u-ca-invalid", {"calendar" : "gregory"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-ca-invalid", {calendar : "gregory"} as Intl.LocaleOptions)
         arktest.assertEQ(l.calendar, "gregory")
     }
     {
         // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
-        const l = new Intl.Locale("ru-u-ca-japanese", {"calendar" : "gregory"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-ca-japanese", {calendar : "gregory"} as Intl.LocaleOptions)
         arktest.assertEQ(l.calendar, "gregory")
     }
     {
         // set caseFirst in u-ext & in options
-        const l = new Intl.Locale("ru-u-kf-upper", {"caseFirst" : "lower"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-kf-upper", {caseFirst : "lower"} as Intl.LocaleOptions)
         arktest.assertEQ(l.caseFirst, "lower")
     }
     {
         // NOTE(ekaterinazaytseva) set caseFirst in u-ext & in options
-        const l = new Intl.Locale("ru-u-kf-invalid", {"caseFirst" : "lower"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-kf-invalid", {caseFirst : "lower"} as Intl.LocaleOptions)
         arktest.assertEQ(l.caseFirst, "lower")
     }
     {
         // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
-        const l = new Intl.Locale("ru-u-nu-invalid", {"numberingSystem" : "arab"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-nu-invalid", {numberingSystem : "arab"} as Intl.LocaleOptions)
         arktest.assertEQ(l.numberingSystem, "arab")
     }
     {
         // set numberingSystem in u-ext & in options
-        processCreateLocaleError(() => new Intl.Locale("ru-u-nu-arab", {"numberingSystem" : "invalid"} as Intl.LocaleOptions))
+        processCreateLocaleError(() => new Intl.Locale("ru-u-nu-arab", {numberingSystem : "invalid"} as Intl.LocaleOptions))
     }
     {
         // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
-        const l = new Intl.Locale("ru-u-nu-arab", {"numberingSystem" : "adlm"} as Intl.LocaleOptions)
+        const l = new Intl.Locale("ru-u-nu-arab", {numberingSystem : "adlm"} as Intl.LocaleOptions)
         arktest.assertEQ(l.numberingSystem, "adlm")
     }
     {

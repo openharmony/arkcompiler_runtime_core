@@ -332,7 +332,7 @@ function testGetColumnNuber() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: tokenCb}
     parser.parseXml(options)
 
     let expectedTextStr = "{  : 1 }; { note : 63 }; {  : 67 }; { title : 74 }; {  : 79 }; { title : 87 }; \
