@@ -730,10 +730,6 @@
 17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
 17.experimental_features/17.packages/02.package_initializer/p4/init4_2.ets
 
-# 5. mb
-# Seems should be CTE, but now: 1. the test is positive; 2. CTE exists, but it looks like a bug with strange message
-10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_26.ets
-
 # 13.
 # Assertion in IsLegalBoxedPrimitiveConversion
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_n_5.ets
@@ -793,28 +789,13 @@
 # TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Object|null|undefined, Object|null|undefined]'
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
-# TypeError: Property 'dog' does not exist on type 'GermanShepherd' [2.ets:63:20] (Strange error on call GermanShepherd.guard())
-10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_26.ets
-
-# IrBuilder Assert Failed ((inputType == realInputType || (realInputType == DataType::ANY && (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) || (IsZeroConstant(input) && (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) || (inputType == DataType::ANY && input->IsConst() && realInputType == DataType::INT64) || (GetGraph()->IsThrowApplied() && (input->GetBasicBlock()->IsEndWithThrow() || ((input->GetOpcode() == Opcode::CatchPhi || input->GetOpcode() == Opcode::Phi) && (inst->GetOpcode() == Opcode::Phi || inst->GetOpcode() == Opcode::CatchPhi))))))
-07.expressions/29.assignment/01.simple_assignment_operator/ord25.ets
-
-# Segfault
-17.experimental_features/07.statements/01.for-of_type_annotation/for_of_n_5.ets
-
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
 03.types/15.literal_types/function_literal_type_7.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/07.casting_conversions_to_enumeration/cte_int_enum.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var-n_6.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var-n_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_meth/call-meth-n3_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr-n_6.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr-n_7.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss-n_6.ets
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss-n_7.ets
 07.expressions/12.indexing_expression/02.record_indexing_expression/ind_1.ets
 07.expressions/25.equality_expressions/eq_neg_101.ets
 07.expressions/25.equality_expressions/eq_neg_146.ets
@@ -824,12 +805,6 @@
 07.expressions/25.equality_expressions/eq_neg_54.ets
 07.expressions/25.equality_expressions/eq_neg_7.ets
 07.expressions/25.equality_expressions/eq_neg_99.ets
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/neg_2.ets
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_2.ets
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_3.ets
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_4.ets
-15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/overload_equivalent_example_5.ets
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_n_6.ets
 
 # end of 41
 
@@ -841,27 +816,12 @@
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_13.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_14.ets
 
-# 49 Type '(resolve: (p: String) => void, reject: (p: Object|null) => void) => void' is not compatible with
-# 49 type '(resolve: (value: String|PromiseLike<String>) => void, reject: (error: Error) => void) => void' at index 1
-17.experimental_features/15.coroutines/promise_class/p_0.ets
-17.experimental_features/15.coroutines/promise_class/p_1.ets
-17.experimental_features/15.coroutines/promise_class/p_2.ets
-17.experimental_features/15.coroutines/promise_class/p_3.ets
-17.experimental_features/15.coroutines/promise_class/p_4.ets
-17.experimental_features/15.coroutines/promise_class/p_5.ets
-
 # 50 RUNTIME_FAIL RangeError: Out of bounds
 05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
 05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
 
 # 52 ES2PANDA_NEG_FAIL missed cte: implicit cast T -> primitive
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
-
-# 53 'TypeError: Array initializer's type is not assignable to tuple type at index: 2
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_3.ets
 
 # 54 RUNTIME_FAIL ClassCastError: std.core.Float cannot be cast to std.core.Double
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
