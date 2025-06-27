@@ -836,7 +836,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * ECMA reference: https://tc39.es/ecma262/multipage/doubles-and-dates.html#sec-double.prototype.toexponential
      *
     */
-    public native toExponential(d: double): String;
+    private native toExponentialImpl(d: double): String;
     public native toExponentialWithNoDigit(): String;
 
     /**
@@ -847,6 +847,19 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     */
     public toExponential(): String {
         return this.toExponentialWithNoDigit();
+    }
+
+    /**
+     * toExponential() returns std.core.String representing the underlying double in exponential notation
+     *
+     * @returns the result of conversion
+     *
+    */
+    public toExponential(d?: double): String {
+        if (d == undefined) {
+            return this.toExponentialWithNoDigit()
+        }
+        return this.toExponentialImpl(d)
     }
 
     /**
@@ -904,7 +917,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed
      *
     */
-    public native toFixed(d: double): String;
+    public native toFixedImpl(d: double): String;
 
     /**
      * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
@@ -914,6 +927,19 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     */
     public toFixed(): String {
         return this.toFixed(0);
+    }
+
+    /**
+     * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
+     *
+     * @returns the result of conversion
+     *
+    */
+    public toFixed(d?: double): String {
+        if (d == undefined) {
+            return this.toFixedImpl(0)
+        }
+        return this.toFixedImpl(d)
     }
 
     /**

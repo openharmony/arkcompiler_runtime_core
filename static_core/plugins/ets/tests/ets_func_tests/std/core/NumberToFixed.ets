@@ -22,6 +22,8 @@ function main(): int {
     suite.addTest("number.toFixed(num), treatment of Scientific notation", testNumberToFixed);
     suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
     suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
+    suite.addTest('number.toFixed(num), the parameter is union', testUnionParameter)
+    suite.addTest('number.toFixed(num), the parameter is union', testUndefined)
     return suite.run()
 }
 
@@ -110,4 +112,15 @@ function testNegativeParameter() {
 
     const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
     arktest.expectThrow((): void => { a.toFixed(negative_digits) }, errorcheck)
+}
+
+function testUnionParameter() {
+    let num: Number | undefined = 2;
+    let actual: string = new Number(-1e22).toFixed(num);
+    arktest.assertEQ(actual, '-1e+22')
+}
+
+function testUndefined() {
+    let actual: string = new Number(-1e22).toFixed(undefined);
+    arktest.assertEQ(actual, '-1e+22')
 }
