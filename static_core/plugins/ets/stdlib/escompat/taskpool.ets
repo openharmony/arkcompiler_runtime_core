@@ -381,8 +381,6 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
             } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
-            } else if (this.isSubmitted) {
-                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -735,8 +733,6 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
             } else if (task.isDependent || task.dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
-            } else if (task.isSubmitted) {
-                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -952,9 +948,6 @@ export namespace taskpool {
      * @returns { Promise<Array<NullishType>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
-        if (group.isTaskAlreadySubmitted) {
-            throw new Error("taskpool:: groupTask has been executed");
-        }
         const tasksCount = group.tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
