@@ -1198,3 +1198,4 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/interface_override_with_object_example_return_neg_0.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_primitive_4.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_36.ets
+07.expressions/06.spread_expression/spex_47.ets
