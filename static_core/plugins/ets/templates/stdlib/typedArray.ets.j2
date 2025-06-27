@@ -1966,25 +1966,32 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     private final native getUnsafe(index: int): {{T}}
 
     internal setUnsafe(insertPos: int, val: {{T}}): void {
-        let startByte = insertPos * {{N}}Array.BYTES_PER_ELEMENT + this.byteOffset.toInt()
-        {%- if T == "float" %}
+        const BPE = {{N}}Array.BYTES_PER_ELEMENT.toInt()
+        let byteIndex = insertPos * BPE + this.byteOffset.toInt()
+        let buf = this.buffer
+        {%- if T != "byte" %}
+            {%- if T == "float" %}
         let bits = Float.bitCastToInt(val)
-        {%- elif T == "double" %}
+            {%- elif T == "double" %}
         let bits = Double.bitCastToLong(val)
-        {%- else %}
+            {%- else %}
         let bits = val
-        {%- endif %}
+            {%- endif %}
         if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT.toInt(); ++i) {
+            for (let i = 0; i < BPE; ++i) {
                 let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
-                this.buffer.set(startByte + i, byteVal)
+                buf.set(byteIndex++, byteVal)
             }
         } else {
-            for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT.toInt(); i++) {
+            byteIndex = byteIndex + BPE - 1 
+            for (let i = 0; i < BPE; ++i) {
                 let byteVal = ((bits >>> (i * 8)) & 0xff).toByte()
-                this.buffer.set(startByte + {{S - 1}} - i, byteVal)
+                buf.set(byteIndex--, byteVal)
             }
         }
+        {% else %}
+        buf.set(byteIndex, val)
+        {%- endif %}
     }
 
     /** Underlying ArrayBuffer */
