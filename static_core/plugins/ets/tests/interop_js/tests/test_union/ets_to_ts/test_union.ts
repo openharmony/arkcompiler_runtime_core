@@ -27,10 +27,10 @@ function testUnionType() {
   ASSERT_EQ(boolType, 'boolean');
 
   try {
-    class testClass {
+    class TestClass {
       prop: number = 1;
     }
-    testChildUnion(new testClass());
+    testChildUnion(new TestClass());
   } catch (err) {
     ASSERT_EQ(err.toString(), 'TypeError: Value is not assignable to Lunion/test/UnionClass;');
   }
