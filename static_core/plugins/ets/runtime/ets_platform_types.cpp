@@ -25,6 +25,35 @@
 
 namespace ark::ets {
 
+void EtsPlatformTypes::InitializeCaches()
+{
+    auto *charClass = this->coreString;
+    asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
+                                                             ark::SpaceType::SPACE_TYPE_OBJECT);
+
+    for (uint32_t i = 0; i < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE; ++i) {
+        auto *str = EtsString::CreateNewStringFromCharCode(i);
+        asciiCharCache_->Set(i, str);
+    }
+}
+
+void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
+{
+    if (asciiCharCache_ != nullptr) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
+    }
+}
+
+void EtsPlatformTypes::UpdateCachesVmRefs(const GCRootUpdater &updater) const
+{
+    if (asciiCharCache_ != nullptr) {
+        auto *obj = static_cast<ark::ObjectHeader *>(asciiCharCache_->GetCoreType());
+        if (updater(&obj)) {
+            asciiCharCache_ = reinterpret_cast<EtsTypedObjectArray<EtsString> *>(obj);
+        }
+    }
+}
+
 EtsPlatformTypes const *PlatformTypes(PandaEtsVM *vm)
 {
     return vm->GetClassLinker()->GetEtsClassLinkerExtension()->GetPlatformTypes();
@@ -81,7 +110,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto const findType = [classLinker](std::string_view descriptor) { return FindType(classLinker, descriptor); };
-
+    coreString = findType(STRING);
     coreBoolean = findType(BOX_BOOLEAN);
     coreByte = findType(BOX_BYTE);
     coreChar = findType(BOX_CHAR);
@@ -145,6 +174,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreTuple = findType(TUPLE);
     escompatRegExpExecArray = findType(REG_EXP_EXEC_ARRAY);
     escompatJsonReplacer = findType(JSON_REPLACER);
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        InitializeCaches();
+    }
 }
 
 }  // namespace ark::ets

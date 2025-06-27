@@ -23,11 +23,15 @@ namespace ark::ets {
 class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
+template <typename T>
+class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
+    static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
+    EtsClass *coreString {};  // IsStringClass
     EtsClass *coreBoolean;
     EtsClass *coreByte;
     EtsClass *coreChar;
@@ -94,10 +98,19 @@ public:
     EtsClass *escompatRegExpExecArray;
     EtsClass *escompatJsonReplacer;
 
+    /* Internal Caches */
+    void InitializeCaches();
+    void VisitRoots(const GCRootVisitor &visitor) const;
+    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
+    EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
+    {
+        return asciiCharCache_;
+    }
+
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
-
+    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     explicit EtsPlatformTypes(EtsCoroutine *coro);
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
