@@ -42,10 +42,42 @@ function main(): int {
  * @tc.level: Level 2
  */
 function testwrite003() {
-    let decoder = new util.StringDecoder('big5');
-    let input = new Uint8Array([167, 65, 166, 110]);
-    const decoded = decoder.write(input);
-    arktest.assertEQ(decoded, '你好');
+    {
+        let decoder = new util.StringDecoder('big5');
+        let input = new Uint8Array([167, 65, 166, 110]);
+        const decoded = decoder.write(input);
+        arktest.assertEQ(decoded, '你好');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-4');
+        let input = new Uint8Array([84,97,118,97,108,105,115,101,108,116,32,116,101,114,101,32,112,228,101,118,97,108]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Tavaliselt tere päeval');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-5');
+        let input = new Uint8Array([183,212,224,208,210,225,226,210,227,217,226,213]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Здравствуйте');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-6');
+        let input = new Uint8Array([229,209,205,200,199]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'مرحبا');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-7');
+        let input = new Uint8Array([195,229,233,225,32,243,239,245]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Γεια σου');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-14');
+        let input = new Uint8Array([68,105,111,108,99,104]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Diolch');
+    }
 }
 
 /**
@@ -58,10 +90,66 @@ function testwrite003() {
  * @tc.level: Level 2
  */
 function testwrite004() {
-    let decoder = new util.StringDecoder('iso-8859-2');
-    let input = new Uint8Array([0X61, 0X62, 0X63]);
-    const decoded = decoder.write(input);
-    arktest.assertEQ(decoded, 'abc');
+    {
+        let decoder = new util.StringDecoder('iso-8859-2');
+        let input = new Uint8Array([0X61, 0X62, 0X63]);
+        const decoded = decoder.write(input);
+        arktest.assertEQ(decoded, 'abc');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-2');
+        let input = new Uint8Array([83,122,105,97]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Szia');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-8');
+        let input = new Uint8Array([249,236,229,237]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'שלום');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('macintosh');
+        let input = new Uint8Array([142,163]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'é£');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-8-i');
+        let input = new Uint8Array([249,236,229,237]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'שלום');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-10');
+        let input = new Uint8Array([72,101,105]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Hei');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-13');
+        let input = new Uint8Array([83,118,101,105,107,105]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Sveiki');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-8859-15');
+        let input = new Uint8Array([72,111,108,97]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Hola');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('koi8-r');
+        let input = new Uint8Array([240,210,201,215,197,212,44,32,205,201,210,33]);
+        let data= stringDecoder.write(input);
+        arktest.assertEQ(data, 'Привет, мир!');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('koi8-u');
+        let input = new Uint8Array([240,210,201,215,166,212,44,32,211,215,166,212]);
+        let data = stringDecoder.write(input);
+        arktest.assertEQ(data, 'Привіт, світ');
+    }
 }
 
 /**
@@ -74,10 +162,62 @@ function testwrite004() {
  * @tc.level: Level 2
  */
 function testwrite005() {
-    let decoder = new util.StringDecoder('koi8-r');
-    let input = new Uint8Array([97, 98, 99]);
-    const decoded = decoder.write(input);
-    arktest.assertEQ(decoded, 'abc');
+    {
+        let decoder = new util.StringDecoder('koi8-r');
+        let input = new Uint8Array([97, 98, 99]);
+        const decoded = decoder.write(input);
+        arktest.assertEQ(decoded, 'abc');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('utf-8');
+        let uint8 = new Uint8Array([228,189,160,0,229,165,189]);
+        let resStr = stringDecoder.write(uint8);
+        arktest.assertEQ(resStr, '你\u0000好');
+        arktest.assertEQ(resStr.length, 3);
+    }
+    {
+
+        let stringDecoder = new util.StringDecoder('gb18030');
+        let uint8 = new Uint8Array([97,98,99,236,218,236,218]);
+        let res = stringDecoder.write(uint8);
+        arktest.assertEQ(res, 'abc熠熠');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('big5');
+        let uint8 = new Uint8Array([97,98,99,230,102,230,102]);
+        let res = stringDecoder.write(uint8);
+        arktest.assertEQ(res, 'abc熠熠');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('shift_jis');
+        let uint8 = new Uint8Array([130,177,130,241,130,201,130,191,130,205]);
+        let res = stringDecoder.write(uint8);
+        arktest.assertEQ(res, 'こんにちは');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('iso-2022-jp');
+        let uint8 = new Uint8Array([27,36,66,36,51,36,115,36,75,36,65,36,79,27,40,66]);
+        let res = stringDecoder.write(uint8);
+        arktest.assertEQ(res, 'こんにちは');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('ibm866');
+        let uint8 = new Uint8Array([135,164,224,160,162,225,226,162,227,169,226,165]);
+        let res = stringDecoder.write(uint8);
+        arktest.assertEQ(res, 'Здравствуйте');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('GBK');
+        let uint8 = new Uint8Array([97,98,99,236,218,236,218]);
+        let data= stringDecoder.write(uint8);
+        arktest.assertEQ(data, 'abc熠熠');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('GB2312');
+        let uint8 = new Uint8Array([97,98,99,236,218,236,218]);
+        let data= stringDecoder.write(uint8);
+        arktest.assertEQ(data, 'abc熠熠');
+    }
 }
 
 /**
@@ -105,10 +245,28 @@ function testwrite006() {
  * @tc.level: Level 2
  */
 function testend001() {
-    let decoder = new util.StringDecoder('macintosh');
-    let input = new Uint8Array([0X61]);
-    const decoded = decoder.end(input);
-    arktest.assertEQ(decoded, 'a');
+    {
+        let decoder = new util.StringDecoder('macintosh');
+        let input = new Uint8Array([0X61]);
+        const decoded = decoder.end(input);
+        arktest.assertEQ(decoded, 'a');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('utf-8');
+        let uint8 = new Uint8Array([0,228,189,160,229]);
+        let retStr = stringDecoder.write(uint8);
+        arktest.assertEQ(retStr, '\u0000你');
+        let uint8arr = new Uint8Array([165,189]);
+        let resStr = stringDecoder.end(uint8arr);
+        arktest.assertEQ(resStr, '好');
+    }
+    {
+        let stringDecoder = new util.StringDecoder('utf-8');
+        let uint8 = new Uint8Array([228,189,160,0,229,165,189]);
+        let resStr = stringDecoder.write(uint8);
+        arktest.assertEQ(resStr, '你\u0000好');
+        arktest.assertEQ(resStr.length, 3);
+    }
 }
 
 
@@ -164,11 +322,58 @@ function test_Decode_Test_001() {
  * @tc.level      : Level 0
  */
 function test_Decode_Test_002() {
-    let that = new util.TextEncoder('utf-16be')
-    let result = that.encodeInto('HelLoWorLd123?')
-    let decoder = new util.StringDecoder('utf-16be')
-    const decoded1 = decoder.write(result)
-    arktest.assertEQ(decoded1, 'HelLoWorLd123?')
+    {
+        let that = new util.TextEncoder('utf-16be')
+        let result = that.encodeInto('HelLoWorLd123?')
+        let decoder = new util.StringDecoder('utf-16be')
+        const decoded1 = decoder.write(result)
+        arktest.assertEQ(decoded1, 'HelLoWorLd123?')
+    }
+    {
+        let textEncoder = new util.TextEncoder();
+        let buffer = new ArrayBuffer(4);
+        let dest = new Uint8Array(buffer);
+        textEncoder.encodeIntoUint8Array('😃', dest);
+        let stringDecoder = new util.StringDecoder();
+        let result = stringDecoder.write(dest);
+        arktest.assertEQ(result, '😃');
+    }
+    {
+        let textEncoder = new util.TextEncoder();
+        let buffer = new ArrayBuffer(10);
+        let dest = new Uint8Array(buffer);
+        textEncoder.encodeIntoUint8Array('aé中😃', dest);
+        let stringDecoder = new util.StringDecoder();
+        let result = stringDecoder.write(dest);
+        arktest.assertEQ(result, 'aé中😃');
+    }
+    {
+        let textEncoder = new util.TextEncoder();
+        let buffer = new ArrayBuffer(4);
+        let dest = new Uint8Array(buffer);
+        textEncoder.encodeIntoUint8Array('😃🤞', dest);
+        let stringDecoder = new util.StringDecoder();
+        let result = stringDecoder.write(dest);
+        arktest.assertEQ(result, '😃');
+    }
+    {
+        let textEncoder = new util.TextEncoder();
+        let buffer = new ArrayBuffer(8);
+        let dest = new Uint8Array(buffer);
+        textEncoder.encodeIntoUint8Array('😃🤞', dest);
+        let stringDecoder = new util.StringDecoder();
+        let result = stringDecoder.write(dest);
+        arktest.assertEQ(result, '😃🤞');
+    }
+    {
+        let textEncoder = new util.TextEncoder();
+        let buffer = new ArrayBuffer(10);
+        let dest = new Uint8Array(buffer);
+        textEncoder.encodeIntoUint8Array('a😃🤞b', dest);
+        let stringDecoder = new util.StringDecoder();
+        let result = stringDecoder.write(dest);
+        arktest.assertEQ(result, 'a😃🤞b');
+    }
 }
 
 /**

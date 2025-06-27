@@ -24,7 +24,6 @@ namespace ark::ets::sdk::util {
 class UtilHelper {
 public:
     static UConverter *CreateConverter(const std::string &encStr, UErrorCode &codeflag);
-    static std::string ConvertToString(UChar *uchar);
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
@@ -50,7 +49,6 @@ public:
 
 private:
     ani_object ThrowError(ani_env *env, const std::string &message);
-    void FreedMemory(UChar *&pData);
     const char *pend_ {};
     int pendingLen_ {};
     UConverter *conv_ {};
