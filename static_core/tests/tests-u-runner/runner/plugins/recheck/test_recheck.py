@@ -33,7 +33,7 @@ class TestRecheck(TestFileBased):
     def do_run(self) -> TestFileBased:
         self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=self.flags,
-            test_abc='',
+            test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
 
