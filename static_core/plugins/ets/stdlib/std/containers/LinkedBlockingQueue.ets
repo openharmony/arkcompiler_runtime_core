@@ -45,7 +45,7 @@ export namespace containers {
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.mutexCreate();
+            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
         }
 
         /**
@@ -63,7 +63,7 @@ export namespace containers {
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.mutexCreate();
+            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
         }
 
         /**
@@ -78,7 +78,7 @@ export namespace containers {
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.mutexCreate();
+            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
             if (iterable) {
                 const entriesIter = iterable.$_iterator();
                 for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
@@ -106,7 +106,7 @@ export namespace containers {
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
-            this.sizeMutex = ConcurrencyHelpers.mutexCreate();
+            this.sizeMutex = ConcurrencyHelpers.spinlockCreate();
             const entriesIter = (iterable as Iterable<T>).$_iterator();
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
@@ -316,28 +316,29 @@ export namespace containers {
         }
 
         private fetchAndAddSize(): int {
-            ConcurrencyHelpers.mutexLock(this.sizeMutex);
-            let res = this.actualSize;
-            this.actualSize++;
-            ConcurrencyHelpers.mutexUnlock(this.sizeMutex);
+            let res = 0;
+            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
+                res = this.actualSize;
+                this.actualSize++;
+            });
             return res;
         }
 
         private fetchAndSubSize(): int {
-            ConcurrencyHelpers.mutexLock(this.sizeMutex);
-            let res = this.actualSize;
-            this.actualSize--;
-            ConcurrencyHelpers.mutexUnlock(this.sizeMutex);
+            let res = 0;
+            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
+                res = this.actualSize;
+                this.actualSize--;
+            });
             return res;
         }
 
         private atomicsGetSize(): int {
-            ConcurrencyHelpers.mutexLock(this.sizeMutex);
-            try {
-                return this.actualSize;
-            } finally {
-                ConcurrencyHelpers.mutexUnlock(this.sizeMutex);
-            }
+            let res = 0;
+            ConcurrencyHelpers.spinlockGuard(this.sizeMutex, () => {
+                res = this.actualSize;
+            });
+            return res;
         }
 
         private pushListNode(newNode: ListNode<T>): void {
