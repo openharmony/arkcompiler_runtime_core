@@ -24,6 +24,8 @@ class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
 class EtsClassLinker;
+template <typename T>
+class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -33,6 +35,7 @@ public:
 
     // Arity threshold for functional types
     static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
+    static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
     /* Core runtime type system */
     EtsClass *coreObject {};  // IsObjectClass
@@ -120,12 +123,20 @@ public:
         size_t slotIndex {};
     };
 
+    /* Internal Caches */
+    void InitializeCaches();
+    void VisitRoots(const GCRootVisitor &visitor) const;
+    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
+    EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
+    {
+        return asciiCharCache_;
+    }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
-
+    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 

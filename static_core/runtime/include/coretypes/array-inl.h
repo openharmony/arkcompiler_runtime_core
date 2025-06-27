@@ -180,7 +180,8 @@ inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Get
 {
     size_t offset = GetElementSize<T, IS_DYN>() * idx + byteOffset;
     if constexpr (is_object_v<T>) {
-        return ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset);
+        return static_cast<T>(
+            ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset));
     }
     return ObjectAccessor::GetPrimitive<T, IS_VOLATILE>(this, GetDataOffset() + offset);
 }
