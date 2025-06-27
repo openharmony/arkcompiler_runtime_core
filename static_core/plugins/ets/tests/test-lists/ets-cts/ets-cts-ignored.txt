@@ -910,3 +910,7 @@
 02.lexical_elements/07.keywords/soft_1.ets
 02.lexical_elements/07.keywords/soft_10.ets
 02.lexical_elements/07.keywords/soft_13.ets
+
+# 27159
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_27.ets
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_28.ets
