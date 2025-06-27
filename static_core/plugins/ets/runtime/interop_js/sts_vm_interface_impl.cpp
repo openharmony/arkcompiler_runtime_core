@@ -30,7 +30,9 @@ thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ 
 #if defined(ARK_USE_CMC_GC)
 void STSVMInterfaceImpl::MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor)
 {
-    ASSERT(obj != nullptr);
+    if (obj != nullptr) {
+        return;
+    }
     auto *nativeRef = static_cast<NativeReference *>(obj);
     auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
     // Atomic with acquire order reason: load visibility after shared reference initialization in mutator thread

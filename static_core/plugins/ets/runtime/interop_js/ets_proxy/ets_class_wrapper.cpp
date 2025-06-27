@@ -20,6 +20,7 @@
 #include <ostream>
 #include <vector>
 
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "include/mem/panda_containers.h"
 #include "interop_js/interop_common.h"
 #include "interop_js/js_proxy/js_proxy.h"
@@ -750,6 +751,38 @@ static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value js
     NAPI_CHECK_FATAL(napi_set_named_property(env, cprototype, IS_STATIC_PROXY.data(), trueValue));
 }
 
+static napi_value AttachCBForClass([[maybe_unused]] napi_env env, void *data)
+{
+    auto ctx = InteropCtx::Current();
+    auto *etsClass = reinterpret_cast<EtsClass *>(data);
+    EtsClassWrapper *wrapper = EtsClassWrapper::Get(ctx, etsClass);
+    return wrapper->GetJsCtor(ctx->GetJSEnv());
+}
+
+static napi_value AttachCBForFunc([[maybe_unused]] napi_env env, void *data)
+{
+    auto ctx = InteropCtx::Current();
+    auto curEnv = ctx->GetJSEnv();
+    auto *method = reinterpret_cast<EtsMethodSet *>(data);
+    EtsClassWrapper *wrapper = EtsClassWrapper::Get(ctx, method->GetEnclosingClass());
+    napi_value methodFunc;
+    NAPI_CHECK_FATAL(napi_get_named_property(curEnv, wrapper->GetJsCtor(curEnv), method->GetName(), &methodFunc));
+    return methodFunc;
+}
+
+static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vector<EtsMethodSet *> &methods,
+                                      EtsClass *etsClass)
+{
+    for (auto method : methods) {
+        if (method->IsStatic()) {
+            napi_value func;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, method->GetName(), &func));
+            NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, func, static_cast<void *>(method), AttachCBForFunc));
+        }
+    }
+    NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
+}
+
 /*static*/
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
                                                          const OverloadsMap *overloads)
@@ -800,6 +833,8 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
         return _this;
     }
+
+    SetAttachCallbackForClass(env, jsCtor, methods, etsClass);
 
     auto base = _this->baseWrapper_;
     napi_value fakeSuper = _this->HasBuiltin() ? _this->GetBuiltin(env)

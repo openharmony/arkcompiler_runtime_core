@@ -27,17 +27,20 @@
 #include <functional>
 #include <string_view>
 
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, modernize-use-using)
+typedef napi_value (*proxy_object_attach_cb)(napi_env env, void *data);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
-                    napi_ref *result);
+                    proxy_object_attach_cb proxy_cb, napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_mark_attach_with_xref(napi_env env, napi_value js_object, void *attach_data, proxy_object_attach_cb attach_cb);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, modernize-use-using)
 
 namespace ark::ets::interop::js {
 
