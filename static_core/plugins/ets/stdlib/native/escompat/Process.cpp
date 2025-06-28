@@ -32,6 +32,20 @@ namespace ark::ets::stdlib {
 
 enum Signals : uint32_t { SIG_INT = 2, SIG_QUIT = 3, SIG_KILL = 9, SIG_TERM = 15 };
 
+#ifdef PANDA_TARGET_OHOS
+// constexpr variables used by isAppUid & isIsolatedProcess, refered to arkts 1.0
+// See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L38
+constexpr int PER_USER_RANGE = 100000;
+// See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.h#L242
+constexpr std::pair<int, int> APP_UID_RANGE = {10000, 19999};
+// Only isolateuid numbers between 99000 and 99999.
+// See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L290
+constexpr std::pair<int, int> ISOLATE_UID_RANGE = {99000, 99999};
+// Only appuid numbers between 9000 and 98999.
+// See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L291
+constexpr std::pair<int, int> GENERAL_UID_RANGE = {9000, 98999};
+#endif
+
 static auto GetPipeHandler(int stdOutFdIn, int stdOutFdOut, int stdErrFdIn, int stdErrFdOut)
 {
     auto handlePipes = [stdOutFdIn, stdOutFdOut, stdErrFdIn, stdErrFdOut] {
@@ -329,6 +343,24 @@ static void CloseChildProcess(ani_env *env, ani_object child)
     ThrowNewError(env, "Lstd/core/RuntimeException;", "Close failed", "Lstd/core/String;:V");
 }
 
+static ani_boolean PManagerIsAppUid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process,
+                                    [[maybe_unused]] ani_double uid)
+{
+#ifdef PANDA_TARGET_OHOS
+    // refer to https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L300
+    int number = static_cast<int>(uid);
+    if (number > 0) {
+        const auto appId = number % PER_USER_RANGE;
+        return (appId >= APP_UID_RANGE.first && appId <= APP_UID_RANGE.second) ? ANI_TRUE : ANI_FALSE;
+    }
+
+    return ANI_FALSE;
+#else
+    ThrowNewError(env, "Lstd/core/RuntimeException;", "not implemented for Non-OHOS target", "Lstd/core/String;:V");
+    return ANI_FALSE;
+#endif
+}
+
 static ani_double PManagerGetUidForName(ani_env *env, [[maybe_unused]] ani_object process, ani_string name)
 {
     auto str = ConvertFromAniString(env, name);
@@ -383,6 +415,22 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
 static ani_double GetTid([[maybe_unused]] ani_env *env)
 {
     return ark::os::thread::GetCurrentThreadId();
+}
+
+static ani_boolean IsIsolatedProcImpl([[maybe_unused]] ani_env *env)
+{
+#ifdef PANDA_TARGET_OHOS
+    // refer to https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L284
+    auto uid = ark::os::thread::GetUid();
+    uid %= PER_USER_RANGE;
+    return ((uid >= ISOLATE_UID_RANGE.first && uid <= ISOLATE_UID_RANGE.second) ||
+            (uid >= GENERAL_UID_RANGE.first && uid <= GENERAL_UID_RANGE.second))
+               ? ANI_TRUE
+               : ANI_FALSE;
+#else
+    ThrowNewError(env, "Lstd/core/RuntimeException;", "not implemented for Non-OHOS target", "Lstd/core/String;:V");
+    return ANI_FALSE;
+#endif
 }
 
 static ani_double GetPid([[maybe_unused]] ani_env *env)
@@ -484,6 +532,7 @@ void RegisterProcessNativeMethods(ani_env *env)
                     ani_native_function {"waitImpl", ":D", reinterpret_cast<void *>(WaitChildProcess)}};
 
     const auto processManagerImpls = std::array {
+        ani_native_function {"isAppUid", "D:Z", reinterpret_cast<void *>(PManagerIsAppUid)},
         ani_native_function {"getUidForName", "Lstd/core/String;:D", reinterpret_cast<void *>(PManagerGetUidForName)},
         ani_native_function {"getThreadPriority", "D:D", reinterpret_cast<void *>(PManagerGetThreadPriority)},
         ani_native_function {"getSystemConfig", "D:D", reinterpret_cast<void *>(PManagerGetSystemConfig)},
@@ -508,7 +557,9 @@ void RegisterProcessNativeMethods(ani_env *env)
         ani_native_function {"abort", ":V", reinterpret_cast<void *>(AbortProcess)},
         ani_native_function {"cwd", ":Lstd/core/String;", reinterpret_cast<void *>(GetCurrentWorkingDirectory)},
         ani_native_function {"chdir", "Lstd/core/String;:V", reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
-        ani_native_function {"uptime", ":D", reinterpret_cast<void *>(GetSystemUptime)}};
+        ani_native_function {"uptime", ":D", reinterpret_cast<void *>(GetSystemUptime)},
+        ani_native_function {"isIsolatedProcess", ":Z", reinterpret_cast<void *>(IsIsolatedProcImpl)},
+    };
 
     ani_class childProcessKlass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/ChildProcess;", &childProcessKlass));

@@ -209,9 +209,7 @@ export namespace StdProcess {
          *
          * @returns resulting boolean
          */
-        isAppUid(uid: number): boolean {
-            throw new Error("not implemented");
-        }
+        native isAppUid(uid: number): boolean;
 
         /**
          * Determine the uid corresponding to a user name string
@@ -333,9 +331,7 @@ export namespace StdProcess {
     *
     * @returns { boolean } value indicating if the current process is isolated
     */
-    export function isIsolatedProcess(): boolean {
-        throw new Error("not implemented");
-    }
+    export native function isIsolatedProcess(): boolean;
 
     /**
     * Determine if the current process is a 64-bit process
