@@ -476,10 +476,11 @@ export namespace taskpool {
                 } catch (callbackError) {}
                 throw e;
             } finally {
-                // Save duration stats
+                // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
+                // And we should set ioDuration = 0, totalDuration = cpuDuration here
                 this.cpuDuration = (Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS;
-                this.totalDuration = this.getDuration();
-                this.ioDuration = this.totalDuration - this.cpuDuration;
+                this.totalDuration = this.cpuDuration;
+                this.ioDuration = 0;
                 // Process the task finishing
                 const notCanceled: boolean = taskFinished(this);
                 this.notifyDependencies();
