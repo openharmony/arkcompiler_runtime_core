@@ -85,14 +85,18 @@ export namespace taskpool {
             let p = Promise.resolve<NullishType>(new Object()).then<NullishType, NullishType>(taskRunner, taskRunner);
             p.then((res: NullishType) => {
 				task?.resolve(res);
-                this.notifyTaskFinished(task)
+                this.notifyTaskFinished(task);
             }).catch((e) => {
                 task?.reject(e);
-                this.notifyTaskFinished(task)
+                this.notifyTaskFinished(task);
             }).finally(() => {
                 this.currentPriority = undefined;
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
+                })
+                setTimeout(() => {
+                    task?.notifyDependencies();
+                    this.notifyTaskFinished(task);
                 })
             })
             return true;
@@ -444,7 +448,7 @@ export namespace taskpool {
             ConcurrencyHelpers.mutexUnlock(this.taskMutex);
         }
 
-        private notifyDependencies(): void {
+        internal notifyDependencies(): void {
             for (const dependentTask: Task of this.dependentTasks) {
                 ConcurrencyHelpers.lockGuard(dependentTask.taskMutex, () => {
                     dependentTask.taskDependenciesCount--;
@@ -488,7 +492,9 @@ export namespace taskpool {
                 this.ioDuration = 0;
                 // Process the task finishing
                 const notCanceled: boolean = taskFinished(this);
-                this.notifyDependencies();
+                if(isTaskPoolUseLaunch) {
+                    this.notifyDependencies();
+                }
                 if (!notCanceled) {
                     this.throwCancelTaskError();
                 }
@@ -1450,7 +1456,7 @@ export namespace taskpool {
      * @see taskpool.notifyExecuteTask
      */
     function chooseWorkerForTask(): TaskPoolWorker {
-        let minTaskCount  = Double.MAX_VALUE;
+        let minTaskCount  = Int.MAX_VALUE;
         let selectedWorker = Array.from(workers)[0];
         for (let w : TaskPoolWorker of workers) {
             let currentWorkerTaskCount = workerPendingTasksCount.get(w.workerId);
