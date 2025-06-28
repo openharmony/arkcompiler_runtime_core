@@ -542,6 +542,81 @@ static bool CheckUniqueMethod(EtsClass *klass, const char *name)
     return true;
 }
 
+static bool CheckPrimitiveEncoding(char primitiveEncoding)
+{
+    // Switch-case is more optimal when compiled for arm
+    switch (primitiveEncoding) {
+        case 'Z':
+            [[fallthrough]];
+        case 'B':
+            [[fallthrough]];
+        case 'S':
+            [[fallthrough]];
+        case 'C':
+            [[fallthrough]];
+        case 'I':
+            [[fallthrough]];
+        case 'J':
+            [[fallthrough]];
+        case 'F':
+            [[fallthrough]];
+        case 'D':
+            return true;
+        default:
+            return false;
+    }
+    UNREACHABLE();
+}
+
+static std::optional<std::string> ReplaceArrayInSignature(const char *signature)
+{
+    static constexpr std::string_view ESCOMPAT_ARRAY = "Lescompat/Array;";
+
+    std::string_view signatureView(signature);
+    auto pos = signatureView.find('[');
+    if (pos == std::string_view::npos) {
+        // Arrays are not used in signature
+        return std::string(signature);
+    }
+
+    std::stringstream ss;
+    std::string_view::size_type prevPos = 0;
+    for (; pos != std::string_view::npos; pos = signatureView.find('[', prevPos)) {
+        ss << signatureView.substr(prevPos, pos - prevPos);
+
+        prevPos = signatureView.find_first_not_of('[', pos);
+        if (UNLIKELY(prevPos == std::string_view::npos)) {
+            // Invalid signature, incorrect array encoding (trailing '[')
+            return std::nullopt;
+        }
+
+        auto elementTypeEncoding = signatureView[prevPos];
+        if (elementTypeEncoding == 'L') {
+            auto tmpPrevPos = signatureView.find(';', prevPos);
+            if (UNLIKELY(tmpPrevPos == std::string_view::npos || (tmpPrevPos - prevPos) == 1)) {
+                // Invalid signature, incorrectly encoded reference type
+                return std::nullopt;
+            }
+            prevPos = tmpPrevPos + 1;
+        } else {
+            // Primitive array, check its encoding
+            if (UNLIKELY(!CheckPrimitiveEncoding(elementTypeEncoding))) {
+                return std::nullopt;
+            }
+            ++prevPos;
+        }
+        // Add escompat.Array as replacement. This is required to support compatibility with existing user code.
+        // In order to use signatures with FixedArray, use new mangling rules, which are supported as part of #IBZ7ML
+        ss << ESCOMPAT_ARRAY;
+    }
+    // Append final part of signature
+    if (prevPos < signatureView.size()) {
+        ss << signatureView.substr(prevPos);
+    }
+
+    return ss.str();
+}
+
 template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
@@ -552,11 +627,22 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
 
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     auto *method = [klass, name, signature]() -> EtsMethod * {
-        if constexpr (IS_STATIC_METHOD) {
-            return klass->GetStaticMethod(name, signature, true);
-        } else {
-            return klass->GetInstanceMethod(name, signature, true);
+        if (signature == nullptr) {
+            if constexpr (IS_STATIC_METHOD) {
+                return klass->GetStaticMethod(name, signature, true);
+            } else {
+                return klass->GetInstanceMethod(name, signature, true);
+            }
         }
+        auto optSignature = ReplaceArrayInSignature(signature);
+        if (optSignature) {
+            if constexpr (IS_STATIC_METHOD) {
+                return klass->GetStaticMethod(name, optSignature.value().c_str(), true);
+            } else {
+                return klass->GetInstanceMethod(name, optSignature.value().c_str(), true);
+            }
+        }
+        return nullptr;
     }();
     if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
         return ANI_NOT_FOUND;
@@ -1783,7 +1869,18 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
     etsMethods.reserve(nrFunctions);
     for (ani_size i = 0; i < nrFunctions; ++i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        etsMethods.push_back(etsNs->GetFunction(functions[i].name, functions[i].signature));
+        if (functions[i].signature == nullptr) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            etsMethods.push_back(etsNs->GetFunction(functions[i].name, functions[i].signature));
+            continue;
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto optSignature = ReplaceArrayInSignature(functions[i].signature);
+        if (!optSignature) {
+            return ANI_INVALID_ARGS;
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        etsMethods.push_back(etsNs->GetFunction(functions[i].name, optSignature.value().c_str()));
     }
     return DoBindNative(s, etsMethods, functions, nrFunctions);
 }
