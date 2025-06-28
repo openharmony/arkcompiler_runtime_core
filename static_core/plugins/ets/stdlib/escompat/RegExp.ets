@@ -595,8 +595,7 @@ export class RegExp extends Object {
                 let capN = result.$_get(n);
                 captures.pushBack(capN)
             }
-            let namedCaptures: Object | undefined = result.groups;
-            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
+            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups, replaceValue)
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength
