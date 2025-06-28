@@ -17,10 +17,18 @@
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLLOCALE_H
 
 #include <ani.h>
+#include <string>
 
 namespace ark::ets::stdlib::intl {
 
+struct ParsedLocale {
+    std::string base;
+    std::string extension;
+};
+
 ani_status RegisterIntlLocaleNativeMethods(ani_env *env);
+ParsedLocale HandleLocale(const std::string &localeString);
+void HandleLocaleExtension(size_t &start, size_t &extensionEnd, const std::string &result, size_t len);
 
 }  // namespace ark::ets::stdlib::intl
 

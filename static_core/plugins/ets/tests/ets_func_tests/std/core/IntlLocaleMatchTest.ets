@@ -49,9 +49,10 @@ function testLookupLocaleMatchList() {
     arktest.assertEQ(intlLookUpLocale(localeList), ru_RU)
 
     let result = intlLookUpLocales(localeList)
-    arktest.assertEQ(result.length, 2)
+    arktest.assertEQ(result.length, 3)
     arktest.assertEQ(result[0], ru_RU)
-    arktest.assertEQ(result[1], en_US)
+    arktest.assertEQ(result[1], zh_CN)
+    arktest.assertEQ(result[2], en_US)
 }
 
 function negativeTestLanguageTag() {
