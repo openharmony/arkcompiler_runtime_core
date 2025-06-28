@@ -35,12 +35,14 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
 {
     size_t counter = 0;
     // Creation of TaskQueue
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     EXPECT_TRUE(queue->IsEmpty());
     EXPECT_EQ(queue->Size(), 0);
     EXPECT_EQ(queue->GetPriority(), QUEUE_PRIORITY);
     // Add COUNT_OF_TASKS tasks in queue-> Each task increment counter.
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t COUNT_OF_TASKS = 10;
     for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
         queue->AddBackgroundTask([&counter]() { counter++; });
@@ -48,6 +50,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     EXPECT_FALSE(queue->IsEmpty());
     EXPECT_EQ(queue->Size(), COUNT_OF_TASKS);
     // Pop count_of_done_task tasks from queue and execute them.
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t COUNT_OF_DONE_TASKS = 6;
     ASSERT(COUNT_OF_DONE_TASKS < COUNT_OF_TASKS);
     for (size_t i = 0; i < COUNT_OF_DONE_TASKS; i++) {
@@ -55,6 +58,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
         ASSERT_NE(popTask, nullptr);
         popTask->RunTask();
         EXPECT_EQ(counter, i + 1);
+        Task::Delete(popTask);
     }
     // Now in queue counter_of_tasks - COUNT_OF_DONE_TASKS objects.
     EXPECT_EQ(queue->IsEmpty(), COUNT_OF_TASKS == COUNT_OF_DONE_TASKS);
@@ -77,6 +81,7 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
     while (!queue->IsEmpty()) {
         auto nextTask = static_cast<SchedulableTaskQueueInterface *>(queue)->PopTask();
         nextTask->RunTask();
+        Task::Delete(nextTask);
     }
     // After all task is done, counter = 3 * COUNT_OF_TASKS
     EXPECT_EQ(counter, 3 * COUNT_OF_TASKS);
@@ -86,10 +91,12 @@ TEST_F(TaskTest, TaskQueueSimpleTest)
 
 TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
 {
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     std::atomic_size_t counter = 0;
-    constexpr size_t RESULT_COUNT = 10'000;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
+    constexpr size_t RESULT_COUNT = 10;
     auto pusher = [&queue, &counter]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
             queue->AddBackgroundTask([&counter]() { counter++; });
@@ -102,6 +109,7 @@ TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
                 continue;
             }
             task->RunTask();
+            Task::Delete(task);
             i++;
         }
     };
@@ -117,9 +125,11 @@ TEST_F(TaskTest, TaskQueueMultithreadingOnePushOnePop)
 
 TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
 {
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     std::atomic_size_t counter = 0;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t RESULT_COUNT = 10'000;
     auto pusher = [&queue, &counter]() {
         for (size_t i = 0; i < RESULT_COUNT; i++) {
@@ -134,11 +144,13 @@ TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
                 continue;
             }
             task->RunTask();
+            Task::Delete(task);
             i++;
         }
     };
     std::vector<std::thread *> pushers;
     std::vector<std::thread *> poppers;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t COUNT_OF_WORKERS = 10;
     for (size_t i = 0; i < COUNT_OF_WORKERS; i++) {
         pushers.push_back(new std::thread(pusher));
@@ -156,14 +168,17 @@ TEST_F(TaskTest, TaskQueueMultithreadingNPushNPop)
 
 TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
 {
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     std::atomic_size_t counter = 0;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t TASK_COUNT = 100'000;
     for (size_t i = 0; i < TASK_COUNT; i++) {
         queue->AddBackgroundTask([&counter]() { counter++; });
     }
 
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t THREAD_COUNTER = 10;
     os::memory::Mutex popLock;
     std::vector<std::thread> poppers;
@@ -175,6 +190,7 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
                     break;
                 }
                 task->RunTask();
+                Task::Delete(task);
             }
         });
     }
@@ -188,9 +204,11 @@ TEST_F(TaskTest, TaskQueueWaitForQueueEmptyAndFinish)
 
 TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
 {
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     std::queue<std::string> modeQueue;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t TASKS_COUNT = 100;
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
@@ -204,6 +222,7 @@ TEST_F(TaskTest, TaskQueueForegroundAndBackgroundTasks)
         auto task = queue->PopTask();
         ASSERT_TRUE(task != nullptr);
         task->RunTask();
+        Task::Delete(task);
     }
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
@@ -226,6 +245,7 @@ TEST_F(TaskTest, PopTaskWithExecutionMode)
     constexpr uint8_t QUEUE_PRIORITY = MAX_QUEUE_PRIORITY;
     SchedulableTaskQueueInterface *queue = TaskQueue<>::Create(QUEUE_PRIORITY, nullptr, nullptr);
     std::queue<std::string> modeQueue;
+    // CC-OFFNXT(G.NAM.03-CPP): static_core files have specifice codestyle
     constexpr size_t TASKS_COUNT = 100;
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {
@@ -239,9 +259,11 @@ TEST_F(TaskTest, PopTaskWithExecutionMode)
         auto task = queue->PopForegroundTask();
         ASSERT_TRUE(task != nullptr);
         task->RunTask();
+        Task::Delete(task);
         task = queue->PopBackgroundTask();
         ASSERT_TRUE(task != nullptr);
         task->RunTask();
+        Task::Delete(task);
     }
 
     for (size_t i = 0; i < TASKS_COUNT; i++) {

@@ -39,17 +39,19 @@ void TaskLifeTimeAggregator::GetTimeOfTaskExecutionFinishAndStoreTimeStats(TaskQ
 }
 
 /* static */
-Task::Ptr Task::Create(RunnerCallback runner, TaskQueueInterface *queue, OnDestructionCallback callback)
+Task::Ptr Task::Create(void *buf, void *node, RunnerCallback runner, TaskQueueInterface *queue,
+                       OnDestructionCallback callback)
 {
     // Task can be created only by TaskQueue so callback should be controled from outside.
     ASSERT(callback != nullptr);
-    // CC-OFFNXT(G.RES.09-CPP): constructor of Task class is private
-    return std::unique_ptr<Task>(new Task(std::move(runner), queue, callback));
+    ASSERT(buf != nullptr);
+    return new (buf) Task(std::move(runner), queue, callback, node);
 }
 
-Task::~Task()
+/* static */
+void Task::Delete(Ptr task)
 {
-    onDestructionCallback_(parentQueue_);
+    task->onDestructionCallback_(task->parentQueue_, task->nodePtr_);
 }
 
 void Task::RunTask()

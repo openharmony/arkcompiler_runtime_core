@@ -19,17 +19,22 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/math_helpers.h"
 #include "coherency_line_size.h"
+#include "mem/pool_map.h"
 #include <array>
 #include <atomic>
+#include <utility>
+#include <type_traits>
 
 namespace ark::taskmanager::internal {
+
+enum class QueueElemAllocationType { OUTSIDE, INPLACE };
 
 /**
  * @brief SPSCLockFreeQueue is single producer, single consumer lock free queue.
  * @tparam T: Type of class you want ot store in queue
  * @tparam Allocator: Type of allocator that will be used to allocate nodes
  */
-template <class T, class Allocator>
+template <class T, class Allocator, QueueElemAllocationType ALLOCATION_TYPE = QueueElemAllocationType::OUTSIDE>
 class SPSCLockFreeQueue {
     static constexpr size_t QUEUE_NODE_SIZE = 1UL << 5U;
     static_assert(ark::helpers::math::IsPowerOfTwo(QUEUE_NODE_SIZE));
@@ -37,18 +42,33 @@ class SPSCLockFreeQueue {
     static_assert(QUEUE_NODE_MASK > 0);
 
     struct QueueNode {
-        std::array<T, QUEUE_NODE_SIZE> buffer;
+        std::array<T *, QUEUE_NODE_SIZE> buffer {};
         std::atomic<QueueNode *> next = nullptr;
     };
 
+    struct QueueBigNode : public QueueNode {
+        // count of tasks that will have pointer on a node + pointer in head_
+        std::atomic_size_t toDeleteCount = QUEUE_NODE_SIZE + 1;
+        std::array<T, QUEUE_NODE_SIZE> inPlaceCreationSpace;
+    };
+
     using QueueNodeAllocatorType = typename std::allocator_traits<Allocator>::template rebind_alloc<QueueNode>;
-    template <class U, class OtherAllocator>
+    using QueueBigNodeAllocatorType = typename std::allocator_traits<Allocator>::template rebind_alloc<QueueBigNode>;
+    template <class U, class OtherAllocator, QueueElemAllocationType OTHER_ALLOCATION_TYPE>
     friend class SPSCLockFreeQueue;
 
 public:
     SPSCLockFreeQueue()
     {
-        auto *node = GetNewQueueNode();
+        QueueNode *node = nullptr;
+        if constexpr (ALLOCATION_TYPE == QueueElemAllocationType::OUTSIDE) {
+            node = GetNewQueueNode();
+        } else {
+            auto *bigNode = GetNewQueueBigNode();
+            // Atomic with relaxed order reason: no order requirement
+            bigNode->toDeleteCount.fetch_sub(1, std::memory_order_relaxed);
+            node = bigNode;
+        }
         // Atomic with relaxed order reason: no order requirement
         head_.store(node, std::memory_order_relaxed);
         // Atomic with relaxed order reason: no order requirement
@@ -60,33 +80,63 @@ public:
         ASSERT(head_ == tail_);
         // Atomic with relaxed order reason: no order requirement
         auto head = head_.load(std::memory_order_relaxed);
-        DeleteQueueNode(head);
+        if constexpr (ALLOCATION_TYPE == QueueElemAllocationType::OUTSIDE) {
+            DeleteQueueNode(head);
+        } else {
+            DeleteQueueBigNode(static_cast<QueueBigNode *>(head));
+        }
     }
 
     NO_COPY_SEMANTIC(SPSCLockFreeQueue);
     NO_MOVE_SEMANTIC(SPSCLockFreeQueue);
 
-    void Push(T &&val)
+    void Push(T *val)
     {
+        static_assert(ALLOCATION_TYPE == QueueElemAllocationType::OUTSIDE);
         // Atomic with relaxed order reason: gets local variable
         auto *tail = tail_.load(std::memory_order_relaxed);
         // Atomic with relaxed order reason: gets local variable
         auto pushIndex = pushIndex_.load(std::memory_order_relaxed);
-        if UNLIKELY (GetNodeIndex(pushIndex) == 0) {
+        auto pushNodeIndex = GetNodeIndex(pushIndex);
+        if UNLIKELY (pushNodeIndex == 0) {
             auto *node = GetNewQueueNode();
             // Atomic with relaxed order reason: set in local variable
             tail->next.store(node, std::memory_order_relaxed);
-            node->buffer[0] = std::move(val);
             // Atomic with relaxed order reason: set in local variable
             tail_.store(node, std::memory_order_relaxed);
-        } else {
-            tail->buffer[GetNodeIndex(pushIndex)] = std::move(val);
+            tail = node;
         }
+        tail->buffer[pushNodeIndex] = std::move(val);
         // Atomic with release order reason: other threads should see correct value
         pushIndex_.store(pushIndex + 1U, std::memory_order_release);
     }
 
-    bool TryPop(T *val)
+    template <class CreationFunc, class... Args>
+    void Emplace(CreationFunc creationFunc, Args &&...args)
+    {
+        static_assert(ALLOCATION_TYPE == QueueElemAllocationType::INPLACE);
+        static_assert(std::is_invocable_v<CreationFunc, void *, void *, Args...>);
+        // Atomic with relaxed order reason: gets local variable
+        auto *tail = tail_.load(std::memory_order_relaxed);
+        // Atomic with relaxed order reason: gets local variable
+        auto pushIndex = pushIndex_.load(std::memory_order_relaxed);
+        auto pushNodeIndex = GetNodeIndex(pushIndex);
+        if UNLIKELY (pushNodeIndex == 0) {
+            auto *node = GetNewQueueBigNode();
+            // Atomic with relaxed order reason: set in local variable
+            tail->next.store(node, std::memory_order_relaxed);
+            // Atomic with relaxed order reason: set in local variable
+            tail_.store(node, std::memory_order_relaxed);
+            tail = node;
+        }
+        auto *bigTail = static_cast<QueueBigNode *>(tail);
+        auto *allocSpace = &bigTail->inPlaceCreationSpace.data()[pushNodeIndex];
+        tail->buffer[pushNodeIndex] = creationFunc(allocSpace, bigTail, std::forward<Args>(args)...);
+        // Atomic with release order reason: other threads should see correct value
+        pushIndex_.store(pushIndex + 1U, std::memory_order_release);
+    }
+
+    bool TryPop(T **val)
     {
         ASSERT(val != nullptr);
         // Atomic with relaxed order reason: gets local variable
@@ -105,7 +155,11 @@ public:
             ASSERT(nextHead != nullptr);
             // Atomic with relaxed order reason: set in local variable
             head_.store(nextHead, std::memory_order_relaxed);
-            DeleteQueueNode(head);
+            if constexpr (ALLOCATION_TYPE == QueueElemAllocationType::OUTSIDE) {
+                DeleteQueueNode(head);
+            } else {
+                TryDeleteNode(head);
+            }
             *val = std::move(nextHead->buffer[0]);
         } else {
             *val = std::move(head->buffer[GetNodeIndex(popIndex)]);
@@ -117,7 +171,7 @@ public:
         return true;
     }
 
-    T Pop()
+    T *Pop()
     {
         T val;
         while (!TryPop(&val)) {
@@ -139,8 +193,19 @@ public:
         return pushIndex - popIndex;
     }
 
+    static void TryDeleteNode(void *node)
+    {
+        static_assert(ALLOCATION_TYPE == QueueElemAllocationType::INPLACE);
+        auto inode = reinterpret_cast<QueueBigNode *>(node);
+        // Atomic with relaxed order reason: gets correct value
+        auto count = inode->toDeleteCount.fetch_sub(1, std::memory_order_relaxed);
+        if (count == 1) {
+            DeleteQueueBigNode(inode);
+        }
+    }
+
 private:
-    QueueNode *GetNewQueueNode()
+    static QueueNode *GetNewQueueNode()
     {
         QueueNodeAllocatorType allocator;
         auto *mem = allocator.allocate(1U);
@@ -148,14 +213,29 @@ private:
         return new (mem) QueueNode;
     }
 
-    void DeleteQueueNode(QueueNode *node)
+    static QueueBigNode *GetNewQueueBigNode()
+    {
+        QueueBigNodeAllocatorType allocator;
+        auto *mem = allocator.allocate(1U);
+        ASSERT(mem != nullptr);
+        return new (mem) QueueBigNode;
+    }
+
+    static void DeleteQueueNode(QueueNode *node)
     {
         QueueNodeAllocatorType allocator;
         std::allocator_traits<QueueNodeAllocatorType>::destroy(allocator, node);
         allocator.deallocate(node, 1U);
     }
 
-    size_t GetNodeIndex(size_t index)
+    static void DeleteQueueBigNode(QueueBigNode *node)
+    {
+        QueueBigNodeAllocatorType allocator;
+        std::allocator_traits<QueueBigNodeAllocatorType>::destroy(allocator, node);
+        allocator.deallocate(node, 1U);
+    }
+
+    static size_t GetNodeIndex(size_t index)
     {
         return index & QUEUE_NODE_MASK;
     }

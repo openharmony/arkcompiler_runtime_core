@@ -35,8 +35,8 @@ public:
     using SignalWorkersCallback = std::function<void()>;
     using SignalWaitersCallback = std::function<void()>;
 
-    using AddTaskToWorkerFunc = std::function<void(TaskPtr &&)>;
-    using AddTaskToHelperFunc = std::function<void(TaskPtr &&)>;
+    using AddTaskToWorkerFunc = std::function<void(TaskPtr)>;
+    using AddTaskToHelperFunc = std::function<void(TaskPtr)>;
 
     using GetSplittingFactorFunc = std::function<size_t()>;
 
