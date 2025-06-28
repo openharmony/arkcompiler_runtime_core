@@ -2024,7 +2024,7 @@ class ISODateParser {
         }
 
         const literalText = this.dateStr.substring(startPos, endPos)
-        for (const literalChar of literalText) {
+        for (const literalChar of literalText.getChars()) {
             if (!Char.isDecDigit(literalChar)) {
                 throw new ISODateParseError()
             }
