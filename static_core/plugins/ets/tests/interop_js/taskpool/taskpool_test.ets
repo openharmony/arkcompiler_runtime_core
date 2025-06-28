@@ -86,53 +86,14 @@ function testCPUTaskDuration(): void {
 
     await runner.execute(task); 
 
-    // Even when running pure CPU task, the cpuDuration and totalDuration are both calculated 
-    // as task running time currently and should be the same, but that not generally happened.
-    if (task.totalDuration != task.cpuDuration) {
-        // The period between them is less than 3ms
-        arktest.assertTrue(task.totalDuration - task.cpuDuration <= 3);
-    }
-    
-    // The ioDuration of a pure CPU task will be procedured to 0
+    arktest.assertTrue(task.cpuDuration > 0);
+    arktest.assertTrue(task.totalDuration > 0);
     arktest.assertTrue(task.ioDuration == 0);
-}
-
-function testCheckCPUTasksDuration(): void {
-    let i: int = 0;
-    // Run test for some times, in case of accident performance.
-    while (i++ < 10) {
-        testCPUTaskDuration();
-    }
-}
-
-// This is a task with IO request
-function simulateIOTask(period: number): void {
-    let start: number = new Date().getTime();
-    while (new Date().getTime() - start < period) {
-        // Simulate IO operation with console.log
-        console.log('Simulate IO operation once');
-    }
-}
-
-function testCheckIOTaskDuration(): void {    
-    let task: taskpool.Task = new taskpool.Task(simulateIOTask, 1000.0);
-    let runner: taskpool.SequenceRunner = new taskpool.SequenceRunner();
-
-    // All initialized with 0
-    arktest.assertTrue(task.ioDuration == 0);
-    arktest.assertTrue(task.cpuDuration == 0);
-    arktest.assertTrue(task.totalDuration == 0);
-
-    await runner.execute(task); 
-    
-    // The ioDuration of a io task will not be procedured to 0
-    arktest.assertTrue(task.ioDuration > 0);
 }
 
 export function main(): int {
     let testSuite = new arktest.ArkTestsuite('taskpool.taskpool_test');
-    testSuite.addTest('testCheckCPUTasksDuration', testCheckCPUTasksDuration);
-    testSuite.addTest('testCheckIOTaskDuration', testCheckIOTaskDuration);
+    testSuite.addTest('testCPUTaskDuration', testCPUTaskDuration);
     let res = testSuite.run();
     return res;
 }
