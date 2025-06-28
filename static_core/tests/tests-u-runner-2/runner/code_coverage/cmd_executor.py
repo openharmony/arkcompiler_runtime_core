@@ -21,13 +21,19 @@ from typing import TextIO
 
 class CmdExecutor(ABC):
     @abstractmethod
-    def run_command(self, command: list[str], stdout: TextIO | int = subprocess.PIPE) -> str | int:
+    def run_command(
+        self,
+        command: list[str],
+        stdout: TextIO | int = subprocess.PIPE,
+        stderror: TextIO | int = subprocess.DEVNULL
+    ) -> subprocess.CompletedProcess:
         """
         Execute a shell command in a subprocess.
 
         Args:
             command (list[str]): Command and its arguments as a list of strings.
             stdout (TextIO | int): Standard output stream. Defaults to subprocess.PIPE.
+            stderror (TextIO | int): Standard error stream. Defaults to subprocess.DEVNULL.
 
         Returns:
             str | int: Output of the command as a string or exit code.
@@ -56,13 +62,19 @@ class CmdExecutor(ABC):
 
 
 class LinuxCmdExecutor(CmdExecutor):
-    def run_command(self, command: list[str], stdout: TextIO | int = subprocess.PIPE) -> str | int:
+    def run_command(
+        self,
+        command: list[str],
+        stdout: TextIO | int = subprocess.PIPE,
+        stderror: TextIO | int = subprocess.DEVNULL
+    ) -> subprocess.CompletedProcess:
         """
         Run a command on Linux using subprocess.run().
 
         Args:
             command (list[str]): Command and arguments to execute.
             stdout (TextIO | int): Standard output destination. Defaults to subprocess.PIPE.
+            stderror (TextIO | int): Standard error stream. Defaults to subprocess.DEVNULL.
 
         Returns:
             str | int: Command output as a string or return code.
@@ -71,7 +83,7 @@ class LinuxCmdExecutor(CmdExecutor):
             subprocess.CalledProcessError: If the command returns a non-zero exit status.
             subprocess.TimeoutExpired: If the command times out.
         """
-        return subprocess.run(command, check=True, text=True, stdout=stdout, timeout=5400).stdout
+        return subprocess.run(command, check=True, text=True, stdout=stdout, stderr=stderror, timeout=5400)
 
     def get_binary(self, binary_name: str, version: str | None = None) -> str:
         """

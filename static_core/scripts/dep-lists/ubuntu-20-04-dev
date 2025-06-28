@@ -21,7 +21,6 @@ libunwind-14=1:14.*
 
 ninja-build=1.10.*
 
-lcov=1.14-*                                  # For coverage calculation
 libc++-dev:amd64=1:10*                       # For clang-tidy to find standard headers
 python3-pip
 python3-setuptools

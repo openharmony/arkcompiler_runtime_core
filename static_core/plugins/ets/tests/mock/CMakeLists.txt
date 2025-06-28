@@ -104,12 +104,6 @@ panda_ets_napi_add_gtest(
 )
 
 panda_ets_napi_add_gtest(
-    NAME register_native_allocation_test
-    CPP_SOURCE register_native_allocation_test.cpp
-    ETS_SOURCE RegisterNativeAllocationTest.ets
-)
-
-panda_ets_napi_add_gtest(
     NAME stack_reference_check_test
     CPP_SOURCE stack_reference_check_test.cpp
     ETS_SOURCE StackReferenceCheckTest.ets
@@ -143,20 +137,8 @@ panda_ets_napi_add_gtest(
 )
 
 panda_ets_napi_add_gtest(
-    NAME coroswitch_in_cctor
-    CPP_SOURCE coroswitch_in_cctor.cpp
-    ETS_SOURCE coroswitch_in_cctor.ets
-)
-
-panda_ets_napi_add_gtest(
     NAME test_exception
     CPP_SOURCE test_exception.cpp
-)
-
-panda_ets_napi_add_gtest(
-    NAME abort_flag_launch
-    CPP_SOURCE abort_flag_launch_test.cpp
-    ETS_SOURCE AbortFlagLaunchTest.ets
 )
 
 panda_ets_napi_add_gtest(
@@ -164,3 +146,21 @@ panda_ets_napi_add_gtest(
     CPP_SOURCE unhandled_rejection_recursive_test.cpp
     ETS_SOURCE UnhandledRejectionRecursiveTest.ets
 )
+
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    panda_ets_napi_add_gtest(
+        NAME register_native_allocation_test
+        CPP_SOURCE register_native_allocation_test.cpp
+        ETS_SOURCE RegisterNativeAllocationTest.ets
+    )
+    panda_ets_napi_add_gtest(
+        NAME coroswitch_in_cctor
+        CPP_SOURCE coroswitch_in_cctor.cpp
+        ETS_SOURCE coroswitch_in_cctor.ets
+    )
+    panda_ets_napi_add_gtest(
+        NAME abort_flag_launch
+        CPP_SOURCE abort_flag_launch_test.cpp
+        ETS_SOURCE AbortFlagLaunchTest.ets
+    )
+endif()

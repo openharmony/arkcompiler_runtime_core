@@ -860,10 +860,12 @@ add_gtests(
     tests/mem_stats_test.cpp
 )
 
-add_gtests(
-    arkruntime_memory_management_bump_allocator_test
-    tests/bump_allocator_test.cpp
-)
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    add_gtests(
+        arkruntime_memory_management_bump_allocator_test
+        tests/bump_allocator_test.cpp
+    )
+endif()
 
 add_gtests(
     arkruntime_memory_management_frame_allocators_test
@@ -947,11 +949,20 @@ add_gtests(
     tests/heap_space_test.cpp
 )
 
-add_gtests(
-    arkruntime_multithreading_test
+set(MULTITHREADING_TESTS_SRC
     tests/compiler_queue_test.cpp
     tests/monitor_test.cpp
-    tests/thread_test.cpp
+)
+
+if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
+    list(APPEND MULTITHREADING_TESTS_SRC
+        tests/thread_test.cpp
+    )
+endif()
+
+add_gtests(
+    arkruntime_multithreading_test
+    ${MULTITHREADING_TESTS_SRC}
 )
 
 add_gtests(

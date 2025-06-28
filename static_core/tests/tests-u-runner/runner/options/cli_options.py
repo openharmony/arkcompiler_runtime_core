@@ -15,13 +15,13 @@
 # limitations under the License.
 
 import argparse
-from os import path, makedirs
-from typing import Type, Optional, Union, Sequence
+from os import makedirs, path
+from typing import Optional, Sequence, Type, Union
 
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
-from runner.reports.report_format import ReportFormat
-from runner.utils import enum_from_str, EnumT
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.path_utils import is_sudo_user
+from runner.reports.report_format import ReportFormat
+from runner.utils import EnumT, enum_from_str
 
 
 def is_directory(arg: str) -> str:
@@ -528,6 +528,10 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--coverage-per-binary', action='store_true', dest='coverage_per_binary',
         default=None, help='Creates a separate coverage report for each binary running')
+
+    parser.add_argument(
+        '--gcov-tool', dest='gcov_tool', default=None,
+        help='Specify gcov binary name (Needed for lcov --gcov-tool)')
 
 
 def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:

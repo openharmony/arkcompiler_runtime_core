@@ -31,6 +31,7 @@ COVERAGE_PER_BINARY = "coverage-per-binary"
 LLVM_COV_EXCLUDE = "llvm-cov-exclude"
 LCOV_EXCLUDE = "lcov-exclude"
 CLEAN_GCDA_BEFORE_RUN = "clean-gcda-before-run"
+GCOV_TOOL = "gcov-tool"
 
 
 class CoverageOptions(IOptions):
@@ -82,6 +83,11 @@ class CoverageOptions(IOptions):
         parser.add_argument(
             f'--{CLEAN_GCDA_BEFORE_RUN}', action='store_true', default=False,
             dest=f"{dest}{CLEAN_GCDA_BEFORE_RUN}")
+        parser.add_argument(
+            f'--{GCOV_TOOL}', default=None,
+            type=str,
+            dest=f"{dest}{GCOV_TOOL}",
+            help='Specify gcov binary name (Needed for lcov --gcov-tool)')
 
     @cached_property
     def use_llvm_cov(self) -> bool:
@@ -164,3 +170,12 @@ class CoverageOptions(IOptions):
             bool: True if `--clean-gcda-before-run` was passed; False otherwise.
         """
         return cast(bool, self._parameters[CLEAN_GCDA_BEFORE_RUN])
+
+    @cached_property
+    def gcov_tool(self) -> str | None:
+        """Specify gcov binary name (Needed for lcov --gcov-tool).
+
+        Returns:
+            Optional[str]: gcov binary name if specified, None otherwise.
+        """
+        return self._parameters.get(GCOV_TOOL)

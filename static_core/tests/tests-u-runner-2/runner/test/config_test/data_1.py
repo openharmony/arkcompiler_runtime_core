@@ -107,5 +107,6 @@ args = {
     'runner.llvm-cov-exclude': None,
     'runner.lcov-exclude': None,
     'runner.clean-gcda-before-run': False,
-    'runner.gn-build': False
+    'runner.gn-build': False,
+    'runner.gcov-tool': None
 }

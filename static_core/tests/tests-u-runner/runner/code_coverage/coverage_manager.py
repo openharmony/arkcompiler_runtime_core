@@ -14,14 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import threading
 import platform
+import threading
 from pathlib import Path
 from typing import Optional, Tuple
-from runner.code_coverage.coverage_dir import CoverageDir
-from runner.code_coverage.llvm_cov_tool import LlvmCovTool
-from runner.code_coverage.lcov_tool import LcovTool
+
 from runner.code_coverage.cmd_executor import CmdExecutor, LinuxCmdExecutor
+from runner.code_coverage.coverage_dir import CoverageDir
+from runner.code_coverage.lcov_tool import LcovTool
+from runner.code_coverage.llvm_cov_tool import LlvmCovTool
+from runner.options.options_coverage import CoverageOptions
 
 
 class CoverageManager:
@@ -30,17 +32,19 @@ class CoverageManager:
     _initialized: bool = False
 
     def __new__(
-            cls,
-            build_dir_path: Optional[Path] = None,
-            coverage_dir: Optional[CoverageDir] = None
-        ) -> 'CoverageManager':
+        cls,
+        build_dir_path: Optional[Path] = None,
+        coverage_dir: Optional[CoverageDir] = None,
+        coverage_options: Optional[CoverageOptions] = None
+    ) -> 'CoverageManager':
         if cls._instance is not None:
             return cls._instance
         with cls._lock:
             build_dir_path, coverage_dir = cls._validate_parameters(build_dir_path, coverage_dir)
+            gcov_tool = None if coverage_options is None else coverage_options.gcov_tool
             if cls._instance is None:
                 instance = super().__new__(cls)
-                instance._initialize(build_dir_path, coverage_dir)
+                instance._initialize(build_dir_path, coverage_dir, gcov_tool)
                 cls._instance = instance
         return cls._instance
 
@@ -61,10 +65,10 @@ class CoverageManager:
 
     @classmethod
     def _validate_parameters(
-            cls,
-            build_dir_path: Optional[Path] = None,
-            coverage_dir: Optional[CoverageDir] = None
-        ) -> Tuple[Path, CoverageDir]:
+        cls,
+        build_dir_path: Optional[Path] = None,
+        coverage_dir: Optional[CoverageDir] = None
+    ) -> Tuple[Path, CoverageDir]:
         if build_dir_path is None:
             raise ValueError("build_dir_path is not initialized")
         if not build_dir_path.parts or str(build_dir_path) == ".":
@@ -79,10 +83,10 @@ class CoverageManager:
 
         return build_dir_path, coverage_dir
 
-    def _initialize(self, build_dir_path: Path, coverage_dir: CoverageDir) -> None:
+    def _initialize(self, build_dir_path: Path, coverage_dir: CoverageDir, gcov_tool: Optional[str]) -> None:
         if self._initialized:
             return
         self.cmd_executor = self._get_cmd_executor()
         self.llvm_cov = LlvmCovTool(build_dir_path, coverage_dir, self.cmd_executor)
-        self.lcov = LcovTool(build_dir_path, coverage_dir, self.cmd_executor)
+        self.lcov = LcovTool(build_dir_path, coverage_dir, self.cmd_executor, gcov_tool)
         self._initialized = True

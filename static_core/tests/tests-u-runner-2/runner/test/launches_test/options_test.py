@@ -70,7 +70,7 @@ class OptionsTest(TestCase):
             timestamp=timestamp,
             report_formats={config.general.report_format},
             work_dir=work_dir,
-            coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir)
+            coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir, config.general.coverage)
         )
         test_root = self.data_folder
         return test_env, test_root, work_dir

@@ -107,5 +107,6 @@ args = {
     'runner.llvm-cov-exclude': ['/tmp', '*.h'],
     'runner.lcov-exclude': ['/tmp', '*.h'],
     'runner.clean-gcda-before-run': True,
-    'runner.gn-build': True
+    'runner.gn-build': True,
+    'runner.gcov-tool': '/usr/bin/ls'
 }

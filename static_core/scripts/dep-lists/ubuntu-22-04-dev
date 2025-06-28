@@ -19,7 +19,6 @@ clang-tidy-14=1:14*
 g++=4:11.2*
 ninja-build=1.10.*
 
-lcov=1.15-*                                  # For coverage calculation
 libc++-dev:amd64=1:14**                      # For clang-tidy to find standard headers
 python2                                      # For repo tool
 python3-pip
