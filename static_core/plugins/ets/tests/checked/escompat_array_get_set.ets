@@ -140,3 +140,51 @@ function test2(): void {
     // Exception case #3: undefined -> Int cast error
     arktest.assertEQ(__noinline__testClassCastError(arr, 2), CORRECT_EXCEPTION_THROWN);
 }
+
+class ExtArray<T> extends Array<T> {
+    public constructor(n: int) {
+        super(n)
+    }
+}
+
+//! CHECKER       Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "escompat.Array::pop"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.EscompatArrayGetUnsafe"
+//! INST_NOT      /Call/
+
+//! CHECKER       Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "escompat.Array::pop"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "LoadArray"
+//! INST_NOT      "Intrinsic.EscompatArrayGetUnsafe"
+//! INST_NOT      /BoundsCheck/
+//! INST_NOT      /Call/
+function testGetUnsafe() {
+    let a = new ExtArray<int>(1)
+    a[0] = 10
+    arktest.assertEQ(10, a.pop())
+}
+
+//! CHECKER       Array setUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "escompat.Array::with"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.EscompatArraySetUnsafe"
+//! INST_NOT      /Call.*set_unsafe/
+
+//! CHECKER       Array setUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "escompat.Array::with"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "StoreArray"
+//! INST_NOT      "Intrinsic.EscompatArraySetUnsafe"
+//! INST_NOT      /BoundsCheck/
+//! INST_NOT      /Call.*set_unsafe/
+function testSetUnsafe() {
+    let a = new ExtArray<int>(1)
+    let b = a.with(0, 10)
+    arktest.assertEQ(10, b[0])
+}

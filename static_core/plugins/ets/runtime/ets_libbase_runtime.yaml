@@ -1557,6 +1557,26 @@ intrinsics:
       args: [ std.core.Object, i32, i32 ]
     impl: ark::ets::intrinsics::EtsEscompatArrayFill
 
+  - name: EscompatArrayGetUnsafe
+    space: ets
+    class_name: escompat.Array
+    method_name: $_get_unsafe
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGetUnsafe
+
+  - name: EscompatArraySetUnsafe
+    space: ets
+    class_name: escompat.Array
+    method_name: $_set_unsafe
+    static: false
+    signature:
+      ret: void
+      args: [ i32, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArraySetUnsafe
+
 ########################
 # escompat.ArrayBuffer #
 ########################

@@ -940,7 +940,7 @@ private joinObject(sep?: String): string {
     if (index < 0) {
         index += <%= this_len_int %>;
     }
-    if (index >= <%= this_len_int %>) {
+    if (index < 0 || index >= <%= this_len_int %>) {
         throw new RangeError("Invalid index")
     }
     let arr = <%= clone_this %>;

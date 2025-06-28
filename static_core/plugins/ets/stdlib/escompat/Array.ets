@@ -98,15 +98,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public native $_get(idx: int): T;
 
-    internal final $_get_unsafe(idx: int): T {
-        return this.buffer[idx] as T
-    }
+    internal final native $_get_unsafe(idx: int): T
 
     public native $_set(idx: int, val: T): void;
 
-    private $_set_unsafe(idx: int, val: T): void {
-        this.buffer[idx] = val
-    }
+    private final native $_set_unsafe(idx: int, val: T): void
 
     /**
      * Creates a new instance of Array
@@ -834,9 +830,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if(this.actualLength == 0) {
             return undefined
         }
-        let obj = this.$_get_unsafe(this.actualLength - 1)
-        this.buffer[this.actualLength - 1] = null
-        this.actualLength--
+        let index = this.actualLength - 1
+        let obj = this.$_get_unsafe(index)
+        this.actualLength = index
         return obj
     }
 
@@ -1915,7 +1911,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (index < 0) {
             index += this.actualLength;
         }
-        if (index >= this.actualLength) {
+        if (index < 0 || index >= this.actualLength) {
             throw new RangeError("Invalid index")
         }
         let arr = new Array<T>(FROM_BUFFER, this.copyArray());

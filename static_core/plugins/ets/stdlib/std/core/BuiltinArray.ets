@@ -837,7 +837,7 @@ export function with(self: FixedArray<boolean>, index: int, value: boolean): Fix
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -1797,7 +1797,7 @@ export function with(self: FixedArray<byte>, index: int, value: byte): FixedArra
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -2757,7 +2757,7 @@ export function with(self: FixedArray<short>, index: int, value: short): FixedAr
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -3717,7 +3717,7 @@ export function with(self: FixedArray<int>, index: int, value: int): FixedArray<
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -4677,7 +4677,7 @@ export function with(self: FixedArray<long>, index: int, value: long): FixedArra
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -5645,7 +5645,7 @@ export function with(self: FixedArray<float>, index: int, value: float): FixedAr
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -6613,7 +6613,7 @@ export function with(self: FixedArray<double>, index: int, value: double): Fixed
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
@@ -7573,7 +7573,7 @@ export function with(self: FixedArray<char>, index: int, value: char): FixedArra
     if (index < 0) {
         index += self.length;
     }
-    if (index >= self.length) {
+    if (index < 0 || index >= self.length) {
         throw new RangeError("Invalid index")
     }
     let arr = cloneArray(self);
