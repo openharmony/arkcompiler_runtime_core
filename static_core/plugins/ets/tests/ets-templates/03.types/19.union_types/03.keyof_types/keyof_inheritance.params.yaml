@@ -21,63 +21,75 @@ cases:
   - decl: |-
       class A {}
       class B extends A {}
-      let n: never
     check: |-
       type t1 = keyof A
       type t2 = keyof B
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       abstract class A {}
       class B extends A {}
-      let n: never
     check: |-
       type t1 = keyof A
       type t2 = keyof B
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       abstract class A {}
       abstract class B extends A {}
-      let n: never
     check: |-
       type t1 = keyof A
       type t2 = keyof B
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       class A {}
       final class B extends A {}
-      let n: never
     check: |-
       type t1 = keyof A
       type t2 = keyof B
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       abstract class A {}
       final class B extends A {}
-      let n: never
     check: |-
       type t1 = keyof A
       type t2 = keyof B
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   # Interfaces
   - decl: |-
       interface I {}
       interface II extends I {}
-      let n: never
     check: |-
       type t1 = keyof I
       type t2 = keyof II
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       interface I {
@@ -100,16 +112,19 @@ cases:
       let d: "bar" | "foo" | "jay" = c
       c = d
 
+
   # Interfaces + class
   - decl: |-
       interface I {}
       class A implements I {}
-      let n: never
     check: |-
       type t1 = keyof I
       type t2 = keyof A
-      let a: t1 = n
-      let b: t2 = a
+      let a: t1|number
+      let b: t2|number
+      arktest.assertEQ(typeof a, 'number')
+      arktest.assertEQ(typeof b, 'number')
+
 
   - decl: |-
       interface I {
@@ -135,6 +150,7 @@ cases:
       let d: "bar" | "foo" | "jay" | "raf" = c
       c = d
 
+
   - decl: |-
       interface I {
         foo: int
@@ -155,6 +171,7 @@ cases:
       let c: t2 = a
       let d: "bar" | "foo" | "foo1" | "bar1" = c
       c = d
+
 
   - decl: |-
       interface I {
@@ -179,6 +196,7 @@ cases:
       let d: "bar" | "foo" | "bar1" | "foo1" = c
       c = d
 
+
 # empty interface|non-empty class
   - decl: |-
       interface I { }
@@ -186,15 +204,16 @@ cases:
         bar() {}
         foo = true
       }
-      let n: never
     check: |-
       type t1 = keyof I
       type t2 = keyof A
-      let a: t1 = n
+      let a: t1|number
+      arktest.assertEQ(typeof a, 'number')
       
       let b: t2 = "foo"
       let c: "bar" | "foo" = b
       b = c
+
 
   # empty class|non-empty interface
   - decl: |-
@@ -209,3 +228,4 @@ cases:
       let a: t1 = "foo"
       let b: t2 = a
       a = b
+
