@@ -59,6 +59,8 @@ constexpr const char *RESULT_FIELD_NAME = "result_";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
 constexpr const char *GROUPS_FIELD_NAME = "groupsRaw_";
 
+constexpr const auto REG_EXP_PARSER_EXT_FLAG_EXT_UNICODE = (1U << 7U);
+
 constexpr const uint32_t INDICES_DIMENSIONS_NUM = 2;
 
 uint32_t CastToBitMask(EtsString *checkStr)
@@ -88,6 +90,9 @@ uint32_t CastToBitMask(EtsString *checkStr)
             case 'y':
                 flagsBitsTemp = RegExpParser::FLAG_STICKY;
                 break;
+            case 'v':
+                flagsBitsTemp = REG_EXP_PARSER_EXT_FLAG_EXT_UNICODE;
+                break;
             default: {
                 auto *thread = ManagedThread::GetCurrent();
                 auto ctx = PandaEtsVM::GetCurrent()->GetLanguageContext();
@@ -109,6 +114,13 @@ uint32_t CastToBitMask(EtsString *checkStr)
     }
     return flagsBits;
 }
+
+struct ExecuteOptions {
+    EtsInt lastIndex;
+    bool hasIndices;
+    bool hasSlashU;
+};
+
 }  // namespace
 
 void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
@@ -264,8 +276,7 @@ PandaVector<uint8_t> ExtractString(EtsString *from, const bool asUtf16)
     return result;
 }
 
-RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, EtsInt lastIndex,
-                         bool hasIndices)
+RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, ExecuteOptions options)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -278,7 +289,8 @@ RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputS
     const bool isUtf16Pattern = patternHandle->IsUtf16();
     auto re = EtsRegExp();
     re.SetFlags(flagsHandle.GetPtr());
-    const bool isUtf16 = isUtf16Str || isUtf16Pattern || re.IsUtf16();
+
+    const bool isUtf16 = options.hasSlashU || isUtf16Str || isUtf16Pattern || re.IsUtf16();
 
     auto str = ExtractString(inputStr.GetPtr(), isUtf16);
     auto patternStr = ExtractString(patternHandle.GetPtr(), isUtf16);
@@ -289,9 +301,9 @@ RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputS
         return badResult;
     }
 
-    auto result = re.Execute(str, stringLength, lastIndex);
+    auto result = re.Execute(str, stringLength, options.lastIndex);
     re.Destroy();
-    if (!hasIndices) {
+    if (!options.hasIndices) {
         result.indices.clear();
     }
     return result;
@@ -415,7 +427,8 @@ void SetGroupsField(EtsObject *regexpExecArrayObj, const std::map<PandaString, s
     regexpExecArray->SetFieldObject(groupsField, groupsStr->AsObject());
 }
 
-extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, EtsString *flagsStr, EtsString *str)
+extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, EtsString *flagsStr, EtsString *str,
+                                         EtsBoolean hasSlashU)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -449,7 +462,8 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
         return regexpExecArrayObject.GetPtr();
     }
 
-    auto execResult = Execute(pattern.GetPtr(), flags.GetPtr(), strHandle.GetPtr(), lastIdx, hasIndices);
+    auto execResult = Execute(pattern.GetPtr(), flags.GetPtr(), strHandle.GetPtr(),
+                              ExecuteOptions {lastIdx, hasIndices, static_cast<bool>(hasSlashU)});
     if (!execResult.isSuccess) {
         SetLastIndexField(regexp.GetPtr(), lastIndexField, global, sticky, 0.0);
         SetUnsuccessfulMatchLegacyProperties(regexpClass);

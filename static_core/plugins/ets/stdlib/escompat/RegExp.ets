@@ -526,7 +526,7 @@ export class RegExp extends Object {
         return this.compile()
     }
 
-    private native execImpl(pattern: String, flags: String, str: String): RegExpExecArray;
+    private native execImpl(pattern: String, flags: String, str: String, hasSlashU: boolean): RegExpExecArray;
 
     /**
      * Executes a search for a match in a specified string and returns a result array
@@ -538,7 +538,8 @@ export class RegExp extends Object {
      * @see RegExpExecArray
      */
     public exec(str: String): RegExpExecArray | null {
-        const res = this.execImpl(this.pattern_, this.flags_, str)
+        let hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
+        const res = this.execImpl(this.pattern_, this.flags_, str, hasSlashU)
         if (res.isCorrect) {
             res.updateGroups()
             return res
@@ -761,7 +762,8 @@ export class RegExp extends Object {
      * @returns true if match was found
      */
     public test(str: String): boolean {
-        return this.execImpl(this.pattern_, this.flags_, str).isCorrect
+        let hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
+        return this.execImpl(this.pattern_, this.flags_, str, hasSlashU).isCorrect
     }
 
     /**
