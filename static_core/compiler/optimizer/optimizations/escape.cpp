@@ -431,6 +431,49 @@ bool EscapeAnalysis::DecomposeAnalysis::Decompose()
     return !decomposeBbs_.empty();
 }
 
+static DeoptimizeType GetDeoptType(Inst *deopt)
+{
+    DeoptimizeType deoptType;
+    switch (deopt->GetOpcode()) {
+        case Opcode::NullCheck:
+            deoptType = DeoptimizeType::NULL_CHECK;
+            break;
+        case Opcode::DeoptimizeIf:
+            deoptType = deopt->CastToDeoptimizeIf()->GetDeoptimizeType();
+            break;
+        default:
+            UNREACHABLE();
+    }
+    return deoptType;
+}
+
+static bool CheckReturnInlineMismatch(Inst *deopt)
+{
+    auto ss = deopt->GetSaveState();
+    ASSERT(ss != nullptr);
+    auto callInst = ss->GetCallerInst();
+    if (callInst == nullptr) {
+        return false;
+    }
+    int isMatch = 0;
+    Inst *inst = deopt;
+    // There exists cases like this:
+    // In normal case, when deoptimizeif inst is in some inlined call method, we expect its savestate inst is just
+    // before deoptimizeif inst, and no call.inlined or returninlined inst between savestate inst and deoptimizeif inst.
+    // But in some corner case, there exists some call.inlined and returninlined inst between deoptimizeif and its
+    // savestate inst, and if call.inlined is not match returninlined, graphchecker will check fail. So we need skip
+    // these cases.
+    while (inst != ss) {
+        inst = inst->GetPrev();
+        if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
+            isMatch--;
+        } else if (inst->GetOpcode() == Opcode::ReturnInlined) {
+            isMatch++;
+        }
+    }
+    return isMatch != 0;
+}
+
 bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
 {
     auto deoptPos = std::find_if(deoptBb->AllInstsSafeReverse().begin(), deoptBb->AllInstsSafeReverse().end(),
@@ -440,11 +483,7 @@ bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
     }
 
     Inst *deopt = *deoptPos;
-    auto ss = deopt->GetSaveState();
-    ASSERT(ss != nullptr);
-    auto callInst = ss->GetCallerInst();
-    // NOTE : support inlined call
-    if (callInst != nullptr) {
+    if (CheckReturnInlineMismatch(deopt)) {
         return false;
     }
 
@@ -461,21 +500,25 @@ bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
     deoptBb->AddSucc(emptyBb);
     emptyBb->AddSucc(endBb);
 
+    // If deopt in inlined method, we need to build all return.inlined before deoptimize to correct restore registers.
+    auto ss = deopt->GetSaveState();
+    ASSERT(ss != nullptr);
+    auto callInst = ss->GetCallerInst();
+    while (callInst != nullptr) {
+        ss = callInst->GetSaveState();
+        ASSERT(ss != nullptr);
+        auto retInl = graph_->CreateInstReturnInlined(DataType::NO_TYPE, INVALID_PC, ss);
+        retInl->SetExtendedLiveness();
+        emptyBb->AppendInst(retInl);
+        callInst = ss->GetCallerInst();
+    }
+    ss = deopt->GetSaveState();
+
     // Add savestate and deoptimize instruction into the empty block.
     auto saveState4Deopt = CopySaveState(graph_, ss);
     emptyBb->PrependInst(saveState4Deopt);
-    DeoptimizeType deoptType;
-    switch (deopt->GetOpcode()) {
-        case Opcode::NullCheck:
-            deoptType = DeoptimizeType::NULL_CHECK;
-            break;
-        case Opcode::DeoptimizeIf:
-            deoptType = deopt->CastToDeoptimizeIf()->GetDeoptimizeType();
-            break;
-        default:
-            UNREACHABLE();
-    }
 
+    auto deoptType = GetDeoptType(deopt);
     auto newDeopt = graph_->CreateInstDeoptimize(DataType::NO_TYPE, deopt->GetPc(), saveState4Deopt, deoptType);
     emptyBb->AppendInst(newDeopt);
 

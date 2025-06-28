@@ -48,8 +48,8 @@
 //! INST_COUNT   "DeoptimizeIf", 3
 //! INST_COUNT   "Deoptimize ", 1
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "DeoptimizeIf", 3
-//! INST_COUNT   "Deoptimize ", 1
+//! INST_COUNT   "DeoptimizeIf", 1
+//! INST_COUNT   "Deoptimize ", 3
 
 function __noinline__next1(str: string): string {
   return str;
@@ -102,7 +102,7 @@ class Int8ArrayIteratorEntries1 implements IterableIterator<[Number, Number]> {
     }
 }
 
-// Negative test 2 - Deopt's savestate is in inlined func
+// Positive test 3 - Deopt's savestate is in a matched inlined func
 function next4(t : Int8ArrayIteratorEntries1) : IteratorResult<[Number, Number]> {
     return t.next()
 }
