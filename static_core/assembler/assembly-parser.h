@@ -181,11 +181,7 @@ private:
     bool ParseFunctionArgComma(bool &comma);
     bool ParseFunctionArgs();
     bool ParseType(Type *type);
-    bool PrefixedValidUnionName(BracketOptions options);
     bool PrefixedValidName(BracketOptions options = BracketOptions::NOT_ALLOW_BRACKETS);
-    bool PrefixedValidNameToken(BracketOptions options, bool isUnion = false);
-    void GetName(std::string *name);
-    void GetUnionName(std::string *name);
     bool ParseMetaListComma(bool &comma, bool eq);
     bool MeetExpMetaList(bool eq);
     bool BuildMetaListAttr(bool &eq, std::string &attributeName, std::string &attributeValue);

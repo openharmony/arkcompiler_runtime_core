@@ -24,7 +24,6 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_vtable_builder.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -87,7 +86,6 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
-        case ClassLinker::Error::REDECL_BY_TYPE_SIG:
             return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
@@ -714,65 +712,6 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
     ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
     ASSERT(ctx != nullptr);
     return ctx;
-}
-
-const uint8_t *EtsClassLinkerExtension::ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor)
-{
-    auto [pf, id] = ComputeLUBInfo(ctx, descriptor);
-    return RefTypeLink(ctx, pf, id).GetDescriptor();
-}
-
-std::pair<panda_file::File const *, panda_file::File::EntityId> GetClassInfo(ClassLinker *cl,
-                                                                             const ClassLinkerContext *ctx,
-                                                                             const uint8_t *desc)
-{
-    auto cda = GetClassDataAccessor(cl, const_cast<ClassLinkerContext *>(ctx), desc);
-    return {&(cda.GetPandaFile()), cda.GetClassId()};
-}
-
-std::pair<panda_file::File const *, panda_file::File::EntityId> EtsClassLinkerExtension::ComputeLUBInfo(
-    const ClassLinkerContext *ctx, const uint8_t *descriptor)
-{
-    // Union descriptor format: '{' 'U' TypeDescriptor+ '}'
-    RefTypeLink lub(ctx, nullptr);
-    auto idx = 2;
-    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    while (descriptor[idx] != '}') {
-        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
-        if (ClassHelper::IsPrimitive(typeSp.begin()) || ClassHelper::IsArrayDescriptor(typeSp.begin())) {
-            // NOTE(aantipina): Process arrays:
-            // compute GetClosestCommonAncestor for component type, lub = GetClosestCommonAncestor[]
-            return GetClassInfo(GetClassLinker(), ctx, langCtx_.GetObjectClassDescriptor());
-        }
-        idx += typeSp.Size();
-
-        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto [typePf, typeClassId] = GetClassInfo(GetClassLinker(), ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
-
-        if (lub.GetDescriptor() == nullptr) {
-            lub = RefTypeLink(ctx, typePf, typeClassId);
-            continue;
-        }
-
-        auto type = RefTypeLink(ctx, typePf, typeClassId);
-        if (RefTypeLink::AreEqual(lub, type)) {
-            continue;
-        }
-
-        if (ClassHelper::IsReference(type.GetDescriptor()) && ClassHelper::IsReference(lub.GetDescriptor())) {
-            auto lubDescOpt = GetClosestCommonAncestor(GetClassLinker(), ctx, lub, type);
-            if (!lubDescOpt.has_value()) {
-                return GetClassInfo(GetClassLinker(), ctx, langCtx_.GetObjectClassDescriptor());
-            }
-            lub = lubDescOpt.value();
-            continue;
-        }
-
-        return GetClassInfo(GetClassLinker(), ctx, langCtx_.GetObjectClassDescriptor());
-    }
-    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-    return {lub.GetPandaFile(), lub.GetId()};
 }
 
 }  // namespace ark::ets

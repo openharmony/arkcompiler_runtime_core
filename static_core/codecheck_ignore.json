@@ -160,7 +160,6 @@
   "plugins/ets/tests/scripts": "*",
   "plugins/ets/tests/stdlib-templates": "*",
   "plugins/ets/tests/ets_ts_subset": "*",
-  "plugins/ets/tests/verify_unions": "*",
   "plugins/ets/tools": "*",
   "plugins/ets/verification": "*",
   "quickener": "*",

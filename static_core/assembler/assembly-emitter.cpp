@@ -1886,7 +1886,7 @@ TypeItem *AsmEmitter::GetTypeItem(
         return Find(primitiveTypes, type.GetId());
     }
 
-    if (type.IsArray() || type.IsUnion()) {
+    if (type.IsArray()) {
         return items->GetOrCreateForeignClassItem(type.GetDescriptor());
     }
 
