@@ -50,6 +50,9 @@ public:
         SUSPENSION_FOR_STW = 2,
         SUSPENSION_FOR_EXIT = 4,
         SUSPENSION_FOR_CPU_PROFILE = 8,
+        SUSPENSION_FOR_PENDING_CALLBACK = 16,
+        SUSPENSION_FOR_RUNNING_CALLBACK = 32,
+        SUSPENSION_FOR_FINALIZE = 64,
     };
 
     enum GCPhaseTransitionState : uint32_t {
@@ -117,11 +120,6 @@ public:
         if (UNLIKELY_CC(HasAnySuspensionRequest())) {
             HandleSuspensionRequest();
         }
-        // temporary impl, and need to refact to call this by flip function
-        if (UNLIKELY_CC(HasCallbackRequest())) {
-            HandleJSGCCallback();
-            ClearCallbackRequest();
-        }
     }
 
     // If current mutator is not in saferegion, enter and return true
@@ -138,6 +136,11 @@ public:
 
     // temporary impl to clean GC callback, and need to refact to flip function
     void HandleJSGCCallback();
+
+    static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
+    {
+        return (flag & ~clearFlag) | setFlag;
+    }
 
     __attribute__((always_inline)) inline bool FinishedTransition() const
     {
@@ -185,19 +188,19 @@ public:
         return (suspensionFlag_.load(std::memory_order_acquire) != 0);
     }
 
-    __attribute__((always_inline)) inline bool HasCallbackRequest() const
+    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
     {
-        return (callbackRequest_.load(std::memory_order_acquire) != 0);
+        return suspensionFlag_.compare_exchange_strong(oldFlag, newFlag);
     }
 
-    __attribute__((always_inline)) inline void SetCallbackRequest()
+    __attribute__((always_inline)) inline void SetFinalizeRequest()
     {
-        callbackRequest_.store(true, std::memory_order_release);
+        SetSuspensionFlag(SUSPENSION_FOR_FINALIZE);
     }
 
-    __attribute__((always_inline)) inline void ClearCallbackRequest()
+    __attribute__((always_inline)) inline void ClearFinalizeRequest()
     {
-        callbackRequest_.store(false, std::memory_order_relaxed);
+        ClearSuspensionFlag(SUSPENSION_FOR_FINALIZE);
     }
 
     void SetSafepointActive(bool value)
@@ -291,7 +294,6 @@ private:
 
     // If set implies this mutator should process suspension requests
     std::atomic<uint32_t> suspensionFlag_ = { 0 };
-    std::atomic<bool> callbackRequest_ = { false };
     // Indicate the state of mutator's phase transition
     std::atomic<GCPhaseTransitionState> transitionState_ = { NO_TRANSITION };
 
