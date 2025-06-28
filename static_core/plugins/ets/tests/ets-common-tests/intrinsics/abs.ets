@@ -32,13 +32,13 @@ function main(): int {
     if (abs(-Double.MIN_VALUE) != Double.MIN_VALUE) {
         return 8;
     }
-    if (abs(1.) != 1.) {
+    if (abs(1.0) != 1.0) {
         return 9;
     }
-    if (abs(-1.) != 1.) {
+    if (abs(-1.0) != 1.0) {
         return 10;
     }
-    if (abs(0.) != 0.) {
+    if (abs(0.0) != 0.0) {
         return 11;
     }
     return 0;

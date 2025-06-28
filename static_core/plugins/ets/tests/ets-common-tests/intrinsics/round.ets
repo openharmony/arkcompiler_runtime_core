@@ -23,31 +23,31 @@ function main(): int {
     if (Double.toString(round(Double.NaN)) != Double.toString(Double.NaN)) {
         return 3;
     }
-    if (round(0.) != 0.) {
+    if (round(0.0) != 0.0) {
         return 4;
     }
-    if (round(1.) != 1.) {
+    if (round(1.0) != 1.0) {
         return 5;
     }
-    if (round(-1.) != -1.) {
+    if (round(-1.0) != -1.0) {
         return 6;
     }
-    if (round(1.5) != 2.) {
+    if (round(1.5) != 2.0) {
         return 7;
     }
-    if (round(1.6) != 2.) {
+    if (round(1.6) != 2.0) {
         return 8;
     }
-    if (round(1.4) != 1.) {
+    if (round(1.4) != 1.0) {
         return 9;
     }
-    if (round(-1.5) != -1.) {
+    if (round(-1.5) != -1.0) {
         return 10;
     }
-    if (round(-1.6) != -2.) {
+    if (round(-1.6) != -2.0) {
         return 11;
     }
-    if (round(-1.4) != -1.) {
+    if (round(-1.4) != -1.0) {
         return 12;
     }
     return 0;
