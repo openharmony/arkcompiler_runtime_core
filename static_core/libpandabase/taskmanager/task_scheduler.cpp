@@ -18,6 +18,7 @@
 #include "libpandabase/taskmanager/task_queue_set.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/os/mutex.h"
+#include "taskmanager/task_manager_common.h"
 
 namespace ark::taskmanager::internal {
 
@@ -185,7 +186,8 @@ size_t TaskScheduler::GetCountOfTasksInSystem() const
 size_t TaskScheduler::GetCountOfWorkers() const
 {
     os::memory::LockHolder lh(taskSchedulerStateLock_);
-    return workers_.size();
+    // Atomic with relaxed order reason: no order required
+    return workersCount_.load(std::memory_order_relaxed);
 }
 
 void TaskScheduler::SetCountOfWorkers(size_t count)
@@ -193,6 +195,9 @@ void TaskScheduler::SetCountOfWorkers(size_t count)
     os::memory::LockHolder lh(taskSchedulerStateLock_);
     // Atomic with relaxed order reason: no order required
     size_t currentCount = workersCount_.load(std::memory_order_relaxed);
+    if (count > MAX_WORKER_COUNT) {
+        count = MAX_WORKER_COUNT;
+    }
     if (count > currentCount) {
         // Atomic with relaxed order reason: no order required
         workersCount_.store(count, std::memory_order_relaxed);
