@@ -16,6 +16,14 @@ regression/15278_1.ets
 #22791
 regression/16158_2.ets
 
+#26443
+regression/23659_0.ets
+regression/23659_1.ets
+
+#26215
+regression/26215_0.ets
+regression/26215_1.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
