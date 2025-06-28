@@ -15,6 +15,8 @@
 
 import HashMap from '@ohos.util.HashMap';
 
+export type HashSetCbFn<T> = (value: T, key: T, set: HashSet<T>) => void;
+
 interface ReadonlyHashSet<T> extends Iterable<T> {
     /**
      * Returns number of unique elements in the HashSet
@@ -86,7 +88,7 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
      *
      * @param callbackFn to apply; key is always same as value
      */
-    forEach(callbackFn: (value: T, key: T, set: HashSet<T>) => void): void {
+    forEach(callbackFn: HashSetCbFn<T>): void {
         this.buckets.forEach((value: T, key: T) => {
             callbackFn(value, key, this);
         });

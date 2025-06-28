@@ -18,6 +18,8 @@ import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
 
+export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
+
 interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**
      * Checks if a value is in the LightWeightSet
@@ -157,7 +159,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @param callbackfn to apply; key is always same as value
      */
-    forEach(callbackFn: (value: T, key: T, set: LightWeightSet<T>) => void): void {
+    forEach(callbackFn: LightWeightSetForEachCb<T>): void {
         this.buckets.forEach((value: T, key: T): void => {
             callbackFn(value, key, this);
         });

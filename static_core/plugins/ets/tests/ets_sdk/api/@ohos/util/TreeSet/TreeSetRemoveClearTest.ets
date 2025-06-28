@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import {TreeSetComparator} from "@ohos.util.TreeSet";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet Remove Clear API tests")
@@ -57,9 +58,10 @@ function removeItem(treeSet: TreeSet<number>){
 }
 
 function testAddValueBetweenRemoveValue() {
-    let treeSet = new TreeSet<number>((first: number, second: number) =>{
+    let treeSetCb: TreeSetComparator<number> = (first: number, second: number) =>{
         return second - first;
-    });
+    };
+    let treeSet = new TreeSet<number>(treeSetCb);
     const insertArr = [643, 811, 807, 378, 226, 195, 599, 641, 494, 964, 156, 419, 977, 20, 788, 596]
     for(let i = 0;i < insertArr.length;i++) {
         treeSet.add(insertArr[i]);

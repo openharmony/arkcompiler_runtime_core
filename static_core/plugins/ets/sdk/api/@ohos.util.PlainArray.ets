@@ -19,6 +19,8 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
+export type PlainArrayForEachCb<T> = (value: T, key: number, PlainArray: PlainArray<T>) => void;
+
 /**
  * The PlainArray class is a collection of key-value pairs.
  */
@@ -77,7 +79,7 @@ export class PlainArray<T> implements Iterable<[Number, T]> {
      * @param callbackFn.key the key of the element
      * @param callbackFn.PlainArray the instance of this object
      */
-    public forEach(callbackFn: (value: T, key: number, PlainArray: PlainArray<T>) => void): void {
+    public forEach(callbackFn: PlainArrayForEachCb<T>): void {
         this.buckets.forEach((value: T, key: number) => {
             callbackFn(value, key, this);
         });

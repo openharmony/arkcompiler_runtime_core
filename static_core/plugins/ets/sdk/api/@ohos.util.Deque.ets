@@ -18,6 +18,8 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
+export type DequeforEachCb<T> = (value: T, index: number, deque: Deque<T>) => void;
+
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
     err.code = code;
@@ -139,7 +141,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The function to execute on each element, taking the value, index, and Deque as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, deque: Deque<T>) => void): void {
+    public forEach(callbackfn: DequeforEachCb<T>): void {
         let i: int = this.front, k = 0;
         while (i != this.rear) {
             callbackfn(this.buffer[i], k++, this);

@@ -21,6 +21,9 @@ const IncorrectBufferSizeId: number = 10200009;
 const CapacityErrorCodeId: number = 10200062;
 const INT_MAX_VALUE_OFFSET: number = 4294967296;
 
+export type ArrayListForEachCb<T> =  (value: T, index: number, arrlist: ArrayList<T>) => void;
+export type ArrayListReplaceCb<T> =  (value: T, index: number, arrlist: ArrayList<T>) => T;
+
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
@@ -207,7 +210,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The callback function taking the value, index, and the ArrayList as arguments.
      *
      */
-    public replaceAllElements(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => T): void {
+    public replaceAllElements(callbackfn: ArrayListReplaceCb<T>): void {
         for (let i: int = 0; i < this.length; i++) {
             this.buffer[i] = callbackfn(this.buffer[i], i.toDouble(), this);
         }
@@ -219,7 +222,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param callbackfn - The function to execute on each element, taking the value, index, and ArrayList as arguments.
      *
      */
-    public forEach(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => void): void {
+    public forEach(callbackfn: ArrayListForEachCb<T>): void {
        for (let i: int = 0; i < this.length; i++) {
             callbackfn(this.buffer[i], i.toDouble(), this);
         }
