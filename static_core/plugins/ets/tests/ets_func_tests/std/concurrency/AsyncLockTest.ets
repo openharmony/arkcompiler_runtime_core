@@ -197,6 +197,114 @@ function queryTest2() {
     return p;
 }
 
+const Sleep = (ms: int | undefined): Promise<int> => {
+    return new Promise<int>(resolve => {
+        setTimeout(() => {
+            resolve(1)
+        },ms as int)
+    });
+}
+
+function asynclockStateTest1() {
+    let lockName = 'Multiplelocktest1'
+    let lock = AsyncLock.request(lockName);
+    lock.lockAsync(async() =>{
+        await Sleep(1000);
+    }, AsyncLockMode.EXCLUSIVE);
+    lock.lockAsync(async() => {
+    }, AsyncLockMode.SHARED);
+    let state = AsyncLock.query(lockName);
+    arktest.assertEQ(state.held[0]?.name, lockName, 'Test failed, the state.held[0].name expected Multiplelocktest1, but is ' + state.held[0]?.name);
+    arktest.assertEQ(state.held[0]?.mode, AsyncLockMode.EXCLUSIVE, 'Test failed, the state.held[0].mode value expected AsyncLockMode.EXCLUSIVE, but is ' + state.held[0]?.mode);
+    let pending : AsyncLockInfo[] = state.pending;
+    arktest.assertEQ(pending[0]?.name, lockName, 'Test failed, the pending[0].name expected Multiplelocktest1, but is ' + pending[0]?.name);
+    arktest.assertEQ(pending[0]?.mode, AsyncLockMode.SHARED, 'Test failed, the pending[0].mode expected AsyncLockMode.SHARED,but is ' + pending[0]?.mode);
+    let res = false;
+    for(let i = 0; i < pending.length; i++){
+        if(pending[i].name == lockName){
+            res = pending[i].mode == AsyncLockMode.SHARED;
+        }
+    }
+    arktest.assertTrue(res,'Test failed, the res expected true.');
+}
+
+function asynclockStateTest2() {
+    let lockName = 'Multiplelocktest2'
+    let lock = AsyncLock.request(lockName);
+    lock.lockAsync(async() =>{
+        await Sleep(1000);
+    }, AsyncLockMode.SHARED);
+    lock.lockAsync(async() => {
+    }, AsyncLockMode.SHARED);
+    let state = AsyncLock.query(lockName);
+    arktest.assertEQ(state.held[0]?.name, lockName, 'Test failed, the state.held[0].name expected Multiplelocktest2, but is ' + state.held[0]?.name);
+    arktest.assertEQ(state.held[0]?.mode, AsyncLockMode.SHARED, 'Test failed, the state.held[0].mode value expected AsyncLockMode.SHARED, but is ' + state.held[0]?.mode);
+    let pending : AsyncLockInfo[] = state.pending;
+    arktest.assertEQ(pending.length, 0, 'Test failed, the pending.length expected 0, but is ' + pending.length);
+}
+
+function asynclockStateTest3() {
+    let lockName = 'Multiplelocktest3'
+    let lock = AsyncLock.request(lockName);
+    lock.lockAsync(async() =>{
+        await Sleep(1000);
+    }, AsyncLockMode.SHARED);
+    lock.lockAsync(async() => {
+    }, AsyncLockMode.EXCLUSIVE);
+    let state = AsyncLock.query(lockName);
+    arktest.assertEQ(state.held[0]?.name, lockName, 'Test failed, the state.held[0].name expected Multiplelocktest3, but is ' + state.held[0]?.name);
+    arktest.assertEQ(state.held[0]?.mode, AsyncLockMode.SHARED, 'Test failed, the state.held[0].mode value expected AsyncLockMode.SHARED, but is ' + state.held[0]?.mode);
+    let pending : AsyncLockInfo[] = state.pending;
+    arktest.assertEQ(pending[0]?.name, lockName, 'Test failed, the pending[0].name expected Multiplelocktest3, but is ' + pending[0]?.name);
+    arktest.assertEQ(pending[0]?.mode, AsyncLockMode.EXCLUSIVE, 'Test failed, the pending[0].mode expected AsyncLockMode.EXCLUSIVE,but is ' + pending[0]?.mode);
+    let res = false;
+    for(let i = 0; i < pending.length; i++){
+    if(pending[i].name == lockName){
+            res = pending[i].mode == AsyncLockMode.EXCLUSIVE;
+        }
+    }
+    arktest.assertTrue(res,'Test failed, the res expected true.');
+}
+
+function asynclockStateTest4() {
+    let lockName = 'Multiplelocktest4'
+    let lock = AsyncLock.request(lockName);
+    lock.lockAsync(async() =>{
+        await Sleep(1000);
+    }, AsyncLockMode.EXCLUSIVE);
+    lock.lockAsync(async() => {
+    }, AsyncLockMode.EXCLUSIVE);
+    let state = AsyncLock.query(lockName);
+    arktest.assertEQ(state.held[0]?.name, lockName, 'Test failed, the state.held[0].name expected Multiplelocktest4, but is ' + state.held[0]?.name);
+    arktest.assertEQ(state.held[0]?.mode, AsyncLockMode.EXCLUSIVE, 'Test failed, the state.held[0].mode value expected AsyncLockMode.EXCLUSIVE, but is ' + state.held[0]?.mode);
+    let pending : AsyncLockInfo[] = state.pending;
+    arktest.assertEQ(pending[0]?.name, lockName, 'Test failed, the pending[0].name expected Multiplelocktest4, but is ' + pending[0]?.name);
+    arktest.assertEQ(pending[0]?.mode, AsyncLockMode.EXCLUSIVE, 'Test failed, the pending[0].mode expected AsyncLockMode.EXCLUSIVE,but is ' + pending[0]?.mode);
+    let res = false;
+    for(let i = 0; i < pending.length; i++){
+        if(pending[i].name == lockName){
+            res = pending[i].mode == AsyncLockMode.EXCLUSIVE;
+        }
+    }
+    arktest.assertTrue(res,'Test failed, the res expected true.');
+}
+
+function assertasynclockStateTest1() {
+    arktest.expectNoThrow(() => { asynclockStateTest1(); });
+}
+
+function assertasynclockStateTest2() {
+    arktest.expectNoThrow(() => { asynclockStateTest2(); });
+}
+
+function assertasynclockStateTest3() {
+    arktest.expectNoThrow(() => { asynclockStateTest3(); });
+}
+
+function assertasynclockStateTest4() {
+    arktest.expectNoThrow(() => { asynclockStateTest4(); });
+}
+
 function abortTest() {
     let lock = new AsyncLock();
     let s: AbortSignal<string> = {aborted: false, reason: "Aborted"};
@@ -464,8 +572,8 @@ function sequentialLockUnlocked1() {
         lockA.lockAsync<void>(/*F1*/ async () => {
             let lockB = new AsyncLock();
             let p = lockB.lockAsync<void>(/*F2*/ async (): Promise<void> => {
-                let res = await lockA.lockAsync<number>(/*F3*/ (): int => {
-                    return 42
+                let res = await lockA.lockAsync<number>(/*F3*/ (): number => {
+                    return 42.0
                 }, AsyncLockMode.SHARED);
                 if (res == 42) {
                     resolve();
@@ -639,6 +747,10 @@ function main(): int {
 
         assertEQ(failures, 0);
     });
+    asyncLockTestsuite.addTest('asynclockStateTest1', assertasynclockStateTest1);
+    asyncLockTestsuite.addTest('asynclockStateTest2', assertasynclockStateTest2);
+    asyncLockTestsuite.addTest('asynclockStateTest3', assertasynclockStateTest3);
+    asyncLockTestsuite.addTest('asynclockStateTest4', assertasynclockStateTest4);
 
     let summ = 0;
     summ += asyncLockTestsuite.run();
