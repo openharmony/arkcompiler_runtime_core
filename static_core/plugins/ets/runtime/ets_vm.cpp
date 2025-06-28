@@ -696,6 +696,7 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+        PlatformTypes(this)->VisitRoots(visitor);
     }
     {
         os::memory::LockHolder lock(rootProviderlock_);
@@ -809,6 +810,12 @@ void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
         os::memory::LockHolder lh(unhandledMutex_);
         UpdateUnhandledObjects(unhandledFailedJobs_, gcRootUpdater);
         UpdateUnhandledObjects(unhandledRejectedPromises_, gcRootUpdater);
+    }
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        auto *asciiCache = PlatformTypes(this)->GetAsciiCacheTable();
+        if (asciiCache != nullptr) {
+            PlatformTypes(this)->UpdateCachesVmRefs(gcRootUpdater);
+        }
     }
 }
 
