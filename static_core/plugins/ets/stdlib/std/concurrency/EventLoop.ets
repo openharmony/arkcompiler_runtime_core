@@ -186,7 +186,8 @@ class Timer {
 
 class TimerTable {
     constructor() {
-        this.nextFreeId = 0;
+        // IDs must be positive integers beginning at 1.
+        this.nextFreeId = 1;
         this.tableSpinlock = ConcurrencyHelpers.spinlockCreate();
         this.timers = new Map<TimerId, Timer>();
     }
