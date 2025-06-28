@@ -11,10 +11,10 @@
 
 # move from exclude to ignore list on 4/12
 #24840
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
+17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co3_over_3.ets
 
 #25414
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_19.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_19.ets
 
 ################################################
 # primitive types refactoring. Need to rework the following tests, because they're incorrect:
@@ -132,20 +132,20 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_arr_val_6.ets
 17.experimental_features/02.fixed_array_types/far1_7.ets
 17.experimental_features/02.fixed_array_types/far3_6.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.ets
+17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
+17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_8.ets
 06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
 
 # Runtime Fail Exclude list (Type changes from byte -> std.core.Byte)
-20.implementation_details/03.how_to_get_type_via_reflection/how_to_get_type_via_reflection_ext_13.ets
-20.implementation_details/03.how_to_get_type_via_reflection/how_to_get_type_via_reflection_ext_17.ets
-20.implementation_details/03.how_to_get_type_via_reflection/how_to_get_type_via_reflection_ext_34.ets
-20.implementation_details/03.how_to_get_type_via_reflection/how_to_get_type_via_reflection_ext_35.ets
+20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_13.ets
+20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_17.ets
+20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_34.ets
+20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_35.ets
 
 # Runtime Fail Exclude list (function overloading)
 15.semantic_rules/08.overload_resolution/02.best_candidate_selection/better_shorter_conversion_2.ets
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_19.ets
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_19.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_35.ets
 
 # TypeError: No matching call signature
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_7.ets
@@ -160,12 +160,12 @@
 17.experimental_features/02.fixed_array_types/far3_7.ets
 
 # Looks like should be positive (async tests)
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_10.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_11.ets
-17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_n_9.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_12.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_13.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_n_14.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_10.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_11.ets
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_9.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_12.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_13.ets
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_n_14.ets
 
 # std.core.Float cannot be cast to std.core.Double (class cast error in runtime)
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
@@ -174,13 +174,13 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
 
 # Promise lambda type errors
-17.experimental_features/15.coroutines/promise_class/p_6.ets
-17.experimental_features/15.coroutines/promise_class/p_2.ets
-17.experimental_features/15.coroutines/promise_class/p_3.ets
-17.experimental_features/15.coroutines/promise_class/p_5.ets
-17.experimental_features/15.coroutines/promise_class/p_4.ets
-17.experimental_features/15.coroutines/promise_class/p_1.ets
-17.experimental_features/15.coroutines/promise_class/p_0.ets
+16.concurrency/03.asynchronous_api/05.promise/p_6.ets
+16.concurrency/03.asynchronous_api/05.promise/p_2.ets
+16.concurrency/03.asynchronous_api/05.promise/p_3.ets
+16.concurrency/03.asynchronous_api/05.promise/p_5.ets
+16.concurrency/03.asynchronous_api/05.promise/p_4.ets
+16.concurrency/03.asynchronous_api/05.promise/p_1.ets
+16.concurrency/03.asynchronous_api/05.promise/p_0.ets
 
 # TypeError: Type 'Int' cannot be assigned to type 'Byte'
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_0.ets
@@ -195,8 +195,8 @@
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_34.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_7.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_8.ets
-17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
-17.experimental_features/17.packages/02.package_initializer/p4/init4_2.ets
+15.semantic_rules/11.static_initialization/package_initializer/p4/init4_1.ets
+15.semantic_rules/11.static_initialization/package_initializer/p4/init4_2.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_12.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_13.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_14.ets
@@ -232,4 +232,4 @@
 07.expressions/31.string_interpolation_expressions/siexp_6.ets
 
 # there is no correct return value
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/fn_overloading_35.ets
