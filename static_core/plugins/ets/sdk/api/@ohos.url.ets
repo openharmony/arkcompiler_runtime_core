@@ -47,9 +47,10 @@ export namespace url {
         static doubleSegment = new Array<string>("..", ".%2e", ".%2E", "%2e.", "%2E.",
             "%2e%2e", "%2E%2E", "%2e%2E", "%2E%2e");
 
-        static singlesegment = new Array<string>(".", "%2e", "%2E");
+        static singlesegment = new Array<string>('.', "%2e", "%2E");
 
-        static spesicalSymbols = new Array<string>("@", "%40", "#", "%23", "=", "%3D", ":", "%3A", "/", "%2F", ";", "%3B", "?", "%3F");
+        static spesicalSymbols: Record<string, string> =
+            { "@": "%40", "#": "%23", "=": "%3D", ":": "%3A", "/": "%2F", ";": "%3B", "?": "%3F" };
 
         static specialcharacter = new Array<string>('\0', '\t', '\n', '\r', ' ', '#', '%', '/', ':', '?', '@', '[', '\\', ']');
 
@@ -62,7 +63,8 @@ export namespace url {
                 Helper.specialCharForBit[i] = 1;
             }
             for (let i = 0; i < specialSymbolsTmp.length; i++) {
-                Helper.specialCharForBit[specialSymbolsTmp[i].charCodeAt(0)] = 1;
+                let specialChar = specialSymbolsTmp[i][0];
+                Helper.specialCharForBit[specialChar] = 1;
             }
             Helper.specialCharForBit[Helper.ASCII_127] = 1;
 
@@ -429,24 +431,26 @@ export namespace url {
         return res.slice(0, res.length - 1);
     }
 
-    class UrlInfo {
-        cScheme: string = "";
-        cFragment: string = "";
-        cQuery: string = "";
-        cPath = new Array<string>();
-        cHost: string = "";
-        cIsSpecialPath: boolean = false;
-        cUsername: string = "";
-        cPassword: string = "";
-        cPort: number = -1;
-    }
+    const INDEX_INVALID = 0;
+    const INDEX_SPECIAL = 1;
+    const INDEX_USERNAME = 2;
+    const INDEX_PASSWORD = 3;
+    const INDEX_HOST = 4;
+    const INDEX_PORT = 5;
+    const INDEX_PATH = 6;
+    const INDEX_QUERY = 7;
+    const INDEX_FRAGMENT = 8;
+    const INDEX_INFOPATH = 9;
+    const INDEX_IPV6 = 10;
+    const INDEX_DOUBLE_SLASH = 11;
+
 
     /**
     * Handle the specific URL logic
     * @class InnerURL
     */
     class InnerURL {
-        flags: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false];
+        flags: boolean[] = new boolean[12];
         cScheme: string = "";
         cFragment: string = "";
         cQuery: string = "";
@@ -462,32 +466,32 @@ export namespace url {
         analysizeScheme(input: string): boolean {
             let ch = new Char(input[0]);
             if (!isAlpha(ch.toString())) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return false;
             }
             let sizeLen: number = input.length;
             for (let i = 1; i < sizeLen - 1; i++) {
                 let ch1 = new Char(input[i]);
                 if (!isAlphaNum(ch1.toString()) && input[i] != c'+' && input[i] != c'-' && input[i] != c'.') {
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     return false;
                 }
             }
             this.cScheme = input.toLowerCase();
             if (isSpecialScheme(this.cScheme)) {
-                this.flags[1] = true;
+                this.flags[INDEX_SPECIAL] = true;
             }
             return true;
         }
 
         private analysizeFragment(fragment: string) {
             this.cFragment = fragment;
-            this.flags[8] = true;
+            this.flags[INDEX_FRAGMENT] = true;
         }
 
         private analysizeQuery(query: string) {
             this.cQuery = query;
-            this.flags[7] = true;
+            this.flags[INDEX_QUERY] = true;
         }
 
         private analysizeFilePath(input: string) {
@@ -519,7 +523,7 @@ export namespace url {
                     continue;
                 }
                 this.cPath.push(temp[i]);
-                this.flags[6] = true;
+                this.flags[INDEX_PATH] = true;
             }
 
             let it = this.cPath[0];
@@ -527,7 +531,7 @@ export namespace url {
             if (isAlpha(ch.toString()) && (it[1] == c':' || it[1] == c'|')) {
                 if (it.length == 2) {
                     this.cPath[0] = it[0] + ':';
-                    this.flags[4] = false;
+                    this.flags[INDEX_HOST] = false;
                     this.cHost = "";
                 }
             }
@@ -540,7 +544,7 @@ export namespace url {
             let isFile = isFileNotHost(strHost);
             if (!isFile) {
                 this.analysizeHost(strHost, special);
-            } else if (!isFile && this.flags[0]) {
+            } else if (!isFile && this.flags[INDEX_INVALID]) {
                 return;
             }
             if (!isFile) {
@@ -553,7 +557,7 @@ export namespace url {
         private analysizeIPv6Host(input: string) {
             let regex: RegExp = new RegExp("(::|(:((:[0-9A-Fa-f]{1,4}){1,7}))|(([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|:))|(((:(:[0-9A-Fa-f]{1,4}){0,5}:)|(([0-9A-Fa-f]{1,4}:){1}(:[0-9A-Fa-f]{1,4}){0,4}:)|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}:)|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}:)|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4})?:)|(([0-9A-Fa-f]{1,4}:){5}:)|(([0-9A-Fa-f]{1,4}:){6}))((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)))(%[a-zA-Z0-9._]+)?")
             if (!regex.test(input)) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             let pos: number = input.indexOf('.');
@@ -563,8 +567,8 @@ export namespace url {
             input = formatIPv6(input);
             input = compress(input);
             this.cHost = "[" + input + "]";
-            this.flags[4] = true;
-            this.flags[10] = true
+            this.flags[INDEX_HOST] = true;
+            this.flags[INDEX_IPV6] = true
         }
 
         private removalIPv4(inputStr: string): boolean {
@@ -596,10 +600,10 @@ export namespace url {
             for (let i = 0; i < inputSize; i++) {
                 if (res[i] == '') {
                     isIPv4 = false;
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     if (i == inputSize - 1) {
                         res.push('');
-                        this.flags[0] = false;
+                        this.flags[INDEX_INVALID] = false;
                     }
                 }
             }
@@ -619,7 +623,7 @@ export namespace url {
                 }
                 res += nums[len - 1];
                 this.cHost = res;
-                this.flags[4] = true;
+                this.flags[INDEX_HOST] = true;
             } else if (index == (len - 1)) {
                 for (let i = 0; i < (len - 1); i++) {
                     res += nums[i] + ".";
@@ -627,16 +631,16 @@ export namespace url {
                 let storeNumber: number[] = [0];
                 let temp: string = splitNum(nums[index], storeNumber);
                 if (storeNumber[0] + (len - 1) > 4) {
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     return;
                 }
                 for (let i = 0; i < (4 - (len - 1 + storeNumber[0])); i++) {
                     temp = "0." + temp;
                 }
                 this.cHost = res + temp;
-                this.flags[4] = true;
+                this.flags[INDEX_HOST] = true;
             } else {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
             }
         }
 
@@ -647,7 +651,7 @@ export namespace url {
             let tempLen: number = temp.length;
             let lastSize: number = temp[tempLen - 1].length;
             if (isIPv4 && lastSize > 8) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             let res: string = "";
@@ -661,13 +665,13 @@ export namespace url {
                 if (tempLen > 4) {
                     res = res.toLowerCase();
                     this.cHost = res;
-                    this.flags[4] = true;
+                    this.flags[INDEX_HOST] = true;
                 } else if (tempLen == 4) {
                     if (getFormatIPv4Index(temp) == -1) {
                         this.cHost = res;
-                        this.flags[4] = true;
+                        this.flags[INDEX_HOST] = true;
                     } else {
-                        this.flags[0] = true;
+                        this.flags[INDEX_INVALID] = true;
                     }
                 } else {
                     this.formatIPv4(temp);
@@ -675,7 +679,7 @@ export namespace url {
             } else {
                 res = res.toLowerCase();
                 this.cHost = res;
-                this.flags[4] = true;
+                this.flags[INDEX_HOST] = true;
             }
         }
 
@@ -685,17 +689,17 @@ export namespace url {
                 let ch = new Char(input[i]);
                 let result = Helper.specialcharacter.indexOf(ch.toString());
                 if ((ch != c'%') && (result != -1)) {
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     return;
                 }
             }
             this.cHost = input;
-            this.flags[4] = true;
+            this.flags[INDEX_HOST] = true;
         }
 
         analysizeHost(input: string, special: boolean) {
             if (input.length == 0) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             let inputLength = input.length;
@@ -705,7 +709,7 @@ export namespace url {
                     this.analysizeIPv6Host(input);
                     return;
                 }
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             if (!special) {
@@ -714,7 +718,7 @@ export namespace url {
             }
             let decodedInput = DecodeSpecialChars(input);
             if (!checkCharacter(decodedInput)) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             this.analysizeIPv4(decodedInput);
@@ -731,9 +735,9 @@ export namespace url {
                 } else if (((pos = temp.indexOf('/')) != -1 || (pos = temp.indexOf('\\')) != -1) && pos != 0) {
                     this.analysizeSpecialFile(temp, pos);
                 } else {
-                    if (temp.length != 0 && this.flags[0]) {
+                    if (temp.length != 0 && this.flags[INDEX_INVALID]) {
                         this.analysizeHost(temp, special);
-                    } else if (temp.length != 0 && !this.flags[0]) {
+                    } else if (temp.length != 0 && !this.flags[INDEX_INVALID]) {
                         this.analysizeHost(temp, special);
                         return;
                     }
@@ -774,15 +778,15 @@ export namespace url {
                 let keyWord: string = userAndPasswd.substring(position + 1);
                 if (user.length != 0) {
                     this.cUsername = user;
-                    this.flags[2] = true;
+                    this.flags[INDEX_USERNAME] = true;
                 }
                 if (keyWord.length != 0) {
                     this.cPassword = keyWord;
-                    this.flags[3] = true;
+                    this.flags[INDEX_PASSWORD] = true;
                 }
             } else {
                 this.cUsername = userAndPasswd;
-                this.flags[2] = true;
+                this.flags[INDEX_USERNAME] = true;
             }
             return strHost;
         }
@@ -794,26 +798,26 @@ export namespace url {
             for (let i = 0; i < port.length; i++) {
                 let ch = new Char(port[i]);
                 if (!isNum(ch.toString())) {
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     return;
                 }
             }
             if (port.length >= 6) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             let it: number = parseInt(port);
             const maxPort: number = 65535;
             if (it > maxPort) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
-            this.flags[5] = true;
+            this.flags[INDEX_PORT] = true;
             for (let key of Helper.head.keys()) {
                 let value = Helper.head.get(key);
                 if (key == this.cScheme && value == it) {
                     this.cPort = -1;
-                    this.flags[5] = false;
+                    this.flags[INDEX_PORT] = false;
                     return;
                 }
             }
@@ -834,7 +838,7 @@ export namespace url {
                 if (result != -1) {
                     if (this.cPath.length == 0 && it == (tempLen - 1)) {
                         this.cPath.push("");
-                        this.flags[6] = true;
+                        this.flags[INDEX_PATH] = true;
                     }
                     if (this.cPath.length == 0) {
                         continue;
@@ -842,7 +846,7 @@ export namespace url {
                     this.cPath.pop();
                     if (it == (tempLen - 1)) {
                         this.cPath.push("");
-                        this.flags[6] = true;
+                        this.flags[INDEX_PATH] = true;
                     }
                     continue;
                 }
@@ -850,12 +854,12 @@ export namespace url {
                 result = Helper.singlesegment.indexOf(temp[it]);
                 if (result != -1 && it == (tempLen - 1)) {
                     this.cPath.push("");
-                    this.flags[6] = true;
+                    this.flags[INDEX_PATH] = true;
                     continue;
                 }
                 if (result == -1) {
                     this.cPath.push(temp[it]);
-                    this.flags[6] = true;
+                    this.flags[INDEX_PATH] = true;
                 }
             }
         }
@@ -874,7 +878,7 @@ export namespace url {
                 strHost = this.analysizeUsernameAndPasswd(strHost);
             }
             if (strHost.length == 0) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             if (strHost[strHost.length - 1] != c']' && (strHost.lastIndexOf(':') != -1)) {
@@ -885,7 +889,7 @@ export namespace url {
                     this.analysizePort(port);
                 }
             }
-            if (strHost[strHost.length - 1] != c']' && strHost.lastIndexOf(':') != -1 && this.flags[0]) {
+            if (strHost[strHost.length - 1] != c']' && strHost.lastIndexOf(':') != -1 && this.flags[INDEX_INVALID]) {
                 return;
             }
             this.analysizeHost(strHost, special);
@@ -898,7 +902,7 @@ export namespace url {
                 strHost = this.analysizeUsernameAndPasswd(strHost);
             }
             if (strHost.length == 0) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return;
             }
             if (strHost[strHost.length - 1] != c']') {
@@ -907,7 +911,7 @@ export namespace url {
                     strHost = strHost.substring(0, pos);
                     this.analysizePort(port);
                 }
-                if ((pos = strHost.lastIndexOf(':')) != -1 && this.flags[0]) {
+                if ((pos = strHost.lastIndexOf(':')) != -1 && this.flags[INDEX_INVALID]) {
                     return;
                 }
             }
@@ -917,7 +921,7 @@ export namespace url {
         private analysizeFilescheme(input: string) {
             let strPath: string = this.cScheme + input;
             this.cScheme = "file:";
-            this.flags[1] = true;
+            this.flags[INDEX_SPECIAL] = true;
             this.analysizeFilePath(strPath);
         }
 
@@ -926,7 +930,7 @@ export namespace url {
                 input = this.analysizeUsernameAndPasswd(input);
             }
             if (input.length == 0) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
             }
             return input;
         }
@@ -937,7 +941,7 @@ export namespace url {
                 let port: string = input.substring(pos + 1);
                 input = input.substring(0, pos);
                 this.analysizePort(port);
-                if (this.flags[0]) {
+                if (this.flags[INDEX_INVALID]) {
                     return input;
                 }
             }
@@ -945,12 +949,12 @@ export namespace url {
         }
 
         private analysizeInfoPath(input: string) {
-            this.flags[9] = true;
+            this.flags[INDEX_INFOPATH] = true;
             if (this.cPath.length == 0) {
                 this.cPath.push("");
             }
             this.cPath[0] = input;
-            this.flags[6] = true;
+            this.flags[INDEX_PATH] = true;
             return;
         }
 
@@ -975,7 +979,7 @@ export namespace url {
                         strHost = this.analysizeUsernameAndPasswd(strHost);
                     }
                     if (strHost.length == 0) {
-                        this.flags[0] = true;
+                        this.flags[INDEX_INVALID] = true;
                         return;
                     }
                     let pos: number = 0;
@@ -984,7 +988,7 @@ export namespace url {
                         strHost = strHost.substring(0, pos);
                         this.analysizePort(port);
                     }
-                    if (strHost[strHost.length - 1] != c']' && (pos = strHost.lastIndexOf(':')) != -1 && this.flags[0]) {
+                    if (strHost[strHost.length - 1] != c']' && (pos = strHost.lastIndexOf(':')) != -1 && this.flags[INDEX_INVALID]) {
                         return;
                     }
                     this.analysizeHost(strHost, special);
@@ -1004,7 +1008,7 @@ export namespace url {
         }
 
         private analysizeHostAndPath(input: string) {
-            if (this.flags[1]) {
+            if (this.flags[INDEX_SPECIAL]) {
                 let pos: number = 0;
                 let inputLen: number = input.length;
                 while (pos < inputLen) {
@@ -1016,7 +1020,7 @@ export namespace url {
                 }
                 input = input.substring(pos);
                 if (input.length == 0) {
-                    this.flags[0] = true;
+                    this.flags[INDEX_INVALID] = true;
                     return;
                 } else if (input.indexOf('/') != -1 || input.indexOf('\\') != -1) {
                     this.parsingHostAndPath(input, pos);
@@ -1028,7 +1032,7 @@ export namespace url {
                 if (inputLen > 0) {
                     this.cIsSpecialPath = input[0] != c'/' ? true : false;
                 }
-                if (this.flags[11] && inputLen == 2) {
+                if (this.flags[INDEX_DOUBLE_SLASH] && inputLen == 2) {
                     return;
                 }
                 this.analysizeNoDefaultProtocol(input);
@@ -1037,14 +1041,14 @@ export namespace url {
 
         initOnlyInput(input: string): string {
             if (input.length == 0) {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
                 return input;
             }
             let tempInput = input;
             if (tempInput.indexOf(':') != -1) {
                 let pos = tempInput.indexOf(':');
                 pos++;
-                this.flags[11] = (input[pos] == c'/' && input[pos + 1] == c'/');
+                this.flags[INDEX_DOUBLE_SLASH] = (input[pos] == c'/' && input[pos + 1] == c'/');
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1068,7 +1072,7 @@ export namespace url {
                     this.analysizeHostAndPath(restInput);
                 }
             } else {
-                this.flags[0] = true;
+                this.flags[INDEX_INVALID] = true;
             }
 
             return tempInput;
@@ -1088,7 +1092,7 @@ export namespace url {
                 this.analysizeQuery(query);
                 input = input.substring(0, pos);
             }
-            let special: boolean = this.flags[1] ? true : false;
+            let special: boolean = this.flags[INDEX_SPECIAL] ? true : false;
             // let pathStr: string = input;
             this.analysizePath(input, special);
             return input;
@@ -1113,8 +1117,8 @@ export namespace url {
 
         getHostName(): string {
             let temp = "";
-            if (this.flags[4]) {
-                if (!this.flags[10]) {
+            if (this.flags[INDEX_HOST]) {
+                if (!this.flags[INDEX_IPV6]) {
                     temp = encodePercentEncoding(this.cHost, Helper.URL_ENCODED_PERCENT_SIGN_CHARS);
                 } else {
                     temp = this.cHost;
@@ -1124,7 +1128,7 @@ export namespace url {
         }
 
         setHostName(input: string) {
-            if (this.flags[9]) {
+            if (this.flags[INDEX_INFOPATH]) {
                 return;
             }
             let strHost: string = input;
@@ -1141,43 +1145,40 @@ export namespace url {
             let special: boolean = Helper.head.has(this.cScheme);
             let tempUrl: InnerURL = new InnerURL();
             tempUrl.analysizeHost(strHost, special);
-            if (tempUrl.flags[4]) {
+            if (tempUrl.flags[INDEX_HOST]) {
                 if (this.cScheme == "file:" && (tempUrl.cHost == "localhost")) {
                     tempUrl.cHost = "";
                 }
                 this.cHost = tempUrl.cHost;
-                this.flags[4] = true;
+                this.flags[INDEX_HOST] = true;
             }
         }
 
         setUserName(input: string) {
             if (input.length == 0) {
                 this.cUsername = "";
-                this.flags[2] = false;
+                this.flags[INDEX_USERNAME] = false;
             } else {
                 let username: string = encodePercentEncoding(input, Helper.USERINFO_PERCENT_SIGN_CHARS);
-                let len: number = Helper.spesicalSymbols.length - 2;
-                for (let i = 0; i <= len; i += 2) {
-                    // ReplaceSpecialSymbols
-                    username = username.replaceAll(Helper.spesicalSymbols[i], Helper.spesicalSymbols[i + 1]);
-                }
+                Helper.spesicalSymbols.forEach((value: string, key: string) => {
+                    username = username.replaceAll(key, value);
+                });
                 this.cUsername = username;
-                this.flags[2] = true;
+                this.flags[INDEX_USERNAME] = true;
             }
         }
 
         setPassword(input: string) {
             if (input.length == 0) {
                 this.cPassword = "";
-                this.flags[3] = false;
+                this.flags[INDEX_PASSWORD] = false;
             } else {
                 let keyWord: string = encodePercentEncoding(input, Helper.USERINFO_PERCENT_SIGN_CHARS);
-                let len: number = Helper.spesicalSymbols.length - 2;
-                for (let i = 0; i <= len; i += 2) {
-                    keyWord = keyWord.replaceAll(Helper.spesicalSymbols[i], Helper.spesicalSymbols[i + 1]);
-                }
+                Helper.spesicalSymbols.forEach((value: string, key: string) => {
+                    keyWord = keyWord.replaceAll(key, value);
+                });
                 this.cPassword = keyWord;
-                this.flags[3] = true;
+                this.flags[INDEX_PASSWORD] = true;
             }
         }
 
@@ -1185,13 +1186,13 @@ export namespace url {
             let strInput: string = input;
             let special: boolean = Helper.head.has(this.cScheme);
             let inputIsSpecial: boolean = Helper.head.has(input);
-            if ((special != inputIsSpecial) || ((input == "file") && (this.flags[2] || this.flags[3] || this.flags[5]))) {
+            if ((special != inputIsSpecial) || ((input == "file") && (this.flags[INDEX_USERNAME] || this.flags[INDEX_PASSWORD] || this.flags[INDEX_PORT]))) {
                 return;
             }
             let tempUrl: InnerURL = new InnerURL();
             if (tempUrl.analysizeScheme(strInput)) {
-                if (tempUrl.flags[1]) {
-                    this.flags[1] = true;
+                if (tempUrl.flags[INDEX_SPECIAL]) {
+                    this.flags[INDEX_SPECIAL] = true;
                 }
                 this.cScheme = tempUrl.cScheme;
             }
@@ -1201,7 +1202,7 @@ export namespace url {
             let temp: string = "";
             if (input.length == 0) {
                 this.cFragment = "";
-                this.flags[8] = false;
+                this.flags[INDEX_FRAGMENT] = false;
             } else {
                 if (input[0] != c'#') {
                     temp = '#';
@@ -1217,7 +1218,7 @@ export namespace url {
             let temp: string = "";
             if (input.length == 0) {
                 this.cQuery = "";
-                this.flags[7] = false;
+                this.flags[INDEX_QUERY] = false;
             } else {
                 if (input[0] != c'?') {
                     temp = "?";
@@ -1237,7 +1238,7 @@ export namespace url {
         }
 
         setHost(input: string) {
-            if (input.length == 0 || this.flags[9]) {
+            if (input.length == 0 || this.flags[INDEX_INFOPATH]) {
                 return;
             }
             let strHost: string = input;
@@ -1261,12 +1262,12 @@ export namespace url {
             let special: boolean = Helper.head.has(this.cScheme);
             let tempUrl: InnerURL = new InnerURL();
             tempUrl.analysizeHost(strHost, special);
-            if (tempUrl.flags[4]) {
+            if (tempUrl.flags[INDEX_HOST]) {
                 if (this.cScheme == "file:" && tempUrl.cHost == "localhost") {
                     tempUrl.cHost = "";
                 }
                 this.cHost = tempUrl.cHost;
-                this.flags[4] = true;
+                this.flags[INDEX_HOST] = true;
             } else {
                 return;
             }
@@ -1281,8 +1282,8 @@ export namespace url {
                 if (port.length > 0) {
                     let tempPortUrl: InnerURL = new InnerURL();
                     tempPortUrl.analysizePort(port);
-                    if (tempPortUrl.flags[5]) {
-                        this.flags[5] = true;
+                    if (tempPortUrl.flags[INDEX_PORT]) {
+                        this.flags[INDEX_PORT] = true;
                         this.cPort = tempPortUrl.cPort;
                     }
                 }
@@ -1301,8 +1302,8 @@ export namespace url {
             if (port.length > 0) {
                 let tempUrl: InnerURL = new InnerURL();
                 tempUrl.analysizePort(port);
-                if (tempUrl.flags[5]) {
-                    this.flags[5] = true;
+                if (tempUrl.flags[INDEX_PORT]) {
+                    this.flags[INDEX_PORT] = true;
                     this.cPort = tempUrl.cPort;
                 }
             }
@@ -1314,7 +1315,7 @@ export namespace url {
             let newUrl: InnerURL = new InnerURL();
             newUrl.initOnlyInput(str);
             this.flags = newUrl.flags;
-            if (!newUrl.flags[0]) {
+            if (!newUrl.flags[INDEX_INVALID]) {
                 this.flags = newUrl.flags;
                 this.cFragment = newUrl.cFragment;
                 this.cScheme = newUrl.cScheme;
@@ -1330,7 +1331,7 @@ export namespace url {
 
         setPath(input: string) {
             let strPath: string = encodePercentEncoding(input, Helper.PATH_PERCENT_SIGN_CHARS);
-            if (this.flags[9] || strPath.length == 0) {
+            if (this.flags[INDEX_INFOPATH] || strPath.length == 0) {
                 return;
             }
             let oldStr: string = "%3A";
@@ -1339,57 +1340,57 @@ export namespace url {
             let special: boolean = Helper.head.has(this.cScheme);
             if (this.cScheme == "file:") {
                 let tempUrl: InnerURL = new InnerURL();
-                if ((strPath[0] == c'/') || (strPath[0] == c'\\' && this.flags[1])) {
+                if ((strPath[0] == c'/') || (strPath[0] == c'\\' && this.flags[INDEX_SPECIAL])) {
                     strPath = strPath.substring(1);
                 }
                 tempUrl.analysizeFilePath(strPath);
-                if (tempUrl.flags[6]) {
+                if (tempUrl.flags[INDEX_PATH]) {
                     this.cPath = tempUrl.cPath;
-                    this.flags[6] = true;
+                    this.flags[INDEX_PATH] = true;
                 }
             } else {
                 let tempUrl: InnerURL = new InnerURL();
-                if ((strPath[0] == c'/') || (strPath[0] == c'\\' && this.flags[1])) {
+                if ((strPath[0] == c'/') || (strPath[0] == c'\\' && this.flags[INDEX_SPECIAL])) {
                     strPath = strPath.substring(1);
                 }
                 tempUrl.analysizePath(strPath, special);
-                if (tempUrl.flags[6]) {
+                if (tempUrl.flags[INDEX_PATH]) {
                     this.cPath = tempUrl.cPath;
-                    this.flags[6] = true;
+                    this.flags[INDEX_PATH] = true;
                 }
             }
         }
 
         getSearch(): string {
-            if (this.flags[7] && (this.cQuery.length != 1)) {
+            if (this.flags[INDEX_QUERY] && (this.cQuery.length != 1)) {
                 return this.cQuery;
             }
             return "";
         }
 
         getEncodeSearch(): string {
-            if (this.flags[7] && (this.cQuery.length != 1)) {
+            if (this.flags[INDEX_QUERY] && (this.cQuery.length != 1)) {
                 return encodePercentEncoding(this.cQuery, Helper.QUERY_PERCENT_SIGN_CHARS);
             }
             return "";
         }
 
         getUsername(): string {
-            if (this.flags[2]) {
+            if (this.flags[INDEX_USERNAME]) {
                 return encodePercentEncoding(this.cUsername, Helper.USERINFO_PERCENT_SIGN_CHARS);
             }
             return "";
         }
 
         getPassword(): string {
-            if (this.flags[3]) {
+            if (this.flags[INDEX_PASSWORD]) {
                 return encodePercentEncoding(this.cPassword, Helper.USERINFO_PERCENT_SIGN_CHARS);
             }
             return "";
         }
 
         getFragment(): string {
-            if (this.flags[8] && (this.cFragment.length != 1)) {
+            if (this.flags[INDEX_FRAGMENT] && (this.cFragment.length != 1)) {
                 return encodePercentEncoding(this.cFragment, Helper.FRAGMENT_PERCENT_SIGN_CHARS);
             }
             return "";
@@ -1407,7 +1408,7 @@ export namespace url {
             if (this.cIsSpecialPath) {
                 temp = "";
             }
-            if (this.flags[6]) {
+            if (this.flags[INDEX_PATH]) {
                 let len: number = this.cPath.length;
                 for (let i = 0; i < len; i++) {
                     if (i < len - 1) {
@@ -1427,7 +1428,7 @@ export namespace url {
         }
 
         getPort(): string {
-            if (this.flags[5]) {
+            if (this.flags[INDEX_PORT]) {
                 return Number.toString(this.cPort);
             }
             return "";
@@ -1435,53 +1436,53 @@ export namespace url {
 
         getHost(): string {
             let temp: string = this.cHost;
-            if (this.flags[5]) {
+            if (this.flags[INDEX_PORT]) {
                 temp += ":";
                 temp += Number.toString(this.cPort);
             }
-            if (!this.flags[10]) {
+            if (!this.flags[INDEX_IPV6]) {
                 temp = encodePercentEncoding(temp, Helper.URL_ENCODED_PERCENT_SIGN_CHARS);
             }
             return temp;
         }
 
         getIsIpv6(): boolean {
-            return this.flags[10] ? true : false;
+            return this.flags[INDEX_IPV6] ? true : false;
         }
 
         hasDoubleSlash(): boolean {
-            return this.flags[11];
+            return this.flags[INDEX_DOUBLE_SLASH];
         }
     }
 
     function baseIntoUrl(base: InnerURL, res: InnerURL, inputIsEmpty: boolean) {
         res.cScheme = base.cScheme;
-        res.flags[1] = base.flags[1];
+        res.flags[INDEX_SPECIAL] = base.flags[INDEX_SPECIAL];
 
         res.cHost = base.cHost;
-        res.flags[4] = true
+        res.flags[INDEX_HOST] = true
 
         res.cUsername = base.cUsername;
-        res.flags[2] = base.flags[2];
+        res.flags[INDEX_USERNAME] = base.flags[INDEX_USERNAME];
 
         res.cPassword = base.cPassword;
-        res.flags[3] = base.flags[3];
+        res.flags[INDEX_PASSWORD] = base.flags[INDEX_PASSWORD];
 
         res.cPort = base.cPort;
-        res.flags[5] = base.flags[5];
+        res.flags[INDEX_PORT] = base.flags[INDEX_PORT];
 
         if (inputIsEmpty) {
             res.cPath = base.cPath;
-            res.flags[6] = base.flags[6];
+            res.flags[INDEX_PATH] = base.flags[INDEX_PATH];
 
             res.cQuery = base.cQuery;
-            res.flags[7] = base.flags[7];
+            res.flags[INDEX_QUERY] = base.flags[INDEX_QUERY];
 
             res.cFragment = base.cFragment;
-            res.flags[8] = base.flags[8];
+            res.flags[INDEX_FRAGMENT] = base.flags[INDEX_FRAGMENT];
         }
-        res.flags[9] = base.flags[9];
-        res.flags[10] = base.flags[10];
+        res.flags[INDEX_INFOPATH] = base.flags[INDEX_INFOPATH];
+        res.flags[INDEX_IPV6] = base.flags[INDEX_IPV6];
     }
 
     function shorteningPath(resUrl: InnerURL, baseUrl: InnerURL, isFile: boolean) {
@@ -1595,8 +1596,8 @@ export namespace url {
                     nativeUrl = URL.parseBaseUrl(fixIllegalString(inputUrl), inputBase as URL);
                 }
             }
-            if (nativeUrl.urlInner.flags[0]) {
-                throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
+            if (nativeUrl.urlInner.flags[INDEX_INVALID]) {
+                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
             }
             setEncodedData(nativeUrl, nativeUrl.urlInner);
             return nativeUrl;
@@ -1867,7 +1868,7 @@ export namespace url {
         */
         set href(href: string) {
             this.urlInner.setHref(href);
-            if (!this.urlInner.flags[0]) {
+            if (!this.urlInner.flags[INDEX_INVALID]) {
                 setEncodedData(this, this.urlInner);
             } else {
                 throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
@@ -1921,45 +1922,45 @@ export namespace url {
             let resUrl = new InnerURL();
             let strInput = input;
             if (base.length == 0) {
-                possibleBaseURL.flags[0] = true
+                possibleBaseURL.flags[INDEX_INVALID] = true
             }
             possibleBaseURL.parseSingleUrl(base);
-            if (possibleBaseURL.flags[0]) {
-                resUrl.flags[0] = true
+            if (possibleBaseURL.flags[INDEX_INVALID]) {
+                resUrl.flags[INDEX_INVALID] = true
                 result.urlInner = resUrl;
                 return result;
-            } else if (!possibleBaseURL.flags[0]) {
+            } else if (!possibleBaseURL.flags[INDEX_INVALID]) {
                 strInput = resUrl.parseSingleUrl(strInput);
-                if (!resUrl.flags[0]) {
+                if (!resUrl.flags[INDEX_INVALID]) {
                     result.urlInner = resUrl;
                     return result;
                 }
-                if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && possibleBaseURL.flags[1]))) {
+                if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && possibleBaseURL.flags[INDEX_SPECIAL]))) {
                     let newInput: string = possibleBaseURL.cScheme + input;
-                    resUrl.flags[0] = false
+                    resUrl.flags[INDEX_INVALID] = false
                     resUrl.parseSingleUrl(newInput);
                     result.urlInner = resUrl;
                     return result;
                 }
-                if (!possibleBaseURL.flags[9]) {
-                    resUrl.flags[0] = false
+                if (!possibleBaseURL.flags[INDEX_INFOPATH]) {
+                    resUrl.flags[INDEX_INVALID] = false
                     baseIntoUrl(possibleBaseURL, resUrl, input.length == 0);
                     strInput = resUrl.toolHasBase(input, strInput);
                     if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length == 0) {
                         resUrl.cPath = possibleBaseURL.cPath;
-                        resUrl.flags[6] = possibleBaseURL.flags[6];
+                        resUrl.flags[INDEX_PATH] = possibleBaseURL.flags[INDEX_PATH];
                     }
                     if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length != 0) {
                         let isFile: boolean = ((resUrl.cScheme == "file:") ? true : false);
                         shorteningPath(resUrl, possibleBaseURL, isFile);
                         let basePathStr: string = basePathToString(possibleBaseURL);
-                        basePathStr == "" ? basePathStr = strInput : basePathStr += "/" + strInput;
+                        basePathStr == "" ? basePathStr = strInput : basePathStr += '/' + strInput;
                         resUrl.cPath = new Array<string>();
                         resUrl.analysizeInput(basePathStr);
-                        resUrl.flags[6] = true
+                        resUrl.flags[INDEX_PATH] = true
                     }
-                } else if (possibleBaseURL.flags[9]) {
-                    resUrl.flags[0] = true
+                } else if (possibleBaseURL.flags[INDEX_INFOPATH]) {
+                    resUrl.flags[INDEX_INVALID] = true
                     result.urlInner = resUrl;
                     return result;
                 }
@@ -1974,26 +1975,26 @@ export namespace url {
             let resUrl: InnerURL = new InnerURL();
             let strInput: string = input;
             resUrl.parseSingleUrl(strInput);
-            if (!resUrl.flags[0]) {
+            if (!resUrl.flags[INDEX_INVALID]) {
                 result.urlInner = resUrl;
                 return result;
             }
             if (input.length != 0) {
-                if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && base.flags[1]))) {
+                if ((input[0] == c'/') && (input[1] == c'/' || (input[1] == c'\\' && base.flags[INDEX_SPECIAL]))) {
                     let newInput: string = base.cScheme + input;
-                    resUrl.flags[0] = false
+                    resUrl.flags[INDEX_INVALID] = false
                     resUrl.initOnlyInput(newInput);
                     result.urlInner = resUrl;
                     return result;
                 }
             }
-            if (!base.flags[9]) {
-                resUrl.flags[0] = false
+            if (!base.flags[INDEX_INFOPATH]) {
+                resUrl.flags[INDEX_INVALID] = false
                 baseIntoUrl(base, resUrl, input.length == 0);
                 strInput = resUrl.toolHasBase(input, strInput);
                 if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length == 0) {
                     resUrl.cPath = base.cPath;
-                    resUrl.flags[6] = base.flags[6];
+                    resUrl.flags[INDEX_PATH] = base.flags[INDEX_PATH];
                 }
                 if (input.length != 0 && input[0] != c'/' && resUrl.cPath.length != 0) {
                     let isFile: boolean = ((resUrl.cScheme == "file:") ? true : false);
@@ -2002,10 +2003,10 @@ export namespace url {
                     basePathStr == "" ? basePathStr = strInput : basePathStr += "/" + strInput;
                     resUrl.cPath = new Array<string>();
                     resUrl.analysizeInput(basePathStr);
-                    resUrl.flags[6] = true
+                    resUrl.flags[INDEX_PATH] = true
                 }
-            } else if (base.flags[9]) {
-                resUrl.flags[0] = true
+            } else if (base.flags[INDEX_INFOPATH]) {
+                resUrl.flags[INDEX_INVALID] = true
                 result.urlInner = resUrl;
                 return result;
             }
