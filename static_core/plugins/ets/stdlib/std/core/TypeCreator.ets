@@ -314,7 +314,7 @@ final class TypeCreatorCtx {
 
         this.checkError()
 
-        const objsArray : FixedArray<Object> = new Object[this.objects.length as int]
+        const objsArray : FixedArray<Object> = new Object[this.objects.length.toInt()]
         for (let i = 0; i < this.objects.length; i++) {
             objsArray[i] = this.objects.$_get(i) as Object
         }
@@ -335,7 +335,7 @@ final class TypeCreatorCtx {
     internal registerObject(o: Object): int {
         const r = this.objects.length
         this.objects.push(o)
-        return r as int
+        return r.toInt()
     }
 
     /**

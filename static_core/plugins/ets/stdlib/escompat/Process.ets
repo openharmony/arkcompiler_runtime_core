@@ -126,7 +126,7 @@ export namespace StdProcess {
                 if (!isInteger(signal as number) || (signal as number) < 1 || (signal as number) > 31) {
                     throw new RangeError("Invalid signal value");
                 }
-                killSignal = signal as int;
+                killSignal = signal.toInt();
             }
             this.killImpl(killSignal);
         }
@@ -455,30 +455,30 @@ export namespace StdProcess {
             return [timeout, killSignal, maxBuffer];
         }
 
-        if (options.timeout != undefined && options.timeout as number > 0) {
-            timeout = (options.timeout as number).toInt();
-        }
-
-        if (options.killSignal != undefined) {
-            if (options.killSignal instanceof string) {
-                let key: string = options.killSignal as string;
-                if (SIGNAL_MAP.has(key)) {
-                    killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
-                }
-            } else {
-                if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
-                    throw new RangeError("Invalid signal value");
-                }
-                killSignal = (options.killSignal as number).toInt();
+            if (options.timeout != undefined && options.timeout as number > 0) {
+                timeout = (options.timeout as number).toInt();
             }
-        }
 
-        if (options.maxBuffer != undefined) {
-            if ((options.maxBuffer as number).toInt() < 0) {
-                throw new RangeError("Invalid buffer size value");
+            if (options.killSignal != undefined) {
+                if (options.killSignal instanceof string) {
+                    let key: string = options.killSignal as string;
+                    if (SIGNAL_MAP.has(key)) {
+                        killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
+                    }
+                } else {
+                    if (!isInteger(options.killSignal as number) || (options.killSignal as number) < 1 || (options.killSignal as number) > 31) {
+                        throw new RangeError("Invalid signal value");
+                    }
+                    killSignal = (options.killSignal as number).toInt();
+                }
             }
-            maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
-        }
+
+            if (options.maxBuffer != undefined) {
+                if ((options.maxBuffer as number).toInt() < 0) {
+                    throw new RangeError("Invalid buffer size value");
+                }
+                maxBuffer = min((options.maxBuffer as number).toInt(), MAX_BUFFER_SIZE);
+            }
 
         return [timeout, killSignal, maxBuffer];
     }

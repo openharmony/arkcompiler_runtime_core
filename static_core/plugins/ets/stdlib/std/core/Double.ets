@@ -195,7 +195,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override toByte(): byte {
-        return Double.toByte(this.value);
+        return this.value.toByte();
     }
 
     /**
@@ -205,7 +205,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override toShort(): short {
-        return Double.toShort(this.value);
+        return this.value.toShort();
     }
 
     /**
@@ -215,7 +215,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override toInt(): int {
-        return Double.toInt(this.value);
+        return this.value.toInt();
     }
 
     /**
@@ -225,7 +225,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override toLong(): long {
-        return Double.toLong(this.value);
+        return this.value.toLong();
     }
 
     /**
@@ -235,8 +235,49 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override toFloat(): float {
-        return Double.toFloat(this.value);
+        return this.value.toFloat();
     }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as double
+     * @tag arkts
+     */
+    public override toDouble(): double {
+        return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     * @tag arkts
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toDouble(value: double): double {
+        return value;
+    }
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: double): char;
+
 
     /**
      * Returns the primitive as byte value
@@ -284,16 +325,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     public static native toFloat(value: double): float;
 
     /**
-     * Returns value of this instance
-     *
-     * @returns value as double
-     * @tag arkts
-     */
-    public override toDouble(): double {
-        return this.value;
-    }
-
-    /**
      * Compares this instance to other Double object
      * The result is less than 0 if this instance lesser than provided object
      * 0 if they are equal
@@ -305,7 +336,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override compareTo(other: Double): int {
-        return (this.value - other.unboxed()) as int;
+        return (this.value - other).toInt();
     }
 
     /**
@@ -329,7 +360,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     public toString(d: Number): String {
-        return Double.toString(this.value, d as int);
+        return Double.toString(this.value, d.toInt());
     }
 
     /**
@@ -343,29 +374,18 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Converts a number to a string by using the current locale
+     * Without an argument method returns just toString value
      *
-     * @param locales
+     * @returns result of the conversion
      *
-     * @param options
-     *
-     * @returns string representation
      */
     public toLocaleString(): String {
-        return this.toLocaleString(undefined)
+        return new Intl.NumberFormat().format(this.value)
     }
 
-    /**
-     * Converts a number to a string by using the current or specified locale.
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): string {
-        return new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options).format(this.value)
+    public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
+        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options)
+        return formatter.format(this.value)
     }
 
     /**
@@ -674,7 +694,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
         if ((r < 2.0 || r > 36.0) && r != 0.0) {
             return NaN;
         } else {
-            return Double.parseIntCore(s.trim(), r as int);
+            return Double.parseIntCore(s.trim(), Double.toInt(r));
         }
     }
 

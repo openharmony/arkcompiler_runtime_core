@@ -87,7 +87,7 @@ export class Reflect {
      * Gets the property of the record
      *
      * @param target Record that contains the property
-     * 
+     *
      * @param key name of the property
      *
      * @returns property value
@@ -556,9 +556,9 @@ export class Reflect {
      * @param target Record that contains the property
      *
      * @param key name of the property
-     * 
+     *
      * @param value of the property
-     * 
+     *
      * @returns a Boolean indicating whether or not setting the property was successful
      */
     public static set(target: Record<PropertyKey, NullishType>, key: string, value: Object): Boolean {
@@ -586,7 +586,7 @@ export class Reflect {
             }
             let av = v as ArrayValue
             try {
-                av.setElement(index as long, Value.of(value))
+                av.setElement(index.toLong(), Value.of(value))
             } catch (e: Error) {
                 return false
             }
@@ -610,7 +610,7 @@ export class Reflect {
      * Returns the string keys of the properties of a record
      *
      * @param target Record that contains the properties
-     * 
+     *
      * @returns as array of the target Record property names
      */
     public static ownKeys(target: Record<PropertyKey, NullishType>): string[] {
@@ -704,4 +704,3 @@ export class Reflect {
         return Reflect.isLiteralInitializedInterfaceImpl(target)
     }
 }
-

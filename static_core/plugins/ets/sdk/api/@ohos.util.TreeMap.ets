@@ -267,8 +267,8 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
             if (Number.isInteger(firstValueN) && Number.isInteger(secondValueN) &&
                 firstValueN <= Int.MAX_VALUE / 128 && firstValueN >= Int.MIN_VALUE / 128 &&
                 secondValueN <= Int.MAX_VALUE / 128 && secondValueN >= Int.MIN_VALUE / 128) {
-                const firstValueI = firstValueN as int;
-                const secondValueI = secondValueN as int;
+                const firstValueI = firstValueN.toInt();
+                const secondValueI = secondValueN.toInt();
                 return secondValueI - firstValueI;
             }
         } else if (firstValue instanceof String && secondValue instanceof String) {

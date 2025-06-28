@@ -72,17 +72,6 @@ export function parseFloat(s: String): number {
 }
 
 /**
- * Checks if Double is `NaN` (not a number)
- *
- * @param d the Double to test
- *
- * @returns `true` if the argument is `NaN`, `false` otherwise.
- */
-export function isNaN(d: Number): boolean {
-    return d.isNaN();
-}
-
-/**
  * Checks if double is `NaN` (not a number)
  *
  * @param d the `double` to test
@@ -493,18 +482,7 @@ export function isSafeInteger(v: Int): boolean {
  * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
  */
 export function isSafeInteger(v: long): boolean {
-    return v <= Double.MAX_SAFE_INTEGER as long;
-}
-
-/**
- * Checks if Long can be represented in double without lossing precision
- *
- * @param v: Long - the Long to test
- *
- * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: Long): boolean {
-    return v.unboxed() <= Double.MAX_SAFE_INTEGER as long;
+    return v <= Double.MAX_SAFE_INTEGER.toLong();
 }
 
 /**
@@ -621,20 +599,20 @@ export function clearInterval(timerId: number): void {
 
 function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 {
-    const realDelayMs = delayMs as int; 
+    const realDelayMs = delayMs.toInt();
     if (CoroutineExtras.workerHasExternalScheduler()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
+        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
     }
-    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
+    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
 }
 
 function stopTimer(timerId: number): void
 {
     if (CoroutineExtras.workerHasExternalScheduler()) {
-        stopTimerImpl(timerId as int);
+        stopTimerImpl(timerId.toInt());
         return;
     }
-    clearTimer(timerId as int);
+    clearTimer(timerId.toInt());
 }
 
 native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;

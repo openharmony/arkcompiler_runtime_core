@@ -93,7 +93,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as short
      */
     public override toShort(): short {
-        return Byte.toShort(this.value);
+        return this.value.toShort();
     }
 
     /**
@@ -102,7 +102,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as int
      */
     public override toInt(): int {
-        return Byte.toInt(this.value);
+        return this.value.toInt();
     }
 
     /**
@@ -111,7 +111,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as long
      */
     public override toLong(): long {
-        return Byte.toLong(this.value);
+        return this.value.toLong();
     }
 
     /**
@@ -120,7 +120,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as float
      */
     public override toFloat(): float {
-        return Byte.toFloat(this.value);
+        return this.value.toFloat();
     }
 
     /**
@@ -129,7 +129,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as double
      */
     public override toDouble(): double {
-        return Byte.toDouble(this.value);
+        return this.value.toDouble();
     }
 
     /**
@@ -138,7 +138,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns value as char
      */
     public toChar(): char {
-        return Byte.toChar(this.value);
+        return this.value.toChar();
     }
 
     /**
@@ -196,6 +196,17 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     public static native toChar(value: byte): char;
 
     /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toByte(value: byte): byte {
+        return value;
+    }
+
+    /**
      * Compares this instance to other Byte object
      * The result is less than 0 if this instance lesser than provided object
      * 0 if they are equal
@@ -221,7 +232,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
         }
         let val = this.value;
         let negative: boolean = (val < 0);
-        let digitsNum = (log10(abs(this.value)) + 1) as int;
+        let digitsNum = Double.toInt(log10(abs(this.value)) + 1);
         if (negative) {
             ++digitsNum;
         }
@@ -232,7 +243,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
             if (negative) {
                 remainder = -remainder;
             }
-            data[curPlace] = (remainder + c'0') as char;
+            data[curPlace] = (remainder + c'0').toChar();
             val /= 10;
             curPlace -= 1;
         }
@@ -288,7 +299,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns Result of the addition
      */
     public add(other: Byte): Byte {
-        return Byte.valueOf((this.value + other.toByte()) as byte)
+        return (this.value + other.toByte()).toByte()
     }
 
     /**
@@ -299,7 +310,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns Result of the subtraction
      */
     public sub(other: Byte): Byte {
-        return Byte.valueOf((this.value - other.toByte()) as byte)
+        return (this.value - other.toByte()).toByte()
     }
 
     /**
@@ -310,7 +321,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns Result of the multiplication
      */
     public mul(other: Byte): Byte {
-        return Byte.valueOf((this.value * other.toByte()) as byte)
+        return (this.value * other.toByte()).toByte()
     }
 
     /**
@@ -321,7 +332,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      * @returns Result of the division
      */
     public div(other: Byte): Byte {
-        return Byte.valueOf((this.value / other.toByte()) as byte)
+        return (this.value / other.toByte()).toByte()
     }
 
     /**
@@ -382,7 +393,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Byte.MIN_VALUE <= num && num <= Byte.MAX_VALUE) {
-                return Byte.valueOf(num as byte)
+                return num.toByte()
             }
         }
         throw new JSONTypeError("Cannot create Byte from JSON", new ErrorOptions(json as Object))

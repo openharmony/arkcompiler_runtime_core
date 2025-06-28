@@ -144,7 +144,7 @@ export class TypeKind {
 }
 
 // 5 lower bits stores kind's id
-const TypeKindMask: byte = (1 << 6) - 1
+const TypeKindMask: byte;
 
 // NOTE(shumilov-petr): replace to enum, enum not available now
 class ValueTypeDesc {
@@ -221,7 +221,7 @@ export abstract class Type extends Object {
      * @returns instance of appropriate type or undefined if resolving is failed
      */
     internal static resolve(td: RuntimeTypeDescriptor, contextLinker: RuntimeLinker): Type | undefined {
-        let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask) as byte
+        let kind = (TypeAPI.getTypeKind(td, contextLinker) & TypeKindMask).toByte()
         switch (kind) {
             case TypeKind.NONE:
                 return undefined
@@ -371,89 +371,6 @@ export abstract class Type extends Object {
         const td = TypeAPI.getTypeDescriptor(o)
         const contextLinker = (o == null) ? Class.ofCaller().getLinker() : Class.of(o).getLinker()
         return Type.resolve(td, contextLinker)!
-    }
-
-    // -----
-
-    public static of(v: Boolean): Type {
-        return BooleanType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Char): Type {
-        return CharType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Byte): Type {
-        return ByteType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Short): Type {
-        return ShortType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Int): Type {
-        return IntType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Long): Type {
-        return LongType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Float): Type {
-        return FloatType.REF
-    }
-
-    /**
-     * Returns Type of value
-     *
-     * @param v value
-     *
-     * @returns Type instance of this value
-     */
-    public static of(v: Double): Type {
-        return DoubleType.REF
     }
 
     // -----
@@ -833,7 +750,7 @@ export final class UndefinedType extends Type {
  * Represents void type
  */
 export final class VoidType extends Type {
-    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true) 
+    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true)
     public static readonly REF: VoidType = new VoidType(TypeAPI.getTypeDescriptor(Void.void_instance), false)
 
     private readonly value: boolean
@@ -2282,7 +2199,7 @@ export final class ArrayType extends Type {
     internal static getInstance(arrayClass: Class, elemTD?: RuntimeTypeDescriptor): ArrayType {
         elemTD = elemTD ?? TypeAPI.getArrayElementType(arrayClass)
         const contextLinker = arrayClass.getLinker()
-        let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask) as byte
+        let ek = (TypeAPI.getTypeKind(elemTD, contextLinker) & TypeKindMask).toByte()
         switch (ek) {
             case TypeKind.BOOLEAN:
                 return TypeAPI.isValueType(elemTD, contextLinker) ? ArrayType.BOOLEAN_VAL : ArrayType.BOOLEAN_REF

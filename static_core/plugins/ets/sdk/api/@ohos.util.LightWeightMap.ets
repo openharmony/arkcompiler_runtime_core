@@ -178,7 +178,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @returns number of Entries with unique keys in the LightWeightMap
      */
     get length(): number {
-        return this.buckets.actualLength as number;
+        return this.buckets.actualLength.toDouble();
     }
 
     /**
@@ -355,7 +355,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         if (minimumCapacity > Int.MAX_VALUE) {
             return;
         }
-        this.buckets.increaseCapacityTo(minimumCapacity as int);
+        this.buckets.increaseCapacityTo(minimumCapacity.toInt());
     }
 
     /**
@@ -392,7 +392,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
      * @returns true if the entry was removed, false otherwise
      */
     removeAt(index: number): boolean {
-        if (index < 0 || this.buckets.actualLength <= (index as int)) {
+        if (index < 0 || this.buckets.actualLength <= (index.toInt())) {
             return false;
         }
         this.buckets.remove(index);
@@ -474,14 +474,14 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             let right = index;
             while ((right < this.buckets.actualLength) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[right] === key) {
-                    return right as number;
+                    return right.toDouble();
                 }
                 right++;
             }
             let left = index - 1;
             while ((left > 0) && (this.buckets.entryHashs[right] === hashCode)) {
                 if (this.buckets.entryKeys[left] === key) {
-                    return left as number;
+                    return left.toDouble();
                 }
                 left--;
             }
