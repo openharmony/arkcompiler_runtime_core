@@ -29,7 +29,7 @@ namespace ark::ets::interop::js::ets_proxy {
 napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     std::ostringstream classDescriptorBuilder;
     classDescriptorBuilder << "L" << packageName << (packageName.empty() ? "ETSGLOBAL;" : "/ETSGLOBAL;");
@@ -80,7 +80,7 @@ napi_value CreateEtsRecordInstance(napi_env env)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
 
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
     EtsClass *etsClass = PlatformTypes()->escompatRecord;
@@ -110,7 +110,7 @@ napi_value GetETSInstance(napi_env env, std::string_view classDescriptor)
 napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
     return GetETSClassImpl(env, classDescriptor);

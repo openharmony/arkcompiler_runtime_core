@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "arkts_esvalue.h"
-#include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
+function main(): void {
+    let etsVm = globalThis.gtest.etsVm;
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" bool arkts_esvalue_unwrap(ani_env *env, ani_object esValue, void **result)
-{
-    return ark::ets::interop::js::UnwrapESValue(env, esValue, result);
+    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "checkInteropApi")());
 }
+
+main();

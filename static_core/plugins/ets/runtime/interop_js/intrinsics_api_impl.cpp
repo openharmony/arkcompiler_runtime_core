@@ -57,7 +57,7 @@ namespace ark::ets::interop::js {
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     napi_value result;
     napi_status status;
@@ -144,7 +144,7 @@ JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
     if (v->GetClass() == PlatformTypes(coro)->interopJSValue) {
         return JSValue::FromEtsObject(v);
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -182,7 +182,7 @@ JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -254,7 +254,7 @@ EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsClass *clsObj)
         return etsJsValue->AsObject();
     }
 
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsVal = JSConvertJSValue::Wrap(env, etsJsValue);
@@ -308,7 +308,7 @@ JSValue *JSRuntimeGetGlobal()
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -323,7 +323,7 @@ JSValue *JSRuntimeCreateObject()
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -336,7 +336,7 @@ JSValue *JSRuntimeCreateArray()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -353,7 +353,7 @@ uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
         ThrowNoInteropContextException();
         return 0;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -445,7 +445,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
 
     PandaString moduleName = module->GetMutf8();
@@ -500,7 +500,7 @@ uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSV
         ThrowNoInteropContextException();
         return 0;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -514,7 +514,7 @@ uint8_t JSRuntimeHasProperty(JSValue *object, EtsString *name)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -546,7 +546,7 @@ JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -558,7 +558,7 @@ void SetPropertyWithObject(JSValue *object, JSValue *property, EtsObject *value)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -576,7 +576,7 @@ void SetIndexedPropertyWithObject(JSValue *object, uint32_t index, EtsObject *va
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -593,7 +593,7 @@ void SetNamedPropertyWithObject(JSValue *object, const char *key, EtsObject *val
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -610,7 +610,7 @@ EtsObject *GetPropertyObject(JSValue *object, JSValue *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -622,7 +622,7 @@ EtsObject *GetNamedPropertyObject(JSValue *object, const char *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -633,7 +633,7 @@ JSValue *GetNamedPropertyJSValue(JSValue *object, const char *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -644,7 +644,7 @@ EtsObject *GetPropertyObjectByString(JSValue *object, const char *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     return JSValueGetByName<JSConvertEtsObject>(ctx, object, property).value();
@@ -654,7 +654,7 @@ EtsObject *InvokeWithObjectReturn(JSValue *thisObj, JSValue *func, Span<VMHandle
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -686,7 +686,7 @@ uint8_t JSRuntimeHasPropertyJSValue(JSValue *object, JSValue *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -705,7 +705,7 @@ uint8_t JSRuntimeHasElement(JSValue *object, int index)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -723,7 +723,7 @@ uint8_t JSRuntimeHasOwnProperty(JSValue *object, EtsString *name)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -742,7 +742,7 @@ uint8_t JSRuntimeHasOwnPropertyJSValue(JSValue *object, JSValue *property)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -792,7 +792,7 @@ JSValue *JSRuntimeInvoke(JSValue *recv, JSValue *func, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -831,7 +831,7 @@ JSValue *JSRuntimeInstantiate(JSValue *callable, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -869,7 +869,7 @@ EtsObject *CreateObject(JSValue *ctor, Span<VMHandle<ObjectHeader>> args)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -901,7 +901,7 @@ uint8_t JSRuntimeIsPromise(JSValue *object)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -914,7 +914,7 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     EtsHandleScope scope(coro);
@@ -1006,7 +1006,7 @@ void *CompilerGetJSNamedProperty(void *val, char *propStr)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     auto jsVal = ToLocal(val);
     napi_value res;
@@ -1027,7 +1027,7 @@ void *CompilerGetJSProperty(void *val, void *prop)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     auto jsVal = ToLocal(val);
     napi_value res;
@@ -1069,7 +1069,7 @@ void *CompilerJSCallCheck(void *fn)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     if (UNLIKELY(GetValueType(env, jsFn) != napi_function)) {
         ctx->ThrowJSTypeError(env, "call target is not a function");
@@ -1090,7 +1090,7 @@ void *CompilerJSNewInstance(void *fn, uint32_t argc, void *args)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
 
     napi_value jsRet;
@@ -1180,7 +1180,7 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
 
     auto ref = etsValue->GetCoreType();
@@ -1255,7 +1255,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     if (UNLIKELY(IsNull(env, jsVal))) {
         return ctx->GetNullValue();
@@ -1336,7 +1336,7 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
         ThrowNoInteropContextException();
         return;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value completionValue;
 
@@ -1410,7 +1410,7 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -1442,7 +1442,7 @@ EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffe
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -1466,7 +1466,7 @@ EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, in
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -1492,7 +1492,7 @@ EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, doub
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -1517,7 +1517,7 @@ void SetInteropRuntimeLinker(EtsRuntimeLinker *linker)
         ThrowNoInteropContextException();
         return;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
 
     ctx->SetDefaultLinkerContext(linker);
 }

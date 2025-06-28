@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "arkts_esvalue.h"
+#include "arkts_interop_js_api_impl.h"
 
-#include <node_api.h>
-
+#include "ets_object_state_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/interop_js/code_scopes-inl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/interop_js/js_value.h"
 
 namespace ark::ets::interop::js {
 
@@ -94,7 +96,7 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     ani::ScopedManagedCodeFix s(env);
     auto *jsValueObject = JSValue::FromEtsObject(s.ToInternalType(jsValue));
 
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto jsenv = ctx->GetJSEnv();
     NapiScope jsHandleScope(jsenv);
 
@@ -106,4 +108,101 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     *result = res;
     return true;
 }
+
+PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result)
+{
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    if (UNLIKELY(PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
+        return false;
+    }
+
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        return false;
+    }
+
+    *result = ctx->GetJSEnv();
+    return true;
+}
+
+PANDA_PUBLIC_API bool OpenJSToETSScope(EtsCoroutine *coro, char const *descr)
+{
+    return OpenInteropCodeScope<false>(coro, descr);
+}
+
+PANDA_PUBLIC_API bool CloseJSToETSScope(EtsCoroutine *coro)
+{
+    return CloseInteropCodeScope<true>(coro);
+}
+
+PANDA_PUBLIC_API bool OpenETSToJSScope(EtsCoroutine *coro, char const *descr)
+{
+    return OpenInteropCodeScope<true>(coro, descr);
+}
+
+PANDA_PUBLIC_API bool CloseETSToJSScope(EtsCoroutine *coro)
+{
+    return CloseInteropCodeScope<false>(coro);
+}
+
+static bool CreateAnyRef(ani::ScopedManagedCodeFix &s, JSValue *anyRef, ani_ref *result)
+{
+    EtsObject *etsObj = anyRef->AsObject();
+    return s.AddLocalRef(etsObj, result) == ANI_OK;
+}
+
+static bool ConvertNativeReferences(EtsCoroutine *coro, InteropCtx *ctx, Span<napi_value> values, Span<ani_ref> results)
+{
+    ASSERT(values.size() == results.size());
+
+    ani::ScopedManagedCodeFix s(coro->GetEtsNapiEnv());
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    napi_env env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    std::vector<ani_ref> localResults(values.size(), nullptr);
+    for (size_t i = 0, end = values.size(); i < end; ++i) {
+        auto optAnyRef = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, values[i]);
+        if (UNLIKELY(!optAnyRef || optAnyRef.value() == nullptr)) {
+            ctx->ForwardJSException(coro);
+            return false;
+        }
+        if (UNLIKELY(!CreateAnyRef(s, optAnyRef.value(), &localResults[i]))) {
+            return false;
+        }
+    }
+    std::copy(localResults.begin(), localResults.end(), results.begin());
+    return true;
+}
+
+static bool CloseJsScopeImpl(napi_env env, Span<napi_value> values, Span<ani_ref> results)
+{
+    ASSERT(values.size() == results.size());
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *ctx = InteropCtx::Current(coro);
+    if (UNLIKELY(ctx == nullptr || ctx->GetJSEnv() != env)) {
+        return false;
+    }
+
+    if (!values.empty()) {
+        if (UNLIKELY(!ConvertNativeReferences(coro, ctx, values, results))) {
+            return false;
+        }
+    }
+    return CloseETSToJSScope(coro);
+}
+
+PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value *values, ani_ref *result)
+{
+    if (UNLIKELY(env == nullptr || (nValues != 0 && (values == nullptr || result == nullptr)))) {
+        return false;
+    }
+    return CloseJsScopeImpl(env, Span(values, nValues), Span(result, nValues));
+}
+
 }  // namespace ark::ets::interop::js

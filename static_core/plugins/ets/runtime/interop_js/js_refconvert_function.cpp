@@ -26,7 +26,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     napi_value athis;

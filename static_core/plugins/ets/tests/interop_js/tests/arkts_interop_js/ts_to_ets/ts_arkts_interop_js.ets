@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NATIVE_API_ARKTS_ESVALUE_H
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NATIVE_API_ARKTS_ESVALUE_H
+package ets_functions;
 
-#include <ani.h>
-#include "libpandabase/macros.h"
-namespace ark::ets::interop::js {
-// Experimental API, only for internal usage.
-PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **result);
-}  // namespace ark::ets::interop::js
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NATIVE_API_ARKTS_ESVALUE_H
+native function createJsObject(): Any
+
+native function checkCreatedJsObject(esValue: ESValue): boolean
+
+export function checkInteropApi(): boolean {
+    let anyRef = createJsObject()
+    let esValue = ESValue.wrap(anyRef)
+    let resString = esValue.getPropertySafe("jsProperty").toString()
+    return resString == "jsProperty" && checkCreatedJsObject(esValue)
+}

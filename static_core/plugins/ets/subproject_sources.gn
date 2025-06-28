@@ -248,6 +248,7 @@ if (ark_ets_interop_js) {
   srcs_runtime += [
     "runtime/interop_js/call/call_ets.cpp",
     "runtime/interop_js/call/call_js.cpp",
+    "runtime/interop_js/code_scopes.cpp",
     "runtime/interop_js/ets_proxy/ets_class_wrapper.cpp",
     "runtime/interop_js/ets_proxy/ets_field_wrapper.cpp",
     "runtime/interop_js/ets_proxy/ets_method_set.cpp",
@@ -270,7 +271,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/js_refconvert_record.cpp",
     "runtime/interop_js/js_value.cpp",
     "runtime/interop_js/napi_impl/napi_impl.cpp",
-    "runtime/interop_js/native_api/arkts_esvalue.cpp",
+    "runtime/interop_js/native_api/arkts_interop_js_api_impl.cpp",
     "runtime/interop_js/stack_info.cpp",
     "runtime/interop_js/sts_vm_interface_impl.cpp",
     "runtime/interop_js/timer_module.cpp",

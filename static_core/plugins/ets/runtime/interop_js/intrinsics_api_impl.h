@@ -102,7 +102,7 @@ typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropNa
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -123,7 +123,7 @@ void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T:
         ThrowNoInteropContextException();
         return;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -140,7 +140,7 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
         ThrowNoInteropContextException();
         return {};
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -171,7 +171,7 @@ void JSValueIndexedSetter(JSValue *etsJsValue, int32_t index, typename T::cpptyp
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_status jsStatus;
@@ -195,7 +195,7 @@ void *ConvertToLocal(typename T::cpptype etsValue)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value localJsValue = T::Wrap(env, etsValue);
     if (UNLIKELY(localJsValue == nullptr)) {
@@ -229,7 +229,7 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
     }
     ASSERT(ctx != nullptr);
 
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
 
     [[maybe_unused]] napi_value jsRet;
@@ -277,7 +277,7 @@ typename CONVERTOR::cpptype ConvertFromLocal(void *value)
             return nullptr;
         }
     }
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     auto res = CONVERTOR::Unwrap(ctx, env, ToLocal(value));
     if (UNLIKELY(!res.has_value())) {
@@ -295,7 +295,7 @@ template <>
 // CC-OFFNXT(G.FUD.06) solid logic
 inline JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
 {
-    INTEROP_CODE_SCOPE_ETS(EtsCoroutine::GetCurrent());
+    INTEROP_CODE_SCOPE_ETS_TO_JS(EtsCoroutine::GetCurrent());
 
     auto ctx = InteropCtx::Current(EtsCoroutine::GetCurrent());
     if (ctx == nullptr) {

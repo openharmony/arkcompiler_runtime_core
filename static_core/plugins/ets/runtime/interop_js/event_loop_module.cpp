@@ -134,7 +134,7 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
     auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
     ASSERT(callbackQueue != nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
-    InteropCodeScope<false> codeScope(coro, __PRETTY_FUNCTION__);
+    ScopedInteropCallStackRecord codeScope(coro, __PRETTY_FUNCTION__);
     callbackQueue->ExecuteAllCallbacks();
 }
 
