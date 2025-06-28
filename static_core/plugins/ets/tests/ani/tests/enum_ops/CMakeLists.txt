@@ -16,9 +16,9 @@ ani_add_gtest(ani_test_get_enum_item
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.ets
 )
 
-ani_add_gtest(ani_test_get_enum_from_item
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_from_item_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_from_item_test.ets
+ani_add_gtest(ani_test_enum_item_get_enum
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_enum_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/enum_item_get_enum_test.ets
 )
 
 ani_add_gtest(ani_test_enum_item_get_value

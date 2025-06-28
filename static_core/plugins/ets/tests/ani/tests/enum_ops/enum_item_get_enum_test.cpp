@@ -22,7 +22,7 @@ class GetEnumFromItemTest : public AniTest {};
 TEST_F(GetEnumFromItemTest, get_enum_from_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_enum_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -59,7 +59,7 @@ TEST_F(GetEnumFromItemTest, get_enum_from_item)
 TEST_F(GetEnumFromItemTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_enum_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -74,7 +74,7 @@ TEST_F(GetEnumFromItemTest, invalid_arg_enum)
 TEST_F(GetEnumFromItemTest, enum_get_value_test_one_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/OneItem;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_enum_test.OneItem", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item one {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "ONE", &one), ANI_OK);
@@ -85,7 +85,7 @@ TEST_F(GetEnumFromItemTest, enum_get_value_test_one_item)
 TEST_F(GetEnumFromItemTest, enum_item_combination_test_1)
 {
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->FindEnum("Lget_enum_from_item_test/ColorString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_enum_test.ColorString", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
     ani_enum_item redString {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumString, "REDSTR", &redString), ANI_OK);
@@ -107,4 +107,15 @@ TEST_F(GetEnumFromItemTest, enum_item_combination_test_1)
     ASSERT_STREQ(enumVal.data(), "str_red");
 }
 
+TEST_F(GetEnumFromItemTest, get_enum_from_object)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("enum_item_get_enum_test.A", &cls), ANI_OK);
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_OK);
+    ani_object obj {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &obj), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    ani_enum enm {};
+    ASSERT_EQ(env_->EnumItem_GetEnum(static_cast<ani_enum_item>(obj), &enm), ANI_INVALID_TYPE);
+}
 }  // namespace ark::ets::ani::testing

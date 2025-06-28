@@ -77,6 +77,17 @@ class D {
     }
 }
 
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+
+enum Items {
+    ONE,
+    TWO
+}
+
 interface I {}
 
 class F implements I {
@@ -90,6 +101,16 @@ class F implements I {
 
     public static new_Union(): D | F {
         return new F();
+    }
+
+    public static new_Color(): Color {
+        let c: Color = Color.BLUE
+        return c;
+    }
+
+    public static new_Items(): Items {
+        let i: Items = Items.ONE
+        return i;
     }
 
     public static new_Object(): Object {
