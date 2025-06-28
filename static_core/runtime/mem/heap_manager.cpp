@@ -395,13 +395,16 @@ void HeapManager::CountInstances(const PandaVector<Class *> &classes, bool assig
             }
         }
     };
-    {
-        ManagedThread *thread = ManagedThread::GetCurrent();
-        ASSERT(thread != nullptr);
-        ScopedChangeThreadStatus ets(thread, ThreadStatus::RUNNING);
-        ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
-        GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(objectsChecker);
-    }
+    IterateOverObjectsWithSuspendAllThread(objectsChecker);
+}
+
+void HeapManager::IterateOverObjectsWithSuspendAllThread(const ObjectVisitor &objectVisitor)
+{
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ScopedChangeThreadStatus ets(thread, ThreadStatus::RUNNING);
+    ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
+    GetObjectAllocator().AsObjectAllocator()->IterateOverObjects(objectVisitor);
 }
 
 uint64_t HeapManager::CountInstancesOfClass(Class *klass)

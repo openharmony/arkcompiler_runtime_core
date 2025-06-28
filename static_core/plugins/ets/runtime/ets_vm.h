@@ -56,6 +56,7 @@
 #include "runtime/thread_manager.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/mem/ets_gc_stat.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
@@ -401,6 +402,12 @@ public:
         objStateTable_->DeflateInfo();
     }
 
+    uint64_t GetFullGCLongTimeCount() const
+    {
+        ASSERT(fullGCLongTimeListener_);
+        return fullGCLongTimeListener_->GetFullGCLongTimeCount();
+    }
+
     /// @brief Invokes managed method to apply custom handler on stored failed jobs
     void ListUnhandledFailedJobs();
 
@@ -471,6 +478,7 @@ private:
     FloatToStringCache *floatToStringCache_ {nullptr};
     LongToStringCache *longToStringCache_ {nullptr};
     UnhandledObjectManager *unhandledObjectManager_ {nullptr};
+    FullGCLongTimeListener *fullGCLongTimeListener_ {nullptr};
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;

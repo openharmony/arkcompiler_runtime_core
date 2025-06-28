@@ -123,6 +123,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
     vm->classLinker_ = std::move(classLinker.Value());
 
     vm->InitializeGC();
+    vm->GetGC()->AddListener(vm->fullGCLongTimeListener_);
 
     const auto &icuPath = options.GetIcuDataPath();
     if (icuPath == "default") {
@@ -193,6 +194,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     finalizationRegistryManager_ = allocator->New<FinalizationRegistryManager>(this);
     referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC());
     unhandledObjectManager_ = allocator->New<UnhandledObjectManager>(this);
+    fullGCLongTimeListener_ = allocator->New<FullGCLongTimeListener>();
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     const auto &coroType = options.GetCoroutineImpl(langStr);
@@ -220,6 +222,7 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
     allocator->Delete(unhandledObjectManager_);
+    allocator->Delete(fullGCLongTimeListener_);
     if (saverWorker_ != nullptr) {
         allocator->Delete(saverWorker_);
     }

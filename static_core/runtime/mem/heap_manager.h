@@ -177,6 +177,8 @@ public:
         GetObjectAllocator()->IterateOverObjects(objectVisitor);
     }
 
+    void IterateOverObjectsWithSuspendAllThread(const ObjectVisitor &objectVisitor);
+
     ALWAYS_INLINE void PinObject(ObjectHeader *object)
     {
         GetObjectAllocator().AsObjectAllocator()->PinObject(object);
