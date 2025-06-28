@@ -17,6 +17,7 @@
 /*---
 desc: 
     Constant expression with mathematical calculations as enum initializer.
+tags: [{{c.neg}}]
 ---*/
 
 const value1: {{c.type}} = {{c.value}}
