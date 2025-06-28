@@ -383,6 +383,38 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
     GetCount(cls, &valueA);
     ASSERT_EQ(valueA, VAL2 - VAL1);
 }
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, check_initialization_void)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "publicMethodx", "ii:", VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "publicMethod", "ii:", VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, check_initialization_void_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "publicMethodx", "ii:", args), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "publicMethod", "ii:", args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

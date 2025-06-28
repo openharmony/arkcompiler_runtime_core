@@ -515,6 +515,44 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
               ANI_OK);
     CheckRefUp(valueA);
 }
+
+TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization_ref)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+    ani_ref value {};
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "publicMethodx", "ii:C{std.core.String}", &value, VAL3, VAL4),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "publicMethod", "ii:C{std.core.String}", &value, VAL3, VAL4),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization_ref_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+    ani_ref value {};
+    ani_value args[2U];
+    args[0U].i = VAL3;
+    args[1U].i = VAL4;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "publicMethodx", "ii:C{std.core.String}", &value, args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "publicMethod", "ii:C{std.core.String}", &value, args),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

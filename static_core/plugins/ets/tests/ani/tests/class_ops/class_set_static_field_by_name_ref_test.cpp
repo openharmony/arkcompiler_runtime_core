@@ -174,5 +174,23 @@ TEST_F(ClassSetStaticFieldByNameRefTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "\n", string), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Ref(nullptr, cls, "string_value", string), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStaticFinal", &cls), ANI_OK);
+
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 6U, &stringValue), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_valuex", stringValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_value", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

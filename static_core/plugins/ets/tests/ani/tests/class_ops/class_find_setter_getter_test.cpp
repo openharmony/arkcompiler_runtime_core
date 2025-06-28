@@ -91,4 +91,26 @@ TEST_F(FindGetterSetterTest, invalid_args)
     ASSERT_EQ(env_->Class_FindGetter(nullptr, "field", &method), ANI_INVALID_ARGS);
 }
 
+TEST_F(FindSetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_setter_getter_test.ExplicitMethods", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindSetter(cls, "age", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+}
+
+TEST_F(FindGetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_setter_getter_test.ExplicitMethods", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindGetter(cls, "age", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_setter_getter_test.ExplicitMethods"));
+}
+
 }  // namespace ark::ets::ani::testing

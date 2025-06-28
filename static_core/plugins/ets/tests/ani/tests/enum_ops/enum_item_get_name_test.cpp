@@ -150,4 +150,15 @@ TEST_F(EnumItemGetNameTest, enum_get_name_test_one_item)
     ASSERT_STREQ(itemName.data(), "ONE");
 }
 
+TEST_F(EnumItemGetNameTest, check_initialization)
+{
+    ani_enum aniEnum {};
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.OneItem", &aniEnum), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("enum_item_get_name_test.OneItem"));
+    ani_enum_item one {};
+    ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "ONE", &one), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("enum_item_get_name_test.OneItem"));
+}
+
 }  // namespace ark::ets::ani::testing

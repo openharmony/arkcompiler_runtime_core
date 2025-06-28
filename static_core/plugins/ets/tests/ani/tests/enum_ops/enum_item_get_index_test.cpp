@@ -204,4 +204,16 @@ TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_combine_scenes_001)
     ASSERT_EQ(env_->EnumItem_GetIndex(blue, &blueIndex), ANI_OK);
     ASSERT_EQ(blueIndex, 2U);
 }
+
+TEST_F(EnumItemGetIndexTest, check_initialization)
+{
+    ani_enum aniEnum {};
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("enum_item_get_index_test.Color"));
+    ani_enum_item red {};
+    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, 0U, &red), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("enum_item_get_index_test.Color"));
+}
+
 }  // namespace ark::ets::ani::testing

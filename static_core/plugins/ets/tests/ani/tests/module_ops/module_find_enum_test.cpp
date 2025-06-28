@@ -188,4 +188,18 @@ TEST_F(ModuleFindEnumTest, find_enum_combine_scenes_003)
     ASSERT_EQ(env_->EnumItem_GetIndex(red, &redIndex), ANI_OK);
     ASSERT_EQ(redIndex, 0U);
 }
+
+TEST_F(ModuleFindEnumTest, check_initialization)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_enum_test", &module), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_enum_test", false));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_enum_test.Color"));
+    ani_enum enm {};
+    ASSERT_EQ(env_->Module_FindEnum(module, "Color", &enm), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_enum_test.Color"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_enum_test", false));
+}
+
 }  // namespace ark::ets::ani::testing

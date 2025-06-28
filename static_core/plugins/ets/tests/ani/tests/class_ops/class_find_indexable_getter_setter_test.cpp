@@ -35,7 +35,7 @@ TEST_F(FindIndexableGetterTest, get_method)
     ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:I", &method), ANI_NOT_FOUND);
 }
 
-TEST_F(FindIndexableGetterTest, set_method)
+TEST_F(FindIndexableSetterTest, set_method)
 {
     ani_class cls;
     ASSERT_EQ(env_->FindClass("Lclass_find_indexable_getter_setter_test/A;", &cls), ANI_OK);
@@ -59,6 +59,28 @@ TEST_F(FindIndexableSetterGetterTest, invalid_args)
     ani_method method;
     ASSERT_EQ(env_->Class_FindIndexableSetter(nullptr, "II:V", &method), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_FindIndexableGetter(nullptr, "II:V", &method), ANI_INVALID_ARGS);
+}
+
+TEST_F(FindIndexableGetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_indexable_getter_setter_test.A", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindIndexableGetter(cls, "D:Lclass_find_indexable_getter_setter_test/A;", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
+}
+
+TEST_F(FindIndexableSetterTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_indexable_getter_setter_test.A", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindIndexableSetter(cls, "DZ:V", &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_indexable_getter_setter_test.A"));
 }
 
 }  // namespace ark::ets::ani::testing

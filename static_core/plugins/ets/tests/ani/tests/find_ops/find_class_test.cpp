@@ -53,4 +53,12 @@ TEST_F(FindClassTest, class_is_not_module)
     ASSERT_EQ(env_->FindModule("LPoint;", &md), ANI_NOT_FOUND);
 }
 
+TEST_F(FindClassTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_class_test.Point"));
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("find_class_test.Point", &cls), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("find_class_test.Point"));
+}
+
 }  // namespace ark::ets::ani::testing

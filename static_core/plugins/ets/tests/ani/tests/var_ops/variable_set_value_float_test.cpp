@@ -182,6 +182,18 @@ TEST_F(VariableSetValueFloatTest, composite_case_4)
     ASSERT_EQ(env_->Variable_GetValue_Float(variable2, &getValue2), ANI_OK);
     ASSERT_EQ(getValue2, val2);
 }
+
+TEST_F(VariableSetValueFloatTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "floatValue", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_set_value_float_test.anyns"));
+    const ani_float x = 23.01F;
+    ASSERT_EQ(env_->Variable_SetValue_Float(variable, x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_set_value_float_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

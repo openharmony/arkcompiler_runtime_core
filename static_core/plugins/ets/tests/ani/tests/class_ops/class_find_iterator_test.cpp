@@ -63,4 +63,15 @@ TEST_F(ClassFindIteratorTest, invalid_argument1)
     ASSERT_EQ(env_->Class_FindIterator(cls, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ClassFindIteratorTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_iterator_test.ops.Singleton", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_iterator_test.ops.Singleton"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindIterator(cls, &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_iterator_test.ops.Singleton"));
+}
+
 }  // namespace ark::ets::ani::testing

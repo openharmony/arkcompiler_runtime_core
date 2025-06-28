@@ -52,4 +52,15 @@ TEST_F(ClassFindStaticFieldTest, invalid_argument3)
     ASSERT_EQ(env_->Class_FindStaticField(cls, "instance", nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ClassFindStaticFieldTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_find_static_field_test.Singleton", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_static_field_test.Singleton"));
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "instance", &field), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_find_static_field_test.Singleton"));
+}
+
 }  // namespace ark::ets::ani::testing

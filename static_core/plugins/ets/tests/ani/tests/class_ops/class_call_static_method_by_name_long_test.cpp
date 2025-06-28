@@ -386,5 +386,39 @@ TEST_F(ClassCallStaticMethodByNameLongTest, call_static_method_by_name_long_comb
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "callPrivateMethod", "JJ:J", &valueA, args), ANI_OK);
     ASSERT_EQ(valueA, VAL2 - VAL1);
 }
+
+TEST_F(ClassCallStaticMethodByNameLongTest, check_initialization_long)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_long_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+    ani_long value {};
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long(cls, "publicMethodx", "ll:l", &value, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long(cls, "publicMethod", "ll:l", &value, VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameLongTest, check_initialization_long_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_long_test.G", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+    ani_long value {};
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "publicMethodx", "ll:l", &value, args), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Long_A(cls, "publicMethod", "ll:l", &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_long_test.G"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

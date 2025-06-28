@@ -198,4 +198,18 @@ TEST_F(NamespaceFindClassTest, find_class11)
 
     ASSERT_EQ(env_->Namespace_FindClass(ns, "LB/C;", nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(NamespaceFindClassTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_class_test.A", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_class_test.A"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_class_test.A.C"));
+    ani_class result {};
+    ASSERT_EQ(env_->Namespace_FindClass(ns, "C", &result), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_class_test.A.C"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_class_test.A"));
+}
+
 }  // namespace ark::ets::ani::testing

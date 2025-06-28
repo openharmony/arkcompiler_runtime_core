@@ -399,6 +399,34 @@ TEST_F(FunctionCallFloatTest, function_call_float_010)
     ASSERT_EQ(env_->Function_Call_Float(fn, &result, nullptr), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Float_A(fn, &result, nullptr), ANI_INVALID_ARGS);
 }
+
+TEST_F(FunctionCallFloatTest, check_initialization_float)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_float_test.ops"));
+    ani_float result {};
+    ASSERT_EQ(env_->Function_Call_Float(fn, &result, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_float_test.ops"));
+}
+
+TEST_F(FunctionCallFloatTest, check_initialization_float_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_float_test.ops"));
+    ani_float result {};
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ASSERT_EQ(env_->Function_Call_Float_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_float_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

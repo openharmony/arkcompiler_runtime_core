@@ -76,6 +76,17 @@ TEST_F(VariableGetValueDoubleTest, invalid_args_value)
     ASSERT_EQ(env_->Variable_GetValue_Double(variable, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(VariableGetValueDoubleTest, check_initialization)
+{
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns_, "x", &variable), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("variable_get_value_double_test.anyns"));
+    ani_double x;
+    ASSERT_EQ(env_->Variable_GetValue_Double(variable, &x), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("variable_get_value_double_test.anyns"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(readability-identifier-naming, misc-non-private-member-variables-in-classes)

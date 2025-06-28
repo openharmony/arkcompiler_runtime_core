@@ -142,5 +142,21 @@ TEST_F(ClassSetStaticFieldByNameLongTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Long(nullptr, cls, "long_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameLongTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_long_test.PackageStaticFinal", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_long_test.PackageStaticFinal"));
+    const ani_long longValue = 10;
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_valuex", longValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_long_test.PackageStaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Long(cls, "long_value", longValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_long_test.PackageStaticFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -158,4 +158,17 @@ TEST_F(ModuleFindNamespaceTest, invalid_arg_result)
     ASSERT_EQ(env_->Module_FindNamespace(module, "Lmodule_find_class_test/atest;", nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ModuleFindNamespaceTest, check_initialization)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.module_find_namespace_test", &module), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_namespace_test", false));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_namespace_test.outer.inner"));
+    ani_namespace nm {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "outer.inner", &nm), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_namespace_test.outer.inner"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.module_find_namespace_test", false));
+}
+
 }  // namespace ark::ets::ani::testing

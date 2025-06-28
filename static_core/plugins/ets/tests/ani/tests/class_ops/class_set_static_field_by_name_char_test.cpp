@@ -181,5 +181,21 @@ TEST_F(ClassSetStaticFieldByNameCharTest, invalid_argument1)
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Char(nullptr, cls, "char_value", setTarget), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameCharTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_char_test.CharStatic", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+    const ani_char charValue = 'n';
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_valuex", charValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Char(cls, "char_value", charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_char_test.CharStatic"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

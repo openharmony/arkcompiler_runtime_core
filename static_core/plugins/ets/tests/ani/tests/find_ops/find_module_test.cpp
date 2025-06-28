@@ -50,6 +50,14 @@ TEST_F(FindModuleTest, invalid_argument_env)
     ASSERT_EQ(env_->c_api->FindModule(nullptr, "L@abcModule/find_module_test;", &module), ANI_INVALID_ARGS);
 }
 
+TEST_F(FindModuleTest, check_initialization)
+{
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.find_module_test", false));
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule("@abcModule.find_module_test", &module), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("@abcModule.find_module_test", false));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(modernize-avoid-c-arrays)

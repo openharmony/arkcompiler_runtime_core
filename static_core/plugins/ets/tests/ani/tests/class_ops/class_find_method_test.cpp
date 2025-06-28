@@ -1129,5 +1129,16 @@ TEST_F(ClassFindMethodTest, static_no_duplicate)
     ASSERT_EQ(env_->Class_FindMethod(baseCls, "notOverloaded", nullptr, &method), ANI_OK);
 }
 
+TEST_F(ClassFindMethodTest, check_initalization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.NotOverloaded", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "notOverloaded", nullptr, &method), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
+}
+
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
