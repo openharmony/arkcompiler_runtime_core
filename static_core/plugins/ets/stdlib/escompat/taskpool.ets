@@ -172,7 +172,6 @@ export namespace taskpool {
             this.dependentTasks = new Set<Task>();
             // Each task has unique identifier
             this.id = Task.generateId();
-            initWorkerPool();
         }
 
         /**
@@ -458,6 +457,7 @@ export namespace taskpool {
         }
 
         internal execute(): NullishType {
+            initWorkerPool();
             this.waitForDependencies();
             if (!taskStarted(this)) {
                 this.notifyDependencies();
@@ -693,7 +693,6 @@ export namespace taskpool {
             this.name = name;
             this.id = TaskGroup.generateGroupId();
             this.tasks = new Array<Task>();
-            initWorkerPool();
         }
 
         /**
@@ -777,10 +776,10 @@ export namespace taskpool {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
             this.priority = priority == undefined ? Priority.MEDIUM : priority;
             this.tasks = new Array<Task>();
-            initWorkerPool();
         }
 
         execute(task: Task): Promise<NullishType> {
+            initWorkerPool();
             this.checkExecution(task);
             task.seqId = this.impl.id;
             task.runner = this;
@@ -923,6 +922,7 @@ export namespace taskpool {
      * @returns { Promise<NullishType> } Promise for result of executed task
      */
     export function execute(task: Task, priority?: Priority): Promise<NullishType> {
+        initWorkerPool();
         task.checkExecution();
         taskSubmitted(task);
         task.isSubmitted = true;
@@ -948,6 +948,7 @@ export namespace taskpool {
      * @returns { Promise<Array<NullishType>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
+        initWorkerPool();
         const tasksCount = group.tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
@@ -982,6 +983,7 @@ export namespace taskpool {
      * @returns { Promise<NullishType> } Promise for result of executed task
      */
     export function executeDelayed(delayTime: number, task: Task, priority?: Priority): Promise<NullishType> {
+        initWorkerPool();
         task.checkExecutionForDelayedTask(delayTime);
         task.isSubmitted = true;
         ConcurrencyHelpers.lockGuard(mutex, () => {
@@ -1030,6 +1032,7 @@ export namespace taskpool {
      * @param { Priority } [priority] priority for task
      */
     export function executePeriodically(period: number, task: Task, priority?: Priority): void {
+        initWorkerPool();
         task.checkExecutionForPeriodTask(period);
         task.isSubmitted = true;
         task.isPeriodicTask = true;
@@ -1374,8 +1377,8 @@ export namespace taskpool {
             w.join();
         }
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            isWorkersInitialized.set(false);
             workers.clear();
-            isWorkersInitialized = false;
         })
     }
 
@@ -1407,15 +1410,18 @@ export namespace taskpool {
      * @see taskpool.SequenceRunner.constructor
      */
     function initWorkerPool(): void {
+        if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+                return;
+        }
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            if (isWorkersInitialized || isTaskPoolUseLaunch) {
+            if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
             }
-            isWorkersInitialized = true;
             for (let i = 0; i < initialWorkersNumber; ++i) {
                 let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                 workers.add(w);
             }
+            isWorkersInitialized.set(true);
         })
     }
 
@@ -1427,6 +1433,7 @@ export namespace taskpool {
      * @see taskpool.SequenceRunner.execute
      */
     function notifyExecuteTask(): void {
+        initWorkerPool();
         ConcurrencyHelpers.mutexLock(workersMutex);
         for (let w : TaskPoolWorker of workers) {
             if (!w.performTask() && getTaskNum() > 0) {
@@ -1568,7 +1575,7 @@ export namespace taskpool {
 
     const workersMutex = ConcurrencyHelpers.mutexCreate();
     const workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
-    let isWorkersInitialized: boolean = false;
+    let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
     let isTaskQueuesInitialized: boolean = false;
