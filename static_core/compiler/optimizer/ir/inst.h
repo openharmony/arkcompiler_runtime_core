@@ -162,9 +162,9 @@ enum FlagsIndex {
 };
 }  // namespace internal
 
-enum Flags : uint32_t {
+enum Flags : uint64_t {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FLAG_DEF(flag) flag = (1U << internal::flag##_INDEX),
+#define FLAG_DEF(flag) flag = (1ULL << internal::flag##_INDEX),
     FLAGS_LIST(FLAG_DEF)
 #undef FLAG_DEF
         FLAGS_COUNT = internal::FLAGS_COUNT,
@@ -178,6 +178,11 @@ inline constexpr uintptr_t GetFlagsMask(Opcode opcode)
     constexpr std::array<uintptr_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
 #undef INST_DEF
     return INST_FLAGS_TABLE[static_cast<size_t>(opcode)];
+}
+
+inline constexpr bool HasFlag(Opcode opcode, Flags flag)
+{
+    return (GetFlagsMask(opcode) & flag) != 0;
 }
 }  // namespace inst_flags
 
@@ -1699,7 +1704,7 @@ protected:
     }
 
 protected:
-    using FieldFlags = BitField<uint32_t, 0, MinimumBitsToStore(1U << inst_flags::FLAGS_COUNT)>;
+    using FieldFlags = BitField<uint64_t, 0, MinimumBitsToStore(1ULL << inst_flags::FLAGS_COUNT)>;
     using FieldType = FieldFlags::NextField<DataType::Type, MinimumBitsToStore(DataType::LAST)>;
     using InputsCount = FieldType::NextField<uint32_t, BITS_PER_INPUTS_NUM>;
     using LastField = InputsCount;
@@ -7198,6 +7203,22 @@ InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
 }
 
 INST_CAST_TO_DEF()
+
+template <Opcode OPCODE>
+struct OpcodeTraits;
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define SPECIALIZE_OPCODE_TRAITS(OPCODE, BASE, ...) \
+    template <>                                     \
+    struct OpcodeTraits<Opcode::OPCODE> {           \
+        using BaseType = BASE;                      \
+    }; /* CC-OFF(G.PRE.09) code generation */
+
+OPCODE_LIST(SPECIALIZE_OPCODE_TRAITS)
+#undef SPECIALIZE_OPCODE_TRAITS
+
+template <Opcode OPCODE>
+using BaseTypeOf = typename OpcodeTraits<OPCODE>::BaseType;
 
 inline Inst *User::GetInput()
 {
