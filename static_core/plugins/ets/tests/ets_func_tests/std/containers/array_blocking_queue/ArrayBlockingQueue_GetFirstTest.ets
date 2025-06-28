@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
 const elementsNum: int = 10;
 const stressNum: int = 100;
-let b1: int | null = 0;
-let f1: int | null = 0;
-let f2: int | null = 0;
-let backNum: int | null = 0;
+let f1: int | undefined = 0;
+let f2: int | undefined = 0;
 
 let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
@@ -123,7 +119,6 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt002", () =>
     {
-        backNum = 0;
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
             arktest.assertEQ(el, queueInt.pop());
@@ -136,7 +131,6 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt003", () =>
     {
-        backNum = 0;
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
@@ -157,7 +151,6 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt004", () =>
     {
-        b1 = 0;
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
@@ -183,8 +176,8 @@ function main(): int {
         p1.Await();
         p2.Await();
         p3.Await();
-        arktest.assertTrue(f1 == 10 || f1 == null);
-        arktest.assertTrue(f2 == 10 || f2 == null);
+        arktest.assertTrue(f1 == 10 || f1 == undefined);
+        arktest.assertTrue(f2 == 10 || f2 == undefined);
         arktest.assertFalse(queueInt.isEmpty());
     });
     ArrayBlockingQueueTestsuite.addTest("GetFirstTestInt006", () =>
@@ -206,11 +199,11 @@ function main(): int {
 }
 
 function queueIntGetEnddata() {
-    backNum = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntGetEndB1data() {
-    b1 = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntGetFirstF1data() {

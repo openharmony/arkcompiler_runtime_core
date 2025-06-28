@@ -13,13 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
 const elementsNum: int = 100;
-let b1: int | null = 0;
-let b2: int | null = 0;
-let backNum: int | null = 0;
-
 let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
@@ -130,15 +124,15 @@ function main(): int {
 }
 
 function queueIntGetEnddata() {
-    backNum = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntGetEndB1data() {
-    b1 = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntGetEndB2data() {
-    b2 = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntAddTwodata() {

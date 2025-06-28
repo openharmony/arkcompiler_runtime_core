@@ -22,9 +22,9 @@ export namespace containers {
     */
     export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         /**
-        * Constructs a LinkedBlockingQueue with provided capaity.
+        * Constructs a ArrayBlockingQueue with provided capaity.
         *
-        * @param { int } capacity capacity of the container
+        * @param { int } capacity the capacity of the ArrayBlockingQueue
         */
         constructor(capacity: int) {
             if (capacity <= 0) {
@@ -37,10 +37,10 @@ export namespace containers {
         }
 
         /**
-        * Constructs a LinkedBlockingQueue with provided capaity from iterable.
+        * Constructs a ArrayBlockingQueue with provided capaity from iterable.
         *
-        * @param { int } capacity capacity of the container
-        * @param { Iterable<T> } iterable some iterable
+        * @param { int } capacity the capacity of the ArrayBlockingQueue
+        * @param { Iterable<T> } iterable the iterable instance to initialize ArrayBlockingQueue
         */
         constructor(capacity: int, iterable: Iterable<T>) {
             if (capacity <= 0) {
@@ -62,9 +62,9 @@ export namespace containers {
         }
 
         /**
-        * Inserts element at the end.
+        * Inserts element at the end. If the queue is full, blocking.
         *
-        * @param { T } el element to insert
+        * @param { T } el the element to insert
         */
         override push(el: T): void {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -76,10 +76,9 @@ export namespace containers {
         }
 
         /**
-        * Removes and returns the first element in a ArrayBlockingQueue.
-        * If the ArrayBlockingQueue is empty then wait method is called.
+        * Removes and returns the first element in the BlockingQueue. If the queue is empty, blocking.
         *
-        * @returns { T } the removed element
+        * @returns { T } the fisrt element poped in the queue.
         */
         override pop(): T {
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -95,7 +94,7 @@ export namespace containers {
         }
 
         /**
-        * The insert operation. Return true upon success and false if no space is currently available, no blocking.
+        * The insert operation. Returns true upon success and false if no space is currently available, no blocking.
         *
         * @param { T } element the element inserted to the BlockingQueue
         *
@@ -118,15 +117,15 @@ export namespace containers {
 
         /**
         * The poll operation. Pop one element and return it if the queue is not empty.
-        * Return null when the queue is empty. No blocking.
+        * Returns undefined when the queue is empty. No blocking.
         *
-        * @returns { T | null } Return the deleted element or null.
+        * @returns { T | undefined } the deleted element or when the queue is empty.
         */
-        override poll(): T | null {
+        override poll(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
             try {
                 if (this.isQueueEmpty) {
-                    return null;
+                    return undefined;
                 }
                 const val = this.array[this.curHeadIdx];
                 this.increaseHeadIdx();
@@ -140,13 +139,13 @@ export namespace containers {
         /**
         * Returns the first element in a BlockingQueue.
         *
-        * @returns { T | null } The first element or null.
+        * @returns { T | undefined } the first element or undefined when the queue is empty.
         */
-        override getFirst(): T | null {
+        override getFirst(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
             try {
                 if (this.isQueueEmpty) {
-                    return null;
+                    return undefined;
                 }
                 const value = this.array[this.curHeadIdx];
                 return value;
@@ -158,13 +157,13 @@ export namespace containers {
         /**
         * Returns the end element in a ArrayBlockingQueue.
         *
-        * @returns { T | null } return the end element or null.
+        * @returns { T | undefined } the end element or undefined when the queue is empty.
         */
-        public getEnd(): T | null {
+        public getEnd(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.mutex);
             try {
                 if (this.isQueueEmpty) {
-                    return null;
+                    return undefined;
                 }
                 let tailIdx = this.curTailIdx;
                 if (this.curTailIdx == 0) {
@@ -209,7 +208,7 @@ export namespace containers {
         /**
         * Returns the capacity of a BlockingQueue.
         *
-        * @returns { int } The capacity of the BlockingQueue.
+        * @returns { int } the capacity of the BlockingQueue.
         */
         override get capacity(): int {
             return this.capacitySize;
@@ -218,7 +217,7 @@ export namespace containers {
         /**
         * Returns the number of additional elements that this queue can ideally accept without blocking.
         *
-        * @returns { int } The capacity of the BlockingQueue.
+        * @returns { int } the capacity of the BlockingQueue.
         */
         override remainingCapacity(): int {
             return this.capacitySize - this.size;

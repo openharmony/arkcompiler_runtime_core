@@ -43,7 +43,7 @@ class Waiter {
     public notify(val: string): boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let res = this.promiseQueue.poll();
-        if(res instanceof null) {
+        if(res == undefined) {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return false;
         }

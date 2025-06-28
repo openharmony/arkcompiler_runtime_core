@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-import { Job } from "std/core"
-
 const elementsNum: int = 100;
-let f1: int | null = 0;
 
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
@@ -58,7 +54,7 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntPop2.push(i);
         }
-        let num: int | null = queueIntPop2.getFirst();
+        let num = queueIntPop2.getFirst();
         arktest.assertEQ(num, queueIntPop2.pop());
         arktest.assertEQ(queueIntPop2.size, elementsNum - 1);
         while (!queueIntPop2.isEmpty()) {
@@ -207,5 +203,5 @@ function queueIntPopNdata () {
 }
 
 function queueIntFrontF1data() {
-    f1 = queueInt.getFirst();
+    queueInt.getFirst();
 }
