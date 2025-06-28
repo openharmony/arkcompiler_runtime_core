@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f];
+    public static array: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22.0 as float;
-        ArrayClass.array[4] = 44.0 as float;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22.0 as float
+        ArrayClass.array[4] = 44.0 as float
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0].toInt() == 1.0 &&
             ArrayClass.array[1].toInt() == 2.0 &&
@@ -33,19 +33,19 @@ class ArrayClass {
     }
 }
 
-function GetArray(): FixedArray<float> {
-    let a : FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
+function getArray(): FixedArray<float> {
+    let a: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
     return a
 }
 
-function CheckArray(a: FixedArray<float>): boolean {
+function checkArray(a: FixedArray<float>): boolean {
     return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function GetSpecialArray(): FixedArray<float> {
+function getSpecialArray(): FixedArray<float> {
 	let min: float = new Float(1.40129846432481707e-45)
 	let max: float = new Float(3.40282346638528860e+38)
 	let minus: float = new Float(-3.40282346638528860e+38)
-    let a : FixedArray<float> = [min, max, minus, 0.0f, 0.0f, 0.0f]
+    let a: FixedArray<float> = [min, max, minus, 0.0f, 0.0f, 0.0f]
     return a
 }

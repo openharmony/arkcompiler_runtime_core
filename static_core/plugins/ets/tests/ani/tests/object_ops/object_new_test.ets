@@ -14,15 +14,15 @@
  */
 
 class MobilePhone {
-    constructor(model: String, weight: int) {
+    constructor(model: string, weight: int) {
         this.model = model;
         this.weight = weight;
     }
-    model: String;
+    model: string;
     weight: int;
 }
 
-function checkModel(p: MobilePhone, model: String): boolean {
+function checkModel(p: MobilePhone, model: string): boolean {
     return p.model == model;
 }
 
@@ -50,11 +50,11 @@ class B {
 };
 
 class Animal {
-    constructor(name: String, value: boolean) {
+    constructor(name: string, value: boolean) {
         this.name = name;
         this.value = value;
     }
-    name: String;
+    name: string;
     value: boolean;
 }
 
@@ -63,7 +63,7 @@ function newAnimalObject() {
 }
 
 class Test {
-    constructor(a: int, tag: String, animal: Animal) {
+    constructor(a: int, tag: string, animal: Animal) {
         this.a = a;
         this.tag = tag;
         this.animal = animal;
@@ -73,19 +73,19 @@ class Test {
         return this.a == 200 && this.tag == "Pure P60" && this.animal.name == "Cat" && this.animal.value == true;
     }
 
-    setValue(a: int, tag: String, animal: Animal) {
+    setValue(a: int, tag: string, animal: Animal) {
         this.a = a;
         this.tag = tag;
         this.animal = animal;
     }
 
-    newTestObject(a: int, tag: String, animal: Animal): Test {
+    newTestObject(a: int, tag: string, animal: Animal): Test {
         this.setValue(a, tag, animal);
         return this;
     }
 
     private a: int;
-    private tag: String;
+    private tag: string;
     private animal: Animal;
 };
 
@@ -105,7 +105,7 @@ function getByteArray(): byte[] {
 
 class Mixture {
     newMixtureObject(v1: null, arr: int[], byteArr: byte[], i: int, f: float, d: double, b: boolean,
-                  longVal: long, shortVal: short, str: String, animalObj: Animal): Mixture {
+                  longVal: long, shortVal: short, str: string, animalObj: Animal): Mixture {
         this.v1 = v1;
         this.arr = arr;
         this.byteArr = byteArr;
@@ -133,6 +133,6 @@ class Mixture {
     private b: boolean = false;
     private longVal: long = 100;
     private shortVal: short = 5;
-    private str: String = new String("");
+    private str: string = "";
     private animalObj: Animal = new Animal("Elephant", false);
 };

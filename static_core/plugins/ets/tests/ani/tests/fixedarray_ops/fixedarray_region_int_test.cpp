@@ -60,7 +60,7 @@ TEST_F(FixedArraySetGetRegionIntTest, GetIntArrayRegionErrorTests)
 TEST_F(FixedArraySetGetRegionIntTest, GetRegionIntTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "GetArray"));
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "getArray"));
 
     ani_int nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->FixedArray_GetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
@@ -74,10 +74,10 @@ TEST_F(FixedArraySetGetRegionIntTest, GetRegionIntTest)
 TEST_F(FixedArraySetGetRegionIntTest, SetRegionIntTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "GetArray"));
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "getArray"));
     ani_int nativeBuffer1[LENGTH_5] = {TEST_UPDATE1, TEST_UPDATE2, TEST_UPDATE3};
     ASSERT_EQ(env_->FixedArray_SetRegion_Int(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_int_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_int_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
@@ -100,7 +100,7 @@ TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromManagedRegionIntTest)
     ASSERT_EQ(nativeBuffer[3U], TEST_VALUE4);
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE5);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->FixedArray_GetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE2);
@@ -125,14 +125,14 @@ TEST_F(FixedArraySetGetRegionIntTest, CheckChangeFromApiRegionIntTest)
     ASSERT_EQ(env_->FixedArray_SetRegion_Int(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionIntTest, GetSpecialValueToArrayTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "GetSpecialArray"));
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("fixedarray_region_int_test", "getSpecialArray"));
 
     std::array<ani_int, LENGTH_5> nativeBuffer = {};
     const ani_int minIntValue = -2147483648;

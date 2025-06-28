@@ -45,7 +45,7 @@ TEST_F(FixedArraySetGetRegionBooleanTest, GetBooleanArrayRegionErrorTests)
 TEST_F(FixedArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_boolean>(CallEtsFunction<ani_ref>("fixedarray_region_boolean_test", "GetArray"));
+        static_cast<ani_fixedarray_boolean>(CallEtsFunction<ani_ref>("fixedarray_region_boolean_test", "getArray"));
     ani_boolean nativeBuffer[LENGTH_5] = {ANI_FALSE};
     ASSERT_EQ(env_->FixedArray_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
@@ -58,10 +58,10 @@ TEST_F(FixedArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 TEST_F(FixedArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_fixedarray_boolean>(CallEtsFunction<ani_ref>("fixedarray_region_boolean_test", "GetArray"));
+        static_cast<ani_fixedarray_boolean>(CallEtsFunction<ani_ref>("fixedarray_region_boolean_test", "getArray"));
     const ani_boolean nativeBuffer1[LENGTH_5] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->FixedArray_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_boolean_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("fixedarray_region_boolean_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
@@ -84,7 +84,7 @@ TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTes
     ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[4U], ANI_TRUE);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->FixedArray_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
@@ -108,7 +108,7 @@ TEST_F(FixedArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
     ASSERT_EQ(env_->FixedArray_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 

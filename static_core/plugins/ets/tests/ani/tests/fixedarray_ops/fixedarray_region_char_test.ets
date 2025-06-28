@@ -14,34 +14,34 @@
  */
 
 function getArray(): FixedArray<char> {
-    let a : FixedArray<char> = [c'a', c'b', c'c', c'd', c'e']
+    let a: FixedArray<char> = [c'a', c'b', c'c', c'd', c'e']
     return a
 }
 
 function checkArray(a: FixedArray<char>): boolean {
-    let b : FixedArray<char> = [c'a', c'b', c'x', c'y', c'z']
+    let b: FixedArray<char> = [c'a', c'b', c'x', c'y', c'z']
     return compareCharArrays(a, b) == 0
 }
 
 function changeArray(arr: FixedArray<char>): FixedArray<char> {
-    arr[0] = c'a';
-    arr[1] = c'b';
-    arr[2] = c'x';
-    arr[3] = c'y';
-    arr[4] = c'z';
-    return arr;
+    arr[0] = c'a'
+    arr[1] = c'b'
+    arr[2] = c'x'
+    arr[3] = c'y'
+    arr[4] = c'z'
+    return arr
 }
 
 function compareCharArrays(a: FixedArray<char>, b: FixedArray<char>): int {
     for (let i: int = 0; i < a.length; ++i) {
         if (a[i] != b[i]) {
-            return 1;
+            return 1
         }
     }
-    return 0;
+    return 0
 }
 
-function GetSpecialArray(): FixedArray<char> {
-    let aChar : FixedArray<char> = [c'\0', c'\0', c'\n', c'\r', c'\t', c'\b', c'\a', c'\v', c'\f', c'\0']
+function getSpecialArray(): FixedArray<char> {
+    let aChar: FixedArray<char> = [c'\0', c'\0', c'\n', c'\r', c'\t', c'\b', c'\a', c'\v', c'\f', c'\0']
     return aChar
 }

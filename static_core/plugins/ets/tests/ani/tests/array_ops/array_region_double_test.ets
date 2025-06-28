@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: double[] = [1.0, 2.0, 3.0, 4.0, 5.0];
+    public static array: double[] = [1.0, 2.0, 3.0, 4.0, 5.0]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22.0;
-        ArrayClass.array[4] = 44.0;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22.0
+        ArrayClass.array[4] = 44.0
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0].toInt() == 1.0 &&
             ArrayClass.array[1].toInt() == 2.0 &&
@@ -32,13 +32,13 @@ class ArrayClass {
     }
 }
 
-function GetArray(): double[] {
-    let a : double[] = [1.0, 2.0, 3.0, 4.0, 5.0]
+function getArray(): double[] {
+    let a: double[] = [1.0, 2.0, 3.0, 4.0, 5.0]
     return a
 }
 
-function GetEscompatArray(): Array<double> {
-    let a : Array<double> = new Array<double>(5)
+function getEscompatArray(): Array<double> {
+    let a: Array<double> = new Array<double>(5)
     a[0] = 1.0
     a[1] = 2.0
     a[2] = 3.0
@@ -47,19 +47,19 @@ function GetEscompatArray(): Array<double> {
     return a
 }
 
-function CheckArray(a: double[]): boolean {
+function checkArray(a: double[]): boolean {
     return a[0].toInt() == 1 && a[1].toInt() == 2 && a[2].toInt() == 30 && a[3].toInt() == 40 && a[4].toInt() == 50
 }
 
-function GetSpecialArray(): double[] {
+function getSpecialArray(): double[] {
 	let min: double = Number.MIN_VALUE
 	let max: double = Number.MAX_VALUE
 	let minus: double = -Number.MAX_VALUE
-    let a : double[] = [min, max, minus, 0, 0, 0]
+    let a: double[] = [min, max, minus, 0, 0, 0]
     return a
 }
 
-function CheckEscompatArray(a: Array<double>): boolean {
+function checkEscompatArray(a: Array<double>): boolean {
     return a[0].toInt() == 1 &&
            a[1].toInt() == 2 &&
            a[2].toInt() == 30 &&

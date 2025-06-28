@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-function GetEmptyArray(): Array<Int> {
-    let a : Array<Int> = []
+function getEmptyArray(): Array<Int> {
+    let a: Array<Int> = []
     return a
 }
 
-function GetArray(): Array<Int> {
-    let a : Array<Int> = [1, 2, 3, 4, 5]
+function getArray(): Array<Int> {
+    let a: Array<Int> = [1, 2, 3, 4, 5]
     return a
 }
 
-function CheckEmptyArray(a: Array<Int>): boolean {
+function checkEmptyArray(a: Array<Int>): boolean {
     return a.length == 0
 }
 
-function CheckArray(a: Array<Int>): boolean {
+function checkArray(a: Array<Int>): boolean {
     return a[0] == 10 && a[1] == 20 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }

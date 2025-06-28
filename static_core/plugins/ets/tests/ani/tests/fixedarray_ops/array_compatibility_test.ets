@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-function GetArray(): int[] {
-    let a : int[] = [1, 2, 3, 4, 5]
+function getArray(): int[] {
+    let a: int[] = [1, 2, 3, 4, 5]
     return a
 }
 
-function GetEscompatArray(): Array<int> {
-    let a : Array<int> = new Array<int>(5)
+function getEscompatArray(): Array<int> {
+    let a: Array<int> = new Array<int>(5)
     return a
 }

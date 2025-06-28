@@ -69,7 +69,7 @@ TEST_F(AnyGetPropertyTest, AnyGetByIndex_Valid)
 {
     ani_module md {};
     ani_function fn {};
-    GetMethod("GetArray", &md, &fn);
+    GetMethod("getArray", &md, &fn);
     ani_ref arrayRef {};
     ASSERT_EQ(env_->Function_Call_Ref(fn, &arrayRef), ANI_OK);
     ani_ref nameRefByIdx {};
@@ -85,7 +85,7 @@ TEST_F(AnyGetPropertyTest, AnyGetByIndex_Invalid)
 
     ani_module md {};
     ani_function fn {};
-    GetMethod("GetArray", &md, &fn);
+    GetMethod("getArray", &md, &fn);
     ani_ref arrayRef {};
     ASSERT_EQ(env_->Function_Call_Ref(fn, &arrayRef), ANI_OK);
 

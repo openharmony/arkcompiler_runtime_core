@@ -80,7 +80,7 @@ TEST_F(ArraySetGetRegionByteTest, GetByteFixedArrayRegionErrorTests)
 
 TEST_F(ArraySetGetRegionByteTest, GetRegionByteTest)
 {
-    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getArray"));
 
     ani_byte nativeBuffer[LENGTH_5] = {0};
     const ani_size offset3 = 0;
@@ -94,10 +94,10 @@ TEST_F(ArraySetGetRegionByteTest, GetRegionByteTest)
 
 TEST_F(ArraySetGetRegionByteTest, SetRegionByteTest)
 {
-    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetArray"));
+    const auto array = static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getArray"));
     ani_byte nativeBuffer1[LENGTH_5] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     ASSERT_EQ(env_->Array_SetRegion_Byte(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_byte_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_byte_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
@@ -122,7 +122,7 @@ TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
     ASSERT_EQ(nativeBuffer[3U], TEST_VALUE_4);
     ASSERT_EQ(nativeBuffer[4U], TEST_VALUE_5);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, offset5, len5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], TEST_VALUE_1);
     ASSERT_EQ(nativeBuffer[1U], TEST_VALUE_2);
@@ -146,14 +146,14 @@ TEST_F(ArraySetGetRegionByteTest, CheckChangeFromApiRegionByteTest)
     ASSERT_EQ(env_->Array_SetRegion_Byte(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionByteTest, GetSpecialValueToArrayTest)
 {
     const auto array =
-        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetSpecialArray"));
+        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getSpecialArray"));
     std::array<ani_byte, LENGTH_5> nativeBuffer = {};
 
     ASSERT_EQ(env_->Array_GetRegion_Byte(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -251,7 +251,7 @@ TEST_F(ArraySetGetRegionByteTest, SetGetStabilityToArrayTest)
 TEST_F(ArraySetGetRegionByteTest, EscompatGetRegionByteTest)
 {
     const auto array =
-        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetEscompatArray"));
+        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getEscompatArray"));
 
     ani_byte nativeBuffer[LENGTH_5] = {0};
     const ani_size offset3 = 0;
@@ -267,18 +267,18 @@ TEST_F(ArraySetGetRegionByteTest, EscompatGetRegionByteTest)
 TEST_F(ArraySetGetRegionByteTest, EscompatSetRegionByteTest)
 {
     const auto array =
-        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetEscompatArray"));
+        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getEscompatArray"));
     const ani_byte nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 2U;
     const ani_size len4 = 3U;
     ASSERT_EQ(env_->Array_SetRegion_Byte(array, offset4, len4, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_byte_test", "CheckEscompatArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_byte_test", "checkEscompatArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionByteTest, EscompatInvalidByteTest)
 {
     const auto array =
-        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "GetEscompatArray"));
+        static_cast<ani_array_byte>(CallEtsFunction<ani_ref>("array_region_byte_test", "getEscompatArray"));
     ani_byte nativeBuffer1[5U] = {TEST_UPDATE_1, TEST_UPDATE_2, TEST_UPDATE_3};
     const ani_size offset4 = 3;
     const ani_size len4 = 3;

@@ -70,7 +70,7 @@ TEST_F(ReferenceEqualsTest, check_null_and_undefined)
 TEST_F(ReferenceEqualsTest, check_null_and_object)
 {
     auto nullRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetNull");
-    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
     ani_boolean isEquals = ANI_TRUE;
     ASSERT_EQ(env_->Reference_Equals(nullRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -88,7 +88,7 @@ TEST_F(ReferenceEqualsTest, check_undefined_and_undefined)
 TEST_F(ReferenceEqualsTest, check_undefined_and_object)
 {
     auto undefinedRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetUndefined");
-    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
     ani_boolean isEquals = ANI_TRUE;
     ASSERT_EQ(env_->Reference_Equals(undefinedRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -96,8 +96,8 @@ TEST_F(ReferenceEqualsTest, check_undefined_and_object)
 
 TEST_F(ReferenceEqualsTest, check_object_and_object)
 {
-    auto objectRef1 = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
-    auto objectRef2 = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+    auto objectRef1 = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
+    auto objectRef2 = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
     ani_boolean isEquals = ANI_FALSE;
     ASSERT_EQ(env_->Reference_Equals(objectRef1, objectRef2, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
@@ -123,7 +123,7 @@ TEST_F(ReferenceEqualsTest, check_custom_object)
 TEST_F(ReferenceEqualsTest, check_custom_and_string)
 {
     auto packRef = CallEtsFunction<ani_ref>("reference_equals_test", "newPackObject");
-    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
     ani_boolean isEquals = ANI_TRUE;
     ASSERT_EQ(env_->Reference_Equals(packRef, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
@@ -132,14 +132,14 @@ TEST_F(ReferenceEqualsTest, check_custom_and_string)
 TEST_F(ReferenceEqualsTest, check_reference_equals_loop)
 {
     for (int32_t i = 0; i < LOOP_COUNT; i++) {
-        auto objectRef1 = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
-        auto objectRef2 = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+        auto objectRef1 = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
+        auto objectRef2 = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
         ani_boolean isEquals = ANI_FALSE;
         ASSERT_EQ(env_->Reference_Equals(objectRef1, objectRef2, &isEquals), ANI_OK);
         ASSERT_EQ(isEquals, ANI_TRUE);
 
         auto packRef = CallEtsFunction<ani_ref>("reference_equals_test", "newPackObject");
-        auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "GetObject");
+        auto objectRef = CallEtsFunction<ani_ref>("reference_equals_test", "getObject");
         ASSERT_EQ(env_->Reference_Equals(packRef, objectRef, &isEquals), ANI_OK);
         ASSERT_EQ(isEquals, ANI_FALSE);
     }

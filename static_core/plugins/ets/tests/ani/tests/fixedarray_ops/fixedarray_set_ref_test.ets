@@ -13,23 +13,26 @@
  * limitations under the License.
  */
 
-function GetArray(): FixedArray<(String | null)> {
-    let a: FixedArray<(String | null)> = [null, null , new String("Hello World!")];
-    return a;
+function getArray(): FixedArray<(string | null)> {
+    let a: FixedArray<(string | null)> = [null, null, 'Hello World!']
+    return a
 }
 
-function GetNewString1(): String {
-    return new String("New String 1!");
+const string1 = 'New String 1!'
+const string2 = 'New String 2!'
+
+function getNewString1(): string {
+    return string1
 }
 
-function GetNewString2(): String {
-    return new String("New String 2!");
+function getNewString2(): string {
+    return string2
 }
 
-function CheckArray(array: FixedArray<(String | null)>): boolean {
-    return array[0] == "New String 1!" && array[1] == null && array[2] == "New String 2!";
+function checkArray(array: FixedArray<(string | null)>): boolean {
+    return array[0] == string1 && array[1] == null && array[2] == string2
 }
 
-function GetObject(): Object {
-    return new Object();
+function getObject(): Object {
+    return new Object()
 }

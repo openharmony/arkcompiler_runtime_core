@@ -40,7 +40,7 @@ TEST_F(ReferenceIsUndefinedTest, check_undefined)
 
 TEST_F(ReferenceIsUndefinedTest, check_object)
 {
-    auto ref = CallEtsFunction<ani_ref>("reference_is_undefined_test", "GetObject");
+    auto ref = CallEtsFunction<ani_ref>("reference_is_undefined_test", "getObject");
     ani_boolean isUndefined = ANI_TRUE;
     ASSERT_EQ(env_->Reference_IsUndefined(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_FALSE);
@@ -71,7 +71,7 @@ TEST_F(ReferenceIsUndefinedTest, mix_test)
     ASSERT_EQ(env_->Reference_IsUndefined(ref, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_TRUE);
 
-    auto objectRef = CallEtsFunction<ani_ref>("reference_is_undefined_test", "GetObject");
+    auto objectRef = CallEtsFunction<ani_ref>("reference_is_undefined_test", "getObject");
     ASSERT_EQ(env_->Reference_IsUndefined(objectRef, &isUndefined), ANI_OK);
     ASSERT_EQ(isUndefined, ANI_FALSE);
 

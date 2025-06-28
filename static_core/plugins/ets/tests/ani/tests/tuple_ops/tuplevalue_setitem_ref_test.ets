@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-function getReferenceTuple(): [String, double[], String] {
-    return [new String("Hello"), [1, 2, 3, 4, 5], "world"];
+function getReferenceTuple(): [string, double[], string] {
+    return ["Hello", [1, 2, 3, 4, 5], "world"]
 }
 
 function getCharTuple(): [char, char, char, char, char] {
-    return [c'H', c'e', c'l', c'l', c'o'];
+    return [c'H', c'e', c'l', c'l', c'o']
 }

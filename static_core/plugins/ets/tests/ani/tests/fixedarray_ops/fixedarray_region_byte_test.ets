@@ -14,14 +14,14 @@
  */
 
 class ArrayClass {
-    public static array: FixedArray<byte> = [1, 2, 3, 4, 5];
+    public static array: FixedArray<byte> = [1, 2, 3, 4, 5]
 
-    public static ChangeStaticArray() {
-        ArrayClass.array[2] = 22 as byte;
-        ArrayClass.array[4] = 44 as byte;
+    public static changeStaticArray() {
+        ArrayClass.array[2] = 22 as byte
+        ArrayClass.array[4] = 44 as byte
     }
 
-    public static CheckStaticArray(): boolean {
+    public static checkStaticArray(): boolean {
         return (
             ArrayClass.array[0] == 1 &&
             ArrayClass.array[1] == 2 &&
@@ -32,18 +32,18 @@ class ArrayClass {
     }
 }
 
-function GetArray(): FixedArray<byte> {
-    let a : FixedArray<byte> = [1, 2, 3, 4, 5]
+function getArray(): FixedArray<byte> {
+    let a: FixedArray<byte> = [1, 2, 3, 4, 5]
     return a
 }
 
-function CheckArray(a: FixedArray<byte>): boolean {
+function checkArray(a: FixedArray<byte>): boolean {
     return a[0] == 1 && a[1] == 2 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-function GetSpecialArray(): FixedArray<byte> {
+function getSpecialArray(): FixedArray<byte> {
 	let min: byte = -128
 	let max: byte = 127
-    let a : FixedArray<byte> = [min, max, 0, 0, 0]
+    let a: FixedArray<byte> = [min, max, 0, 0, 0]
     return a
 }
