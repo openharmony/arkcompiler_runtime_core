@@ -18,7 +18,7 @@ desc: The result of === at runtime is true if both operand values refer to the s
 ---*/
 
 function main(): void {
-  let a: int[] = [1,2,3];
+  let a: int[] = [1, 2, 3];
   let b: int[] = a;
   arktest.assertTrue( (a !== a) == false )
   arktest.assertTrue( (a !== b) == false )
