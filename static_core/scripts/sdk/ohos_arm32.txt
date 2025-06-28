@@ -1,5 +1,6 @@
 bin/ark
 bin/aspt_converter
+bin/dependency_analyzer
 lib/libabc2program.so
 lib/libarkaotmanager.so
 lib/libarkassembler.so
