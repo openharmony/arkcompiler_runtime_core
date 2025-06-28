@@ -14,7 +14,9 @@
         "name": "runtime_core",
         "subsystem": "arkcompiler",
         "syscap": [],
-        "features": [],
+        "features": [
+            "runtime_core_enable_codegen"
+        ],
         "adapted_system_type": [
             "standard"
         ],
