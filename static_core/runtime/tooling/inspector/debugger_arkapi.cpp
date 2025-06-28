@@ -14,7 +14,14 @@
  */
 
 #include "debugger_arkapi.h"
+#include <fstream>
+#include "os/mutex.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+#include "runtime/tooling/sampler/samples_record.h"
+#include "runtime/tooling/sampler/sampling_profiler.h"
+#include "types/profile_result.h"
+#include "utils/json_builder.h"
 
 namespace ark {
 bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused]] int32_t instanceId,
@@ -84,5 +91,84 @@ bool ArkDebugNativeAPI::IsDebugModeEnabled()
     LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::IsDebugModeEnabled is " << ark::Runtime::GetCurrent()->IsDebugMode();
 
     return ark::Runtime::GetCurrent()->IsDebugMode();
+}
+
+// NOLINTBEGIN(fuchsia-statically-constructed-objects)
+static std::shared_ptr<tooling::sampler::SamplesRecord> g_profileInfoBuffer = nullptr;
+static os::memory::Mutex g_profileMutex;
+static std::string g_filePath;
+// NOLINTEND(fuchsia-statically-constructed-objects)
+
+bool ArkDebugNativeAPI::StartProfiling(const std::string &filePath, uint32_t interval)
+{
+    if (filePath.empty()) {
+        LOG(DEBUG, PROFILER) << "File path is empty";
+        return false;
+    }
+    os::memory::LockHolder lock(g_profileMutex);
+    if (ark::Runtime::GetCurrent() == nullptr) {
+        LOG(DEBUG, PROFILER) << "That runtime is not created.";
+        return false;
+    }
+    if (g_profileInfoBuffer) {
+        LOG(WARNING, PROFILER) << "Repeatedly start cpu profiler, please call StopProfiling first.";
+        return false;
+    }
+    g_profileInfoBuffer = std::make_shared<tooling::sampler::SamplesRecord>();
+    g_profileInfoBuffer->SetThreadStartTime(tooling::sampler::Sampler::GetMicrosecondsTimeStamp());
+    if (!Runtime::GetCurrent()->GetTools().IsSamplingProfilerCreate()) {
+        Runtime::GetCurrent()->GetTools().CreateSamplingProfiler();
+    }
+    auto result = Runtime::GetCurrent()->GetTools().StartSamplingProfiler(
+        std::make_unique<tooling::sampler::InspectorStreamWriter>(g_profileInfoBuffer), interval);
+    if (!result) {
+        g_profileInfoBuffer.reset();
+        LOG(DEBUG, PROFILER) << "Fatal, profiler start failed";
+        return false;
+    }
+    g_filePath = filePath;
+    return true;
+}
+
+bool ArkDebugNativeAPI::StopProfiling()
+{
+    os::memory::LockHolder lock(g_profileMutex);
+    if (Runtime::GetCurrent() == nullptr) {
+        LOG(DEBUG, PROFILER) << "That runtime is not created.";
+        g_profileInfoBuffer.reset();
+        return false;
+    }
+
+    if (!g_profileInfoBuffer) {
+        LOG(DEBUG, PROFILER) << "Fatal, profiler inactive";
+        g_profileInfoBuffer.reset();
+        return false;
+    }
+
+    Runtime::GetCurrent()->GetTools().StopSamplingProfiler();
+    auto profileInfoPtr = g_profileInfoBuffer->GetAllThreadsProfileInfos();
+    if (!profileInfoPtr) {
+        g_profileInfoBuffer.reset();
+        LOG(WARNING, PROFILER) << "The CPU profiler did not collect any data.";
+        return true;
+    }
+    g_profileInfoBuffer.reset();
+    tooling::inspector::Profile profile(std::move(profileInfoPtr));
+    JsonObjectBuilder builder;
+    profile.Serialize(builder);
+    std::string jsonData = std::move(builder).Build();
+    std::ofstream outputFile(g_filePath);
+    if (!outputFile.is_open()) {
+        LOG(ERROR, PROFILER) << "Failed to open output file: " << g_filePath;
+        return false;
+    }
+    outputFile << jsonData;
+    if (outputFile.fail()) {
+        LOG(ERROR, PROFILER) << "Failed to write profiling data to file: " << g_filePath;
+        return false;
+    }
+    outputFile.close();
+    g_filePath.clear();
+    return true;
 }
 }  // namespace ark

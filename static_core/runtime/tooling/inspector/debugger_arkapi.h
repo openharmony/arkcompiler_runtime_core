@@ -16,9 +16,9 @@
 #ifndef PANDA_DEBUGGER_ARKAPI_H
 #define PANDA_DEBUGGER_ARKAPI_H
 
-#include <string>
 #include <functional>
-
+#include <memory>
+#include <string>
 #include "libpandabase/macros.h"
 
 namespace ark {
@@ -31,11 +31,17 @@ public:
     static bool StopDebugger();
     static bool IsDebugModeEnabled();
 
+    static bool StartProfiling(const std::string &filepath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
+    static bool StopProfiling();
+
     ArkDebugNativeAPI() = delete;
     ~ArkDebugNativeAPI() = delete;
 
     NO_COPY_SEMANTIC(ArkDebugNativeAPI);
     NO_MOVE_SEMANTIC(ArkDebugNativeAPI);
+
+private:
+    static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
 };
 
 }  // namespace ark

@@ -31,6 +31,7 @@ set(SOURCES
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
     tooling/inspector/debugger_arkapi.cpp
+    tooling/inspector/types/profile_result.cpp
     tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
@@ -602,6 +603,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${PANDA_BINARY_ROOT}/runtime/asm_defines
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
 )
 
 panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
