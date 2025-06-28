@@ -402,10 +402,10 @@ function main(): int {
         let res = await taskpool.execute(funcTask);
         assertEQ(res, "abc");
         assertEQ(funcTask.isDone(), true);
-        // Disallow execute one task several times
-        expectError(() => {
-            taskpool.execute(funcTask);
-        }, new Error("taskpool:: task has been executed"));
+        // Repeated execution is allowed for common tasks
+        let secondRunResult = await taskpool.execute(funcTask);
+        arktest.assertEQ(secondRunResult, "abc");
+        arktest.assertEQ(funcTask.isDone(), true);
         // Tasks with params
         let task1 = new taskpool.Task(sum, 10, 20);
         let res1 = await taskpool.execute(task1);
@@ -547,10 +547,8 @@ function main(): int {
             return;
         }
         expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
-        // task finished, disallow new execution
-        expectError(() => {
-            await taskpool.execute(task1);
-        }, new Error("taskpool:: task has been executed"));
+        let res = await taskpool.execute(task1);
+        arktest.assertEQ(res, "abc");
         let task2 = new taskpool.Task(testCancelFunc, 300);
         let val: int = 0;
         let isExecuted = new Event();
