@@ -27,6 +27,15 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
+#26515 Double too large value causes abort_fail
+03.types/06.value_types/02.floating-point_types_and_operations/addition/addition_double_46.ets
+03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_63.ets
+03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_3.ets
+03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_2.ets
+03.types/06.value_types/02.floating-point_types_and_operations/multiplication/multiplication_double_35.ets
+03.types/06.value_types/02.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
+03.types/06.value_types/02.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
+
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 

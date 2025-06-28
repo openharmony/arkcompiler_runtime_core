@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,16 @@ limitations under the License.
 
 {% for v in values %}
 /*---
-desc: check unary minus operation for float operand
+desc: check unary plus operation for double operand
 ---*/
 
 function main(): void {
-  const v: float = ( {{v.value}} ).toFloat()
-  const r: float = ( {{v.result}} ).toFloat()
-    if (Float.isNaN(v)) {
-      arktest.assertTrue(Float.isNaN(r))
+  const v: double = {{v.value}}
+  const r: double = {{v.result}}
+    if (Double.isNaN(v)) {
+      arktest.assertTrue(Double.isNaN(r))
     } else {
-      arktest.assertEQ(  -(v), r )
+      arktest.assertEQ(+(v), r)
     }
 }
 
