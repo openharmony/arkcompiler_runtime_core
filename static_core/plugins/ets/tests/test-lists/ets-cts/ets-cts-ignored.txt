@@ -76,6 +76,11 @@
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_2.ets
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_3.ets
 
+#26485
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_13.ets
+
 #24441
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_2.ets

@@ -19,7 +19,7 @@ desc: >-
     Any assignment of readonly parameters and variables must follow the limitations stated in Contexts and Conversions.
 tags: [{{c.tags}}]
 ---*/
-
+{{c.decl}}
 {{c.use}}
 
 {% endfor %}
