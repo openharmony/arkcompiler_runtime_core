@@ -133,6 +133,7 @@
     FN_MACRO(napi_is_arraybuffer, napi_env, env, napi_value, value, bool *, result)                                    \
     FN_MACRO(napi_close_handle_scope, napi_env, env, napi_handle_scope, scope)                                         \
     FN_MACRO(napi_create_string_utf16, napi_env, env, const char16_t *, str, size_t, length, napi_value *, result)     \
+    FN_MACRO(napi_get_last_error_info, napi_env, env, const napi_extended_error_info **, result)                       \
     FN_MACRO(napi_create_typedarray, napi_env, env, napi_typedarray_type, type, size_t, length, napi_value,            \
              arraybuffer, size_t, byte_offset, napi_value *, result)                                                   \
     FN_MACRO(napi_create_dataview, napi_env, env, size_t, length, napi_value, arraybuffer, size_t, byte_offset,        \

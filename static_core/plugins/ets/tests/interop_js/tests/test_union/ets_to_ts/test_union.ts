@@ -17,7 +17,7 @@ const etsVm = globalThis.gtest.etsVm;
 const testBasicUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testBasicUnion');
 const testChildUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testChildUnion');
 
-function testUnionType() {
+function testUnionType(): void {
   let numType = typeof testBasicUnion(1);
   let strType = typeof testBasicUnion('1');
   let boolType = typeof testBasicUnion(true);

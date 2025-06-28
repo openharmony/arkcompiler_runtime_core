@@ -35,6 +35,12 @@ export final class ESValue {
     private ev: JSValue
     private isStatic: boolean
 
+    private static OBJECT_CLASS: Class = Class.of(new object());
+    private static NUMBER_CLASS: Class = Class.of(new number());
+    private static BOOLEAN_CLASS: Class = Class.of(new boolean());
+    private static STRING_CLASS: Class = Class.of(new string());
+    private static BIGINT_CLASS: Class = Class.of(new bigint());
+
     constructor(ev: JSValue) {
         this.ev = ev
         this.isStatic = false;
@@ -164,24 +170,39 @@ export final class ESValue {
 
     public toBoolean(): boolean {
         if(this.isObject()) {
-            return JSRuntime.getValueObject(this.ev, Class.of(new boolean())) as boolean;
+            return JSRuntime.getValueObject(this.ev, ESValue.BOOLEAN_CLASS) as boolean;
+        }
+        if (!this.isBoolean()) {
+            throw new TypeError("Boolaen expected");
         }
         return JSRuntime.getValueBoolean(this.ev);
     }
 
     public toString(): string {
+        if(this.isObject()) {
+            return JSRuntime.getValueObject(this.ev, ESValue.STRING_CLASS) as string;
+        }
+        if (!this.isString()) {
+            throw new TypeError("String expected");
+        }
         return JSRuntime.getValueString(this.ev);
     }
 
     public toNumber(): number {
         if(this.isObject()) {
-            return JSRuntime.getValueObject(this.ev, Class.of(new object())) as number;
+            return JSRuntime.getValueObject(this.ev, ESValue.NUMBER_CLASS) as number;
+        }
+        if (!this.isNumber()) {
+            throw new TypeError("Number expected");
         }
         return JSRuntime.getValueDouble(this.ev);
     }
 
     public toBigInt(): bigint {
-        return JSRuntime.getValueObject(this.ev, Class.of(new bigint())) as bigint;
+        if (!this.isBigInt()) {
+            throw new TypeError("bigint expected");
+        }
+        return JSRuntime.getValueObject(this.ev, ESValue.BIGINT_CLASS) as bigint;
     }
 
     public toUndefined(): undefined {
@@ -200,7 +221,7 @@ export final class ESValue {
 
     public toStaticObject(): object {
         if (this.isStatic) {
-            return JSRuntime.getValueObject(this.ev, Class.of(new Object()));
+            return JSRuntime.getValueObject(this.ev, ESValue.OBJECT_CLASS);
         }
         throw Error("Can not cast to a static object")
     }
@@ -447,6 +468,9 @@ export final class ESValue {
     }
 
     public toPromise(): Promise<Any> {
+        if (!this.isPromise()) {
+            throw new TypeError("Promise expected");
+        }
         const callerClass = Class.ofCaller();
         const linker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker();
         let clsName = 'std.core.Promise';
