@@ -281,7 +281,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     size_t width = SerializeIfPrintMethodInfo(method, printMethodInfo, headerSs, methodInfo, methodInfoIt);
 
     auto headerSsStr = headerSs.str();
-    size_t lineNumber = std::count(headerSsStr.begin(), headerSsStr.end(), '\n') + 1;
+    size_t lineNumber = static_cast<size_t>(std::count(headerSsStr.begin(), headerSsStr.end(), '\n')) + 1;
 
     os << headerSsStr;
 
@@ -306,7 +306,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         insSs << "\n";
 
         auto insSsStr = insSs.str();
-        lineNumber += std::count(insSsStr.begin(), insSsStr.end(), '\n');
+        lineNumber += static_cast<size_t>(std::count(insSsStr.begin(), insSsStr.end(), '\n'));
 
         if (lineTable != nullptr) {
             lineTable->emplace_back(

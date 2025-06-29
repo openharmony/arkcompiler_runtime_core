@@ -104,14 +104,14 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
         return std::chrono::duration_cast<std::chrono::microseconds>(e - s).count();
     };
 
-    res.stats.elapsed.read = delta(tStart, tRead);
-    res.stats.elapsed.merge = delta(tRead, tMerge);
-    res.stats.elapsed.parse = delta(tMerge, tParse);
-    res.stats.elapsed.trydelete = delta(tParse, tDelete);
-    res.stats.elapsed.layout = delta(tDelete, tLayout);
-    res.stats.elapsed.patch = delta(tLayout, tPatch);
-    res.stats.elapsed.write = delta(tPatch, tEnd);
-    res.stats.elapsed.total = delta(tStart, tEnd);
+    res.stats.elapsed.read = static_cast<uint64_t>(delta(tStart, tRead));
+    res.stats.elapsed.merge = static_cast<uint64_t>(delta(tRead, tMerge));
+    res.stats.elapsed.parse = static_cast<uint64_t>(delta(tMerge, tParse));
+    res.stats.elapsed.trydelete = static_cast<uint64_t>(delta(tParse, tDelete));
+    res.stats.elapsed.layout = static_cast<uint64_t>(delta(tDelete, tLayout));
+    res.stats.elapsed.patch = static_cast<uint64_t>(delta(tLayout, tPatch));
+    res.stats.elapsed.write = static_cast<uint64_t>(delta(tPatch, tEnd));
+    res.stats.elapsed.total = static_cast<uint64_t>(delta(tStart, tEnd));
 
     return res;
 }
