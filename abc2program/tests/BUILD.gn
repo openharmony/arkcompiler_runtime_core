@@ -30,6 +30,8 @@ abc2prog_test_deps = [
 ]
 
 test_ts_dir = "//arkcompiler/runtime_core/abc2program/tests/ts/"
+test_column_number_dir =
+    "//arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/"
 test_line_number_dir =
     "//arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/"
 test_json_dir = "//arkcompiler/runtime_core/abc2program/tests/json/"
@@ -48,6 +50,27 @@ foreach(file, abc2prog_test_release_line_number_files) {
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
     extra_args = [ "--module" ]
+    in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
+abc2prog_test_release_column_number_files = [
+  "ReleaseEnableColumnNumberCallargs",
+  "ReleaseEnableColumnNumberCallthis",
+]
+
+foreach(file, abc2prog_test_release_column_number_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_ts = "${test_column_number_dir}${file}.ts"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_ts)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--enable-release-column",
+      "--module",
+    ]
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }
@@ -121,6 +144,7 @@ abc2prog_include_dirs = [
 script_sources = [
   "cpp_sources/abc2program_test_utils.cpp",
   "cpp_sources/hello_world_test.cpp",
+  "cpp_sources/release_column_number.cpp",
   "cpp_sources/release_line_number.cpp",
 ]
 
@@ -145,6 +169,9 @@ host_unittest_action("Abc2ProgScriptTest") {
     deps += [ ":gen_${file}_debug_abc" ]
   }
   foreach(file, abc2prog_test_json_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, abc2prog_test_release_column_number_files) {
     deps += [ ":gen_${file}_abc" ]
   }
   foreach(file, abc2prog_test_release_line_number_files) {
