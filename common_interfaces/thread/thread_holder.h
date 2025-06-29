@@ -39,11 +39,11 @@ namespace panda {
 using InterOpCoroutineToNativeHookFunc = bool (*)(ThreadHolder *current);
 using InterOpCoroutineToRunningHookFunc = bool (*)(ThreadHolder *current);
 
-bool InterOpCoroutineToNative(ThreadHolder *current);
-bool InterOpCoroutineToRunning(ThreadHolder *current);
+PUBLIC_API bool InterOpCoroutineToNative(ThreadHolder *current);
+PUBLIC_API bool InterOpCoroutineToRunning(ThreadHolder *current);
 
-void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
-void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
+PUBLIC_API void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
+PUBLIC_API void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
 }  // namespace panda
 
 namespace panda {
