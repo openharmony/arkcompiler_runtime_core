@@ -173,6 +173,7 @@ extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
         coro->GetManager()->CreateWorkers(scaler, runtime, vm);
         return;
     }
+    ScopedNativeCodeThread nativeScope(coro);
     Coroutine::GetCurrent()->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
 }
 

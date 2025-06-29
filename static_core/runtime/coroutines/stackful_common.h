@@ -39,7 +39,8 @@ inline constexpr WorkerId INVALID_WORKER_ID = std::numeric_limits<WorkerId>::max
 inline constexpr WorkerId MAIN_WORKER_ID = 0U;
 // taskpool eaworker limit
 inline constexpr size_t TASKPOOL_EAWORKER_LIMIT = 2;
-
+// taskpool eaworker mode
+inline static constexpr const char *TASKPOOL_EAWORKER_MODE = "eaworker";
 }  // namespace ark::stackful_coroutines
 
 #endif /* PANDA_RUNTIME_COROUTINES_STACKFUL_COMMON_H */

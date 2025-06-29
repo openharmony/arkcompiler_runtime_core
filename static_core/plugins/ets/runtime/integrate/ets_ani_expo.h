@@ -43,6 +43,23 @@ public:
 private:
     static void TryLoadAotFileForBoot();
     static void LoadAotFileForApp(std::string const &aotFileName);
+    /**
+     * @brief Pre create exclusive worker for taskpool execution engine
+     * @return true if success, false if failed
+     */
+    static bool PreCreateExclusiveWorkerForTaskpool();
+
+    /**
+     * @brief Destroy exclusive worker for taskpool execution engine in preFork
+     * @return true if success, false if failed
+     */
+    static bool DestroyExclusiveWorkerForTaskpoolIfExists();
+
+    /**
+     * @brief Process taskpool worker in preFork and postFork
+     * @param preFork true if preFork, false if postFork
+     */
+    static void ProcessTaskpoolWorker(bool preFork);
 };
 }  // namespace ark::ets
 #endif  // !PLUGINS_ETS_RUNTIME_INTEGRATE_ETS_ANI_EXPO

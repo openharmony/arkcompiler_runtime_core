@@ -99,7 +99,6 @@ void StackfulCoroutineManager::FinalizeWorkers(size_t howMany, Runtime *runtime,
     }
     entrypointParam.workerFinalizationEvent.Lock();
 
-    ScopedNativeCodeThread nativeCode(Coroutine::GetCurrent());
     Await(&entrypointParam.workerFinalizationEvent);
 
     os::memory::LockHolder lh(workersLock_);
@@ -1170,18 +1169,7 @@ void StackfulCoroutineManager::PreZygoteFork()
         StopManagerThread();
     }
 
-    // Will be refactored by using modified 'FinalizeWorkers' to avoid copy-paste. #26674
-    os::memory::LockHolder lock(workersLock_);
-    for (auto *worker : workers_) {
-        if (worker->IsMainWorker()) {
-            continue;
-        }
-        worker->SetActive(false);
-    }
-    // 1 is for MAIN
-    while (activeWorkersCount_ > 1) {
-        workersCv_.Wait(&workersLock_);
-    }
+    FinalizeWorkers(commonWorkersCount_ - 1, Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
 }
 
 void StackfulCoroutineManager::PostZygoteFork()
