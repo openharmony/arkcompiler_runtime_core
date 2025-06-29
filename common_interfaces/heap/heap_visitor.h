@@ -31,6 +31,8 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 void VisitRoots(const RefFieldVisitor &visitor);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
+void VisitSTWRoots(const RefFieldVisitor &visitor);
+void VisitConcurrentRoots(const RefFieldVisitor &visitor);
 
 // GlobalRoots are subsets of roots which are shared in all mutator threads.
 void VisitGlobalRoots(const RefFieldVisitor &visitor);
