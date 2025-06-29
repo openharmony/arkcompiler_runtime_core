@@ -17,12 +17,15 @@
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/file_manager.h"
+#include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
 PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env)
 {
     PandaEtsVM *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
+    ProcessTaskpoolWorker(true);
     vm->PreZygoteFork();
 }
 
@@ -62,6 +65,7 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
 
     if (postZygoteFork) {
         vm->PostZygoteFork();
+        ProcessTaskpoolWorker(false);
     }
 }
 
@@ -91,5 +95,66 @@ void ETSAni::TryLoadAotFileForBoot()
             pf->SetClassHashTable(aotFile->GetClassHashTable());
         }
     }
+}
+
+void ETSAni::ProcessTaskpoolWorker(bool preFork)
+{
+    auto &taskpoolMode =
+        Runtime::GetCurrent()->GetOptions().GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+
+    const char *taskpoolEAWorkerMode = "eaworker";
+    if (taskpoolMode != taskpoolEAWorkerMode) {
+        return;
+    }
+
+    if (preFork) {
+        bool res = DestroyExclusiveWorkerForTaskpoolIfExists();
+        LOG(INFO, COROUTINES) << "DestroyExclusiveWorkerForTaskpoolIfExists done: " << res;
+    } else {
+        bool res = PreCreateExclusiveWorkerForTaskpool();
+        LOG(INFO, COROUTINES) << "PreCreateExclusiveWorkerForTaskpool done: " << res;
+    }
+}
+
+bool ETSAni::PreCreateExclusiveWorkerForTaskpool()
+{
+    auto *runtime = Runtime::GetCurrent();
+    auto *classLinker = runtime->GetClassLinker();
+    ClassLinkerExtension *ext = classLinker->GetExtension(SourceLanguage::ETS);
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto *klass = ext->GetClass(mutf8Name);
+    if (klass == nullptr) {
+        LOG(ERROR, COROUTINES) << "Load taskpool failed in post zygote fork";
+        return false;
+    }
+    auto method = ets::EtsClass::FromRuntimeClass(klass)->GetStaticMethod("initWorkerPool", ":V");
+    if (method == nullptr) {
+        LOG(ERROR, COROUTINES) << "Load taskpool initWorkerPool failed in post zygote fork";
+        return false;
+    }
+    ScopedManagedCodeThread managedScope(Coroutine::GetCurrent());
+    method->GetPandaMethod()->Invoke(Coroutine::GetCurrent(), nullptr);
+    return true;
+}
+
+bool ETSAni::DestroyExclusiveWorkerForTaskpoolIfExists()
+{
+    auto *runtime = Runtime::GetCurrent();
+    auto *classLinker = runtime->GetClassLinker();
+    ClassLinkerExtension *ext = classLinker->GetExtension(SourceLanguage::ETS);
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto *klass = ext->GetClass(mutf8Name);
+    if (klass == nullptr) {
+        LOG(ERROR, COROUTINES) << "Load taskpool failed in pre zygote fork";
+        return false;
+    }
+    auto method = ets::EtsClass::FromRuntimeClass(klass)->GetStaticMethod("stopAllWorkers", ":V");
+    if (method == nullptr) {
+        LOG(ERROR, COROUTINES) << "Load taskpool::stopAllWorkers failed in pre zygote fork";
+        return false;
+    }
+    ScopedManagedCodeThread managedScope(Coroutine::GetCurrent());
+    method->GetPandaMethod()->Invoke(Coroutine::GetCurrent(), nullptr);
+    return true;
 }
 }  // namespace ark::ets
