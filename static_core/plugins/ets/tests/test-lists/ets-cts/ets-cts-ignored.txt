@@ -1,6 +1,3 @@
-#26477 "Any" keyword as identifier
-02.lexical_elements/07.keywords/types_0.ets
-
 #26687
 02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_0.ets
 
