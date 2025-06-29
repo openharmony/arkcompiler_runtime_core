@@ -185,6 +185,8 @@ config("ark_config") {
     include_dirs += [ "$hilog_root/include" ]
   }
 
+  cflags_cc = []
+
   if (is_linux) {
     defines += [
       "PANDA_TARGET_UNIX",
@@ -202,6 +204,10 @@ config("ark_config") {
       defines += [ "PANDA_USE_FUTEX" ]
     }
   } else if (is_mingw) {
+    cflags_cc += [
+      "-std=c++17",
+      "-Wno-ignored-attributes",
+    ]
     defines += [
       "PANDA_TARGET_WINDOWS",
       "PANDA_WITH_BYTECODE_OPTIMIZER",
@@ -262,7 +268,7 @@ config("ark_config") {
     defines += [ "NDEBUG" ]
   }
 
-  cflags_cc = [
+  cflags_cc += [
     "-std=c++17",
     "-pedantic",
     "-Wall",

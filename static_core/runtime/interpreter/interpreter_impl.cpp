@@ -56,6 +56,13 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
                 interpreterType = InterpreterType::IRTOC;
             }
 #endif
+#ifdef ARK_USE_CMC_GC
+            // CMC GC will be supported with LLVM interpreter with issue27125
+            if (interpreterType == InterpreterType::LLVM) {
+                LOG(INFO, RUNTIME) << "--interpreter-type=LLVM is downgraded into IRTOC in CMC GC if no setting";
+                interpreterType = InterpreterType::IRTOC;
+            }
+#endif
 #ifndef PANDA_WITH_IRTOC
             if (interpreterType == InterpreterType::IRTOC) {
                 interpreterType = InterpreterType::CPP;
@@ -140,6 +147,13 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
         }
 #endif  // #ifdef ARK_USE_CMC_GC
     }
+#ifdef ARK_USE_CMC_GC
+    // CMC GC will be supported with LLVM interpreter with issue27125
+    if (interpreterType == InterpreterType::LLVM) {
+        LOG(FATAL, RUNTIME) << "CMC GC is only supported to be set with --interpreter-type=cpp or irtoc";
+        return;
+    }
+#endif  // #ifdef ARK_USE_CMC_GC
 #endif  // #if !defined(PANDA_TARGET_ARM32)
     ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }
