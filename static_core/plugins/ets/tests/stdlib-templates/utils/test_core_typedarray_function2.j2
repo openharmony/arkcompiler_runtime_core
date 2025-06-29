@@ -244,8 +244,8 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  let subarrayStart: int = 2;
-  let subarrayEnd: int = 4;
+  let subarrayStart: int | undefined = 2;
+  let subarrayEnd: int | undefined = 4;
 
   let target: {{.item.objectType}};
 
@@ -395,8 +395,8 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -465,9 +465,9 @@ function testSubarrayOneLengthTwoParams(): int {
     console.log(e);
     return fail;
   }
-  
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -529,7 +529,7 @@ function testNonEmptyTypedArraySetValue(): number {
   {% elif item.objectType == 'BigInt64Array' %}
     const minValue = Long.MIN_VALUE;
     const maxValue = Long.MAX_VALUE;
-  {%- endif %}    
+  {%- endif %}
 
   try {
     typedArray[0] = {{.item.create}}(1);
@@ -550,7 +550,7 @@ function testNonEmptyTypedArraySetValue(): number {
       return fail;
     }
   }
-  
+
   if (typedArray.at(length) != undefined) { // check value,  wrong index
     console.log("Test failed. typedArray.at(length) : " + typedArray.at(length));
     return fail;
@@ -631,7 +631,7 @@ function testTypedArrayIncludesOneParamWithNormalNum(): number {
   } else {
     console.log(`Includes ${searchElement}? false`);
   }
-  return success; 
+  return success;
 }
 
 {%- if item.objectType != 'BigInt64Array' %}
@@ -695,7 +695,7 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
       return fail;
     }
   }
-  return success; 
+  return success;
 }
 {% endif %}
 
@@ -777,7 +777,7 @@ function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
   let fromIndex = 0;
   let arrayLen = typedArray.length;
   //a. Let k be len + n.
-  //ECMA: if fromIndex < 0(k < 0) ,a. Let k be len + n. 
+  //ECMA: if fromIndex < 0(k < 0) ,a. Let k be len + n.
   //      b. If k < 0, set k to 0. typedArray need to be fixed
   for (let i = 0 as int; i < arrayLen; i++) {
     fromIndex = (- arrayLen + i).toInt();
@@ -790,7 +790,7 @@ function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
       return fail;
     }
   }
- 
+
   //index > len, return false;
   fromIndex = 6 as int;
   result = typedArray.includes(searchElement, fromIndex);
@@ -959,7 +959,7 @@ function testTypedArrayKeysWithEmptyArray(): number {
   if (typedArray.length != 0 || typedArray.byteOffset != 0) {
     return fail;
   }
-  
+
   const emptyKeysArray = typedArray.keys();
   if(emptyKeysArray.next().value != undefined){
     return fail;
@@ -974,7 +974,7 @@ function testTypedArrayKeysWithSingleElementArray(): number {
   } catch(e) {
     return fail;
   }
-  
+
   const emptyKeysArray = typedArray.keys();
   if(emptyKeysArray.next().value != 0){
     return fail;
@@ -999,7 +999,7 @@ function testTypedArrayKeysWithSingleElementArray(): number {
       return fail;
   }
 
-  //test big length,comment out the code to prevent potential unknown errors. 
+  //test big length,comment out the code to prevent potential unknown errors.
   /*
   try {
       const largeLengthArray = new {{.item.objectType}}(1e4);
@@ -1230,7 +1230,7 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     failures += check(boolToResult(isPosInfThrows == expected[3]), `{{.item.objectType}} didn't throw: array[+Infinity]`)
     failures += check(boolToResult(isNanZero == expected[4]), `{{.item.objectType}} failed: array[NaN] == array[0]`)
     failures += check(boolToResult(isCorrectValues == expected[5]), `{{.item.objectType}} failed: array[i] == (i + 1) * 10`)
-    
+
     return failures == 0 ? success: fail
   }
 )
@@ -1271,10 +1271,10 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 
     array[0] = (value + 1)
     const isNumberNumberCorrect = array[0] == {{.item.create}}(value + 1)
-    
+
     array[0 as int] = (value + 2)
     const isIntNumberCorrect = array[0] == {{.item.create}}(value + 2)
-    
+
     {%- endif %}
 
     array[0] = (value + 3).toInt()
@@ -1296,7 +1296,7 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     {%- endif %}
     failures += check(boolToResult(isNumberIntCorrect == expected[7]), `{{.item.objectType}} failed: array[0] = value.toInt()`)
     failures += check(boolToResult(isIntIntCorrect == expected[8]), `{{.item.objectType}} failed: array[0 as int] = value.toInt()`)
-    
+
     return failures == 0 ? success: fail
   }
 )
