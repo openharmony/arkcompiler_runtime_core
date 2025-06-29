@@ -785,3 +785,7 @@
 17.experimental_features/02.fixed_array_types/far4a.ets
 17.experimental_features/02.fixed_array_types/far4c.ets
 17.experimental_features/02.fixed_array_types/far4d.ets
+
+# 27159
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_27.ets
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_28.ets
