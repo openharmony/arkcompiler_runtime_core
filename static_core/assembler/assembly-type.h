@@ -37,12 +37,11 @@ public:
     DEFAULT_COPY_SEMANTIC(Type);
     ~Type() = default;
 
-    Type(std::string_view componentName, size_t rank, bool ignorePrimitive = false) : rank_(rank)
+    Type(std::string_view componentName, size_t rank, bool ignorePrimitive = false)
+        : componentName_(componentName), rank_(rank)
     {
-        name_ = GetName(componentName, rank_);
+        name_ = GetName(componentName_, rank_);
         typeId_ = GetId(name_, ignorePrimitive);
-        FillComponentNames(componentName);
-        Canonicalize();
     }
 
     Type(const Type &componentType, size_t rank)
@@ -50,69 +49,10 @@ public:
     {
     }
 
-    static constexpr size_t UNION_PREFIX_LEN = 2;  // CC-OFF(G.NAM.03-CPP) project code style
-    static constexpr size_t RANK_STEP = 2;         // CC-OFF(G.NAM.03-CPP) project code style
-
     PANDA_PUBLIC_API std::string GetDescriptor(bool ignorePrimitive = false) const;
     PANDA_PUBLIC_API std::string GetName() const
     {
         return name_;
-    }
-
-    size_t SkipUnion(std::string_view name)
-    {
-        auto unionLength = 2;
-        while (name[unionLength++] != '}') {
-            if (name[unionLength] == '{') {
-                unionLength += SkipUnion(name.substr(unionLength));
-            }
-        }
-        return unionLength;
-    }
-
-    std::pair<std::string, size_t> GetComponentName(std::string_view name)
-    {
-        if (name[0] != '{') {
-            auto delimPos = name.find(',');
-            if (delimPos != std::string::npos) {
-                return {std::string(name).substr(0, delimPos), delimPos};
-            }
-            return {std::string(name), name.length()};
-        }
-
-        auto unionLen = SkipUnion(name);
-        while ((name.length() > unionLen) && (name[unionLen] == '[')) {
-            unionLen += Type::RANK_STEP;
-        }
-        return {std::string(name).substr(0, unionLen), unionLen};
-    }
-
-    void FillComponentNames(std::string_view componentNamesStr)
-    {
-        if (!IsUnion()) {
-            componentNames_.emplace_back(componentNamesStr);
-            return;
-        }
-        componentNamesStr.remove_prefix(Type::UNION_PREFIX_LEN);
-        componentNamesStr.remove_suffix(1);
-        while (!componentNamesStr.empty()) {
-            auto [component, length] = GetComponentName(componentNamesStr);
-            componentNames_.push_back(component);
-            if (componentNamesStr.length() == length || componentNamesStr[length] != ',') {
-                break;
-            }
-            componentNamesStr.remove_prefix(length + 1);
-        }
-        ASSERT(componentNames_.size() > 1);
-    }
-
-    std::string GetNameWithoutRank() const
-    {
-        auto idx = name_.length() - 1;
-        while (name_[idx] == ']') {
-            idx -= Type::RANK_STEP;
-        }
-        return name_.substr(0, idx + 1);
     }
 
     std::string GetPandasmName() const
@@ -124,23 +64,8 @@ public:
 
     std::string GetComponentName() const
     {
-        if (componentNames_.size() == 1) {
-            return componentNames_[0];
-        }
-        std::string res = "{U";
-        for (const auto &comp : componentNames_) {
-            res += comp + ",";
-        }
-        res.pop_back();
-        return res + "}";
+        return componentName_;
     }
-
-    const std::vector<std::string> &GetComponentNames() const
-    {
-        return componentNames_;
-    }
-
-    std::string GetComponentDescriptor(bool ignorePrimitive) const;
 
     size_t GetRank() const
     {
@@ -149,8 +74,7 @@ public:
 
     Type GetComponentType() const
     {
-        ASSERT(componentNames_.size() == 1);
-        return Type(componentNames_[0], rank_ > 0 ? rank_ - 1 : 0);
+        return Type(componentName_, rank_ > 0 ? rank_ - 1 : 0);
     }
 
     panda_file::Type::TypeId GetId() const
@@ -160,14 +84,13 @@ public:
 
     bool IsArrayContainsPrimTypes() const
     {
-        ASSERT(componentNames_.size() == 1);
-        auto elem = GetId(componentNames_[0]);
+        auto elem = GetId(componentName_);
         return elem != panda_file::Type::TypeId::REFERENCE;
     }
 
     bool IsValid() const
     {
-        return !componentNames_.empty();
+        return !componentName_.empty();
     }
 
     bool IsArray() const
@@ -232,11 +155,6 @@ public:
         return typeId_ == panda_file::Type::TypeId::VOID;
     }
 
-    bool IsUnion() const
-    {
-        return (name_.substr(0, Type::UNION_PREFIX_LEN) == "{U") && (name_.back() == '}');
-    }
-
     PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(std::string_view name, bool ignorePrimitive = false);
 
     PANDA_PUBLIC_API static pandasm::Type FromPrimitiveId(panda_file::Type::TypeId id);
@@ -258,13 +176,10 @@ public:
     static PANDA_PUBLIC_API bool IsPandaPrimitiveType(const std::string &name);
     static bool IsStringType(const std::string &name, ark::panda_file::SourceLang lang);
 
-    PANDA_PUBLIC_API void Canonicalize();
-    static PANDA_PUBLIC_API std::string CanonicalizeDescriptor(std::string_view descriptor);
-
 private:
     static PANDA_PUBLIC_API std::string GetName(std::string_view componentName, size_t rank);
 
-    std::vector<std::string> componentNames_;
+    std::string componentName_;
     size_t rank_ {0};
     std::string name_;
     panda_file::Type::TypeId typeId_ {panda_file::Type::TypeId::VOID};

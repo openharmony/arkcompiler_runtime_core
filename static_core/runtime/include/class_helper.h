@@ -86,11 +86,6 @@ public:
         return dim;
     }
 
-    static bool IsPrimitive(const uint8_t *descriptor);
-    static bool IsReference(const uint8_t *descriptor);
-    static bool IsUnion(const uint8_t *descriptor);
-    static Span<const uint8_t> GetUnionComponent(const uint8_t *descriptor);
-
 private:
     template <typename Str = std::string>
     static void AppendType(const uint8_t *descriptor, int rank, Str &result);

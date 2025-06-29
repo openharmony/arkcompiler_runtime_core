@@ -606,7 +606,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
 )
 
-panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options arkassembler)
+panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
 if (NOT PANDA_TARGET_OHOS)
   panda_target_link_libraries(arkruntime_obj atomic)
 endif()

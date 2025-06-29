@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "assembler/assembly-type.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
@@ -54,50 +53,6 @@ PandaString Mangle::ConvertDescriptor(const std::string_view descriptor, bool al
 static constexpr size_t MIN_BODY_SIZE = sizeof('{') + 1 + sizeof('}');
 
 static size_t ParseType(char type, const std::string_view data, PandaStringStream &ss);
-
-static size_t ParseUnionBody(const std::string_view data, PandaStringStream &ss)
-{
-    if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
-        return std::string_view::npos;
-    }
-    PandaStringStream unionStream;
-    unionStream << "{U";
-
-    bool containsNull = false;
-    std::string_view previousConstituentTypes;
-    size_t size = 1;
-    while (size < data.size() && data[size] != '}') {
-        std::string_view substr = data.substr(size);
-        size_t sz = ParseType(data[size], substr, unionStream);
-        if (sz == std::string_view::npos) {
-            // The 'descriptor' does not have a new format, so no conversion is required.
-            return std::string_view::npos;
-        }
-        // NOTE(dslynko, #26222): do not replace union to `Object` when `null` will have its own publically fixed type
-        std::string_view parsedType = substr.substr(0, sz);
-        if (parsedType == "N") {
-            containsNull = true;
-        }
-        // NOTE(dslynko, #26223): move constituent types order check into VerifyANI
-        if (previousConstituentTypes > parsedType) {
-            // Constituent types must be ordered in alphabetical order with respect to ANI encodings.
-            return std::string_view::npos;
-        }
-        size += sz;
-    }
-    if (size >= data.size() || data[size] != '}') {
-        // Union descriptor must end with '}'.
-        return std::string_view::npos;
-    }
-    unionStream << '}';
-
-    if (containsNull) {
-        ss << panda_file_items::class_descriptors::OBJECT;
-    } else {
-        ss << pandasm::Type::CanonicalizeDescriptor(unionStream.str());
-    }
-    return size + sizeof('}');
-}
 
 static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss)
 {
@@ -152,7 +107,6 @@ static size_t ParseType(char type, const std::string_view data, PandaStringStrea
         case 'N': ss << panda_file_items::class_descriptors::OBJECT; return 1;
         case 'U': ss << panda_file_items::class_descriptors::OBJECT; return 1;
         case 'A': bodySize = ParseArrayBody(data.substr(1), ss); break;
-        case 'X': bodySize = ParseUnionBody(data.substr(1), ss); break;
         case 'C':
         case 'E':
         case 'P': bodySize = ParseBody(type, data.substr(1), ss); break;
