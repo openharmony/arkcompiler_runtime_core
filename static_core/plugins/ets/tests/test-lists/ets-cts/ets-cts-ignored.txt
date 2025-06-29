@@ -404,33 +404,33 @@
 #26107 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_6.ets
-07.expressions/25.equality_expressions/07.reference_equality_based_on_actual_type/union_equality_operators/eq_0.ets
-07.expressions/25.equality_expressions/07.reference_equality_based_on_actual_type/union_equality_operators/ne_0.ets
-07.expressions/25.equality_expressions/07.reference_equality_based_on_actual_type/union_equality_operators/ne_3.ets
+07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/eq_0.ets
+07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/ne_0.ets
+07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/ne_3.ets
 
 #26354
-07.expressions/25.equality_expressions/06.function_type_equality_operators/function_equality_0.ets
-07.expressions/25.equality_expressions/06.function_type_equality_operators/function_equality_ne_0.ets
-07.expressions/25.equality_expressions/06.function_type_equality_operators/function_equality_ne_1.ets
-07.expressions/25.equality_expressions/06.function_type_equality_operators/function_equality_ne_2.ets
-07.expressions/25.equality_expressions/06.function_type_equality_operators/function_equality_ne_3.ets
+07.expressions/25.equality_expressions/02.function_type_equality_operators/function_equality_0.ets
+07.expressions/25.equality_expressions/02.function_type_equality_operators/function_equality_ne_0.ets
+07.expressions/25.equality_expressions/02.function_type_equality_operators/function_equality_ne_1.ets
+07.expressions/25.equality_expressions/02.function_type_equality_operators/function_equality_ne_2.ets
+07.expressions/25.equality_expressions/02.function_type_equality_operators/function_equality_ne_3.ets
 
 #23051 Reference comparison
-07.expressions/25.equality_expressions/08.reference_equality/type_conversion_of_one_operand_to_another_type.ets
+07.expressions/25.equality_expressions/reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
 #26321 equality expr with numeric and null
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_17.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_18.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_17.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_18.ets
 
 #26320 equality expr with numeric and undefined
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_19.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_20.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_21.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_22.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_23.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_24.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_25.ets
-07.expressions/25.equality_expressions/09.equality_with_null_or_undefined/null_and_undefined_equality_26.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_19.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_20.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_21.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_22.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_23.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_24.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_25.ets
+07.expressions/25.equality_expressions/03.equality_with_null_or_undefined/null_and_undefined_equality_26.ets
 
 #24401 Generic lambda is not supported by compiler
 07.expressions/32.lambda_expression/generic.ets
@@ -452,18 +452,18 @@
 08.statements/15.try_statements/01.catch_clauses/catch_2.ets
 
 #23050
-09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
+09.classes/04.field_declarations/06.overriding_fields/overriding_fields_1.ets
 
 #25498
-09.classes/06.method_declarations/throws_clause_1.ets
-09.classes/06.method_declarations/throws_clause_2.ets
+09.classes/05.method_declarations/throws_clause_1.ets
+09.classes/05.method_declarations/throws_clause_2.ets
 
 #23238 Method returning 'this' returns wrong instance
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
+09.classes/05.method_declarations/08.methods_returning_this/met_ret_this_8.ets
 
 #25498
-09.classes/09.constructor_declaration/throws_clause_1.ets
-09.classes/09.constructor_declaration/throws_clause_2.ets
+09.classes/07.constructor_declaration/throws_clause_1.ets
+09.classes/07.constructor_declaration/throws_clause_2.ets
 
 #16840
 10.interfaces/04.interface_members/methods_overriding.ets
@@ -774,7 +774,7 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_lmbd/call-lmbd-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_meth/call-meth-n3_7.ets
-07.expressions/12.indexing_expression/02.record_indexing_expression/ind_1.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/ind_1.ets
 07.expressions/25.equality_expressions/eq_neg_101.ets
 07.expressions/25.equality_expressions/eq_neg_146.ets
 07.expressions/25.equality_expressions/eq_neg_148.ets
