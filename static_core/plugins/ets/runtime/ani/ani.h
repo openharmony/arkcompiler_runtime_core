@@ -443,46 +443,6 @@ struct __ani_interaction_api {
     ani_status (*FindEnum)(ani_env *env, const char *enum_descriptor, ani_enum *result);
 
     /**
-     * @brief Finds a namespace within a module by its descriptor.
-     *
-     * This function locates a namespace within the specified module based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] module The module to search within.
-     * @param[in] namespace_descriptor The descriptor of the namespace to find.
-     * @param[out] result A pointer to the namespace object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Module_FindNamespace)(ani_env *env, ani_module module, const char *namespace_descriptor,
-                                       ani_namespace *result);
-
-    /**
-     * @brief Finds a class within a module by its descriptor.
-     *
-     * This function locates a class within the specified module based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] module The module to search within.
-     * @param[in] class_descriptor The descriptor of the class to find.
-     * @param[out] result A pointer to the class object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Module_FindClass)(ani_env *env, ani_module module, const char *class_descriptor, ani_class *result);
-
-    /**
-     * @brief Finds an enum within a module by its descriptor.
-     *
-     * This function locates an enum within the specified module based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] module The module to search within.
-     * @param[in] enum_descriptor The descriptor of the enum to find.
-     * @param[out] result A pointer to the enum object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Module_FindEnum)(ani_env *env, ani_module module, const char *enum_descriptor, ani_enum *result);
-
-    /**
      * @brief Finds a function within a module by its name and signature.
      *
      * This function locates a function within the specified module based on its name and signature.
@@ -509,46 +469,6 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Module_FindVariable)(ani_env *env, ani_module module, const char *name, ani_variable *result);
-
-    /**
-     * @brief Finds a namespace within another namespace by its descriptor.
-     *
-     * This function locates a namespace within the specified parent namespace based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ns The parent namespace to search within.
-     * @param[in] namespace_descriptor The descriptor of the namespace to find.
-     * @param[out] result A pointer to the namespace object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Namespace_FindNamespace)(ani_env *env, ani_namespace ns, const char *namespace_descriptor,
-                                          ani_namespace *result);
-
-    /**
-     * @brief Finds a class within a namespace by its descriptor.
-     *
-     * This function locates a class within the specified namespace based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ns The namespace to search within.
-     * @param[in] class_descriptor The descriptor of the class to find.
-     * @param[out] result A pointer to the class object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Namespace_FindClass)(ani_env *env, ani_namespace ns, const char *class_descriptor, ani_class *result);
-
-    /**
-     * @brief Finds an enum within a namespace by its descriptor.
-     *
-     * This function locates an enum within the specified namespace based on its descriptor.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ns The namespace to search within.
-     * @param[in] enum_descriptor The descriptor of the enum to find.
-     * @param[out] result A pointer to the enum object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Namespace_FindEnum)(ani_env *env, ani_namespace ns, const char *enum_descriptor, ani_enum *result);
 
     /**
      * @brief Finds a function within a namespace by its name and signature.
@@ -6396,18 +6316,6 @@ struct __ani_env {
     {
         return c_api->FindEnum(this, enum_descriptor, result);
     }
-    ani_status Module_FindNamespace(ani_module module, const char *namespace_descriptor, ani_namespace *result)
-    {
-        return c_api->Module_FindNamespace(this, module, namespace_descriptor, result);
-    }
-    ani_status Module_FindClass(ani_module module, const char *class_descriptor, ani_class *result)
-    {
-        return c_api->Module_FindClass(this, module, class_descriptor, result);
-    }
-    ani_status Module_FindEnum(ani_module module, const char *enum_descriptor, ani_enum *result)
-    {
-        return c_api->Module_FindEnum(this, module, enum_descriptor, result);
-    }
     ani_status Module_FindFunction(ani_module module, const char *name, const char *signature, ani_function *result)
     {
         return c_api->Module_FindFunction(this, module, name, signature, result);
@@ -6415,18 +6323,6 @@ struct __ani_env {
     ani_status Module_FindVariable(ani_module module, const char *name, ani_variable *result)
     {
         return c_api->Module_FindVariable(this, module, name, result);
-    }
-    ani_status Namespace_FindNamespace(ani_namespace ns, const char *namespace_descriptor, ani_namespace *result)
-    {
-        return c_api->Namespace_FindNamespace(this, ns, namespace_descriptor, result);
-    }
-    ani_status Namespace_FindClass(ani_namespace ns, const char *class_descriptor, ani_class *result)
-    {
-        return c_api->Namespace_FindClass(this, ns, class_descriptor, result);
-    }
-    ani_status Namespace_FindEnum(ani_namespace ns, const char *enum_descriptor, ani_enum *result)
-    {
-        return c_api->Namespace_FindEnum(this, ns, enum_descriptor, result);
     }
     ani_status Namespace_FindFunction(ani_namespace ns, const char *name, const char *signature, ani_function *result)
     {

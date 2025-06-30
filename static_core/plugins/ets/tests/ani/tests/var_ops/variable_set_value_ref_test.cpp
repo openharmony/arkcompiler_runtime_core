@@ -104,7 +104,7 @@ TEST_F(VariableSetValueRefTest, invalid_value)
 TEST_F(VariableSetValueRefTest, composite_case_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns_, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("variable_set_value_ref_test.anyns.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
@@ -177,7 +177,7 @@ TEST_F(VariableSetValueRefTest, composite_case_2)
 TEST_F(VariableSetValueRefTest, composite_case_3)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "second", &result), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("variable_set_value_ref_test.anyns.second", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_variable variable1 {};

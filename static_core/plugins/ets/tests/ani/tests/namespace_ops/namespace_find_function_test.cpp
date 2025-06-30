@@ -68,7 +68,7 @@ TEST_F(NamespaceFindFunctionTest, find_function03)
     ASSERT_NE(ns, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("namespace_find_function_test.Fnns.A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method result {};
@@ -83,10 +83,7 @@ TEST_F(NamespaceFindFunctionTest, find_function03)
 TEST_F(NamespaceFindFunctionTest, find_function04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "A", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA.A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
@@ -97,10 +94,8 @@ TEST_F(NamespaceFindFunctionTest, find_function04)
 TEST_F(NamespaceFindFunctionTest, find_function05)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "A", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_function_test.TestA.A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};

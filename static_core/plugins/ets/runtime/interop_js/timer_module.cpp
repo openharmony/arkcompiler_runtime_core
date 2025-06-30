@@ -200,12 +200,8 @@ void TimerModule::DisarmTimer(uv_timer_t *timer)
 
 ani_object TimerModule::GetTimerTable(ani_env *env)
 {
-    ani_module concurrencyModule {};
-    [[maybe_unused]] auto status = env->FindModule("Lstd/concurrency;", &concurrencyModule);
-    ASSERT(status == ANI_OK);
-
     ani_class loopCls {};
-    status = env->Module_FindClass(concurrencyModule, "LEventLoop;", &loopCls);
+    [[maybe_unused]] auto status = env->FindClass("std.concurrency.EventLoop", &loopCls);
     ASSERT(status == ANI_OK);
 
     ani_ref timerTable {};

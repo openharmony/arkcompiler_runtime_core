@@ -281,10 +281,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_a_inva
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -305,12 +303,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.nb.nc.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -331,10 +325,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -359,10 +351,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.nd.B", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     const ani_int value1 = VAL3;

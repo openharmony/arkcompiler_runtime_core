@@ -67,12 +67,9 @@ static const ani_native_function NATIVE_FUNC_CONCAT = {"concat", CONCAT_SIGNATUR
 
 TEST_F(NamespaceBindNativeFunctionsTest, bind_native_functions)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     std::array functions = {
@@ -87,12 +84,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, bind_native_functions)
 
 TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     std::array functions = {
@@ -128,12 +122,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, invalid_functions)
 
 TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
@@ -146,12 +137,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
 
 TEST_F(NamespaceBindNativeFunctionsTest, new_overload_bind)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
@@ -166,12 +154,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, new_overload_bind)
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT};
@@ -184,12 +169,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_001)
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_002)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT};
@@ -202,12 +184,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_002)
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_003)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_SUM, 1), ANI_OK);
@@ -222,16 +201,14 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_003)
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_004)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nsA {};
     ani_namespace nsB {};
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nsA), ANI_OK);
+    const std::string nsNameA = std::string(MODULE_NAME).append(".A");
+    ASSERT_EQ(env_->FindNamespace(nsNameA.c_str(), &nsA), ANI_OK);
     ASSERT_NE(nsA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nsB), ANI_OK);
+    const std::string nsNameB = std::string(MODULE_NAME).append(".A.B");
+    ASSERT_EQ(env_->FindNamespace(nsNameB.c_str(), &nsB), ANI_OK);
     ASSERT_NE(nsB, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nsA, "checkSumB", ":z", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
@@ -248,12 +225,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_004)
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_005)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    const std::string nsName = std::string(MODULE_NAME).append(".ops");
+    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     std::array functions = {

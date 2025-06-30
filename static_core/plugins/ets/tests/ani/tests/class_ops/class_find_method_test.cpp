@@ -61,10 +61,9 @@ public:
     void CheckClassFindMethod(const char *clsDescriptor, const char *methodName, const char *methodSignature,
                               const ani_value *args = nullptr, ani_int expectedResult = TEST_EXPECTED_VALUE1)
     {
-        ani_module module;
-        ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
         ani_class cls;
-        ASSERT_EQ(env_->Module_FindClass(module, clsDescriptor, &cls), ANI_OK);
+        const std::string className = std::string("test.") + clsDescriptor;
+        ASSERT_EQ(env_->FindClass(className.c_str(), &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method method;
@@ -90,10 +89,9 @@ public:
     void CheckIntrinsicsFindMethod(const char *moduleDescriptor, const char *clsDescriptor, const char *methodName,
                                    const char *methodSignature)
     {
-        ani_module module;
-        ASSERT_EQ(env_->FindModule(moduleDescriptor, &module), ANI_OK);
         ani_class cls;
-        ASSERT_EQ(env_->Module_FindClass(module, clsDescriptor, &cls), ANI_OK);
+        const std::string className = std::string(moduleDescriptor) + "." + clsDescriptor;
+        ASSERT_EQ(env_->FindClass(className.c_str(), &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method method;
@@ -372,10 +370,8 @@ TEST_F(ClassFindMethodTest, generics)
 
 TEST_F(ClassFindMethodTest, binded_method)
 {
-    ani_module module;
-    ASSERT_EQ(env_->FindModule("test", &module), ANI_OK);
     ani_class cls;
-    ASSERT_EQ(env_->Module_FindClass(module, "FindNativeMethods", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.FindNativeMethods", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -707,16 +703,8 @@ TEST_F(ClassFindMethodTest, static_method_find_static_method_006)
 
 TEST_F(ClassFindMethodTest, find_method_combine_scenes_002)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("test.test002A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test002B", &result), ANI_OK);
-    ASSERT_NE(result, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(result, "TestA002", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("test.test002A.test002B.TestA002", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};

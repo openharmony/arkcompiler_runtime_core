@@ -178,16 +178,8 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_001_1)
 
 TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("find_enum_test.test003A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test003B", &result), ANI_OK);
-    ASSERT_NE(result, nullptr);
-
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Namespace_FindEnum(result, "EnumA003", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.test003A.test003B.EnumA003", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -220,12 +212,8 @@ TEST_F(EnumFindTest, find_enum_combine_scenes_003)
 
 TEST_F(EnumFindTest, find_enum_combine_scenes_004)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("find_enum_test.test004A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "EnumA004", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("find_enum_test.test004A.EnumA004", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

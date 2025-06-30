@@ -5761,44 +5761,7 @@ This function retrieves the value of a reference at the specified index in the f
 
 **RETURNS:**
 - Returns a status code of type `ani_status` indicating success or failure.
-- ## 16. Module Support
----
-### Module_FindNamespace
-`ani_status (*Module_FindNamespace)(ani_env *env, ani_module module, const char *namespace_descriptor, ani_namespace *result);`
-**PARAMETERS:**
-- env: A pointer to the environment structure.
-- module: The module to search within.
-- namespace_descriptor: The descriptor of the namespace to find.
-- result: A pointer to the namespace object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
----
-### Module_FindClass
-`ani_status (*Module_FindClass)(ani_env *env, ani_module module, const char *class_descriptor, ani_class *result);`
-**PARAMETERS:**	
-- env: A pointer to the environment structure.
-- module: The module to search within.
-- class_descriptor: The descriptor of the class to find.
-- result: A pointer to the class object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
----
-### Module_FindEnum
-`ani_status (*Module_FindEnum)(ani_env *env, ani_module module, const char *enum_descriptor, ani_enum *result);`
-**PARAMETERS:** 
-- env: A pointer to the environment structure.
-- module: The module to search within.
-- enum_descriptor: The descriptor of the enum to find.
-- result: A pointer to the enum object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
----
+## 16. Module Support
 ### Module_FindFunction
 `ani_status (*Module_FindFunction)(ani_env *env, ani_module module, const char *function_descriptor, ani_function *result);`
 **PARAMETERS:** 
@@ -5824,42 +5787,6 @@ This function retrieves the value of a reference at the specified index in the f
 - Returns a status code of type `ani_status` indicating success or failure.
 
 ## 17. NameSpace Support
----
-### Namespace_FindNamespace
-`ani_status (*Namespace_FindNamespace)(ani_env *env, ani_namespace ns, const char *namespace_descriptor, ani_namespace *result);`
-**PARAMETERS:**
-- env: A pointer to the environment structure.
-- ns: The parent namespace to search within.
-- namespace_descriptor: The descriptor of the namespace to find.
-- result: A pointer to the namespace object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
----
-### Namespace_FindClass
-`ani_status (*Namespace_FindClass)(ani_env *env, ani_namespace ns, const char *class_descriptor, ani_class *result);`
-**PARAMETERS:**
-- env: A pointer to the environment structure.
-- ns: The namespace to search within.
-- class_descriptor: The descriptor of the class to find.
-- result: A pointer to the class object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
----
-### Namespace_FindEnum
-`ani_status (*Namespace_FindEnum)(ani_env *env, ani_namespace ns, const char *enum_descriptor, ani_enum *result);`
-**PARAMETERS:**
-- env: A pointer to the environment structure.
-- ns: The namespace to search within.
-- enum_descriptor: The descriptor of the enum to find.
-- result: A pointer to the enum object.
-
-**RETURNS:**
-- Returns a status code of type `ani_status` indicating success or failure.
-
 ---
 ### Namespace_FindFunction
 `ani_status (*Namespace_FindFunction)(ani_env *env, ani_namespace ns, const char *function_descriptor, ani_function *result);`
