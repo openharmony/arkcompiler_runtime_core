@@ -25,62 +25,62 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
 #26515 Double too large value causes abort_fail
-03.types/06.value_types/02.floating-point_types_and_operations/addition/addition_double_46.ets
-03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_63.ets
-03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_3.ets
-03.types/06.value_types/02.floating-point_types_and_operations/division/division_double_2.ets
-03.types/06.value_types/02.floating-point_types_and_operations/multiplication/multiplication_double_35.ets
-03.types/06.value_types/02.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
-03.types/06.value_types/02.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
+03.types/06.value_types/03.floating-point_types_and_operations/addition/addition_double_46.ets
+03.types/06.value_types/03.floating-point_types_and_operations/division/division_double_63.ets
+03.types/06.value_types/03.floating-point_types_and_operations/division/division_double_3.ets
+03.types/06.value_types/03.floating-point_types_and_operations/division/division_double_2.ets
+03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_35.ets
+03.types/06.value_types/03.floating-point_types_and_operations/multiplication/multiplication_double_51.ets
+03.types/06.value_types/03.floating-point_types_and_operations/subtraction/subtraction_double_51.ets
 
 #20936 Access to common union method doesn't work
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
+03.types/20.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 
 #25172
-03.types/19.union_types/united_switch_ext_1.ets
-03.types/19.union_types/united_switch_ext_3.ets
-03.types/19.union_types/united_switch_ext_4.ets
-03.types/19.union_types/united_switch_ext_5.ets
-03.types/19.union_types/united_switch_ext_6.ets
-03.types/19.union_types/united_switch_ext_7.ets
-03.types/19.union_types/united_switch_ext_8.ets
-03.types/19.union_types/united_switch_ext_9.ets
-03.types/19.union_types/united_switch_ext_10.ets
+03.types/20.union_types/united_switch_ext_1.ets
+03.types/20.union_types/united_switch_ext_3.ets
+03.types/20.union_types/united_switch_ext_4.ets
+03.types/20.union_types/united_switch_ext_5.ets
+03.types/20.union_types/united_switch_ext_6.ets
+03.types/20.union_types/united_switch_ext_7.ets
+03.types/20.union_types/united_switch_ext_8.ets
+03.types/20.union_types/united_switch_ext_9.ets
+03.types/20.union_types/united_switch_ext_10.ets
 
 #24420
-03.types/19.union_types/ut_34.ets
+03.types/20.union_types/ut_34.ets
 
 #26072 expected equality failed: '0' === ' ''
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.ets
 
 #26102 Readonly array assignment does not throw CTE
-03.types/15.literal_types/function_literal_type_7.ets
-03.types/19.union_types/01.union_types_normalization/norm_29.ets
-03.types/19.union_types/01.union_types_normalization/norm_30.ets
-03.types/19.union_types/01.union_types_normalization/norm_32.ets
-03.types/19.union_types/01.union_types_normalization/norm_34.ets
-03.types/19.union_types/01.union_types_normalization/norm_35.ets
+03.types/16.literal_types/function_literal_type_7.ets
+03.types/20.union_types/01.union_types_normalization/norm_29.ets
+03.types/20.union_types/01.union_types_normalization/norm_30.ets
+03.types/20.union_types/01.union_types_normalization/norm_32.ets
+03.types/20.union_types/01.union_types_normalization/norm_34.ets
+03.types/20.union_types/01.union_types_normalization/norm_35.ets
 
 #24649
-04.names_declarations_and_scopes/04.scopes/type_param_class_neg_3.ets
+04.names_declarations_and_scopes/03.scopes/type_param_class_neg_3.ets
 
 #24109
-04.names_declarations_and_scopes/05.accessible/type_name_const_enum.ets
-04.names_declarations_and_scopes/05.accessible/type_name_variable_enum.ets
+04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets
+04.names_declarations_and_scopes/04.accessible/type_name_variable_enum.ets
 
 #23643
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_14.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_15.ets
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.ets
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_14.ets
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_15.ets
 
 #23134
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_neg_15.ets
 
 #25498
-04.names_declarations_and_scopes/08.function_declarations/throws_clause_1.ets
-04.names_declarations_and_scopes/08.function_declarations/throws_clause_2.ets
-04.names_declarations_and_scopes/08.function_declarations/throws_clause_3.ets
+04.names_declarations_and_scopes/07.function_declarations/throws_clause_1.ets
+04.names_declarations_and_scopes/07.function_declarations/throws_clause_2.ets
+04.names_declarations_and_scopes/07.function_declarations/throws_clause_3.ets
 
 #26485
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
@@ -768,7 +768,7 @@
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 # Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
-03.types/15.literal_types/function_literal_type_7.ets
+03.types/16.literal_types/function_literal_type_7.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/07.casting_conversions_to_enumeration/cte_int_enum.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_cons/call-cons-n3_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/call_func/call-func-n3_7.ets
@@ -808,10 +808,10 @@
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_4.ets
 
 # 56 ES2PANDA_NEG_FAIL A value of type Function can not be called directly. A developer must use the unsafeCall method instead.
-03.types/18.function_types/01.type_function/negative_1.ets
+03.types/19.function_types/01.type_function/negative_1.ets
 
 # 57 ES2PANDA_NEG_FAIL Literal type does not match, have to be CTE
-03.types/19.union_types/union_type_narrowing_attribute_n.ets
+03.types/20.union_types/union_type_narrowing_attribute_n.ets
 
 #58: flaky, do not delete if it passed
 07.expressions/33.constant_expression/check_array/constant_bitwise_complement_4.ets
@@ -855,3 +855,6 @@
 # 27159
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_28.ets
+
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
