@@ -39,7 +39,9 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             // Create new number formatter, number range formatter is empty
             // Number range formatter will be created via call NumRangeFmtsCacheInvalidation
             auto *ptr = new icu::number::LocalizedNumberFormatter();
-            ASSERT(ptr != nullptr);
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumFmt;
+            }
 
             // Set options
             status = InitNumFormatter(env, options, *ptr);
@@ -82,7 +84,9 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             // Create new number range formatter, number formatter is empty
             // Number formatter will be created via call IntlFormattersCacheInvalidation
             auto *ptr = new icu::number::LocalizedNumberRangeFormatter();
-            ASSERT(ptr != nullptr);
+            if (UNLIKELY(ptr == nullptr)) {
+                return defaultLocNumRangeFmt;
+            }
 
             // Set options
             status = InitNumRangeFormatter(env, options, *ptr);
