@@ -42,55 +42,55 @@ class Consumer {
     public static localObjs: Object[] = [new Object()];
     public static pseudorand: long = Double.toLong(Date.now());
 
-    public static consumeBool(boolc: boolean): void throws {
+    public static consumeBool(boolc: boolean): void {
         if (boolc == Consumer.boola && boolc == Consumer.boolb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeChar(charc: char): void throws {
+    public static consumeChar(charc: char): void {
         if (charc == Consumer.chara && charc == Consumer.charb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeByte(bytec: byte): void throws {
+    public static consumeByte(bytec: byte): void {
         if (bytec == Consumer.bytea && bytec == Consumer.byteb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeShort(shortc: short): void throws {
+    public static consumeShort(shortc: short): void {
         if (shortc == Consumer.shorta && shortc == Consumer.shortb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeInt(intc: int): void throws {
+    public static consumeInt(intc: int): void {
         if (intc == Consumer.inta && intc == Consumer.intb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeLong(longc: long): void throws {
+    public static consumeLong(longc: long): void {
         if (longc == Consumer.longa && longc == Consumer.longb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeFloat(floatc: float): void throws {
+    public static consumeFloat(floatc: float): void {
         if (floatc == Consumer.floata && floatc == Consumer.floatb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeDouble(doublec: double): void throws {
+    public static consumeDouble(doublec: double): void {
         if (doublec == Consumer.doublea && doublec == Consumer.doubleb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeObj(obj: Object): void throws {
+    public static consumeObj(obj: Object): void {
         Consumer.pseudorand = (Consumer.pseudorand * Consumer.x1 + Consumer.x2);
         if ((Consumer.pseudorand & Consumer.x3) == 0) {
             Consumer.x3 = (Consumer.x3 << 1) + (0xad as long);
@@ -98,13 +98,13 @@ class Consumer {
         }
     }
 
-    public static consumeString(strc: string): void throws {
+    public static consumeString(strc: string): void {
         if (strc === Consumer.stra && strc === Consumer.strb) {
             throw new NullPointerError();
         }
     }
 
-    public static consumeObjs(objs: Object[]): void throws {
+    public static consumeObjs(objs: Object[]): void {
         Consumer.pseudorand = (Consumer.pseudorand * Consumer.x1 + Consumer.x2);
         if ((Consumer.pseudorand & Consumer.x3) == 0) {
             Consumer.x3 = (Consumer.x3 << 1) + (0xad as long);
@@ -112,43 +112,43 @@ class Consumer {
         }
     }
 
-    public static consume(v: boolean): void throws {
+    public static consume(v: boolean): void {
         Consumer.consumeBool(v);
     }
 
-    public static consume(v: byte): void throws {
+    public static consume(v: byte): void {
         Consumer.consumeByte(v);
     }
 
-    public static consume(v: char): void throws {
+    public static consume(v: char): void {
         Consumer.consumeChar(v);
     }
 
-    public static consume(v: short): void throws {
+    public static consume(v: short): void {
         Consumer.consumeShort(v);
     }
 
-    public static consume(v: int): void throws {
+    public static consume(v: int): void {
         Consumer.consumeInt(v);
     }
 
-    public static consume(v: long): void throws {
+    public static consume(v: long): void {
         Consumer.consumeLong(v);
     }
 
-    public static consume(v: float): void throws {
+    public static consume(v: float): void {
         Consumer.consumeFloat(v);
     }
 
-    public static consume(v: double): void throws {
+    public static consume(v: double): void {
         Consumer.consumeDouble(v);
     }
 
-    public static consume(v: Object): void throws {
+    public static consume(v: Object): void {
         Consumer.consumeObj(v);
     }
 
-    public static consume(v: Object[]): void throws {
+    public static consume(v: Object[]): void {
         Consumer.consumeObjs(v);
     }
 

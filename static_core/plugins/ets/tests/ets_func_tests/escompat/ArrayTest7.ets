@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function main() throws {
+function main() {
     testArraySplice()
 }
 

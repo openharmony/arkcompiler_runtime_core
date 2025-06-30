@@ -71,7 +71,7 @@ class VmbLauncher {
                         VmbLauncher.loopCount1 + ' reps');
     }
 
-    static runIters(phase: String, count: int, time: int, bench: {{state_name}}): void throws {
+    static runIters(phase: String, count: int, time: int, bench: {{state_name}}): void {
         let iterMs: long = time * S2MS;
         VmbLauncher.totalOps = 0;
         VmbLauncher.totalMs = 0;

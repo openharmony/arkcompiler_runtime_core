@@ -430,46 +430,46 @@ function testParseWithWhitespace(): void {
     arktest.assertEQ(parsedWhitespace.getString("name"), "test");
 }
 
-function expectJsonParseError(func: () => void throws): void {
+function expectJsonParseError(func: () => void): void {
     arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof JsonParseError) });
 }
 
 function testParseErrorHandling(): void {
     // Test invalid JSON strings
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement("{")
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement("}")
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement("[")
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement("]")
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement('[{}, {]}')
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement('["", "",,]')
     });
     /// NOTE: need to add check case for trailing comma (only one) in array
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement('{"name":}')
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement('{"name":"unclosed string}')
     });
 
-    expectJsonParseError((): void throws => {
+    expectJsonParseError((): void => {
         JSON.parseJsonElement("invalid")
     });
 }

@@ -979,9 +979,9 @@ function testByteOffset() {
     buf = new buffer.Buffer(a, 2)
     arktest.assertEQ(buf.byteOffset, 2)
     let byteOffset: number;
-    arktest.expectError((): void throws => { byteOffset = -1; let f = new buffer.Buffer(a, byteOffset) });
-    arktest.expectError((): void throws => { byteOffset = a.getByteLength().toDouble(); let f = new buffer.Buffer(a, byteOffset) });
-    arktest.expectError((): void throws => { byteOffset = a.getByteLength().toDouble() + 1; let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void => { byteOffset = -1; let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void => { byteOffset = a.getByteLength().toDouble(); let f = new buffer.Buffer(a, byteOffset) });
+    arktest.expectError((): void => { byteOffset = a.getByteLength().toDouble() + 1; let f = new buffer.Buffer(a, byteOffset) });
 }
 
 function testFillHex() {

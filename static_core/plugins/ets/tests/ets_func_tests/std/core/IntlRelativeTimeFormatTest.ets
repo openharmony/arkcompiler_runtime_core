@@ -15,7 +15,7 @@
 
 const fakeLocale = "er-or"
 
-function main() throws {
+function main() {
     testFormat()
     testFormatToParts()
     testResolvedOptions()

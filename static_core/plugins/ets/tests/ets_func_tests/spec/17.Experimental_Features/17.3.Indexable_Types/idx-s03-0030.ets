@@ -21,7 +21,7 @@
 class Bar  {
     private data1 : int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data1;
@@ -30,7 +30,7 @@ class Bar  {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data1 = value;
@@ -40,7 +40,7 @@ class Bar  {
         }
     }
 
-    $_get (index: string) : int throws {
+    $_get (index: string) : int {
         switch(index) {
         case "hello":
             return this.data1;
@@ -49,7 +49,7 @@ class Bar  {
         }
     }
 
-    $_set (index: string, value: int)  throws {
+    $_set (index: string, value: int) {
         switch(index) {
         case "hello":
             this.data1 = value;

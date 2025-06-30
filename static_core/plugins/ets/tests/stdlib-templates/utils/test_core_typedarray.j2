@@ -430,7 +430,7 @@ function testTAFromWithSizeableIterator(): int {
     return success
 }
 
-function createFromSource(source: FixedArray<{{.item.primitiveType}}>): {{.item.objectType}} throws {
+function createFromSource(source: FixedArray<{{.item.primitiveType}}>): {{.item.objectType}} {
     let ss = new ArrayBuffer(source.length.toInt() * {{.item.primitiveSizeBytes}});
     let origin: {{.item.objectType}};
 

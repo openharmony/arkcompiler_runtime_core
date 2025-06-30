@@ -244,16 +244,16 @@ function testJsonElementArrayOperations(): void {
     arktest.assertEQ(secondElement.asInteger(), 42, "$_get should return correct element at index");
 }
 
-function expectJsonError(func: () => void throws): void {
+function expectJsonError(func: () => void): void {
     arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonError) });
 }
-function expectJsonTypeError(func: () => void throws): void {
+function expectJsonTypeError(func: () => void): void {
     arktest.expectThrow(func, (e: Error | Exception) => { return (e instanceof jsonx.JsonTypeError) });
 }
 function testJsonElementErrorHandlingGet(): void {
     // forall e, i: int: e.jsonKind != Array => e[i] throws
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             u[1]
         }
@@ -263,7 +263,7 @@ function testJsonElementErrorHandlingGet(): void {
     //   i < 0 || i > |e| - 1
     //      => e[i] throws RangeError
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createArray([]);
             u[0]
         },
@@ -277,14 +277,14 @@ function testJsonElementErrorHandlingGet(): void {
     //   e.jsonKind != Object
     //      => e[k] throws JsonTypeError
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             u["key"]
         }
     );
     // the same for getElement
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             u.getElement("key")
         }
@@ -294,7 +294,7 @@ function testJsonElementErrorHandlingGet(): void {
     //   k not in e.maybeObjectValues.Keys
     //      => e[k] throws RangeError
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createObject({});
             u["key"]
         },
@@ -304,7 +304,7 @@ function testJsonElementErrorHandlingGet(): void {
     );
     // the same for getElement
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createObject({});
             u.getElement("key")
         },
@@ -319,14 +319,14 @@ function testJsonElementErrorHandlingIterator(): void {
     //   e.jsonKind != Object
     //      => e.$_iterator() throws JsonTypeError
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             u.$_iterator()
         }
     );
     // the same for Array
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createArray([]);
             u.$_iterator()
         }
@@ -338,26 +338,26 @@ function testJsonElementErrorHandlingAs(): void {
     //   e.jsonType != t
     //   => e as t throws JsonTypeError
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             let v = u.asArray()
         }
     );
     // no implicit conversion double <=> integer
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createDouble(3.14);
             let v = u.asInteger()
         }
     );
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createBoolean(true);
             let v = u.asDouble()
         }
     );
     expectJsonTypeError(
-        (): void throws => {
+        (): void => {
             let u = jsonx.JsonElement.createString("test");
             let v = u.asBoolean()
         }

@@ -21,7 +21,7 @@
 class BarInt1  {
     private data1 : int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data1;
@@ -30,7 +30,7 @@ class BarInt1  {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data1 = value;
@@ -50,7 +50,7 @@ class BarInt2 extends BarInt1 {
     private data2 : int;
     private data21: int;
 
-    override $_get (index: int) : int throws {
+    override $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data2;
@@ -61,7 +61,7 @@ class BarInt2 extends BarInt1 {
         }
     }
 
-    override $_set (index: int, value: int)  throws {
+    override $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data2 = value;

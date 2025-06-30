@@ -74,11 +74,6 @@
 #23134
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_neg_15.ets
 
-#25498
-04.names_declarations_and_scopes/07.function_declarations/throws_clause_1.ets
-04.names_declarations_and_scopes/07.function_declarations/throws_clause_2.ets
-04.names_declarations_and_scopes/07.function_declarations/throws_clause_3.ets
-
 #26485
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
@@ -463,25 +458,13 @@
 #23050
 09.classes/04.field_declarations/06.overriding_fields/overriding_fields_1.ets
 
-#25498
-09.classes/05.method_declarations/throws_clause_1.ets
-09.classes/05.method_declarations/throws_clause_2.ets
-
 #23238 Method returning 'this' returns wrong instance
 09.classes/05.method_declarations/08.methods_returning_this/met_ret_this_8.ets
-
-#25498
-09.classes/07.constructor_declaration/throws_clause_1.ets
-09.classes/07.constructor_declaration/throws_clause_2.ets
 
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature.ets
-
-#25498
-10.interfaces/05.interface_method_declarations/throws_clause_1.ets
-10.interfaces/05.interface_method_declarations/throws_clause_2.ets
 
 #23856
 13.compilation_units/07.export_directives/01.selective_export_directive/t01/c.ets
@@ -697,10 +680,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_3.ets
 17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_4.ets
-
-#25498
-17.experimental_features/10.native_functions_and_methods/01.native_functions/nat7.ets
-17.experimental_features/10.native_functions_and_methods/01.native_functions/nat8.ets
 
 #25179
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_11.ets

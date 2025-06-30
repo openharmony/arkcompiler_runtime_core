@@ -25,7 +25,7 @@ function fooType(): ClassType {
     return Type.of(new Foo()) as ClassType // Type.resolve("Lpackage/Foo;") as ClassType
 }
 
-function main(): void throws {
+function main(): void {
     const fooClass = fooType()
     const creator = new ClassTypeCreator("MyClass").addBaseType(fooClass)
     arktest.assertEQ( fooClass.getConstructorsNum(), 1)

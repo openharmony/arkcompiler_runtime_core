@@ -24,7 +24,7 @@ class Bar {
     private data2: int;
     private data3: int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data;
@@ -37,7 +37,7 @@ class Bar {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data = value;

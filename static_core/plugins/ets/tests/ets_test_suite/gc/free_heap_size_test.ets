@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-function AllocMemoryAndReturnFreeHeapSize(): long throws {
+function AllocMemoryAndReturnFreeHeapSize(): long {
     const ALLOC_SIZE: int = 10000;
     let mem: FixedArray<long> = new long[ALLOC_SIZE];
     return GC.getFreeHeapSize();
 }
 
-function main(): void throws {
+function main(): void {
     // Free allocations done during runtime creation (i.e. application RuntimeLinker)
     GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     let free_size_in_start = GC.getFreeHeapSize();

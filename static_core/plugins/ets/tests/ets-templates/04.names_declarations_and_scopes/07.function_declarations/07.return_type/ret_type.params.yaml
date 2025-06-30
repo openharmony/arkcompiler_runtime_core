@@ -211,7 +211,7 @@ function_decls:
 
     - decl: |-
         let i = 1
-        function foo() throws {
+        function foo() {
             i += 1
             throw new Exception()
             return i;

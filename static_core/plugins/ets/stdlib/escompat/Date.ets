@@ -367,7 +367,7 @@ function ecmaMakeDate(day:long, time: long): long {
  * @returns Elapsed number of milliceconds since Unix Epoch.
  *
  */
-function ecmaTimeClip(time: long): long throws {
+function ecmaTimeClip(time: long): long {
     if ((time > maxDateOffset) || (time < -maxDateOffset)) {
         throw new RangeError()
     }

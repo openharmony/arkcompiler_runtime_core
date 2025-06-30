@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function test_iu8_array(): void throws {
+function test_iu8_array(): void {
     let data = Int8Array.of(-128, -42, -14, 0, 16, 48, 127)
     let data_rev = new Int8Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -25,7 +25,7 @@ function test_iu8_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_iu16_array(): void throws {
+function test_iu16_array(): void {
     let data = Int16Array.of(-32768, -2731, -227, 0, 128, 2564, 32767)
     let data_rev = new Int16Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -37,7 +37,7 @@ function test_iu16_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_iu32_array(): void throws {
+function test_iu32_array(): void {
     let data = Int32Array.of(-2147483648, -1398, 0, 11184, 89478, 536872, 2147483647)
     let data_rev = new Int32Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -50,7 +50,7 @@ function test_iu32_array(): void throws {
     
 }
 
-function test_iu64_array(): void throws {
+function test_iu64_array(): void {
     let data = BigInt64Array.of(-9.223e+18, -8589934588, 0, 4294967294, 2.3058e+16, 9.223e+18)
     let data_rev = new BigInt64Array(data).reverse()
     let data_rev2 = data.toReversed()
@@ -62,14 +62,14 @@ function test_iu64_array(): void throws {
     check_array(udata, udata_rev, udata_rev2)
 }
 
-function test_f32_array(): void throws {
+function test_f32_array(): void {
     let data = Float32Array.of(-3.4e+38, -2.02e+16, 1.06e+12, 2.8e+24,  3.4e+38)
     let data_rev = new Float32Array(data).reverse()
     let data_rev2 = data.toReversed()
     check_array(data, data_rev, data_rev2)
 }
 
-function test_f64_array(): void throws {
+function test_f64_array(): void {
     let data = Float64Array.of(-1.7e+308, -3.6e+42, -0.6e+16, 0.4e+105, 1.7e+308)
     let data_rev = new Float64Array(data).reverse()
     let data_rev2 = data.toReversed()

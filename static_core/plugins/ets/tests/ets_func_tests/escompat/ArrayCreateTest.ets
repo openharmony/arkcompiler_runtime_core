@@ -30,7 +30,7 @@ class TestData {
 
 function testCreateNegLength() {
     const expectedError = new NegativeArraySizeError("size = " + TestData.arrayLength1);
-    arktest.expectError((): void throws => { Array.create<number>(TestData.arrayLength1, TestData.initialValue1) },
+    arktest.expectError((): void => { Array.create<number>(TestData.arrayLength1, TestData.initialValue1) },
         expectedError);
 }
 

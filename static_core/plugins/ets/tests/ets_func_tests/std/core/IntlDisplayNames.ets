@@ -45,7 +45,7 @@ function testDisplayNamesCreation(): void {
 
     // DisplayNames constructor should throw when type is not specified
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             new Intl.DisplayNames("en");
         },
         typeErrorCheck
@@ -53,7 +53,7 @@ function testDisplayNamesCreation(): void {
 
     // DisplayNames constructor should throw when type is not specified
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             new Intl.DisplayNames("en", {});
         },
         typeErrorCheck
@@ -381,7 +381,7 @@ function testInvalidCodes(): void {
 
     // DisplayNames.of should throw when given an empty code
     arktest.expectThrow(
-        (): void throws => {
+        (): void => {
             displayNames.of("");
         },
         (e: Error | Exception) => { return (e instanceof RangeError) }

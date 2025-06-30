@@ -29,7 +29,7 @@ class PinningTestsuite extends arktest.ArkTestsuite {
 
 function main(): int {
     let pinObjTestsuite = new PinningTestsuite();
-    pinObjTestsuite.addTest("SimpleTest", (): void throws =>
+    pinObjTestsuite.addTest("SimpleTest", (): void =>
     {
         let obj: Object = new Object();
         GC.pinObject(obj);
@@ -46,7 +46,7 @@ function main(): int {
 
         arktest.assertEQ(addr_before_gc, addr_after_gc, "Pinned object must has a fixed address");
     });
-    pinObjTestsuite.addTest("AllocatePinnedArrayTest", (): void throws =>
+    pinObjTestsuite.addTest("AllocatePinnedArrayTest", (): void =>
     {
         let obj = GC.allocatePinnedIntArray(10);
         arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "The pinned array after GC must be placed in tenured space");
@@ -58,17 +58,17 @@ function main(): int {
         GC.unpinObject(obj);
         arktest.assertEQ(addr_before_gc, addr_after_gc, "Pinned array must has a fixed address");
     });
-    pinObjTestsuite.addTest("AllocateNegativeSizePinnedArrayTest", (): void throws =>
+    pinObjTestsuite.addTest("AllocateNegativeSizePinnedArrayTest", (): void =>
     {
         let expectedError = new NegativeArraySizeError("The value must be non negative");
-        arktest.expectError((): void throws => { GC.allocatePinnedBooleanArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedByteArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedCharArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedShortArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedIntArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedLongArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedFloatArray(-1) }, expectedError);
-        arktest.expectError((): void throws => { GC.allocatePinnedDoubleArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedBooleanArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedByteArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedCharArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedShortArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedIntArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedLongArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedFloatArray(-1) }, expectedError);
+        arktest.expectError((): void => { GC.allocatePinnedDoubleArray(-1) }, expectedError);
     });
     return pinObjTestsuite.run();
 }

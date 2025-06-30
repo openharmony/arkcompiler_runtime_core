@@ -19,7 +19,7 @@
  * (in case of using objects they are wrapped with handles)
  */
 
-function main(): void throws {
+function main(): void {
     // create object of exception class
     let e: Exception = new Exception("test");
 

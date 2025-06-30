@@ -68,14 +68,14 @@ export class ArraySort {
      * @Bugs gitee0123456789
      */
 
-    public sort(): void throws {
+    public sort(): void {
     }
 
     /**
      * @Benchmark
      * @Tags StdLib, StdLib_String, Ohos
      */
-    public baseline(): void throws {
+    public baseline(): void {
     }
 }
 '''

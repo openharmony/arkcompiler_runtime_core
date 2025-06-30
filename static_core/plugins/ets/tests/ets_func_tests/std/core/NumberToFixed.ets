@@ -101,7 +101,7 @@ function testLargeParameter() {
     let big_digits: Number = TestData.big_digits;
 
     const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void throws => { a.toFixed(big_digits) }, errorcheck)
+    arktest.expectThrow((): void => { a.toFixed(big_digits) }, errorcheck)
 }
 
 function testNegativeParameter() {
@@ -109,5 +109,5 @@ function testNegativeParameter() {
     let negative_digits: Number = TestData.negative_digits;
 
     const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void throws => { a.toFixed(negative_digits) }, errorcheck)
+    arktest.expectThrow((): void => { a.toFixed(negative_digits) }, errorcheck)
 }
