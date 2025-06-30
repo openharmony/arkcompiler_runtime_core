@@ -1880,7 +1880,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
             return ANI_INVALID_ARGS;
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        etsMethods.push_back(etsNs->GetFunction(functions[i].name, optSignature.value().c_str()));
+        etsMethods.push_back(etsNs->GetFunction(functions[i].name, optSignature.value().c_str(), true));
     }
     return DoBindNative(s, etsMethods, functions, nrFunctions);
 }
@@ -2078,7 +2078,7 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
             if (signature == nullptr) {
                 return klass->GetDirectMethod(name);
             }
-            return klass->GetDirectMethod(name, signature);
+            return klass->GetDirectMethod(name, signature, true);
         }();
         etsMethods.push_back(method);
     }

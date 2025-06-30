@@ -128,10 +128,10 @@ EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
+EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature, bool isANIFormat)
 {
     auto coreName = reinterpret_cast<const uint8_t *>(name);
-    return GetDirectMethod(coreName, signature);
+    return GetDirectMethod(coreName, signature, isANIFormat);
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name)
@@ -141,9 +141,9 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name)
     return EtsMethod::FromRuntimeMethod(rtMethod);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature)
+EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat)
 {
-    EtsMethodSignature methodSignature(signature);
+    EtsMethodSignature methodSignature(signature, isANIFormat);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, ETS_NAPI) << "Wrong method signature: " << signature;
         return nullptr;

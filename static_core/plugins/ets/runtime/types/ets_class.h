@@ -98,8 +98,8 @@ public:
     EtsField *GetStaticFieldIDByOffset(uint32_t fieldOffset);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
-    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat = false);
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature, bool isANIFormat = false);
 
     PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
     {
