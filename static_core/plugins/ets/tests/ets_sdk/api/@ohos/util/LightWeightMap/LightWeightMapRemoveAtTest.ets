@@ -15,9 +15,6 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap RemoveAt API tests")
 
@@ -74,11 +71,9 @@ function testRemoveAtRightExceededIndex() {
 
 function testRemoveAtIndexOfEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
-    try {
-        lightWeightMap.removeAt(5);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightMap.removeAt(5);
+    arktest.assertFalse(result, "The lightWeightMap should not remove the element with empty lightWeightMap");
+    arktest.assertEQ(lightWeightMap.length, 0);
 }
 
 function testRemoveAtLeftFloatIndex() {

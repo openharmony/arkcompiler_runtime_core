@@ -15,9 +15,6 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap ForEach Keys Values API tests")
 
@@ -99,15 +96,15 @@ function testKeysIterator() {
     arktest.assertEQ(iteratorSetValues.next().value, "gull", "The lightWeightMap keys iterator should return the correct key");
     arktest.assertEQ(iteratorSetValues.next().value, "sparrow",
         "The lightWeightMap keys iterator should return the correct key");
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap keys iterator should return undefined at the end");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap keys iterator.done should true at the end");
 }
 
 function testKeysIteratorWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.keys();
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap keys iterator should return undefined for an empty map");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap keys iterator.done should true for an empty map");
 }
 
 function testValuesIterator() {
@@ -117,13 +114,13 @@ function testValuesIterator() {
     let iteratorSetValues = lightWeightMap.values();
     arktest.assertEQ(iteratorSetValues.next().value, 357, "The lightWeightMap values iterator should return the correct value");
     arktest.assertEQ(iteratorSetValues.next().value, 123, "The lightWeightMap values iterator should return the correct value");
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap values iterator should return undefined at the end");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap values iterator.done should true at the end");
 }
 
 function testValuesIteratorWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.values();
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap values iterator should return undefined for an empty map");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap values iterator.done should true for an empty map");
 }

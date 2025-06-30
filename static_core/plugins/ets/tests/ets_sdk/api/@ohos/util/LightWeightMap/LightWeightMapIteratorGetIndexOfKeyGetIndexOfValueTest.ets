@@ -15,9 +15,6 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap Iterator GetIndexOfKey GetIndexOfValue API tests")
 
@@ -62,8 +59,8 @@ function testIteratorReturnsIterator() {
 function testIteratorWithEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let iteratorSetValues = lightWeightMap.$_iterator();
-    arktest.assertEQ(iteratorSetValues.next().value, undefined,
-        "The lightWeightMap $_iterator should return undefined for an empty map");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The lightWeightMap iterator.done should true for an empty map");
 }
 
 function testGetIndexOfKeyAndValue() {
