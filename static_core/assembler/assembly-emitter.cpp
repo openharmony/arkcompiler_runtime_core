@@ -254,7 +254,7 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItemFromMethod(const Value *va
 {
     auto name = value->GetAsScalar()->GetValue<std::string>();
     ASSERT(value->GetType() == Value::Type::METHOD);
-    auto *methodItem = FindAmongAllMethods(name, entities);
+    auto *methodItem = FindAmongAllMethods(name, entities, value);
     out->emplace_back(methodItem);
     return &out->back();
 }
@@ -507,7 +507,7 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(ItemContainer *containe
             methodItem = it->second;
         }
     } else {
-        methodItem = FindAmongAllMethods(name, entities);
+        methodItem = FindAmongAllMethods(name, entities, value);
     }
     if (methodItem == nullptr) {
         return nullptr;
@@ -1557,14 +1557,20 @@ ark::panda_file::MethodItem *AsmEmitter::FindMethod(const Function &func, const 
 
 /* static */
 ark::panda_file::MethodItem *AsmEmitter::FindAmongAllMethods(const std::string &name,
-                                                             const AsmEmitter::AsmEntityCollections &entities)
+                                                             const AsmEmitter::AsmEntityCollections &entities,
+                                                             const Value *value)
 {
-    auto res = entities.staticMethodItems.find(name);
-    if (res != entities.staticMethodItems.cend()) {
+    bool isStatic = value->GetAsScalar()->IsStatic();
+    auto &primaryMap = isStatic ? entities.staticMethodItems : entities.methodItems;
+    auto &secondaryMap = isStatic ? entities.methodItems : entities.staticMethodItems;
+
+    auto res = primaryMap.find(name);
+    if (res != primaryMap.cend()) {
         return static_cast<MethodItem *>(res->second);
     }
-    res = entities.methodItems.find(name);
-    return res == entities.methodItems.cend() ? nullptr : static_cast<MethodItem *>(res->second);
+
+    res = secondaryMap.find(name);
+    return res == secondaryMap.cend() ? nullptr : static_cast<MethodItem *>(res->second);
 }
 
 /* static */
