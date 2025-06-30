@@ -121,17 +121,17 @@ function taskpoolFuncTestSumAndMulti() {
 }
 
 function main(): int {
-    let funcTaskSuite = new arktest.ArkTestsuite("taskpool.FuncTask");
-    funcTaskSuite.addTest("TaskpoolFuncTestSumInt", taskpoolFuncTestSumInt);
-    funcTaskSuite.addTest("TaskpoolFuncTestAnd", taskpoolFuncTestAnd);
-    funcTaskSuite.addTest("TaskpoolFuncTestStrCat", taskpoolFuncTestStrCat);
-    funcTaskSuite.addTest("TaskpoolFuncTestStrCat2", taskpoolFuncTestStrCat2);
-    funcTaskSuite.addTest("TaskpoolFuncTestStrCat3", taskpoolFuncTestStrCat3);
-    funcTaskSuite.addTest("TaskpoolFuncTestArraySum", taskpoolFuncTestArraySum);
-    funcTaskSuite.addTest("TaskpoolFuncTestClassFieldsSum", taskpoolFuncTestClassFieldsSum);
-    funcTaskSuite.addTest("TaskpoolFuncTestSumInt2", taskpoolFuncTestSumInt2);
-    funcTaskSuite.addTest("TaskpoolFuncTestSumInt2SameArguments", taskpoolFuncTestSumInt2SameArguments);
-    funcTaskSuite.addTest("TaskpoolFuncTestSumAndMulti", taskpoolFuncTestSumAndMulti);
+    let funcTaskSuite = new arktest.ArkTestsuite('taskpool.FuncTask');
+    funcTaskSuite.addTest('TaskpoolFuncTestSumInt', taskpoolFuncTestSumInt);
+    funcTaskSuite.addTest('TaskpoolFuncTestAnd', taskpoolFuncTestAnd);
+    funcTaskSuite.addTest('TaskpoolFuncTestStrCat', taskpoolFuncTestStrCat);
+    funcTaskSuite.addTest('TaskpoolFuncTestStrCat2', taskpoolFuncTestStrCat2);
+    funcTaskSuite.addTest('TaskpoolFuncTestStrCat3', taskpoolFuncTestStrCat3);
+    funcTaskSuite.addTest('TaskpoolFuncTestArraySum', taskpoolFuncTestArraySum);
+    funcTaskSuite.addTest('TaskpoolFuncTestClassFieldsSum', taskpoolFuncTestClassFieldsSum);
+    funcTaskSuite.addTest('TaskpoolFuncTestSumInt2', taskpoolFuncTestSumInt2);
+    funcTaskSuite.addTest('TaskpoolFuncTestSumInt2SameArguments', taskpoolFuncTestSumInt2SameArguments);
+    funcTaskSuite.addTest('TaskpoolFuncTestSumAndMulti', taskpoolFuncTestSumAndMulti);
     let res = funcTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
