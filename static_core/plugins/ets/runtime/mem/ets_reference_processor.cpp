@@ -90,7 +90,7 @@ void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, const BaseC
     HandleOtherFields<true>(cls, object, processor);
 }
 
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_JS_ETS_HYBRID_MODE)
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
 bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls) const
 {
     ASSERT(baseCls != nullptr);

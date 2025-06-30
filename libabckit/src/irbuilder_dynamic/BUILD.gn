@@ -58,7 +58,7 @@ ohos_source_set("abckit_ir_builder_dynamic_source_set") {
     "$ark_root_static/../libabckit/include",
   ]
 
-  if (ark_use_cmc_gc) {
+  if (ark_hybrid) {
     include_dirs += [ "$ark_root_static/../common_interfaces" ]
   }
 

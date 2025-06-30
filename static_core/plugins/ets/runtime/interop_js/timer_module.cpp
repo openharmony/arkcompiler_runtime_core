@@ -33,25 +33,6 @@
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 extern "C" {
-#ifdef ARK_HYBRID
-__attribute__((weak)) int uv_async_send([[maybe_unused]] uv_async_t *async);
-__attribute__((weak)) int uv_async_init([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_async_t *async,
-                                        [[maybe_unused]] uv_async_cb async_cb);
-
-__attribute__((weak)) void uv_update_time([[maybe_unused]] uv_loop_t *loop);
-__attribute__((weak)) int uv_timer_init([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_timer_t *handle);
-__attribute__((weak)) int uv_timer_start([[maybe_unused]] uv_timer_t *handle, [[maybe_unused]] uv_timer_cb cb,
-                                         [[maybe_unused]] uint64_t timeout, [[maybe_unused]] uint64_t repeat);
-
-__attribute__((weak)) int uv_timer_stop([[maybe_unused]] uv_timer_t *handle);
-__attribute__((weak)) int uv_timer_again([[maybe_unused]] uv_timer_t *handle);
-__attribute__((weak)) void uv_close([[maybe_unused]] uv_handle_t *handle, [[maybe_unused]] uv_close_cb close_cb) {}
-
-__attribute__((weak)) uv_loop_t *uv_default_loop();
-__attribute__((weak)) int uv_run([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_run_mode mode);
-__attribute__((weak)) void uv_walk([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_walk_cb walk_cb,
-                                   [[maybe_unused]] void *arg);
-#else
 __attribute__((weak)) int uv_async_send([[maybe_unused]] uv_async_t *async)
 {
     return -1;
@@ -96,7 +77,6 @@ __attribute__((weak)) void uv_walk([[maybe_unused]] uv_loop_t *loop, [[maybe_unu
                                    [[maybe_unused]] void *arg)
 {
 }
-#endif  // ARK_HYBRID
 }
 // NOLINTEND(readability-identifier-naming)
 #endif /* !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE) */

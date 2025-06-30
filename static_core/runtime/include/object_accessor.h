@@ -167,7 +167,7 @@ public:
     }
 
 // NOTE(ipetrov): Hack for 128 bit ObjectHeader
-#if !defined(ARK_USE_CMC_GC)
+#if !defined(ARK_HYBRID)
     static bool IsHeapObject(coretypes::TaggedType v)
     {
         return coretypes::TaggedValue(v).IsHeapObject();

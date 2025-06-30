@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 #include "interfaces/inner_api/napi/native_node_api.h"
 #include "native_engine/native_reference.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -27,7 +27,7 @@ namespace ark::ets::interop::js {
 thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ =
     STSVMInterfaceImpl::XGCSyncState::NONE;
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 void STSVMInterfaceImpl::MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor)
 {
     if (obj != nullptr) {

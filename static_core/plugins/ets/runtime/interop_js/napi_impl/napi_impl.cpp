@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 #include "heap/heap_visitor.h"
 #endif
 #include "libpandabase/macros.h"
@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_HYBRID)
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTBEGIN(readability-identifier-naming)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_wrap_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
@@ -63,7 +63,7 @@ napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value valu
     return napi_ok;
 }
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref,
                       [[maybe_unused]] std::function<void(uintptr_t)> &visitor)
@@ -132,24 +132,21 @@ void NapiImpl::Init(NapiImpl impl)
 #include <node_api.h>
 #include <node_api_types.h>
 
-#ifdef ARK_HYBRID
-extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-napi_fatal_exception([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value err);
-
-extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (*fun)(void *arg),
-                          [[maybe_unused]] void *arg);
-
-extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value value,
-                            [[maybe_unused]] char16_t *buf, [[maybe_unused]] size_t bufsize,
-                            [[maybe_unused]] size_t *result);
-#else
 // NOTE: napi_fatal_exception() is not public in libace_napi.z.so.
 extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_fatal_exception([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value err)
 {
     INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__ << " will be implemented in OHOS 5.0" << std::endl;
+    return napi_ok;
+}
+
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (*fun)(void *arg),
+                          [[maybe_unused]] void *arg)
+{
+    // NOTE: Empty stub. In CI currently used OHOS 4.0.8, but `napi_add_env_cleanup_hook`
+    // is public since 4.1.0. Remove this method after CI upgrade.
+    INTEROP_LOG(ERROR) << "napi_add_env_cleanup_hook is implemented in OHOS since 4.1.0, please update" << std::endl;
     return napi_ok;
 }
 
@@ -162,7 +159,6 @@ napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
-#endif  // ARK_HYBRID
 
 #else
 
@@ -171,7 +167,6 @@ napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi
  * implementation for all used napi symbols.
  */
 
-#ifndef ARK_HYBRID
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define WEAK_SYMBOL(name, ...)                              \
     extern "C" napi_status name(PARAMS_PAIR(__VA_ARGS__))   \
@@ -182,22 +177,6 @@ napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi
 
 ENUMERATE_NAPI(WEAK_SYMBOL)
 // NOLINTEND(cppcoreguidelines-macro-usage)
-#endif
 
 #endif
-
-#if defined(PANDA_TARGET_OHOS) || defined(ARK_HYBRID)
-
-extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (*fun)(void *arg),
-                          [[maybe_unused]] void *arg)
-{
-    // NOTE: Empty stub. In CI currently used OHOS 4.0.8, but `napi_add_env_cleanup_hook`
-    // is public since 4.1.0. Remove this method after CI upgrade.
-    INTEROP_LOG(ERROR) << "napi_add_env_cleanup_hook is implemented in OHOS since 4.1.0, please update" << std::endl;
-    return napi_ok;
-}
-
-#endif
-
 }  // namespace ark::ets::interop::js

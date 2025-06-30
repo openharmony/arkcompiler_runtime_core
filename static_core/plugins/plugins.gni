@@ -60,7 +60,6 @@ plugin_clear_profile_paths = []
 plugin_profiling_includes_paths = []
 plugin_profiling_includes_disasm_paths = []
 plugin_get_profiling_any_type_paths = []
-plugin_external_deps = []
 
 plugin_enable_bytecode_optimizer = false
 
@@ -68,15 +67,7 @@ plugin_enable_bytecode_optimizer = false
 
 foreach(plugin, ark_enabled_plugins) {
   print("Reading plugin sources: $plugin ($current_toolchain)")
-
-  _plugin_dir = ""
-  if (plugin == "ets_runtime") {
-    # workaround while ets_runtime is not in plugins folder
-    _plugin_dir = "$js_root"
-  } else {
-    _plugin_dir = "$ark_root/plugins/$plugin"
-  }
-
+  _plugin_dir = "$ark_root/plugins/$plugin"
   _plugin_vars = {
   }
 
@@ -89,70 +80,26 @@ foreach(plugin, ark_enabled_plugins) {
   _plugin_vars = read_file("$_plugin_dir/plugin.gn", "scope")
 
   if (defined(_plugin_vars.enable_bytecode_optimizer)) {
-    if (defined(_plugin_vars.bytecodeopt_config)) {
-      foreach(sub_dep, _plugin_vars.bytecodeopt_config) {
-        plugin_bytecodeopt_configs += [ sub_dep ]
-      }
-    }
-
+    plugin_bytecodeopt_configs += [ "$_plugin_dir:bytecodeopt" ]
     plugin_enable_bytecode_optimizer = plugin_enable_bytecode_optimizer ||
                                        _plugin_vars.enable_bytecode_optimizer
   }
 
-  if (defined(_plugin_vars.ark_host_linux_tools_packages)) {
-    foreach(sub_dep, _plugin_vars.ark_host_linux_tools_packages) {
-      plugin_ark_host_linux_tools_packages += [ sub_dep ]
-    }
-  }
+  plugin_ark_host_linux_tools_packages +=
+      [ "$_plugin_dir:ark_host_linux_tools_packages" ]
+  plugin_ark_host_windows_tools_packages +=
+      [ "$_plugin_dir:ark_host_windows_tools_packages" ]
+  plugin_ark_host_mac_tools_packages +=
+      [ "$_plugin_dir:ark_host_mac_tools_packages" ]
+  plugin_ark_packages += [ "$_plugin_dir:ark_packages" ]
 
-  if (defined(_plugin_vars.ark_host_windows_tools_packages)) {
-    foreach(sub_dep, _plugin_vars.ark_host_windows_tools_packages) {
-      plugin_ark_host_windows_tools_packages += [ sub_dep ]
-    }
-  }
+  plugin_ark_configs += [ "$_plugin_dir:ark_config" ]
+  plugin_libarkassembler_configs += [ "$_plugin_dir:assembler" ]
+  plugin_runtime_configs += [ "$_plugin_dir:runtime" ]
+  plugin_runtime_interpreter_impl_configs +=
+      [ "$_plugin_dir:runtime_interpreter_impl" ]
 
-  if (defined(_plugin_vars.ark_host_mac_tools_packages)) {
-    foreach(sub_dep, _plugin_vars.ark_host_mac_tools_packages) {
-      plugin_ark_host_mac_tools_packages += [ sub_dep ]
-    }
-  }
-
-  if (defined(_plugin_vars.ark_packages)) {
-    foreach(sub_dep, _plugin_vars.ark_packages) {
-      plugin_ark_packages += [ sub_dep ]
-    }
-  }
-
-  if (defined(_plugin_vars.ark_config)) {
-    foreach(sub_dep, _plugin_vars.ark_config) {
-      plugin_ark_configs += [ sub_dep ]
-    }
-  }
-
-  print(plugin_libarkassembler_configs)
-  if (defined(_plugin_vars.assembler_config)) {
-    foreach(sub_dep, _plugin_vars.assembler_config) {
-      plugin_libarkassembler_configs += [ sub_dep ]
-    }
-  }
-
-  if (defined(_plugin_vars.runtime_config)) {
-    foreach(sub_dep, _plugin_vars.runtime_config) {
-      plugin_runtime_configs += [ sub_dep ]
-    }
-  }
-
-  if (defined(_plugin_vars.runtime_interpreter_impl)) {
-    foreach(sub_dep, _plugin_vars.runtime_interpreter_impl) {
-      plugin_runtime_interpreter_impl_configs += [ sub_dep ]
-    }
-  }
-
-  if (defined(_plugin_vars.assembler_deps)) {
-    foreach(sub_dep, _plugin_vars.assembler_deps) {
-      plugin_assembler_deps += [ sub_dep ]
-    }
-  }
+  plugin_assembler_deps += [ "$_plugin_dir:assembler_deps" ]
 
   if (defined(_plugin_vars.arkruntime_header_sub_deps)) {
     foreach(sub_dep, _plugin_vars.arkruntime_header_sub_deps) {
@@ -177,11 +124,6 @@ foreach(plugin, ark_enabled_plugins) {
   if (defined(_plugin_vars.arkruntime_deps)) {
     foreach(sub_dep, _plugin_vars.arkruntime_deps) {
       plugin_runtime_deps += [ sub_dep ]
-    }
-  }
-  if (defined(_plugin_vars.arkruntime_external_deps)) {
-    foreach(sub_dep, _plugin_vars.arkruntime_external_deps) {
-      plugin_external_deps += [ sub_dep ]
     }
   }
 

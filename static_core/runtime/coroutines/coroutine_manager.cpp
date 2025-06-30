@@ -32,7 +32,7 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 
     Coroutine::SetCurrent(main);
     main->InitBuffers();
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     auto hasJsRuntime = panda::ThreadHolder::GetCurrent() != nullptr;
     main->LinkToExternalHolder(true);
     // We need to unbind mutator before binding in the RequestResume,

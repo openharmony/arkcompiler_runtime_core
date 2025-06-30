@@ -42,7 +42,7 @@ ohos_executable("arkts_bin") {
 
   external_deps = [ sdk_libc_secshared_dep ]
 
-  if (defined(ark_use_cmc_gc) && ark_use_cmc_gc) {
+  if (defined(ark_hybrid) && ark_hybrid) {
     external_deps += [ "napi:ace_napi" ]
   }
 

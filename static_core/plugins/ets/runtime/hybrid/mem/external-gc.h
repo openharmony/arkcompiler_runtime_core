@@ -16,12 +16,12 @@
 #ifndef PLUGINS_ETS_RUNTIME_HYBRID_MEM_EXTERNAL_GC_H
 #define PLUGINS_ETS_RUNTIME_HYBRID_MEM_EXTERNAL_GC_H
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 namespace panda {
 
 void RegisterStaticRootsProcessFunc();
 
 }  // namespace panda
 
-#endif  // ARK_USE_CMC_GC
+#endif  // ARK_HYBRID
 #endif  // PLUGINS_ETS_RUNTIME_HYBRID_MEM_EXTERNAL_GC_H

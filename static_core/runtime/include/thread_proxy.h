@@ -22,7 +22,7 @@ namespace ark {
 
 class MutatorLock;
 
-#ifndef ARK_USE_CMC_GC
+#ifndef ARK_HYBRID
 class ThreadProxy : public ThreadProxyStatic {
 public:
     explicit ThreadProxy(MutatorLock *mutatorLock) : ThreadProxyStatic(mutatorLock) {}
