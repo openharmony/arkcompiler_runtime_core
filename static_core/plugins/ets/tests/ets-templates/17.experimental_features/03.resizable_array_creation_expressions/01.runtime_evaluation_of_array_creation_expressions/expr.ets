@@ -19,8 +19,6 @@ desc: >-
     The dimension expressions are evaluated. The evaluation is performed left-to-right;
     if any expression evaluation completes abruptly, then the expressions to the right
     of it are not evaluated.
-ark_options: ['--heap-size-limit=33554432', '--init-heap-size-limit=33554432']
-timeout: 60
 ---*/
 
 {{c.defs}}

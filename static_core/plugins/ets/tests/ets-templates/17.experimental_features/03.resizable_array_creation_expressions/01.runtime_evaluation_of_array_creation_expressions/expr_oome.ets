@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,20 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: OutOfMemoryError is thrown by string allocation
+desc: >-
+    The dimension expressions are evaluated. The evaluation is performed left-to-right;
+    if any expression evaluation completes abruptly, then the expressions to the right
+    of it are not evaluated.
 ark_options: ['--heap-size-limit=8388608', '--init-heap-size-limit=8388608', '--gc-type=stw']
-timeout: 60
 tags: [no-warmup]
+timeout: 60
 ---*/
 
-const STR_ARRAY_SIZE = 250
+{{c.defs}}
 
 function main() {
-    let s: string = "lolo"
-    try {
-        for (let i = 1; i < STR_ARRAY_SIZE; i++) {
-            s = s + s
-        }
-    } catch (e) {
-        arktest.assertTrue(e instanceof OutOfMemoryError, 'OutOfMemoryError was expected');
-        return
-    }
-    arktest.assertTrue(false, 'OutOfMemoryError was expected');
+    {{c.use|indent}}
 }
+{%- endfor %}
