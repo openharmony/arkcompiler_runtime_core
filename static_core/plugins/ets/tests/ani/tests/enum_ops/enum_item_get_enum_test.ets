@@ -20,10 +20,10 @@ enum Color {
 }
 
 enum ColorString {
-    REDSTR = "str_red",
-    GREENSTR = "str_green",
-    BLUESTR = "str_blue",
-    ONEMORERED = "str_red"
+    REDSTR = 'str_red',
+    GREENSTR = 'str_green',
+    BLUESTR = 'str_blue',
+    ONEMORERED = 'str_red'
 }
 
 enum OneItem {
