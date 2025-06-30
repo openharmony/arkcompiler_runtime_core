@@ -391,6 +391,7 @@ template <bool SUSPEND_AS_BLOCKED>
 void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
 {
     auto *currentCoro = Coroutine::GetCurrent();
+    ASSERT(currentCoro != nullptr);
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
         os::memory::LockHolder lock(runnablesLock_);
@@ -442,12 +443,14 @@ void StackfulCoroutineWorker::ScheduleNextCoroUnlockNone()
 StackfulCoroutineContext *StackfulCoroutineWorker::GetCurrentContext() const
 {
     auto *co = Coroutine::GetCurrent();
+    ASSERT(co != nullptr);
     return co->GetContext<StackfulCoroutineContext>();
 }
 
 StackfulCoroutineContext *StackfulCoroutineWorker::PrepareNextRunnableContextForSwitch()
 {
     // precondition: runnable coros are present
+    ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *il = Coroutine::GetCurrent()->ReleaseImmediateLauncher();
     auto *nextCtx = il != nullptr ? il->GetContext<StackfulCoroutineContext>()
                                   : PopFromRunnableQueue()->GetContext<StackfulCoroutineContext>();
