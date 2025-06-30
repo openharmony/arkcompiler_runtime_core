@@ -29,7 +29,7 @@ import {
   getObjectId,
   getId,
   getObjectName
-  } from "js_import"
+  } from 'js_import'
 
 //Test 1 Get public property
  function getPublicProperty():string{
@@ -92,7 +92,7 @@ import {
  // Test 8 Update object value
 
  function updateObjectValue():number{
-  updateObjectId(testObject,333)
+  updateObjectId(testObject, 333)
   return testObject.id
  }
 
