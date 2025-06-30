@@ -458,6 +458,7 @@ template <bool IS_CALL, class AccVRegisterPtrT>
 inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcOffset,
                                             [[maybe_unused]] AccVRegisterPtrT acc, bool osr, TaggedValue func)
 {
+    ASSERT(thread != nullptr);
     // The compilation process will start performing
     // once the counter value decreases to a value that is or less than 0
 

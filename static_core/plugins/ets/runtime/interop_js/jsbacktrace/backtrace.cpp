@@ -70,6 +70,7 @@ int Backtrace::EtsSymbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, 
     }
     uintptr_t realOffset = pc - mapBase;
     std::unique_ptr<const panda_file::File> file = panda_file::OpenPandaFileFromMemory(abcData, abcSize);
+    ASSERT(file != nullptr);
     uintptr_t realPc = realOffset + reinterpret_cast<uintptr_t>(file->GetBase());
 
     auto methodInfos = ReadAllMethodInfos(file.get());

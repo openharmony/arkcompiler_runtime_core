@@ -45,6 +45,7 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
 
 static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
 {
+    ASSERT(coro != nullptr);
     if (obj == nullptr) {
         return "undefined";
     }
@@ -58,11 +59,21 @@ static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)
 ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString *target)
 {
     auto coro = EtsCoroutine::GetCurrent();
+
     ASSERT(coro != nullptr);
+
     auto message = PandaString(ReferenceTypeString(coro, source)) + " cannot be cast to " + target->GetMutf8();
-    auto *e =
+
+    auto *exc =
         ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data());
-    return e->GetCoreType();
+
+    if (LIKELY(exc != nullptr)) {
+        return exc->GetCoreType();
+    }
+
+    ASSERT(coro->HasPendingException());
+
+    return nullptr;
 }
 
 EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)

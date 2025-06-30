@@ -290,6 +290,7 @@ public:
             vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
         }
 #endif
+        ASSERT(thread != nullptr);
         ASSERT(thread->IsRuntimeCallEnabled());
         if (UNLIKELY(thread->IsRuntimeTerminated())) {
             ThreadRuntimeTermination(thread);
