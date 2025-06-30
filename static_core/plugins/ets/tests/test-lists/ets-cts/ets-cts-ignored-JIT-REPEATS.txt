@@ -53,5 +53,5 @@
 #25054
 16.concurrency/03.asynchronous_api/03.async_methods/ameth_29.ets
 
-#26913
+#27290 RUNTIME_TIMEOUT
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oom-string.ets
