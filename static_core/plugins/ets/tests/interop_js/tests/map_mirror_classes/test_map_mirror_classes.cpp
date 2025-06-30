@@ -36,12 +36,12 @@ static void CheckOffsetOfFields(const char *className, const std::vector<MemberI
     EtsClass *klass = etsClassLinker->GetClass(className);
     ASSERT_NE(klass, nullptr);
 
-    auto fields = klass->GetFields();
+    auto fields = klass->GetRuntimeClass()->GetInstanceFields();
     ASSERT_EQ(fields.size(), membersList.size());
 
     for (size_t i = 0; i < fields.size(); i++) {
-        ASSERT_NE(fields[i], nullptr);
-        EXPECT_STREQ(fields[i]->GetNameString()->GetMutf8().data(), membersList[i].name);
+        ASSERT_NE(fields[i].GetName().data, nullptr);
+        EXPECT_STREQ(utf::Mutf8AsCString(fields[i].GetName().data), membersList[i].name);
     }
 }
 
