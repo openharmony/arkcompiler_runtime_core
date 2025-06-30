@@ -265,8 +265,8 @@ function testSubarrayTwoParams(): int {
     return fail;
   }
 
-  let subarrayStart: int = 2;
-  let subarrayEnd: int = 4;
+  let subarrayStart: int | undefined = 2;
+  let subarrayEnd: int | undefined = 4;
 
   let target: {{.item.objectType}};
 
@@ -423,8 +423,8 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
     return fail;
   }
 
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -494,8 +494,8 @@ function testSubarrayOneLengthTwoParams(): int {
     return fail;
   }
 
-  let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayStart: int | undefined = 4;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -1244,7 +1244,7 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     failures += check(boolToResult(isPosInfThrows == expected[3]), `didn't throw: array[+Infinity]`)
     failures += check(boolToResult(isNanZero == expected[4]), `failed: array[NaN] == array[0]`)
     failures += check(boolToResult(isCorrectValues == expected[5]), `failed: array[i] == (i + 1) * 10`)
-    
+
     return failures == 0 ? success: fail
   }
 )
@@ -1310,7 +1310,7 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
     {%- endif %}
     failures += check(boolToResult(isNumberIntCorrect == expected[7]), `failed: array[0.toDouble()] = value as int`)
     failures += check(boolToResult(isIntIntCorrect == expected[8]), `failed: array[0 as int] = value as int`)
-    
+
     return failures == 0 ? success: fail
   }
 )
