@@ -6191,8 +6191,7 @@ fixed implementation.
 
 .. _R237:
 
-|CB_R| Form of implementation signature must be predefiend
-----------------------------------------------------------
+|CB_R| Implementation signature must have a predefiend form
 
 |CB_RULE| ``arkts-no-arbitrary-implementation-signature``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

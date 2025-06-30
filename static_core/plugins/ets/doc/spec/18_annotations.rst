@@ -176,7 +176,7 @@ Types of Annotation Fields
 The choice of *types for annotation fields* is limited to the following:
 
 - :ref:`Numeric Types`;
-- Type ``boolean`` (see :ref:`Boolean Types and Operations`);
+- Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
 - Array of the above types (e.g., ``string[]``), including multidimensional

@@ -113,6 +113,9 @@ The |LANG| language as a whole is characterized by the following:
    on). A module can communicate with other modules by exporting all or some
    of its resources to, or importing from other modules.
 
+   A *package* in |LANG| is a set of (usually related) modules that are stored
+   in a file system or a database, and have the same *packageHeader*.
+
    This feature provides a high level of software development process and
    software maintainability, supports flexible module reuse and efficient
    version control.
@@ -535,12 +538,14 @@ as used in other languages, application areas, or industries.
 
 
    package level scope
-      -- a name that is declared on the package level, and is accessible
-      throughout the entire package and in other packages if exported.
+      -- a name in the package level scope that is declared on the package
+      level, and is accessible throughout the entire package and in other
+      packages if exported.
 
    module level scope
-     -- a name that is applicable to separate modules only, and is accessible
-     throughout the entire module and in other packages if exported.
+     -- a name in the module level scope that is applicable to separate modules
+     only, and is accessible throughout the entire module and in other packages
+     if exported.
 
    class level scope
      -- a name that is declared inside a class, and is accessible inside the
@@ -548,8 +553,8 @@ as used in other languages, application areas, or industries.
      via a derived class).
 
    interface level scope
-     -- a name that is declared inside an interface, and is accessible inside
-     and outside the interface.
+     -- a name declared inside an interface is considered to have interface
+     level scope, and is accessible inside and outside the interface.
 
    function type parameter scope
      -- a scope of a type parameter name in a function declaration.
@@ -565,9 +570,9 @@ as used in other languages, application areas, or industries.
      -- same as *method scope*.
 
    type parameter scope
-     -- a name of a type parameter declared in a class or an interface. Type
-     parameter scope is identical to the entire declaration (except static
-     member declarations).
+     -- the scope of a name of a type parameter that is declared in a class or
+     an interface. Type parameter scope is identical to the entire declaration
+     (except static member declarations).
 
    static member
      -- a class member that is not related to a particular class instance.
@@ -596,6 +601,20 @@ as used in other languages, application areas, or industries.
    subcomponent (derived component, child component)
      -- a component produced by, inherited from, and dependent from another
      component.
+
+   array length
+     -- the number of elements in a resizable array.
+
+   resizable array type
+     -- a built-in type that consists of more than one element, and can have
+     the number of constituent elements changed at runtime.
+
+   fixed-size array type
+     -- a built-in type that consists of more than one element, and has its
+     length set only once to achieve a better performance.
+
+   array type
+     -- a type that consists of more than one element.
 
 .. raw:: pdf
 

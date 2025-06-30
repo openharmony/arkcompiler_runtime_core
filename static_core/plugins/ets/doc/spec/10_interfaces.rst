@@ -163,8 +163,8 @@ the declared interface also implements all interfaces that the interface
 
 A :index:`compile-time error` occurs if:
 
--  `typeReference`` in the ``extends`` clause refers directly to,
-   or is an alias of non-interface type.
+-  `typeReference`` in the ``extends`` clause refers directly to, or is an
+   alias of non-interface type.
 -  Interface type named by ``typeReference`` is not :ref:`Accessible`.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
@@ -243,10 +243,12 @@ If superinterfaces have default implementations (see
 the following occurs:
 
 - Method ``m`` with an override-compatible signature (see
-  :ref:`Override-Compatible Signatures`) must be declared within the current
-  interface that extends these interfaces; or
-- All these methods refer to the same implementation, and this default
-  implementation is the current class method.
+  :ref:`Override-Compatible Signatures`) declared within the current interface
+  overrides all other ``m`` methods inherited from superinterfaces; or
+- All methods from superinterfaces refer to the same implementation, and this default
+  implementation is the current interface method; or
+- There is one method ``m`` in some superinterface which overrides all other
+  methods from other superinterfaces.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -266,6 +268,18 @@ Otherwise, a :index:`compile-time error` occurs.
     interface II3 extends I3, I4 {
        // OK, as foo() from I3 and foo() from I4 refer to the same implementation
     }
+
+    class Base {}
+    class Derived extends Base {}
+
+    interface II1 {
+        foo (p: Base) {}
+    }
+    interface II2 {
+        foo (p: Derived) {}
+    }
+    interface II3 extends II1, II2 {}
+        // foo() from II1 overrides foo() from II2
 
 .. index::
    interface

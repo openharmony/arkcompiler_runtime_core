@@ -334,8 +334,6 @@ The target type in this context is always ``string``:
     console.log(15 + " steps") // prints "15 steps"
     let x: string | null = null
     console.log("string is " + x) // prints "string is null"
-    let c = c'X'
-    console.log("char is " + c) // prints "char is X"
 
 |
 

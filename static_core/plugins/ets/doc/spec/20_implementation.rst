@@ -235,6 +235,47 @@ sufficient to perform it.
    object
    available memory
 
+|
+
+.. _Make a Bridge Method for Overriding Method:
+
+Make a Bridge Method for Overriding Method
+******************************************
+
+.. meta:
+    frontend_status: None
+
+There are cases where the compiler makes an additional
+*bridge* method for overriding method in a subclass of a generic class.
+As the overriding is based on *erased types* (see :ref:`Type Erasure`)
+a *bridge* method is required to provide type safe method call.
+
+The following example illustrates such case:
+
+.. code-block:: typescript
+   :linenos:
+   
+    class B<T extends Object> {
+        foo(p: T) {}
+    }
+    class D extends B<string> {
+        foo(p: string> {} // original overriding method
+    }
+
+For this example, the compiler generates a *bridge* method with 
+the name ``foo`` and signature ``(p: Object)``.
+
+A *bridge* method:
+
+-  Behaves, in most cases, as ordinary method, but is not accessible from 
+   the source code and does not participate in overloading;
+   
+-  In its body, it applies narrowing to argument types to match parameter types in the
+   original method and invokes the original method.
+
+
+**TBD** Provide more formal description.
+
 .. raw:: pdf
 
    PageBreak
