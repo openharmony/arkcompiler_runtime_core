@@ -467,7 +467,7 @@ function testF64ArrayFromIndex() {
 
 function testF32Array() {
     let data = Float32Array.of(Infinity, -3.4e+38, -3.4e+38, -2.02e+16, 1, 1, 1, 1.5, -1, -3, -3.4e+38, -1.0031,
-        -.1031, -1.061e+09, 1.0601e+09, 1.060001e+09, Infinity, 2.8e+24, Infinity, 2.8e+24, 3.4e+38, Infinity);
+        -0.1031, -1.061e+09, 1.0601e+09, 1.060001e+09, Infinity, 2.8e+24, Infinity, 2.8e+24, 3.4e+38, Infinity);
     checkArray(data, Infinity, 0);
     checkArrayExactlyNumber(data, Infinity, 0);
     checkArray(data, -3.4e+38, 1);
@@ -504,7 +504,7 @@ function testF32Array() {
 
 function testF32ArrayFromIndex() {
     let data = Float32Array.of(Infinity, -3.4e+38, -3.4e+38, -2.02e+16, 1, 1, 1, 1.5, -1, -3, -3.4e+38, -1.0031,
-        -.1031, -1.061e+09, 1.0601e+09, 1.060001e+09, Infinity, 2.8e+24, Infinity, 2.8e+24, 3.4e+38, Infinity);
+        -0.1031, -1.061e+09, 1.0601e+09, 1.060001e+09, Infinity, 2.8e+24, Infinity, 2.8e+24, 3.4e+38, Infinity);
     checkArray(data, Infinity, 0, 0);
     checkArray(data, Infinity, 16, 1);
     checkArray(data, Infinity, 21, -1);
