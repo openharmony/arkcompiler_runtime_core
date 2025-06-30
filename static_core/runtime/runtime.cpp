@@ -880,6 +880,7 @@ void Runtime::SetPandaPath()
 void Runtime::SetThreadClassPointers()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     classLinker_->InitializeRoots(thread);
     auto ext = GetClassLinker()->GetExtension(GetLanguageContext(GetRuntimeType()));
     if (ext != nullptr) {

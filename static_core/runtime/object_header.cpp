@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ std::atomic<uint32_t> g_hashSeed = std::atomic<uint32_t>(LINEAR_SEED + std::time
 /* static */
 ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, ark::BaseClass *klass, bool nonMovable)
 {
+    ASSERT(thread != nullptr);
     ASSERT(klass != nullptr);
 #ifndef NDEBUG
     if (!klass->IsDynamicClass()) {
@@ -140,7 +141,7 @@ uint32_t ObjectHeader::GetHashCodeMTMulti()
             }
             case MarkWord::STATE_HEAVY_LOCKED: {
                 auto monitorId = mark.GetMonitorId();
-                auto monitorP = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(monitorId);
+                auto monitorP = thread->GetMonitorPool()->LookupMonitor(monitorId);
                 if (monitorP != nullptr) {
                     return GetHashCodeFromMonitor(monitorP);
                 }

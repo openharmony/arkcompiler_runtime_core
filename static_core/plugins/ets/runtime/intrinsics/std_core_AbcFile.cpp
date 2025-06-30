@@ -78,6 +78,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
             return nullptr;
         }
         auto safeData = extractor->GetSafeData(pathStr);
+        ASSERT(safeData != nullptr);
         pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
     }
 

@@ -663,6 +663,7 @@ void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 bool MTManagedThread::Sleep(uint64_t ms)
 {
     auto thread = MTManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     bool isInterrupted = thread->IsInterrupted();
     if (!isInterrupted) {
         thread->TimedWait(ThreadStatus::IS_SLEEPING, ms, 0);
