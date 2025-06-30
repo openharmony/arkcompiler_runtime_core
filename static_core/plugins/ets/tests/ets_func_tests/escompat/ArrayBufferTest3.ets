@@ -23,12 +23,12 @@ function createResizableArrayBuffer(): void {
     arktest.assertEQ(a.byteLength, 10)
     arktest.assertFalse(a.detached)
 
-    a = new ArrayBuffer(10, 10)
+    a = new ArrayBuffer(10, 10.0)
     arktest.assertTrue(a.resizable)
     arktest.assertEQ(a.byteLength, 10)
     arktest.assertFalse(a.detached)
 
-    a = new ArrayBuffer(0, 10)
+    a = new ArrayBuffer(0, 10.0)
     arktest.assertTrue(a.resizable)
     arktest.assertEQ(a.byteLength, 0)
     arktest.assertFalse(a.detached)
@@ -79,7 +79,7 @@ function resizeArrayBuffer(): void {
     let errorCheck = (e: Error | Exception) => { return (e instanceof TypeError) }
     arktest.expectThrow((): void => { a.resize(5) }, errorCheck)
 
-    a = new ArrayBuffer(10, 10);
+    a = new ArrayBuffer(10, 10.0);
 
     // Shrink length
     a.resize(5);
@@ -100,7 +100,7 @@ function resizeArrayBuffer(): void {
     arktest.expectThrow((): void => { a.resize(11) }, errorCheck)
     arktest.expectThrow((): void => { a.resize(-11) }, errorCheck)
 
-    a = new ArrayBuffer(10, 12)
+    a = new ArrayBuffer(10, 12.0)
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
     arktest.expectThrow((): void => { a.set(10, 0 .toByte()) }, errorCheck)
     arktest.expectThrow((): void => { a.at(10) }, errorCheck)

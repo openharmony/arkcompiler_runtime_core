@@ -255,6 +255,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/js_refconvert.cpp",
     "runtime/interop_js/js_refconvert_builtin.cpp",
     "runtime/interop_js/js_refconvert_function.cpp",
+    "runtime/interop_js/js_refconvert_union.cpp",
     "runtime/interop_js/js_refconvert_record.cpp",
     "runtime/interop_js/js_refconvert_tuple.cpp",
     "runtime/interop_js/js_value.cpp",

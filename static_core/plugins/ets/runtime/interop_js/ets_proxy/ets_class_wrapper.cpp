@@ -167,13 +167,6 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
     return nullptr;
 }
 
-void EtsClassWrapper::ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlass, EtsClass *toKlass)
-{
-    const char *from = fromKlass->GetDescriptor();
-    const char *to = toKlass->GetDescriptor();
-    InteropCtx::ThrowJSTypeError(env, std::string(from) + " is not assignable to " + to);
-}
-
 EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue)
 {
     ASSERT(jsproxyWrapper_ != nullptr);

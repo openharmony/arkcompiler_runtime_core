@@ -253,14 +253,16 @@ private:
     void RegisterMap()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             std::make_pair("{ULescompat/Array;Lescompat/Iterable;Lstd/core/Null;}:V", 2)}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
     void RegisterSet()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+            {utf::CStringAsMutf8("<ctor>"),
+             std::make_pair("{ULescompat/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2)}};
         wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
     }
 

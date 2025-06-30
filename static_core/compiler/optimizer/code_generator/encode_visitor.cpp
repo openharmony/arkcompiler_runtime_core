@@ -1678,6 +1678,19 @@ void EncodeVisitor::FillInterfaceClass(GraphVisitor *visitor, Inst *inst)
     }
 }
 
+// Note(#27132): implement FastPath
+void EncodeVisitor::FillUnionClass(GraphVisitor *visitor, Inst *inst)
+{
+    auto enc = static_cast<EncodeVisitor *>(visitor);
+    auto encoder = enc->GetEncoder();
+    auto eid = inst->CanDeoptimize() ? RuntimeInterface::EntrypointId::CHECK_CAST_DEOPTIMIZE
+                                     : RuntimeInterface::EntrypointId::CHECK_CAST;
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, eid);
+    encoder->EncodeJump(slowPath->GetLabel());
+    slowPath->BindBackLabel(encoder);
+}
+
+// CC-OFFNXT(huge_method) solid logic
 void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, LabelHolder::LabelId endLabel,
                                   compiler::ClassType klassType)
 {
@@ -1688,6 +1701,12 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
+
+    if (klassType == ClassType::UNION_CLASS) {
+        FillUnionClass(visitor, inst);
+        return;
+    }
+
     // class_reg - CheckCast class
     // tmp_reg - input class
     auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
@@ -1945,7 +1964,7 @@ void EncodeVisitor::VisitIsInstance(GraphVisitor *visitor, Inst *inst)
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
     auto klassType = inst->CastToIsInstance()->GetClassType();
-    if (klassType == ClassType::UNRESOLVED_CLASS) {
+    if (klassType == ClassType::UNRESOLVED_CLASS || klassType == ClassType::UNION_CLASS) {
         FillIsInstanceUnresolved(visitor, inst);
         return;
     }

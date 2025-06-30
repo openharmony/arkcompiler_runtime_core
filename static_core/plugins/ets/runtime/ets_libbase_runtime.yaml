@@ -4506,6 +4506,9 @@ intrinsics:
       ret: std.core.Object[]
       args:
         - i32
+        - U{std.core.Null,std.core.Object}
+      impl_args:
+        - i32
         - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
 
@@ -6048,7 +6051,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.ClassCastError
-      args: [ std.core.Object, std.core.String ]
+      args: [ std.core.Object, std.core.String, u1 ]
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 

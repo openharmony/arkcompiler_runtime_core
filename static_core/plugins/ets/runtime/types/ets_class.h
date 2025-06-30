@@ -271,6 +271,11 @@ public:
         return GetRuntimeClass()->IsArrayClass();
     }
 
+    bool IsUnionClass() const
+    {
+        return GetRuntimeClass()->IsUnionClass();
+    }
+
     bool IsInterface() const
     {
         return GetRuntimeClass()->IsInterface();
@@ -349,6 +354,18 @@ public:
         GetInterfaces(ifaces, this);
         for (auto iface : ifaces) {
             bool finished = callback(iface);
+            if (finished) {
+                break;
+            }
+        }
+    }
+
+    template <class Callback>
+    void EnumerateConstituentClasses(const Callback &callback)
+    {
+        for (Class *runtimeClasses : GetRuntimeClass()->GetConstituentTypes()) {
+            EtsClass *klass = EtsClass::FromRuntimeClass(runtimeClasses);
+            bool finished = callback(klass);
             if (finished) {
                 break;
             }

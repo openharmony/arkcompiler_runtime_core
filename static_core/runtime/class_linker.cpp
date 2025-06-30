@@ -132,6 +132,11 @@ void ClassLinker::FreeClassData(Class *classPtr)
         allocator_->Free(interfaces.begin());
         classPtr->SetInterfaces(Span<Class *>());
     }
+    Span<Class *> consTypes = classPtr->GetConstituentTypes();
+    if (!consTypes.Empty()) {
+        allocator_->Free(consTypes.begin());
+        classPtr->SetConstituentTypes(Span<Class *>());
+    }
 }
 
 void ClassLinker::FreeClass(Class *classPtr)
@@ -1183,6 +1188,118 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
     return klass;
 }
 
+Class *ClassLinker::CreateUnionClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
+                                     Span<Class *> constituentClasses, ClassLinkerContext *commonContext)
+{
+    if (needCopyDescriptor) {
+        descriptor = CopyMutf8String(allocator_, descriptor);
+        os::memory::LockHolder lock(copiedNamesLock_);
+        copiedNames_.push_front(descriptor);
+    }
+
+    auto *unionClass = ext->CreateClass(descriptor, ext->GetArrayClassVTableSize(), ext->GetArrayClassIMTSize(),
+                                        ext->GetArrayClassSize());
+
+    if (UNLIKELY(unionClass == nullptr)) {
+        return nullptr;
+    }
+
+    unionClass->SetLoadContext(commonContext);
+
+    if (UNLIKELY(!ext->InitializeUnionClass(unionClass, constituentClasses))) {
+        return nullptr;
+    }
+
+    return unionClass;
+}
+
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+std::optional<Span<Class *>> ClassLinker::LoadConstituentClasses(const uint8_t *descriptor, bool needCopyDescriptor,
+                                                                 ClassLinkerContext *context,
+                                                                 ClassLinkerErrorHandler *errorHandler)
+{
+    static constexpr size_t UNION_COMPONENT_IDX = 2;
+    size_t idx = UNION_COMPONENT_IDX;
+    size_t elementsSize = 0;
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        elementsSize += 1;
+        idx += typeSp.Size();
+    }
+
+    Span<Class *> klasses {allocator_->AllocArray<Class *>(elementsSize), elementsSize};
+    size_t i = 0;
+    idx = UNION_COMPONENT_IDX;
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
+        idx += typeSp.Size();
+        const uint8_t *separateDesc = utf::CStringAsMutf8(typeDescCopy.c_str());
+
+        Class *klass = GetClass(separateDesc, ClassHelper::IsArrayDescriptor(separateDesc) ? true : needCopyDescriptor,
+                                context, errorHandler);
+        if (klass == nullptr) {
+            LOG(INFO, CLASS_LINKER) << "Cannot find substituent class '" << typeDescCopy << "' of union class '"
+                                    << utf::Mutf8AsCString(descriptor) << "' in context " << context;
+            ASSERT(!klasses.Empty());
+            allocator_->Free(klasses.begin());
+            return {};
+        }
+
+        klasses[i++] = klass;
+    }
+    ASSERT(klasses.Size() > 1);
+    return klasses;
+}
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+Class *ClassLinker::LoadUnionClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                                   ClassLinkerErrorHandler *errorHandler)
+{
+    auto constituentClasses = LoadConstituentClasses(descriptor, needCopyDescriptor, context, errorHandler);
+    if (!constituentClasses.has_value()) {
+        LOG(INFO, CLASS_LINKER) << "Cannot load constituent classes of union class '" << descriptor << "'";
+        return nullptr;
+    }
+
+    ASSERT(constituentClasses.value().Size() > 1);
+
+    auto *ext = GetExtension((*constituentClasses.value().begin())->GetSourceLang());
+    ASSERT(ext != nullptr);
+    auto *commonContext = ext->GetCommonContext(constituentClasses.value());
+    ASSERT(commonContext != nullptr);
+
+    if (commonContext != context) {
+        auto *loadedClass = FindLoadedClass(descriptor, commonContext);
+        if (loadedClass != nullptr) {
+            ASSERT(!constituentClasses.value().Empty());
+            allocator_->Free(constituentClasses.value().begin());
+            return loadedClass;
+        }
+    }
+
+    auto *unionClass = CreateUnionClass(ext, descriptor, needCopyDescriptor, constituentClasses.value(), commonContext);
+
+    if (UNLIKELY(unionClass == nullptr)) {
+        ASSERT(!constituentClasses.value().Empty());
+        allocator_->Free(constituentClasses.value().begin());
+        return nullptr;
+    }
+
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(unionClass);
+
+    auto *otherKlass = commonContext->InsertClass(unionClass);
+    if (otherKlass != nullptr) {
+        FreeClass(unionClass);
+        return otherKlass;
+    }
+
+    RemoveCreatedClassInExtension(unionClass);
+    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(unionClass);
+
+    return unionClass;
+}
+
 Class *ClassLinker::CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
                                      Class *componentClass)
 {
@@ -1286,6 +1403,10 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
         return cls;
     }
 
+    if (ClassHelper::IsUnionDescriptor(descriptor)) {
+        return LoadUnionClass(descriptor, needCopyDescriptor, context, errorHandler);
+    }
+
     if (ClassHelper::IsArrayDescriptor(descriptor)) {
         return LoadArrayClass(descriptor, needCopyDescriptor, context, errorHandler);
     }
@@ -1318,6 +1439,7 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
     return context->LoadClass(descriptor, needCopyDescriptor, errorHandler);
 }
 
+// CC-OFFNXT(huge_method[C++]) solid logic
 Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context,
                              ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
@@ -1329,11 +1451,19 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     if (cls != nullptr) {
         return cls;
     }
-    const uint8_t *descriptor = pf.GetStringData(id).data;
 
+    const uint8_t *descriptor = pf.GetStringData(id).data;
     cls = FindLoadedClass(descriptor, context);
     if (cls != nullptr) {
         pf.GetPandaCache()->SetClassCache(id, cls);
+        return cls;
+    }
+
+    if (ClassHelper::IsUnionDescriptor(descriptor)) {
+        cls = LoadUnionClass(descriptor, false, context, errorHandler);
+        if (LIKELY(cls != nullptr)) {
+            pf.GetPandaCache()->SetClassCache(id, cls);
+        }
         return cls;
     }
 
@@ -1628,6 +1758,25 @@ Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id
                      (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(field != nullptr)) {
         caller.GetPandaFile()->GetPandaCache()->SetFieldCache(id, field);
+    }
+    return field;
+}
+
+Field *ClassLinker::GetField(Class *klass, const panda_file::FieldDataAccessor &fda, bool isStatic,
+                             ClassLinkerErrorHandler *errorHandler)
+{
+    if (klass == nullptr) {
+        return nullptr;
+    }
+    Field *field {nullptr};
+    auto pf = &fda.GetPandaFile();
+    if (!fda.IsExternal() && (klass->GetPandaFile() == pf)) {
+        field = GetFieldById(klass, fda, errorHandler, isStatic);
+    } else {
+        field = GetFieldBySignature(klass, fda, errorHandler, isStatic);
+    }
+    if (LIKELY(field != nullptr)) {
+        pf->GetPandaCache()->SetFieldCache(fda.GetFieldId(), field);
     }
     return field;
 }

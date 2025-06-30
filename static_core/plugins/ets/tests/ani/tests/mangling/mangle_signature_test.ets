@@ -31,6 +31,8 @@ class F {
     foo(x: double) {}
     foo(x: double, y: A, z: B): E { return E.R }
     foo(p: Partial<A>, a: Array<B>) {}
+    foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
 
     $_get(index: number): int { return 0 }
 
@@ -62,7 +64,8 @@ class G {
     static foo(x: double) {}
     static foo(x: double, y: A, z: B): E { return E.R }
     static foo(p: Partial<A>, a: Array<B>) {}
-
+    static foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    static foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
     static foo(a: int, b: int, c: int): int {return a + b + c }
 }
 
@@ -77,6 +80,8 @@ function foo(x: float) {}
 function foo(x: double) {}
 function foo(x: double, y: A, z: B): E { return E.R }
 function foo(p: Partial<A>, a: Array<B>) {}
+function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
 
 native function foo(data: string[]): string[];
 native function foo(data: string[], fn : (it: string) => void): void;

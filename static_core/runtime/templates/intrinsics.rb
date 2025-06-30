@@ -84,11 +84,48 @@ def object_type?(type)
   !primitive_type?(type)
 end
 
-def get_object_descriptor(type)
+def union_type?(type)
+  type[0,2] == '{U'
+end
+
+def get_object_descriptor_impl(type)
   rank = type.count('[')
   type = type[0...-(rank * 2)] if rank > 0
-  return '[' * rank + get_primitive_descriptor(type) if primitive_type?(type)
-  '[' * rank + 'L' + type.gsub('.', '/') + ';'
+  if primitive_type?(type)
+    res = '[' * rank + get_primitive_descriptor(type)
+    return res, type.length + rank * 2
+  elsif not union_type?(type)
+    res = '[' * rank + 'L' + type.gsub('.', '/') + ';'
+    return res, type.length + rank * 2
+  end
+  res = '{U'
+  idx = 2
+  while type[idx] != '}' do
+    if type[idx] == ','
+      idx += 1
+      next
+    end
+    if type[idx] == '{'
+      elem, len = get_object_descriptor_impl(type[idx..-1])
+      res += elem
+      idx += len
+      next
+    end
+    comma_pos = type[idx..-1].index(',')
+    if not comma_pos
+      comma_pos = type[idx..-1].index('}')
+    end
+    component, len = get_object_descriptor_impl(type[idx..comma_pos+idx-1])
+    res += component
+    idx += len
+  end
+  res = '[' * rank + res + '}'
+  return res, idx + 1 + rank*2
+end
+
+def get_object_descriptor(type)
+  res, len = get_object_descriptor_impl(type)
+  return res
 end
 
 def floating_point_type?(type)

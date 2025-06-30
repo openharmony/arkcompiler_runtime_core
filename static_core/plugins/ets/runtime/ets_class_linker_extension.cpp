@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_vtable_builder.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -209,6 +210,21 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
     arrayClass->SetState(Class::State::INITIALIZED);
 
     ASSERT(arrayClass->IsArrayClass());  // After init, we give out a well-formed array class.
+    return true;
+}
+
+bool EtsClassLinkerExtension::InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses)
+{
+    ASSERT(IsInitialized());
+
+    ASSERT(!unionClass->IsInitialized());
+    ASSERT(unionClass->GetConstituentTypes().begin() == nullptr);
+
+    unionClass->SetBase(nullptr);
+    unionClass->SetConstituentTypes(constituentClasses);
+    unionClass->SetState(Class::State::INITIALIZED);
+
+    ASSERT(unionClass->IsUnionClass());  // After init, we give out a well-formed union class.
     return true;
 }
 
@@ -718,6 +734,79 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
     ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
     ASSERT(ctx != nullptr);
     return ctx;
+}
+
+/* static */
+ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext *ctx)
+{
+    auto *linker = GetOrCreateEtsRuntimeLinker(ctx);
+    auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(linker);
+    auto *parentLinker = abcRuntimeLinker->GetParentLinker();
+    return parentLinker->GetClassLinkerContext();
+}
+
+ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> classes) const
+{
+    ASSERT(!classes.Empty());
+    auto *commonCtx = classes[0]->GetLoadContext();
+
+    size_t foundClassesNum = 0;
+    while (!commonCtx->IsBootContext()) {
+        for (auto *klass : classes) {
+            if (commonCtx->FindClass(klass->GetDescriptor()) != nullptr) {
+                foundClassesNum++;
+            }
+        }
+        if (foundClassesNum == classes.Size()) {
+            break;
+        }
+        commonCtx = GetParentContext(commonCtx);
+    }
+    return commonCtx;
+}
+
+const uint8_t *EtsClassLinkerExtension::ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor)
+{
+    // Union descriptor format: '{' 'U' TypeDescriptor+ '}'
+    RefTypeLink lub(ctx, nullptr);
+    auto idx = 2;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    while (descriptor[idx] != '}') {
+        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
+        if (ClassHelper::IsPrimitive(typeSp.begin()) || ClassHelper::IsArrayDescriptor(typeSp.begin())) {
+            // NOTE(aantipina): Process arrays:
+            // compute GetClosestCommonAncestor for component type, lub = GetClosestCommonAncestor[]
+            return langCtx_.GetObjectClassDescriptor();
+        }
+        idx += typeSp.Size();
+
+        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
+        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
+
+        if (lub.GetDescriptor() == nullptr) {
+            lub = RefTypeLink(ctx, typePf, typeClassId);
+            continue;
+        }
+
+        auto type = RefTypeLink(ctx, typePf, typeClassId);
+        if (RefTypeLink::AreEqual(lub, type)) {
+            continue;
+        }
+
+        if (ClassHelper::IsReference(type.GetDescriptor()) && ClassHelper::IsReference(lub.GetDescriptor())) {
+            auto lubDescOpt = GetClosestCommonAncestor(GetClassLinker(), ctx, lub, type);
+            if (!lubDescOpt.has_value()) {
+                return langCtx_.GetObjectClassDescriptor();
+            }
+            lub = lubDescOpt.value();
+            continue;
+        }
+
+        return langCtx_.GetObjectClassDescriptor();
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    return lub.GetDescriptor();
 }
 
 }  // namespace ark::ets

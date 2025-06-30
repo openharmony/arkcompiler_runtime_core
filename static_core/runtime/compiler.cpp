@@ -209,6 +209,9 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
         }
         return compiler::ClassType::ARRAY_CLASS;
     }
+    if (klass->IsUnionClass()) {
+        return compiler::ClassType::UNION_CLASS;
+    }
     if (klass->IsFinal()) {
         return compiler::ClassType::FINAL_CLASS;
     }

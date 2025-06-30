@@ -388,6 +388,7 @@ protected:
     static void FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillInterfaceClass(GraphVisitor *visitor, Inst *inst);
+    static void FillUnionClass(GraphVisitor *visitor, Inst *inst);
 
     static void FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst);
 

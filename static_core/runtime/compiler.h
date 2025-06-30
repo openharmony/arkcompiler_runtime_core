@@ -570,7 +570,8 @@ public:
 
     bool IsClassFinal(ClassPtr klass) const override
     {
-        return ClassCast(klass)->IsFinal();
+        auto *kls = ClassCast(klass);
+        return kls->IsFinal() && !kls->IsUnionClass();
     }
 
     bool IsInterface(ClassPtr klass) const override

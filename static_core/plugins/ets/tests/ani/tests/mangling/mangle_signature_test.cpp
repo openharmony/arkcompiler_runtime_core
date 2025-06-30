@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+#include "ani.h"
 #include "ani_gtest.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -20,6 +22,17 @@
 namespace ark::ets::ani::testing {
 
 class MangleSignatureTest : public AniTest {};
+
+// type F = (u: number | string | FixedArray<char>) => (E | B) | Partial<A>
+static constexpr std::string_view FOO_UNION_SIGNATURE =
+    "X{A{c}C{std.core.Double}C{std.core.String}}:X{C{msig.B}E{msig.E}P{msig.A}}";
+static constexpr std::string_view NAMESPACE_FOO_UNION_SIGNATURE =
+    "X{A{c}C{std.core.Double}C{std.core.String}}:X{C{msig.rls.B}E{msig.rls.E}P{msig.A}}";
+// type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
+static constexpr std::string_view FOO1_UNION_SIGNATURE =
+    "X{C{msig.A}C{std.core.String}C{std.core.Double}}:X{A{C{msig.A}}C{msig.A}C{std.core.String}N}";
+static constexpr std::string_view NAMESPACE_FOO1_UNION_SIGNATURE =
+    "X{C{msig.rls.A}C{std.core.String}C{std.core.Double}}:X{A{C{msig.rls.A}}C{msig.rls.A}C{std.core.String}N}";
 
 TEST_F(MangleSignatureTest, FormatVoid_NewToOld)
 {
@@ -156,9 +169,9 @@ TEST_F(MangleSignatureTest, FormatNullAndUndefined_NewToOld)
     PandaString desc;
 
     desc = Mangle::ConvertSignature("N:");
-    EXPECT_STREQ(desc.c_str(), "Lstd/core/Object;:V");
+    EXPECT_STREQ(desc.c_str(), "Lstd/core/Null;:V");
     desc = Mangle::ConvertSignature(":N");
-    EXPECT_STREQ(desc.c_str(), ":Lstd/core/Object;");
+    EXPECT_STREQ(desc.c_str(), ":Lstd/core/Null;");
 
     desc = Mangle::ConvertSignature("U:");
     EXPECT_STREQ(desc.c_str(), "Lstd/core/Object;:V");
@@ -327,6 +340,28 @@ TEST_F(MangleSignatureTest, FormatReferencesFixedArray_OldToOld)
     EXPECT_STREQ(desc.c_str(), "[Lstd/core/String;D[[La/b/Color;:[La/b/X$partial;");
 }
 
+TEST_F(MangleSignatureTest, FormatUnion_NewToRuntime)
+{
+    PandaString desc;
+
+    // type F = (u: a.b | double | FixedArray<int>) => null | e
+    desc = Mangle::ConvertSignature("X{C{a.b}C{std.core.Double}A{i}}:X{NE{e}}");
+    EXPECT_STREQ(desc.c_str(), "{ULa/b;[ILstd/core/Double;}:{ULe;Lstd/core/Null;}");
+
+    // type F = (u: (e | double) | FixedArray<string[] | FunctionR1>) => void
+    desc = Mangle::ConvertSignature("X{X{E{e}C{std.core.Double}}A{X{A{C{std.core.String}}C{std.core.FunctionR1}}}}:");
+    EXPECT_STREQ(desc.c_str(), "{U{ULe;Lstd/core/Double;}[{ULstd/core/FunctionR1;[Lstd/core/String;}}:V");
+
+    // type F = (u: number | string | FixedArray<char>) => (msig.E | msig.B) | Partial<msig.A>
+    desc = Mangle::ConvertSignature(FOO_UNION_SIGNATURE);
+    EXPECT_STREQ(desc.c_str(), "{ULstd/core/Double;Lstd/core/String;[C}:{ULmsig/A$partial;Lmsig/B;Lmsig/E;}");
+
+    // type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
+    desc = Mangle::ConvertSignature(FOO1_UNION_SIGNATURE);
+    EXPECT_STREQ(desc.c_str(),
+                 "{ULmsig/A;Lstd/core/Double;Lstd/core/String;}:{ULmsig/A;[Lmsig/A;Lstd/core/Null;Lstd/core/String;}");
+}
+
 TEST_F(MangleSignatureTest, Format_Wrong)
 {
     PandaString desc;
@@ -369,6 +404,8 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     // Check references
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{msig.A}C{escompat.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo1", FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
 
 TEST_F(MangleSignatureTest, Module_FindFunction_OldFormat)
@@ -417,6 +454,8 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     // Check references
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "dC{msig.rls.A}C{msig.rls.B}:E{msig.rls.E}", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{msig.A}C{escompat.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", NAMESPACE_FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", NAMESPACE_FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
 
 TEST_F(MangleSignatureTest, Namespace_FindFunction_OldFormat)
@@ -465,6 +504,8 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     // Check references
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{msig.A}C{escompat.Array}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
 
 TEST_F(MangleSignatureTest, Class_FindMethod_OldFormat)
@@ -513,6 +554,8 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     // Check references
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{msig.A}C{escompat.Array}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
 
 TEST_F(MangleSignatureTest, Class_FindStaticMethod_OldFormat)
@@ -615,6 +658,23 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "foo", "iii:i", &result, 1, 2U, 3U), ANI_OK);
     ASSERT_EQ(result, 1 + 2U + 3U);
+
+    // Check correct union type is returned from `Class_CallStaticMethodByName_Ref`
+    static constexpr std::string_view SAMPLE_STRING = "sample";
+    ani_string sampleStr {};
+    ASSERT_EQ(env_->String_NewUTF8(SAMPLE_STRING.data(), SAMPLE_STRING.size(), &sampleStr), ANI_OK);
+    ani_ref unionResult {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "foo", FOO_UNION_SIGNATURE.data(), &unionResult, sampleStr),
+              ANI_OK);
+    // Check returned object is of correct type
+    ani_boolean booleanResult = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsUndefined(unionResult, &booleanResult), ANI_OK);
+    ASSERT_EQ(booleanResult, ANI_FALSE);
+    ani_enum enumClass {};
+    ASSERT_EQ(env_->FindEnum("msig.E", &enumClass), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(unionResult), enumClass, &booleanResult), ANI_OK);
+    ASSERT_EQ(booleanResult, ANI_TRUE);
 }
 
 TEST_F(MangleSignatureTest, Class_CallStaticMethodByName_OldFormat)
@@ -648,6 +708,23 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Int(object, "foo", "ii:i", &result, 1, 2U), ANI_OK);
     ASSERT_EQ(result, 1 + 2U);
+
+    // Check correct union type is returned from `Object_CallMethodByName_Ref`
+    static constexpr std::string_view SAMPLE_STRING = "sample";
+    ani_string sampleStr {};
+    ASSERT_EQ(env_->String_NewUTF8(SAMPLE_STRING.data(), SAMPLE_STRING.size(), &sampleStr), ANI_OK);
+    ani_ref unionResult {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "foo", FOO_UNION_SIGNATURE.data(), &unionResult, sampleStr),
+              ANI_OK);
+    // Check returned object is of correct type
+    ani_boolean booleanResult = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsUndefined(unionResult, &booleanResult), ANI_OK);
+    ASSERT_EQ(booleanResult, ANI_FALSE);
+    ani_enum enumClass {};
+    ASSERT_EQ(env_->FindEnum("msig.E", &enumClass), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(unionResult), enumClass, &booleanResult), ANI_OK);
+    ASSERT_EQ(booleanResult, ANI_TRUE);
 }
 
 TEST_F(MangleSignatureTest, Object_CallMethodByName_OldFormat)

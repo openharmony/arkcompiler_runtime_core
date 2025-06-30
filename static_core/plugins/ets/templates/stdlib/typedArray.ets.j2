@@ -104,6 +104,7 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
 export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLike<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: int = {{S}}
     public readonly BYTES_PER_ELEMENT: int = {{N}}Array.BYTES_PER_ELEMENT
+    public overload subarray { subarrayII, subarrayNI, subarrayIN, subarrayNN }
     internal readonly lengthInt: int
 
     /**
@@ -1434,7 +1435,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: number): {{N}}Array {
+    public subarrayNN(begin?: number, end?: number): {{N}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1447,7 +1448,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: int, end?: number): {{N}}Array {
+    public subarrayIN(begin?: int, end?: number): {{N}}Array {
         return this.subarray(begin ?? 0, asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1460,7 +1461,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin?: number, end?: int): {{N}}Array {
+    public subarrayNI(begin?: number, end?: int): {{N}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), end ?? this.lengthInt)
     }
 
@@ -1473,7 +1474,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{N}}Array {
+    public subarrayII(begin: int | undefined = 0, end: int | undefined = this.lengthInt): {{N}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin ?? 0, len)
         const relEnd = normalizeIndex(end ?? this.lengthInt, len)
