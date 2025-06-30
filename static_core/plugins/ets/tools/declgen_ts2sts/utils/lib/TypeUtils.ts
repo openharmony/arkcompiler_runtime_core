@@ -139,3 +139,5 @@ export const FINAL_CLASS: string[] = [
     'VoidValue',
     'WeakRef'
 ];
+export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];
+
