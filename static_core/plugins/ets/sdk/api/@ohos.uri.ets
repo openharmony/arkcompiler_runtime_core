@@ -15,17 +15,6 @@
 
 import { BusinessError } from "@ohos.base";
 
-const SyntaxErrorCodeId: number = 10200002;
-const TypeErrorCodeId: number = 401;
-
-function createBusinessError(code: number, message: string) {
-  let err = new BusinessError();
-  err.code = code;
-  err.name = 'BusinessError';
-  err.message = message;
-  return err;
-}
-
 /**
 * The uri module provides utilities for URI resolution and parsing.
 *
@@ -47,12 +36,8 @@ export namespace uri {
     * @param { string } uri - uri uri
     * @throws { BusinessError } 10200002 - Invalid uri string.
     */
-    constructor(input: string) {
-      this.uriEntry = new UriEntry(input);
-      let errStr: string = this.uriEntry.getErrStr();
-      if (errStr != "") {
-        throw createBusinessError(SyntaxErrorCodeId, `Syntax Error. Invalid Uri string: The ${errStr}`)
-      }
+    constructor(uri: string) {
+      this.uriEntry = new UriEntry(uri);
     }
 
     /**
@@ -70,7 +55,7 @@ export namespace uri {
       if (fragment != "") {
         uriStr += '#' + encodeURIComponent(fragment);
       }
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -79,7 +64,7 @@ export namespace uri {
     * @returns { string } Returns the serialized URI as a string.
     */
     toString(): string {
-      return toAscllString(this.uriEntry.toString());
+      return toAsciiString(this.uriEntry.toString());
     }
 
     /**
@@ -87,19 +72,9 @@ export namespace uri {
     *
     * @param { URI } other - other other URI object to be compared
     * @returns { boolean } boolean Tests whether this URI is equivalent to other URI objects.
-    */    
-    equals(other: URI): boolean {
-      return this.uriEntry.equals(other.uriEntry);
-    }
-    
-    /**
-    * Check whether this URI is equivalent to other URI objects.
-    *
-    * @param { URI } other - other other URI object to be compared
-    * @returns { boolean } boolean Tests whether this URI is equivalent to other URI objects.
     */
     equalsTo(other: URI): boolean {
-      return this.uriEntry.equals(other.uriEntry);
+      return this.uriEntry.equalsTo(other.uriEntry);
     }
 
     /**
@@ -147,7 +122,7 @@ export namespace uri {
     */
     addQueryValue(key: string, value: string): URI {
       let uriStr = this.uriEntry.addQueryValue(encodeURIComponent(key), encodeURIComponent(value));
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -158,7 +133,7 @@ export namespace uri {
     */
     addEncodedSegment(encodedPathSegment: string): URI {
       let uriStr = this.uriEntry.addSegment(encodedPathSegment);
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -169,7 +144,7 @@ export namespace uri {
     */
     addSegment(pathSegment: string): URI {
       let uriStr = this.uriEntry.addSegment(encodeURIComponent(pathSegment));
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -179,63 +154,11 @@ export namespace uri {
     * @returns { string | null } Return decoded value.
     */
     getQueryValue(key: string): string | null {
-      let query = this.uriEntry.getQuery();
-      if (query === '') {
-        return null;
-      }
-      const queryStrs = query.split('&');
-      for (const item of queryStrs) {
-        const eqPos = item.indexOf('=');
-        let currentKey = item;
-        let currentValue = '';
-        if (eqPos !== -1) {
-          currentKey = item.substring(0, eqPos);
-          currentValue = item.substring(eqPos + 1);
-        }
-
-        const decodedKey = this.decodeSafelyInner(currentKey);
-        if (decodedKey === key) {
-          const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
-          return decodedValue || '';
-        }
-      }
-      return null;
+      return this.uriEntry.getQueryValue(key);
     }
 
-    private decodeSafelyOut(input: string): string {
-      let decodedString = "";
-      let decodedTemp = "";
-      let index: number = 0;
-      while (index < input.length) {
-        let isHexDigit: boolean = Char.isHexDigit(input[index + 1]) && Char.isHexDigit(input[index + 2]);
-        if (input[index] == c'%' && isHexDigit) {
-          const encodedChar = input.slice(index, index + 3);
-          try {
-            decodedString += decodeURIComponent(decodedTemp + encodedChar);
-            decodedTemp = "";
-          } catch (e) {
-            decodedTemp += encodedChar;
-          }
-          index += 3;
-          continue;
-        }
-        decodedString += decodedTemp + input[index];
-        decodedTemp = "";
-        index++;
-      }
-      return decodedString + decodedTemp;
-    }
 
-    private decodeSafelyInner(input: string): string {
-      if (input == "") {
-        return input;
-      }
-      try {
-        return decodeURIComponent(input);
-      } catch (e) {
-        return this.decodeSafelyOut(input);
-      }
-    }
+
 
     /**
     * Returns a set of the unique names of all query parameters.
@@ -243,24 +166,7 @@ export namespace uri {
     * @returns { Array<string> } Return a set of decoded names.
     */
     getQueryNames(): Array<string> {
-      let query = this.uriEntry.getQuery();
-      if (query == "") {
-        return new Array<string>();
-      }
-      let names = new Set<string>();
-      let start: number = 0;
-      while (start < query.length) {
-        let next: number = query.indexOf('&', start);
-        let end: number = (next == -1) ? query.length : next;
-        let separator: number = query.indexOf('=', start);
-        if (separator > end || separator == -1) {
-          separator = end;
-        }
-        let name = query.substring(start, separator);
-        names.add(this.decodeSafelyInner(name));
-        start = end + 1;
-      }
-      return Array.from<string>(names);
+      return this.uriEntry.getQueryNames();
     }
 
     /**
@@ -270,26 +176,7 @@ export namespace uri {
     * @returns { Array<string> } Return a set of decoded values.
     */
     getQueryValues(key: string): Array<string> {
-      let query = this.uriEntry.getQuery();
-      if (query == "") {
-        return new Array<string>();
-      }
-      let values = new Array<string>();
-      let queryStrs: string[] = query.split('&');
-      let isKeyEmpty = key == "";
-      for (let item of queryStrs) {
-        if (isKeyEmpty && item == "") {
-          values.push(item);
-        }
-        let strArr: string[] = item.split('=');
-        let isKeyEqualStr0 = this.decodeSafelyInner(strArr[0]) == key;
-        if (strArr.length == 1 && isKeyEqualStr0) {
-          values.push("");
-        } else if (isKeyEqualStr0) {
-          values.push(this.decodeSafelyInner(item.substring(strArr[0].length + 1)));
-        }
-      }
-      return values;
+      return this.uriEntry.getQueryValues(key);
     }
 
     /**
@@ -300,7 +187,7 @@ export namespace uri {
     * @returns { boolean } Query with key value returns true, otherwise returns false.
     */
     getBooleanQueryValue(key: string, defaultValue: boolean): boolean {
-      let flag = this.getQueryValue(key);
+      let flag = this.uriEntry.getQueryValue(key);
       if (flag == null) {
         return defaultValue;
       }
@@ -314,11 +201,11 @@ export namespace uri {
     * @returns { string } Returns the last decoded segment, or null if the path is empty.
     */
     getLastSegment(): string {
-      let segments = this.uriEntry.getSegment();
+      let segments = this.uriEntry.getSegments();
       if (segments.length == 0) {
         return "";
       }
-      return this.decodeSafelyInner(segments[segments.length - 1]);
+      return segments[segments.length - 1];
     }
 
     /**
@@ -327,13 +214,7 @@ export namespace uri {
     * @returns { Array<string> } Return decoded path segments, each without a leading or trailing "/".
     */
     getSegment(): Array<string> {
-      let array = new Array<string>();
-      let segments = this.uriEntry.getSegment();
-      segments.forEach(
-        (element: string, i: number) => {
-          array.push(this.decodeSafelyInner(element));
-        });
-      return array;
+      return this.uriEntry.getSegments();
     }
 
     /**
@@ -343,7 +224,7 @@ export namespace uri {
     */
     clearQuery(): URI {
       let uriStr: string = this.uriEntry.clearQuery();
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -353,7 +234,7 @@ export namespace uri {
     */
     normalize(): URI {
       let uriStr: string = this.uriEntry.normalize();
-      return createNewUri(uriStr);
+      return new URI(uriStr);
     }
 
     /**
@@ -374,11 +255,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get authority(): string | null {
-      let thisAuthority: string = this.uriEntry.getAuthority();
-      if (thisAuthority == '') {
-        return null;
-      }
-      return this.dealDecode(thisAuthority, true);
+      let s: string = this.uriEntry.getAuthority();
+      return s == "" ? null : this.dealDecodeInput(s);
     }
 
     /**
@@ -387,26 +265,19 @@ export namespace uri {
     * @returns { string }
     */
     get ssp(): string {
-      return this.dealDecode(this.uriEntry.getSsp(), true)
+      return this.dealDecodeInput(this.uriEntry.getSsp())
     }
 
-    private dealDecode(input: string, decode?: boolean): string {
+    private dealDecodeInput(input: string): string {
       let index1 = input.indexOf('[');
-      let result = "";
-      if (index1 != -1) {
-        let index2 = input.indexOf(']', index1);
-        let split1 = input.substring(0, index1);
-        let split2 = input.substring(index1 + 1, index2);
-        let split3 = input.substring(index2 + 1);
-        if (decode) {
-          result = this.decodeSafelyInner(split1) + '[' + split2 + ']' + this.decodeSafelyInner(split3);
-        } else {
-          result = split1 + '[' + split2 + ']' + split3;
-        }
-      } else {
-        result = decode ? this.decodeSafelyInner(input) : input;
+      if (index1 == -1) {
+        return decodeURIComponent(input);
       }
-      return result;
+      let index2 = input.indexOf(']', index1);
+      let split1 = input.substring(0, index1);
+      let split2 = input.substring(index1 + 1, index2);
+      let split3 = input.substring(index2 + 1);
+      return decodeURIComponent(split1) + '[' + split2 + ']' + decodeURIComponent(split3);
     }
 
     /**
@@ -415,10 +286,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get userInfo(): string | null {
-      if (this.uriEntry.getUserinfo() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getUserinfo());
+      let s: string = this.uriEntry.getUserinfo();
+      return s == '' ? null : decodeURIComponent(s);
     }
 
     /**
@@ -427,10 +296,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get host(): string | null {
-      if (this.uriEntry.getHost() == '') {
-        return null;
-      }
-      return this.uriEntry.getHost();
+      let s: string = this.uriEntry.getHost();
+      return s == '' ? null : s;
     }
 
     /**
@@ -448,10 +315,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get path(): string | null {
-      if (this.uriEntry.getPath() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getPath());
+      let s: string = this.uriEntry.getPath();
+      return s == '' ? null : decodeURIComponent(s);
     }
 
     /**
@@ -460,10 +325,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get query(): string | null {
-      if (this.uriEntry.getQuery() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getQuery());
+      let s: string = this.uriEntry.getQuery();
+      return s == '' ? null : decodeURIComponent(s);
     }
 
     /**
@@ -472,10 +335,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get fragment(): string | null {
-      if (this.uriEntry.getFragment() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getFragment());
+      let s: string = this.uriEntry.getFragment();
+      return s == '' ? null : decodeURIComponent(s);
     }
 
     /**
@@ -484,10 +345,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get encodedUserInfo(): string | null {
-      if (this.uriEntry.getUserinfo() == '') {
-        return null;
-      }
-      return this.uriEntry.getUserinfo();
+      let s: string = this.uriEntry.getUserinfo();
+      return s == '' ? null : s;
     }
 
     /**
@@ -496,10 +355,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get encodedPath(): string | null {
-      if (this.uriEntry.getPath() == '') {
-        return null;
-      }
-      return this.uriEntry.getPath();
+      let s: string = this.uriEntry.getPath();
+      return s == '' ? null : s;
     }
 
     /**
@@ -508,10 +365,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get encodedQuery(): string | null {
-      if (this.uriEntry.getQuery() == '') {
-        return null;
-      }
-      return this.uriEntry.getQuery();
+      let s: string = this.uriEntry.getQuery();
+      return s == '' ? null : s;
     }
 
     /**
@@ -520,10 +375,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get encodedFragment(): string | null {
-      if (this.uriEntry.getFragment() == '') {
-        return null;
-      }
-      return this.uriEntry.getFragment();
+      let s: string = this.uriEntry.getFragment();
+      return s == '' ? null : s;
     }
 
     /**
@@ -532,11 +385,8 @@ export namespace uri {
     * @returns { string | null }
     */
     get encodedAuthority(): string | null {
-      let thisAuthority: string = this.uriEntry.getAuthority();
-      if (thisAuthority == '') {
-        return null;
-      }
-      return this.dealDecode(thisAuthority);
+      let s: string = this.uriEntry.getAuthority();
+      return s == '' ? null : s;
     }
 
     /**
@@ -546,8 +396,7 @@ export namespace uri {
     * @returns { string }
     */
     get encodedSSP(): string {
-      let thisSsp: string = this.uriEntry.getSsp();
-      return this.dealDecode(thisSsp);
+      return this.uriEntry.getSsp();
     }
 
     /**
@@ -697,18 +546,14 @@ export namespace uri {
     }
   }
 
-  function toAscllString(uriStr: string): string {
+  function toAsciiString(uriStr: string): string {
     return encodeURI(uriStr)
       .replaceAll("%5B", '[')
       .replaceAll("%5D", ']')
       .replaceAll("%25", '%');
   }
 
-  function createNewUri(uriStr: string): URI {
-    return new URI(uriStr);
-  }
 
-  const MAX_BIT_SIZE: number = 128;
 
   /**
   * Handling specific URI logic
@@ -738,17 +583,41 @@ export namespace uri {
     private REG_DIGIT = new RegExp("[\\d]", 'g');
 
     constructor(input: string) {
-      this.errStr = "";
       if (input == "") {
         this.errStr = "Uri is empty.";
-        return;
+        this.checkErrAndThrow();
       }
       this.inputUri = input;
-      try {
-        this.analysisUri();
-      } catch (e) { }
+      this.analysisUri();
+    }
+    getQueryValue(key: string): string | null {
+      let queryList = this.getQueryList();
+      for (let i = 0; i < queryList.length; i += 2) {
+        if (decodeURIComponent(queryList[i]) == key) {
+          return decodeURIComponent(queryList[i + 1].replaceAll("+", ' '));
+        }
+      }
+      return null;
     }
 
+    getQueryValues(key: string): Array<string> {
+      let queryList = this.getQueryList();
+      let values = new Array<string>();
+      for (let i = 0; i < queryList.length; i += 2) {
+        if (decodeURIComponent(queryList[i]) == key) {
+          values.push(decodeURIComponent(queryList[i + 1]));
+        }
+      }
+      return values;
+    }
+    getQueryNames(): Array<string> {
+      let queryList = this.getQueryList();
+      let names = new Set<string>();
+      for (let i = 0; i < queryList.length; i += 2) {
+        names.add(decodeURIComponent(queryList[i]));
+      }
+      return Array.from<string>(names);
+    }
     private assignSchemeSpecificPart() {
       this.schemeSpecificPart += this.data;
       if (this.query != "") {
@@ -802,6 +671,21 @@ export namespace uri {
       }
       str = str.replaceAll(regex, "");
       return str == '';
+    }
+
+    private getQueryList(): Array<string> {
+      let queryList = new Array<string>();
+      if (this.query == "" || this.query == null) {
+        return queryList;
+      }
+      for (let str of this.query.split('&')) {
+        let pare = str.split('=');
+        let key = pare.length > 0 ? pare[0] : '';
+        let value = pare.length > 1 ? pare[1] : '';
+        queryList.push(key);
+        queryList.push(value);
+      }
+      return queryList;
     }
 
     private specialPath() {
@@ -939,27 +823,27 @@ export namespace uri {
     }
 
     private analysisPort(pos: number) {
-      let port = this.data.substring(pos + 1);
-      if (!this.checkCharacter(port, this.REG_PORT, true)) {
-        console.log('<>> 944 '+port)
+      let portStr = this.data.substring(pos + 1);
+      if (!this.checkCharacter(portStr, this.REG_PORT, true)) {
         this.errStr = "Port does not conform to the rule.";
         return false;
-      } else if (this.checkCharacter(port, this.REG_DIGIT, false)) {
-        // 10:The maximum number of bits for int value
-        if (port.length == 0 || port.length > 10) {
-          return false;
-        }
-        let tempPort = new Number(port);
-        if (tempPort < 0 || tempPort > Int.MAX_VALUE) {
-          return false;
-        }
-        this.port = tempPort;
-        this.data = this.data.substring(0, pos);
-        return true;
-      } else {
+      }
+
+      if (portStr == '') {
+        return false;
+      }
+
+      let port = new Number(portStr);
+      if (isNaN(port)) {
         this.data = this.data.substring(0, pos);
         return false;
       }
+      if (port < 0 || port > Int.MAX_VALUE) {
+        return false;
+      }
+      this.port = port;
+      this.data = this.data.substring(0, pos);
+      return true;
     }
 
     private analysisIPV4() {
@@ -997,35 +881,12 @@ export namespace uri {
       this.data = "";
     }
 
-    equals(other: UriEntry): boolean {
-      if (this.port != other.port) {
-        return false;
-      }
-      if (this.scheme != other.scheme) {
-        return false;
-      }
-      if (this.userInfo != other.userInfo) {
-        return false;
-      }
-      if (this.host != other.host) {
-        return false;
-      }
-      if (this.query != other.query) {
-        return false;
-      }
-      if (this.fragment != other.fragment) {
-        return false;
-      }
-      if (this.path != other.path) {
-        return false;
-      }
-      if (this.authority != other.authority) {
-        return false;
-      }
-      if (this.schemeSpecificPart != other.schemeSpecificPart) {
-        return false;
-      }
-      return true;
+    equalsTo(other: UriEntry): boolean {
+      return (this.port == other.port) && (this.scheme == other.scheme)
+        && (this.userInfo == other.userInfo) && (this.host == other.host)
+        && (this.query == other.query) && (this.fragment == other.fragment)
+        && (this.path == other.path) && (this.authority == other.authority)
+        && (this.schemeSpecificPart == other.schemeSpecificPart);
     }
 
     toString(): string {
@@ -1100,34 +961,20 @@ export namespace uri {
       return result;
     }
 
-    getSegment(): Array<string> {
-      let segments = new Array<string>();
-      if (this.path == "") {
-        return segments;
-      }
-      let previous = 0;
-      let current = 0;
-      for (current = this.path.indexOf('/', previous); current != -1;
-        current = this.path.indexOf('/', previous)) {
-        if (previous < current) {
-          let segment = this.path.substring(previous, current);
-          segments.push(segment);
+    getSegments(): Array<string> {
+      let segmentArray = new Array<string>();
+      for (let segment of this.path.split('/')) {
+        if (segment.trim() != '') {
+          segmentArray.push(decodeURIComponent(segment.trim()))
         }
-        previous = current + 1;
       }
-      if (previous < this.path.length) {
-        segments.push(this.path.substring(previous));
-      }
-      return segments;
-    }
-
-    getErrStr(): string {
-      return this.errStr;
+      return segmentArray;
     }
 
     private checkErrAndThrow() {
       if (this.errStr != "") {
-        throw new Error();
+        const SyntaxErrorCodeId: number = 10200002;
+        throw new BusinessError(SyntaxErrorCodeId, new Error('BusinessError', `Syntax Error. Invalid Uri string: The ${this.errStr}`, undefined));
       }
     }
 
