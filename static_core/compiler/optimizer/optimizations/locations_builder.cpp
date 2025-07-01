@@ -86,6 +86,7 @@ LOCATIONS_BUILDER(void)::ProcessManagedCall(Inst *inst, ParameterInfo *pinfo)
         if (i == 0U && inst->GetOpcode() == Opcode::CallNative) {
             // NOTE: this is a hack for workarounding regalloc bug (i.e. this input can get some parameter register
             // location by mistake)!
+            ASSERT(locations != nullptr);
             locations->SetLocation(0U, Location::MakeRegister(GetFirstCalleeReg(GetGraph()->GetArch(), false)));
             continue;
         }
@@ -125,6 +126,7 @@ LOCATIONS_BUILDER(void)::ProcessManagedCallStackRange(Inst *inst, size_t rangeSt
     for (size_t i = 0; i < rangeStart; i++) {
         ASSERT(inst->GetInputType(i) != DataType::NO_TYPE);
         auto param = pinfo->GetNextLocation(inst->GetInputType(i));
+        ASSERT(locations != nullptr);
         locations->SetLocation(i, param);
         if (param.IsStackArgument()) {
             stackArgs++;
@@ -217,6 +219,7 @@ LOCATIONS_BUILDER(void)::VisitCallIndirect(GraphVisitor *visitor, Inst *inst)
     auto params = static_cast<LocationsBuilder *>(visitor)->GetResetParameterInfo();
 
     /* First input is an address of the memory to call. So it hasn't exact location and maybe be any register */
+    ASSERT(locations != nullptr);
     locations->SetLocation(0, Location::RequireRegister());
 
     /* Inputs, starting from 1, are the native call arguments */
@@ -237,6 +240,7 @@ LOCATIONS_BUILDER(void)::VisitCall(GraphVisitor *visitor, Inst *inst)
 
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
         auto param = params->GetNextLocation(inst->GetInputType(i));
+        ASSERT(locations != nullptr);
         locations->SetLocation(i, param);
     }
     if (!inst->NoDest()) {
@@ -271,6 +275,7 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     LocationsInfo *locations = allocator->New<LocationsInfo>(allocator, inst);
     auto inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
     for (size_t i = 0; i < inputsCount; i++) {
+        ASSERT(locations != nullptr);
         locations->SetLocation(i, Location::RequireRegister());
     }
 }
@@ -325,6 +330,7 @@ LOCATIONS_BUILDER(void)::VisitMultiArray(GraphVisitor *visitor, Inst *inst)
     auto graph = static_cast<LocationsBuilder *>(visitor)->GetGraph();
     ArenaAllocator *allocator = graph->GetAllocator();
     LocationsInfo *locations = allocator->New<LocationsInfo>(allocator, inst);
+    ASSERT(locations != nullptr);
     locations->SetLocation(0, Location::RequireRegister());
 
     for (size_t i = 1; i < inst->GetInputsCount() - 1; i++) {

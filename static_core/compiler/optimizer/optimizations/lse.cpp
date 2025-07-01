@@ -365,11 +365,15 @@ public:
                     ssb_.SearchAndCreateMissingObjInSaveState(bb->GetGraph(), phiInput, bb->GetLastInst(), nullptr, bb);
                 }
             }
-        } else if (hvalue.val->IsMovableObject()) {
-            ASSERT(!loop->IsIrreducible());
-            auto head = loop->GetHeader();
-            // Add cand value to all SaveStates in this loop and inner loops
-            ssb_.SearchAndCreateMissingObjInSaveState(head->GetGraph(), hvalue.val, head->GetLastInst(), nullptr, head);
+        } else {
+            ASSERT(hvalue.val != nullptr);
+            if (hvalue.val->IsMovableObject()) {
+                ASSERT(!loop->IsIrreducible());
+                auto head = loop->GetHeader();
+                // Add cand value to all SaveStates in this loop and inner loops
+                ssb_.SearchAndCreateMissingObjInSaveState(head->GetGraph(), hvalue.val, head->GetLastInst(), nullptr,
+                                                          head);
+            }
         }
     }
 

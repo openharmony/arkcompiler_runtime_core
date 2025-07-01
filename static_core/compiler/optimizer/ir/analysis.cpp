@@ -131,6 +131,7 @@ bool HasOsrEntryBetween(T *dominate, T *current)
         bb = current;
     }
     auto graph = bb->GetGraph();
+    ASSERT(graph->IsOsrMode() || dominateBb != nullptr);
     if (!graph->IsOsrMode() && dominateBb->GetLoop() != bb->GetLoop()) {
         return false;
     }
@@ -230,6 +231,7 @@ Inst *InstStoredValue(Inst *inst)
 
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst)
 {
+    ASSERT(inst != nullptr);
     auto copy = static_cast<SaveStateInst *>(inst->Clone(graph));
     ASSERT(copy->GetCallerInst() == inst->GetCallerInst());
     for (size_t inputIdx = 0; inputIdx < inst->GetInputsCount(); inputIdx++) {
@@ -445,6 +447,7 @@ bool IsSuitableForImplicitNullCheck(const Inst *inst)
 
 bool IsInstNotNull(const Inst *inst)
 {
+    ASSERT(inst != nullptr);
     // Allocations cannot return null pointer
     if (inst->IsAllocation() || inst->IsNullCheck() || inst->NoNullPtr()) {
         return true;
