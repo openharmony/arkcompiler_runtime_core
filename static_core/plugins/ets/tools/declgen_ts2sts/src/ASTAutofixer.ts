@@ -104,7 +104,6 @@ export class Autofixer {
         this[FaultID.NoBuiltInType].bind(this)
       ]
     ],
-    [ts.SyntaxKind.VariableStatement, [this[FaultID.StringLiteralType].bind(this)]],
     [
       ts.SyntaxKind.FunctionDeclaration,
       [
@@ -556,43 +555,6 @@ export class Autofixer {
       }
     }
 
-    return node;
-  }
-
-  /**
-   * Rule: `arkts-no-string-literal-type`
-   */
-  private [FaultID.StringLiteralType](node: ts.Node): ts.VisitResult<ts.Node> {
-    void this;
-
-    /**
-     * StringLiteralType mapped to string in arkts1.2
-     */
-
-    if (ts.isVariableStatement(node)) {
-      const newDeclarations = node.declarationList.declarations.map((declaration) => {
-        if (declaration.type && ts.isLiteralTypeNode(declaration.type)) {
-          let isStringLiteral = false;
-          declaration.type.forEachChild((child: ts.Node) => {
-            if (child.kind === ts.SyntaxKind.StringLiteral) {
-              isStringLiteral = true;
-              return;
-            }
-          });
-          if (isStringLiteral) {
-            return ts.factory.createVariableDeclaration(
-              declaration.name,
-              declaration.exclamationToken,
-              ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-              declaration.initializer
-            );
-          }
-        }
-        return declaration;
-      });
-      const newDeclarationList = ts.factory.createVariableDeclarationList(newDeclarations, node.declarationList.flags);
-      return ts.factory.createVariableStatement(node.modifiers, newDeclarationList);
-    }
     return node;
   }
 

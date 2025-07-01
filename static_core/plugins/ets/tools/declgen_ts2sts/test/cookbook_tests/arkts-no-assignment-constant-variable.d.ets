@@ -32,5 +32,5 @@ declare let b18: boolean;
 declare let b19: boolean;
 declare let b20: boolean;
 declare let b21: boolean;
-declare let a: string;
+declare let a: "hello";
 declare let a2: number;
