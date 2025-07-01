@@ -14,15 +14,20 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: Rest function spread with generic
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+type MyUnionType = string | number
+
+function genericRestFunction<A>(...tuple: A[]): number {
+    return tuple.length;
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    arktest.assertEQ(genericRestFunction<MyUnionType>(), 0);
+    arktest.assertEQ(genericRestFunction<MyUnionType>(1), 1);
+    arktest.assertEQ(genericRestFunction<MyUnionType>(1, 2), 2);
+
+    let rest: MyUnionType[] = [1,"2",3,"4"]
+    arktest.assertEQ(genericRestFunction<MyUnionType>(...rest), 4);
 }

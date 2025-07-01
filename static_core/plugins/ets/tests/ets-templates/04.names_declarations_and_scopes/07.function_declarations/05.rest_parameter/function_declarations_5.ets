@@ -14,10 +14,10 @@
  */
 
 /*---
-desc: Rest parameters in lambda expression.
+desc:  Nested functions are not allowed
 tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-    function invalidRestParameter(tmp: number, ...tmp1: number[], tmp2 :number) {}
+    function invalidRestParameter(tmp: number, ...rest: number[]) {}
 }

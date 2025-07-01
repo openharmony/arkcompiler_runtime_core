@@ -20,8 +20,8 @@ cases:
               return x + y;
           }
       call: |-
-          arktest.assertEQ( pair(1.0, 2.0), 3.0 )
-          arktest.assertEQ( pair(1.0), 8.0 )
+          arktest.assertEQ(3.0, pair(1.0, 2.0))
+          arktest.assertEQ(8.0, pair(1.0))
 
     - decl: |-
           // check primitive defaults
@@ -219,24 +219,24 @@ cases:
               return p === undefined ? 0 : 2 * p;
           }
       call: |-
-          arktest.assertEQ( foo(), 0 )
-          arktest.assertEQ( foo(1), 2 )
+          arktest.assertEQ(0, foo())
+          arktest.assertEQ(2, foo(1))
 
     - decl: |-
           function foo(i: int, j: int, k?: boolean): boolean {
               return !k;
           }
       call: |-
-         arktest.assertEQ( foo(1, 2), true )
-          arktest.assertEQ( foo(2, 1, true), false )
+         arktest.assertTrue(foo(1, 2))
+         arktest.assertFalse(foo(2, 1, true))
 
     - decl: |-
           function foo(e?: string): string | undefined {
               return e
           }
       call: |-
-         arktest.assertEQ( foo(), undefined )
-          arktest.assertEQ( foo('test'), 'test')
+         arktest.assertEQ(undefined, foo())
+         arktest.assertEQ('test', foo('test'))
 
     - decl: |-
           enum Color {Red, Green, Blue}
@@ -248,3 +248,94 @@ cases:
           type XYZ=Color
           function foo(c?: XYZ) {}
       call: foo(Color.Blue)
+
+    - decl: |-
+        type OptL = () => int 
+        function test(i: int, ov: OptL = () => 0): int {
+            return ov()
+        }
+      call: |-
+        arktest.assertEQ(0, test(1))
+        arktest.assertEQ(42, test(2, () => 42))
+
+    - decl: |-
+        interface DefaultMethodDecl {
+          test(x: number, y: number = 7.0): number {
+              return x + y;
+          }
+        }
+        class OptionalMethodOwner implements DefaultMethodDecl {    
+        }
+      call: |-
+        const test = new OptionalMethodOwner
+        arktest.assertEQ(3.0, test.test(1.0, 2.0))
+        arktest.assertEQ(8.0, test.test(1.0))
+
+    - decl: |-
+        class OptionalMethodOwner {
+          test(x: number, y: number = 7.0): number {
+              return x + y;
+          }        
+        }
+      call: |-
+        const test = new OptionalMethodOwner
+        arktest.assertEQ(3.0, test.test(1.0, 2.0))
+        arktest.assertEQ(8.0, test.test(1.0))
+
+    - decl: |-
+        class OptionalStaticMethodOwner {
+          static test(x: number, y: number = 7.0): number {
+              return x + y;
+          }        
+        }
+
+      call: |-
+        arktest.assertEQ(3.0, OptionalStaticMethodOwner.test(1.0, 2.0))
+        arktest.assertEQ(8.0, OptionalStaticMethodOwner.test(1.0))
+
+    - decl: |-
+        type OptL = () => int
+        class OptionalMethodOwner {
+          test(i: int, ov: OptL = () => 0): int {
+              return ov()
+          }        
+        }
+
+      call: |-
+        const test = new OptionalMethodOwner
+        arktest.assertEQ(0, test.test(1))
+        arktest.assertEQ(42, test.test(2, () => 42))
+
+    - decl: |-
+        type OptL = () => int
+        class OptionalMethodOwner {
+          static test(i: int, ov: OptL = () => 0): int {
+              return ov()
+          }        
+        }
+
+      call: |-
+        arktest.assertEQ(0, OptionalMethodOwner.test(1))
+        arktest.assertEQ(42, OptionalMethodOwner.test(2, () => 42))
+
+    - decl: |-
+        type OptL = (input?: int) => int
+      call: |-
+        let lc: OptL = (input: int = 42) => input
+        arktest.assertEQ(12, lc(12))
+        arktest.assertEQ(42, lc())
+
+    - decl: |-
+        type OptL = (input?: int) => int
+      call: |-
+        let lc: (input?: int) => int = (input: int = 42) => input
+        arktest.assertEQ(12, lc(12))
+        arktest.assertEQ(42, lc())
+
+    - decl: |-
+        type OptL = (input?: int) => int
+      call: |-
+          let lc: (input: int | undefined) => int = (input: int = 42) => input
+          arktest.assertEQ(12, lc(12))
+          arktest.assertEQ(42, lc())
+        

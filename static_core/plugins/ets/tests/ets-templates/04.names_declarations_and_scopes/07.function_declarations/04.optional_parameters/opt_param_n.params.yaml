@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,3 +45,34 @@ cases:
         arktest.assertEQ( foo(,, 11), 14 )
         arktest.assertEQ( foo(11,, 11), 24 )
         arktest.assertEQ( foo(,,), 6 )
+
+    - decl: |-
+        type OptL = () => int 
+        function foo(i: int, ov?: OptL = () => 0): int { / CTE, ambiguity
+            return ov()
+        }
+      call: |-
+        foo(0)
+
+    - decl: |-
+        type OptL = () => int
+        class OptionalMethodOwner {
+          test(i: int, ov?: OptL = () => 0): int {
+              return ov()
+          }        
+        }
+
+      call: |-
+        const test = new OptionalMethodOwner
+        arktest.assertEQ(0, test.test(1))
+
+    - decl: |-
+        type OptL = () => int
+        class OptionalMethodOwner {
+          static test(i: int, ov?: OptL = () => 0): int {
+              return ov()
+          }        
+        }
+
+      call: |-
+        arktest.assertEQ(0, OptionalMethodOwner.test(1))

@@ -14,15 +14,33 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: class constructor Rest parameters spread
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+class RestClass {
+    res = 0;
+
+    constructor(...numbers: number[]) {
+       for (let num of numbers) {
+           this.res += num;
+       }
+    }
+
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    let rc = new RestClass
+    arktest.assertEQ(rc.res, 0);
+
+    arktest.assertEQ(new RestClass().res, 0);
+
+    let emp: number[] = []
+    let tmp: number[] = [1, 2, 3];
+    let arr: Array<number> = Array.create<number>(1, 1.0)
+
+    arktest.assertEQ(new RestClass(...emp).res, 0.0);
+    arktest.assertEQ(new RestClass(...tmp).res, 6.0);
+    arktest.assertEQ(new RestClass(...arr).res, 1.0);
+
+
 }

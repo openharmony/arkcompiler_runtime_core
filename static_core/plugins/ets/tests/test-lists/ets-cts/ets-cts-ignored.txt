@@ -84,6 +84,18 @@
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_13.ets
 
+#26657
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_23.ets
+
+#26671
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_30.ets
+
+#27046
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_rest_tuple_negative.ets
+
+#26981
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
+
 #24441
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_2.ets

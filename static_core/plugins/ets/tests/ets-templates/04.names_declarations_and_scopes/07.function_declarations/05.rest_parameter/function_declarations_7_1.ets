@@ -16,13 +16,14 @@
 /*---
 desc: Rest parameters with mixed types.
 ---*/
+type NumberOrString = number | string
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
+export function logValues(...values: NumberOrString[]): NumberOrString[] {
     return values
 }
 
 function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
+    let tmp: NumberOrString[]=[1, "1"];
     let tmp1 = logValues(...tmp);
     arktest.assertEQ(tmp1[0], 1);
 }

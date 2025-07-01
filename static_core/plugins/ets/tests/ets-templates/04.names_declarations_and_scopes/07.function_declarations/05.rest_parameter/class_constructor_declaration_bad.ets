@@ -14,15 +14,20 @@
  */
 
 /*---
-desc: Rest parameters with mixed types.
+desc: class constructor Rest parameters spread
+tags: [compile-only, negative]
 ---*/
 
-export function logValues(...values: (number | string)[]): (number | string)[] {
-    return values
+class RestClass {
+    res = 0;
+
+    constructor(...numbers: [number, number, number, number]) {
+        this.res = 4
+    }
 }
 
-function main(): void {
-    let tmp: (number | string)[] = [1, "1"];
-    let tmp1 = logValues(...tmp);
-    arktest.assertEQ(tmp1[0], 1);
+function main() {
+    let ht0: [number, number] = [1, 2]
+    let ht1: [number, number] = [3, 4]
+    arktest.assertEQ(new RestClass(...ht0, ...ht1).res, 4);
 }

@@ -193,11 +193,41 @@ cases:
 
   # 15. spread 2 arrays
   - sig: |-
-      sum(...numbers: int[]): int
+      sum(...numbers: int[]): number
     def: |-
-      return 1
+      return numbers.length
     call: |-
-      const arr1 = [1, 2, 3]
-      const arr2 = [4, 5, 6]
-      const combined = [...arr1, ...arr2]
+      const arr1: int[] = [1, 2, 3]
+      const arr2: int[] = [4, 5, 6]
+      const combined: int[] = [...arr1, ...arr2]
       const copy = [...arr1]
+      arktest.assertEQ(sum(...combined), 6)
+
+  #16. Spread readonly array
+  - sig: |-
+      sum(...numbers: readonly int[]): number
+    def: |-
+      return numbers.length
+    call: |-
+      const arr: readonly int[] = [1, 2, 3, 4, 5, 6]
+
+      arktest.assertEQ(sum(...arr), 6)
+
+  #16. Spread readonly array
+  - sig: |-
+      sum(...numbers: readonly Array<int>): number
+    def: |-
+      return numbers.length
+    call: |-
+      const arr: readonly Array<int> = Array.create<int>(1, 1)
+      arktest.assertEQ(sum(...arr), 1)
+      
+
+  #16. Spread readonly array
+  - sig: |-
+      sum(...numbers: readonly Array<int>): number
+    def: |-
+      return numbers.length
+    call: |-
+      const arr: readonly Array<int> = new Array<int>(0, 1, 2, 3, 4, 5);
+      arktest.assertEQ(sum(...arr), 6)
