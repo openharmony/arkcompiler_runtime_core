@@ -401,7 +401,7 @@ function testAlloc() {
     arktest.assertEQ(buf.length, 10);
     arktest.assertEQ(buf.toString('ascii'), 'aaaaaaaaaa');
 
-    const buf2 = buffer.alloc(5, 0x1);
+    const buf2 = buffer.alloc(5, 0x1 as long);
     arktest.assertEQ(buf2.length, 5);
     arktest.assertEQ(buf2.at(0), 0x1);
 }
@@ -552,7 +552,7 @@ function testBufferCompareUint8Array() {
     arktest.assertEQ(buffer.compare(u2, u1), 1)
 
     // Call Buffer.compare Uint8Arrays (no byteOffset) vs Buffer (no byteOffset)
-    let bufNoOffset = buffer.alloc(3, 22);
+    let bufNoOffset = buffer.alloc(3, 22 as long);
     arktest.assertEQ(buffer.compare(u1, bufNoOffset), -1)
     arktest.assertEQ(buffer.compare(bufNoOffset, u1), 1)
 
@@ -625,7 +625,7 @@ function testFill() {
     let buf3 = buffer.from(ab)
     arktest.expectNoThrow(() => {
         arktest.assertEQ(JSON.stringify(buf3), '{"type":"Buffer","data":[0,0,0,0,0,0,0,0,0,0]}')
-        buf3.fill(1)
+        buf3.fill(1 as long)
         arktest.assertEQ(new Uint8Array(ab).toString(), "1,1,1,1,1,1,1,1,1,1")
         arktest.assertEQ(JSON.stringify(buf3), '{"type":"Buffer","data":[1,1,1,1,1,1,1,1,1,1]}')
         arktest.assertEQ(JSON.stringify(new Uint8Array(ab)), '{"0":1,"1":1,"2":1,"3":1,"4":1,"5":1,"6":1,"7":1,"8":1,"9":1}')
@@ -667,19 +667,20 @@ function testSubarray() {
     }
 
     let buf2 = buf1.subarray(-1)
-    let res = buf2.toString('ascii', 0, buf2.length)
+    const bufLength: int = buf2.length.toInt()
+    let res = buf2.toString('ascii', 0, bufLength)
     arktest.assertEQ(res, '')
 
     buf2 = buf1.subarray(10, -1)
-    res = buf2.toString('ascii', 0, buf2.length)
+    res = buf2.toString('ascii', 0, bufLength)
     arktest.assertEQ(res, '')
 
     buf2 = buf1.subarray(2, 1)
-    res = buf2.toString('ascii', 0, buf2.length)
+    res = buf2.toString('ascii', 0, bufLength)
     arktest.assertEQ(res, '')
 
     buf2 = buf1.subarray(2, 2)
-    res = buf2.toString('ascii', 0, buf2.length)
+    res = buf2.toString('ascii', 0, bufLength)
     arktest.assertEQ(res, '')
 }
 
@@ -841,7 +842,7 @@ function testFloatReadWrite() {
     const buf = buffer.from(new Uint8Array(8))
 
     // Test Big Endian
-    const testFloat = 3.14159
+    const testFloat: float = 3.14159f
     buf.writeFloatBE(testFloat, 0)
     // Using approx comparison due to float precision
     arktest.assertDoubleEQ(buf.readFloatBE(0), testFloat, 0.00001)
@@ -947,10 +948,10 @@ function testReadIntUintLEBE() {
     }
     {
         let buf = buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
-        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), "-1")
-        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), "-1")
-        arktest.assertEQ(buf.readUIntLE(0, 6).toString(16), "ffffffffffff")
-        arktest.assertEQ(buf.readUIntBE(0, 6).toString(16), "ffffffffffff")
+        arktest.assertEQ(buf.readIntLE(0, 6).toString(16), '-1')
+        arktest.assertEQ(buf.readIntBE(0, 6).toString(16), '-1')
+        arktest.assertEQ(buf.readUIntLE(0, 6), 0xffffffffffff)
+        arktest.assertEQ(buf.readUIntBE(0, 6), 0xffffffffffff)
     }
 
     {
@@ -986,15 +987,17 @@ function testStringWrite() {
 
     // Test basic ASCII write
     const str = "Hello"
-    const bytesWritten = buf.write(str, 0, str.length, 'utf8')
-    arktest.assertEQ(bytesWritten, str.length)
-    arktest.assertEQ(buf.toString('utf8', 0, str.length), str)
+    const strLen: int = str.length.toInt()
+    const bytesWritten = buf.write(str, 0, strLen, 'utf8')
+    arktest.assertEQ(bytesWritten, strLen)
+    arktest.assertEQ(buf.toString('utf8', 0, strLen), str)
 
     // Test write with offset
     const str2 = "World"
-    const bytesWritten2 = buf.write(str2, 10, str2.length, 'utf8')
-    arktest.assertEQ(bytesWritten2, str2.length)
-    arktest.assertEQ(buf.toString('utf8', 10, 10 + str2.length), str2)
+    const strLen2: int = str2.length.toInt()
+    const bytesWritten2 = buf.write(str2, 10, strLen2, 'utf8')
+    arktest.assertEQ(bytesWritten2, strLen2)
+    arktest.assertEQ(buf.toString('utf8', 10, 10 + strLen2), str2)
 
     // Test partial write
     const longStr = "ThisIsALongString"
@@ -1014,16 +1017,17 @@ function testBufferWriteStringSingleParam() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
     let res = buf.write(str)
-    arktest.assertEQ(res, str.length)
-    arktest.assertEQ(buf.toString('utf8', 0, str.length), str)
+    let strLen: int = str.length.toInt()
+    arktest.assertEQ(res, strLen)
+    arktest.assertEQ(buf.toString('utf8', 0, strLen), str)
 }
 
 function testBufferWriteStringInfinity() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
     arktest.expectError(() => {
-        buf.write(str, 0, Infinity);
-    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: Infinity");
+        buf.write(str, 0, Infinity.toInt());
+    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: 2147483647");
 }
 
 function testBufferWriteStringWrongOffset() {
@@ -1037,8 +1041,8 @@ function testBufferWriteStringWrongOffset() {
 function testBufferWriteStringOutRangeOffset() {
     let buf = buffer.alloc(10);
     arktest.expectError(() => {
-        buf.write("abc", -Infinity, -Infinity, 'utf8');
-    }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -Infinity");
+        buf.write("abc", -Infinity.toInt(), -Infinity.toInt(), 'utf8');
+    }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -2147483647");
 }
 
 function testBufferWriteStringOutRangeLength() {
@@ -1084,14 +1088,16 @@ function testByteOffset() {
     a.set(3, 33 as byte)
     buf = new buffer.Buffer(a, 2)
     arktest.assertEQ(buf.byteOffset, 2)
-    let byteOffset: number;
-    arktest.expectError((): void => { byteOffset = -1; let f = new buffer.Buffer(a, byteOffset) });
+    let byteOffset: int;
+    arktest.expectError((): void => { 
+                                        byteOffset = -1; 
+                                        let f = new buffer.Buffer(a, byteOffset) });
     arktest.expectError((): void => {
-                                        byteOffset = a.getByteLength().toDouble();
+                                        byteOffset = a.getByteLength();
                                         let f = new buffer.Buffer(a, byteOffset)
                         });
     arktest.expectError((): void => {
-                                        byteOffset = a.getByteLength().toDouble() + 1;
+                                        byteOffset = a.getByteLength() + 1;
                                         let f = new buffer.Buffer(a, byteOffset)
                         });
 }

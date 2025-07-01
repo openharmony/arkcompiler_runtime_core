@@ -1429,7 +1429,7 @@ export namespace stream {
                     res = buf[num];
                     buf[num++] = null;
                 } else {
-                    res = buffer.allocUninitializedFromPool(this.readableLengthInner);
+                    res = buffer.allocUninitializedFromPool(this.readableLengthInner.toInt()) as buffer.Buffer
                     let index: int = 0;
                     while (num < len) {
                         (buf[num] as buffer.Buffer).copy(res, index, 0 ,(buf[num] as buffer.Buffer).length);
@@ -1437,10 +1437,10 @@ export namespace stream {
                         buf[num++] = null;
                     }
                 }
-            } else if (size < (buf[num] as buffer.Buffer).length.toInt()) {
-                res = (buf[num] as buffer.Buffer).subarray(0, size);
-                buf[num] = (buf[num] as buffer.Buffer).subarray(size);
-            } else if (size === (buf[num] as buffer.Buffer).length.toInt()) {
+            } else if (size < (buf[num] as buffer.Buffer).length) {
+                res = (buf[num] as buffer.Buffer).subarray(0, size.toInt());
+                buf[num] = (buf[num] as buffer.Buffer).subarray(size.toInt());
+            } else if (size === (buf[num] as buffer.Buffer).length) {
                 res = buf[num];
                 buf[num++] = null;
             } else if (this.readableDecoder) {
@@ -1456,31 +1456,30 @@ export namespace stream {
                             res = (res as string) + (str as string);
                             buf[num++] = null;
                         } else {
-                            res = (res as string) + (str as buffer.Buffer).subarray(0, size);
-                            buf[num] = (str as buffer.Buffer).subarray(size);
+                            res = (res as string) + (str as buffer.Buffer).subarray(0, size.toInt());
+                            buf[num] = (str as buffer.Buffer).subarray(size.toInt());
                         }
                         break;
                     }
                 }
             } else {
-                res = buffer.allocUninitializedFromPool(size);
+                res = buffer.allocUninitializedFromPool(size.toInt()) as buffer.Buffer
 
-                const nRetLen = size;
+                const nRetLen = size.toInt();
                 while (num < len) {
                     const data = buf[num];
-                    if (size > (data as buffer.Buffer).length.toInt()) {
-                        (data as buffer.Buffer).copy(res, nRetLen - size, 0, (data as buffer.Buffer).length);
-                        size -= (data as buffer.Buffer).length.toInt();
+                    const dataLength = (data as buffer.Buffer).length
+                    if (size > dataLength) {
+                        (data as buffer.Buffer).copy(res, nRetLen - size.toInt(), 0, dataLength);
+                        size -= dataLength
                         buf[num++] = null;
                     } else {
-                        if (size === (data as buffer.Buffer).length.toInt()) {
-                            (data as buffer.Buffer).copy(res, nRetLen - size, 0, (data as buffer.Buffer).length);
+                        (data as buffer.Buffer).copy(res, nRetLen - size.toInt(), 0, size.toInt());
+                        if (size === dataLength) {
                             buf[num++] = null;
                         } else {
-                            (data as buffer.Buffer).copy(res, nRetLen - size, 0, size);
-                            let RemainBuf: buffer.Buffer =
-                                buffer.allocUninitializedFromPool((data as buffer.Buffer).length.toInt() - size);
-                            (data as buffer.Buffer).copy(RemainBuf, nRetLen - size, 0, size);
+                            let RemainBuf = buffer.allocUninitializedFromPool(dataLength - size.toInt());
+                            (data as buffer.Buffer).copy(RemainBuf, nRetLen - size.toInt(), 0, size.toInt());
                             buf[num] = RemainBuf;
                         }
                         break;
