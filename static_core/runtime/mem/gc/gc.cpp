@@ -170,6 +170,7 @@ void GC::Initialize(PandaVM *vm)
     auto allocator = GetInternalAllocator();
     gcListenerManager_ = allocator->template New<GCListenerManager>();
     clearedReferencesLock_ = allocator->New<os::memory::Mutex>();
+    ASSERT(clearedReferencesLock_ != nullptr);
     os::memory::LockHolder holder(*clearedReferencesLock_);
     clearedReferences_ = allocator->New<PandaVector<ark::mem::Reference *>>(allocator->Adapter());
     this->SetPandaVM(vm);

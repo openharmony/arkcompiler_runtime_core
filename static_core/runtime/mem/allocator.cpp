@@ -50,6 +50,7 @@ ObjectAllocatorBase::~ObjectAllocatorBase()
     // NOLINTNEXTLINE(readability-delete-null-pointer)
     if (pygoteSpaceAllocator_ != nullptr) {
         delete pygoteSpaceAllocator_;
+        pygoteSpaceAllocator_ = nullptr;
     }
 }
 
@@ -107,8 +108,11 @@ ObjectAllocatorNoGen<MT_MODE>::ObjectAllocatorNoGen(MemStatsType *memStats, bool
         pygoteSpaceAllocator_->SetHeapSpace(&heapSpace_);
     }
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats);
+    ASSERT(objectAllocator_ != nullptr);
     largeObjectAllocator_ = new (std::nothrow) LargeObjectAllocator(memStats);
+    ASSERT(largeObjectAllocator_ != nullptr);
     humongousObjectAllocator_ = new (std::nothrow) HumongousObjectAllocator(memStats);
+    ASSERT(humongousObjectAllocator_ != nullptr);
 }
 
 template <MTModeT MT_MODE>
@@ -224,6 +228,7 @@ void ObjectAllocatorNoGen<MT_MODE>::FreeObjectsMovedToPygoteSpace()
         [](void *mem, size_t size) { PoolManager::GetMmapMemPool()->FreePool(mem, size); });
     delete objectAllocator_;
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats_);
+    ASSERT(objectAllocator_ != nullptr);
 }
 
 template <MTModeT MT_MODE>

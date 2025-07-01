@@ -132,6 +132,7 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinke
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *coroManager = coro->GetCoroutineManager();
     auto launchMode = coroManager->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     [[maybe_unused]] EtsHandleScope scope(coro);
@@ -183,6 +184,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
     auto *exc = promiseHandle->GetValue(currentCoro);
+    ASSERT(exc != nullptr);
     currentCoro->SetException(exc->GetCoreType());
     return nullptr;
 }
