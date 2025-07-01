@@ -129,6 +129,7 @@ Inst *BalanceExpressions::OptimizeExpression(Inst *instAfterExpr)
 template <bool IS_FIRST_CALL>
 Inst *BalanceExpressions::AllocateSourcesRec(size_t firstIdx, size_t lastIdx)
 {
+    ASSERT(lastIdx > firstIdx);
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << firstIdx << " to " << lastIdx << "]";
     size_t splitIdx = firstIdx + GetBitFloor(lastIdx - firstIdx + 1) - 1;
 
