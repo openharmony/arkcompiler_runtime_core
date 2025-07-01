@@ -350,11 +350,13 @@ export final class Console {
             return
         }
         if (!vals[0]) {
-            let errMsg = new StringBuilder("Assertion failed")
+            // replace false evaluated condition with no `vals` length changes
+            let sb = new StringBuilder("Assertion failed")
             if (vals.length > 1) {
-                errMsg.append(c':')
+                sb.append(c':')
             }
-            this.error(errMsg.toString(), vals)
+            vals[0] = sb
+            this.error(...vals)
         }
     }
 
