@@ -38,7 +38,7 @@
 }
 .tag {
   margin-right: 8px;
-  font-family: 'Roboto Mono';
+  font-family: 'Roboto Mono', monospace;
   color: var(--text-color);
   opacity: 0.3;
 }
@@ -48,7 +48,7 @@
 }
 .logText {
   color: var(--text-color);
-  font-family: 'Roboto Mono';
+  font-family: 'Roboto Mono', monospace;
 }
 .filterContainer {
   display: flex;
@@ -66,5 +66,5 @@
   border: 1px solid var(--divider);
   border-radius: 2px;
   color: var(--text-color);
-  font-family: 'Roboto Mono';
+  font-family: 'Roboto Mono', monospace;
 }
