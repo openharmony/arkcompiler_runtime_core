@@ -18,6 +18,7 @@
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
+#include <algorithm>
 
 namespace ark {
 
@@ -591,6 +592,12 @@ void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStat
 {
     os::memory::LockHolder lock(runnablesLock_);
     runnables_.IterateOverCoroutines([&info](Coroutine *co) { info->AddCoroutine(co); });
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        std::for_each(waiters_.begin(), waiters_.end(), [&info](const std::pair<CoroutineEvent *, Coroutine *> &pair) {
+            info->AddCoroutine(pair.second);
+        });
+    }
 }
 
 }  // namespace ark
