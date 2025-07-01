@@ -174,7 +174,6 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
         auto timerId = reinterpret_cast<uint64_t>(timerHandle->data);
         auto [info, exists] = FindTimerInfo(env, timerId);
         if (!exists) {
-            DisarmTimer(timerHandle);
             return;
         }
 

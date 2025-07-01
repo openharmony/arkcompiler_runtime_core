@@ -31,25 +31,23 @@ let shortTimeout = 10;
 let mediumTimeout = 100;
 let longTimeout = 1000;
 
-function assertTrue(expr: boolean) {
-    if (!expr) {
-        console.log(new Error().stack);
-        StdProcess.abort();
-    }
-}
-
 function setTimeoutTest() {
     let flag = false;
     let start = Date.now();
     setTimeout(() => {
-        assertTrue(flag);
-        assertTrue(Date.now() - start >= shortTimeout);
+        arktest.assertTrue(flag);
+        arktest.assertTrue(Date.now() - start >= shortTimeout);
     }, shortTimeout);
     flag = true;
 }
 
+function firstTimerIdTest() {
+    let id = setTimeout(() => {}, 0);
+    arktest.assertTrue(id == 1);
+}
+
 function clearTimeoutTest() {
-    let id = setTimeout(() => { assertTrue(false); }, mediumTimeout);
+    let id = setTimeout(() => { arktest.assertTrue(false); }, mediumTimeout);
     clearTimeout(id);
 }
 
@@ -68,7 +66,7 @@ function clearIntervalFromAnotherTimer() {
     let flag = false;
     let id = setInterval(() => { flag = true; }, shortTimeout);
     setTimeout(() => {
-        assertTrue(flag);
+        arktest.assertTrue(flag);
         clearInterval(id);
     }, mediumTimeout);
 }
@@ -84,6 +82,7 @@ function sameWorkerIdTest() {
 }
 
 function main() {
+    firstTimerIdTest();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     for (let test of tests) {
         test();
