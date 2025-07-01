@@ -104,6 +104,7 @@ extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame 
     }
 
     ManagedThread *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     if (!thread->template StackOverflowCheck<true, false>()) {
         HandlePendingException(UnwindPolicy::SKIP_INLINED);
         UNREACHABLE();
@@ -139,6 +140,7 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
 
     LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object in compiled code at " << mem << " size: " << size;
     auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     ASSERT(size <= Runtime::GetOptions().GetMaxTlabSize());
     // 1. Pointer to TLAB
     // 2. Pointer to allocated memory
@@ -202,7 +204,9 @@ extern "C" coretypes::String *CreateEmptyStringEntrypoint()
 {
     BEGIN_ENTRYPOINT();
 
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto str = coretypes::String::CreateEmptyString(vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
         HandlePendingException();
@@ -214,7 +218,9 @@ extern "C" coretypes::String *CreateEmptyStringEntrypoint()
 extern "C" coretypes::String *CreateStringFromStringEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto str = coretypes::String::CreateFromString(static_cast<coretypes::String *>(obj), vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
         HandlePendingException();
@@ -226,7 +232,9 @@ extern "C" coretypes::String *CreateStringFromStringEntrypoint(ObjectHeader *obj
 extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto array = static_cast<coretypes::Array *>(obj);
     auto str = coretypes::String::CreateNewStringFromChars(0, array->GetLength(), array, vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
@@ -240,7 +248,9 @@ extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t
                                                                         ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto array = static_cast<coretypes::Array *>(obj);
     auto str = coretypes::String::CreateNewStringFromChars(offset, length, array, vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
@@ -253,7 +263,9 @@ extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t
 extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto array = static_cast<coretypes::Array *>(obj);
     auto str = coretypes::String::CreateNewStringFromChars(0, length, array, vm->GetLanguageContext(), vm);
     if (UNLIKELY(str == nullptr)) {
@@ -267,7 +279,9 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
 {
     BEGIN_ENTRYPOINT();
 
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, static_cast<coretypes::String *>(obj));
     auto substrLength = indexes.second - indexes.first;
     auto substr = coretypes::String::FastSubString(static_cast<coretypes::String *>(obj), indexes.first, substrLength,
@@ -303,7 +317,9 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
         HandlePendingException(UnwindPolicy::SKIP_INLINED);
         UNREACHABLE();
     }
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto arrayLength = end - begin;
     auto array = coretypes::String::GetChars(static_cast<coretypes::String *>(obj), begin, arrayLength,
                                              vm->GetLanguageContext());
@@ -318,7 +334,9 @@ extern "C" coretypes::Array *ResolveLiteralArrayEntrypoint(const Method *caller,
 {
     BEGIN_ENTRYPOINT();
 
-    auto arr = Runtime::GetCurrent()->ResolveLiteralArray(ManagedThread::GetCurrent()->GetVM(), *caller, typeId);
+    auto thread = Runtime::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto arr = thread->ResolveLiteralArray(ManagedThread::GetCurrent()->GetVM(), *caller, typeId);
     if (UNLIKELY(arr == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -389,7 +407,9 @@ extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t si
     LOG_ENTRYPOINT();
     AnnotateSanitizersEntrypoint(obj, size);
     auto *objectClass = obj->ClassAddr<Class>();
-    auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto *barrierSet = thread->GetBarrierSet();
     if (!objectClass->IsArrayClass() || !objectClass->GetComponentType()->IsPrimitive()) {
         barrierSet->PostBarrier(obj, 0, size);
     }
@@ -465,8 +485,10 @@ extern "C" Class *ResolveClassEntrypoint(const Method *caller, FileEntityId type
 extern "C" coretypes::String *ResolveStringEntrypoint(const Method *caller, FileEntityId id)
 {
     BEGIN_ENTRYPOINT();
-    return Runtime::GetCurrent()->ResolveStringFromCompiledCode(ManagedThread::GetCurrent()->GetVM(), *caller,
-                                                                panda_file::File::EntityId(id));
+    auto *thread = Runtime::GetCurrent();
+    ASSERT(thread != nullptr);
+    return thread->ResolveStringFromCompiledCode(ManagedThread::GetCurrent()->GetVM(), *caller,
+                                                 panda_file::File::EntityId(id));
 }
 
 extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, FileEntityId id, ObjectHeader **slot)
@@ -474,7 +496,9 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
     BEGIN_ENTRYPOINT();
     auto runtime = Runtime::GetCurrent();
     auto aotManager = runtime->GetClassLinker()->GetAotManager();
-    auto vm = ManagedThread::GetCurrent()->GetVM();
+    auto thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    auto vm = thread->GetVM();
     auto str = runtime->ResolveStringFromCompiledCode(vm, *caller, ark::panda_file::File::EntityId(id));
     if (UNLIKELY(str == nullptr)) {
         return nullptr;
@@ -530,6 +554,7 @@ extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs
                                                    Method *method, Frame *prev)
 {
     auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     uint32_t extSz = thread->GetVM()->GetFrameExtSize();
     size_t allocSz = Frame::GetAllocSize(size, extSz);
     void *mem = thread->GetStackFrameAllocator()->Alloc(allocSz);
@@ -544,7 +569,9 @@ extern "C" Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t
 {
     uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
     size_t allocSz = Frame::GetAllocSize(size, extSz);
-    void *mem = ManagedThread::GetCurrent()->GetStackFrameAllocator()->Alloc(allocSz);
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    void *mem = thread->GetStackFrameAllocator()->Alloc(allocSz);
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
@@ -562,6 +589,9 @@ static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, 
 {
     auto frame =
         CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs, method, prev);
+    if (UNLIKELY(frame == nullptr)) {
+        return nullptr;
+    }
     if (IS_DYNAMIC) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
         coretypes::TaggedValue initialValue = ctx.GetInitialTaggedValue();
@@ -602,7 +632,9 @@ extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t numActualArgs, 
 extern "C" void FreeFrame(Frame *frame)
 {
     ASSERT(frame->GetExt() != nullptr);
-    ManagedThread::GetCurrent()->GetStackFrameAllocator()->Free(frame->GetExt());
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    thread->GetStackFrameAllocator()->Free(frame->GetExt());
 }
 
 extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fieldId)
@@ -790,6 +822,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
     {
         auto thread = ManagedThread::GetCurrent();
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+        ASSERT(obj != nullptr);
         VMHandle<ObjectHeader> handleObj(thread, obj);
 
         BEGIN_ENTRYPOINT();
@@ -802,8 +835,9 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
                 // Codegen must subtract index after loading from the slot.
                 *slot = method->GetVTableIndex() + 1;
             }
-
-            auto *resolved = handleObj.GetPtr()->ClassAddr<Class>()->ResolveVirtualMethod(method);
+            auto objPtr = handleObj.GetPtr();
+            ASSERT(objPtr != nullptr);
+            auto *resolved = objPtr->ClassAddr<Class>()->ResolveVirtualMethod(method);
             ASSERT(resolved != nullptr);
 
             return reinterpret_cast<uintptr_t>(resolved);
@@ -882,14 +916,16 @@ extern "C" NO_ADDRESS_SANITIZE void ThrowExceptionEntrypoint(ObjectHeader *excep
 {
     BEGIN_ENTRYPOINT();
     LOG(DEBUG, INTEROP) << "ThrowExceptionEntrypoint \n";
-    ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ASSERT(!thread->HasPendingException());
     if (exception == nullptr) {
         NullPointerExceptionEntrypoint();
         UNREACHABLE();
     }
-    ManagedThread::GetCurrent()->SetException(exception);
+    thread->SetException(exception);
 
-    SetExceptionEvent(events::ExceptionType::THROW, ManagedThread::GetCurrent());
+    SetExceptionEvent(events::ExceptionType::THROW, thread);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -977,7 +1013,7 @@ extern "C" NO_ADDRESS_SANITIZE void StackOverflowExceptionEntrypoint()
     // WARNING: We should not add any heavy code constructions here, like events or other debug/testing stuff,
     // because we have small stack here, see ManagedThread::STACK_OVERFLOW_RESERVED_SIZE.
     auto thread = ManagedThread::GetCurrent();
-
+    ASSERT(thread != nullptr);
     ASSERT(!thread->HasPendingException());
     thread->DisableStackOverflowCheck();
     ThrowStackOverflowException(thread);
@@ -1035,11 +1071,13 @@ extern "C" void LockObjectSlowPathEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     ark::intrinsics::ObjectMonitorEnter(obj);
-    if (!ManagedThread::GetCurrent()->HasPendingException()) {
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    if (!thread->HasPendingException()) {
         return;
     }
     LOG(DEBUG, INTEROP) << "ThrowNativeExceptionEntrypoint after LockObject \n";
-    SetExceptionEvent(events::ExceptionType::NATIVE, ManagedThread::GetCurrent());
+    SetExceptionEvent(events::ExceptionType::NATIVE, thread);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
@@ -1053,7 +1091,9 @@ extern "C" void UnlockObjectSlowPathEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     ark::intrinsics::ObjectMonitorExit(obj);
-    if (!ManagedThread::GetCurrent()->HasPendingException()) {
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    if (!thread->HasPendingException()) {
         return;
     }
     LOG(DEBUG, INTEROP) << "ThrowNativeExceptionEntrypoint after UnlockObject \n";
