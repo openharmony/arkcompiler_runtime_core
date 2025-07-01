@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ public:
             decodingBuffer[baseIdx++] = decoded;
 
             if (baseIdx == ENCODED_GROUP_BYTES) {
-                DecodeSextetsGroup(decodingBuffer, Span(output, DECODED_GROUP_BYTES));
+                DecodeSextetsGroup(decodingBuffer, decodingBuffer.size(), Span(output, DECODED_GROUP_BYTES));
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 output += DECODED_GROUP_BYTES;
                 baseIdx = 0;
@@ -85,7 +85,8 @@ public:
         if (baseIdx != 0) {
             // Decode the remainder part.
             std::array<uint8_t, DECODED_GROUP_BYTES> decodedRemainder = {0};
-            DecodeSextetsGroup(decodingBuffer, Span(decodedRemainder.data(), DECODED_GROUP_BYTES));
+            DecodeSextetsGroup(decodingBuffer, decodingBuffer.size(),
+                               Span(decodedRemainder.data(), DECODED_GROUP_BYTES));
             for (size_t idx = 0, end = baseIdx - 1; idx < end; ++idx) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 *output++ = decodedRemainder[idx];
@@ -114,7 +115,8 @@ private:
     }
 
     /// @brief Converts 4 sextets into 3 output bytes.
-    static void DecodeSextetsGroup(const std::array<uint8_t, ENCODED_GROUP_BYTES> &decodingBuffer, Span<uint8_t> output)
+    static void DecodeSextetsGroup(const std::array<uint8_t, ENCODED_GROUP_BYTES> &decodingBuffer,
+                                   [[maybe_unused]] size_t bufferLength, Span<uint8_t> output)
     {
         // 0b00110000
         static constexpr uint8_t FOURTH_TO_FIFTH_BITS = 0x30U;
@@ -124,6 +126,7 @@ private:
         static constexpr uint8_t FOUR_BITS_SHIFT = 4U;
         static constexpr uint8_t SIX_BITS_SHIFT = 6U;
 
+        ASSERT(bufferLength == ENCODED_GROUP_BYTES);
         ASSERT(output.size() == DECODED_GROUP_BYTES);
         // NOLINTBEGIN(hicpp-signed-bitwise)
         output[0UL] =
