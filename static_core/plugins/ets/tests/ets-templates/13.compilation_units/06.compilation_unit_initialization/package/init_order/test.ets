@@ -15,16 +15,17 @@
 
 /*---
 desc: >-
-    Compilation unit is a separate module (see Separate Module Initializer) or a package (see Package Initializer) that
-    is initialized once before an entity (function, variable, or type), exported from the compilation unit, is used for the
-    first time.
+    Compilation unit is a separate module (see Separate Module Initializer)
+    or a package (see Package Initializer) that is initialized once
+    before an entity (function, variable, or type), exported from the compilation unit,
+    is used for the first time.
 tags: [no-warmup]
 files:
 - ./pkg/module.ets
 ---*/
 
-import {i} from "./pkg"
-import {j} from "./pkg"
+import {i} from './pkg'
+import {j} from './pkg'
 
 function main() {
   assertEQ(i, 2.0)
