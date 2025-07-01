@@ -1357,37 +1357,15 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): Int8Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Int8Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Int8Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int8Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): Int8Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Int8Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int8Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): Int8Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -3209,37 +3187,15 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): Int16Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Int16Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Int16Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int16Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): Int16Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Int16Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int16Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): Int16Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -5026,37 +4982,15 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): Int32Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Int32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Int32Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int32Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): Int32Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Int32Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Int32Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): Int32Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -6863,37 +6797,15 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): BigInt64Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): BigInt64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a BigInt64Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new BigInt64Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): BigInt64Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a BigInt64Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new BigInt64Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): BigInt64Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -8682,37 +8594,15 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): Float32Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Float32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Float32Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Float32Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): Float32Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Float32Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Float32Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): Float32Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -10365,37 +10255,15 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): Float64Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Float64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Float64Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Float64Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): Float64Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Float64Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Float64Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): Float64Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**

@@ -1343,19 +1343,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns new Uint8ClampedArray with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): Uint8ClampedArray {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8ClampedArray with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): Uint8ClampedArray {
         return this.subarray(begin as int, end as int)
     }
@@ -1382,37 +1369,15 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns new Uint8ClampedArray with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): Uint8ClampedArray {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Uint8ClampedArray {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Uint8ClampedArray(this.buffer, relStart * Uint8ClampedArray.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint8ClampedArray with the same Buffer
-     */
-    public subarray(begin: number): Uint8ClampedArray {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Uint8ClampedArray with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint8ClampedArray with the same Buffer
-     */
-    public subarray(begin: int): Uint8ClampedArray {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -3187,19 +3152,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint8Array with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): Uint8Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Uint8Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint8Array with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): Uint8Array {
         return this.subarray(begin as int, end as int)
     }
@@ -3226,37 +3178,15 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint8Array with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): Uint8Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Uint8Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Uint8Array(this.buffer, relStart * Uint8Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Uint8Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint8Array with the same Buffer
-     */
-    public subarray(begin: number): Uint8Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Uint8Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint8Array with the same Buffer
-     */
-    public subarray(begin: int): Uint8Array {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -5017,19 +4947,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint16Array with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): Uint16Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Uint16Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint16Array with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): Uint16Array {
         return this.subarray(begin as int, end as int)
     }
@@ -5056,37 +4973,15 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint16Array with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): Uint16Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Uint16Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Uint16Array(this.buffer, relStart * Uint16Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Uint16Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint16Array with the same Buffer
-     */
-    public subarray(begin: number): Uint16Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Uint16Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint16Array with the same Buffer
-     */
-    public subarray(begin: int): Uint16Array {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -6882,19 +6777,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint32Array with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): Uint32Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a Uint32Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new Uint32Array with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): Uint32Array {
         return this.subarray(begin as int, end as int)
     }
@@ -6921,37 +6803,15 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Uint32Array with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): Uint32Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): Uint32Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new Uint32Array(this.buffer, relStart * Uint32Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a Uint32Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint32Array with the same Buffer
-     */
-    public subarray(begin: number): Uint32Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a Uint32Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new Uint32Array with the same Buffer
-     */
-    public subarray(begin: int): Uint32Array {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**
@@ -8757,19 +8617,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns new BigUint64Array with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): BigUint64Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a BigUint64Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new BigUint64Array with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): BigUint64Array {
         return this.subarray(begin as int, end as int)
     }
@@ -8796,37 +8643,15 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns new BigUint64Array with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): BigUint64Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): BigUint64Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new BigUint64Array(this.buffer, relStart * BigUint64Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a BigUint64Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new BigUint64Array with the same Buffer
-     */
-    public subarray(begin: number): BigUint64Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a BigUint64Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new BigUint64Array with the same Buffer
-     */
-    public subarray(begin: int): BigUint64Array {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**

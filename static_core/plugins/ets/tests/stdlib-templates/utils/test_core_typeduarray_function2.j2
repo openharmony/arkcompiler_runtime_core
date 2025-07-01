@@ -266,7 +266,7 @@ function testSubarrayTwoParams(): int {
   }
 
   let subarrayStart: int = 2;
-  let subarrayEnd: int = 4;
+  let subarrayEnd: int | undefined = 4;
 
   let target: {{.item.objectType}};
 
@@ -424,7 +424,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
   }
 
   let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 
@@ -495,7 +495,7 @@ function testSubarrayOneLengthTwoParams(): int {
   }
 
   let subarrayStart: int = 4;
-  let subarrayEnd: int = 2;
+  let subarrayEnd: int | undefined = 2;
 
   let target: {{.item.objectType}};
 

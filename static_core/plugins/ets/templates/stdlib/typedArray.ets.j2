@@ -1546,37 +1546,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
-    public subarray(begin: int, end: int): {{N}}Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): {{N}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new {{N}}Array(this.buffer, relStart * {{N}}Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a {{N}}Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new {{N}}Array with the same ArrayBuffer
-     */
-    public subarray(begin: number): {{N}}Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a {{N}}Array with the same ArrayBuffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new {{N}}Array with the same ArrayBuffer
-     */
-    public subarray(begin: int): {{N}}Array {
-        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
