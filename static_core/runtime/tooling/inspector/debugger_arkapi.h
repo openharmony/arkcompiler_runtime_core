@@ -19,16 +19,19 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <dlfcn.h>
 #include "libpandabase/macros.h"
+
+using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 
 namespace ark {
 class PANDA_PUBLIC_API ArkDebugNativeAPI final {
 public:
     using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
-
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
-    static bool NotifyDebugMode(int tid, int32_t instanceId = 0, bool debugApp = false);
-    static bool StopDebugger();
+    static bool NotifyDebugMode(int tid, int32_t instanceId, bool debugApp, void *vm,
+                                DebuggerPostTask &debuggerPostTask);
+    static bool StopDebugger(void *vm);
     static bool IsDebugModeEnabled();
 
     static bool StartProfiling(const std::string &filepath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
@@ -41,6 +44,7 @@ public:
     NO_MOVE_SEMANTIC(ArkDebugNativeAPI);
 
 private:
+    static void *gHybridDebuggerHandle_;
     static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
 };
 
