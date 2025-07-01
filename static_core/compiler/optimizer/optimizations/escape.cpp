@@ -551,6 +551,7 @@ bool EscapeAnalysis::MergeProcessor::MergeFields(BasicBlock *block, BasicBlockSt
         bool needMerge = false;
         for (auto predBlock : block->GetPredsBlocks()) {
             auto predState = parent_->GetState(predBlock)->GetStateById(stateToMerge);
+            ASSERT(predState != nullptr);
             auto predFieldValue = predState->GetFieldOrDefault(field, ZERO_INST);
             if (commonId != predFieldValue) {
                 needMerge = true;
@@ -590,7 +591,9 @@ void EscapeAnalysis::MergeProcessor::MaterializeObjectsAtTheBeginningOfBlock(Bas
         // Otherwise remove the instruction from list of instruction requiring materialization
         // at this block.
         if (blockState->GetStateId(inst) != EscapeAnalysis::MATERIALIZED_ID) {
-            statesIt->second = blockState->GetState(inst)->Copy(parent_->GetLocalAllocator());
+            auto state = blockState->GetState(inst);
+            ASSERT(state != nullptr);
+            statesIt->second = state->Copy(parent_->GetLocalAllocator());
             blockState->Materialize(inst);
             ++statesIt;
         } else {
@@ -884,7 +887,9 @@ std::pair<PhiState *, bool> EscapeAnalysis::CreatePhi(BasicBlock *targetBlock, B
 void EscapeAnalysis::MaterializeInBlock(StateOwner inst, BasicBlock *block)
 {
     auto blockState = GetState(block);
-    inst = blockState->GetState(inst)->GetInst();
+    auto state = blockState->GetState(inst);
+    ASSERT(state != nullptr);
+    inst = state->GetInst();
     if (blockState->GetStateId(inst) == EscapeAnalysis::MATERIALIZED_ID) {
         return;
     }
@@ -953,6 +958,7 @@ void EscapeAnalysis::Materialize(StateOwner inst, Inst *before)
     auto prevState = blockState->GetState(inst);
     blockState->Materialize(inst);
     RegisterMaterialization(res, targetInst);
+    ASSERT(prevState != nullptr);
     for (auto &t : prevState->GetFields()) {
         auto &fieldInst = t.second;
         if (blockState->GetStateId(fieldInst) == MATERIALIZED_ID) {
@@ -1138,6 +1144,7 @@ void EscapeAnalysis::VisitNullCheck(Inst *inst)
     auto aliasedStateId = blockState->GetStateId(aliasedInst);
     blockState->SetStateId(inst, aliasedStateId);
     if (aliasedStateId != MATERIALIZED_ID) {
+        ASSERT(blockState->GetState(aliasedInst) != nullptr);
         aliases_[inst] = blockState->GetState(aliasedInst)->GetInst();
     } else {
         aliases_.erase(inst);
@@ -1527,7 +1534,9 @@ void ScalarReplacement::MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, V
         if (auto callerInst = FindCallerInst(block, site)) {
             currSs->SetMethod(callerInst->GetCallMethod());
             currSs->SetCallerInst(callerInst);
-            currSs->SetInliningDepth(callerInst->GetSaveState()->GetInliningDepth() + 1);
+            auto saveState = callerInst->GetSaveState();
+            ASSERT(saveState != nullptr);
+            currSs->SetInliningDepth(saveState->GetInliningDepth() + 1);
         } else {
             currSs->SetMethod(graph_->GetMethod());
         }
@@ -1550,7 +1559,9 @@ void ScalarReplacement::MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst
         if (auto callerInst = FindCallerInst(block)) {
             currSs->SetMethod(callerInst->GetCallMethod());
             currSs->SetCallerInst(callerInst);
-            currSs->SetInliningDepth(callerInst->GetSaveState()->GetInliningDepth() + 1);
+            auto saveState = callerInst->GetSaveState();
+            ASSERT(saveState != nullptr);
+            currSs->SetInliningDepth(saveState->GetInliningDepth() + 1);
         } else {
             currSs->SetMethod(graph_->GetMethod());
         }

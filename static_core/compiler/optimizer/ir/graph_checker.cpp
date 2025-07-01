@@ -43,7 +43,9 @@ GraphChecker::GraphChecker(Graph *graph, const char *passName)
     graph_ = graph;
     PreCloneChecks(graph);
     graph_ = GraphCloner(graph, GetAllocator(), GetLocalAllocator()).CloneGraph();
-    GetGraph()->GetPassManager()->SetCheckMode(true);
+    auto graphTmp = GetGraph();
+    ASSERT(graphTmp != nullptr);
+    graphTmp->GetPassManager()->SetCheckMode(true);
     passName_ = std::string(passName);
     ASSERT(passName != nullptr);
 }

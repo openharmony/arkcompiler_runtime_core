@@ -593,8 +593,9 @@ ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t classId, size_t p
         inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr,
                                                             TypeIdMixin {classId, GetGraph()->GetMethod()}, classPtr);
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
-            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), classId,
-                                                             UnresolvedTypesInterface::SlotKind::CLASS);
+            auto unresolvedTypes = GetRuntime()->GetUnresolvedTypes();
+            ASSERT(unresolvedTypes != nullptr);
+            unresolvedTypes->AddTableSlot(GetMethod(), classId, UnresolvedTypesInterface::SlotKind::CLASS);
         }
     } else {
         ASSERT(classId != 0);

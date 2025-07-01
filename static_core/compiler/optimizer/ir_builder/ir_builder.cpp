@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,6 +176,7 @@ bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions,
     }
 
     auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    ASSERT(pandaFile != nullptr);
     panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     panda_file::CodeDataAccessor cda(*pandaFile, mda.GetCodeId().value());
@@ -437,6 +438,7 @@ IrBuilder::TryCodeBlock *IrBuilder::InsertTryBlockInfo(const Boundaries &tryBoun
 void IrBuilder::CreateTryCatchBoundariesBlocks()
 {
     auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    ASSERT(pandaFile != nullptr);
     panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     panda_file::CodeDataAccessor cda(*pandaFile, mda.GetCodeId().value());
@@ -643,6 +645,7 @@ void IrBuilder::ConnectTryCatchBlocks()
     // Firstly create catch_begin blocks, as they should precede try_begin blocks
     for (auto pc : catchesPc_) {
         auto catchBegin = GetGraph()->CreateEmptyBlock();
+        ASSERT(catchBegin != nullptr);
         catchBegin->SetGuestPc(pc);
         catchBegin->SetCatch(true);
         catchBegin->SetCatchBegin(true);
@@ -717,6 +720,7 @@ void IrBuilder::RestoreTryEnd(const TryCodeBlock &tryBlock)
 bool IrBuilderInliningAnalysis::RunImpl()
 {
     auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    ASSERT(pandaFile != nullptr);
     panda_file::MethodDataAccessor mda(*pandaFile,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     auto codeId = mda.GetCodeId();
@@ -748,6 +752,7 @@ uint32_t IrBuilder::FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const
     }
     auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
     auto *rta = GetGraph()->GetRuntime();
+    ASSERT(pandaFile != nullptr);
     panda_file::MethodDataAccessor mda(*(pandaFile),
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     panda_file::CodeDataAccessor cda(*(pandaFile), mda.GetCodeId().value());

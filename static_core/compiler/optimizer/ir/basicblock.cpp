@@ -151,6 +151,7 @@ bool BasicBlock::HasSucc(BasicBlock *succ)
 void BasicBlock::ReplacePred(BasicBlock *prevPred, BasicBlock *newPred)
 {
     preds_[GetPredBlockIndex(prevPred)] = newPred;
+    ASSERT(newPred != nullptr);
     newPred->succs_.push_back(this);
 }
 
@@ -482,6 +483,7 @@ BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool makeEdge)
 
     auto nextInst = inst->GetNext();
     auto newBb = GetGraph()->CreateEmptyBlock((nextInst != nullptr) ? nextInst->GetPc() : INVALID_PC);
+    ASSERT(newBb != nullptr);
     newBb->SetAllFields(this->GetAllFields());
     newBb->SetOsrEntry(false);
     GetLoop()->AppendBlock(newBb);
@@ -514,6 +516,7 @@ void BasicBlock::AddSucc(BasicBlock *succ, bool canAddEmptyBlock)
         // If edge already exists we create empty block on it
         auto emptyBb = GetGraph()->CreateEmptyBlock(GetGuestPc());
         ReplaceSucc(succ, emptyBb);
+        ASSERT(succ != nullptr);
         succ->ReplacePred(this, emptyBb);
     }
     succs_.push_back(succ);
@@ -527,6 +530,7 @@ void BasicBlock::ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bo
     if (it != succs_.end() && canAddEmptyBlock) {
         // If edge already exists we create empty block on it
         auto emptyBb = GetGraph()->CreateEmptyBlock(GetGuestPc());
+        ASSERT(newSucc != nullptr);
         ReplaceSucc(newSucc, emptyBb);
         newSucc->ReplacePred(this, emptyBb);
     }
@@ -1026,6 +1030,7 @@ void BasicBlock::AddInst(Inst *inst)
         if constexpr (TO_END) {
             ASSERT_PRINT(lastInst_, "Last instruction is undefined");
             inst->SetPrev(lastInst_);
+            ASSERT(lastInst_ != nullptr);
             lastInst_->SetNext(inst);
             lastInst_ = inst;
             // NOLINTNEXTLINE(readability-misleading-indentation)
@@ -1080,6 +1085,7 @@ void BasicBlock::InsertAfter(Inst *inst, Inst *after)
     ASSERT(inst->IsPhi() == after->IsPhi());
     ASSERT(after->GetBasicBlock() == this);
     ASSERT(inst->GetBasicBlock() == nullptr);
+    ASSERT(inst != nullptr);
     inst->SetBasicBlock(this);
     Inst *next = after->GetNext();
     inst->SetPrev(after);
@@ -1099,6 +1105,7 @@ void BasicBlock::InsertBefore(Inst *inst, Inst *before)
     ASSERT(inst->IsPhi() == before->IsPhi());
     ASSERT(before->GetBasicBlock() == this);
     ASSERT(inst->GetBasicBlock() == nullptr);
+    ASSERT(inst != nullptr);
     inst->SetBasicBlock(this);
     Inst *prev = before->GetPrev();
     inst->SetPrev(prev);
@@ -1323,6 +1330,7 @@ BasicBlock *BasicBlock::CreateImmediateDominator()
     if (GetDominator() != nullptr) {
         GetDominator()->RemoveDominatedBlock(this);
         GetDominator()->AddDominatedBlock(dominator);
+        ASSERT(dominator != nullptr);
         dominator->SetDominator(GetDominator());
     }
     dominator->AddDominatedBlock(this);
@@ -1410,6 +1418,7 @@ BasicBlock *BasicBlock::Clone(Graph *targetGraph) const
 #else
     clone = targetGraph->CreateEmptyBlock();
 #endif
+    ASSERT(clone != nullptr);
     clone->SetAllFields(GetAllFields());
     clone->tryId_ = GetTryId();
     if (IsStartBlock()) {
