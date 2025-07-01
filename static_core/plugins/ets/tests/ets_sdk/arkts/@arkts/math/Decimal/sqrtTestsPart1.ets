@@ -16,7 +16,7 @@
 import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Decimal clamp API tests");
+    const suite = new arktest.ArkTestsuite("Decimal sqrt API tests");
     suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM001);
     suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM002);
     suite.addTest("Decimal clamp with specific config", testSqrtWithDiffPRandRM003);
