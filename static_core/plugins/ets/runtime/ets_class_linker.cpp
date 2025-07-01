@@ -42,6 +42,7 @@ bool EtsClassLinker::Initialize()
 
 bool EtsClassLinker::InitializeClass(EtsCoroutine *coroutine, EtsClass *klass)
 {
+    ASSERT(klass != nullptr);
     return classLinker_->InitializeClass(coroutine, klass->GetRuntimeClass());
 }
 

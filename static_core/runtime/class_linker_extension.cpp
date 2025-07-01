@@ -83,6 +83,7 @@ void ClassLinkerExtension::InitializeArrayClassRoot(ClassRoot root, ClassRoot co
 
     auto *arrayClass = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root), GetClassIMTSize(root),
                                    GetClassSize(root));
+    ASSERT(arrayClass != nullptr);
     arrayClass->SetLoadContext(&bootContext_);
     auto *componentClass = GetClassRoot(componentRoot);
     if (!InitializeArrayClass(arrayClass, componentClass)) {
@@ -101,6 +102,7 @@ void ClassLinkerExtension::InitializePrimitiveClassRoot(ClassRoot root, panda_fi
 
     auto *primitiveClass = CreateClass(utf::CStringAsMutf8(descriptor), GetClassVTableSize(root), GetClassIMTSize(root),
                                        GetClassSize(root));
+    ASSERT(primitiveClass != nullptr);
     primitiveClass->SetType(panda_file::Type(typeId));
     primitiveClass->SetLoadContext(&bootContext_);
     InitializePrimitiveClass(primitiveClass);

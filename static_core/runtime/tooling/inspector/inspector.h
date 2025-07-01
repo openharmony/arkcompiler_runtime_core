@@ -120,7 +120,7 @@ private:
 
     Expected<EvaluationResult, std::string> Evaluate(PtThread thread, const std::string &bytecodeBase64,
                                                      size_t frameNumber);
-    void ProfilerSetSamplingInterval(int32_t interval);
+    void ProfilerSetSamplingInterval(uint32_t interval);
     Expected<bool, std::string> ProfilerStart();
     Expected<Profile, std::string> ProfilerStop();
 

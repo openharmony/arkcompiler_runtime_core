@@ -94,13 +94,14 @@ void SamplesRecord::BuildStackInfoMap(const SampleInfo &sampleInfo)
         if (iter == scriptIdMap_.end()) {
             auto scriptId = scriptIdMap_.size() + 1;
             scriptIdMap_.emplace(frameInfo.url, scriptId);
-            frameInfo.scriptId = static_cast<uint32_t>(scriptId);
+            frameInfo.scriptId = static_cast<int>(scriptId);
         } else {
-            frameInfo.scriptId = iter->second;
+            frameInfo.scriptId = static_cast<int>(iter->second);
         }
         frameInfo.moduleName = mda.GetClassName();
         frameInfo.functionName = mda.GetFullName();
-        frameInfo.lineNumber = panda_file::debug_helpers::GetLineNumber(mda, frameId.bcOffset, pfId) - 1;
+        frameInfo.lineNumber =
+            static_cast<int>(panda_file::debug_helpers::GetLineNumber(mda, frameId.bcOffset, pfId)) - 1;
         stackInfoMap_.emplace(frameId, frameInfo);
     }
 }
@@ -131,7 +132,7 @@ struct FrameInfo *SamplesRecord::GetFrameInfoByFrameId(const SampleInfo::Managed
 void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, ProfileInfo &profileInfo,
                                                uint64_t &prevTimeStamp)
 {
-    size_t nodeId = 1;
+    int nodeId = 1;
     // Iterate over the managed stack frames in reverse order.
     for (auto index = static_cast<int>(sampleInfo.stackInfo.managedStackSize - 1); index >= 0; --index) {
         const auto &currentFrame = &sampleInfo.stackInfo.managedStack[index];
@@ -152,7 +153,7 @@ void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, Pro
         if (nodesMap_.find(nodeKey) == nodesMap_.end()) {
             // Create a new CpuProfileNode if it doesn't exist.
             CpuProfileNode methodNode;
-            methodNode.id = nodeId = nodesMap_.size() + 1;
+            methodNode.id = nodeId = static_cast<int>(nodesMap_.size() + 1);
             nodesMap_.emplace(nodeKey, nodeId);
             methodNode.codeEntry = *frameInfo;
             profileInfo.nodes[profileInfo.nodeCount++] = methodNode;

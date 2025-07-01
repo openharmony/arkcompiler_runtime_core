@@ -83,7 +83,9 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetCurrentLineLocat
     auto method = frame.GetMethod();
     auto pandaFile = method->GetPandaFile();
     auto methodId = method->GetFileId();
-    auto &table = GetDebugInfo(pandaFile)->GetLineNumberTable(methodId);
+    auto debugInfo = GetDebugInfo(pandaFile);
+    ASSERT(debugInfo != nullptr);
+    auto &table = debugInfo->GetLineNumberTable(methodId);
     auto it = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
                                [](auto offset, auto entry) { return offset < entry.offset; });
     if (it == table.begin()) {
@@ -351,7 +353,9 @@ std::string DebugInfoCache::GetSourceCode(std::string_view sourceFile)
 
         auto it = disassemblies_.find(sourceFile);
         if (it != disassemblies_.end()) {
-            return GetDebugInfo(&it->second.first)->GetSourceCode(it->second.second);
+            auto debugInfo = GetDebugInfo(&it->second.first);
+            ASSERT(debugInfo != nullptr);
+            return debugInfo->GetSourceCode(it->second.second);
         }
     }
 

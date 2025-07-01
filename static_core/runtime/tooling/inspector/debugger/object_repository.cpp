@@ -19,10 +19,11 @@
 #include "runtime/handle_scope-inl.h"
 
 namespace ark::tooling::inspector {
-ObjectRepository::ObjectRepository()
-    : extension_(ManagedThread::GetCurrent()->GetLanguageContext().CreatePtLangExt()),
-      scope_(ManagedThread::GetCurrent())
+ObjectRepository::ObjectRepository() : extension_(nullptr), scope_(ManagedThread::GetCurrent())
 {
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    extension_ = thread->GetLanguageContext().CreatePtLangExt();
 }
 
 RemoteObject ObjectRepository::CreateGlobalObject()
