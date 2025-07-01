@@ -132,24 +132,24 @@ function test7(): int {
 
 function test8(): int {
     let failure = 0
-    let pattern = "(?<fst>.)(?<snd>.)|(?<thd>x)"
-    for (let flags of ["", "u"]) {
+    let pattern = '(?<fst>.)(?<snd>.)|(?<thd>x)'
+    for (let flags of ['', 'u']) {
         let re = new RegExp(pattern, flags)
-        failure += checkTestResult("cd", "abcd".replace(re, "$<42$1>"))
-        failure += checkTestResult("cd", "abcd".replace(re, "$<fth>"))
-        failure += checkTestResult("cd", "abcd".replace(re, "$<$1>"))
-        failure += checkTestResult("cd", "abcd".replace(re, "$<>"))
-        failure += checkTestResult("cd", "abcd".replace(re, "$<thd>"))
-        failure += checkTestResult("bacd", "abcd".replace(re, "$<snd>$<fst>"))
+        failure += checkTestResult('cd', 'abcd'.replace(re, '$<42$1>'))
+        failure += checkTestResult('cd', 'abcd'.replace(re, '$<fth>'))
+        failure += checkTestResult('cd', 'abcd'.replace(re, '$<$1>'))
+        failure += checkTestResult('cd', 'abcd'.replace(re, '$<>'))
+        failure += checkTestResult('cd', 'abcd'.replace(re, '$<thd>'))
+        failure += checkTestResult('bacd', 'abcd'.replace(re, '$<snd>$<fst>'))
     }
-    for (let flags of ["g", "gu"]) {
+    for (let flags of ['g', 'gu']) {
         let re = new RegExp(pattern, flags)
-        failure += checkTestResult("", "abcd".replace(re, "$<42$1>"))
-        failure += checkTestResult("", "abcd".replace(re, "$<fth>"))
-        failure += checkTestResult("", "abcd".replace(re, "$<$1>"))
-        failure += checkTestResult("", "abcd".replace(re, "$<>"))
-        failure += checkTestResult("", "abcd".replace(re, "$<thd>"))
-        failure += checkTestResult("badc", "abcd".replace(re, "$<snd>$<fst>"))
+        failure += checkTestResult('', 'abcd'.replace(re, '$<42$1>'))
+        failure += checkTestResult('', 'abcd'.replace(re, '$<fth>'))
+        failure += checkTestResult('', 'abcd'.replace(re, '$<$1>'))
+        failure += checkTestResult('', 'abcd'.replace(re, '$<>'))
+        failure += checkTestResult('', 'abcd'.replace(re, '$<thd>'))
+        failure += checkTestResult('badc', 'abcd'.replace(re, '$<snd>$<fst>'))
     }
     return failure
 }
