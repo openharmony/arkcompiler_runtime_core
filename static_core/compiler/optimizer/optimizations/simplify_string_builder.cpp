@@ -1821,6 +1821,7 @@ void SimplifyStringBuilder::ReplaceWithAppendIntrinsic(const ConcatenationMatch 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "for instance id=" << match.instance->GetId() << " ("
                                      << GetOpcodeString(match.instance->GetOpcode()) << "), applying";
 
+    ASSERT(match.appendCount != 0);
     auto lastAppendIntrinsic = match.appendIntrinsics[match.appendCount - 1U];
     auto appendNIntrinsic = CreateIntrinsicStringBuilderAppendStrings(
         match, CopySaveState(GetGraph(), lastAppendIntrinsic->GetSaveState()));
@@ -1874,7 +1875,7 @@ const SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::Colle
                 continue;
             }
 
-            if (current->first != instance) {
+            if (current != calls.end() && current->first != instance) {
                 current = calls.find(instance);
             }
             if (current == calls.end()) {
@@ -1957,6 +1958,7 @@ void SimplifyStringBuilder::CollectStringBuilderFirstCalls(BasicBlock *block)
         }
 
         if (IsStringBuilderAppend(inst) && inst->GetDataFlowInput(0) == instance) {
+            ASSERT(calls != stringBuilderFirstLastCalls_.end());
             auto &firstCall = calls->second.first;
             if (firstCall == nullptr) {
                 firstCall = inst;
