@@ -16,6 +16,7 @@
 #ifndef PANDA_GUARD_OBFUSCATE_NODE_H
 #define PANDA_GUARD_OBFUSCATE_NODE_H
 
+#include "array.h"
 #include "class.h"
 #include "entity.h"
 #include "file_path.h"
@@ -163,6 +164,17 @@ private:
     void UpdateExportForNamespaceMember(const InstructionInfo &info) const;
 
     /**
+     * create array
+     * e.g.
+     * const array = [1, 2, 3];
+     * byteCode:
+     *  main_573 { 6 [ tag_value: 2, i32:1, tag_value: 2, i32:2, tag_value: 2, i32:3, ] }
+     *  createarraywithbuffer 0x0 main_573
+     * @param info instruction info
+     */
+    void CreateArray(const InstructionInfo &info);
+
+    /**
      * this instruction crosses functions and cannot be analyzed by graph, therefore it has been added to the whitelist
      * e.g.
      * class A { ['field'] = 1; }
@@ -209,6 +221,7 @@ public:
     std::unordered_map<std::string, std::shared_ptr<Object>> objectTable_ {};      // key: object literalArray idx
     std::vector<std::shared_ptr<UiDecorator>> uiDecorator_ {};
     std::vector<std::shared_ptr<Annotation>> annotations_ {};
+    std::vector<std::shared_ptr<Array>> arrays_ {};
     std::set<std::string> strings_ {};
     std::string pkgName_;
     bool fileNameNeedUpdate_ = true;

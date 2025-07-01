@@ -83,6 +83,9 @@ bool panda::guard::StringUtil::IsAnonymousFunctionName(const std::string &functi
         return true;
     }
 
+    if (functionName[0] != '^') {
+        return false;
+    }
     return std::regex_search(functionName, ANONYMOUS_FUNCTION_NAME_REG);
 }
 
@@ -169,4 +172,15 @@ bool panda::guard::StringUtil::IsNumber(const std::string &str)
         }
         return false;
     });
+}
+
+std::tuple<std::string, std::string> panda::guard::StringUtil::SplitAnonymousName(const std::string &str)
+{
+    std::smatch match;
+    if (std::regex_search(str.begin(), str.end(), match, ANONYMOUS_FUNCTION_NAME_REG)) {
+        std::string suffix = match[0].str();
+        std::string prefix = str.substr(0, str.find(suffix));
+        return std::make_tuple(prefix, suffix);
+    }
+    return std::make_tuple(str, "");
 }
