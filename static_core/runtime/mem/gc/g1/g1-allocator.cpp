@@ -397,6 +397,7 @@ void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
     // clear because we have move all objects in it to pygote space
     // NOTE(dtrubenkov): FIX clean object_allocator_
     objectAllocator_.reset(new (std::nothrow) ObjectAllocator(memStats_, &heapSpaces_));
+    ASSERT(objectAllocator_.get() != nullptr);
 }
 
 template <MTModeT MT_MODE>
