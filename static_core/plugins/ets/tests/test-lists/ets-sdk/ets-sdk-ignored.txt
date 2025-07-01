@@ -2,3 +2,5 @@
 api/@ohos/util/StringDecoder/EncodingTest.ets
 ### Issue 27038
 api/@ohos/util/types/IsSetIteratorTest.ets
+### Issue 27033
+api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets

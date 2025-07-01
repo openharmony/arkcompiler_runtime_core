@@ -15,9 +15,6 @@
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap ToString IncreaseCapacityTo API tests")
 
@@ -68,43 +65,27 @@ function testIncreaseCapacity() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(2);
-        lightWeightMap.increaseCapacityTo(10);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightMap should increase the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(2) });
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(10) });
 }
 
 function testIncreaseCapacityLessThanLength() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(1);
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightMap should not increase the capacity less than the length");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(1) });
 }
 
 function testIncreaseCapacityLeftFloat() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(Math.floor(1.2));
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightMap should not increase the left float capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(Math.floor(1.2)) });
 }
 
 function testIncreaseCapacityRightFloat() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
-    try {
-        lightWeightMap.increaseCapacityTo(Math.floor(3.8));
-    } catch (err: Error) {
-        arktest.assertEQ(err.message, "The lightWeightMap should increase the right float capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightMap.increaseCapacityTo(Math.floor(3.8)) });
 }
