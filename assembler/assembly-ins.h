@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,8 @@ struct Ins {
     bool set_label = false;          /* whether this label is defined */
     debuginfo::Ins ins_debug;
 
-    std::string ToString(std::string endline = "", bool print_args = false, size_t first_arg_idx = 0) const;
+    PANDA_PUBLIC_API std::string ToString(std::string endline = "", bool print_args = false,
+                                          size_t first_arg_idx = 0) const;
 
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,

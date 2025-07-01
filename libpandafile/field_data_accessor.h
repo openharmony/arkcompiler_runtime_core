@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ namespace panda::panda_file {
 
 class FieldDataAccessor {
 public:
-    FieldDataAccessor(const File &panda_file, File::EntityId field_id);
+    PANDA_PUBLIC_API FieldDataAccessor(const File &panda_file, File::EntityId field_id);
 
     ~FieldDataAccessor() = default;
 
@@ -159,7 +159,7 @@ public:
 private:
     using FieldValue = std::variant<uint32_t, uint64_t>;
 
-    std::optional<FieldValue> GetValueInternal();
+    PANDA_PUBLIC_API std::optional<FieldValue> GetValueInternal();
 
     void SkipValue();
 
