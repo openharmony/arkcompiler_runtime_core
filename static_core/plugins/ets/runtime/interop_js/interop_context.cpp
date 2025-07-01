@@ -593,6 +593,13 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
 void InteropCtx::ForwardJSException(EtsCoroutine *coro)
 {
     auto env = GetJSEnv();
+    const napi_extended_error_info *info = nullptr;
+    NAPI_CHECK_FATAL(napi_get_last_error_info(env, &info));
+    if (info->error_code != napi_ok && info->error_code != napi_pending_exception) {
+        INTEROP_LOG(INFO) << "Napi last error: " << info->error_message;
+        ThrowETSError(coro, info->error_message);
+        return;
+    }
     napi_value excval;
     ASSERT(NapiIsExceptionPending(env));
     NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &excval));

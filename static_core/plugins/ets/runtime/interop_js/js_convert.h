@@ -393,31 +393,37 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
+    napi_status jsStatus;
+    auto coro = EtsCoroutine::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
-        // No access to jsvalue after this line
-        napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
-        if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
-            return {};
-        }
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_get_named_property(env, jsVal, name, &jsVal);
+    }
+    if (jsStatus != napi_ok) {
+        return {};
     }
     return T::UnwrapWithNullCheck(ctx, env, jsVal);
 }
 
 template <typename T>
-[[nodiscard]] static ALWAYS_INLINE inline bool JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
-                                                                typename T::cpptype etsPropVal)
+ALWAYS_INLINE inline void JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
+                                           typename T::cpptype etsPropVal)
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
     napi_value jsPropVal = T::WrapWithNullCheck(env, etsPropVal);
     if (UNLIKELY(jsPropVal == nullptr)) {
-        return false;
+        return;
     }
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
-    // No access to jsvalue after this line
-    napi_status rc = napi_set_named_property(env, jsVal, name, jsPropVal);
-    return rc != napi_pending_exception && !NapiThrownGeneric(rc);
+    auto coro = EtsCoroutine::GetCurrent();
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_set_named_property(env, jsVal, name, jsPropVal);
+    }
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+    }
 }
 
 }  // namespace ark::ets::interop::js
