@@ -299,7 +299,7 @@ group("arktscompiler_header_deps") {
 ohos_shared_library("libarktscompiler") {
   sources = libarkcompiler_sources
 
-  configs = libarkcompiler_configs
+  public_configs = libarkcompiler_configs
 
   deps = [
     ":arktscompiler_header_deps",

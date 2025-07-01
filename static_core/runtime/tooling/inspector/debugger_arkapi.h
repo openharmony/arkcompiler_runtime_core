@@ -19,22 +19,29 @@
 #include <string>
 #include <functional>
 
+#include <dlfcn.h>
 #include "libpandabase/macros.h"
+
+using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 
 namespace ark {
 class PANDA_PUBLIC_API ArkDebugNativeAPI final {
 public:
     using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
-
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
-    static bool NotifyDebugMode(int tid, int32_t instanceId = 0, bool debugApp = false);
-    static bool StopDebugger();
+    static bool NotifyDebugMode(int tid, int32_t instanceId, bool debugApp, void *vm,
+                                DebuggerPostTask &debuggerPostTask);
+    static bool StopDebugger(void *vm);
+    static bool IsDebugModeEnabled();
 
     ArkDebugNativeAPI() = delete;
     ~ArkDebugNativeAPI() = delete;
 
     NO_COPY_SEMANTIC(ArkDebugNativeAPI);
     NO_MOVE_SEMANTIC(ArkDebugNativeAPI);
+
+private:
+    static void *gHybridDebuggerHandle_;
 };
 
 }  // namespace ark

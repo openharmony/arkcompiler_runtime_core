@@ -208,6 +208,27 @@
                     "name": "//arkcompiler/runtime_core/static_core/isa:isa_combine_static_etc",
                     "header": {
                         "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/compiler"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/compiler:libarktscompiler",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/compiler"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/disassembler:arktsdisassembler",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/disassembler"
+                    }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/isa:isa_combine",
+                    "header": {
+                        "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/static_core/isa"
                     }
                 },
