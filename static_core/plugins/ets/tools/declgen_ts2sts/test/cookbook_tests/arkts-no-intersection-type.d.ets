@@ -23,11 +23,11 @@ declare class Logger {
 declare class Validator {
     validate(data: ESObject): boolean;
 }
-interface Person {
+export declare interface Person {
     name: string;
     age: number;
 }
-interface Employee {
+export declare interface Employee {
     employeeId: string;
     department: string;
 }

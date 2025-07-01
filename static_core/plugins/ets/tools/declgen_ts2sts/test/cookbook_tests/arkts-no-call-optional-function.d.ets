@@ -17,6 +17,6 @@ export type OptionalMethodInterface = ESObject;
 export type MixedInterface = ESObject;
 export type CallableInterface1 = ESObject;
 export type OptionalMethodInterface1 = ESObject;
-export interface NormalInterface {
+export declare interface NormalInterface {
     method2(): void;
 }

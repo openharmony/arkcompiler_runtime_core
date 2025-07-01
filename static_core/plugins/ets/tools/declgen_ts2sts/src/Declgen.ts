@@ -38,6 +38,7 @@ export class Declgen {
   private readonly hookedHost: ts.CompilerHost;
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
+  private readonly declgenOptions: DeclgenCLIOptions;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -47,6 +48,7 @@ export class Declgen {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
+    this.declgenOptions = declgenOptions;
 
     this.sourceFileMap = new Map<string, ts.SourceFile>();
     this.compilerOptions = Object.assign({}, options, {
@@ -115,14 +117,24 @@ export class Declgen {
     this.rootFiles.forEach((fileName) => {
       const sourceFile = program.getSourceFile(fileName);
       if (sourceFile && sourceFile.isDeclarationFile) {
-        const outDir = program.getCompilerOptions().outDir || path.dirname(fileName);
-        const regex = new RegExp(`\\${Extension.DTS}|\\${Extension.DETS}$`);
-        const dEtsFilePath = path.join(outDir, `${path.basename(fileName).replace(regex, '')}${Extension.DETS}`);
+
+        const compilerOptions = program.getCompilerOptions();
+        const outDir = compilerOptions.outDir || path.dirname(fileName);
+        const rootDir = compilerOptions.rootDir || path.dirname(fileName);
+        const relativePath = path.relative(rootDir, fileName);
+        const fileNameWithoutExt = relativePath.replace(/\.d\.(ts|ets)$/, '');
+        const dEtsFilePath = path.join(outDir, `${fileNameWithoutExt}${Extension.DETS}`);
 
         const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
         const printer = ts.createPrinter();
         const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
-        fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+
+        if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+          if (!fs.existsSync(outDir)) {
+            fs.mkdirSync(outDir, { recursive: true });
+          }
+          fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+        }
       }
     });
   }

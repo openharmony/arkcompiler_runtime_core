@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 export type RequiredPerson = Required<Person>;
-interface Person {
+export declare interface Person {
     name?: string;
     age?: number;
     address?: string;
