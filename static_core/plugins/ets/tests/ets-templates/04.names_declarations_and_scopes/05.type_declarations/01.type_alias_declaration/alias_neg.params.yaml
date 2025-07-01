@@ -73,7 +73,7 @@ cases:
     - defs: |-
           type RF = (p: RF) => RF
       use: |-
-          let v1: RF = (p: RF): RF => { return RF }
+          let v1: RF = (p: RF): RF => { return p }
 
     - defs: |-
         { class ClassNestedInBlock{} }        
@@ -85,3 +85,48 @@ cases:
       use: |-
           let v: Fields = new Axis[6];
           let ok = v.length == 6;
+
+    - defs: |-
+        type TStringAlias? = String | undefined
+
+    - defs: |-
+        @interface ClassAuthor {}
+        type A = ClassAuthor
+
+    - defs: |-
+        @interface ClassAuthor {}
+        type A = ClassAuthor | String
+
+    - defs: |-
+        type A = class MyClassDec {}
+
+    - defs: |-
+        class AliasMe {}
+        type Alias = AliasMe<X> // CTE:  TypeError: Type 'AliasMe' is not generic.
+
+    - defs: |-
+        class AliasMe<X> {}
+        type Alias = AliasMe<X> // CTE: TypeError: Cannot find type 'X'.
+
+    - defs: |-
+        type A<T, U> = T | A<U, T>[]
+      use: |-
+        let xx: A<Boolean, String> = new A<Boolean, String>()  //CTE: TypeError: The union type is not constructible.
+
+    - defs: |-
+        final class FinitaLaComedia {}
+        type Alias<T extends FinitaLaComedia> = T
+      use: |-
+        let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+
+    - defs: |-
+        class FinitaLaComedia {}
+        type Alias<T = FinitaLaComedia> = T
+      use: |-
+        let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+
+    - defs: |-
+        class FinitaLaComedia {}
+        type Alias<T = FinitaLaComedia> = T
+      use: |-
+        let x: Alias = 1  //CTE: TypeError: Type 'Int' cannot be assigned to type 'FinitaLaComedia'
