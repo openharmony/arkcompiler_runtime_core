@@ -1,7 +1,7 @@
 #17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class.ets
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class_alias.ets
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_interface.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
 
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_4.ets
 17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a_6.ets

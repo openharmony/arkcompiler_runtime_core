@@ -1,5 +1,5 @@
-deprecated/13.compilation_units/03.import_directives/04.default_import_binding/default_import_struct.ets
-deprecated/13.compilation_units/07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.ets
+deprecated/13.compilation_units/02.import_directives/02.default_import_binding/default_import_struct.ets
+deprecated/13.compilation_units/05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.ets
 deprecated/02.multiple_catch_clauses_in_try_statements/catch2.ets
 deprecated/02.multiple_catch_clauses_in_try_statements/catch3.ets
 deprecated/02.multiple_catch_clauses_in_try_statements/catch_0.ets

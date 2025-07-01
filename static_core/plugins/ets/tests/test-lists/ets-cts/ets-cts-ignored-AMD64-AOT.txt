@@ -1,7 +1,7 @@
 #17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class.ets
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class_alias.ets
-13.compilation_units/03.import_directives/05.type_import_binding/type_binding_interface.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_class_alias.ets
+13.compilation_units/02.import_directives/04.import_type_directive/type_binding_interface.ets
 
 #14338
 15.semantic_rules/08.overriding/03.override-compatible_signatures/override_compatibility_array_9.ets
