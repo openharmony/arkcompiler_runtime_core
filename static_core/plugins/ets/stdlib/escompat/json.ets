@@ -1181,6 +1181,10 @@ class JSONWriter {
             return
         }
 
+        if (Type.of(obj).isPrimitive()) {
+            return
+        }
+
         const cycleDetected = this.path.has(obj)
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
