@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2907,6 +2907,53 @@ TEST_F(LSETest, HoistFromLoopWithSafepoint)
         BASIC_BLOCK(4U, -1L)
         {
             INST(10U, Opcode::Return).ref().Inputs(7U);
+        }
+    }
+    ASSERT_TRUE(GetGraph()->RunPass<Lse>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
+}
+
+TEST_F(LSETest, HoistFromLoopInRPO)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        BASIC_BLOCK(2U, 3U) {}
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(7U, Opcode::LoadObject).ref().Inputs(0U).TypeId(122U);
+            INST(11U, Opcode::LoadObject).ref().Inputs(7U).TypeId(122U);
+            INST(8U, Opcode::LoadObject).ref().Inputs(11U).TypeId(122U);
+            INST(12U, Opcode::LoadObject).ref().Inputs(8U).TypeId(122U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::REFERENCE).CC(CC_NE).Imm(0U).Inputs(7U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(10U, Opcode::Return).ref().Inputs(12U);
+        }
+    }
+
+    Graph *graphLsed = CreateEmptyGraph();
+    GRAPH(graphLsed)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(7U, Opcode::LoadObject).ref().Inputs(0U).TypeId(122U);
+            INST(11U, Opcode::LoadObject).ref().Inputs(7U).TypeId(122U);
+            INST(8U, Opcode::LoadObject).ref().Inputs(11U).TypeId(122U);
+            INST(12U, Opcode::LoadObject).ref().Inputs(8U).TypeId(122U);
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(9U, Opcode::IfImm).SrcType(DataType::REFERENCE).CC(CC_NE).Imm(0U).Inputs(7U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(10U, Opcode::Return).ref().Inputs(12U);
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
