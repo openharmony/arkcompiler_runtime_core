@@ -20,9 +20,10 @@ import { visitVisitResult } from './utils/ASTHelpers';
 import { 
   ETSKeyword,
   FINAL_CLASS,
-  JSValue, 
-  KitPrefix, 
-  UtilityTypes, 
+  JSValue,
+  KitPrefix,
+  LIMIT_DECORATOR,
+  UtilityTypes,
   SpecificTypes,
   BuiltInType
 } from '../utils/lib/TypeUtils';
@@ -109,7 +110,8 @@ export class Autofixer {
       [
         this[FaultID.GeneratorFunction].bind(this), 
         this[FaultID.ObjectBindingParams].bind(this),
-        this[FaultID.DefaultExport].bind(this)
+        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
@@ -119,7 +121,8 @@ export class Autofixer {
       [
         this[FaultID.NoPrivateMember].bind(this), 
         this[FaultID.DefaultExport].bind(this),
-        this[FaultID.NoETSKeyword].bind(this)
+        this[FaultID.NoETSKeyword].bind(this),
+        this[FaultID.RemoveLimitDecorator].bind(this)
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -1170,6 +1173,28 @@ export class Autofixer {
 
     return this.context.factory.updateSourceFile(node, statements);
   }
+
+  /**
+   * Rule: `remove-limit-decorator`
+   */
+  private [FaultID.RemoveLimitDecorator](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isFunctionDeclaration(node) && !ts.isClassDeclaration(node)) {
+      return node;
+    }
+
+    let decorators: ts.Decorator[] = [];
+    
+    const illegalDecorators = ts.getAllDecorators(node)
+    decorators = illegalDecorators?.filter(ts.isDecorator) as ts.Decorator[];
+    // Filter out restricted decorators
+    const filteredDecorators = decorators?.filter((decorator) => {
+      const expression = decorator.expression;
+      return !(ts.isIdentifier(expression) && LIMIT_DECORATOR.includes(expression.text));
+    });
+    (node as any).illegalDecorators = filteredDecorators;
+
+    return node;
+  }
 }
 
 /**
@@ -1620,7 +1645,8 @@ function getUpdatedType(
   const isBigint = isBigintType(v);
   const isBoolean = isBooleanType(v);
 
-  if (isBigint && nodeFlag === ts.NodeFlags.Const) {
+  const allowedFlags = [ts.NodeFlags.Const, ts.NodeFlags.Let];
+  if (isBigint && allowedFlags.includes(nodeFlag)) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword);
   } else if (isBoolean) {
     return context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
