@@ -721,7 +721,7 @@ BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, const Inst
             if (typeInfo) {
                 auto klass = typeInfo.GetClass();
                 auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
-                maxLength = runtime->GetMaxArrayLength(klass);
+                maxLength = static_cast<int32_t>(runtime->GetMaxArrayLength(klass));
             }
         }
         return BoundsRange(0, maxLength, nullptr, inst->GetType());

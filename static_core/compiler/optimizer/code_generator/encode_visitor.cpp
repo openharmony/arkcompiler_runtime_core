@@ -929,6 +929,7 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
         enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(typeId));
     } else {
         auto skind = UnresolvedTypesInterface::SlotKind::FIELD;
+        ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
         auto fieldOffsetAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, skind);
         ScopedTmpReg tmpReg(enc->GetEncoder());
         // load field offset and if it's 0 then call runtime EntrypointId::GET_FIELD_OFFSET
@@ -1182,6 +1183,7 @@ void EncodeVisitor::FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst)
     auto typeId = loadClass->GetTypeId();
     auto method = loadClass->GetMethod();
     auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
+    ASSERT(utypes != nullptr);
     auto klassAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::CLASS);
     Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
     encoder->EncodeMov(dstPtr, Imm(klassAddr));
@@ -1315,6 +1317,7 @@ void EncodeVisitor::VisitUnresolvedLoadAndInitClass(GraphVisitor *visitor, Inst 
     } else {  // JIT mode
         auto method = inst->CastToUnresolvedLoadAndInitClass()->GetMethod();
         auto utypes = graph->GetRuntime()->GetUnresolvedTypes();
+        ASSERT(utypes != nullptr);
         auto klassAddr = utypes->GetTableSlot(method, classId, UnresolvedTypesInterface::SlotKind::CLASS);
         Reg dstPtr(dst.GetId(), enc->GetCodegen()->GetPtrRegType());
         encoder->EncodeMov(dstPtr, Imm(klassAddr));
@@ -1367,6 +1370,7 @@ void EncodeVisitor::VisitResolveObjectFieldStatic(GraphVisitor *visitor, Inst *i
         enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeId), TypedImm(0));
     } else {
         ScopedTmpReg tmpReg(enc->GetEncoder());
+        ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
         auto fieldAddr = graph->GetRuntime()->GetUnresolvedTypes()->GetTableSlot(method, typeId, slotKind);
         enc->GetEncoder()->EncodeMov(tmpReg, Imm(fieldAddr));
         enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(tmpReg));
@@ -1510,6 +1514,7 @@ void EncodeVisitor::VisitUnresolvedLoadType(GraphVisitor *visitor, Inst *inst)
         encoder->EncodeLdr(dst, false, MemRef(dst, runtime->GetManagedClassOffset(enc->GetArch())));
     } else {
         auto utypes = runtime->GetUnresolvedTypes();
+        ASSERT(utypes != nullptr);
         auto clsAddr = utypes->GetTableSlot(method, typeId, UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
         Reg dstPtr(dst.GetId(), codegen->GetPtrRegType());
         encoder->EncodeMov(dstPtr, Imm(clsAddr));

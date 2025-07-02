@@ -480,8 +480,8 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
         if (intptr_t res = helpers::ToSigned(pc) + offset; res < 0) {
             // Make both, pc and addr, positive
             ssize_t extend = RoundUp(std::abs(res), vixl::aarch64::kPageSize);
-            addr = res + extend;
-            pc += extend;
+            addr = static_cast<size_t>(res + extend);
+            pc += static_cast<size_t>(extend);
         } else {
             addr = res;
         }
@@ -2413,7 +2413,7 @@ void Aarch64Encoder::CheckAlignment(MemRef mem, size_t size)
         // We need additional tmp register for check base + offset.
         // The case when separately the base and the offset are not aligned, but in sum there are aligned very rarely.
         // Therefore, the alignment check for base and offset takes place separately
-        [[maybe_unused]] size_t offset = mem.GetDisp();
+        [[maybe_unused]] auto offset = static_cast<size_t>(mem.GetDisp());
         ASSERT((offset & alignmentMask) == 0);
     }
     auto baseReg = mem.GetBase();
@@ -3317,12 +3317,12 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
     }
     // Construct single add for big offset
     size_t spOffset;
-    auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
+    auto lastOffset = (slot + lastReg - static_cast<ssize_t>(startReg)) * static_cast<ssize_t>(DOUBLE_WORD_SIZE_BYTES);
 
     if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
         ScopedTmpReg lrReg(this, true);
         auto tmp = VixlReg(lrReg);
-        spOffset = slot * DOUBLE_WORD_SIZE_BYTES;
+        spOffset = static_cast<size_t>(slot * DOUBLE_WORD_SIZE_BYTES);
         slot = 0;
         if (vixl::aarch64::Assembler::IsImmAddSub(spOffset)) {
             GetMasm()->Add(tmp, vixl::aarch64::sp, VixlImm(spOffset));

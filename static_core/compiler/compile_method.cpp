@@ -110,6 +110,7 @@ static bool CheckSingleImplementation(Graph *graph)
     // otherwise we must drop compiled code.
     // NOTE(compiler): we need to reset hotness counter hereby avoid yet another warmup phase.
     auto cha = graph->GetRuntime()->GetCha();
+    ASSERT(cha != nullptr);
     for (auto siMethod : graph->GetSingleImplementationList()) {
         if (!cha->IsSingleImplementation(siMethod)) {
             LOG(WARNING, COMPILER)
