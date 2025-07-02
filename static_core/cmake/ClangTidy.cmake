@@ -19,6 +19,18 @@
 # TODO: Retry once we upgrade the checker.
 
 
+add_custom_target(clang-tidy-static-core-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /runtime_core/static_core/ ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
+
+add_custom_target(clang-tidy-ets2panda-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /ets2panda/ ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
+
 add_custom_target(clang-tidy-check
   COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
   USES_TERMINAL
