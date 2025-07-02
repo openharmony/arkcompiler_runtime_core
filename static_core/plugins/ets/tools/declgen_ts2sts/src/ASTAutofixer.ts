@@ -927,7 +927,7 @@ export class Autofixer {
    */
   private [FaultID.DefaultExport](node: ts.Node): ts.VisitResult<ts.Node> {
     if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
-      return exportDefaultAssignment(node,this.context);
+      return exportDefaultAssignment(node, this.context);
     }
   
     return node;
@@ -1992,15 +1992,15 @@ function findSameInterfaceOrClassOrEnumList(
 function restrictIdentifierName(
   node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration | ts.ImportSpecifier | ts.ExportSpecifier
 ): ts.VisitResult<ts.Node> {
-  const restrictedNames: ReadonlySet<string>= new Set(ETSKeyword);
+  const restrictedNames: ReadonlySet<string> = new Set(ETSKeyword);
 
   if (
-    ts.isPropertyDeclaration(node) 
-    || ts.isMethodDeclaration(node) 
-    || ts.isClassDeclaration(node) 
-    || ts.isInterfaceDeclaration(node)
-    || ts.isImportSpecifier(node) 
-    || ts.isExportSpecifier(node)
+    ts.isPropertyDeclaration(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isImportSpecifier(node) ||
+    ts.isExportSpecifier(node)
   ) {
     return restrictDeclarationName(node, restrictedNames);
   }
