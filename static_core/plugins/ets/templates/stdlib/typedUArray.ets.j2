@@ -1531,19 +1531,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin: number, end: number): {{element['name']}}Array {
-        return this.subarray(begin as int, end as int)
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same underlying Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @param end last index, exclusive
-     *
-     * @returns new {{element['name']}}Array with the same underlying Buffer
-     */
     public subarray(begin: number, end: int): {{element['name']}}Array {
         return this.subarray(begin as int, end as int)
     }
@@ -1570,37 +1557,15 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin: int, end: int): {{element['name']}}Array {
+    public subarray(begin: int, end: int | undefined = this.lengthInt): {{element['name']}}Array {
         const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
-        const relEnd = normalizeIndex(end, len)
+        const relEnd = normalizeIndex(end ?? this.lengthInt, len)
         let count = relEnd - relStart
         if (count < 0) {
             count = 0
         }
         return new {{element['name']}}Array(this.buffer, relStart * {{element['name']}}Array.BYTES_PER_ELEMENT as int, count)
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new {{element['name']}}Array with the same Buffer
-     */
-    public subarray(begin: number): {{element['name']}}Array {
-        return this.subarray(begin as int, this.lengthInt)
-    }
-
-    /**
-     * Creates a {{element['name']}}Array with the same Buffer
-     *
-     * @param begin start index, inclusive
-     *
-     * @returns new {{element['name']}}Array with the same Buffer
-     */
-    public subarray(begin: int): {{element['name']}}Array {
-        return this.subarray(begin, this.lengthInt)
     }
 
     /**
