@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1042,6 +1042,45 @@ TEST(emittertests, final_modifier)
         ASSERT_TRUE(cda.GetMethodsNumber() == 3);
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) { ASSERT_TRUE(mda.IsFinal()); });
     }
+}
+
+TEST(emittertests, valid_method)
+{
+    Parser p;
+
+    auto source = R"(
+        .record A <access.record=public> {
+        }
+
+        .function void A.method(A a0) <access.function=public> {
+            return.void
+        }
+
+        .function void A.method() <static, access.function=public> {
+            return.void
+        }
+    )";
+
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto pf = AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    std::string descriptor;
+    auto classId = pf->GetClassId(GetTypeDescriptor("A", &descriptor));
+
+    panda_file::ClassDataAccessor cda(*pf, classId);
+
+    ASSERT_TRUE(cda.GetMethodsNumber() == 2);
+    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+        ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(mda.GetNameId()).data, utf::CStringAsMutf8("method")), 0);
+        panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
+        if (pda.GetNumArgs() == 1) {
+            ASSERT_TRUE(mda.IsStatic());
+        }
+    });
 }
 
 }  // namespace ark::test
