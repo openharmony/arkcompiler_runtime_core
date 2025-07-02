@@ -45,6 +45,17 @@ config("bytecodeopt_public_config") {
   }
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("bytecode_optimizer_headers") {
+    include_dirs = [
+      "$target_gen_dir",
+      "$ark_root/bytecode_optimizer",
+    ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 libarkbytecodeopt_sources = [
   "$ark_root/bytecode_optimizer/bytecodeopt_peepholes.cpp",
   "$ark_root/bytecode_optimizer/canonicalization.cpp",

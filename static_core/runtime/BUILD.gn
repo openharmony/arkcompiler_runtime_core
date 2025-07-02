@@ -52,6 +52,25 @@ config("arkruntime_public_config") {
   configs += plugin_runtime_configs
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("runtime_headers") {
+    include_dirs = [
+      "$ark_root/runtime",
+      "$ark_root/plugins/ets/runtime/ani/",
+      "$target_gen_dir",
+      "$target_gen_dir/generated",
+      "$target_gen_dir/include",
+    ]
+    include_dirs += [get_label_info("$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})", "target_gen_dir")]
+    deps = ["$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})"]
+
+    include_dirs += platform_include_dirs
+
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 config("arkruntime_config") {
   include_dirs = [
     "$ark_root/compiler",
@@ -629,6 +648,15 @@ ark_isa_gen("profiling_gen") {
 config("profiling_gen_public_config") {
   include_dirs =
       [ get_label_info(":profiling_gen_profiling_gen_h", "target_gen_dir") ]
+}
+
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("runtime_gen_headers") {
+    include_dirs = [ get_label_info(":profiling_gen_profiling_gen_h", "target_gen_dir") ]
+    deps = [ ":profiling_gen_profiling_gen_h" ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
 }
 
 ark_isa_gen("isa_gen_libarkruntime") {
