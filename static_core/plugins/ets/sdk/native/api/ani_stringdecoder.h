@@ -35,7 +35,7 @@ public:
     {
         ucnv_close(conv_);
     }
-    ani_string Write(ani_env *env, const char *source, int32_t byteOffset, int32_t length, UBool flush = 0);
+    ani_string Write(ani_env *env, const char *source, int32_t byteOffset, uint32_t length, UBool flush = 0);
     ani_string End(ani_env *env, const char *source, int32_t byteOffset, int32_t length);
     ani_string End(ani_env *env);
 
