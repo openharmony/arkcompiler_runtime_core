@@ -20,7 +20,7 @@ tags: []
 
 
 class A<T> {
-    foo(p:T): T! {
+    foo(p:T): NonNullable<T> {
         return p!
     }
 }

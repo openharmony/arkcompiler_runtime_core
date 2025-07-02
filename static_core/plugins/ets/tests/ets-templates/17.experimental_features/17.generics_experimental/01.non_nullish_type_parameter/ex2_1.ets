@@ -24,7 +24,7 @@ type TMyBase = MyBase
 type TMyBaseNullable = MyBase | null
 
 class A<T extends MyBase | null> {
-    foo(p:T): T! {
+    foo(p:T): NonNullable<T> {
         return p!
     }
 }

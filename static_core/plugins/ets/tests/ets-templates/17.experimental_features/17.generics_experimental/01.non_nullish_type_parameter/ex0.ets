@@ -15,12 +15,12 @@ limitations under the License.
 
 /*---
 desc: NonNullish Type Parameter
-tags: [compile-only, negative]
+tags: []
 ---*/
 
 
 class A<T> {
-    foo(p:T): T!! {
+    foo(p:T): NonNullable<NonNullable<T>> {
         return p!
     }
 }

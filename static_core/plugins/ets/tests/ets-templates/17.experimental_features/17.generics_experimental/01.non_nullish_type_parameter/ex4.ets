@@ -21,7 +21,7 @@ desc: NonNullish Type Parameter
 class MyBase {}
 
 class A<T extends MyBase | undefined | null> {
-    foo(p:T): T! {
+    foo(p:T): NonNullable<T> {
         return p!
     }
 }

@@ -21,7 +21,7 @@ desc: NonNullish Type Parameter
 interface IMyInterface {}
 
 class A<T extends IMyInterface | undefined | null> {
-    foo(p:T): T! {
+    foo(p:T): NonNullable<T> {
         return p!
     }
 }
