@@ -31,8 +31,10 @@ NOTE: `panda::` is dynamic runtime namespace, `ark::` is static runtime namespac
 
 And only one static runtime compiler is used for AbcKit graph representation: `ark::compiler::Graph`.
 
-## C API and C++ implementation
+## C and C++ API
 
+AbcKits provides two kinds of API : C API and C++ API.
+### C API
 All public API is stored in `./include/c` folder and has such structure:
 
 ```
@@ -40,18 +42,45 @@ include/c/
 ├── abckit.h                  // Entry point API
 ├── metadata_core.h           // API for language-independent metadata inspection/transformation
 ├── extensions
-│   ├── arkts
-│   │   └── metadata_arkts.h  // API for language-specific (ArkTS and static ArkTS) metadata inspection/transformation
-│   └── js
-│       └── metadata_js.h     // API for language-specific (JS) metadata inspection/transformation
+│   ├── arkts
+│   │   └── metadata_arkts.h  // API for language-specific (ArkTS and static ArkTS) metadata inspection/transformation
+│   └── js
+│       └── metadata_js.h     // API for language-specific (JS) metadata inspection/transformation
 ├── ir_core.h                 // API for language-independent graph inspection/transformation
 ├── isa
-│   ├── isa_dynamic.h         // API for language-specific (JS and ArkTS) graph inspection/transformation
-│   └── isa_static.h          // API for language-specific (static ArkTS) graph inspection/transformation (This header is now hidden)
+│   ├── isa_dynamic.h         // API for language-specific (JS and ArkTS) graph inspection/transformation
+│   └── isa_static.h          // API for language-specific (static ArkTS) graph inspection/transformation (This header is now hidden)
 ├── statuses.h                // List of error codes
 ```
 
 Abckit APIs are pure C functions, all implementations are stored in `./src/` folder and written in C++
+
+### C++ API
+
+C++ API is stored in `./include/cpp` folder and has such structure:
+
+```
+include/cpp/
+├── abckit_cpp.h              // C++ API entry point
+├── headers/
+│   ├── file.h                // File operations
+│   ├── graph.h               // Graph operations
+│   ├── basic_block.h         // Basic block operations
+│   ├── instruction.h         // Instruction operations
+│   ├── literal.h             // Literal operations
+│   ├── value.h               // Value operations
+│   ├── type.h                // Type operations
+│   ├── dynamic_isa.h         // Dynamic ISA operations
+│   ├── config.h              // Configuration
+│   ├── utils.h               // Utility functions
+│   ├── base_classes.h        // Base classes
+│   ├── base_concepts.h       // Base concepts
+│   ├── core/                 // Language-independent APIs
+│   ├── arkts/                // ArkTS-specific APIs
+│   └── js/                   // JS-specific APIs
+```
+
+C++ API provides a higher-level, object-oriented interface.
 
 ## Control flow by components
 

@@ -1,5 +1,7 @@
 # AbcKit
 
+[简体中文](README_zh.md)
+
 AbcKit is a library for `abc` file inspection and modification.
 
 Documentation:
