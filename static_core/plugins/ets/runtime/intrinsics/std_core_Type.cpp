@@ -480,7 +480,7 @@ EtsLong TypeAPIGetInterfacesNum(EtsClass *cls)
 EtsClass *TypeAPIGetInterface(EtsClass *cls, EtsLong i)
 {
     auto interfaces = cls->GetRuntimeClass()->GetInterfaces();
-    if (0 <= i && i <= static_cast<EtsLong>(interfaces.size())) {
+    if (0 <= i && i < static_cast<EtsLong>(interfaces.size())) {
         return EtsClass::FromRuntimeClass(interfaces[i]);
     }
     return nullptr;
