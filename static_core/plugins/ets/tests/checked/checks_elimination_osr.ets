@@ -39,7 +39,7 @@ function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int 
   return indexes[x]; // should not delete NullCheck
 }
 
-function __noinline__foo(length: int, elem: int) : void throws
+function __noinline__foo(length: int, elem: int) : void
 {
   if (elem >= length) {
     throw new ArrayIndexOutOfBoundsError("find failed: out of range");

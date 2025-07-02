@@ -144,7 +144,7 @@ function jsonStringify() {
     arktest.assertEQ(jsonObj?.nickname, "")
 }
 
-function checkThrow(fn: () => void throws, expectMsg: string) {
+function checkThrow(fn: () => void, expectMsg: string) {
     arktest.expectThrow(fn, (e) => {
         if (e.message === expectMsg) {
             return true

@@ -35,12 +35,12 @@ function testInvoke() {
 
 function testInvokeCurrencyStyleError() {
     let expectedError = new RangeError("Style is currency but currency is undefined");
-    arktest.expectError((): void throws => { Intl.NumberFormat.$_invoke("en-EN", { style: "currency" } as Intl.NumberFormatOptions) }, expectedError);
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke("en-EN", { style: "currency" } as Intl.NumberFormatOptions) }, expectedError);
 }
 
 function testInvokeUnitStyleError() {
     let expectedError = new RangeError("Style is unit but unit is undefined");
-    arktest.expectError((): void throws => { Intl.NumberFormat.$_invoke("en-EN", { style: "unit" } as Intl.NumberFormatOptions) }, expectedError);
+    arktest.expectError((): void => { Intl.NumberFormat.$_invoke("en-EN", { style: "unit" } as Intl.NumberFormatOptions) }, expectedError);
 }
 
 function testInvokeUndefinedLocale() {

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function simpleTest(): void throws {
+function simpleTest(): void {
     GC.scheduleGcAfterNthAlloc(2, GC.Cause.YOUNG);
     new Object();
     arktest.assertFalse(GC.isScheduledGCTriggered(), "GC was scheduled before 2nd allocation, current is 1st");

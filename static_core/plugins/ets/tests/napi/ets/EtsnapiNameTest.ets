@@ -24,7 +24,7 @@ class EtsnapiNameTest {
 
     public native static methodOverloaded(obj: Object | undefined, str: String, arr: FixedArray<double>): int;
 
-    public run(): void throws {
+    public run(): void {
         if (EtsnapiNameTest.objectArg(undefined) != 0) {
             throw new Exception("ERROR: failed to call objectArg");
         }
@@ -45,7 +45,7 @@ class EtsnapiNameTest {
 
     public native 中文函数2不带参数(): String;
 
-    public runClass(): void throws {
+    public runClass(): void {
         if (this.中文函数2不带参数() != "passed") {
             throw new Exception("ERROR: failed to call 中文函数2不带参数");
         }
@@ -54,7 +54,7 @@ class EtsnapiNameTest {
 
 native function nativeInGlobal(): int;
 
-function main(): int throws {
+function main(): int {
     loadLibrary("etsnapi_lib");
     let a: EtsnapiNameTest = new EtsnapiNameTest;
     a.run();

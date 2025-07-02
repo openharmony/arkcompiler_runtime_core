@@ -26,7 +26,7 @@ interface IFooBar {
 class BarInt1 implements IFooBar {
     private data : int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data;
@@ -35,7 +35,7 @@ class BarInt1 implements IFooBar {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data = value;
@@ -55,7 +55,7 @@ class BarInt2 implements IFooBar {
     private data : int;
     private data2: int;
 
-    $_get (index: int) : int throws {
+    $_get (index: int) : int {
         switch(index) {
         case 0:
             return this.data;
@@ -66,7 +66,7 @@ class BarInt2 implements IFooBar {
         }
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
         switch(index) {
         case 0:
             this.data = value;

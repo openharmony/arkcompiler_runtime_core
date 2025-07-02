@@ -173,7 +173,7 @@ class Test {
     }
 
     private static triggerGC() {
-        arktest.expectNoThrow((): void throws => {
+        arktest.expectNoThrow((): void => {
             GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
         });
     }

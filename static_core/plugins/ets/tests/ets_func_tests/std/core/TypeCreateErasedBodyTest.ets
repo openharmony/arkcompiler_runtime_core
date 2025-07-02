@@ -42,7 +42,7 @@ function erased(recv: NullishType, args: FixedArray<NullishType>): NullishType {
 	}
 }
 
-function main(): void throws {
+function main(): void {
 	const c = Type.of(new C()) as ClassType
 	const creator = new ClassTypeCreator("C1").addBaseType(c)
 	creator

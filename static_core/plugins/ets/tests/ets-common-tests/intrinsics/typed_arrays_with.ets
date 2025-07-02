@@ -48,7 +48,7 @@ function main(): int {
     return testSuite.run()
 }
 
-function test_u8_clamped_array(): void throws {
+function test_u8_clamped_array(): void {
     let src  = new Uint8ClampedArray([0, 7, 74, 181, 255])
     let exp1 = new Uint8ClampedArray([0, 0, 74, 181, 255])
     let exp2 = new Uint8ClampedArray([0, 255, 74, 181, 255])
@@ -75,7 +75,7 @@ function test_u8_clamped_array_rangeerror() {
     }
 }
 
-function test_i8_array(): void throws {
+function test_i8_array(): void {
     let src  = new Int8Array([-128, -56, 0, 64, 128])
     let exp1 = new Int8Array([-128, 100, 0, 64, 128])
     let exp2 = new Int8Array([-128, -56, 0, 64, 128])
@@ -99,7 +99,7 @@ function test_i8_array_rangeerror() {
     }
 }
 
-function test_u8_array(): void throws {
+function test_u8_array(): void {
     let src  = new Uint8Array([0, 7, 74, 181, 255])
     let exp1 = new Uint8Array([0, 4, 74, 181, 255])
     let exp2 = new Uint8Array([0, 7, 74, 181, 255])
@@ -123,7 +123,7 @@ function test_u8_array_rangeerror() {
     }
 }
 
-function test_i16_array(): void throws {
+function test_i16_array(): void {
     let src  = new Int16Array([-32768, -1321, 0, 10321, 32767])
     let exp1 = new Int16Array([-32768, 10000, 0, 10321, 32767])
     let exp2 = new Int16Array([-32768, -1321, 0, 10321, 32767])
@@ -147,7 +147,7 @@ function test_i16_array_rangeerror() {
     }
 }
 
-function test_u16_array(): void throws {
+function test_u16_array(): void {
     let src  = new Uint16Array([0, 62, 538, 35891, 65535])
     let exp1 = new Uint16Array([0, 14, 538, 35891, 65535])
     let exp2 = new Uint16Array([0, 62, 538, 35891, 65535])
@@ -171,7 +171,7 @@ function test_u16_array_rangeerror() {
     }
 }
 
-function test_i32_array(): void throws {
+function test_i32_array(): void {
     let src  = new Int32Array([-2147483648, -20543, 0, 20543, 2147483647])
     let exp1 = new Int32Array([-2147483648, 100000, 0, 20543, 2147483647])
     let exp2 = new Int32Array([-2147483648, -20543, 0, 20543, 2147483647])
@@ -195,7 +195,7 @@ function test_i32_array_rangeerror() {
     }
 }
 
-function test_u32_array(): void throws {
+function test_u32_array(): void {
     let src  = new Uint32Array([0, 25974, 57356, 2054306, 4294967295])
     let exp1 = new Uint32Array([0, 10004, 57356, 2054306, 4294967295])
     let exp2 = new Uint32Array([0, 25974, 57356, 2054306, 4294967295])
@@ -219,7 +219,7 @@ function test_u32_array_rangeerror() {
     }
 }
 
-function test_i64_array(): void throws {
+function test_i64_array(): void {
     let src  = new BigInt64Array([-9.223e+18, -404221, 0, 404221, 9.223e+18])
     let exp1 = new BigInt64Array([-9.223e+18, 1000000, 0, 404221, 9.223e+18])
     let exp2 = new BigInt64Array([-9.223e+18, -404221, 0, 404221, 9.223e+18])
@@ -243,7 +243,7 @@ function test_i64_array_rangeerror() {
     }
 }
 
-function test_u64_array(): void throws {
+function test_u64_array(): void {
     let src  = new BigUint64Array([0, 2598574, 4042214, 6.446e+11, 18.446e+18])
     let exp1 = new BigUint64Array([0, 1000000, 4042214, 6.446e+11, 18.446e+18])
     let exp2 = new BigUint64Array([0, 2598574, 4042214, 6.446e+11, 18.446e+18])
@@ -267,7 +267,7 @@ function test_u64_array_rangeerror() {
     }
 }
 
-function test_f32_array(): void throws {
+function test_f32_array(): void {
     let src  = new Float32Array([-3.4e+38, -1.5e+16, 0.0, 1.5e+16, 3.4e+38])
     let exp1 = new Float32Array([-3.4e+38, 5.05e+16, 0.0, 1.5e+16, 3.4e+38])
     let exp2 = new Float32Array([-3.4e+38, -1.5e+16, 0.0, 1.5e+16, 3.4e+38])
@@ -291,7 +291,7 @@ function test_f32_array_rangeerror() {
     }
 }
 
-function test_f64_array(): void throws {
+function test_f64_array(): void {
     let src  = new Float64Array([-1.7e+308, -3.4e+72, 0.0, 3.4e+72, 1.7e+308])
     let exp1 = new Float64Array([-1.7e+308, 5.05e+32, 0.0, 3.4e+72, 1.7e+308])
     let exp2 = new Float64Array([-1.7e+308, -3.4e+72, 0.0, 3.4e+72, 1.7e+308])

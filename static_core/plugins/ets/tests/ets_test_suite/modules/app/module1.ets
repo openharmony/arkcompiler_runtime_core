@@ -54,7 +54,7 @@ function testLazyLoading() {
 
 function triggerGC() {
     // Check that garbage collection does not break user-defined RuntimeLinker
-    arktest.expectNoThrow((): void throws => {
+    arktest.expectNoThrow((): void => {
         const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         if(gcId > 0) {
         GC.waitForFinishGC(gcId);

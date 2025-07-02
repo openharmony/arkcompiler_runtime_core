@@ -38,7 +38,7 @@ function throwCustomErrorFromSts(): void {
     throw new CustomError("Throw Custom Error from ets!", 12345);
 }
 
-function throwExceptionFromSts(): void throws {
+function throwExceptionFromSts(): void {
     throw new Exception("Throw Exception from ets!");
 }
 
@@ -46,7 +46,7 @@ class ExceptionCause {
     reason: String = "";
 }
 
-function throwExceptionWithCauseFromSts(): void throws {
+function throwExceptionWithCauseFromSts(): void {
     let cause: ExceptionCause = { reason: "Test cause" };
     throw new Exception("Throw Exception with cause from ets!", cause);
 }
@@ -59,6 +59,6 @@ class CustomException extends Exception {
     }
 }
 
-function throwCustomExceptionFromSts(): void throws {
+function throwCustomExceptionFromSts(): void {
     throw new CustomException("Throw Custom Exception from ets!", 54321);
 }

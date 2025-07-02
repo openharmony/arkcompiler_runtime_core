@@ -235,7 +235,7 @@ export namespace arktest {
     * @throws AssertionError if no value thrown or value doesn't match the test predicate
     */
     export function expectThrow(
-        cb: () => void throws,
+        cb: () => void,
         test?: (v: Error | Exception) => boolean | string) {
         try {
             cb()
@@ -258,7 +258,7 @@ export namespace arktest {
     * @param message optional string message or Exception to be tested upon the thrown value
     * @throws AssertionError if an exception was not occured or occured exception is not same as expected exception
     */
-    export function expectException(fn: () => void throws, expect?: string | Exception): void {
+    export function expectException(fn: () => void, expect?: string | Exception): void {
         expectThrow(fn, (e) => {
             if (!(e instanceof Exception)) {
                 return "Expected an instance of Exception, got " + Type.of(e).getName()
@@ -288,7 +288,7 @@ export namespace arktest {
     * @param message optional string message or Error to be tested upon the thrown value
     * @throws AssertionError if an error was not occured or occured error is not same as expected error
     */
-    export function expectError(fn: () => void throws, expect?: string | Error): void {
+    export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
             if (!(e instanceof Error)) {
                 return "Expected an instance of Error, got " + Type.of(e).getName()
@@ -317,7 +317,7 @@ export namespace arktest {
     * @param fn executing callback
     * @throws AssertionError if an error or an exception was occured
     */
-    export function expectNoThrow(fn: () => void throws): void {
+    export function expectNoThrow(fn: () => void): void {
         try {
             fn();
         } catch (e) {
@@ -350,7 +350,7 @@ export namespace arktest {
         * @param name test name
         * @param callback callback with test body
         */
-        constructor(name: string, callback: () => void throws) {
+        constructor(name: string, callback: () => void) {
             this.name = name;
             this.callback = callback;
         }
@@ -411,7 +411,7 @@ export namespace arktest {
         /// Name of the test
         readonly name: string;
 
-        private readonly callback: () => void throws;
+        private readonly callback: () => void;
         private suite?: ArkTestsuite;
     }
 
@@ -444,7 +444,7 @@ export namespace arktest {
         * @param name name of test
         * @param callback callback with test body
         */
-        final addTest(name: string, callback: () => void throws): void {
+        final addTest(name: string, callback: () => void): void {
             this.addTest(new ArkTest(name, callback));
         }
 

@@ -24,7 +24,7 @@ class C {
 	bar(): Void { throw new Error("not overriden")  }
 }
 
-function main(): void throws {
+function main(): void {
 	test(foo());
 
 	const called = new boolean[1];

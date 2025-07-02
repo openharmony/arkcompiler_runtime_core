@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-function NonMovableTest(): void throws {
+function NonMovableTest(): void {
     arktest.assertEQ(GC.getObjectSpaceType("spaceTypeTest"), GC.ObjectSpaceType.NON_MOVABLE, "Must be non movable space");
 }
 
-function AllocateAndMoveTest(): void throws {
+function AllocateAndMoveTest(): void {
     let obj: Object = new Object();
     arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.YOUNG, "Must be young space");
 
@@ -27,7 +27,7 @@ function AllocateAndMoveTest(): void throws {
     arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "Must be tenured space");
 }
 
-function HumongousObjectTest(): void throws
+function HumongousObjectTest(): void
 {
     let h_obj: FixedArray<long> = new long[1024 * 1024];
     arktest.assertEQ(GC.getObjectSpaceType(h_obj), GC.ObjectSpaceType.HUMONGOUS, "Must be humongous space");

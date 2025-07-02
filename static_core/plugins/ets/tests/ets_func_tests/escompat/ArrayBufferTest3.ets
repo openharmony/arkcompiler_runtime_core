@@ -34,8 +34,8 @@ function createResizableArrayBuffer(): void {
     arktest.assertFalse(a.detached)
 
     const errorCheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void throws => { let a1 = new ArrayBuffer(11, -10) }, errorCheck)
-    arktest.expectThrow((): void throws => { let a1 = new ArrayBuffer(11, 10) }, errorCheck)
+    arktest.expectThrow((): void => { let a1 = new ArrayBuffer(11, -10) }, errorCheck)
+    arktest.expectThrow((): void => { let a1 = new ArrayBuffer(11, 10) }, errorCheck)
 }
 
 function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: FixedArray<byte>): void {
@@ -77,7 +77,7 @@ function createArrayBufferFrom(): void {
 function resizeArrayBuffer(): void {
     let a = new ArrayBuffer(10)
     let errorCheck = (e: Error | Exception) => { return (e instanceof TypeError) }
-    arktest.expectThrow((): void throws => { a.resize(5) }, errorCheck)
+    arktest.expectThrow((): void => { a.resize(5) }, errorCheck)
 
     a = new ArrayBuffer(10, 10);
 
@@ -86,8 +86,8 @@ function resizeArrayBuffer(): void {
     arktest.assertEQ(a.byteLength, 5)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    arktest.expectThrow((): void throws => { a.set(5, 0 .toByte()) }, errorCheck)
-    arktest.expectThrow((): void throws => { a.at(5) }, errorCheck)
+    arktest.expectThrow((): void => { a.set(5, 0 .toByte()) }, errorCheck)
+    arktest.expectThrow((): void => { a.at(5) }, errorCheck)
 
     // Return previous length
     a.resize(10);
@@ -97,13 +97,13 @@ function resizeArrayBuffer(): void {
     arktest.assertEQ(a.at(5), VALUE)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    arktest.expectThrow((): void throws => { a.resize(11) }, errorCheck)
-    arktest.expectThrow((): void throws => { a.resize(-11) }, errorCheck)
+    arktest.expectThrow((): void => { a.resize(11) }, errorCheck)
+    arktest.expectThrow((): void => { a.resize(-11) }, errorCheck)
 
     a = new ArrayBuffer(10, 12)
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    arktest.expectThrow((): void throws => { a.set(10, 0 .toByte()) }, errorCheck)
-    arktest.expectThrow((): void throws => { a.at(10) }, errorCheck)
+    arktest.expectThrow((): void => { a.set(10, 0 .toByte()) }, errorCheck)
+    arktest.expectThrow((): void => { a.at(10) }, errorCheck)
 
     a.resize(11)
     a.set(10, VALUE)

@@ -28,7 +28,7 @@ class Bar {
           return this.data;
     }
 
-    $_set (index: int, value: int)  throws {
+    $_set (index: int, value: int) {
          this.data = value;
     }
 

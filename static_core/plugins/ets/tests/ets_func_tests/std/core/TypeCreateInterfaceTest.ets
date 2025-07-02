@@ -36,7 +36,7 @@ function getIfaces(): (InterfaceType | undefined)[] {
 	return r
 }
 
-function main(): void throws {
+function main(): void {
 	const ifaces = getIfaces()
  arktest.assertEQ( ifaces.length, 2)
 	const intType = Type.of(0)

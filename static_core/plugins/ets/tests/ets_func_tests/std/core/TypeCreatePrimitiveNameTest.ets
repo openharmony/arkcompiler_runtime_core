@@ -26,7 +26,7 @@ const foo1: (self: Object, x: int) => int = foo;
 
 class C implements I {}
 
-function main(): void throws {
+function main(): void {
 	const CType = Type.of(new C()) as ClassType
 	const i32 = Type.of(0)
 	const creator = new ClassTypeCreator("i32").addInterface(CType.getInterface(0))

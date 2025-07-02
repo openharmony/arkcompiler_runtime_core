@@ -942,7 +942,7 @@ export native function random(): double;
  * @returns Returns the base 10 logarithm of a number.
  *
  */
-export function log10(v: int): int throws {
+export function log10(v: int): int {
     if (v < 1) {
         throw new ArgumentOutOfRangeException("Integer argument for log10 should be positive");
     }

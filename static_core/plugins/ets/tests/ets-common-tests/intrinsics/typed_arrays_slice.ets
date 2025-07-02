@@ -41,7 +41,7 @@ function check_array<T extends Number | BigInt>(data: ArrayLike<T>, data_rev: Ar
     }
 }
 
-function sliceInt8ArrayTest(): void throws {
+function sliceInt8ArrayTest(): void {
     let data = new Int8Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -56,7 +56,7 @@ function sliceInt8ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceInt16ArrayTest(): void throws {
+function sliceInt16ArrayTest(): void {
     let data = new Int16Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -71,7 +71,7 @@ function sliceInt16ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceInt32ArrayTest(): void throws {
+function sliceInt32ArrayTest(): void {
     let data = new Int32Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -86,7 +86,7 @@ function sliceInt32ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceBigInt64ArrayTest(): void throws {
+function sliceBigInt64ArrayTest(): void {
     let data = new BigInt64Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -101,7 +101,7 @@ function sliceBigInt64ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceFloat32ArrayTest(): void throws {
+function sliceFloat32ArrayTest(): void {
     let data = new Float32Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -116,7 +116,7 @@ function sliceFloat32ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceFloat64ArrayTest(): void throws {
+function sliceFloat64ArrayTest(): void {
     let data = new Float64Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -131,7 +131,7 @@ function sliceFloat64ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceUint8ArrayTest(): void throws {
+function sliceUint8ArrayTest(): void {
     let data = new Uint8Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -146,7 +146,7 @@ function sliceUint8ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceUint16ArrayTest(): void throws {
+function sliceUint16ArrayTest(): void {
     let data = new Uint16Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -161,7 +161,7 @@ function sliceUint16ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceUint32ArrayTest(): void throws {
+function sliceUint32ArrayTest(): void {
     let data = new Uint32Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -176,7 +176,7 @@ function sliceUint32ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceBigUint64ArrayTest(): void throws {
+function sliceBigUint64ArrayTest(): void {
     let data = new BigUint64Array(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
@@ -191,7 +191,7 @@ function sliceBigUint64ArrayTest(): void throws {
     check_array(data, data_rev)
 }
 
-function sliceUint8ClampedArrayTest(): void throws {
+function sliceUint8ClampedArrayTest(): void {
     let data = new Uint8ClampedArray(create_array())
     let length = (data.length).toInt()
     let data_rev = data.slice(0 + beginPlus, length - endMinus)
