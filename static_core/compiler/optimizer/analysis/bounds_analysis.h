@@ -263,6 +263,7 @@ private:
     std::optional<LoopIterationsInfo> GetNestedLoopIterationsInfo(Loop *loop);
     Inst *TryFindCorrespondingInitPhi(PhiInst *updatePhi, BasicBlock *header);
     bool ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfo);
+    bool ProcessIndexPhiForAddSub(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfo);
     bool ProcessInitPhi(PhiInst *initPhi, BoundsRangeInfo *bri);
     bool ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, uint64_t iterations);
     void VisitLoop(BasicBlock *header, BasicBlock *updatePhiBlock);

@@ -1170,6 +1170,11 @@ public:
         return IsAdd() || IsSub();
     }
 
+    bool IsShift() const
+    {
+        return GetOpcode() == Opcode::Shl || GetOpcode() == Opcode::Shr || GetOpcode() == Opcode::AShr;
+    }
+
     const SaveStateInst *GetSaveState() const
     {
         return const_cast<Inst *>(this)->GetSaveState();

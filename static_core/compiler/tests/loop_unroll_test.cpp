@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,6 +275,10 @@ public:
                                   DataType::Type type = DataType::INT32);
     Graph *BuildLoopWithDecrement(ConditionCode cc, std::optional<uint64_t> start, std::optional<uint64_t> stop,
                                   uint64_t step, DataType::Type type = DataType::INT32);
+    Graph *BuildLoopWithShiftLeftLe(DataType::Type type = DataType::INT32);
+    Graph *BuildLoopWithShiftLeftLt(DataType::Type type = DataType::INT32);
+    Graph *BuildLoopWithShiftRightGe(DataType::Type type = DataType::INT32);
+    Graph *BuildLoopWithShiftRightGt(DataType::Type type = DataType::INT32);
 
 protected:
     static constexpr uint32_t INST_LIMIT = 1000;
@@ -771,6 +775,134 @@ Graph *LoopUnrollTest::BuildLoopWithDecrement(ConditionCode cc, std::optional<ui
     return graph;
 }
 
+Graph *LoopUnrollTest::BuildLoopWithShiftLeftLe(DataType::Type type)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 0xfU);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(type).CC(CC_LE).Inputs(1U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);  // if a [cc] stop
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(5U, Opcode::Phi).SetType(type).Inputs(1U, 8U);  // a
+            INST(6U, Opcode::Phi).SetType(type).Inputs(0U, 7U);  // b
+            INST(7U, Opcode::Add).SetType(type).Inputs(6U, 5U);  // b += a
+            INST(8U, Opcode::Shl).SetType(type).Inputs(5U, 1U);  // a <<= step
+            INST(9U, Opcode::Compare).b().SrcType(type).CC(CC_LE).Inputs(8U, 2U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);  // if a [cc] stop
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(11U, Opcode::Phi).SetType(type).Inputs(1U, 7U);
+            INST(12U, Opcode::Return).SetType(type).Inputs(11U);  // return b
+        }
+    }
+    return graph;
+}
+
+Graph *LoopUnrollTest::BuildLoopWithShiftLeftLt(DataType::Type type)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 0x10U);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(type).CC(CC_LT).Inputs(1U, 2U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);  // if a [cc] stop
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(5U, Opcode::Phi).SetType(type).Inputs(1U, 8U);  // a
+            INST(6U, Opcode::Phi).SetType(type).Inputs(0U, 7U);  // b
+            INST(7U, Opcode::Add).SetType(type).Inputs(6U, 5U);  // b += a
+            INST(8U, Opcode::Shl).SetType(type).Inputs(5U, 1U);  // a <<= step
+            INST(9U, Opcode::Compare).b().SrcType(type).CC(CC_LT).Inputs(8U, 2U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);  // if a [cc] stop
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(11U, Opcode::Phi).SetType(type).Inputs(1U, 7U);
+            INST(12U, Opcode::Return).SetType(type).Inputs(11U);  // return b
+        }
+    }
+    return graph;
+}
+
+Graph *LoopUnrollTest::BuildLoopWithShiftRightGe(DataType::Type type)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 0xfU);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(type).CC(CC_GE).Inputs(2U, 1U);  // if a [cc] stop
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(5U, Opcode::Phi).SetType(type).Inputs(2U, 8U);                    // a
+            INST(6U, Opcode::Phi).SetType(type).Inputs(0U, 7U);                    // b
+            INST(7U, Opcode::Add).SetType(type).Inputs(6U, 5U);                    // b += a
+            INST(8U, Opcode::Shr).SetType(type).Inputs(5U, 1U);                    // a >>= 1
+            INST(9U, Opcode::Compare).b().SrcType(type).CC(CC_GE).Inputs(8U, 1U);  // if a [cc] stop
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(11U, Opcode::Phi).SetType(type).Inputs(1U, 7U);
+            INST(12U, Opcode::Return).SetType(type).Inputs(11U);  // return b
+        }
+    }
+    return graph;
+}
+
+Graph *LoopUnrollTest::BuildLoopWithShiftRightGt(DataType::Type type)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 0xfU);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(type).CC(CC_GT).Inputs(2U, 0U);  // if a [cc] stop
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 3U, 4U)
+        {
+            INST(5U, Opcode::Phi).SetType(type).Inputs(2U, 8U);                    // a
+            INST(6U, Opcode::Phi).SetType(type).Inputs(0U, 7U);                    // b
+            INST(7U, Opcode::Add).SetType(type).Inputs(6U, 5U);                    // b += a
+            INST(8U, Opcode::Shr).SetType(type).Inputs(5U, 1U);                    // a >>= 1
+            INST(9U, Opcode::Compare).b().SrcType(type).CC(CC_GT).Inputs(8U, 0U);  // if a [cc] stop
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(11U, Opcode::Phi).SetType(type).Inputs(1U, 7U);
+            INST(12U, Opcode::Return).SetType(type).Inputs(11U);  // return b
+        }
+    }
+    return graph;
+}
+
 TEST_F(LoopUnrollTest, ConstCountableLoopWithIncrement)
 {
     static constexpr uint32_t INC_STEP = 1;
@@ -932,6 +1064,79 @@ TEST_F(LoopUnrollTest, SmallCountableLoopWithIncrement)
             INST(15U, Opcode::Add).s32().Inputs(13U, 2U);   // a + 1
             INST(16U, Opcode::Add).s32().Inputs(14U, 15U);  // b + a
             INST(12U, Opcode::Return).s32().Inputs(16U);    // return b
+        }
+    }
+    EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
+    EXPECT_TRUE(GraphComparator().Compare(graph2, graphUnroll));
+}
+
+TEST_F(LoopUnrollTest, SmallCountableLoopWithShiftLeft)
+{
+    static constexpr uint32_t UNROLL_FACTOR = 4;
+
+    auto graph = BuildLoopWithShiftLeftLt();
+    graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
+    graph->RunPass<Cleanup>();
+    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 15U));
+
+    auto graph2 = BuildLoopWithShiftLeftLe();
+    graph2->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
+    graph2->RunPass<Cleanup>();
+    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph2, 15U));
+
+    auto graphUnroll = CreateEmptyGraph();
+    GRAPH(graphUnroll)
+    {
+        CONSTANT(0U, 0U);  // b = 0
+        CONSTANT(1U, 1U);  // a = 1
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(7U, Opcode::Add).s32().Inputs(0U, 1U);     // b += a
+            INST(8U, Opcode::Shl).s32().Inputs(1U, 1U);     // a <<= 1
+            INST(14U, Opcode::Add).s32().Inputs(7U, 8U);    // b += a
+            INST(15U, Opcode::Shl).s32().Inputs(8U, 1U);    // a <<= 1
+            INST(16U, Opcode::Add).s32().Inputs(14U, 15U);  // b += a
+            INST(17U, Opcode::Shl).s32().Inputs(15U, 1U);   // a <<= 1
+            INST(18U, Opcode::Add).s32().Inputs(16U, 17U);  // b += a
+            INST(12U, Opcode::Return).s32().Inputs(18U);    // return b
+        }
+    }
+    EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
+    EXPECT_TRUE(GraphComparator().Compare(graph2, graphUnroll));
+}
+
+TEST_F(LoopUnrollTest, SmallCountableLoopWithShiftRight)
+{
+    static constexpr uint32_t UNROLL_FACTOR = 4;
+
+    auto graph = BuildLoopWithShiftRightGt();
+    graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
+    graph->RunPass<Cleanup>();
+    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 26U));
+
+    auto graph2 = BuildLoopWithShiftRightGe();
+    graph2->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
+    graph2->RunPass<Cleanup>();
+    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph2, 26U));
+
+    auto graphUnroll = CreateEmptyGraph();
+    GRAPH(graphUnroll)
+    {
+        CONSTANT(0U, 0U);  // a = 0xf
+        CONSTANT(1U, 1U);  // b = 0
+        CONSTANT(2U, 0xfU);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(7U, Opcode::Add).s32().Inputs(0U, 2U);     // b += a
+            INST(8U, Opcode::Shr).s32().Inputs(2U, 1U);     // a >>= 1
+            INST(14U, Opcode::Add).s32().Inputs(7U, 8U);    // b += a
+            INST(15U, Opcode::Shr).s32().Inputs(8U, 1U);    // a >>= 1
+            INST(16U, Opcode::Add).s32().Inputs(14U, 15U);  // b += a
+            INST(17U, Opcode::Shr).s32().Inputs(15U, 1U);   // a >>= 1
+            INST(18U, Opcode::Add).s32().Inputs(16U, 17U);  // b += a
+            INST(12U, Opcode::Return).s32().Inputs(18U);    // return b
         }
     }
     EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
