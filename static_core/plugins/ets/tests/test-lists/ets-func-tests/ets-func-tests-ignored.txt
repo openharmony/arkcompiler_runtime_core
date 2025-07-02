@@ -23,10 +23,6 @@ regression/23652.ets
 regression/23659_0.ets
 regression/23659_1.ets
 
-#26215
-regression/26215_0.ets
-regression/26215_1.ets
-
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
@@ -211,10 +207,8 @@ regression/14654_0.ets
 ### cannot create runtime (compound tests not supported) (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
 
-#22167 (Import-export)
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_02.ets
-
 #19935 (Import-export)
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
 
@@ -316,6 +310,9 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
+#24088
+std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
+
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
@@ -328,6 +325,9 @@ std/core/ConsoleArrayTest.ets
 #25014
 std/core/ConsoleErrorTest.ets
 std/core/ConsoleAssertTest.ets
+
+#25130
+std/core/dateformat/DateTimeFormatTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
