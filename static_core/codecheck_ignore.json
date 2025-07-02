@@ -202,6 +202,7 @@
   "tests/tests-u-runner-2/runner/test/metadata_test/__init__.py": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
+  "verification/default_plugin.h": "*",
   "verification/util/bit_vector.h": "*",
   "verification/type/type_type.cpp": "*",
   "compiler/optimizer/ir/visitor.inc": "*",
