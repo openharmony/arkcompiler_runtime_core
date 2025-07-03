@@ -56,7 +56,7 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
                 interpreterType = InterpreterType::IRTOC;
             }
 #endif
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
             // CMC GC will be supported with LLVM interpreter with issue27125
             if (interpreterType == InterpreterType::LLVM) {
                 LOG(INFO, RUNTIME) << "--interpreter-type=LLVM is downgraded into IRTOC in CMC GC if no setting";
@@ -128,7 +128,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
             return;
         }
         auto gcType = thread->GetVM()->GetGC()->GetType();
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
         if (gcType != mem::GCType::CMC_GC) {
             LOG(FATAL, RUNTIME) << "--gc-type=" << mem::GCStringFromType(gcType) << " option is supported only with "
                                 << "--interpreter-type=cpp. Use --gc-type=cmc-gc instead.";
@@ -145,15 +145,15 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
                 LOG(INFO, RUNTIME) << "Dynamic types profiling disabled, use --interpreter-type=cpp to enable";
             }
         }
-#endif  // #ifdef ARK_USE_CMC_GC
+#endif  // #ifdef ARK_HYBRID
     }
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     // CMC GC will be supported with LLVM interpreter with issue27125
     if (interpreterType == InterpreterType::LLVM) {
         LOG(FATAL, RUNTIME) << "CMC GC is only supported to be set with --interpreter-type=cpp or irtoc";
         return;
     }
-#endif  // #ifdef ARK_USE_CMC_GC
+#endif  // #ifdef ARK_HYBRID
 #endif  // #if !defined(PANDA_TARGET_ARM32)
     ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }

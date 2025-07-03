@@ -41,7 +41,7 @@ public:
     {
     }
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
     void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const panda::RefFieldVisitor &visitor) override
     {
         std::stringstream err;

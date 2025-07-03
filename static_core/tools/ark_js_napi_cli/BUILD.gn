@@ -56,39 +56,28 @@ ohos_source_set("ark_js_napi_cli_source_set") {
     "$js_root:ark_jsruntime_common_config",
     "$js_root:ark_jsruntime_public_config",
   ]
+  if (ark_standalone_build) {
+    public_configs += [ ":ark_js_napi_cli_config" ]
 
-  external_deps = []
-  deps = []
-
-  public_configs += [ ":ark_js_napi_cli_config" ]
+    deps = [
+      "$ark_root/static_core/plugins/ets/tests/interop_js/test_helper:interop_test_helper",
+      "$ark_third_party_root/libuv:uv",
+      "$js_root:libark_jsruntime",
+      "$js_root/../../foundation/arkui/napi:ace_napi",
+    ]
+  } else {
+    external_deps = [
+      "ets_runtime:libark_jsruntime",
+      "libuv:uv",
+      "napi:ace_napi",
+      "runtime_core:interop_test_helper",
+    ]
+  }
 
   include_dirs = [
     ".",
     "$ark_root/static_core/plugins/ets/tests/interop_js/test_helper",
   ]
-
-  if (defined(ark_hybrid) && ark_hybrid) {
-    defines = [ "ARK_HYBRID" ]
-  }
-
-  deps += [
-    "$ark_root/static_core/libpandabase:libarktsbase",
-    "$ark_root/static_core/plugins/ets/tests/interop_js/test_helper:interop_test_helper",
-  ]
-
-  # ace_napi should be before libark_jsruntime
-  # because there are ace_napi weak symbols in libark_jsruntime
-  # and ace_napi should be loaded before their resolution
-  external_deps += [
-    "libuv:uv",
-    "napi:ace_napi",
-  ]
-
-  if (defined(ark_hybrid) && ark_hybrid) {
-    deps += [ "$ark_root/static_core/runtime:libarkruntime" ]
-  } else {
-    external_deps += [ "ets_runtime:libark_jsruntime" ]
-  }
 }
 
 ohos_executable("ark_js_napi_cli") {

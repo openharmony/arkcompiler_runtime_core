@@ -44,7 +44,6 @@ napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value er
 
 // NOTE(konstanting, #23205): this function is not listed in the ENUMERATE_NAPI macro, but now runtime needs it.
 // I will find a cleaner solution later, but for now let it stay like this, to make aot and verifier happy.
-#ifndef ARK_HYBRID
 #if (!defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)) || \
     defined(PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
 extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
@@ -57,7 +56,6 @@ napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (
     return napi_ok;
 }
 #endif
-#endif  // ARK_HYBRID
 
 namespace ark::ets::interop::js {
 
@@ -794,7 +792,7 @@ void InteropCtx::Destroy(void *ptr)
 
 static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
 {
-#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_USE_CMC_GC)
+#if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_HYBRID)
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
     if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
         (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {

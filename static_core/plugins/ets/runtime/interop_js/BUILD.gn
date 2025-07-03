@@ -86,9 +86,8 @@ ohos_shared_library("ets_interop_js_napi") {
 config("interop_js_public_config") {
   include_dirs = [ "$arkplatform_include" ]
   defines = []
-  if (ark_ets_hybrid || ark_hybrid) {
+  if (ark_ets_hybrid) {
     defines += [ "PANDA_JS_ETS_HYBRID_MODE" ]
-    include_dirs += [ "$arkui_root/napi" ]
   } else if (ark_standalone_build || ark_static_standalone_build) {
     node_version = "v18.13.0"
     distro = "linux-x64"

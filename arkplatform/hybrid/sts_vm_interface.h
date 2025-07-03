@@ -16,7 +16,7 @@
 #ifndef PANDA_STS_VM_INTERFACE_H
 #define PANDA_STS_VM_INTERFACE_H
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 #include "heap/heap_visitor.h"
 #endif
 #include "hybrid/vm_interface.h"
@@ -46,7 +46,7 @@ public:
         return STSVMInterface::VMInterfaceType::ETS_VM_IFACE;
     }
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
     /**
      * @brief executes marking operation of CMC-GC that will be started from gotten object.
      * @param obj: pointer to object from which marking will be started.

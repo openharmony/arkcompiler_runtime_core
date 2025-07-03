@@ -24,7 +24,7 @@
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include <atomic>
 
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
 #include "base_runtime.h"
 #include "runtime/mem/object_helpers-inl.h"
 #endif
@@ -223,7 +223,7 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] void *storedValAddr)
 {
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     panda::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
                                      storedValAddr);
 #endif
@@ -249,7 +249,7 @@ private:
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] size_t count)
 {
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> visitor = [](ObjectHeader *obj,
                                                                                      ObjectHeader *ref, uint32_t off) {
         panda::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
@@ -264,7 +264,7 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
 
 void *GCCMCBarrierSet::PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
 {
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     return panda::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
 #endif
     return nullptr;

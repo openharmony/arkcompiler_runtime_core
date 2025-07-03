@@ -18,7 +18,7 @@
 
 namespace ark::ets {
 
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_JS_ETS_HYBRID_MODE)
+#if defined(ARK_HYBRID) && defined(PANDA_JS_ETS_HYBRID_MODE)
 EtsObject *EtsWeakReference::GetReferentFromGCThread() const
 {
     // Skip read-barrier

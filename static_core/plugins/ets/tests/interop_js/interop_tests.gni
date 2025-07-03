@@ -165,15 +165,9 @@ template("interop_test") {
           "$ark_root/plugins/ets:etsstdlib",
           "$ark_root/plugins/ets/runtime/interop_js:ets_interop_js_napi",
           "$ark_root/tools/ark_js_napi_cli:ark_js_napi_cli(${host_toolchain})",
+          "$etsruntime_root:libark_jsruntime",
           "$etsruntime_root/ecmascript/compiler:stub.an",
         ]
-
-    if (defined(ark_hybrid) && ark_hybrid) {
-      deps += [ "$ark_root/runtime:libarkruntime" ]
-    } else {
-      deps += [ "$etsruntime_root:libark_jsruntime" ]
-    }
-
     if (defined(invoker.sources)) {
       deps += [ ":${target_name}_module" ]
     }

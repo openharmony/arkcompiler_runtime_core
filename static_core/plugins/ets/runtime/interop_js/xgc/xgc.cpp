@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage_verifier.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
 #include "native_engine/native_reference.h"
@@ -302,7 +302,7 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
 }
 
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
 void XGC::UnmarkAllXRefs()
 {
     storage_->UnmarkAll();
@@ -422,7 +422,7 @@ size_t XGC::ComputeNewSize()
 bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     panda::BaseRuntime::GetInstance()->RequestGC(panda::GcType::FULL_WITH_XREF);
     // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
     // the current storage size, need storage size without dead references

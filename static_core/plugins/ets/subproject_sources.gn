@@ -12,7 +12,8 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-_plugin_dir = "$ark_root/plugins/ets"
+_plugin_dir = get_path_info(".", "abspath")
+assert(string_replace(_plugin_dir, "//", "") != _plugin_dir)
 
 enable_bytecode_optimizer = true
 
@@ -50,7 +51,7 @@ if (ark_ets_interop_js) {
   ]
 
   arkcompiler_deps +=
-      [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h" ]
+      [ "$ark_root/plugins/ets/runtime/interop_js:interop_intrinsic_kinds_h" ]
 
   runtime_yamls += [ "runtime/interop_js/intrinsics/std_js_jsruntime.yaml" ]
 }
@@ -79,20 +80,6 @@ irtoc_plugins = [
 
 arkbytecodeopt_deps =
     [ "$_plugin_dir:isa_gen_ets_bytecodeopt_ets_codegen_intrinsics_gen_inc" ]
-
-assembler_deps = [ "$_plugin_dir:assembler_deps" ]
-assembler_config = [ "$_plugin_dir:assembler" ]
-runtime_config = [ "$_plugin_dir:runtime" ]
-ark_config = [ "$_plugin_dir:ark_config" ]
-bytecodeopt_config = [ "$_plugin_dir:bytecodeopt" ]
-runtime_interpreter_impl = [ "$_plugin_dir:runtime_interpreter_impl" ]
-
-ark_host_linux_tools_packages = [ "$_plugin_dir:ark_host_linux_tools_packages" ]
-ark_host_windows_tools_packages =
-    [ "$_plugin_dir:ark_host_windows_tools_packages" ]
-ark_host_mac_tools_packages =
-    [ "$_plugin_dir:ark_host_mac_tools_packages" ]
-ark_packages = [ "$_plugin_dir:ark_packages" ]
 
 arkruntime_deps = [
   "$ark_root/assembler:libarktsassembler_frontend_static",
@@ -230,7 +217,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlLanguageTag.cpp",
 ]
 
-if (ark_use_cmc_gc) {
+if (ark_hybrid) {
   srcs_runtime += [
     "runtime/hybrid/mem/external-gc.cpp",
     "runtime/hybrid/mem/static_object_operator.cpp",
@@ -296,7 +283,7 @@ if (ark_ets_interop_js) {
 
   arkruntime_deps += [ "$arkplatform_root:libarkplatform" ]
 
-  if (ark_standalone_build && ark_ets_hybrid && !ark_hybrid) {
+  if (ark_standalone_build && ark_ets_hybrid) {
     arkruntime_deps += [
       "$ark_third_party_root/libuv:uv",
       "$arkui_root/napi:ace_napi",

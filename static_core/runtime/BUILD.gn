@@ -44,7 +44,7 @@ config("arkruntime_public_config") {
 
   include_dirs += platform_include_dirs
 
-  if (ark_use_cmc_gc) {
+  if (ark_hybrid) {
     include_dirs += [ "$ark_root/../common_interfaces" ]
     cflags_cc = [
       "-Wno-gnu-anonymous-struct",
@@ -183,9 +183,9 @@ ohos_source_set("libarkruntime_set_static") {
     "interpreter/runtime_interface.cpp",
     "intrinsics.cpp",
     "jit/libprofile/pgo_file_builder.cpp",
-    "jit/profile_saver_worker.cpp",
     "jit/profiling_loader.cpp",
     "jit/profiling_saver.cpp",
+    "jit/profile_saver_worker.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",
@@ -429,6 +429,7 @@ ohos_source_set("libarkruntime_set_static") {
   }
 
   external_deps = [
+    "napi:ace_napi",
     "node:node_header_notice",
     icui18n_dep,
     icuuc_dep,
@@ -436,7 +437,7 @@ ohos_source_set("libarkruntime_set_static") {
     zlib_dep,
   ]
 
-  if (!ark_standalone_build && !ark_hybrid) {
+  if (!ark_standalone_build) {
     external_deps += [ "napi:ace_napi" ]
   }
 
@@ -469,7 +470,6 @@ ohos_source_set("libarkruntime_set_static") {
     ]
   }
 
-  defines = []
   if (is_ohos && is_standard_system) {
     defines = [
       "PANDA_OHOS_USE_INNER_HILOG",
@@ -480,13 +480,6 @@ ohos_source_set("libarkruntime_set_static") {
       "hitrace:hitrace_meter",
       "libuv:uv",
     ]
-  }
-
-  if (ark_hybrid) {
-    defines += [ "ARK_HYBRID" ]
-    if (ark_standalone_build) {
-      public_configs += [ "$ark_third_party_root/libuv:libuv_config" ]
-    }
   }
 
   include_dirs = [ "$target_gen_dir/pcre2/common" ]
@@ -505,22 +498,12 @@ config("ark_integrate_public_config") {
   include_dirs = [ "$ark_root/plugins/ets/runtime/integrate" ]
 }
 
-config("ark_hybrid_config") {
-  ldflags = [ "-Wl,--unresolved-symbols=ignore-all" ]
-}
-
 ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   deps = [ ":libarkruntime_set_static" ]
 
-  configs = []
-  external_deps = []
   if (ark_hybrid) {
-    configs += [ ":ark_hybrid_config" ]
-    external_deps += plugin_external_deps
-    if (is_ohos && is_standard_system) {
-      external_deps += [ "hilog:libhilog" ]
-    }
+    external_deps = [ "ets_runtime:libark_jsruntime" ]
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
@@ -533,17 +516,6 @@ ohos_shared_library("libarkruntime") {
   } else {
     output_extension = "so"
   }
-
-  if (ark_hybrid && is_ohos && is_standard_system && !is_debug) {
-    version_script = "libarkruntime.map"
-  }
-
-  if (ark_hybrid && !ark_standalone_build) {
-    symlink_target_name = [ "libark_jsruntime.so" ]
-  }
-
-  innerapi_tags = [ "platformsdk_indirect" ]
-
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }

@@ -150,7 +150,7 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
     ASSERT(finalizee->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
-#ifdef ARK_USE_CMC_GC
+#ifdef ARK_HYBRID
     finalizee->UnbindMutator();
 #endif
     finalizationQueue_.push(finalizee);

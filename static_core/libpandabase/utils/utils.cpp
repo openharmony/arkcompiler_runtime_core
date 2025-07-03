@@ -41,6 +41,4 @@ uint32_t CountDigits(uint64_t v)
     return count;
 }
 
-PANDA_PUBLIC_API void ForceLoadLibPandaBase() {}
-
 }  // namespace ark

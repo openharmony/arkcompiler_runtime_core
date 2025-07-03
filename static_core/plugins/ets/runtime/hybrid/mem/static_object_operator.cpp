@@ -17,7 +17,7 @@
 #include "runtime/mem/object-references-iterator-inl.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/hybrid/mem/external-gc.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
@@ -76,7 +76,7 @@ private:
 
 void StaticObjectOperator::Initialize(ark::ets::PandaEtsVM *vm)
 {
-#if defined(ARK_USE_CMC_GC)
+#if defined(ARK_HYBRID)
     instance_.vm_ = vm;
     panda::BaseObject::RegisterStatic(&instance_);
 

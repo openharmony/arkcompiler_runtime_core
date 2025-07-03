@@ -1257,7 +1257,7 @@ void Codegen::LoadClassFromObject(Reg classReg, Reg objReg)
 {
     Reg reg = ConvertRegister(classReg.GetId(), DataType::REFERENCE);
     GetEncoder()->EncodeLdr(reg, false, MemRef(objReg, GetRuntime()->GetObjClassOffset(GetArch())));
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_64)
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_64)
     // The high 16 bits are used as marking flags in Ark Hybrid mode. We take the lower 48 bits as object address.
     GetEncoder()->EncodeAnd(reg, reg, Imm(0x0000'ffff'ffff'ffffULL));
 #endif

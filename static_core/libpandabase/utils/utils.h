@@ -65,8 +65,5 @@ inline uint32_t HexValue(uint32_t c)
 
 PANDA_PUBLIC_API uint32_t CountDigits(uint64_t v);
 
-// This function is needed to load libarktsbase before libc in ark_js_napi_cli
-PANDA_PUBLIC_API void ForceLoadLibPandaBase();
-
 }  // namespace ark
 #endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H

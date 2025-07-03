@@ -81,7 +81,7 @@ public:
         auto *classWordPtr = reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(&classWord_);
         // NOTE(ipetrov): Set class with flags allocated by external CMC GC, will be removed when allocation in 32-bit
         // space will be supported
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_64)
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_64)
         // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
         // should become visible
         auto flags = classWordPtr->load(std::memory_order_acquire) & ~GetClassMask();
@@ -144,11 +144,6 @@ public:
         return MEMBER_OFFSET(ObjectHeader, classWord_);
     }
 
-    static constexpr size_t GetMarkOffset()
-    {
-        return MEMBER_OFFSET(ObjectHeader, markWord_);
-    }
-
     // Mask to get class word from register:
     // * 64-bit system, 64-bit class word: 0xFFFFFFFFFFFFFFFF
     // * 64-bit system, 48-bit class word: 0x0000FFFFFFFFFFFF (external CMC GC)
@@ -157,7 +152,7 @@ public:
     // * 32-bit system, 16-bit class word: 0x0000FFFF
     static constexpr size_t GetClassMask()
     {
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_64)
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_64)
         return static_cast<size_t>((1ULL << 48ULL) - 1ULL);
 #else
         return std::numeric_limits<size_t>::max() >> (ClassHelper::POINTER_SIZE - OBJECT_POINTER_SIZE) * BITS_PER_BYTE;
@@ -358,7 +353,7 @@ private:
         return classWord_ & GetClassMask();
     }
 
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_32)
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_32)
     MarkWord::MarkWordSize markWord_;
     ClassHelper::ClassWordSize classWord_;
 #else
@@ -375,9 +370,9 @@ private:
     static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool nonMovable);
 };
 
-#if defined(ARK_USE_CMC_GC) && defined(PANDA_TARGET_32)
-constexpr uint32_t OBJECT_HEADER_MARK_OFFSET = 0U;
-static_assert(OBJECT_HEADER_MARK_OFFSET == ark::ObjectHeader::GetMarkOffset());
+#if defined(ARK_HYBRID) && defined(PANDA_TARGET_32)
+constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
+static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetMarkOffset());
 #else
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
