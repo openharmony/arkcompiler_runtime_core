@@ -4007,7 +4007,7 @@ intrinsics:
   - name: StdCoreDoubleToExponential
     space: ets
     class_name: std.core.Double
-    method_name: toExponential
+    method_name: toExponentialImpl
     static: false
     signature:
       ret: std.core.String
@@ -4037,7 +4037,7 @@ intrinsics:
   - name: StdCoreDoubleToFixed
     space: ets
     class_name: std.core.Double
-    method_name: toFixed
+    method_name: toFixedImpl
     static: false
     signature:
       ret: std.core.String

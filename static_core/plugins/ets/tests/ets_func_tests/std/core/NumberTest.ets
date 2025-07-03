@@ -42,6 +42,17 @@ function numberToStringTest5(): void {
     arktest.assertEQ(n.toString(radix), "ff", "Number(255).toString(16) should be equal to ff");
 }
 
+function testNumberToExponential(): void {
+    let n: number | undefined = 1
+    let m: number = 1
+    arktest.assertEQ(m.toExponential(n), "1.0e+0")
+}
+
+function testNumberToExponentialUndefined(): void {
+    let m: number = 1
+    arktest.assertEQ(m.toExponential(undefined), "1e+0")
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
     myTestsuite.addTest("NumberToStringTest1", numberToStringTest1);
@@ -49,5 +60,7 @@ function main() {
     myTestsuite.addTest("NumberToStringTest3", numberToStringTest3);
     myTestsuite.addTest("NumberToStringTest4", numberToStringTest4);
     myTestsuite.addTest("NumberToStringTest5", numberToStringTest5);
+    myTestsuite.addTest('testNumberToExponential', testNumberToExponential);
+    myTestsuite.addTest('testNumberToExponentialUndefined', testNumberToExponentialUndefined);
     myTestsuite.run();
 }
