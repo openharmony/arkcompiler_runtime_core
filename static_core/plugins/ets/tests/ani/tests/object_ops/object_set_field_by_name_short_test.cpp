@@ -54,7 +54,7 @@ TEST_F(ObjectSetFieldByNameShortTest, set_field02)
               ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "value", static_cast<ani_short>(SET_VALUE)), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_short_test", "checkObjectField", animal,
                                                static_cast<ani_short>(SET_VALUE)),
@@ -74,10 +74,18 @@ TEST_F(ObjectSetFieldByNameShortTest, set_field02)
     }
 }
 
+TEST_F(ObjectSetFieldByNameShortTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Short(nullptr, animal, "value", static_cast<ani_short>(SET_VALUE)),
+              ANI_INVALID_ARGS);
+}
+
 TEST_F(ObjectSetFieldByNameShortTest, not_found_name)
 {
     ani_object animal = NewAnimal();
     ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "x", static_cast<ani_short>(SET_VALUE)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Short(animal, "", static_cast<ani_short>(SET_VALUE)), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameShortTest, invalid_type)

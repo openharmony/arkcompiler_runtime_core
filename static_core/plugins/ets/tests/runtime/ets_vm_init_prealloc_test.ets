@@ -18,14 +18,15 @@ package PreallocTest;
 function fillHeap(arr: Object[], numberOfIter: number): void
 {
     let globalIdx = 0;
-    const megabyte = Math.pow(2, 20);
+    const objectSize = GC.getObjectSize(new Object());
+    const count = Math.pow(2, 20) / (objectSize / 8);
 
-    arr[globalIdx++] = new Object[megabyte];
-    arr[globalIdx++] = new Object[megabyte / 2];
-    arr[globalIdx++] = new Object[megabyte / 32];
-    arr[globalIdx++] = new Object[megabyte / 64];
-    arr[globalIdx++] = new Object[megabyte / 128];
-    arr[globalIdx++] = new Object[megabyte / 256];
+    arr[globalIdx++] = new Object[count];
+    arr[globalIdx++] = new Object[count / 2];
+    arr[globalIdx++] = new Object[count / 32];
+    arr[globalIdx++] = new Object[count / 64];
+    arr[globalIdx++] = new Object[count / 128];
+    arr[globalIdx++] = new Object[count / 256];
 
     let newIterNmb = numberOfIter - globalIdx;
     for (let idx = 0; idx < newIterNmb; ++idx) {
@@ -89,7 +90,7 @@ function testThrowingPreallocOOMObject(
 {
     let error = testThrowingPreallocOOMObjectSuite();
 
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }
@@ -125,7 +126,7 @@ function testThrowingPreallocOOMObjectTwice(
 {
     let error = testThrowingPreallocOOMObjectTwiceSuite();
 
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }

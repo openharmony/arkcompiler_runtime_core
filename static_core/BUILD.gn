@@ -53,6 +53,8 @@ group("ark_host_linux_tools_packages") {
   deps = plugin_ark_host_linux_tools_packages
   if (host_os != "mac" && current_cpu != "arm") {
     deps += [
+      "$ark_root/abc2program:arkts_abc2prog(${host_toolchain})",
+      "$ark_root/abc2program:arkts_abc2program(${host_toolchain})",
       "$ark_root/assembler:arkts_asm(${host_toolchain})",
       "$ark_root/compiler:libarktscompiler(${host_toolchain})",
       "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
@@ -85,6 +87,8 @@ group("ark_host_windows_tools_packages") {
   if (host_os != "mac" && current_cpu != "arm" &&
       !ark_static_standalone_build && !ark_standalone_build) {
     deps += [
+      "$ark_root/abc2program:arkts_abc2prog(//build/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/abc2program:arkts_abc2program(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/static_linker:ark_link(//build/toolchain/mingw:mingw_x86_64)",
@@ -97,6 +101,8 @@ group("ark_host_mac_tools_packages") {
   if (host_os == "mac") {
     if (host_cpu == "arm64") {
       deps += [
+        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_arm64)",
@@ -106,6 +112,8 @@ group("ark_host_mac_tools_packages") {
       ]
     } else {
       deps += [
+        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_x64)",
         "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_x64)",
@@ -138,6 +146,7 @@ config("ark_config") {
       "$ark_es2panda_root:libes2panda_public_frontend_static",
       "$ark_es2panda_root/aot:ets2panda",
       "$ark_es2panda_root/bindings:ts_bindings",
+      "$ark_es2panda_root/driver/dependency_analyzer:dependency_analyzer",
       "$ark_es2panda_root/lsp:libes2panda_lsp",
       "$ark_es2panda_root/lsp:libes2panda_lsp_static",
       "$ark_third_party_root/asmjit:*",
@@ -319,6 +328,10 @@ config("ark_config") {
     configs += [ sdk_libc_secshared_config ]
   }
 
+  if (ark_hybrid) {
+    defines += [ "ARK_HYBRID" ]
+  }
+
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",
@@ -344,17 +357,24 @@ config("ark_config") {
       "PANDA_TARGET_ARM64",
       "PANDA_TARGET_64",
       "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES",
-      "PANDA_USE_32_BIT_POINTER",
     ]
+    if (!defined(ark_hybrid) || !ark_hybrid) {
+      defines += [ "PANDA_USE_32_BIT_POINTER" ]
+    }
   } else if (current_cpu == "x86") {
-    defines += [ "PANDA_TARGET_X86" ]
+    defines += [
+      "PANDA_TARGET_32",
+      "PANDA_TARGET_X86",
+    ]
   } else if (current_cpu == "amd64" || current_cpu == "x64" ||
              current_cpu == "x86_64") {
     defines += [
       "PANDA_TARGET_64",
       "PANDA_TARGET_AMD64",
-      "PANDA_USE_32_BIT_POINTER",
     ]
+    if (!defined(ark_hybrid) || !ark_hybrid) {
+      defines += [ "PANDA_USE_32_BIT_POINTER" ]
+    }
   }
 }
 

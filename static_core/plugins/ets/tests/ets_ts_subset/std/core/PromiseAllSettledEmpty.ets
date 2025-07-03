@@ -16,10 +16,10 @@
 let array: Promise<string>[] = [];
 Promise.allSettled(array).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 0) {
-        console.log("Test failed. Expected an empty string array but got length " + values.length + ".");
+        console.log('Test failed. Expected an empty string array but got length ' + values.length + '.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });

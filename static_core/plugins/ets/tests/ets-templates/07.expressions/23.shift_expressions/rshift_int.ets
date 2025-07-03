@@ -20,10 +20,10 @@ desc: Corner case for right shift
 
 function main(): void {
     let n: {{rn.type}} = {{rn.value}};
-    let s = 1;
+    let s: {{rn.type}} = 1;
 
     let a = n >>> s;
-    let b = (n >> s) + (2 << ~s);
+    let b = (n >> s) + ((2 as {{rn.type}}) << ~s);
     assertEQ( a, b );
 }
 {% endfor %}

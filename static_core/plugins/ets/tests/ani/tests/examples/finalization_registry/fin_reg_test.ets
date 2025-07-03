@@ -36,7 +36,7 @@ final class CallbackHolder {
 
     // Required only for purposes of test, do not use it in production code
     public static doFullGC() throws {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
         // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
         // if main coro is executed first, the test will return false
         Coroutine.Schedule()

@@ -43,6 +43,8 @@ disasm_column_test_js_files = [
 
 disasm_line_release_test_ts_files = [ "line_number_release" ]
 
+disasm_ets_implements_test_ts_files = [ "etsImplements" ]
+
 disasm_test_js_files = [
   "slot-number-annotation",
   "script-string1",
@@ -75,6 +77,20 @@ foreach(file, disasm_line_release_test_ts_files) {
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
     extra_args = [ "--module" ]
+    in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, disasm_ets_implements_test_ts_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_ts = "${test_ts_path}${file}.ts"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_ts)
+    dst_file = rebase_path(test_abc)
+    extra_args = [ "--module",
+                   "--enable-ets-implements",
+                 ]
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }
@@ -222,6 +238,7 @@ script_sources = [
   "disassembler_source_lang_test.cpp",
   "disassembler_string_test.cpp",
   "disassembler_system_annotations_test.cpp",
+  "disassembler_etsImplements_literal_test.cpp"
 ]
 
 module_sources = [
@@ -287,6 +304,10 @@ host_unittest_action("DisasmDebugTest") {
   foreach(file, disasm_debug_script_test_action_files) {
     deps += [ ":gen_${file}_abc" ]
   }
+
+  foreach(file, disasm_ets_implements_test_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
 }
 
 host_unittest_action("DisasmReleaseTest") {
@@ -332,6 +353,10 @@ host_unittest_action("DisasmScriptTest") {
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
   foreach(file, disasm_debug_script_test_action_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, disasm_ets_implements_test_ts_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }

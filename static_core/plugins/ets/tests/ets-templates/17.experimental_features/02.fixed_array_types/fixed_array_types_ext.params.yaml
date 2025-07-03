@@ -1,0 +1,127 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Interfaces with static members and type parameters inside
+cases:
+  - desc: |-
+      Fixed arrays are not compatible with resizable arrays.
+      tags:
+        - negative
+        - compile-only
+    logic: |-
+      let fixedArr: FixedArray<number> = [1, 2, 3];
+      let resizeArr: number[] = [4, 5, 6];
+      fixedArr = resizeArr;
+  - desc: |-
+      Fixed arrays are not compatible with resizable arrays.
+      tags:
+        - negative
+        - compile-only
+    logic: |-
+      let fixedArr: FixedArray<number> = [1, 2, 3];
+      let resizeArr: number[] = [4, 5, 6];
+      resizeArr = fixedArr;
+  - desc: Create a one-dimensional fixed array with the data type number.
+    logic: |-
+      let fixedArr: FixedArray<number> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type string.
+    logic: |-
+      let fixedArr: FixedArray<string> = ["1", "2", "3"];
+      assertEQ(fixedArr[0], "1");
+      assertEQ(fixedArr[1], "2");
+      assertEQ(fixedArr[2], "3");
+  - desc: Create a 2D fixed array with the data type number.
+    logic: |-
+      let arr : FixedArray<FixedArray<number>> = [[1, 2, 3], [1, 2, 3]];
+      assertEQ(arr[0][0], 1);
+      assertEQ(arr[1][2], 3); 
+  - desc: Create a 2D fixed array with the data type string.
+    logic: |-
+      let arr : FixedArray<FixedArray<string>> = [['A', 'B', 'C'], ['D', 'E', 'F']];
+      assertEQ(arr[0][0], "A");
+      assertEQ(arr[1][2], "F"); 
+  - desc: An empty array can be inferred as a FixedArray.
+    logic: |-
+      let arr: FixedArray<number> = [];
+  - desc: |-
+      The index exceeds the array length.
+      tags:
+        - negative
+    logic: |-
+      let x: FixedArray<number> = [1, 2, 3];
+      let y = x[3];
+  - desc: Changing the values of array elements.
+    logic: |-
+      let x: FixedArray<number> = [1, 2, 3]; 
+      assertEQ(x[0], 1);
+      x[0] = 0; 
+      assertEQ(x[0], 0);
+  - desc: Loop through array elements.
+    logic: |-
+      let arr: FixedArray<number> = [1, 2, 3]; 
+      let expectedValue = 1;
+      for (const num of arr) {
+          assertEQ(num, expectedValue);
+          expectedValue++;
+      }
+  - desc: Create a one-dimensional fixed array with the data type int.
+    logic: |-
+      let fixedArr: FixedArray<int> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type boolean.
+    logic: |-
+      let fixedArr: FixedArray<boolean> = [true, false, true];
+      assertEQ(fixedArr[0], true);
+      assertEQ(fixedArr[1], false);
+      assertEQ(fixedArr[2], true);
+  - desc: Create a one-dimensional fixed array with the data type short.
+    logic: |-
+      let fixedArr: FixedArray<short> = [1, 2, 3]; 
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type byte.
+    logic: |-
+      let fixedArr: FixedArray<byte> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type long.
+    logic: |-
+      let fixedArr: FixedArray<long> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type float.
+    logic: |-
+      let fixedArr: FixedArray<float> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type double.
+    logic: |-
+      let fixedArr: FixedArray<double> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);
+  - desc: Create a one-dimensional fixed array with the data type char.
+    logic: |-
+      let fixedArr: FixedArray<char> = [1, 2, 3];
+      assertEQ(fixedArr[0], 1);
+      assertEQ(fixedArr[1], 2);
+      assertEQ(fixedArr[2], 3);

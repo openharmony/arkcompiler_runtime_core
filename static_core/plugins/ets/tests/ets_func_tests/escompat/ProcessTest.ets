@@ -59,7 +59,7 @@ function getChildErrorOutputAsString(child: StdProcess.ChildProcess, separator: 
 }
 
 function runChildAndGetOutput(command: string): String {
-    let childProcess = StdProcess.process.runCmd(command);
+    let childProcess = StdProcess.runCmd(command);
     childProcess.wait();
     return getChildOutputAsString(childProcess);
 }
@@ -71,7 +71,7 @@ function runChildAndGetOutput(command: string, separator: string): String[] {
 }
 
 function runChildAndGetErrorOutput(command: string): String {
-    let childProcess = StdProcess.process.runCmd(command);
+    let childProcess = StdProcess.runCmd(command);
     childProcess.wait();
     return getChildErrorOutputAsString(childProcess);
 }
@@ -113,7 +113,7 @@ function getProcAttributes(): Map<String, number> {
 
 function createChildForTesting(): StdProcess.ChildProcess {
     let command = "echo All good; echo 1>&2 All good; echo $$; echo $(cat /proc/$$/status | grep PPid) | cut -d ' ' -f2;exit 3;"
-    let childProcess = StdProcess.process.runCmd(command);
+    let childProcess = StdProcess.runCmd(command);
     return childProcess;
 }
 
@@ -148,12 +148,12 @@ function testChildGetExitCode(child: StdProcess.ChildProcess): int {
 
 function testChildKill(): int {
     let res: int = 0;
-    let childProcess = StdProcess.process.runCmd("while true; do continue ; done");
+    let childProcess = StdProcess.runCmd("while true; do continue ; done");
     childProcess.kill("SIGKILL");
     childProcess.wait()
     res += childProcess.killed ? 0 : 1;
 
-    childProcess = StdProcess.process.runCmd("while true; do continue ; done");
+    childProcess = StdProcess.runCmd("while true; do continue ; done");
     childProcess.kill(9);
     childProcess.wait()
     res += childProcess.killed ? 0 : 1;
@@ -161,21 +161,23 @@ function testChildKill(): int {
 }
 
 function testChildClose(): int {
-    let childProcess = StdProcess.process.runCmd("while true; do continue ; done");
+    let childProcess = StdProcess.runCmd("while true; do continue ; done");
     childProcess.close();
     childProcess.wait();
     return childProcess.exitCode >= 0 ? 0 : 1;
 }
 
 function testProcessManagerGetUidForName(): int {
-    let expected = StdProcess.ProcessManager.getUidForName("root");
+    let pro = new StdProcess.ProcessManager();
+    let expected = pro.getUidForName("root");
     return  expected == 0|| expected == -1 ? 0 : 1;
 }
 
 function testProcessManagerGetThreadPriority(): int {
-    let output = runChildAndGetOutput("cat /proc/" + StdProcess.process.ppid + "/stat", " ");
+    let output = runChildAndGetOutput("cat /proc/" + StdProcess.ppid() + "/stat", " ");
     let expected = parseInt(output[17]);
-    let actual = StdProcess.ProcessManager.getThreadPriority(StdProcess.process.pid) + 20;
+    let pro = new StdProcess.ProcessManager();
+    let actual = pro.getThreadPriority(StdProcess.pid()) + 20;
     return  expected == actual ? 0 : 1;
 }
 
@@ -186,9 +188,10 @@ function  testProcessManagerGetSystemConfig(): int {
     let _SC_OPEN_MAX = 4;
     let _SC_PAGE_SIZE = 8;
 
-    res += StdProcess.ProcessManager.getSystemConfig(_SC_ARG_MAX) > 0 ? 0 : 1;
-    res += StdProcess.ProcessManager.getSystemConfig(_SC_OPEN_MAX) > 0 ? 0 : 1;
-    res += StdProcess.ProcessManager.getSystemConfig(_SC_PAGE_SIZE) > 0 ? 0 : 1;
+    let pro = new StdProcess.ProcessManager();
+    res += pro.getSystemConfig(_SC_ARG_MAX) > 0 ? 0 : 1;
+    res += pro.getSystemConfig(_SC_OPEN_MAX) > 0 ? 0 : 1;
+    res += pro.getSystemConfig(_SC_PAGE_SIZE) > 0 ? 0 : 1;
 
     return res;
 }
@@ -204,7 +207,8 @@ function testProcessManagerGetEnvironmentVar(): int {
 
     let res: int = 0;
     entries.forEach((value: String, key: String) => {
-        let expected = StdProcess.ProcessManager.getEnvironmentVar(key)
+        let pro = new StdProcess.ProcessManager();
+        let expected = pro.getEnvironmentVar(key)
         res += expected == value || expected == "" ? 0 : 1;
     })
     return res;
@@ -213,45 +217,46 @@ function testProcessManagerGetEnvironmentVar(): int {
 // function testProcessManagerExit();
 
 function testProcessManagerKill(): int {
-    let childProcess = StdProcess.process.runCmd("while true; do continue ; done");
+    let childProcess = StdProcess.runCmd("while true; do continue ; done");
     let pid = childProcess.pid;
     let SIGKILL: int = 9;
-    while(!StdProcess.ProcessManager.kill(SIGKILL, pid));
+    let pro = new StdProcess.ProcessManager();
+    while(!pro.kill(SIGKILL, pid));
     childProcess.wait();
     return childProcess.exitCode >= 0 ? 0 : 1;
 }
 
 function testGetPid(attributes: Map<String, number> ): int {
-    return  StdProcess.process.pid == attributes.get("pid") ? 0 : 1;
+    return  StdProcess.pid() == attributes.get("pid") ? 0 : 1;
 }
 
 function testGetTid(attributes: Map<String, number>): int {
-    return  StdProcess.process.tid == attributes.get("tid") ? 0 : 1;
+    return  StdProcess.tid() == attributes.get("tid") ? 0 : 1;
 }
 
 function testGetPpid(attributes: Map<String, number>): int {
-    return  StdProcess.process.ppid == attributes.get("ppid") ? 0 : 1;
+    return  StdProcess.ppid() == attributes.get("ppid") ? 0 : 1;
 }
 
 function testGetUid(attributes: Map<String, number>): int {
-    return  StdProcess.process.uid == attributes.get("uid") ? 0 : 1;
+    return  StdProcess.uid() == attributes.get("uid") ? 0 : 1;
 }
 
 function testGetEuid(attributes: Map<String, number>): int {
-    return  StdProcess.process.euid == attributes.get("euid") ? 0 : 1;
+    return  StdProcess.euid() == attributes.get("euid") ? 0 : 1;
 }
 
 function testGetGid(attributes: Map<String, number>): int {
-    return  StdProcess.process.gid == attributes.get("gid") ? 0 : 1;
+    return  StdProcess.gid() == attributes.get("gid") ? 0 : 1;
 }
 
 function testGetEgid(attributes: Map<String, number>): int {
-    return  StdProcess.process.egid == attributes.get("egid") ? 0 : 1;
+    return  StdProcess.egid() == attributes.get("egid") ? 0 : 1;
 }
 
 function testGetGroups(attributes: Map<String, number>): int {
     let res: int = 0;
-    let groups = StdProcess.process.groups;
+    let groups = StdProcess.groups();
     
     for (let i: int = 1; ; ++i) {
         let key : String = "groups" + i;
@@ -267,41 +272,42 @@ function testGetGroups(attributes: Map<String, number>): int {
 function testIs64Bit(): int {
     let output = runChildAndGetOutput("getconf LONG_BIT", "\n");
     let architecture: String = output[0];
-    if (StdProcess.process.is64Bit() && architecture == "64") {
+    if (StdProcess.is64Bit() && architecture == "64") {
         return 0;
     }
-    if (!StdProcess.process.is64Bit() && architecture == "32") {
+    if (!StdProcess.is64Bit() && architecture == "32") {
         return 0;
     }    
     return 1;
 }
 
 function testGetStartRealTime(): int {
-    let command: string = "cat /proc/" + StdProcess.process.pid + "/stat"
+    let command: string = "cat /proc/" + StdProcess.pid() + "/stat"
     let values: String[] = runChildAndGetOutput(command, " ");
 
     let _SC_CLCL_TCK = 2;
-    let ticksPerSecond = StdProcess.ProcessManager.getSystemConfig(2);
+    let pro = new StdProcess.ProcessManager();
+    let ticksPerSecond = pro.getSystemConfig(2);
 
     let milisecondsPerSecond = 1000;
     let expected = Math.floor(parseInt(values[21]) / ticksPerSecond * milisecondsPerSecond);
-    let actual = StdProcess.process.getStartRealtime();
+    let actual = StdProcess.getStartRealtime();
 
     return actual == expected ? 0 : 1;
 }
 
 function testGetPastCpuTime(): int {
-    let start = StdProcess.process.getPastCpuTime();
+    let start = StdProcess.getPastCpuTime();
 
-    while (StdProcess.process.getPastCpuTime()  - start < 1);
+    while (StdProcess.getPastCpuTime()  - start < 1);
 
-    let finish = StdProcess.process.getPastCpuTime();
+    let finish = StdProcess.getPastCpuTime();
 
     return finish - start >= 1 ? 0 : 1;
 }
 
 function testRunCmdNoCondition(): int {
-    let childProcess = StdProcess.process.runCmd("echo Hello");
+    let childProcess = StdProcess.runCmd("echo Hello");
     childProcess.wait();
     return childProcess.exitCode == 0 ? 0 : 1;
 }
@@ -309,7 +315,7 @@ function testRunCmdNoCondition(): int {
 function testRunCmdWithTimeout(): int {
     let condition = new StdProcess.ConditionType();
     condition.timeout = 1;
-    let childProcess = StdProcess.process.runCmd("while true; do continue ; done", condition);
+    let childProcess = StdProcess.runCmd("while true; do continue ; done", condition);
     childProcess.wait();
     return childProcess.exitCode >= 0 ? 0 : 1;
 }
@@ -320,7 +326,7 @@ function testRunCmdWithMaxBuffer(): int {
     let condition = new StdProcess.ConditionType();
     condition.maxBuffer = 10;
 
-    let childProcess = StdProcess.process.runCmd("echo Display long string output; echo 1>&2 Display long string output", condition);
+    let childProcess = StdProcess.runCmd("echo Display long string output; echo 1>&2 Display long string output", condition);
     childProcess.wait();
     let stdOut = getChildOutputAsString(childProcess);
     let stdErr = getChildErrorOutputAsString(childProcess);
@@ -335,30 +341,86 @@ function testRunCmdWithMaxBuffer(): int {
 
 function testCwd(): int {
     let expected = runChildAndGetOutput("pwd");
-    let actual  = StdProcess.process.cwd() + "\n";
+    let actual  = StdProcess.cwd() + "\n";
     return actual == expected ? 0 : 1;
 }
 
 function testChangeDir(): int {
     let result: int  = 0;
 
-    let currentDir = StdProcess.process.cwd();
-    StdProcess.process.chdir("/");
-    result += StdProcess.process.cwd() == "/" ? 0 : 1;
+    let currentDir = StdProcess.cwd();
+    StdProcess.chdir("/");
+    result += StdProcess.cwd() == "/" ? 0 : 1;
 
-    StdProcess.process.chdir(currentDir);
-    result += StdProcess.process.cwd() == currentDir ? 0 : 1;
+    StdProcess.chdir(currentDir);
+    result += StdProcess.cwd() == currentDir ? 0 : 1;
     return result;
 }
 
 function testUptime(): int {
-    let start = StdProcess.process.uptime();
+    let start = StdProcess.uptime();
 
-    while (StdProcess.process.uptime()  - start < 1);
+    while (StdProcess.uptime()  - start < 1);
 
-    let finish = StdProcess.process.uptime();
+    let finish = StdProcess.uptime();
 
     return finish - start >= 1 ? 0 : 1;
+}
+
+function testProcessManagerIsAppUid(): int {
+    let result: int = 0;
+
+    try {
+        let mgr = new StdProcess.ProcessManager();
+        let isApp = mgr.isAppUid(StdProcess.uid());
+        if (!isApp) {
+            // Current process should be a application, if not, test failed
+            return 1;
+        }
+
+        if (mgr.isAppUid(9999) || mgr.isAppUid(20000)) {
+            // It should be in range of 10000-19999
+            return 1;
+        }
+    } catch (err: RuntimeException) {        
+        // It'll throw RuntimeException for Non-OHOS target
+        // If it's because of 'not implemented', regard it as passed, 
+        // as it only support aarch64-ohos currently.
+        if (err.message == 'not implemented for Non-OHOS target') {
+            // Regard as passed for Non-OHOS target here
+            result = 0;
+        } else {
+            // Otherwise, Regard it as failed.
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+function testIsIsolatedProcess(): int {
+    let result: int = 0;
+
+    try {
+        let isIsolated = StdProcess.isIsolatedProcess();
+        if (isIsolated) {
+            // Current process is not isolated by default, test failed
+            return 1;
+        }
+    } catch (err: RuntimeException) {
+        // It'll throw RuntimeException for Non-OHOS target
+        // If it's because of 'not implemented', regard it as passed, 
+        // as it only support aarch64-ohos currently.
+        if (err.message == 'not implemented for Non-OHOS target') {
+            // Regard as passed for Non-OHOS target here
+            result = 0;
+        } else {
+            // Otherwise, Regard it as failed.
+            result = 1;
+        }
+    }
+
+    return result;
 }
 
 function main(): int {
@@ -376,6 +438,7 @@ function main(): int {
     failures += test(testChildKill(), "ChildProcess.kill() / ChildProcess.killed");
     failures += test(testChildClose(), "ChildProcess.close()");
 
+    failures += test(testProcessManagerIsAppUid(), 'ProcessManager.isAppUid()');
     failures += test(testProcessManagerGetUidForName(), "ProcessManager.getUidForName()");
     failures += test(testProcessManagerGetThreadPriority(), "ProcessManager.getThreadPriority()");
     failures += test(testProcessManagerGetSystemConfig(), "ProcessManager.getSystemConfig()");
@@ -403,6 +466,7 @@ function main(): int {
     failures += test(testCwd(), "process.cwd() test");
     failures += test(testChangeDir(), "process.chdir() test");
     failures += test(testUptime(), "process.uptime() test");
+    failures += test(testIsIsolatedProcess(), 'process.isIsolatedProcess() test');
 
     if (failures != 0) {
         console.log("FAILED: All tests run");

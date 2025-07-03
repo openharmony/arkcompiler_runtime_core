@@ -52,20 +52,24 @@ cases:
         f(): string { return "A" }
       }
       class B {
+        a:A
+        constructor(a:A){
+           this.a = a
+        }
         f = (this: A): string => { return this.f() }
       }
     use: |
       let a: A = new A()
-      let b: B = new B()
+      let b: B = new B(a)
       assertEQ(b.a.f(), "A")
   - decl: |
       class A {
-        let f = (this: number[]): void => {}
+        f(): string { return "A" }
       }
       class B {
-        let f = (this: number[]): void => {}
+        f = (this: B, a: A): string => { return a.f() }
       }
     use: |
       let a: A = new A()
       let b: B = new B()
-      assertEQ(b.f(a), "A")
+      assertEQ(b.f(b, a), "A")

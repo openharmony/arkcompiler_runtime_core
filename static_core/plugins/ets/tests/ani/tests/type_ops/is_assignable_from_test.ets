@@ -23,3 +23,29 @@ class BaseA {}
 class SubB extends BaseA {}
 class SubC extends SubB {}
 class D {}
+
+interface InterfaceA {
+    methodA(): void;
+}
+
+interface InterfaceB {
+    methodB(): void;
+}
+
+interface InterfaceC extends InterfaceA, InterfaceB {
+    methodC(): void;
+}
+
+class MyClass implements InterfaceC {
+    methodA(): void {
+        console.log("Method A");
+    }
+
+    methodB(): void {
+        console.log("Method B");
+    }
+
+    methodC(): void {
+        console.log("Method C");
+    }
+};

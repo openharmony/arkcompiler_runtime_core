@@ -18,8 +18,10 @@
 
 namespace ark::ets::ani {
 
+static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss);
+
 /*static*/
-PandaString Mangle::ConvertDescriptor(const std::string_view descriptor)
+PandaString Mangle::ConvertDescriptor(const std::string_view descriptor, bool allowArray)
 {
     if (descriptor.empty() || descriptor.back() == ';' || descriptor.find('/') != std::string::npos) {
         // The 'descriptor' does not have a new format, so no conversion is required.
@@ -27,6 +29,18 @@ PandaString Mangle::ConvertDescriptor(const std::string_view descriptor)
     }
 
     PandaStringStream ss;
+    if (allowArray) {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        if (descriptor.size() >= 2U && descriptor[0] == 'A' && descriptor[1] == '{') {
+            auto bodySize = ParseArrayBody(descriptor.substr(1), ss);
+            if (bodySize == std::string_view::npos) {
+                // The 'descriptor' has wrong format, so can't be convert
+                return PandaString("");
+            }
+            return ss.str();
+        }
+    }
+
     ss << 'L';
     ss << descriptor;
     ss << ';';

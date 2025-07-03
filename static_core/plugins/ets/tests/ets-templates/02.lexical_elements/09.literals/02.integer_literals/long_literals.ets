@@ -25,6 +25,6 @@ let b{{loop.index}} = new Long({{c['lit']}})
 function main(): void {
 {% for c in cases %}
     assertEQ(v{{loop.index}}, {{c['val']}})
-    assertEQ(b{{loop.index}}.longValue(), {{c['val']}})
+    assertEQ(b{{loop.index}}.toLong(), {{c['val']}})
 {% endfor %}
 }

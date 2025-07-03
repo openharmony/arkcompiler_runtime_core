@@ -62,12 +62,17 @@ class TestObject {
     constructor() {}
 }
 
-let g_obj: TestObject = new TestObject();
-let g_inlineObj: TestObject = new TestObject();
-let g_array = new Array<Object>();
-let g_weakRef1: WeakRef<Object>;
-let g_weakRef2: WeakRef<Object>;
-let g_weakRef3: WeakRef<Object>;
+let g_obj: TestObject;
+let g_inlineObj: TestObject;
+let g_array: Array<Object>;
+static {
+    g_obj = new TestObject();
+    g_inlineObj = new TestObject();
+    g_array = new Array<Object>();
+}
+let g_weakRef1: WeakRef<Object>|null = null;
+let g_weakRef2: WeakRef<Object>|null = null;
+let g_weakRef3: WeakRef<Object>|null = null;
 
 // Cancel the active objects reference cross-reference objects
 export function clearActiveRef(): void {
@@ -145,7 +150,7 @@ export function cycle(p: Promise<Object>, isRootRefStsObject: boolean, isRootInR
 // Triger sts full GC
 function triggerFullGC(): void {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     } catch(e) {
         assertTrue(false, "Unexpected exception during full GC");
     }
@@ -202,30 +207,30 @@ export function createWeakRefObject3(): Object {
 
 export function stsGCTest1(): void {
     triggerFullGC();
-    if ((g_weakRef1 != null && g_weakRef1.deref() == null) || (g_weakRef2 != null && g_weakRef2.deref() == null)) {
+    if ((g_weakRef1 != null && g_weakRef1!.deref() == null) || (g_weakRef2 != null && g_weakRef2!.deref() == null)) {
         throw new Error("STS GC cannot collect cross-reference table objects!");
     }
 }
 
 export function stsGCTest2(): void {
     triggerFullGC();
-    if (g_weakRef1 != null && g_weakRef1.deref() == null) {
+    if (g_weakRef1 != null && g_weakRef1!.deref() == null) {
         throw new Error("STS GC cannot collect cross-reference table objects!");
     }
-    if (g_weakRef2 != null && g_weakRef2.deref() != null) {
+    if (g_weakRef2 != null && g_weakRef2!.deref() != null) {
         throw new Error('STS GC should collect garbage object!');
     }
 }
 
 export function stsGCTest3(): void {
     triggerFullGC();
-    if (g_weakRef1 != null && g_weakRef1.deref() == null) {
+    if (g_weakRef1 != null && g_weakRef1!.deref() == null) {
         throw new Error('STS GC cannot collect the objects that are referenced by cross-referenced objects!');
     }
-    if (g_weakRef2 != null && g_weakRef2.deref() == null) {
+    if (g_weakRef2 != null && g_weakRef2!.deref() == null) {
         throw new Error("STS GC cannot collect cross-reference table objects!");
     }
-    if (g_weakRef3 != null && g_weakRef3.deref() != null) {
+    if (g_weakRef3 != null && g_weakRef3!.deref() != null) {
         throw new Error('STS GC should collect garbage object!');
     }
 }
@@ -233,7 +238,7 @@ export function stsGCTest3(): void {
 export function stsGCTest4(): void {
     xgc();
     triggerFullGC();
-    if ((g_weakRef1 != null && g_weakRef1.deref() != null) || (g_weakRef2 != null && g_weakRef2.deref() != null)) {
+    if ((g_weakRef1 != null && g_weakRef1!.deref() != null) || (g_weakRef2 != null && g_weakRef2!.deref() != null)) {
         throw new Error("STS GC should collect cross-reference table objects that are dereferenced!");
     }
 }
@@ -241,10 +246,10 @@ export function stsGCTest4(): void {
 export function stsGCTest5(): void {
     xgc();
     triggerFullGC();
-    if (g_weakRef1 != null && g_weakRef1.deref() != null) {
+    if (g_weakRef1 != null && g_weakRef1!.deref() != null) {
         throw new Error("STS GC should collect cross-reference table objects that are dereferenced!");
     }
-    if (g_weakRef2 != null && g_weakRef2.deref() != null) {
+    if (g_weakRef2 != null && g_weakRef2!.deref() != null) {
         throw new Error('STS GC should collect garbage object!');
     }
 }
@@ -252,13 +257,13 @@ export function stsGCTest5(): void {
 export function stsGCTest6(): void {
     xgc();
     triggerFullGC();
-    if (g_weakRef1 != null && g_weakRef1.deref() != null) {
+    if (g_weakRef1 != null && g_weakRef1!.deref() != null) {
         throw new Error('STS GC should collect the objects that are referenced by cross-referenced objects!');
     }
-    if (g_weakRef2 != null && g_weakRef2.deref() != null) {
+    if (g_weakRef2 != null && g_weakRef2!.deref() != null) {
         throw new Error("STS GC should collect cross-reference table objects that are dereferenced!");
     }
-    if (g_weakRef3 != null && g_weakRef3.deref() != null) {
+    if (g_weakRef3 != null && g_weakRef3!.deref() != null) {
         throw new Error('STS GC should collect garbage object!');
     }
 }

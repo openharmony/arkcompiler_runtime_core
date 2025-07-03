@@ -26,7 +26,7 @@
  */
 <%= access_public %> <%= override %> map<%= map_generic %>(<%= this_arg %>callbackfn: (value: <%= el_type %><%= lambda_params %>) => <%= mapped_type %>): <%= array_of_type.(mapped_type) %> {
     const len = <%= this_len_int %>;
-    let res = <%= make_buffer.('len', mapped_type) %>;
+    let res : <%= make_fixed_array %> = <%= make_buffer.('len', mapped_type) %>;
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>);
     }

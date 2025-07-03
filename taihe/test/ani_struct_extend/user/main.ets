@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as StructExtendTest from "@generated/struct_extend";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as StructExtendTest from "struct_extend";
 
 loadLibrary("ani_struct_extend");
 
@@ -107,5 +107,5 @@ function main() {
     suite.addTest("check class bar", check_class_Bar)
     suite.addTest("check struct F", check_class_Bar)
     suite.addTest("check struct G", check_class_Bar)
-    System.exit(suite.run())
+    exit(suite.run())
 }

@@ -95,10 +95,6 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 
-//! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=gen-gc)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
-
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"

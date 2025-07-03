@@ -47,11 +47,12 @@ set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
     --load-runtimes=ets
-    --sampling-profiler-enable
+    --sampling-profiler-create
+    --sampling-profiler-startup-run
     --sampling-profiler-interval=200
 )
 
-set(COMPILER_ARGUMENTS_LIST
+set(COMPILER_ARGUMENTS_LIST1
     "false"
     "true"
 )

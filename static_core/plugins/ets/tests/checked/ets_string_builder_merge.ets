@@ -387,10 +387,9 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //! INST_COUNT    "String::concat",1
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
-//! INST_NOT      "String::concat"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 
 // Each '+=' operation on strings in tests below is translated into StringBuilder + 2 append calls by frontend
 

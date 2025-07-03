@@ -60,9 +60,7 @@ public:
         return std::vector<MirrorFieldInfo> {
             MirrorFieldInfo("buffer", ark::cross_values::GetTypedArrayBufferOffset(RUNTIME_ARCH)),
             MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedArrayLengthOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("byteOffset", ark::cross_values::GetTypedArrayByteOffsetOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("arrayBufferBacked",
-                            ark::cross_values::GetTypedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
+            MirrorFieldInfo("byteOffset", ark::cross_values::GetTypedArrayByteOffsetOffset(RUNTIME_ARCH))};
     }
 
     static std::vector<MirrorFieldInfo> GetUArrayMembers()
@@ -70,27 +68,13 @@ public:
         return std::vector<MirrorFieldInfo> {
             MirrorFieldInfo("buffer", ark::cross_values::GetTypedUnsignedArrayBufferOffset(RUNTIME_ARCH)),
             MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedUnsignedArrayLengthOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("byteOffsetInt", ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("arrayBufferBacked",
-                            ark::cross_values::GetTypedUnsignedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
+            MirrorFieldInfo("byteOffsetInt", ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(RUNTIME_ARCH))};
     }
 
     static std::vector<MirrorFieldInfo> GetArrayBufferMembers()
     {
         return std::vector<MirrorFieldInfo> {
             MirrorFieldInfo("data", ark::cross_values::GetArrayBufferDataOffset(RUNTIME_ARCH))};
-    }
-
-    static std::vector<MirrorFieldInfo> GetSharedArrayBufferMembers()
-    {
-        return std::vector<MirrorFieldInfo> {
-            MirrorFieldInfo("sharedMemory", ark::cross_values::GetSharedArrayBufferSharedMemoryOffset(RUNTIME_ARCH))};
-    }
-
-    static std::vector<MirrorFieldInfo> GetSharedMemoryMembers()
-    {
-        return std::vector<MirrorFieldInfo> {
-            MirrorFieldInfo("data", ark::cross_values::GetSharedMemoryDataOffset(RUNTIME_ARCH))};
     }
 
     EtsClass *GetClass(const char *name)
@@ -175,15 +159,4 @@ TEST_F(TypedArrayRelatedMemberOffsetTest, ArrayBufferLayout)
     MirrorFieldInfo::CompareMemberOffsets(klass, GetArrayBufferMembers(), false);
 }
 
-TEST_F(TypedArrayRelatedMemberOffsetTest, SharedArrayBufferLayout)
-{
-    auto *klass = GetClass("Lescompat/SharedArrayBuffer;");
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetSharedArrayBufferMembers(), false);
-}
-
-TEST_F(TypedArrayRelatedMemberOffsetTest, SharedMemoryLayout)
-{
-    auto *klass = GetClass("Lescompat/SharedMemory;");
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetSharedMemoryMembers(), false);
-}
 }  // namespace ark::ets::test

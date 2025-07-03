@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,47 +165,6 @@ public:
 
     static void Shutdown();
 
-    bool IsThreadAlive()
-    {
-        return GetStatus() != ThreadStatus::FINISHED;
-    }
-
-    void UpdateStatus(enum ThreadStatus status)
-    {
-        ASSERT(ManagedThread::GetCurrent() == this);
-
-        ThreadStatus oldStatus = GetStatus();
-        if (oldStatus == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
-            TransitionFromRunningToSuspended(status);
-        } else if (oldStatus != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
-            // NB! This thread is treated as suspended so when we transition from suspended state to
-            // running we need to check suspension flag and counter so SafepointPoll has to be done before
-            // acquiring mutator_lock.
-            // StoreStatus acquires lock here
-            StoreStatus<CHECK_SAFEPOINT, READLOCK>(ThreadStatus::RUNNING);
-        } else if (oldStatus == ThreadStatus::NATIVE && status != ThreadStatus::IS_TERMINATED_LOOP &&
-                   IsRuntimeTerminated()) {
-            // If a daemon thread with NATIVE status was deregistered, it should not access any managed object,
-            // i.e. change its status from NATIVE, because such object may already be deleted by the runtime.
-            // In case its status is changed, we must call a Safepoint to terminate this thread.
-            // For example, if a daemon thread calls ManagedCodeBegin (which changes status from NATIVE to
-            // RUNNING), it may be interrupted by a GC thread, which changes status to IS_SUSPENDED.
-            StoreStatus<CHECK_SAFEPOINT>(status);
-        } else {
-            // NB! Status is not a simple bit, without atomics it can produce faulty GetStatus.
-            StoreStatus(status);
-        }
-    }
-
-    enum ThreadStatus GetStatus()
-    {
-        // Atomic with acquire order reason: data race with flags with dependecies on reads after
-        // the load which should become visible
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        uint32_t resInt = fts_.asAtomic.load(std::memory_order_acquire);
-        return static_cast<enum ThreadStatus>(resInt >> THREAD_STATUS_OFFSET);
-    }
-
     static PandaString ThreadStatusAsString(enum ThreadStatus status);
 
     ark::mem::StackFrameAllocator *GetStackFrameAllocator() const
@@ -327,28 +286,13 @@ public:
 
     PANDA_PUBLIC_API LanguageContext GetLanguageContext();
 
-    inline bool IsSuspended()
-    {
-        return ReadFlag(SUSPEND_REQUEST);
-    }
-
-    inline bool IsRuntimeTerminated()
-    {
-        return ReadFlag(RUNTIME_TERMINATION_REQUEST);
-    }
-
-    inline void SetRuntimeTerminated()
-    {
-        SetFlag(RUNTIME_TERMINATION_REQUEST);
-    }
-
     static constexpr uint32_t GetFrameKindOffset()
     {
         return MEMBER_OFFSET(ManagedThread, isCompiledFrame_);
     }
     static constexpr uint32_t GetFlagOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, fts_);
+        return ThreadProxy::GetFlagOffset();
     }
 
     static constexpr uint32_t GetEntrypointsOffset()
@@ -449,7 +393,7 @@ public:
 
     virtual void VisitGCRoots(const ObjectVisitor &cb);
 
-    virtual void UpdateGCRoots();
+    virtual void UpdateGCRoots(const GCRootUpdater &gcRootUpdater);
 
     PANDA_PUBLIC_API void PushLocalObject(ObjectHeader **objectHeader);
 
@@ -458,41 +402,6 @@ public:
     void SetThreadPriority(int32_t prio);
 
     uint32_t GetThreadPriority();
-
-    // NO_THREAD_SANITIZE for invalid TSAN data race report
-    NO_THREAD_SANITIZE bool ReadFlag(ThreadFlag flag) const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return (fts_.asStruct.flags & static_cast<uint16_t>(flag)) != 0;
-    }
-
-    NO_THREAD_SANITIZE bool TestAllFlags() const
-    {
-        return (fts_.asStruct.flags) != initialThreadFlag_;  // NOLINT(cppcoreguidelines-pro-type-union-access)
-    }
-
-    void SetFlag(ThreadFlag flag)
-    {
-        // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
-        // where threads observe all modifications in the same order
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.asAtomic.fetch_or(flag, std::memory_order_seq_cst);
-    }
-
-    void ClearFlag(ThreadFlag flag)
-    {
-        // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
-        // where threads observe all modifications in the same order
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.asAtomic.fetch_and(UINT32_MAX ^ flag, std::memory_order_seq_cst);
-    }
-
-    // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
-    NO_THREAD_SANITIZE uint32_t ReadFlagsAndThreadStatusUnsafe()
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        return fts_.asInt;
-    }
 
     bool IsManagedCodeAllowed() const
     {
@@ -596,9 +505,9 @@ public:
         usePreallocObj_ = usePreallocObj;
     }
 
-    PANDA_PUBLIC_API void PrintSuspensionStackIfNeeded();
+    PANDA_PUBLIC_API void PrintSuspensionStackIfNeeded() override;
 
-    ThreadId GetId() const
+    ThreadId GetId() const override
     {
         // Atomic with relaxed order reason: data race with id_ with no synchronization or ordering constraints imposed
         // on other reads or writes
@@ -674,9 +583,6 @@ public:
 #endif
     }
 
-    PANDA_PUBLIC_API void SuspendImpl(bool internalSuspend = false);
-    PANDA_PUBLIC_API void ResumeImpl(bool internalResume = false);
-
     virtual void Suspend()
     {
         SuspendImpl();
@@ -686,57 +592,6 @@ public:
     {
         ResumeImpl();
     }
-
-    /// Transition to suspended and back to runnable, re-acquire share on mutator_lock_
-    PANDA_PUBLIC_API void SuspendCheck();
-
-    bool IsUserSuspended()
-    {
-        return userCodeSuspendCount_ > 0;
-    }
-
-    /* @sync 1
-     * @description This synchronization point can be used to insert a new attribute or method
-     * into ManagedThread class.
-     */
-
-    void WaitSuspension()
-    {
-        constexpr int TIMEOUT = 100;
-        auto oldStatus = GetStatus();
-        PrintSuspensionStackIfNeeded();
-        UpdateStatus(ThreadStatus::IS_SUSPENDED);
-        {
-            /* @sync 1
-             * @description Right after the thread updates its status to IS_SUSPENDED and right before beginning to wait
-             * for actual suspension
-             */
-            os::memory::LockHolder lock(suspendLock_);
-            while (suspendCount_ > 0) {
-                suspendVar_.TimedWait(&suspendLock_, TIMEOUT);
-                // In case runtime is being terminated, we should abort suspension and release monitors
-                if (UNLIKELY(IsRuntimeTerminated())) {
-                    suspendLock_.Unlock();
-                    OnRuntimeTerminated();
-                    UNREACHABLE();
-                }
-            }
-            ASSERT(!IsSuspended());
-        }
-        UpdateStatus(oldStatus);
-    }
-
-    virtual void OnRuntimeTerminated() {}
-
-    // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
-    void TransitionFromRunningToSuspended(enum ThreadStatus status) NO_THREAD_SAFETY_ANALYSIS
-    {
-        // Do Unlock after StoreStatus, because the thread requesting a suspension should see an updated status
-        StoreStatus(status);
-        GetMutatorLock()->Unlock();
-    }
-
-    PANDA_PUBLIC_API void SafepointPoll();
 
     /**
      * From NativeCode you can call ManagedCodeBegin.
@@ -811,59 +666,7 @@ protected:
     virtual void CleanUp();
 
 private:
-    enum SafepointFlag : bool { DONT_CHECK_SAFEPOINT = false, CHECK_SAFEPOINT = true };
-    enum ReadlockFlag : bool { NO_READLOCK = false, READLOCK = true };
-
     PandaString LogThreadStack(ThreadState newState) const;
-
-    // NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
-    template <SafepointFlag SAFEPOINT = DONT_CHECK_SAFEPOINT, ReadlockFlag READLOCK_FLAG = NO_READLOCK>
-    void StoreStatus(ThreadStatus status) NO_THREAD_SAFETY_ANALYSIS
-    {
-        while (true) {
-            union FlagsAndThreadStatus oldFts {
-            };
-            union FlagsAndThreadStatus newFts {
-            };
-            oldFts.asInt = ReadFlagsAndThreadStatusUnsafe();  // NOLINT(cppcoreguidelines-pro-type-union-access)
-
-            // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-            if constexpr (SAFEPOINT == CHECK_SAFEPOINT) {  // NOLINT(bugprone-suspicious-semicolon)
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                if (oldFts.asStruct.flags != initialThreadFlag_) {
-                    // someone requires a safepoint
-                    SafepointPoll();
-                    continue;
-                }
-            }
-
-            newFts.asStruct.flags = oldFts.asStruct.flags;  // NOLINT(cppcoreguidelines-pro-type-union-access)
-            newFts.asStruct.status = status;                // NOLINT(cppcoreguidelines-pro-type-union-access)
-
-            // mutator lock should be acquired before change status
-            // to avoid blocking in running state
-            // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-            if constexpr (READLOCK_FLAG == READLOCK) {  // NOLINT(bugprone-suspicious-semicolon)
-                GetMutatorLock()->ReadLock();
-            }
-
-            // clang-format conflicts with CodeCheckAgent, so disable it here
-            // clang-format off
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            if (fts_.asAtomic.compare_exchange_weak(
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                oldFts.asNonvolatileInt, newFts.asNonvolatileInt, std::memory_order_release)) {
-                // If CAS succeeded, we set new status and no request occurred here, safe to proceed.
-                break;
-            }
-            // Release mutator lock to acquire it on the next loop iteration
-            // clang-format on
-            // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-            if constexpr (READLOCK_FLAG == READLOCK) {  // NOLINT(bugprone-suspicious-semicolon)
-                GetMutatorLock()->Unlock();
-            }
-        }
-    }
 
 #ifdef PANDA_WITH_QUICKENER
     NO_OPTIMIZE const void *const *GetOrSetInnerDebugDispatchTable(bool set = false,
@@ -889,9 +692,6 @@ private:
 #endif
 
     virtual bool TestLockState() const;
-
-    static constexpr uint32_t THREAD_STATUS_OFFSET = 16;
-    static_assert(sizeof(fts_) == sizeof(uint32_t), "Wrong fts_ size");
 
     // Can cause data races if child thread's UpdateId is executed concurrently with GetNativeThreadId
     std::atomic<ThreadId> id_;
@@ -958,11 +758,6 @@ private:
 
     PandaVector<HandleScope<ObjectHeader *> *> objectHeaderHandleScopes_ {};
     HandleStorage<ObjectHeader *> *objectHeaderHandleStorage_ {nullptr};
-
-    os::memory::ConditionVariable suspendVar_ GUARDED_BY(suspendLock_);
-    os::memory::Mutex suspendLock_;
-    uint32_t suspendCount_ GUARDED_BY(suspendLock_) = 0;
-    std::atomic_uint32_t userCodeSuspendCount_ {0};
 
     PandaStack<ThreadState> threadFrameStates_;
 

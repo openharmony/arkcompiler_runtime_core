@@ -28,6 +28,9 @@ export function clearTimer(id: TimerId) {
     EventLoop.clearTimer(id);
 }
 
+// NOTE(panferovi): fix signature after #25420
+native function launchSameWorker(callback: Object): void;
+
 class EventLoop {
     constructor(workerId: WorkerId) {
         this.workerId = workerId;
@@ -36,7 +39,7 @@ class EventLoop {
     }
 
     static createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
-        return EventLoop.timerTable.createTimer(callback, delay, repeat);
+        return EventLoop.timerTable.createTimer(callback, delay, repeat, 0);
     }
 
     static clearTimer(id: TimerId) {
@@ -48,7 +51,7 @@ class EventLoop {
     }
 
     public init() {
-        this.pollLoop();
+        launchSameWorker(() => { this.pollLoop(); } as Object);
     }
 
     public registerTimer(timer: Timer) {
@@ -56,7 +59,7 @@ class EventLoop {
         ConcurrencyHelpers.eventFire(this.initEvent);
     }
 
-    private async pollLoop() {
+    private pollLoop() {
         ConcurrencyHelpers.eventWait(this.initEvent);
         this.pollTimers();
         EventLoop.registry.removeEventLoop(this.workerId);
@@ -132,10 +135,11 @@ class Registry {
 };
 
 class Timer {
-    constructor(callback: Callback, delay: int, repeat: boolean, id: TimerId) {
+    constructor(callback: Callback, delay: int, repeat: boolean, linkedTimer: long, id: TimerId) {
         this.callback = callback;
         this.delay = delay;
         this.repeat = repeat;
+        this.linkedTimer = linkedTimer;
         this.id = id;
         this.startTime = Date.now();
         this.elapsedTime = 0;
@@ -150,8 +154,8 @@ class Timer {
         return this.delay <= this.elapsedTime;
     }
 
-    public async invoke() {
-        this.callback();
+    public invoke() {
+        launchSameWorker(this.callback as Object);
     }
 
     public getId(): TimerId {
@@ -167,9 +171,14 @@ class Timer {
         this.elapsedTime = 0;
     }
 
+    public hasLinkedTimer(): boolean {
+        return this.linkedTimer != 0;
+    }
+
     private callback: Callback;
     private delay: int;
     private repeat: boolean;
+    private linkedTimer: long;
     private id: TimerId;
     private startTime: number;
     private elapsedTime: number;
@@ -177,23 +186,43 @@ class Timer {
 
 class TimerTable {
     constructor() {
-        this.nextFreeId = 0;
+        // IDs must be positive integers beginning at 1.
+        this.nextFreeId = 1;
         this.tableSpinlock = ConcurrencyHelpers.spinlockCreate();
         this.timers = new Map<TimerId, Timer>();
     }
 
-    public createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
-        let timer: Timer;
+    public createTimer(callback: Object, delay: int, repeat: boolean, linkedTimer: long): Timer {
+        return this.createTimer(callback as Callback, delay, repeat, linkedTimer);
+    }
+
+    public createTimer(callback: Callback, delay: int, repeat: boolean, linkedTimer: long): Timer {
+        let timer: Timer | undefined;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
             let timerId = this.nextFreeId++;
-            timer = new Timer(callback, delay, repeat, timerId);
-            this.timers.set(timerId, timer);
+            timer = new Timer(callback, delay, repeat, linkedTimer, timerId);
+            this.timers.set(timerId, timer!);
+        });
+        return timer!;
+    }
+
+    public findTimer(id: TimerId): Timer | undefined {
+        let timer: Timer | undefined;
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            timer = this.timers.get(id);
         });
         return timer;
     }
 
     public clearTimer(id: TimerId) {
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            let timer = this.timers.get(id);
+            if (timer === undefined) {
+                return;
+            }
+            if (timer!.hasLinkedTimer() && !CoroutineExtras.workerHasExternalScheduler()) {
+                throw new Error('Failed to clear timer. Unable to clear interop timer from non-interop worker');
+            }
             this.timers.delete(id);
         });
     }

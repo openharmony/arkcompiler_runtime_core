@@ -21,8 +21,16 @@
 #include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
+#ifdef ARK_HYBRID
+#include "thread/thread_holder.h"
+#endif
 
 namespace ark {
+#ifdef ARK_HYBRID
+using CommonRootVisitor = panda::CommonRootVisitor;
+
+extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
+#endif
 
 class CoroutineContext;
 class CompletionEvent;
@@ -121,7 +129,8 @@ public:
      * coroutine. For details see CoroutineManager::CoroutineFactory
      */
     static Coroutine *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR);
+                             std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR,
+                             CoroutinePriority priority = CoroutinePriority::MEDIUM_PRIORITY);
     ~Coroutine() override;
 
     /// Should be called after creation in order to create native context and do other things
@@ -131,7 +140,8 @@ public:
      * but is called to prepare a cached Coroutine instance for reuse when it is needed.
      * Implies that the CleanUp() method was called before caching.
      */
-    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
+    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                      CoroutinePriority priority);
     /**
      * Manual destruction, applicable only to the main coro. Other ones get deleted by the coroutine manager once they
      * finish execution of their entrypoint method.
@@ -176,6 +186,9 @@ public:
     {
         return coroutineId_;
     }
+
+    /// @brief list unhandled language specific events on program exit
+    virtual void ListUnhandledEventsOnProgramExit() {};
 
     /**
      * Suspend a coroutine, so its status becomes either Status::RUNNABLE or Status::BLOCKED, depending on the suspend
@@ -280,15 +293,61 @@ public:
         return startSuspended_;
     }
 
+    /// @return coroutine priority which is used in the runnable queue
+    CoroutinePriority GetPriority() const
+    {
+        return priority_;
+    }
+
+    /// @return immediate launcher and reset it to nullptr
+    Coroutine *ReleaseImmediateLauncher()
+    {
+        return std::exchange(immediateLauncher_, nullptr);
+    }
+
+    /// Set immediate launcher
+    void SetImmediateLauncher(Coroutine *il)
+    {
+        ASSERT(immediateLauncher_ == nullptr);
+        immediateLauncher_ = il;
+    }
+
+    /// Possibly noreturn. Call this if the coroutine got an unexpected exception.
+    virtual void HandleUncaughtException() {};
+
     /* event handlers */
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
+
+#ifdef ARK_HYBRID
+    void Visit(CommonRootVisitor visitor)
+    {
+        visitor(nullptr);
+    }
+#endif
+
+    void LinkToExternalHolder(bool useSharedHolder);
+
+    /**
+     * Set a coroutine parameter abortFlag
+     * meaning that the coroutine could abort the program in an uncaugh exeption occured
+     */
+    void SetAbortFlag(bool abortFlag)
+    {
+        abortFlag_ = abortFlag;
+    }
+
+    /// Check if the abortFlag is set
+    bool HasAbortFlag() const
+    {
+        return abortFlag_;
+    }
 
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                        ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                       std::optional<EntrypointInfo> &&epInfo, Type type);
+                       std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority);
 
     void SetCoroutineStatus(Status newStatus);
 
@@ -341,7 +400,14 @@ private:
     CoroutineManager *manager_ = nullptr;
     // NOTE(konstanting, #IAD5MH): check if we still need this functionality
     bool startSuspended_ = false;
+    bool abortFlag_ = false;
     Type type_ = Type::MUTATOR;
+    CoroutinePriority priority_;
+    /**
+     * Immediate launcher is a caller coroutine that will be back edge for the callee coroutine.
+     * This means that the next context to switch from callee is the context of immediateLauncher_.
+     */
+    Coroutine *immediateLauncher_ = nullptr;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

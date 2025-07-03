@@ -95,6 +95,8 @@ public:
 
     enum class InteropCallKind { UNKNOWN = 0, CALL, CALL_BY_VALUE, NEW_INSTANCE, COUNT };
 
+    enum class ArrayField { UNKNOWN = 0, ACTUAL_LENGTH, BUFFER };
+
     RuntimeInterface() = default;
     virtual ~RuntimeInterface() = default;
 
@@ -299,6 +301,11 @@ public:
         return false;
     }
 
+    virtual bool IsClassExternal([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr calleeClass) const
+    {
+        return true;
+    }
+
     virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -435,6 +442,11 @@ public:
         return false;
     }
 
+    virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
     virtual bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -450,12 +462,42 @@ public:
         UNREACHABLE();
     }
 
+    virtual bool IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
     virtual bool IsFieldStringBuilderBuffer([[maybe_unused]] FieldPtr field) const
     {
         return false;
     }
 
     virtual bool IsFieldStringBuilderIndex([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldArrayActualLength([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldArrayBuffer([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldArray([[maybe_unused]] ArrayField kind, [[maybe_unused]] FieldPtr field) const
     {
         return false;
     }
@@ -514,6 +556,16 @@ public:
     ClassPtr ResolveClassForField(MethodPtr method, size_t fieldId);
 
     virtual bool IsInstantiable([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsBoxedClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassBoxedBoolean([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
@@ -1165,7 +1217,12 @@ public:
         return false;
     }
 
-    virtual uint64_t GetStaticFieldValue([[maybe_unused]] FieldPtr fieldPtr) const
+    virtual uint64_t GetStaticFieldIntegerValue([[maybe_unused]] FieldPtr fieldPtr) const
+    {
+        return 0;
+    }
+
+    virtual double GetStaticFieldFloatValue([[maybe_unused]] FieldPtr fieldPtr) const
     {
         return 0;
     }
@@ -1326,6 +1383,11 @@ public:
         return false;
     }
 
+    virtual bool IsIntrinsicStringConcat([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
     virtual IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId([[maybe_unused]] DataType::Type type) const
     {
         UNREACHABLE();
@@ -1358,7 +1420,7 @@ public:
 
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(static_cast<uint8_t>(id)));
+        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(id));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()
@@ -1574,6 +1636,11 @@ public:
     virtual void *GetDoubleToStringCache() const
     {
         return nullptr;
+    }
+
+    virtual bool IsStringCachesUsed() const
+    {
+        return false;
     }
 
     NO_COPY_SEMANTIC(RuntimeInterface);

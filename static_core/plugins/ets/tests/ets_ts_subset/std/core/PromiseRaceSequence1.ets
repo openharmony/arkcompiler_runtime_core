@@ -15,27 +15,27 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let p1 = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {});
-let p2 = Promise.resolve<string>("abc");
+let p1 = new Promise<string>((resolve: (value: string) => void, reject: (err: Error) => void): void => {});
+let p2 = Promise.resolve<string>('abc');
 let p = Promise.race([p1, p2]);
 
 sequence.push(1);
 
 p.then<void>((value: string): void => {
-    if (value != "abc") {
-        console.log("Test failed. Expected value 'abc', but got '" + value + "'");
+    if (value != 'abc') {
+        console.log('Test failed. Expected value \'abc\', but got \'' + value + '\'');
         return;
     }
 
@@ -49,7 +49,7 @@ Promise.resolve().then<void>((): void => {
 }).then<void>((): void => {
     sequence.push(5);
     checkSequence(sequence, 5);
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
 
 sequence.push(2);

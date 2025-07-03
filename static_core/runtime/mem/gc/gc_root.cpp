@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,34 +208,29 @@ void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gcRoo
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::UpdateAotStringRoots()
+void RootManager<LanguageConfig>::UpdateAotStringRoots(const GCRootUpdater &gcRootUpdater)
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, GC) << "=== AOT string slot roots update. BEGIN ===";
     auto hm = vm_->GetHeapManager();
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->UpdateAotStringRoots(
-        [](ObjectHeader **root) {
-            auto rootValue = *root;
-            if (rootValue->IsForwarded()) {
-                *root = ::ark::mem::GetForwardAddress(rootValue);
-            }
-        },
+        [&gcRootUpdater](ObjectHeader **root) { gcRootUpdater(root); },
         [&hm](const ObjectHeader *root) { return hm->IsObjectInYoungSpace(root); });
     LOG(DEBUG, GC) << "=== AOT string slot roots update. END ===";
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::UpdateVmRefs()
+void RootManager<LanguageConfig>::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 {
-    vm_->UpdateVmRefs();
+    vm_->UpdateVmRefs(gcRootUpdater);
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::UpdateGlobalObjectStorage()
+void RootManager<LanguageConfig>::UpdateGlobalObjectStorage(const GCRootUpdater &gcRootUpdater)
 {
     auto globalStorage = vm_->GetGlobalObjectStorage();
     if (globalStorage != nullptr) {
-        globalStorage->UpdateMovedRefs();
+        globalStorage->UpdateMovedRefs(gcRootUpdater);
     }
 }
 
@@ -256,11 +251,81 @@ void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gcRootVis
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::UpdateThreadLocals()
+void RootManager<LanguageConfig>::UpdateRefsToMovedObjects(const GCRootUpdater &gcRootUpdater)
+{
+    auto cb = [this, &gcRootUpdater](ManagedThread *thread) {
+        UpdateRefsInVRegs(thread, gcRootUpdater);
+        return true;
+    };
+    // Update refs in vregs
+    vm_->GetThreadManager()->EnumerateThreads(cb);
+    if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {
+        // Update refs inside monitors
+        vm_->GetMonitorPool()->EnumerateMonitors([&gcRootUpdater](Monitor *monitor) {
+            ObjectHeader *objectHeader = monitor->GetObject();
+            if (objectHeader == nullptr) {
+                return true;
+            }
+            ObjectHeader *newObjectHeader = objectHeader;
+            if (gcRootUpdater(&newObjectHeader)) {
+                LOG(DEBUG, GC) << "Update monitor " << std::hex << monitor << " object, old val = " << objectHeader
+                               << ", new val = " << newObjectHeader;
+                monitor->SetObject(reinterpret_cast<ObjectHeader *>(newObjectHeader));
+            }
+            return true;
+        });
+    }
+    if (vm_->UpdateMovedStrings(gcRootUpdater)) {
+        // AOT string slots are pointing to strings from the StringTable,
+        // so we should update it only if StringTable's pointers were updated.
+        UpdateAotStringRoots(gcRootUpdater);
+    }
+    // Update thread locals
+    UpdateThreadLocals(gcRootUpdater);
+    // Update refs in vm
+    UpdateVmRefs(gcRootUpdater);
+    // Update refs in class linker contexts
+    UpdateClassLinkerContextRoots(gcRootUpdater);
+    // Update global refs
+    UpdateGlobalObjectStorage(gcRootUpdater);
+}
+
+template <class LanguageConfig>
+void RootManager<LanguageConfig>::UpdateRefsInVRegs(ManagedThread *thread, const GCRootUpdater &gcRootUpdater)
+{
+    LOG(DEBUG, GC) << "Update frames for thread: " << thread->GetId();
+    for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
+        LOG(DEBUG, GC) << "Frame for method " << pframe.GetMethod()->GetFullName();
+        auto iterator = [&pframe, &gcRootUpdater](auto &regInfo, auto &vreg) {
+            ObjectHeader *objectHeader = vreg.GetReference();
+            if (objectHeader == nullptr) {
+                return true;
+            }
+            ObjectHeader *newObjectHeader = objectHeader;
+            if (!gcRootUpdater(&newObjectHeader)) {
+                return true;
+            }
+            LOG(DEBUG, GC) << "Update vreg, vreg old val = " << objectHeader << ", new val = " << newObjectHeader;
+            LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
+            if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
+                LOG(DEBUG, GC) << "^ acc updated";
+                vreg.SetReference(newObjectHeader);
+            } else {
+                pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
+                    regInfo, newObjectHeader);
+            }
+            return true;
+        };
+        pframe.IterateObjectsWithInfo(iterator);
+    }
+}
+
+template <class LanguageConfig>
+void RootManager<LanguageConfig>::UpdateThreadLocals(const GCRootUpdater &gcRootUpdater)
 {
     LOG(DEBUG, GC) << "=== ThreadLocals Update moved. BEGIN ===";
-    vm_->GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
-        thread->UpdateGCRoots();
+    vm_->GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
+        thread->UpdateGCRoots(gcRootUpdater);
         return true;
     });
     LOG(DEBUG, GC) << "=== ThreadLocals Update moved. END ===";
@@ -283,12 +348,12 @@ void RootManager<LanguageConfig>::VisitClassLinkerContextRoots(const GCRootVisit
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::UpdateClassLinkerContextRoots()
+void RootManager<LanguageConfig>::UpdateClassLinkerContextRoots(const GCRootUpdater &gcRootUpdater)
 {
     auto classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto *extension = classLinker->GetExtension(LanguageConfig::LANG);
-    extension->EnumerateContexts([](ClassLinkerContext *ctx) {
-        ctx->UpdateGCRoots();
+    extension->EnumerateContexts([&gcRootUpdater](ClassLinkerContext *ctx) {
+        ctx->UpdateGCRoots(gcRootUpdater);
         return true;
     });
 }

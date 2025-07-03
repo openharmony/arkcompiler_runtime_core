@@ -16,8 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 
+#include "ets_platform_types.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/interop_js/app_state_manager.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
@@ -134,6 +136,20 @@ private:
     static std::atomic_uint32_t qnameBufferSize_;
 };
 
+class CommonJSObjectCache {  // NOLINT(cppcoreguidelines-special-member-functions)
+public:
+    explicit CommonJSObjectCache(InteropCtx *ctx);
+    ~CommonJSObjectCache();
+
+    napi_value GetProxy() const;
+
+private:
+    void InitializeCache();
+
+    InteropCtx *ctx_ = nullptr;
+    napi_ref proxyRef_ {};
+};
+
 class InteropCtx final {
 public:
     NO_COPY_SEMANTIC(InteropCtx);
@@ -158,7 +174,7 @@ public:
         return Current(Coroutine::GetCurrent());
     }
 
-    PandaEtsVM *GetPandaEtsVM()
+    const PandaEtsVM *GetPandaEtsVM() const
     {
         return sharedEtsVmState_->pandaEtsVm;
     }
@@ -208,6 +224,11 @@ public:
     Method *GetRegisterFinalizerMethod() const
     {
         return jsvalueFregistryRegister_;
+    }
+
+    CommonJSObjectCache *GetCommonJSObjectCache()
+    {
+        return &commonJSObjectCache_;
     }
 
     // NOTE(vpukhov): implement in native code
@@ -369,11 +390,6 @@ public:
         return sharedEtsVmState_->arrayClass;
     }
 
-    Class *GetArrayBufferClass() const
-    {
-        return sharedEtsVmState_->arraybufClass;
-    }
-
     bool IsFunctionalInterface(Class *klass) const
     {
         return sharedEtsVmState_->functionalInterfaces.count(klass) > 0;
@@ -387,6 +403,16 @@ public:
     void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy)
     {
         sharedEtsVmState_->SetJsProxyInstance(cls, proxy);
+    }
+
+    js_proxy::JSProxy *GetInterfaceProxyInstance(std::string &interfaceName) const
+    {
+        return sharedEtsVmState_->GetInterfaceProxyInstance(interfaceName);
+    }
+
+    void SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy)
+    {
+        sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
     }
 
     EtsObject *CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue);
@@ -403,6 +429,7 @@ public:
     static void ThrowJSValue(napi_env env, napi_value val);
 
     static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
+    static void SetDefaultLinkerContext(EtsRuntimeLinker *linker);
 
     void ForwardEtsException(EtsCoroutine *coro);
     void ForwardJSException(EtsCoroutine *coro);
@@ -455,7 +482,7 @@ public:
         return sharedEtsVmState_->etsProxyRefStorage.get();
     }
 
-    EtsObject *GetNullValue()
+    EtsObject *GetNullValue() const
     {
         return EtsObject::FromCoreType(GetPandaEtsVM()->GetNullValue());
     }
@@ -520,6 +547,8 @@ private:
 
         js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const;
         void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy);
+        js_proxy::JSProxy *GetInterfaceProxyInstance(std::string &interfaceName) const;
+        void SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy);
 
         // Intentionally leaving these members public to avoid duplicating the InteropCtx's accessors.
         // Maybe its worth to add some e.g. VmState() method to the InteropCtx and move all its accessors here
@@ -536,7 +565,6 @@ private:
         Class *exceptionClass {};
         Class *typeClass {};
         Class *arrayClass {};
-        Class *arraybufClass {};
         Class *boxIntClass {};
         Class *boxLongClass {};
         PandaSet<Class *> functionalInterfaces {};
@@ -551,6 +579,7 @@ private:
 
         // class -> proxy instance, should be accessed under a mutex, hence private
         PandaMap<EtsClass *, PandaUniquePtr<js_proxy::JSProxy>> jsProxies_;
+        PandaMap<std::string, PandaUniquePtr<js_proxy::JSProxy>> interfaceProxies_;
 
         static std::shared_ptr<SharedEtsVmState> instance_;
         static ClassLinkerContext *linkerCtx_;
@@ -575,6 +604,7 @@ private:
     ConstStringStorage constStringStorage_;
     LocalScopesStorage localScopesStorage_ {};
     JSRefConvertCache refconvertCache_;
+    CommonJSObjectCache commonJSObjectCache_;
 
     // finalization registry for JSValues
     mem::Reference *jsvalueFregistryRef_ {};

@@ -144,7 +144,7 @@
 
 function switch_case_loop() : number
 {
-    let arr : int[] = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
+    let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     for (let i = 0; i < arr.length; ++i) {
         switch (arr[i]) {
@@ -169,7 +169,7 @@ function simple_loop() : int
 {
     let count : int = 10000000;
     let i3 : int = 1;
-    let resources : int[] = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
+    let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
     let resourcesLength: int = resources.length;
   
     for (let i = 0; i < count; i++) {
@@ -185,7 +185,7 @@ function simple_loop() : int
 
 function two_vars_loop() : number
 {
-    let arr : int[] = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
+    let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     let b : int = 1;
     for (let i = 0; i < arr.length; ++i) {
@@ -202,7 +202,7 @@ function two_vars_loop() : number
 
 function nested_loops() : number
 {
-    let matrix : int[][] = [[0, 1, 2, 3],
+    let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, 3],
                             [1, 2, 3, 4],
                             [2, 3, 4, 5],
                             [3, 4, 5, 6]];
@@ -219,7 +219,7 @@ function nested_loops() : number
 
 function triple_nested_loops() : number
 {
-    let matrix : int[][] = [[0, 1, 2, 3],
+    let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, 3],
                             [1, 2, 3, 4],
                             [2, 3, 4, 5],
                             [3, 4, 5, 6]];
@@ -255,7 +255,7 @@ function triple_nested_loops() : number
 
 function loop_init_without_update() : int
 {
-    let arr : int[] = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
+    let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     for (let i = 0; i < arr.length; ++i) {
         a += 2; // has no update phi -> cannot count boundaries
@@ -271,7 +271,7 @@ function different_operations() : number
 {
     let count : int = 10000000;
     let i3 : int = 1;
-    let resources : int[] = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
+    let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
     let resourcesLength: int = resources.length;
   
     for (let i = 0; i < count; i++) {
@@ -289,7 +289,7 @@ function operations_chain() : number
 {
     let count : int = 10000000;
     let i3 : int = 1;
-    let resources : int[] = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
+    let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
     let resourcesLength: int = resources.length;
   
     for (let i = 0; i < count; i++) {
@@ -305,7 +305,7 @@ function operations_chain() : number
 
 function linked_vars() : number
 {
-    let arr : int[] = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
+    let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     let b : int = 1;
     for (let i = 0; i < arr.length; ++i) {
@@ -326,7 +326,7 @@ function linked_vars() : number
 
 function not_countable_nested_loop() : number
 {
-    let matrix : int[][] = [[0, 1, 2, -1],
+    let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, -1],
                             [1, 2, 3, -1],
                             [2, 3, 4, -1],
                             [3, 4, 5, -1]];

@@ -198,8 +198,8 @@ cases:
 
   - doc: For loop with Float type in init.
     decl: |-
-      let a:Float = 0.0;
-      for(let i: Float = 0 ; i<10 ; i += 1.01 ) {
+      let a:Float = 0.0f;
+      for(let i: Float = 0f ; i<10f ; i += 1.01f ) {
         a = i;
       }
       assertTrue( a > 9 );

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,7 @@
 #ifndef PANDA_VERIFICATION_OPTIONS_H_
 #define PANDA_VERIFICATION_OPTIONS_H_
 
-#include "utils/pandargs.h"
-#include "runtime/include/runtime_options.h"
+#include "verification/public.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "verification/config/options/method_options_config.h"

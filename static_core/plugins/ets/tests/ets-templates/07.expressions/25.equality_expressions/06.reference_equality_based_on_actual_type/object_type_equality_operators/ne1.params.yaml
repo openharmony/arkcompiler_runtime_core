@@ -90,9 +90,6 @@ cases:
           enum Color { Red, Green, Blue }
       case1:
           - Color.Red
-      case2:
-          - Color.Green
-          - 1
 
     - type: Size
       decl: |-

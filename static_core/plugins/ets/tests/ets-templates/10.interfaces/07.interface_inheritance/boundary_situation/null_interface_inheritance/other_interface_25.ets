@@ -15,7 +15,7 @@
 
 /*---
 desc: Null interface inherits an interface containing an readonly type, modify a read-only array.
-tags: [compile-only, negative]
+tags: []
 ---*/
 
 interface ParentInterface {

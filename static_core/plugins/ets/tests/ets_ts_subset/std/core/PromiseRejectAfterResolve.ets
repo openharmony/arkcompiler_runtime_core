@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-let thenable = Promise.resolve();
-let resolve: ((value: string) => void)|null = null;
-let reject: ((err: Object) => void)|null = null;
-let p = new Promise<string>((_resolve: (value: string) => void, _reject: (err: Object) => void): void => {
+
+let resolve: ((value: string) => void) | null = null;
+let reject: ((err: Error) => void) | null = null;
+let p = new Promise<string>((_resolve: (value: string) => void, _reject: (err: Error) => void): void => {
     resolve = _resolve;
     reject = _reject;
 });
 
 p.then<void, void>((value: string): void => {
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });
 
-resolve!("abc");
-reject!(thenable);
+resolve!('abc');
+reject!(new Error('error'));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,7 +233,7 @@ void G1GCFullGCTest::MakeObjectsGarbage(size_t startIdx, size_t afterEndIdx, int
         if (cnt != 0) {
             continue;
         }
-        root->Set(i, 0);
+        root->Set(i, static_cast<ObjectHeader *>(nullptr));
         rootSize++;
         cnt = every;
     }

@@ -16,7 +16,7 @@ cases:
 # arrays
     - decl: |-
           let a1: Object|null|undefined = new Object
-          function foo(...p: Object[]): int {
+          function foo(...p: Object[]): number {
               return p.length > 0 ? p.length : -1
           }
       use: |-
@@ -35,7 +35,7 @@ cases:
       tags: 'negative, compile-only'
 
     - decl: |-
-          function foo(...p: Object[]): int {
+          function foo(...p: Object[]): number {
               return p.length
           }
       use: |-
@@ -44,7 +44,7 @@ cases:
           assertTrue(foo(...[...a1, ...a2, new Object(), ...a1]) == 1)
 
     - decl: |-
-          function foo(...p: char[]): int {
+          function foo(...p: char[]): number {
               return p.length
           }
       use: |-
@@ -129,7 +129,7 @@ cases:
           assertTrue(foo(...([1.0, 2.0])) == 2.0)
 
     - decl: |-
-          function foo(a: int, ...p: Object[]): int {
+          function foo(a: int, ...p: Object[]): number {
               return a + p.length
           }
       use: |-
@@ -138,7 +138,7 @@ cases:
           assertTrue(foo(5, ...a1!) == 7)
 
     - decl: |-
-          function foo(a: int, ...p: Object[]): int {
+          function foo(a: int, ...p: Object[]): number {
               return a + p.length
           }
           let a1: Object[]|null = null
@@ -148,7 +148,7 @@ cases:
       tags: 'negative'
 
     - decl: |-
-          function foo(a: int, ...p: Object[]): int {
+          function foo(a: int, ...p: Object[]): number {
               return a + p.length
           }
           let a1: Object[]|null = [new Object, new Object]
@@ -160,7 +160,7 @@ cases:
     - decl: |-
           let a1: Object[]|null = null
           let a2: Object[]|null = [new Object, new Object]
-          function foo(a: int, ...p: Object[]): int {
+          function foo(a: int, ...p: Object[]): number {
               return a + p.length
           }
       use: |-
@@ -243,11 +243,11 @@ cases:
               constructor(p: boolean[], q: boolean[]) {
                   this.fld = [...p, ...q]
               }
-              meth(): int {
+              meth(): number {
                   return foo(42, ...this.fld)
               }
           }
-          function foo(a: int, ...p: boolean[]): int {
+          function foo(a: int, ...p: boolean[]): number {
               return a + p.length
           }
       use: |-
@@ -269,11 +269,11 @@ cases:
               constructor(p: boolean[], q: boolean[]) {
                   super([...p, ...q])
               }
-              bar(): int {
+              bar(): number {
                   return foo(42, ...super.meth())
               }
           }
-          function foo(a: int, ...p: boolean[]): int {
+          function foo(a: int, ...p: boolean[]): number {
               return a + p.length
           }
       use: |-
@@ -282,7 +282,7 @@ cases:
           assertTrue(b.bar() == 46)
 
     - decl: |-
-          function foo(...p: number[][]): int {
+          function foo(...p: number[][]): number {
               let res = 0
               for (let el of p) res += el.length
               return res
@@ -312,7 +312,7 @@ cases:
     - decl: |-
           function foo(...p: (Double|Short|Byte)[]): double {
               let res = 0.0
-              for (let el of p) res += (el as Numeric).doubleValue()
+              for (let el of p) res += (el as Numeric).toDouble()
               return res
           }
       use: |-
@@ -322,7 +322,7 @@ cases:
           assertTrue(foo(...ar) == 42.0)
 
     - decl: |-
-          function foo(...p: (Int|Number|String|undefined)[]): int {
+          function foo(...p: (Int|Number|String|undefined)[]): number {
               return p.length
           }
       use: |-
@@ -334,7 +334,7 @@ cases:
           class A<T> {}
           class B<T> {}
           class C<T> {}
-          function foo<T, U, V>(...p: (A<T>|B<U>|C<V>|null)[]): int {
+          function foo<T, U, V>(...p: (A<T>|B<U>|C<V>|null)[]): number {
               return p.length
           }
       use: |-
@@ -515,8 +515,9 @@ cases:
               constructor(p: int, q: char) {
                   super([p, q])
               }
-              meth(): int {
-                  return 10 + foo(...super.meth())
+              meth(): [int, char] {
+                  this.fld[0] = 10 + foo(...super.meth())
+                  return this.fld
               }
           }
           function foo(...p: [int, char]): int {
@@ -525,7 +526,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assertTrue(b.meth() == 111)
+          assertEQ(b.meth()[0], 111)
 
     - decl: |-
           class A<T> {}

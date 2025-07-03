@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ets_coroutine.h"
-#include "types/ets_string.h"
-#include "types/ets_array.h"
 #include "libpandabase/utils/utf.h"
+#include "types/ets_array.h"
+#include "types/ets_string.h"
+#include <gtest/gtest.h>
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -612,6 +612,28 @@ TEST_F(EtsStringTest, GetMutf8)
     PandaString pandaString = string->GetMutf8();
 
     ASSERT_EQ(strcmp(pandaString.data(), "hello"), 0);
+}
+
+TEST_F(EtsStringTest, ConvertToStringView)
+{
+    PandaVector<uint8_t> buf;
+    auto emptyString = EtsString::CreateNewEmptyString();
+    auto emptyStringView = emptyString->ConvertToStringView(&buf);
+    ASSERT_EQ(emptyStringView, "");
+
+    std::vector<uint8_t> data1 {0, 'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data2 {'H', 'e', 'l', 'l', 'o', 0, 'w', 'o', 'r', 'l', 'd', '!'};
+    std::vector<uint8_t> data3 {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
+    auto testString1 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data1.data()));
+    auto testString2 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data2.data()));
+    auto testString3 = EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(data3.data()));
+
+    auto testString1View = testString1->ConvertToStringView(&buf);
+    ASSERT_EQ(testString1View, "");
+    auto testString2View = testString2->ConvertToStringView(&buf);
+    ASSERT_EQ(testString2View, "Hello");
+    auto testString3View = testString3->ConvertToStringView(&buf);
+    ASSERT_EQ(testString3View, "Helloworld!");
 }
 
 TEST_F(EtsStringTest, Resolve)

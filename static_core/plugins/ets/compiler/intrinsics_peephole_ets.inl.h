@@ -24,6 +24,7 @@ static bool PeepholeStrictEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeTypeof(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeDoubleToString(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeGetTypeInfo(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeStringFromCharCodeSingle(GraphVisitor *v, IntrinsicInst *intrinsic);
 
 #ifdef PANDA_ETS_INTEROP_JS
 bool TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,31 +97,26 @@ static bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions 
 
 static void SetPandaFiles(RuntimeOptions &runtimeOptions, ark::PandArg<std::string> &file)
 {
+    const std::string &fileName = file.GetValue();
     auto bootPandaFiles = runtimeOptions.GetBootPandaFiles();
-
-    if (runtimeOptions.GetPandaFiles().empty()) {
-        bootPandaFiles.push_back(file.GetValue());
-    } else {
-        auto pandaFiles = runtimeOptions.GetPandaFiles();
-        auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
-                                      [&](auto &fileName) { return fileName == file.GetValue(); });
-        if (foundIter == pandaFiles.end()) {
-            pandaFiles.push_back(file.GetValue());
-            runtimeOptions.SetPandaFiles(pandaFiles);
-        }
+    auto pandaFiles = runtimeOptions.GetPandaFiles();
+    auto bootFoundIter = std::find(bootPandaFiles.begin(), bootPandaFiles.end(), fileName);
+    if (runtimeOptions.IsLoadInBoot() && bootFoundIter == bootPandaFiles.end()) {
+        bootPandaFiles.push_back(fileName);
+        runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+        return;
     }
 
-    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
-}
+    if (pandaFiles.empty() && bootFoundIter == bootPandaFiles.end()) {
+        pandaFiles.push_back(fileName);
+        runtimeOptions.SetPandaFiles(pandaFiles);
+        return;
+    }
 
-static void SetVerificationMode(RuntimeOptions &runtimeOptions)
-{
-    runtimeOptions.SetVerificationMode(VerificationModeFromString(
-        static_cast<Options>(runtimeOptions).GetVerificationMode()));  // NOLINT(cppcoreguidelines-slicing)
-    if (runtimeOptions.IsVerificationEnabled()) {
-        if (!runtimeOptions.WasSetVerificationMode()) {
-            runtimeOptions.SetVerificationMode(VerificationMode::AHEAD_OF_TIME);
-        }
+    auto pandaFoundIter = std::find(pandaFiles.begin(), pandaFiles.end(), fileName);
+    if (pandaFoundIter == pandaFiles.end()) {
+        pandaFiles.push_back(fileName);
+        runtimeOptions.SetPandaFiles(pandaFiles);
     }
 }
 
@@ -202,8 +197,6 @@ int Main(int argc, const char **argv)
     compiler::g_options.AdjustCpuFeatures(false);
 
     Logger::Initialize(baseOptions);
-
-    SetVerificationMode(runtimeOptions);
 
     ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
     if (compiler::g_options.IsCompilerEnableEvents()) {

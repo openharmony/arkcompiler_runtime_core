@@ -22,7 +22,7 @@ cases:
       use: |-
           res = ""
           let v: number[][][][][] = new number[foo(1)][foo(2)][foo(3)][foo(4)][foo(5)]
-          return (res == "12345" && v instanceof Object ? 0 : 1)
+          return (res == "12345" && v instanceof Array ? 0 : 1)
 
     - defs: |-
           type UT = number[][][][][] | null
@@ -60,7 +60,7 @@ cases:
               return 1
           } catch (e: NegativeArraySizeError) {
               // expected
-              return (res == "123-45" && v == null ? 0 : 1)
+              return (res == "123-4" && v == null ? 0 : 1)
           }
 
     - defs: |-
@@ -105,7 +105,7 @@ cases:
           }
 
     - defs: |-
-          type UT = number[][] | null
+          type UT = FixedArray<FixedArray<number>> | null
           let size = 1_000_000
           let res: string = ""
           function foo(p: int): int {

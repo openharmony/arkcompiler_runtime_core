@@ -49,7 +49,7 @@ ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class /* 
     ASSERT(stringClass != nullptr);
     ani_array_ref pathsArray;
     env->Array_New_Ref(stringClass, paths.size(), paths[0], &pathsArray);
-    for (size_t i = 0; i < paths.size(); ++i) {
+    for (size_t i = 1; i < paths.size(); ++i) {
         env->Array_Set_Ref(pathsArray, i, paths[i]);
     }
     return pathsArray;

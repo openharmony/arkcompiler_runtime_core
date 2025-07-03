@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: declaration generic fumction
+desc: declaration generic function
 tags: [compile-only]
 ---*/
 

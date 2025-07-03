@@ -187,6 +187,41 @@ TEST_F(WeakReferenceCreateTest, weak_reference_case5)
     ASSERT_EQ(isEquals, ANI_FALSE);
 }
 
+TEST_F(WeakReferenceCreateTest, weak_reference_case6)
+{
+    ani_ref objectRef {};
+    std::string str = "test";
+    ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.length(), reinterpret_cast<ani_string *>(&objectRef)), ANI_OK);
+
+    ani_wref wrefa {};
+    ASSERT_EQ(env_->WeakReference_Create(objectRef, &wrefa), ANI_OK);
+
+    ani_wref wrefb {};
+    ASSERT_EQ(env_->WeakReference_Create(objectRef, &wrefb), ANI_OK);
+
+    ani_boolean wasReleased = ANI_FALSE;
+    ani_ref refa {};
+    ASSERT_EQ(env_->WeakReference_GetReference(wrefa, &wasReleased, &refa), ANI_OK);
+
+    ani_ref refb {};
+    ASSERT_EQ(env_->WeakReference_GetReference(wrefb, &wasReleased, &refb), ANI_OK);
+
+    ani_boolean isEquals = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_Equals(refa, refb, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+
+    ASSERT_EQ(env_->Reference_StrictEquals(refa, refb, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+}
+
+TEST_F(WeakReferenceCreateTest, invalid_env)
+{
+    ani_ref undefinedRef {};
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_wref wref {};
+    ASSERT_EQ(env_->c_api->WeakReference_Create(nullptr, undefinedRef, &wref), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-identifier-naming)

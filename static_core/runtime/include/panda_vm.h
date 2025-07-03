@@ -17,7 +17,6 @@
 
 #include "include/coretypes/string.h"
 #include "include/runtime_options.h"
-#include "runtime/include/app_state.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -74,7 +73,7 @@ public:
     virtual void StartGC() = 0;
     virtual void StopGC() = 0;
     virtual void VisitVmRoots(const GCRootVisitor &visitor);
-    virtual void UpdateVmRefs();
+    virtual void UpdateVmRefs(const GCRootUpdater &gcRootUpdater);
     virtual void UninitializeThreads() = 0;
     virtual void SaveProfileInfo() {}
 
@@ -134,9 +133,9 @@ public:
         GetStringTable()->Sweep(gcObjectVisitor);
     }
 
-    virtual bool UpdateMovedStrings()
+    virtual bool UpdateMovedStrings(const GCRootUpdater &gcRootUpdater)
     {
-        return GetStringTable()->UpdateMoved();
+        return GetStringTable()->UpdateMoved(gcRootUpdater);
     }
 
     // NOTE(maksenov): remove this method after fixing interpreter performance
@@ -229,18 +228,6 @@ public:
     void IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor);
     void ClearMarkQueue();
 
-    void UpdateAppState(AppState appState)
-    {
-        os::memory::LockHolder lh(appStateLock_);
-        appState_ = appState;
-    }
-
-    AppState GetAppState() const
-    {
-        os::memory::LockHolder lh(appStateLock_);
-        return appState_;
-    }
-
     // NOTE(konstanting): a potential candidate for moving out of the core part
     // Cleans up language-specific CFrame resources
     virtual void CleanupCompiledFrameResources([[maybe_unused]] Frame *frame) {}
@@ -277,8 +264,6 @@ private:
     // Intrusive GC test API
     PandaList<ObjectHeader *> markQueue_ GUARDED_BY(markQueueLock_);
     os::memory::Mutex markQueueLock_;
-    mutable os::memory::Mutex appStateLock_;
-    AppState appState_;
 };
 
 }  // namespace ark

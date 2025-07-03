@@ -26,18 +26,18 @@
 
 namespace ark::ets::intrinsics {
 
-EtsBoolean StdCoreRuntimeGetPlatformIsLittleEndian()
+EtsBoolean StdCoreRuntimeIsLittleEndianPlatform()
 {
     ASSERT(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ || __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
     return __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__;
 }
 
-uint8_t StdCoreRuntimeIsSameReference([[maybe_unused]] ObjectHeader *header, EtsObject *source, EtsObject *target)
+uint8_t StdCoreRuntimeIsSameReference(EtsObject *source, EtsObject *target)
 {
     return (source == target) ? UINT8_C(1) : UINT8_C(0);
 }
 
-EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObject *source)
+EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
 {
     ASSERT(source != nullptr);
     return bit_cast<EtsInt>(source->GetHashCode());

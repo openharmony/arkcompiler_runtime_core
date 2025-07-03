@@ -143,6 +143,9 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
         hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
         return;
     }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        coro->GetPandaVM()->RemoveUnhandledRejectedPromise(hpromise.GetPtr());
+    }
     ASSERT(hpromise->GetQueueSize() == 0);
     ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
     ASSERT(hpromise->GetLaunchModeQueue(coro) == nullptr);
@@ -175,6 +178,9 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
         return promiseHandle->GetValue(currentCoro);
     }
     // rejected
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        currentCoro->GetPandaVM()->RemoveUnhandledRejectedPromise(promiseHandle.GetPtr());
+    }
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
     auto *exc = promiseHandle->GetValue(currentCoro);
     currentCoro->SetException(exc->GetCoreType());
@@ -196,6 +202,11 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     }
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+
+    {
+        ScopedNativeCodeThread n(currentCoro);
+        currentCoro->GetManager()->Schedule();
+    }
 
     /* CASE 1. This is a converted JS promise */
     if (promiseHandle->IsProxy()) {
@@ -222,6 +233,9 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
         return promiseHandle->GetValue(currentCoro);
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        currentCoro->GetPandaVM()->RemoveUnhandledRejectedPromise(promiseHandle.GetPtr());
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
     auto *exc = promiseHandle->GetValue(currentCoro);

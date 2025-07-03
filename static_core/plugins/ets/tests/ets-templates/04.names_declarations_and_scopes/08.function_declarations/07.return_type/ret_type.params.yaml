@@ -110,6 +110,7 @@ function_decls:
           }
       call: |-
           let v: long[][] = foo() as long[][];
+          v[0][0] = 0
           assertEQ(v[0][0], 0)
 
     - decl: |-

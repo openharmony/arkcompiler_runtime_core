@@ -36,102 +36,102 @@ union union_primitive {
 
 union color_map_value1 {
     colorValue: Color;
-    mapValue1: Map<String, i8>;
+    mapValue1: @record Map<String, i8>;
 }
 
 union color_map_value2 {
     colorValue: Color;
-    mapValue2: Map<String, i16>;
+    mapValue2: @record Map<String, i16>;
 }
 
 union color_map_value3 {
     colorValue: Color;
-    mapValue3: Map<String, i32>;
+    mapValue3: @record Map<String, i32>;
 }
 
 union color_map_value4 {
     colorValue: Color;
-    mapValue4: Map<String, i64>;
+    mapValue4: @record Map<String, i64>;
 }
 
 union color_map_value5 {
     colorValue: Color;
-    mapValue5: Map<String, f32>;
+    mapValue5: @record Map<String, f32>;
 }
 
 union color_map_value6 {
     colorValue: Color;
-    mapValue6: Map<String, f64>;
+    mapValue6: @record Map<String, f64>;
 }
 
 union color_map_value7 {
     colorValue: Color;
-    mapValue7: Map<String, bool>;
+    mapValue7: @record Map<String, bool>;
 }
 
 union color_map_value8 {
     colorValue: Color;
-    mapValue8: Map<String, String>;
+    mapValue8: @record Map<String, String>;
 }
 
 union color_map_value9 {
     colorValue: Color;
-    mapValue9: Map<i32, i32>;
+    mapValue9: @record Map<i32, i32>;
 }
 
 
 
 union UnionArrayMap1 {
   arri8: Array<i8>;
-  mapValue1: Map<String, i8>;
+  mapValue1: @record Map<String, i8>;
 }
 
 
 union UnionArrayMap2 {
   arri8: Array<i8>;
-  mapValue2: Map<String, i16>;
+  mapValue2: @record Map<String, i16>;
 }
 
 
 union UnionArrayMap3 {
   arri8: Array<i8>;
-  mapValue3: Map<String, i32>;
+  mapValue3: @record Map<String, i32>;
 }
 
 
 union UnionArrayMap4 {
   arri8: Array<i8>;
-  mapValue4: Map<String, i64>;
+  mapValue4: @record Map<String, i64>;
 }
 
 
 union UnionArrayMap5 {
   arri8: Array<i8>;
-  mapValue5: Map<String, f32>;
+  mapValue5: @record Map<String, f32>;
 }
 
 
 union UnionArrayMap6 {
   arri8: Array<i8>;
-  mapValue6: Map<String, f64>;
+  mapValue6: @record Map<String, f64>;
 }
 
 
 union UnionArrayMap7 {
   arri8: Array<i8>;
-  mapValue7: Map<String, bool>;
+  mapValue7: @record Map<String, bool>;
 }
 
 
 union UnionArrayMap8 {
   arri8: Array<i8>;
-  mapValue8: Map<String, String>;
+  mapValue8: @record Map<String, String>;
 }
 
 
 union UnionArrayMap9 {
   arri8: Array<i8>;
-  mapValue9: Map<i32, i32>;
+  mapValue9: @record Map<i32, i32>;
 }
 
 union union_mix{
@@ -201,56 +201,53 @@ union union_mix_5 {
 }
 
 union union_map{
-  mapValue: Map<String, i8>;
+  mapValue: @record Map<String, i8>;
 }
-
 
 interface MyInterface {
-  func_union_primitive(data1: union_primitive, data2: union_primitive): String;
-  func_union_primitive_5param(data1: union_primitive, data2: union_primitive, data3: union_primitive, data4: union_primitive, data5: union_primitive): String;
-  func_color_map_value1(data1: color_map_value1): String;
-  func_color_map_value2(data1: color_map_value2): String;
-  func_color_map_value3(data1: color_map_value3): String;
-  func_color_map_value4(data1: color_map_value4): String;
-  func_color_map_value5(data1: color_map_value5): String;
-  func_color_map_value6(data1: color_map_value6): String;
-  func_color_map_value7(data1: color_map_value7): String;
-  func_color_map_value8(data1: color_map_value8): String;
-  func_color_map_value9(data1: color_map_value9): String;
-  func_color_map_value10(data1: color_map_value9, data2: color_map_value9): String;
+  FuncUnionPrimitive(data1: union_primitive, data2: union_primitive): String;
+  FuncUnionPrimitive5Param(data1: union_primitive, data2: union_primitive, data3: union_primitive, data4: union_primitive, data5: union_primitive): String;
+  FuncColorMapValue1(data1: color_map_value1): String;
+  FuncColorMapValue2(data1: color_map_value2): String;
+  FuncColorMapValue3(data1: color_map_value3): String;
+  FuncColorMapValue4(data1: color_map_value4): String;
+  FuncColorMapValue5(data1: color_map_value5): String;
+  FuncColorMapValue6(data1: color_map_value6): String;
+  FuncColorMapValue7(data1: color_map_value7): String;
+  FuncColorMapValue8(data1: color_map_value8): String;
+  FuncColorMapValue9(data1: color_map_value9): String;
+  FuncColorMapValue10(data1: color_map_value9, data2: color_map_value9): String;
 
-  func_union_array_map1(data1: UnionArrayMap1, data2: UnionArrayMap1): String;
-  func_union_array_map2(data1: UnionArrayMap2, data2: UnionArrayMap2): String;
-  func_union_array_map3(data1: UnionArrayMap3, data2: UnionArrayMap3): String;
-  func_union_array_map4(data1: UnionArrayMap4, data2: UnionArrayMap4): String;
-  func_union_array_map5(data1: UnionArrayMap5, data2: UnionArrayMap5): String;
-  func_union_array_map6(data1: UnionArrayMap6, data2: UnionArrayMap6): String;
-  func_union_array_map7(data1: UnionArrayMap7, data2: UnionArrayMap7): String;
-  func_union_array_map8(data1: UnionArrayMap8, data2: UnionArrayMap8): String;
-  func_union_array_map9(data1: UnionArrayMap9, data2: UnionArrayMap9): String;
-  func_union_array_map10(data1: UnionArrayMap1, data2: UnionArrayMap2): String;
+  FuncUnionArrayMap1(data1: UnionArrayMap1, data2: UnionArrayMap1): String;
+  FuncUnionArrayMap2(data1: UnionArrayMap2, data2: UnionArrayMap2): String;
+  FuncUnionArrayMap3(data1: UnionArrayMap3, data2: UnionArrayMap3): String;
+  FuncUnionArrayMap4(data1: UnionArrayMap4, data2: UnionArrayMap4): String;
+  FuncUnionArrayMap5(data1: UnionArrayMap5, data2: UnionArrayMap5): String;
+  FuncUnionArrayMap6(data1: UnionArrayMap6, data2: UnionArrayMap6): String;
+  FuncUnionArrayMap7(data1: UnionArrayMap7, data2: UnionArrayMap7): String;
+  FuncUnionArrayMap8(data1: UnionArrayMap8, data2: UnionArrayMap8): String;
+  FuncUnionArrayMap9(data1: UnionArrayMap9, data2: UnionArrayMap9): String;
+  FuncUnionArrayMap10(data1: UnionArrayMap1, data2: UnionArrayMap2): String;
 
-  func_union_mix(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix): String;
-  func_union_mix_10param(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix,data6: union_mix,data7: union_mix,data8: union_mix,data9: union_mix,data10: union_mix): String;
-  func_union_primitive_return(kind: String): union_primitive_2;
-  func_union_primitive_return1(kind: String): union_primitive_2_1;
-  func_union_primitive_return2(kind: String): union_primitive_2_2;
-  func_union_primitive_return3(kind: String): union_primitive_2_3;
-  func_union_primitive_return4(kind: String): union_primitive_2_4;
-  func_union_primitive_return5(kind: String): union_primitive_2_5;
-  func_union_primitive_return6(kind: String): union_primitive_2_6;
-  func_union_primitive_return7(kind: String): union_primitive_2_7;
-  func_union_primitive_return8(kind: String): union_primitive_2_8;
-  func_union_primitive_return9(kind: String): union_primitive_2_9;
+  FuncUnionMix(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix): String;
+  FuncUnionMix10Param(data1: union_mix,data2: union_mix,data3: union_mix,data4: union_mix,data5: union_mix,data6: union_mix,data7: union_mix,data8: union_mix,data9: union_mix,data10: union_mix): String;
+  FuncUnionPrimitiveReturn(kind: String): union_primitive_2;
+  FuncUnionPrimitiveReturn1(kind: String): union_primitive_2_1;
+  FuncUnionPrimitiveReturn2(kind: String): union_primitive_2_2;
+  FuncUnionPrimitiveReturn3(kind: String): union_primitive_2_3;
+  FuncUnionPrimitiveReturn4(kind: String): union_primitive_2_4;
+  FuncUnionPrimitiveReturn5(kind: String): union_primitive_2_5;
+  FuncUnionPrimitiveReturn6(kind: String): union_primitive_2_6;
+  FuncUnionPrimitiveReturn7(kind: String): union_primitive_2_7;
+  FuncUnionPrimitiveReturn8(kind: String): union_primitive_2_8;
+  FuncUnionPrimitiveReturn9(kind: String): union_primitive_2_9;
 
-  func_union_mix5_return(kind: String): union_mix_5;
-  func_union_mix10_return(kind: String): union_mix;
-
-
-  
+  FuncUnionMix5Return(kind: String): union_mix_5;
+  FuncUnionMix10Return(kind: String): union_mix;
 }
 
-function printUnion(data: union_primitive): String;
-function makeUnion(kind: String): union_primitive;
+function PrintUnion(data: union_primitive): String;
+function MakeUnion(kind: String): union_primitive;
 
-function get_interface(): MyInterface;
+function GetInterface(): MyInterface;
+

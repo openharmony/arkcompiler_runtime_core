@@ -964,14 +964,10 @@ function check_array(arr: BigUint64Array, expected: BigUint64Array) {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_int8array_set_byte_cpp(): void {
     let ar = new Int8Array(10)
-    ar[2] = -128 as byte
-    ar[3] = -129 as byte
-    ar[4] = 127 as byte
-    ar[5] = 128 as byte
+    ar[2] = (-128).toByte()
+    ar[4] = (127).toByte()
     assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
     assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
 }
 
 //! CHECKER       Int8Array $_set byte/$_get IR intrinsic
@@ -983,16 +979,13 @@ function test_int8array_set_byte_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int8array_set_byte_ir(): void {
     let ar = new Int8Array(10)
-    ar[2] = -128 as byte
-    ar[3] = -129 as byte
-    ar[4] = 127 as byte
-    ar[5] = 128 as byte
+    ar[2] = (-128).toByte()
+    ar[4] = (127).toByte()
     assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
     assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
 }
 
 //! CHECKER       Int8Array $_set int/$_get cpp intrinsic
@@ -1025,6 +1018,7 @@ function test_int8array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int8array_set_int_ir(): void {
     let ar = new Int8Array(10)
     ar[2] = -128
@@ -1035,6 +1029,28 @@ function test_int8array_set_int_ir(): void {
     assertEquals(127, ar[3])
     assertEquals(127, ar[4])
     assertEquals(-128, ar[5])
+}
+
+//! CHECKER       Int8Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt8ArrayGetUnsafe"
+//! METHOD        "escompat_Int8Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int8ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Int8Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Int8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt8ArrayGetUnsafe"
+//! METHOD        "escompat_Int8Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.Int8ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testInt8ArrayGetUnsafe(): void {
+    let ar = new Int8Array(10)
+    ar[2] = (-128).toByte()
+    ar[4] = (127).toByte()
+    arktest.assertEQ(-128, ar.at(2))
+    arktest.assertEQ(127, ar.at(4))
 }
 
 //! CHECKER       Int8Array $_set cpp intrinsic rangeerror
@@ -1080,14 +1096,10 @@ function test_int8array_set_number_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_int16array_set_short_cpp(): void {
     let ar = new Int16Array(10)
-    ar[2] = -32768 as short
-    ar[3] = -32769 as short
-    ar[4] = 32767 as short
-    ar[5] = 32768 as short
+    ar[2] = (-32768).toShort()
+    ar[4] = (32767).toShort()
     assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
     assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
 }
 
 //! CHECKER       Int16Array $_set short/$_get IR intrinsic
@@ -1099,16 +1111,13 @@ function test_int16array_set_short_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int16array_set_short_ir(): void {
     let ar = new Int16Array(10)
-    ar[2] = -32768 as short
-    ar[3] = -32769 as short
-    ar[4] = 32767 as short
-    ar[5] = 32768 as short
+    ar[2] = (-32768).toShort()
+    ar[4] = (32767).toShort()
     assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
     assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
 }
 
 //! CHECKER       Int16Array $_set int/$_get cpp intrinsic
@@ -1141,6 +1150,7 @@ function test_int16array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int16array_set_int_ir(): void {
     let ar = new Int16Array(10)
     ar[2] = -32768
@@ -1151,6 +1161,32 @@ function test_int16array_set_int_ir(): void {
     assertEquals(32767, ar[3])
     assertEquals(32767, ar[4])
     assertEquals(-32768, ar[5])
+}
+
+//! CHECKER       Int16Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt16ArrayGetUnsafe"
+//! METHOD        "escompat_Int16Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int16ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Int16Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Int16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt16ArrayGetUnsafe"
+//! METHOD        "escompat_Int16Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.Int16ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testInt16ArrayGetUnsafe(): void {
+    let ar = new Int16Array(10)
+    ar[2] = -32768
+    ar[3] = -32769
+    ar[4] = 32767
+    ar[5] = 32768
+    arktest.assertEQ(-32768, ar.at(2))
+    arktest.assertEQ(32767, ar.at(3))
+    arktest.assertEQ(32767, ar.at(4))
+    arktest.assertEQ(-32768, ar.at(5))
 }
 
 //! CHECKER       Int16Array $_set cpp intrinsic rangeerror
@@ -1209,12 +1245,35 @@ function test_int32array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int32array_set_int_ir(): void {
     let ar = new Int32Array(10)
     ar[2] = -2147483648
     ar[4] = 2147483647
     assertEquals(-2147483648, ar[2])
     assertEquals(2147483647, ar[4])
+}
+
+//! CHECKER       Int32Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt32ArrayGetUnsafe"
+//! METHOD        "escompat_Int32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Int32Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Int32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt32ArrayGetUnsafe"
+//! METHOD        "escompat_Int32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.Int32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testInt32ArrayGetUnsafe(): void {
+    let ar = new Int32Array(10)
+    ar[2] = -2147483648
+    ar[4] = 2147483647
+    arktest.assertEQ(-2147483648, ar.at(2))
+    arktest.assertEQ(2147483647, ar.at(4))
 }
 
 //! CHECKER       Int32Array $_set cpp intrinsic rangeerror
@@ -1299,6 +1358,7 @@ function test_bigint64array_set_long_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_bigint64array_set_long_ir(): void {
     let ar = new BigInt64Array(10)
     ar[2] = 9223372036854775807n
@@ -1309,6 +1369,25 @@ function test_bigint64array_set_long_ir(): void {
     assertEquals(2n, ar[3])
     assertEquals(-9223372036854775808n, ar[4])
     assertEquals(-2n, ar[5])
+}
+
+//! CHECKER       BigInt64Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.BigInt64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testBigInt64ArrayGetUnsafe"
+//! METHOD        "escompat_BigInt64Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.BigInt64ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testBigInt64ArrayGetUnsafe(): void {
+    let ar = new BigInt64Array(10)
+    ar[2] = 9223372036854775807n
+    ar[3] = 18446744073709551618n
+    ar[4] = -9223372036854775808n
+    ar[5] = -18446744073709551618n
+    arktest.assertEQ(9223372036854775807n, ar.at(2))
+    arktest.assertEQ(2n, ar.at(3))
+    arktest.assertEQ(-9223372036854775808n, ar.at(4))
+    arktest.assertEQ(-2n, ar.at(5))
 }
 
 //! CHECKER       BigInt64Array $_set cpp intrinsic rangeerror
@@ -1350,12 +1429,35 @@ function test_float32array_set_float_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_float32array_set_float_ir(): void {
     let ar = new Float32Array(10)
     ar[2] = -3.4028235e+38f
     ar[4] = 3.4028235e+38f
     assertEquals(-3.4028235e+38f, ar[2])
     assertEquals(3.4028235e+38f, ar[4])
+}
+
+//! CHECKER       Float32Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Float32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat32ArrayGetUnsafe"
+//! METHOD        "escompat_Float32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Float32Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Float32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat32ArrayGetUnsafe"
+//! METHOD        "escompat_Float32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.Float32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testFloat32ArrayGetUnsafe(): void {
+    let ar = new Float32Array(10)
+    ar[2] = -3.4028235e+38f
+    ar[4] = 3.4028235e+38f
+    arktest.assertEQ(-3.4028235e+38f, ar.at(2))
+    arktest.assertEQ(3.4028235e+38f, ar.at(4))
 }
 
 //! CHECKER       Float32Array $_set cpp intrinsic rangeerror
@@ -1397,12 +1499,35 @@ function test_float64array_set_double_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_float64array_set_double_ir(): void {
     let ar = new Float64Array(10)
     ar[2] = -3.4028235e+38
     ar[4] = 3.4028235e+38
     assertEquals(-3.4028235e+38, ar[2])
     assertEquals(3.4028235e+38, ar[4])
+}
+
+//! CHECKER       Float64Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Float64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat64ArrayGetUnsafe"
+//! METHOD        "escompat_Float64Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float64ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Float64Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Float64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat64ArrayGetUnsafe"
+//! METHOD        "escompat_Float64Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.Float64ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testFloat64ArrayGetUnsafe(): void {
+    let ar = new Float64Array(10)
+    ar[2] = -3.4028235e+38
+    ar[4] = 3.4028235e+38
+    arktest.assertEQ(-3.4028235e+38, ar.at(2))
+    arktest.assertEQ(3.4028235e+38, ar.at(4))
 }
 
 //! CHECKER       Float64Array $_set cpp intrinsic rangeerror
@@ -1481,6 +1606,7 @@ function test_uint8array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint8array_set_int_ir(): void {
     let ar = new Uint8Array(10)
     ar[2] = -1
@@ -1489,6 +1615,30 @@ function test_uint8array_set_int_ir(): void {
     assertEquals(255, ar[2])
     assertEquals(255, ar[3])
     assertEquals(1, ar[4])
+}
+
+//! CHECKER       Uint8Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ArrayGetUnsafe"
+//! METHOD        "escompat_Uint8Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Uint8Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Uint8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ArrayGetUnsafe"
+//! METHOD        "escompat_Uint8Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.UInt8ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testUint8ArrayGetUnsafe(): void {
+    let ar = new Uint8Array(10)
+    ar[2] = -1
+    ar[3] = 255
+    ar[4] = 257
+    arktest.assertEQ(255, ar.at(2))
+    arktest.assertEQ(255, ar.at(3))
+    arktest.assertEQ(1, ar.at(4))
 }
 
 //! CHECKER       Uint8ClampedArray $_set int/$_get cpp intrinsic
@@ -1533,6 +1683,7 @@ function test_uint8clampedarray_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint8clampedarray_set_int_ir(): void {
     let ar = new Uint8ClampedArray(10)
     ar.fill(77)
@@ -1542,6 +1693,31 @@ function test_uint8clampedarray_set_int_ir(): void {
     assertEquals(0, ar[2])
     assertEquals(255, ar[3])
     assertEquals(255, ar[4])
+}
+
+//! CHECKER       Uint8ClampedArray getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint8ClampedArray::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ClampedArrayGetUnsafe"
+//! METHOD        "escompat_Uint8ClampedArray::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ClampedArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Uint8ClampedArray getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Uint8ClampedArray::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ClampedArrayGetUnsafe"
+//! METHOD        "escompat_Uint8ClampedArray::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.UInt8ClampedArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testUint8ClampedArrayGetUnsafe(): void {
+    let ar = new Uint8ClampedArray(10)
+    ar.fill(77)
+    ar[2] = -1
+    ar[3] = 255
+    ar[4] = 256
+    arktest.assertEQ(0, ar.at(2))
+    arktest.assertEQ(255, ar.at(3))
+    arktest.assertEQ(255, ar.at(4))
 }
 
 //! CHECKER       Uint16Array $_set int/$_get cpp intrinsic
@@ -1585,6 +1761,7 @@ function test_uint16array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint16array_set_int_ir(): void {
     let ar = new Uint16Array(10)
     ar[2] = -1
@@ -1593,6 +1770,30 @@ function test_uint16array_set_int_ir(): void {
     assertEquals(65535, ar[2])
     assertEquals(65535, ar[3])
     assertEquals(1, ar[4])
+}
+
+//! CHECKER       Uint16Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint16ArrayGetUnsafe"
+//! METHOD        "escompat_Uint16Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt16ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Uint16Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Uint16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint16ArrayGetUnsafe"
+//! METHOD        "escompat_Uint16Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.UInt16ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testUint16ArrayGetUnsafe(): void {
+    let ar = new Uint16Array(10)
+    ar[2] = -1
+    ar[3] = 65535
+    ar[4] = 65537
+    arktest.assertEQ(65535, ar.at(2))
+    arktest.assertEQ(65535, ar.at(3))
+    arktest.assertEQ(1, ar.at(4))
 }
 
 //! CHECKER       Uint32Array $_set int/$_get cpp intrinsic
@@ -1637,6 +1838,7 @@ function test_uint32array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_int_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1
@@ -1656,7 +1858,7 @@ function test_uint32array_set_int_ir(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_uint32array_set_long_cpp(): void {
     let ar = new Uint32Array(10)
-    ar[2] = -1 as long
+    ar[2] = (-1).toLong()
     ar[3] = 4294967295
     ar[4] = 4294967297
     assertEquals(4294967295, ar[2])
@@ -1673,14 +1875,39 @@ function test_uint32array_set_long_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_long_ir(): void {
     let ar = new Uint32Array(10)
-    ar[2] = -1 as long
+    ar[2] = (-1).toLong()
     ar[3] = 4294967295
     ar[4] = 4294967297
     assertEquals(4294967295, ar[2])
     assertEquals(4294967295, ar[3])
     assertEquals(1, ar[4])
+}
+
+//! CHECKER       Uint32Array getUnsafe cpp intrinsic
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint32ArrayGetUnsafe"
+//! METHOD        "escompat_Uint32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+
+//! CHECKER       Uint32Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.Uint32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint32ArrayGetUnsafe"
+//! METHOD        "escompat_Uint32Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.UInt32ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testUint32ArrayGetUnsafe(): void {
+    let ar = new Uint32Array(10)
+    ar[2] = (-1).toLong()
+    ar[3] = 4294967295
+    ar[4] = 4294967297
+    arktest.assertEQ(4294967295, ar.at(2))
+    arktest.assertEQ(4294967295, ar.at(3))
+    arktest.assertEQ(1, ar.at(4))
 }
 
 //! CHECKER       BigUint64Array $_set int/$_get cpp intrinsic
@@ -1707,6 +1934,7 @@ function test_biguint64array_set_int_cpp(): void {
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
+//! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_int_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = -1
@@ -1765,6 +1993,7 @@ function test_biguint64array_set_rangeerror_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_long_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = 18446744073709551618n
@@ -1777,6 +2006,25 @@ function test_biguint64array_set_long_ir(): void {
     assertEquals(18446744073709551615n, ar[5])
 }
 
+//! CHECKER       BigUint64Array getUnsafe IR intrinsic
+//! RUN           force_jit: true, options: "--compiler-regex=escompat\.BigUint64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testBigUint64ArrayGetUnsafe"
+//! METHOD        "escompat_BigUint64Array::at"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      "Intrinsic.BigUInt64ArrayGetUnsafe "
+//! INST_NOT      /Call.*Array::getUnsafe/
+//! EVENT_NOT     /Deoptimization/
+function testBigUint64ArrayGetUnsafe(): void {
+    let ar = new BigUint64Array(10)
+    ar[2] = 18446744073709551618n
+    ar[3] = -18446744073709551618n
+    ar[4] = -1n
+    ar[5] = 18446744073709551615n
+    arktest.assertEQ(2n, ar.at(2))
+    arktest.assertEQ(18446744073709551614n, ar.at(3))
+    arktest.assertEQ(18446744073709551615n, ar.at(4))
+    arktest.assertEQ(18446744073709551615n, ar.at(5))
+}
+
 function assertEquals(expected: number, actual: number): void {
     if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
 }
@@ -1787,4 +2035,534 @@ function assertEquals(expected: float, actual: float): void {
 
 function assertEquals(expected: BigInt, actual: BigInt): void {
     if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
+}
+
+//! CHECKER       Int8Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int8ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int8array_copy_within() {
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int8Array.of(1,1,2,3,4))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int8Array.of(1,1,2,3,4))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int8Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Int16Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int16ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int16array_copy_within() {
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int16Array.of(1,1,2,3,4))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int16Array.of(1,1,2,3,4))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int16Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Int32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int32array_copy_within() {
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int32Array.of(1,1,2,3,4))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int32Array.of(1,1,2,3,4))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       BigInt64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.BigInt64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_bigint64array_copy_within() {
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), BigInt64Array.of(1,1,2,3,4))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), BigInt64Array.of(1,1,2,3,4))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), BigInt64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Float32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_float32array_copy_within() {
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Float32Array.of(1,1,2,3,4))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Float32Array.of(1,1,2,3,4))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Float32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Float64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_float64array_copy_within() {
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Float64Array.of(1,1,2,3,4))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Float64Array.of(1,1,2,3,4))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Float64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint8Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint8array_copy_within() {
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint8Array.of(1,1,2,3,4))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint8Array.of(1,1,2,3,4))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint8Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint16Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt16ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint16array_copy_within() {
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint16Array.of(1,1,2,3,4))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint16Array.of(1,1,2,3,4))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint16Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint32array_copy_within() {
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint32Array.of(1,1,2,3,4))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint32Array.of(1,1,2,3,4))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       BigUint64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.BigUInt64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_biguint64array_copy_within() {
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), BigUint64Array.of(1,1,2,3,4))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), BigUint64Array.of(1,1,2,3,4))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), BigUint64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       AOT Uint8ClampedArray copyWithin
+//! RUN_PAOC      options: "--compiler-regex=.*::test_uint8clampedarray_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      /Call.*Array::copyWithin/
+//! RUN           entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+
+//! CHECKER       Uint8ClampedArray copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ClampedArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint8clampedarray_copy_within() {
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint8ClampedArray.of(1,1,2,3,4))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint8ClampedArray.of(1,1,2,3,4))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint8ClampedArray.of(1,1,2,3,4))
+}
+
+//! CHECKER       Int8Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_index_of"
+function test_int8array_index_of() {
+    let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int16Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_index_of"
+function test_int16array_index_of() {
+    let array = new Int16Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
+    arktest.assertEQ(array.indexOf(3.,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_index_of"
+function test_int32array_index_of() {
+    let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3.,  0),  2.);
+    arktest.assertEQ(array.indexOf(3.,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       BigInt64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_index_of"
+function test_bigint64array_index_of() {
+    let array = new BigInt64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.);
+    arktest.assertEQ(array.indexOf(3,  8), -1.);
+    arktest.assertEQ(array.indexOf(3, -1), -1.);
+    arktest.assertEQ(array.indexOf(3, -7),  2.);
+}
+
+//! CHECKER       Float32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_index_of"
+function test_float32array_index_of() {
+    let array = new Float32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3.,  0),  2.);
+    arktest.assertEQ(array.indexOf(3.,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       Float64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_index_of"
+function test_float64array_index_of() {
+    let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3,   0),  2.);
+    arktest.assertEQ(array.indexOf(3,   6), -1.);
+    arktest.assertEQ(array.indexOf(3.,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint8Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_index_of"
+function test_uint8array_index_of() {
+    let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint16Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_index_of"
+function test_uint16array_index_of() {
+    let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
+    arktest.assertEQ(array.indexOf(3.,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_index_of"
+function test_uint32array_index_of() {
+    let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3.,  0),  2.);
+    arktest.assertEQ(array.indexOf(3.,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       BigUint64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_index_of"
+function test_biguint64array_index_of() {
+    let array = new BigUint64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.);
+    arktest.assertEQ(array.indexOf(3,  8), -1.);
+    arktest.assertEQ(array.indexOf(3, -1), -1.);
+    arktest.assertEQ(array.indexOf(3, -7),  2.);
+}
+
+//! CHECKER       UInt8ClampedArray indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_index_of"
+function test_uint8clampedarray_index_of() {
+    let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
+    arktest.assertEQ(array.indexOf(3., -1), -1.);
+    arktest.assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int8Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_last_index_of"
+function test_int8array_last_index_of() {
+    let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Int16Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_last_index_of"
+function test_int16array_last_index_of() {
+    let array = new Int16Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3.,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3.,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 , -7), -1.);
+}
+
+//! CHECKER       Int32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_last_index_of"
+function test_int32array_last_index_of() {
+    let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       BigInt64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_last_index_of"
+function test_bigint64array_last_index_of() {
+    let array = new BigInt64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(new BigInt(3),  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(new BigInt(3),  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3, -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3, -7), -1.);
+}
+
+//! CHECKER       Float32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_last_index_of"
+function test_float32array_last_index_of() {
+    let array = new Float32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3.,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3.,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3.,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 , -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 , -7), -1.);
+}
+
+//! CHECKER       Float64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_last_index_of"
+function test_float64array_last_index_of() {
+    let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint8Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_last_index_of"
+function test_uint8array_last_index_of() {
+    let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint16Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_last_index_of"
+function test_uint16array_last_index_of() {
+    let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_last_index_of"
+function test_uint32array_last_index_of() {
+    let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       BigUint64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_last_index_of"
+function test_biguint64array_last_index_of() {
+    let array = new BigUint64Array([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(new BigInt(3),  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(new BigInt(3), -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(new BigInt(3), -7), -1.);
+}
+
+//! CHECKER       AOT Uint8ClampedArray lastIndexOf
+//! RUN_PAOC      options: "--compiler-regex=.*::test_uint8clampedarray_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+//! PASS_AFTER    "IrBuilder"
+//! RUN           entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+
+//! CHECKER       Uint8ClampedArray lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+function test_uint8clampedarray_last_index_of() {
+    let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
+    arktest.assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    arktest.assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
+    arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }

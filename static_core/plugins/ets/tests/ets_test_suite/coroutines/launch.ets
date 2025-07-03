@@ -51,16 +51,10 @@ class C {
 }
 
 function main(): void {
-  const l0Result = mlaunch<string, () => string>(
-    l0
-  ).Await();
+  const l0Result = launch<string, () => string>(l0).Await();
+  const l1Result = launch<string, (a0: string) => string>(l1, "l1_arg_0").Await();
 
-  const l1Result = mlaunch<string, (a0: string) => string>(
-    l1,
-    "l1_arg_0"
-  ).Await();
-
-  const l2ResultJob: Job<string> = mlaunch<
+  const l2ResultJob: Job<string> = launch<
     string,
     (a0: string, a1: number, a2: MyPayload) => string
   >(l2, "l2_arg_0", 2.73, new MyPayload(3.14));
@@ -70,18 +64,18 @@ function main(): void {
   assertEQ(l1Result, "l1: l1_arg_0");
   assertEQ(l2Result, "l2: l2_arg_0 2.73 MyPayload.s=3.14");
 
-  const f0ResultJob: Job<string> = mlaunch<string, () => string>(
+  const f0ResultJob: Job<string> = launch<string, () => string>(
     f0
   );
   const f0Result = f0ResultJob.Await();
 
-  const f1ResultJob: Job<string> = mlaunch<string, (a0: string) => string>(
+  const f1ResultJob: Job<string> = launch<string, (a0: string) => string>(
     f1,
     "f1_arg_0"
   );
   const f1Result = f1ResultJob.Await();
 
-  const f2ResultJob: Job<string> = mlaunch<
+  const f2ResultJob: Job<string> = launch<
     string,
     (a0: string, a1: number, a2: MyPayload) => string
   >(f2, "f2_arg_0", 2.73, new MyPayload(3.14));
@@ -91,16 +85,10 @@ function main(): void {
   assertEQ(f1Result, "f1: f1_arg_0");
   assertEQ(f2Result, "f2: f2_arg_0 2.73 MyPayload.s=3.14");
 
-  const s0Result = mlaunch<string, () => string>(
-    C.s0
-  ).Await();
+  const s0Result = launch<string, () => string>(C.s0).Await();
+  const s1Result = launch<string, (a0: string) => string>(C.s1, "C.s1_arg_0" ).Await();
 
-  const s1Result = mlaunch<string, (a0: string) => string>(
-    C.s1,
-    "C.s1_arg_0"
-  ).Await();
-
-  const s2ResultJob = mlaunch<
+  const s2ResultJob = launch<
     string,
     (a0: string, a1: number, a2: MyPayload) => string
   >(C.s2, "C.s2_arg_0", 2.73, new MyPayload(3.14));

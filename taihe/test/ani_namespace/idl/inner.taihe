@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("my_ns", "outer.inner")
+@!namespace("my_ns", "inner")
 enum Color: i32 {
     red = 1,
     yellow = 2,
@@ -62,9 +62,9 @@ interface TestInterface{
     Primitives_return(a: i32): i32;
     Containers_noreturn1(a: Array<i8>): void;
     Containers_noreturn2(a: union_primitive): void;
-    Containers_noreturn3(a: Array<u8>): void;
+    Containers_noreturn3(a: @arraybuffer Array<u8>): void;
     Containers_noreturn4(a: Color): void;
-    Containers_noreturn5(a: Map<String, i32>): void;
+    Containers_noreturn5(a: @record Map<String, i32>): void;
 
 
     Containers_return(a: union_primitive): String;
@@ -75,7 +75,7 @@ interface TestInterface{
     OverloadFunc_i8(a: i8, b: i8): void;
 
     @overload("OverloadFunc")
-    OverloadFunc_i16(a: Array<i8>, b: Array<u8>): String;
+    OverloadFunc_i16(a: Array<i8>, b: @arraybuffer Array<u8>): String;
 
     @overload("OverloadFunc")
     OverloadFunc_i32(): void;
@@ -91,10 +91,10 @@ interface TestInterface{
     @get getf32(): f32;
     @get getf64(): f64;
     @get getbool(): bool;
-    @get getArraybuffer(): Array<u8>;
+    @get getArraybuffer(): @arraybuffer Array<u8>;
     @get getArray():Array<i8>;
     @get getunion():union_primitive;
-    @get getrecord():Map<String, i8>;
+    @get getrecord():@record Map<String, i8>;
     @get getColorEnum():Color;
 
 }
@@ -219,11 +219,11 @@ function PrintTestInterfaceNumberi64(testiface: TestInterface): i64;
 function PrintTestInterfaceNumberf32(testiface: TestInterface): f32;
 function PrintTestInterfaceNumberf64(testiface: TestInterface): f64;
 function PrintTestInterfacebool(testiface: TestInterface): bool;
-function PrintTestInterfaceArraybuffer(testiface: TestInterface): Array<u8>;
+function PrintTestInterfaceArraybuffer(testiface: TestInterface): @arraybuffer Array<u8>;
 
 function PrintTestInterfaceArray(testiface: TestInterface): Array<i8>;
 function PrintTestInterfaceUnion(testiface: TestInterface): union_primitive;
-function PrintTestInterfaceRecord(testiface: TestInterface): Map<String, i8>;
+function PrintTestInterfaceRecord(testiface: TestInterface): @record Map<String, i8>;
 function PrintTestInterfaceEnum(testiface: TestInterface): Color;
 
 function get_interface_1(): Test1;

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-let buf = new SharedArrayBuffer(4);
+import { launch } from "std/concurrency"
+
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -63,10 +65,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch hasAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(hasAll);
+        p1.Await();
+        p2.Await();
         assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_001", () =>
@@ -75,10 +77,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_002", () =>
@@ -87,10 +89,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch replaceAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(replaceAll);
+        p1.Await();
+        p2.Await();
         assertEQ(Atomics.load(flag, 0), 10);
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";
@@ -103,10 +105,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch isEmptyFun();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(isEmptyFun);
+        p1.Await();
+        p2.Await();
         assertEQ(Atomics.load(flag, 0), 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_004", () =>
@@ -115,10 +117,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         assertTrue(Atomics.load(flag, 0) >= 0);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_005", () =>
@@ -127,10 +129,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch hasAll();
-        let p2 = launch removeAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(hasAll);
+        let p2 = launch<void, () => void>(removeAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(Atomics.load(flag, 0) >= 0);
         for (let i = 0; i < 10; i++) {
             assertEQ(arrValuesTest[i], arrValues[i]);

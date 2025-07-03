@@ -20,21 +20,22 @@ Expressions
 
 This chapter describes the meanings of expressions and the rules for the
 evaluation of expressions, except the expressions related to coroutines
-(see :ref:`Coroutines`) and expressions
-described as experimental (see :ref:`Lambda Expressions with Receiver`).
+(see :ref:`Coroutines (Experimental)`) and expressions described as experimental
+(see :ref:`Lambda Expressions with Receiver`).
 
 .. index::
    evaluation
    expression
    coroutine
-   await expression
+
+The syntax of *expression* is presented below:
 
 .. code-block:: abnf
 
     expression:
         primaryExpression
-        | castExpression
         | instanceOfExpression
+        | castExpression
         | typeOfExpression
         | nullishCoalescingExpression
         | spreadExpression
@@ -73,8 +74,8 @@ described as experimental (see :ref:`Lambda Expressions with Receiver`).
         | conditionalOrExpression
         ;
 
-The grammar rules below introduce several productions to be used by other
-expression rules:
+The syntax below introduce several productions to be used by other
+expression syntax rules:
 
 .. code-block:: abnf
 
@@ -115,6 +116,8 @@ is handled as a :index:`compile-time error`.
    evaluation
    chaining operator
    pattern
+
+The syntax of *arguments* is presented below:
 
 .. code-block:: abnf
 
@@ -168,8 +171,8 @@ The result of a program expression *evaluation* denotes the following:
 A variable or a value are equally considered the *value of the expression*
 if such a value is required for further evaluation.
 
-The type of an expression is inferred at compile time (see
-:ref:`Contexts and Conversions`).
+The type of an expression is evaluated at compile time (see
+:ref:`Type of Expression`).
 
 Expressions can contain assignments, increment operators, decrement operators,
 method calls, and function calls. The evaluation of an expression can produce
@@ -232,9 +235,9 @@ follows:
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
    :ref:`Array Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
--  If a conversion cannot be performed at runtime, then a *cast expression*
-   (see :ref:`Cast Expressions`) throws ``ClassCastError``.
--  If the right-hand operand expression has the zero value, then integer
+-  If a conversion cannot be performed at runtime, then a
+   :ref:`Cast Expression` throws ``ClassCastError``.
+-  If the right-hand expression has the zero value, then integer
    division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
    operators throw ``ArithmeticError``.
 
@@ -304,26 +307,10 @@ Order of Expression Evaluation
 The operands of an operator are evaluated from left to right in accordance with
 the following rules:
 
--  Any right-hand operand is evaluated only after the left-hand operand of a
+-  for order of evaluation assignment operator see :ref:`Assignment`.
+
+-  Any right-hand expression is evaluated only after the left-hand expression of a
    binary operator is fully evaluated.
-
-   If using a compound-assignment operator (see :ref:`Simple Assignment Operator`),
-   the evaluation of the left-hand operand includes the following:
-
-   - Remembering the variable denoted by the left-hand operand;
-   - Fetching the value of that variable for the subsequent evaluation
-     of the right-hand operand; and
-   - Saving such a value.
-
-   If the evaluation of the left-hand operand completes abruptly, then no
-   part of the right-hand operand is evaluated.
-
-.. index::
-   operand
-   operator
-   evaluation
-   compound-assignment operator
-   assignment
 
 -  Any part of the operation can be executed only after every operand of an
    operator (except conditional operators '``&&``', '``||``', and '``?:``')
@@ -376,7 +363,8 @@ Operator Precedence
 ===================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: fix 'await' precedence
 
 The table below summarizes all information on the precedence and
 associativity of operators. Each section on a particular operator
@@ -388,43 +376,77 @@ also contains detailed information.
    operator
    associativity
 
-+---------------------------------+--------------------------------------------+----------------+
-|         **Operator**            |   **Precedence**                           | **Assoc-ty**   |
-+=================================+============================================+================+
-| postfix increment and decrement | ``++`` ``--``                              | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| prefix increment and decrement, | ``++ -- + - ! ~ typeof``                   | right to left  |
-|                                 |                                            |                |
-| unary, typeof                   |                                            |                |
-+---------------------------------+--------------------------------------------+----------------+
-| multiplicative                  | ``* / %``                                  | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| additive                        | ``+ -``                                    | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| cast                            | ``as``                                     | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| shift                           | ``<< >>  >>>``                             | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| relational                      | ``< > <= >= instanceof``                   | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| equality                        | ``== !=``                                  | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| bitwise AND                     | ``&``                                      | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| bitwise exclusive OR            | ``^``                                      | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| bitwise inclusive OR            | ``|``                                      | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| logical AND                     | ``&&``                                     | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| logical OR                      | ``||``                                     | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| null-coalescing                 | ``??``                                     | left to right  |
-+---------------------------------+--------------------------------------------+----------------+
-| ternary                         | ``?:``                                     | right to left  |
-+---------------------------------+--------------------------------------------+----------------+
-| assignment                      | ``= += -= %= *= /= &= ^= |= <<= >>= >>>=`` | right to left  |
-+---------------------------------+--------------------------------------------+----------------+
+
+.. list-table::
+   :width: 100%
+   :widths: 35 50 15
+   :header-rows: 1
+
+   * - Operator
+     - Precedence
+     - Associativity
+   * - grouping
+     - ``()``
+     - n/a
+   * - member access and chaining
+     - ``.`` ``?.``
+     - left-to-right
+   * - access and call
+     - ``[]`` ``.`` ``()`` ``new``
+     - n/a
+   * - postfix increment and decrement
+     - ``++`` ``--``
+     - n/a
+   * - prefix increment and decrement, unary operators, typeof, await
+     - ``++ -- + - ! ~ typeof await``
+     - n/a
+   * - exponentiation
+     - ``**``
+     - right-to-left
+   * - multiplicative
+     - ``* / %``
+     - left-to-right
+   * - additive
+     - ``+ -``
+     - left-to-right
+   * - cast
+     - ``as``
+     - left-to-right
+   * - shift
+     - ``<< >>  >>>``
+     - left-to-right
+   * - relational
+     - ``< > <= >= instanceof``
+     - left-to-right
+   * - equality
+     - ``== !=``
+     - left-to-right
+   * - bitwise AND
+     - ``&``
+     - left-to-right
+   * - bitwise exclusive OR
+     - ``^``
+     - left-to-right
+   * - bitwise inclusive OR
+     - ``|``
+     - left-to-right
+   * - logical AND
+     - ``&&``
+     - left-to-right
+   * - logical OR
+     - ``||``
+     - left-to-right
+   * - null-coalescing
+     - ``??``
+     - left-to-right
+   * - ternary
+     - ``?:``
+     - right-to-left
+   * - assignment
+     - ``= += -= %= *= /= &= ^= |= <<= >>= >>>=``
+     - right-to-left
+
+
 
 .. index::
    precedence
@@ -490,7 +512,7 @@ when they from time to time cause exceptional conditions. The order of
 evaluation of the following expressions requires specific explanation:
 
 -  Class instance creation expressions (see :ref:`New Expressions`);
--  :ref:`Array Creation Expressions`;
+-  :ref:`Resizable Array Creation Expressions`;
 -  :ref:`Indexing Expressions`;
 -  Method call expressions (see :ref:`Method Call Expression`);
 -  Assignments involving indexing (see :ref:`Assignment`);
@@ -568,7 +590,8 @@ If not a *simple name*, *qualifiedName* refers to the following:
 
 -  Entity imported from a compilation unit,
 -  Entity exported from a namespace, or
--  Member of some class or interface.
+-  Member of some class or interface, or
+-  Special syntax form of :ref:`Record Indexing Expression`.
 
 If *typeArguments* are provided, then *qualifiedName* is a valid instantiation
 of the generic method or function. Otherwise, a :index:`compile-time error`
@@ -582,16 +605,14 @@ A :index:`compile-time error` also occurs in the following situations:
 
 Type of a *named reference* is the type of an expression.
 
-**Note**. When a *named reference* is of a function type, then a new function
-object is always created as specified in :ref:`Uniqueness of Functional Objects`.
-Also when a *named reference* refers to a member of some class or interface
-which is a non-static method it is boundned with the object of that class or
-interface.
+If a *named reference* refers to a non-static method of a class or an interface
+then the named reference is bounded with the object of that class or interface.
 
 .. index::
    simple name
    entity
    compilation unit
+   compile-time error
    namespace
    named reference
    expression
@@ -637,7 +658,7 @@ interface.
          a function type derived from the signature of instantiated function
          'generic_function<string> ()' */
 
-    
+
     class aClass {
         field = 123
         method(): number { return this.field }
@@ -646,6 +667,11 @@ interface.
     const aMethod = anObject.method
     anObject.field = 42
     console.log (aMethod()) // Outputs 42
+
+    let global: Object = goo()
+    function goo() {
+        console.log (global) // compile-time or runtime error
+    }
 
 
 |
@@ -662,7 +688,9 @@ Array Literal
     todo: implement it properly for invocation context to get type from the context, not from the first element
 
 *Array literal* is an expression that can be used to create an array or
-tuple in some cases, and to provide some initial values:
+tuple in some cases, and to provide some initial values.
+
+The syntax of *array literal* is presented below:
 
 .. code-block:: abnf
 
@@ -809,7 +837,7 @@ of an assignment, call parameter type, or type of a cast expression:
    array
    tuple
 
-The following example illustrates the possible kinds of context:
+The following example illustrates possible kinds of context:
 
 .. code-block:: typescript
    :linenos:
@@ -885,17 +913,18 @@ union type. Otherwise, a :index:`compile-time error` occurs:
    union type
    type inference
 
-If the type used in the context is a *fixed array type* (see :ref:`Fixed Array Types`),
-and each initializer expression type is compatible with the array element type,
-then an array literal is of *fixed array type*.
+If the type used in the context is a *fixed-size array type* (see
+:ref:`Fixed-size Array Types`), and each initializer expression type is
+compatible with the array element type, then an array literal is of
+*fixed-size array type*.
 
 .. code-block:: typescript
    :linenos:
 
-    let farray: FixedArray<number> = [1, 2]
+    let array: FixedArray<number> = [1, 2]
 
 .. index::
-   fixed array type
+   fixed-size array type
    initializer expression
    array element
    array literal
@@ -930,10 +959,17 @@ used to infer it from initialization expressions:
 #. If all initialization expressions are of the same type ``T``, then the
    type of the array literal is ``T[]``.
 
-#. Otherwise, the array literal type is an array of elements of the union type
-   which is constructed as a union of ``T``:sub:`1` ``| ... | T``:sub:`N`,
-   where ``T``:sub:`i` is the type of *expr*:sub:`i`. Union type normalization
-   (see :ref:`Union Types Normalization`) is applied to this union type.
+#. Otherwise, the type of array literal is constructed as the union type
+   ``T``:sub:1 ``| ... | T``:sub:N,
+   where ``T``:sub:i is the type of *expr*:sub:i and then:
+
+    - If ``T``:sub:i is a literal type, then it is  replaced for its supertype;
+
+    - If ``T``:sub:i is a union type that contains literal types,
+      then each literal type is replaced for its supertype.
+
+    - :ref:`Union Types Normalization` is applied
+      to the resultant union type after these replacements.
 
 .. index::
    type inference
@@ -950,11 +986,14 @@ used to infer it from initialization expressions:
 .. code-block:: typescript
    :linenos:
 
+    let u : "A" | "B" = "A"
+
     let a = []                        // compile-time error, type cannot be inferred
     let b = ["a"]                     // type is string[]
     let c = [1, 2, 3]                 // type is number[]
-    let d = ["a", 1, 3.14]            // type is (string | number)[]
-    let e = [(): void => {}, new A()] // type is (() => void | A)[]
+    let d = ["a" + "b", 1, 3.14]      // type is (string | number)[]
+    let e = [u]                       // type is string[]
+    let f = [(): void => {}, new A()] // type is (() => void | A)[]
 
 |
 
@@ -966,10 +1005,10 @@ Object Literal
 .. meta:
     frontend_status: Done
 
-*Object literal* is an expression that can be used to create a class
-instance and to provide some initial values. In some cases it is more
+*Object literal* is an expression that can be used to create a class instance
+with methods and fields with initial values. In some cases it is more
 convenient to use an *object literal* in place of a class instance creation
-expression (see :ref:`New Expressions`):
+expression (see :ref:`New Expressions`).
 
 .. index::
    object literal
@@ -978,24 +1017,39 @@ expression (see :ref:`New Expressions`):
    class instance
    creation expression
 
+The syntax of *object literal* is presented below:
+
 .. code-block:: abnf
 
     objectLiteral:
-       '{' valueSequence? '}'
+       '{' objectLiteralMembers? '}'
        ;
 
-    valueSequence:
-       nameValue (',' nameValue)* ','?
+    objectLiteralMembers:
+       objectLiteralMember (',' objectLiteralMember)* ','?
        ;
 
-    nameValue:
+    objectLiteralMember:
+       objectLiteralField | objectLiteralMethod
+       ;
+
+    objectLiteralField:
        identifier ':' expression
        ;
 
-An *object literal* is written as a comma-separated list of *name-value pairs*
-enclosed in curly braces '``{``' and '``}``'. A trailing comma after the last
-pair is ignored. Each *name-value pair* consists of an identifier and an
-expression:
+    objectLiteralMethod
+       identifier typeParameters? signature block
+       ;
+
+
+An *object literal* is written as a comma-separated list of
+*object literal members* enclosed in curly braces '``{``' and '``}``'. A
+trailing comma after the last member is ignored. Each *object literal member*
+can be either an *object literal field* or an *object literal method*.
+
+**Note**. All methods of an *object literal* are public.
+
+An *object literal field* consists of an identifier and an expression as follows:
 
 .. index::
    object literal
@@ -1013,8 +1067,82 @@ expression:
       name: string = ""
       age: number = 0
     }
-    let b : Person = {name: "Bob", age: 25}
-    let a : Person = {name: "Alice", age: 18, } //ok, trailing comma is ignored
+    let b: Person = {name: "Bob", age: 25}
+    let a: Person = {name: "Alice", age: 18, } //ok, trailing comma is ignored
+    let c: Person | number = {name: "Mary", age: 17} // literal will be of type Person
+
+And *object literal method* is a complete declaration of a public method:
+
+.. code-block:: typescript
+   :linenos:
+
+    abstract class Person {
+      name: string = ""
+      abstract set_name (name: string): void
+    }
+    let p: Person = {
+      name: "Bob",
+      set_name (name: string) { this.name = name }
+    }
+    p.set_name ("Alice")
+
+
+A :index:`compile-time error` occurs if an object literal introduces new
+methods:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base1 {}
+    interface Base2 {}
+    const o1: Base1 = { m() {} } // compile-time error
+    const o2: Base2 = { m() {} } // compile-time error
+
+A :index:`compile-time error` occurs if a class has a private or a protected
+method, and its object literal contains same-name methods with
+override-compatible signatures (see :ref:`Override-Compatible Signatures`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Derived extends Base {}
+    class aClass {
+      private method (p: Derived): Base { return new Base }
+    }
+    const x: aClass = {
+      method (p: Base): Derived { return new Derived } // compile-time error
+      method () {} // OK as it is not an overriding case
+    }
+
+    interface I {
+      method (p: Derived): Base
+    }
+    const o: I = {
+      method (p: Base): Derived { return new Derived } // OK
+    }
+    o.method (new Derived) // OK
+    o.method (new Base) // compile-time error
+
+If a class or an interface has some method implementaion, then its object
+literal can skip providing a new implemention of this method:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+      method () { console.log ("method() from Base is called") }
+    }
+    const x: Base = {} // Valid literal of type Base
+    x.method ()
+
+    interface I {
+      method () { console.log ("method() from I is called") }
+    }
+    const x: I = {} // Valid literal of anonymous class type
+    x.method ()
+
+
 
 Type of an *object literal expression* is always some class ``C`` that is
 inferred from the context. A type inferred from the context can be either a
@@ -1024,9 +1152,12 @@ created for the inferred interface type (see
 
 A :index:`compile-time error` occurs if:
 
--  Type of an object literal cannot be inferred from the context; or
--  The inferred type is not a class or interface type.
+-  Type of an object literal cannot be inferred from the context;
+-  The inferred type is not a class or interface type;
+-  The context is a union type, and an object literal can be treated
+   as value of several of union component types; or
 -  The inferred type has abstract methods (see :ref:`Abstract Methods`).
+
    **Note**. An abstract class without abstract methods can be used.
 
 .. index::
@@ -1048,6 +1179,14 @@ A :index:`compile-time error` occurs if:
 
     let p = {name: "Bob", age: 25}
             // compile-time error, type cannot be inferred
+
+    class A { field = 1 }
+    class B { field = 2 }
+
+    let q: A | B = {field: 6}
+            // compile-time error, type cannot be inferred as the literal
+            // fits both A and B
+
 
 |
 
@@ -1231,9 +1370,7 @@ same fields as the interface ``I`` properties.
    field
 
 If some interface properties are of an optional type, then such properties can
-be skipped in an object literal as their default values are *undefined* (see
-:ref:`Default Values for Types`) according to the union type nature (see
-:ref:`Variable Declarations`):
+be skipped in an object literal, their values are set to ``undefined``:
 
 .. code-block:: typescript
    :linenos:
@@ -1246,8 +1383,13 @@ be skipped in an object literal as their default values are *undefined* (see
     let b: Person = {name: "Bob", age: 25}
          // 'sex' field will have 'undefined' value
 
-The interface type ``I`` must contain properties only. A :index:`compile-time error`
-occurs if interface type ``I`` contains a method:
+Properties of a non-optional type cannot be skipped in an object literal,
+despite some property types having default values (see
+:ref:`Default Values for Types`). If a non-optional property (e.g., *age* in
+the example above) is skipped, then a :index:`compile-time error` occurs.
+
+Interface type ``I`` must contain properties only. If interface type ``I``
+contains a method, then a :index:`compile-time error` occurs as follows:
 
 .. index::
    object literal
@@ -1319,6 +1461,8 @@ type:
    initialization
    value
 
+The syntax of *record literal* is presented below:
+
 .. code-block:: abnf
 
     recordLiteral:
@@ -1361,7 +1505,7 @@ The second expression denotes a value and must be of type ``Value``:
         "Mary": { age: 21, salary: 20}
     }
 
-If a key is a union type consisting of literals or enum type, then all variants
+If a key is a union of literal types or an enum type, then all variants
 must be listed in the object literal. Otherwise, a :index:`compile-time error`
 occurs:
 
@@ -1397,7 +1541,7 @@ The evaluation of an object literal of type ``C`` (where ``C`` is either
 a named class type or an anonymous class type created for the interface)
 is to be performed by the following steps:
 
--  A parameterless constructor is executed to produce an instance *x* of
+-  A parameterless constructor is executed to produce an instance ``x`` of
    class ``C``. The execution of the object literal completes abruptly
    if so does the execution of the constructor.
 
@@ -1406,8 +1550,8 @@ is to be performed by the following steps:
    of a name-value pair includes the following:
 
    -  Evaluation of the expression; and
-   -  Assignment of the value of expression to the corresponding field
-      of *x* as its initial value. This rule also applies to *readonly* fields.
+   -  Assignment of the value of expression to the corresponding field of ``x``
+      as its initial value. This rule also applies to ``readonly`` fields.
 
 .. index::
    object literal
@@ -1454,27 +1598,32 @@ Spread Expression
 .. meta:
     frontend_status: Done
 
+*Spread expression* can be used only within an array literal (see
+:ref:`Array Literal`) or argument passing. The *expression* must be of
+array type (see :ref:`Array Types`) or tuple type (see :ref:`Tuple Types`) or
+any type which has iteraror defined (see :ref:`Iterable Types`). 
+Otherwise, a :index:`compile-time error` occurs.
+
+The syntax of *spread expression* is presented below:
+
 .. code-block:: abnf
 
     spreadExpression:
         '...' expression
         ;
 
-*Spread expression* can be used only within an array literal (see
-:ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`) or tuple type (see :ref:`Tuple Types`).
-Otherwise, a :index:`compile-time error` occurs.
-
-A *spread expression* for arrays or tuples can be evaluated as follows:
+A *spread expression* for arrays or tuples or iterable types can be evaluated
+as follows:
 
 -  By the compiler at compile time if *expression* is constant (see
    :ref:`Constant Expressions`);
 -  At runtime otherwise.
 
-An array or tuple referred by the *expression* is broken by the evaluation into
-a sequence of values. This sequence is used where a *spread expression* is used.
-It can be an assignment, a call of a function, method, or constructor.
-A sequence of types of these values is the type of the *spread expression*.
+An array or tuple or iterable object referred by the *expression* is broken by
+the evaluation into a sequence of values. This sequence is used where a
+*spread expression* is used. It can be an assignment, a call of a function,
+method, or constructor. A sequence of types of these values is the type of the
+*spread expression*.
 
 .. index::
    spread expression
@@ -1483,6 +1632,7 @@ A sequence of types of these values is the type of the *spread expression*.
    expression
    array type
    tuple type
+   iterable type
    runtime
    compiler
    evaluation
@@ -1529,36 +1679,59 @@ A sequence of types of these values is the type of the *spread expression*.
         // such array literal will be built at runtime
     }
 
-**Note**. If an array is spread while calling a function, then an appropriate
-parameter must be of the spread array kind. If an array is spread into a
-sequence of ordinary parameters, then a :index:`compile-time error` occurs:
+    class A<T> implements Iterable<T|undefined> { // variables of type A can be spread
+        $_iterator(): Iterator<T|undefined>  {
+          return new MyIteratorResult<T|undefined>(this.data)
+        }
+        private data: T[]
+        constructor (...data: T[]) { this.data = data }       
+    }
+    class MyIteratorResult <T> implements Iterator<T|undefined> {
+        private data: T[]
+        private index: number = 0
+        next(): IteratorResult<T|undefined> {
+            if (this.index >= this.data.length) {
+               return MyIteratorResult.end_of_sequence
+            } else {
+               this.current_element.value = this.data[this.index++]
+               return this.current_element
+            }
+        }
+        constructor (data: T[]) { this.data = data }
+        private static end_of_sequence: IteratorResult<undefined> = {done: true, value: undefined}
+        private current_element: IteratorResult<T|undefined> = {done: false, value: undefined}
+    }
+    function display<T> (...p: T[]) { console.log (p) }
+    display (... new A<number> (1, 2, 3))        // Spread A with numbers
+    display (... new A<string> ("aaa", "bbb"))   // Spread A with strings
+    display (... new A<Object> (1, "aaa", true)) // Spread A with any objects
+    display (... new A<undefined>)               // Spread A with no objects
+
+
+**Note**. If an argument is spread at the call site, then an appropriate
+parameter must be of the rest kind (see :ref:`Rest Parameter`). If an argument
+is spread into a sequence of ordinary non-optional parameters, then a
+:index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
 
+    function foo1 (n1: number, n2: number) // non-rest parameters
+       { ... }
     let an_array = [1, 2]
-    bar (...an_array) // compile-time error
-    function bar (n1: number, n2: number) { ... }
+    foo1 (...an_array) // compile-time error
 
-**Note**. If a tuple is spread while calling a function, then an appropriate
-parameter must be of the spread tuple kind. If a tuple is spread into a
-sequence of ordinary parameters, then a :index:`compile-time error` occurs:
-
-.. code-block:: typescript
-   :linenos:
-
+    function foo2 (n1: number, n2: string)  // non-rest parameters
+       { ... }
     let a_tuple: [number, string] = [1, "2"]
-    bar (...a_tuple) // compile-time error
-    function bar (n1: number, n2: string) { ... }
+    foo2 (...a_tuple) // compile-time error
 
 .. index::
+   call site
    spread
-   function call
    parameter
    tuple
-   spread array
    array
-   parameter
 
 |
 
@@ -1569,6 +1742,8 @@ Parenthesized Expression
 
 .. meta:
     frontend_status: Done
+
+The syntax of *parenthesized expression* is presented below:
 
 .. code-block:: abnf
 
@@ -1595,19 +1770,21 @@ the contained expression.
 .. meta:
     frontend_status: Done
 
+Keyword ``this`` can be used as an expression in the body of an instance
+method of a class (see :ref:`Method Body`) or an interface (see
+:ref:`Default Interface Method Declarations`). The type of *this* expression
+is the appropriate class or interface type.
+
+The syntax of *this expression* is presented below:
+
 .. code-block:: abnf
 
     thisExpression:
         'this'
         ;
 
-The keyword ``this`` can be used as an expression in the body of an instance
-method of a class (see :ref:`Method Body`) or interface (see
-:ref:`Default Interface Method Declarations`). The type of *this* expression
-is the appropriate class or interface type.
-
-It can be used in a lambda expression only if it is allowed in the context
-in which the lambda expression occurs.
+The keyword ``this`` can be used in a lambda expression only if it is allowed
+in the context in which the lambda expression occurs.
 
 The keyword ``this`` in a *direct call* ``this(`` *arguments* ``)`` expression
 can only be used in the explicit constructor call statement (see
@@ -1641,7 +1818,7 @@ The parameter ``this`` in a lambda body and in the surrounding context denote
 the same value.
 
 The class of the actual object referred to at runtime can be ``T`` if ``T`` is
-a class type, or a class assignable (see :ref:`Assignability`) to ``T``.
+a class type, or a subclass of ``T`` (see :ref:`Subtyping`) .
 
 .. index::
    keyword this
@@ -1652,7 +1829,6 @@ a class type, or a class assignable (see :ref:`Assignability`) to ``T``.
    object
    lambda body
    surrounding context
-   assignability
    class
    runtime
    class type
@@ -1678,6 +1854,8 @@ in detail in :ref:`Accessing Current Object Fields` and in
    access
    field
    object reference
+
+The syntax of *field access expression* is presented below:
 
 .. code-block:: abnf
 
@@ -1736,7 +1914,7 @@ expression* of a static field in a class is as follows:
    be changed later.
 
 -  ``value`` if the field is ``readonly``, except where *field access* occurs
-   in a class initializer (see :ref:`Class Initializer`).
+   in a initializer block (see :ref:`Static Initialization`).
 
 .. index::
    access
@@ -1748,7 +1926,7 @@ expression* of a static field in a class is as follows:
    static field
    field access expression
    field access
-   class initializer
+   initializer block
    field
    readonly
    class
@@ -1790,10 +1968,10 @@ Accessing SuperClass Properties
 ===============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-The the form ``super.identifier`` is valid when accessing the superclass
-property via accessor (see :ref:`Accessor Declarations`).
+The form ``super.identifier`` is valid when accessing the superclass property
+via accessor (see :ref:`Accessor Declarations`).
 A :index:`compile-time error` occurs if identifier in 'super.identifier'
 denotes a field.
 
@@ -1831,7 +2009,8 @@ Method Call Expression
     frontend_status: Done
 
 A *method call expression* calls a static or instance method of a class or
-an interface.
+an interface. Dynamic dispatch (see :ref:`Dispatch`) is used during program
+execution to perform a call in case of an instance method.
 
 .. index::
    method call expression
@@ -1839,6 +2018,8 @@ an interface.
    instance method
    class
    interface
+
+The syntax of *method call expression* is presented below:
 
 .. code-block:: abnf
 
@@ -1886,10 +2067,10 @@ The *object reference* is used to determine the type in which to search for the
 method. Three forms of *object reference* are possible:
 
 .. table::
-   :widths: 40, 60
+   :widths: 30, 70
 
    ============================== =================================================================
-    **Form of Object Reference**   **Type to Use**
+    Form of Object Reference        Type to Use
    ============================== =================================================================
    ``typeReference``               Type denoted by ``typeReference``.
    ``expression`` of type *T*      ``T`` if ``T`` is a class, interface, or union; ``T``’s constraint (:ref:`Type Parameter Constraint`) if ``T`` is a type parameter. A :index:`compile-time error` occurs otherwise.
@@ -1919,11 +2100,14 @@ After the type to use is known, the method to call must be determined. |LANG|
 supports overloading, and more than one method can be accessible under the
 method name used in the call.
 
-All accessible methods are called *potentially applicable candidates*, and
-:ref:`Overload Resolution` is used to select the method to call. If *overload
-resolution* can definitely select a single method, then this method is called.
-Otherwise, a :index:`compile-time error` occurs as more than one applicable
-method is available (no method to call, or ambiguity).
+All accessible methods (see :ref:`Accessible`) are called
+*potentially applicable candidates*, and :ref:`Overload Resolution` is used to
+select the method to call. If *overload resolution* can definitely select a
+single method, then this method is called.
+A :index:`compile-time error` occurs in the following cases:
+
+-  If no method is available for the call, or
+-  If there is more than one applicable method, thus causing ambiguity.
 
 .. index::
    overload resolution
@@ -1972,7 +2156,7 @@ Type of Method Call Expression
 ==============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Type of a *method call expression* is the return type of the method.
 
@@ -2007,7 +2191,9 @@ Function Call Expression
 
 *Function call expression* is used to call a function (see
 :ref:`Function Declarations`), a variable of a function type
-(:ref:`Function Types`), or a lambda expression (see :ref:`Lambda Expressions`):
+(:ref:`Function Types`), or a lambda expression (see :ref:`Lambda Expressions`).
+
+The syntax of *function call expression* is presented below:
 
 .. code-block:: abnf
 
@@ -2022,7 +2208,7 @@ A :index:`compile-time error` occurs if the expression type is one of the
 following:
 
 -  Different than the function type;
--  Nullish type but without '``?.``' (see :ref:`Chaining Operator`).
+-  Nullish type without '``?.``' (see :ref:`Chaining Operator`).
 
 .. index::
    function call expression
@@ -2061,13 +2247,20 @@ and require different semantic checks:
   refers to an accessible function (:ref:`Function Declarations`), or to a set
   of accessible overloaded functions.
 
-  In this case, all accessible functions are *potentially applicable candidates*.
-  :ref:`Overload Resolution` is used to select the function to call.
-  If *overload resolution* can definitely select a single function, then this
-  function is called.
-  Otherwise (i.e., if there is no function to call, or if there is ambiguity
-  caused where more than one applicable function is available), a
-  :index:`compile-time error` occurs.
+  In this case, all accessible functions (see :ref:`Accessible`) are
+  *potentially applicable candidates*. :ref:`Overload Resolution` is used to
+  select the function to call. If *overload resolution* can definitely select a
+  single function, then this function is called.
+
+A :index:`compile-time error` occurs in the following cases:
+
+-  If no function is available to call;
+-  If there is more than one applicable function, thus causing ambiguity; or
+-  All other forms of expression.
+
+  In this case, *overload resolution* is not required as the expression
+  determines the entity to call unambiguously. Semantic check is performed
+  in accordance with :ref:`Compatibility of Call Arguments`.
 
 .. index::
    call
@@ -2075,16 +2268,6 @@ and require different semantic checks:
    qualified name
    accessible function
    overloaded function
-   overload resolution
-
-
-- All other forms of expression.
-
-  In this case, *overload resolution* is not required as the expression
-  determines the entity to call unambiguously. Semantic check is performed
-  in accordance with :ref:`Compatibility of Call Arguments`.
-
-.. index::
    overload resolution
    expression
    semantic check
@@ -2140,9 +2323,12 @@ Indexing Expressions
     frontend_status: Done
 
 *Indexing expressions* are used to access elements of arrays (see
-:ref:`Array Types`) and ``Record`` instances (see :ref:`Record Utility Type`).
+:ref:`Array Types`), strings (see :ref:`Type string`) and
+``Record`` instances (see :ref:`Record Utility Type`).
 Indexing expressions can also be applied to instances of indexable types (see
-:ref:`Indexable Types`):
+:ref:`Indexable Types`).
+
+The syntax of *indexing expression* is presented below:
 
 .. code-block:: abnf
 
@@ -2222,7 +2408,7 @@ and the fractional part differs from 0, then errors occur as follows:
    runtime error
    compilation
 
-A numeric types conversion (see :ref:`Primitive Types Conversions`) is
+A numeric types conversion (see :ref:`Widening Numeric Conversions`) is
 performed on an *index expression* to ensure that the resultant type is ``int``.
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -2254,9 +2440,9 @@ array elements can be modified by changing the resultant variable fields:
    :linenos:
 
     let names: string[] = ["Alice", "Bob", "Carol"]
-    console.log(name[1]) // prints Bob
-    string[1] = "Martin"
-    console.log(name[1]) // prints Martin
+    console.log(names[1]) // prints Bob
+    names[1] = "Martin"
+    console.log(names[1]) // prints Martin
 
     class RefType {
         field: number = 42
@@ -2308,6 +2494,47 @@ An array indexing expression evaluated at runtime behaves as follows:
 
 |
 
+.. _String Indexing Expression:
+
+_String Indexing Expression
+===========================
+
+.. meta:
+    frontend_status: Partly
+    todo: return type is string
+
+*Index expression* for array indexing must be of a numeric type (see
+:ref:`Numeric Types`), the rules are the same as for
+:ref:`Array Indexing Expression`.
+
+If the index expression value of an array is less than zero, greater than
+or equal to that string’s *length*, then the ``ArrayIndexOutOfBoundsError``
+is thrown.
+
+.. index::
+   string indexing
+   value
+   type
+
+.. code-block:: typescript
+   :linenos:
+
+    console.log("abc"[1]]) // prints: b
+    console.log("abc"[3]]) // run-time exception
+	
+The result of an string indexing expression is a value of ``string`` type.
+
+**Note.** String value is immutable, it is not allowed to change a value of
+string element by indexing.
+	
+.. code-block:: typescript
+   :linenos:
+
+	let x = "abc"
+	x[1] = "d" // compile-time error, string value is immutable
+	
+|	
+
 .. _Record Indexing Expression:
 
 Record Indexing Expression
@@ -2316,8 +2543,9 @@ Record Indexing Expression
 .. meta:
     frontend_status: Done
 
-*Index expression* for a ``Record<Key, Value>`` indexing (see
-:ref:`Record Utility Type`) must be of type ``Key``.
+*Indexing expression* for a type ``Record<Key, Value>`` (see
+:ref:`Record Utility Type`) allows getting or setting a value of type ``Value``
+at an index specified by the expression of type ``Key``.
 
 The following two cases are to be considered separately:
 
@@ -2424,6 +2652,26 @@ An indexing expression evaluated at runtime behaves as follows:
 -  If the ``record`` instance contains a key defined by the index expression,
    then the result is the value mapped to the key.
 -  Otherwise, the result is the literal ``undefined``.
+
+Syntactically, the *record indexing expression* can be written by using a field
+access notation (see :ref:`Field Access Expression`) if its *index expression*
+is formed as an *identifier* of type *string*.
+
+.. code-block:: typescript
+   :linenos:
+
+    type Keys = 'key1' | 'key2' | 'key3'
+
+    let x: Record<Keys, number> = {
+        'key1': 1,
+        'key2': 2,
+        'key3': 4,
+    }
+    console.log(x.key2) // the same as console.log(x['key2'])
+    x.key2 = 8          // the same as x['key2'] = 8
+    console.log(x.key2) // the same as console.log(x['key2'])
+
+
 
 .. index::
    type
@@ -2544,7 +2792,7 @@ A *new class instance expression* creates a new object that is an instance
 of the specified class and it is described in full details below.
 
 The creation of array instances is an experimental feature discussed in
-:ref:`Array Creation Expressions`.
+:ref:`Resizable Array Creation Expressions`.
 
 .. index::
    syntactical form
@@ -2555,6 +2803,8 @@ The creation of array instances is an experimental feature discussed in
    class instance creation expression
    array instance
    array creation expression
+
+The syntax of *new class instance expression* is presented below:
 
 .. code-block:: abnf
 
@@ -2599,8 +2849,8 @@ discussed in :ref:`Constructor Body`.
 
 A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 
-**Note**. If the *class instance creation expression* with no arguments is used
-as the object reference in the method call expression, then empty parentheses
+**Note**. If a *class instance creation expression* with no argument is used
+as object reference in a method call expression, then empty parentheses
 '*()*' are to be used.
 
 .. code-block:: typescript
@@ -2625,16 +2875,84 @@ as the object reference in the method call expression, then empty parentheses
 
 |
 
-.. _Cast Expressions:
+.. _InstanceOf Expression:
 
-``Cast`` Expressions
-********************
+``InstanceOf`` Expression
+*************************
 
 .. meta:
     frontend_status: Done
 
-*Cast expression* applies *cast operator* ``as`` to an *expression* by issuing
-a value of a specified type.
+The syntax of *instanceof expression* is presented below:
+
+.. code-block:: abnf
+
+    instanceOfExpression:
+        expression 'instanceof' type
+        ;
+
+Any ``instanceof`` expression in the form ``expr instanceof T`` is of type ``boolean``.
+
+.. index::
+   instanceof expression
+   operand
+   operator
+   instanceof operator
+
+The result of an ``instanceof`` expression is ``true`` if the *actual type* of
+evaluated ``expr`` is a subtype of ``T`` (see :ref:`Subtyping`). Otherwise,
+the result is ``false``.
+
+A :index:`compile-time error` occurs if type ``T`` is not preserved by
+:ref:`Type Erasure`.
+
+*Generic type* (see :ref:`Generics`) in the form of *type name* (see :ref:`Type References`)
+can be used as ``T`` operand of an ``instanceof`` expression. In this case,
+the check is performed against the *type name*, and *type parameters* are
+ignored. *Instantiated generic types* (see :ref:`Explicit Generic Instantiations`)
+cannot be used because the ``T`` operand of an ``instanceof`` must be preserved
+by :ref:`Type Erasure`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C<T> {
+        foo() {
+            console.log(this instanceof C)    // true
+            console.log(this instanceof C<T>) // compile-time error
+        }
+    }
+
+    let c = new C<number>
+    c.foo()
+
+The ``type`` of an ``instanceof`` expression is used for *smart typing*
+(see :ref:`Smart Types`) if applicable.
+
+.. index::
+   instanceof expression
+   subtype
+   type erasure
+   smart typing
+   instantiated generic type
+   generic type
+   type name
+   type parameter
+   generic instantiation
+
+|
+
+.. _Cast Expression:
+
+``Cast`` Expression
+*******************
+
+.. meta:
+    frontend_status: Done
+
+*Cast expression* in the form ``expr instanceof target`` applies *cast operator*
+``as`` to an expression by issuing a value of a specified ``target`` type. The
+syntax of *cast expression* is as follows:
 
 .. code-block:: abnf
 
@@ -2651,12 +2969,22 @@ a value of a specified type.
     let ob : Object = x1 as Object
     let x2 : X = ob as X
 
-The cast operator converts the value *V* of one type (as denoted by the
-expression) at runtime to a value of another type.
+.. index::
+   cast expression
+   operand
+   instanceof
+   cast operator
 
-The cast expression introduces the target type for the casting context (see
-:ref:`Casting Contexts and Conversions`). The target type can be either
-``type`` or ``typeReference``.
+The following cases are considered for an *expr as T* in a sequence as follows:
+
+- If ``expr`` is a constant expression (see :ref:`Constant Expressions`),
+  :ref:`Array literal`, or :ref:`Object Literal`, then an attempt is made to
+  apply :ref:`Type Inference in Cast Expression`;
+
+- If the ``target`` type is an enumeration type (see :ref:`Enumerations`),
+  then an attempt is made to apply :ref:`Casting to Enumeration`;
+
+- Otherwise, :ref:`Runtime Checking in Cast Expression` is applied.
 
 .. index::
    cast operator
@@ -2668,17 +2996,28 @@ The cast expression introduces the target type for the casting context (see
    casting context
    type
 
-Cast expression type is always the target type.
+Cast expression type is always the ``target`` type.
+
+A :index:`compile-time error` occurs if the ``target`` type is type ``never``
+as it can cause a type-safety violation as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    1 as never // compile-time error
+
+.. index::
+   type never
+   type-safety violation
+   target type
+   cast expression
 
 The result of a cast expression is a value, not a variable (even if the operand
 expression is a variable).
 
 A :index:`compile-time error` occurs if the cast operator cannot convert the
-compile-time type of the operand to the target type specified by the cast
+compile-time type of the operand to the ``target`` type specified by the cast
 operator.
-
-If the casting conversion cannot be performed during program execution, then
-``ClassCastError`` is thrown.
 
 .. index::
    cast expression
@@ -2693,69 +3032,178 @@ If the casting conversion cannot be performed during program execution, then
 
 |
 
-.. _InstanceOf Expression:
+.. _Type Inference in Cast Expression:
 
-``InstanceOf`` Expression
-*************************
+Type Inference in Cast Expression
+=================================
 
-.. meta:
-    frontend_status: Done
+The following combinations of ``expr`` and ``target`` are considered for the
+``expr as target`` expression:
 
-.. code-block:: abnf
+-  ``expr`` is a constant expression (see :ref:`Constant Expressions`) of a
+   numeric type, and ``target`` is a numeric type. A :index:`compile-time error`
+   occurs if the value of ``expr`` does not belong to the ``target``;
 
-    instanceOfExpression:
-        expression 'instanceof' type
-        ;
+-  ``expr`` is a constant expression (see :ref:`Constant Expressions`), and
+   ``target`` is an enumeration type. A :index:`compile-time error` occurs
+   if the value of ``expr`` does not equal a value of an enumeration type
+   constant;
 
-Any ``instanceof`` expression is of type ``boolean``.
+-  ``expr`` is an :ref:`Array Literal`, and ``target`` is an *array type* or
+   a *tuple type* (see :ref:`Array Literal Type Inference from Context` for
+   detail);
 
-The expression operand of the operator ``instanceof`` must be of a reference
-type. Otherwise, a :index:`compile-time error` occurs.
+-  ``expr`` is an :ref:`Object Literal`, and ``target`` is *class type*,
+   *interface type*, or :ref:`Record Utility Type` (see the subsections of
+   :ref:`Object Literal` for detail).
 
-A :index:`compile-time error` occurs if ``type`` operand of the operator
-``instanceof`` is one of the following:
+This kind of a *cast expression* results in inferring the target type for
+``expr``, and never causes a runtime error by itself. However, the evaluation
+of array literal elements or object literal properties can cause a runtime error.
 
-   - Type parameter (see :ref:`Type Parameters`),
-   - Primitive type (see :ref:`Primitive Types`),
-   - Union type that contains type parameter after normalization
-     (see :ref:`Union Types Normalization`),
-   - *Generic type* (see :ref:`Generics`)---this temporary limitation
-     is expected to be removed in the future (see
-     :ref:`Generic and Function Types Peculiarities`).
+Casting for constant expressions of *numeric types* is represented in the
+example below:
 
-.. index::
-   instanceof expression
-   operand
-   operator
-   instanceof operator
-   reference type
-   type parameter
-   primitive type
-   union type
-   normalization
-   generic type
+.. code-block:: typescript
+   :linenos:
 
-If type of ``expression`` at compile time is assignable to ``type`` (see
-:ref:`Assignability`), then the result of an ``instanceof`` expression
-is ``true``.
+   let x = 1 as byte // ok
+   let y = 128 as byte // compile-time error
 
-Otherwise, an ``instanceof`` expression checks during program execution
-whether type of the value the ``expression`` successfully evaluates to is
-assignable to ``type`` (see :ref:`Assignability`).
-If so, then the result of an ``instanceof`` expression is ``true``.
-Otherwise, the result is ``false``.
+Casting for constant expressions to enumeration types is represented in the
+example below:
 
-If the expression evaluation causes an error, then the execution control is
-transferred to a proper ``catch`` section or runtime system, and the result of
-an ``instanceof`` expression cannot be determined.
+.. code-block:: typescript
+   :linenos:
 
-.. index::
-   instanceof expression
-   assignability
-   execution
-   evaluation
-   assignable type
-   catch section
+   enum NumE {A, B}
+   enums StrE {S1 = "aaa", S2 = "bbb"}
+
+   let x = 1 as NumE // ok, it is E.B
+   let y = 2 as NumE // compile-time error
+
+   let u = "aaa" as StrE // ok, it is StrE.S1
+   let v = "abc" as StrE // compile-time error
+
+Casting for array literals of *numeric types* is represented in the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+   let a = [1, 2] as double[] // ok, [1.0, 2.0]
+   let b = [1, 2] as double // compile-time error, wrong target type
+   let c = [1, "cc"] as double[] // compile-time error, wrong element type
+   let d = [1, "cc"] as [double, string] // ok
+   let e = [1.0, "cc"] as [int, string] // compile-time error, wrong element type
+
+**Note.** *Assignability* check is applied to the elements of an array literal.
+
+Examples with object literals are provided in :ref:`Object literal`.
+
+|
+
+.. _Casting to Enumeration:
+
+Casting to Enumeration
+======================
+
+There are two cases where an ``expr as target`` expression is used to convert
+an expression value to the ``target`` enumeration type:
+
+-  If the *enumeration base type* is an integer type, and the
+   expression is of integer type; or
+
+-  If the *enumeration base type* is type ``string``, and the
+   expression is of string type.
+
+In both cases, the check is performed at runtime:
+
+-  If the value of ``expr`` is the value of some constant of the enumeration
+   type, then the value is converted to the enumeration type;
+
+-  Otheriwise, a runtime error occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum NumE {A, B}
+
+    function foo(x: int): NumE {
+        return x as NumE
+    }
+
+    foo(1) // ok
+    foo(2) // runtime error occurs in 'foo'
+
+|
+
+.. _Runtime Checking in Cast Expression:
+
+Runtime Checking in Cast Expression
+===================================
+
+If none of the previous kinds of *cast expression* can be applied, then
+``expr as target`` checks that the type of ``expr`` is a subtype of
+``target`` (see :ref:`Subtyping`).
+
+The result of an ``as`` expression is the result of the evaluated ``expr``
+if the *actual type* of ``expr`` is a subtype of ``target`` (see :ref:`Subtyping`).
+Otherwise, ``ClassCastError`` is thrown.
+
+If ``target`` type is not preserved by :ref:`Type Erasure`, the check is
+performed against an *effective type* of the ``target`` type. As,
+in the described case an *effective type* is less specific than ``target``,
+usage of the resulting value may lead to type violations and
+``ClassCastError`` thrown as a consequence. See :ref:`Type Erasure` for more details.
+
+Semantically, a *cast expression* of this kind is coupled tightly with
+:ref:`Instanceof Expression`:
+
+-  If the result of ``x instanceof T`` is ``true``, then ``x as T`` never
+   causes a runtime error;
+
+-  If ``x instanceof T`` causes a :index:`compile-time error`, then
+   :ref:`Type Erasure` affects the semantics of ``x as T``.
+
+-  If otherwise the result of ``x instanceof T`` is ``false``, then ``x as T``
+   causes ``ClassCastError`` thrown at runtime.
+
+This situation is represented in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (x: Object) {
+        console.log(x as string)
+    }
+
+    foo("aa") // OK
+    foo(1)    // runtime error is thrown in foo
+
+:ref:`Instanceof Expression` can be used to prevent runtime errors. Moreover,
+in many cases :ref:`Instanceof Expression` makes *cast conversion* unnecessary
+as *smart casting* is applied (see :ref:`Smart Types`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class Person {
+        name: string
+        constructor (name: string) { this.name = name }
+    }
+
+    function printName(x: Object) {
+        if (x instanceof Person) {
+            // no need to cast, type of 'x' is 'Person' here
+            console.log(x.name)
+        } else {
+            console.log("no name")
+        }
+    }
+
+    printName(new Person("Bob")) // output: Bob
+    printName(1)                 // output: no name
 
 |
 
@@ -2767,18 +3215,25 @@ an ``instanceof`` expression cannot be determined.
 .. meta:
     frontend_status: Done
 
+The syntax of *typeof expression* is presented below:
+
 .. code-block:: abnf
 
     typeOfExpression:
         'typeof' expression
         ;
 
-Any ``typeof`` expression is of type ``string``. Its evaluation starts with the
-``expression`` evaluation. If this evaluation causes an error, then the result
-of a ``typeof`` expression cannot be determined. Otherwise, the value of a
-``typeof`` expression is defined as follows:
+Any ``typeof`` expression is of type ``string``.
 
-1. Types defined at compile time
+If *typeof expression* refers to a name of the overloaded function or method,
+then a :index:`compile-time error` occurs.
+
+The evaluation of a *typeof expression* starts with the ``expression``
+evaluation. If this evaluation causes an error, then the ``typeof`` expression
+evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
+is defined as follows:
+
+1. **Expression type defined at compile time**
 
 .. index::
    typeof expression
@@ -2787,7 +3242,7 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
    compile time
 
 +---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
+|       Type of Expression        |     Resulting String    |   Code Example              |
 +=================================+=========================+=============================+
 | ``number``                      | "number"                | .. code-block:: typescript  |
 |                                 |                         |                             |
@@ -2799,12 +3254,6 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
 |                                 |                         |  let s: string = ...        |
 |                                 |                         |  typeof s                   |
 +---------------------------------+-------------------------+-----------------------------+
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | ``boolean``                     | "boolean"               | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let b: boolean = ...       |
@@ -2854,10 +3303,10 @@ of a ``typeof`` expression cannot be determined. Otherwise, the value of a
 
 |
 
-2. All other types evaluated at runtime
+2. **Expression type defined at runtime**
 
 +------------------------+-----------------------------+
-| **Type of Expression** | **Code Example**            |
+|   Type of Expression   |   Code Example              |
 +========================+=============================+
 | Object                 | .. code-block:: typescript  |
 |                        |                             |
@@ -2899,16 +3348,18 @@ Ensure-Not-Nullish Expression
 .. meta:
     frontend_status: Done
 
+*Ensure-not-nullish expression* is a postfix expression with the operator
+'``!``'. An *ensure-not-nullish expression* in the expression *e!* checks
+whether *e* of a nullish type (see :ref:`Nullish Types`) evaluates to a
+nullish value.
+
+The syntax of *ensure-not-nullish expression* is presented below:
+
 .. code-block:: abnf
 
     ensureNotNullishExpression:
         expression '!'
         ;
-
-An *ensure-not-nullish expression* is a postfix expression with the operator
-'``!``'. An *ensure-not-nullish expression* in the expression *e!* checks
-whether *e* of a nullish type (see :ref:`Nullish Types`) evaluates to a
-nullish value.
 
 If the expression *e* is not of a nullish type, then the operator '``!``'
 has no effect.
@@ -2945,15 +3396,19 @@ Nullish-Coalescing Expression
 .. meta:
     frontend_status: Done
 
+*Nullish-coalescing expression* is a binary expression that uses the operator
+'``??``'.
+
+The syntax of *nullish-coalescing expression* is presented below:
+
 .. code-block:: abnf
 
     nullishCoalescingExpression:
         expression '??' expression
         ;
 
-*Nullish-coalescing expression* is a binary expression that uses the operator
-'``??``', and checks whether the evaluation of the left-hand-side expression
-equals the *nullish* value:
+A *nullish-coalescing expression* checks whether the evaluation of the
+left-hand-side expression equals the *nullish* value:
 
 -  If so, then the right-hand-side expression evaluation is the result
    of a nullish-coalescing expression.
@@ -3014,6 +3469,8 @@ Unary Expressions
 .. meta:
     frontend_status: Done
 
+The syntax of *unary expression* is presented below:
+
 .. code-block:: abnf
 
     unaryExpression:
@@ -3067,7 +3524,7 @@ If the evaluation of the operand *expression* completes normally at runtime,
 then:
 
 -  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Primitive Types Conversions`); and
+   conversions (see :ref:`Numeric Casting Conversions`); and
 -  The sum is stored back into the variable.
 
 .. index::
@@ -3113,14 +3570,12 @@ Postfix Decrement
    todo: let a : Double = Double.Nan; a++; a--; ++a; --a; (assertion)
 
 *Postfix decrement expression* is an expression followed by the decrement
-operator '``--``'.
+operator '``--``'. The expression must be *left-hand-side expression* (see
+:ref:`Left-Hand-Side Expressions`).
 
-The *expression* must be *left-hand-side expression* (see
-:ref:`Left-Hand-Side Expressions`). The *expression* denotes a variable.
-
-A :index:`compile-time error` occurs if type of
-the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type (see :ref:`Numeric Types`).
+A :index:`compile-time error` occurs if type of the expression is not
+convertible (see :ref:`Implicit Conversions`) to a numeric type (see
+:ref:`Numeric Types`).
 
 Type of a postfix decrement expression is the type of the variable. The
 result of a postfix decrement expression is a value, not a variable.
@@ -3140,7 +3595,7 @@ If evaluation of the operand expression completes at runtime, then:
    evaluation
 
 -  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Primitive Types Conversions`); and
+   necessary conversions (see :ref:`Numeric Casting Conversions`); and
 -  The sum is stored back into the variable.
 
 Otherwise, the *postfix decrement expression* completes abruptly, and
@@ -3174,13 +3629,11 @@ Prefix Increment
     frontend_status: Done
 
 *Prefix increment expression* is an expression preceded by the operator
-'``++``'.
-
-The *expression* must be *left-hand-side expression* (see
-:ref:`Left-Hand-Side Expressions`). The *expression* denotes a variable.
+'``++``'. The expression must be *left-hand-side expression* (see
+:ref:`Left-Hand-Side Expressions`).
 
 A :index:`compile-time error` occurs if the type of
-the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
+the expression is not convertible (see :ref:`Implicit Conversions`) to a
 numeric type (see :ref:`Numeric Types`).
 
 Type of a prefix increment expression is the type of the variable. The
@@ -3200,7 +3653,7 @@ If evaluation of the operand *expression* completes normally at runtime, then:
    convertibility
 
 -  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Primitive Types Conversions`); and
+   conversions (see :ref:`Numeric Casting Conversions`); and
 -  The sum is stored back into the variable.
 
 Otherwise, the *prefix increment expression* completes abruptly, and no
@@ -3230,14 +3683,12 @@ Prefix Decrement
     frontend_status: Done
 
 *Prefix decrement expression* is an expression preceded by the operator
-'``--``'.
+'``--``'. The expression must be *left-hand-side expression* (see
+:ref:`Left-Hand-Side Expressions`).
 
-The *expression* must be *left-hand-side expression* (see
-:ref:`Left-Hand-Side Expressions`). The *expression* denotes a variable.
-
-A :index:`compile-time error` occurs if type of
-the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
-numeric type (see :ref:`Numeric Types`).
+A :index:`compile-time error` occurs if type of the expression is not
+convertible (see :ref:`Implicit Conversions`) to a numeric type (see
+:ref:`Numeric Types`).
 
 Type of a prefix decrement expression is the type of the variable. The
 result of a prefix decrement expression is a value, not a variable.
@@ -3255,7 +3706,7 @@ result of a prefix decrement expression is a value, not a variable.
 If evaluation of the operand *expression* completes normally at runtime, then:
 
 -  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Primitive Types Conversions`); and
+   necessary conversions (see :ref:`Numeric Casting Conversions`); and
 -  The sum is stored back into the variable.
 
 Otherwise, the *prefix decrement expression* completes abruptly, and no
@@ -3286,12 +3737,11 @@ Unary Plus
     frontend_status: Done
 
 *Unary plus expression* is an expression preceded by the operator '``+``'.
-
-Type of the operand *expression* with the unary operator '``+``' must
+Type of the operand expression with the unary operator '``+``' must
 be convertible  (see :ref:`Implicit Conversions`) to a numeric type (see
 :ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`) is
+The numeric types conversion is
 performed on the operand to ensure that the resultant type is that of the
 unary plus expression. The result of a unary plus expression is always a value,
 not a variable (even if the result of the operand expression is a variable).
@@ -3323,19 +3773,15 @@ Unary Minus
     todo: let a : Double = Double.Nan; a = -a; (assertion)
 
 *Unary minus expression* is an expression preceded by the operator '``-``'.
-
-Type of the operand *expression* with the unary operator '``-``' must
-be convertible (see :ref:`Implicit Conversions`) to a numeric type (see
+Type of the operand expression with the unary operator '``-``' must
+be convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
 :ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
+The numeric types conversion
 is performed on the operand to ensure that the resultant type is that of the
 unary minus expression.
 The result of a unary minus expression is a value, not a variable (even if the
 result of the operand expression is a variable).
-
-A unary numeric promotion performs the value set conversion (see
-:ref:`Implicit Conversions`).
 
 The unary negation operation is always performed on, and the result is drawn
 from the same value set as the promoted operand value.
@@ -3413,42 +3859,35 @@ Bitwise Complement
 .. meta:
     frontend_status: Done
 
-*Bitwise complement expression* is an expression preceded by the operator '``~``'.
+*Bitwise complement* operator '``~``' is applied to an operand
+of a numeric type or type ``bigint``.
 
-Type of the operand *expression* with the unary operator '``~``' must be
-convertible (see :ref:`Implicit Conversions`) to a primitive integer type.
-Otherwise, a :index:`compile-time error` occurs.
+If the type of the operand is ``double`` or ``float``, then it is truncated
+first to the appropriate integer type.
+If the type of the operand is ``byte`` or ``short``, then the operand is
+converted to ``int``.
+If the type of the operand is ``bigint``, then no conversion is required.
 
-Thus the type of the *Bitwise complement expression* is a primitive integer.
-
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
-is performed on the operand to ensure that the resultant type is that of the
-unary bitwise complement expression.
+The resultant type of this operator is the type of its operand.
 
 The result of a unary bitwise complement expression is a value, not a variable
 (even if the result of the operand expression is a variable).
 
 The value of a unary bitwise complement expression at runtime is the bitwise
-complement of the promoted value of the operand. In all cases, *~x* equals
+complement of the value of the operand. In all cases, *~x* equals
 *(-x)-1*.
 
 .. index::
    bitwise complement expression
    numeric type
-   numeric types conversion
    operator
    complement operator
-   expression
    operand
    unary operator
-   conversion
-   convertibility
-   primitive type
    integer type
    unary bitwise complement expression
    variable
    runtime
-   promoted value
 
 |
 
@@ -3461,14 +3900,11 @@ Logical Complement
     frontend_status: Done
 
 *Logical complement expression* is an expression preceded by the operator
-'``!``'.
+'``!``'. Type of the operand expression with the unary '``!``' operator must be
+``boolean`` or type mentioned in :ref:`Extended Conditional Expressions`.
+Otherwise, a :index:`compile-time error` occurs.
 
-Type of the operand *expression* with the unary '``!``' operator must be
-``boolean`` or type mentioned in
-:ref:`Extended Conditional Expressions`. Otherwise, a
-:index:`compile-time error` occurs.
-
-The unary logical complement expression’s type is ``boolean``.
+The unary logical complement expression type is ``boolean``.
 
 The value of a unary logical complement expression is ``true`` if the (possibly
 converted) operand value is ``false``, and ``false`` if the operand value
@@ -3497,7 +3933,9 @@ Multiplicative Expressions
     frontend_status: Done
 
 Multiplicative expressions use *multiplicative operators* '``*``', '``/``',
-and '``%``':
+and '``%``'.
+
+The syntax of *multiplicative expression* is presented below:
 
 .. code-block:: abnf
 
@@ -3505,15 +3943,16 @@ and '``%``':
         expression '*' expression
         | expression '/' expression
         | expression '%' expression
+        | expression '**' expression
         ;
 
 Multiplicative operators group left-to-right.
 
 Type of each operand in a multiplicative operator must be convertible (see
-:ref:`Contexts and Conversions`) to a numeric type (see :ref:`Numeric Types`).
+:ref:`Numeric Operator Contexts`) to a numeric type (see :ref:`Numeric Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
+The numeric types conversion (see :ref:`Widening Numeric Conversions`)
 is performed on both operands to ensure that the resultant type is the type of
 the multiplicative expression.
 
@@ -3651,12 +4090,12 @@ Division
    todo: Division of a nonzero finite value by a zero results should be signed infinity, but "Floating point exception(core dumped)" occurs
 
 The binary operator '``/``' performs division and returns the quotient of its
-left-hand-side and right-hand-side operands (``dividend`` and ``divisor``
+left-hand-side and right-hand-side expressions (``dividend`` and ``divisor``
 respectively).
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
-:ref:`Primitive Types Conversions` for details), is
+:ref:`Widening Numeric Conversions` for details), is
 the integer value *q* with the largest possible magnitude that
 satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
@@ -3748,7 +4187,8 @@ The evaluation of a floating-point division operator '``/``' never throws an
 error despite possible overflow, underflow, division by zero, or loss of
 information.
 
-The type of the *division expression* is an integer or a floating-point number.
+The type of the *division expression* is the '*heaviest*' numeric type (see
+:ref:`Numeric Types`) of its operands.
 
 
 .. index::
@@ -3765,6 +4205,7 @@ The type of the *division expression* is an integer or a floating-point number.
    division
    division operator
    IEEE 754
+
 
 |
 
@@ -3787,7 +4228,7 @@ C and C++).
 
 The remainder operation on integer operands produces a result value, i.e.,
 :math:`(a/b)*b+(a\%b)` equals *a*. The numeric type conversion on remainder
-operation is discussed in :ref:`Primitive Types Conversions`.
+operation is discussed in :ref:`Widening Numeric Conversions`.
 
 .. index::
    binary operator
@@ -3886,7 +4327,8 @@ The evaluation of the floating-point remainder operator '``%``' never throws
 an error, even if the right-hand operand is zero. Overflow, underflow, or
 loss of precision cannot occur.
 
-The type of the *remainder expression* is an integer or floating-point number.
+The type of the *remainder expression* is the '*heaviest*' numeric type (see
+:ref:`Numeric Types`) of its operands.
 
 
 .. index::
@@ -3906,6 +4348,29 @@ The type of the *remainder expression* is an integer or floating-point number.
 
 |
 
+.. _Exponentiation:
+
+Exponentiation
+==============
+
+.. meta:
+    frontend_status: None
+
+The binary operator '``**``' yields the result of raising the first operand
+(base) to the power of the second operand (exponent). The operation returns
+NaN in the following cases:
+
+- Exponent is NaN;
+- Base is NaN, and exponent is not 0;
+- Base is ±1, and exponent is ±Infinity; or
+- Base is less than 0, and exponent is not an integer.
+
+The binary operator '``**``' is equivalent to Math.pow(), except it also
+accepts BigInts as operands.
+
+
+|
+
 .. _Additive Expressions:
 
 Additive Expressions
@@ -3914,7 +4379,10 @@ Additive Expressions
 .. meta:
     frontend_status: Done
 
-Additive expressions use *additive operators* '``+``' and '``-``':
+Additive expressions use *additive operators* '``+``' and '``-``'.
+
+The syntax of *additive expression* is presented below:
+
 
 .. code-block:: abnf
 
@@ -3928,11 +4396,11 @@ Additive operators group left-to-right.
 If either operand of the operator is '``+``' of type ``string``, then the
 operation is a string concatenation (see :ref:`String Concatenation`). In all
 other cases, type of each operand of the operator '``+``' must be
-convertible (see :ref:`Primitive Types Conversions`) to a numeric type (see
+convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
 :ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
 
 Type of each operand of the binary operator '``-``' must be convertible
-(see :ref:`Primitive Types Conversions`) to a numeric type (see
+(see :ref:`Widening Numeric Conversions`) to a numeric type (see
 :ref:`Numeric Types`) in all cases. Otherwise, a :index:`compile-time error`
 occurs.
 
@@ -3995,7 +4463,7 @@ Additive Operators for Numeric Types
    frontend_status: Done
    todo: The sum of two infinities of opposite sign should be NaN, but it is -NaN
 
-The primitive types conversion (see :ref:`Primitive Types Conversions`)
+The numeric types conversion (see :ref:`Widening Numeric Conversions`)
 performed on a pair of operands ensures that both operands are of a numeric
 type. If the conversion fails, then a :index:`compile-time error` occurs.
 
@@ -4016,8 +4484,6 @@ is performed.
 
 .. index::
    additive operator
-   primitive type
-   primitive types conversion
    conversion
    numeric type
    numeric operand
@@ -4153,7 +4619,9 @@ Shift Expressions
 *Shift expressions* use *shift operators* '``<<``' (left shift), '``>>``'
 (signed right shift), and '``>>>``' (unsigned right shift). The value to be
 shifted is the left-hand-side operand in a shift operator, and the
-right-hand-side operand specifies the shift distance:
+right-hand-side operand specifies the shift distance.
+
+The syntax of *shift expression* is presented below:
 
 .. code-block:: abnf
 
@@ -4165,20 +4633,19 @@ right-hand-side operand specifies the shift distance:
 
 Shift operators group left-to-right.
 
-Numeric types conversion (see :ref:`Primitive Types Conversions`) is performed
-separately on each operand to ensure that both operands are of primitive
-integer type.
+Both operands of a *shift expression* must be of numeric types
+or type ``bigint``.
 
-Thus, *shift expression* is of primitive integer type.
+If the type of one or both operands is ``double`` or ``float``, then the
+operand or operands are truncated first to the appropriate integer type.
+If the type of the left-hand-side operand is ``byte`` or ``short``, then the
+operand is converted to ``int``.
+If both operands are of type ``bigint``, then no conversion is required.
+A :index:`compile-time error` occurs if one operand is type ``bigint``, and the
+other one is a numeric type.
 
-**Note**. If the initial type of one or both operands is ``double`` or
-``float``, then such operand or operands are  first truncated to the appropriate
-integer type. If both operands are of type ``bigint``, then shift operator
-is applied to bigint operands.
-
-A :index:`compile-time error` occurs if either operand in a shift operator
-(after unary numeric promotion) is not a primitive ``integer`` or ``bigint``
-type.
+The result of a *shift expression* is of the type to which its first operand
+converted.
 
 .. index::
    shift
@@ -4190,16 +4657,9 @@ type.
    operand
    shift distance
    numeric type
-   predefined numeric types conversion
-   numeric types conversion
-   unary numeric promotion
    truncation
-   truncated operand
-   primitive type
    integer type
    bigint
-
-The shift expression type is the promoted type of the left-hand-side operand.
 
 If the left-hand-side operand is of the promoted type ``int``, then only five
 lowest-order bits of the right-hand-side operand specify the shift distance
@@ -4249,9 +4709,11 @@ zero-extension, where:
 
 -  If *n* is positive, then the result is the same as that of *n* ``>>`` *s*.
 -  If *n* is negative, and type of the left-hand-side operand is ``int``,
-   then the result is equal to that of the expression (*n* ``>>`` *s*) ``+`` (*2* ``<<`` *s*).
+   then the result is equal to that of the expression
+   (*n* ``>>`` *s*) ``+ (2 << ~`` *s*).
 -  If *n* is negative, and type of the left-hand-side operand is ``long``,
-   then the result is equal to that of the expression (*n* ``>>`` *s*) ``+`` (*2L* ``<<`` *s*).
+   then the result is equal to that of the expression
+   (*n* ``>>`` *s*) ``+ ((2 as long) << ~`` *s*).
 
 .. index::
    value
@@ -4279,6 +4741,8 @@ Relational Expressions
 Relational expressions use *relational operators* '``<``', '``>``', '``<=``',
 and '``>=``'.
 
+The syntax of *relational expression* is presented below:
+
 .. code-block:: abnf
 
     relationalExpression:
@@ -4292,7 +4756,7 @@ Relational operators group left-to-right.
 
 A relational expression is always of type ``boolean``.
 
-Two kinds of relational expressions are described below. The kind of a
+The four kinds of relational expressions are described below. The kind of a
 relational expression depends on types of operands. It is a
 :index:`compile-time error` if at least one type of operands is different from
 types described below.
@@ -4317,17 +4781,23 @@ Numerical Relational Operators
     frontend_status: Done
 
 Type of each operand in a numerical relational operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
+to a numeric type (see :ref:`Numeric Types`) or to ``bigint`` type.
 Otherwise, a :index:`compile-time error` occurs.
 
-Numeric types conversions (see :ref:`Primitive Types Conversions`) are
-performed on each operand as follows:
+Numeric types conversions (see :ref:`Widening Numeric Conversions`) are
+performed on each operand. If at least one operand is of ``bigint`` type, then
+the other operand is converted to ``bigint`` by using a ``BigInt()`` function.
 
--  Signed integer comparison if the converted type of the operand is
-   ``int`` or ``long``.
+Depending on the heaviest type of operands, a comparison is performed as follows:
 
--  Floating-point comparison if the converted type of the operand is
-   ``float`` or ``double``.
+-  Signed integer comparison, if the converted type of the operand is ``int``
+   or ``long``.
+
+-  Floating-point comparison, if the converted type of the operand is ``float``
+   or ``double``.
+
+-  Bigint comparison, if the converted type of the operand is ``bigint``.
+
 
 .. index::
    numerical relational operator
@@ -4336,8 +4806,10 @@ performed on each operand as follows:
    numeric type
    numeric types conversion
    predefined numeric types conversion
+   bigint
    signed integer comparison
    floating-point comparison
+   bigint comparison
    converted type
 
 The comparison of floating-point values drawn from any value set must be accurate.
@@ -4367,8 +4839,8 @@ standard specification as follows:
    negative zero
    IEEE 754
 
-Based on the above presumption, the following rules apply to integer operands,
-or floating-point operands other than ``NaN``:
+Based on the above presumption, the following rules apply to integer,
+floating-point, or bigint operands other than ``NaN``:
 
 -  The value produced by the operator '``<``' is ``true`` if the value of the
    left-hand-side operand is less than that of the right-hand-side operand.
@@ -4419,29 +4891,6 @@ Results of all string comparisons are defined as follows:
    operator
    string comparison
    string value
-
-|
-
-.. _Bigint Relational Operators:
-
-Bigint Relational Operators
-===========================
-
-.. meta:
-    frontend_status: Done
-
-Type of each operand in a bigint relational operator must be ``bigint``.
-Otherwise, a :index:`compile-time error` occurs.
-
-All bigint relational operators compare bigint values.
-
-.. index::
-   bigint comparison
-   relational operator
-   bigint
-   operand
-   operator
-   value
 
 |
 
@@ -4506,7 +4955,9 @@ Equality Expressions
     frontend_status: Done
 
 Equality expressions use *equality operators* '``==``', '``===``', '``!=``',
-and '``!==``':
+and '``!==``'.
+
+The syntax of *equality expression* is presented below:
 
 .. code-block:: abnf
 
@@ -4542,13 +4993,13 @@ except when comparing the values ``null`` and ``undefined`` (see
 The variant of equality evaluation to be used depends on types of the
 operands used as follows:
 
--  *Value equality* is applied to entities of primitive types
-   (see :ref:`Primitive Types`),
-   type ``string`` (see :ref:`Type string`), type ``bigint`` (see
-   :ref:`Type bigint`), and enumeration types (see :ref:`Enumerations`).
+-  *Value equality* is applied to entities of :ref:`Value Types`,
+   type ``string`` (see :ref:`Type string`) and type ``bigint`` (see
+   :ref:`Type bigint`).
 -  *Reference Equality based on actual (dynamic) type* is applied to values of
    type ``Object`` (:ref:`Type Object`), values of union types
-   (:ref:`Union Types`), and type parameters (:ref:`Type Parameters`).
+   (:ref:`Union Types`), type parameters (:ref:`Type Parameters`), and if at
+   least one type is of interface type (:ref:`Interfaces`).
 -  *Reference equality* is applied to entities of all other reference types
    (see :ref:`Reference Types`).
 
@@ -4566,8 +5017,8 @@ operands used as follows:
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
-- :ref:`Numerical Equality Operators` if operands are of numeric types (see
-  :ref:`Numeric Types`), or type ``char``;
+- :ref:`Numerical Equality Operators` if both operands are
+  of :ref:`Numeric Types`);
 
 - :ref:`String Equality Operators` if both operands are of type ``string``;
 
@@ -4575,10 +5026,16 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
 - :ref:`Boolean Equality Operators` if both operands are of type ``boolean``;
 
-- :ref:`Enumeration Equality Operators` if both operands are of enumeration type;
+- :ref:`Character Equality Operators` if both operands are of type ``char``;
+
+- :ref:`Enumeration Equality Operators` if both operands are of an enumeration
+  type;
+
+- :ref:`Function type Equality Operators` if both operands are of a function
+  type;
 
 - :ref:`Reference Equality based on actual type` if at least one operand is of
-  ``Object`` type or union type, or is a type parameter;
+  ``Object`` type, union type, interface type, or is a type parameter;
 
 - :ref:`Reference Equality` if both operands are of compatible reference types,
   except types ``string``, ``bigint``, ``Object``, union types, and type
@@ -4629,7 +5086,7 @@ Type of each operand in a numerical equality operator must be convertible
 (see :ref:`Implicit Conversions`) to a numeric type (see :ref:`Numeric Types`).
 Otherwise, a :index:`compile-time error` occurs.
 
-A widening conversion can occur (see :ref:`Widening Primitive Conversions`)
+A widening conversion can occur (see :ref:`Widening Numeric Conversions`)
 if type of one operand is smaller than type of the other operand (see
 :ref:`Numeric Types`).
 
@@ -4824,6 +5281,50 @@ Otherwise, a :index:`compile-time error` occurs.
 
 |
 
+.. _Function Type Equality Operators:
+
+Function Type Equality Operators
+================================
+
+.. meta:
+    frontend_status: None
+
+If both operands refer to the same function object, then the comparison
+returns ``true``. Otherwise, it is ``false``.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {}
+    function bar() {}
+    function goo(p: number) {}
+
+    foo == foo // true, same function object
+    foo == bar // false, different function objects
+    foo == goo // false, different function objects
+
+    class A {
+       method() {}
+       static method() {}
+       foo () {}
+    }
+    const a = new A
+    a.method == a.method // true, same function object
+    A.method == A.method // true, same function object
+
+    const aa = new A
+    a.method == aa.method /* false, different function objects
+         as 'a' and 'aa' are different bounded objects */
+    a.method == a.foo // false, different function objects
+
+
+.. index::
+   function type
+
+
+|
+
 .. _Reference Equality Based on Actual Type:
 
 Reference Equality Based on Actual Type
@@ -4832,10 +5333,11 @@ Reference Equality Based on Actual Type
 .. meta:
     frontend_status: Done
 
-If an operand of an equality operator is of type ``Object``, or a union type,
-or is a type parameter, then the operator is evaluated at runtime, and is based
-on the actual type of this operand. If the other operand is of a type other
-than that above, then the static type of this operand is used for evaluation.
+If an operand of an equality operator is of type ``Object``, a union type,
+an interface type, or is a type parameter, then the operator is evaluated at
+runtime, and is based on the actual type of this operand. If the other operand
+is of a type other than that above, then the static type of this operand is
+used for evaluation.
 
 If actual types of objects are compatible, then the corresponding evaluation of
 equality operator is used. Otherwise, the result of the operators '``==``' and
@@ -4906,10 +5408,12 @@ The following example illustrates an equality with a value of type ``Object``:
 
     function check(a: Object) {}
 
-    class G<A, B extends number> {
+    class MyType {}
+
+    class G<A, B extends MyType> {
         foo(x: A, y: B) {
             check(x) // compile-type error, A is not assignable to Object
-            check(y) // ok, B is assignable to Object (as it is, at least, Number)
+            check(y) // ok, B is assignable to Object as its constraint does
         }
     }
 
@@ -5171,6 +5675,8 @@ The *bitwise operators* and *logical operators* are as follows:
 -  Exclusive OR operator '``^``'; and
 -  Inclusive OR operator '``|``'.
 
+The syntax of *bitwise and logical expression* is presented below:
+
 .. code-block:: abnf
 
     bitwiseAndLogicalExpression:
@@ -5216,26 +5722,27 @@ Integer Bitwise Operators
 .. meta:
     frontend_status: Done
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
-is performed first on the operands of operator '``&``', '``^``', or '``|``'
-if both operands are of a type convertible (see :ref:`Implicit Conversions`)
-to a primitive integer type.
+Bitwise operators '``&``', '``^``', and '``|``' are applied to operands
+of numeric types or type ``bigint``.
 
-**Note**. If the initial type of one or both operands is ``double`` or
-``float``, then that operand or operands are truncated first to the appropriate
-integer type. If both operands are of type ``bigint``, then no conversion is
-required.
+If the type of one or both operands is ``double`` or ``float``, then the operand
+or operands are truncated first to the appropriate integer type.
+If the type of any operand is ``byte`` or ``short``, then the operand is
+converted to ``int``.
+If operands are of different integer types, then the operand of the smaller type
+is converted to the larger type (see :ref:`Numeric types`) by using
+:ref:`Widening Numeric Conversions`.
+If both operands are of type ``bigint``, then no conversion is required.
+A :index:`compile-time error` occurs if one operand of type ``bigint``, and the
+other operand is of a numeric type.
 
-A bitwise operator expression type is the converted type of its operands.
+The resultant type of the bitwise operator is the type of its operands.
 
 The resultant value of '``&``' is the bitwise AND of the operand values.
 
 The resultant value of '``^``' is the bitwise exclusive OR of the operand values.
 
 The resultant value of '``|``' is the bitwise inclusive OR of the operand values.
-
-Thus, *integer bitwise expression* is of primitive integer type.
-
 
 .. index::
    integer bitwise operator
@@ -5305,6 +5812,8 @@ operand only if the value of the left-hand-side operand is ``true``.
 The results of computation of '``&&``' and '``&``' on ``boolean`` operands are
 the same, but the right-hand-side operand in '``&&``' cannot be evaluated.
 
+The syntax of *conditional-and expression* is presented below:
+
 .. code-block:: abnf
 
     conditionalAndExpression:
@@ -5345,7 +5854,7 @@ expression is ``false``. The evaluation of the right-hand-side operand
 expression is omitted.
 
 If the value of the left-hand-side operand is ``true``, then the
-right-hand-side expression is evaluated. 
+right-hand-side expression is evaluated.
 The resultant value is the value of the *conditional-and*
 expression.
 
@@ -5372,6 +5881,8 @@ Conditional-Or Expression
 The *conditional-or* operator '``||``' is similar to '``|``' (see
 :ref:`Integer Bitwise Operators`) but evaluates its right-hand-side operand
 only if the value of its left-hand-side operand is ``false``.
+
+The syntax of *conditional-or expression* is presented below:
 
 .. code-block:: abnf
 
@@ -5409,14 +5920,14 @@ Each operand of the *conditional-or* operator must be of type ``boolean``
 or type mentioned in :ref:`Extended Conditional Expressions`.
 Otherwise, a :index:`compile-time error` occurs.
 
-The left-hand-side operand expression is first evaluated at runtime. 
+The left-hand-side operand expression is first evaluated at runtime.
 
 If the resultant value is ``true``, then the value of the *conditional-or*
 expression is ``true``, and the evaluation of the right-hand-side operand
 expression is omitted.
 
 If the resultant value is ``false``, then the right-hand-side expression is
-evaluated. 
+evaluated.
 The resultant value is the value of the *conditional-or* expression.
 
 The computation results of '``||``' and '``|``' on ``boolean`` operands are
@@ -5448,6 +5959,8 @@ All *assignment operators* group right-to-left (i.e., :math:`a=b=c` means
 :math:`a=(b=c)`. The value of *c* is thus assigned to *b*, and then the value
 of *b* to *a*).
 
+The syntax of *assignment expression* is presented below:
+
 .. code-block:: abnf
 
     assignmentExpression:
@@ -5456,9 +5969,10 @@ of *b* to *a*).
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%='
+        | '+='  | '-='  | '*='   | '='  | '%=' | `**=`
         | '<<=' | '>>=' | '>>>='
-        | '&='  | '|='  | '^='
+        | '&='  | '|='  | '^=' | `&&=` | `||=`
+        | `??=`
         ;
 
     lhsExpression:
@@ -5502,23 +6016,23 @@ Simple Assignment Operator
 .. meta:
     frontend_status: Done
 
-The form of a simple assignment expression is ``E1 = E2``.
+The form of a simple assignment expression is ``lhsExpression = rhsExpression``.
 
-A :index:`compile-time error` occurs if type of the right-hand-side operand
-(*rhsExpression*) is not assignable (see :ref:`Assignability`) to
-the type of the variable. Otherwise, the expression is evaluated at runtime in
-one of the following ways:
+A :index:`compile-time error` occurs if type of *rhsExpression*
+is not assignable (see :ref:`Assignability`) to
+the type of the variable. Otherwise, the assignment expression is evaluated
+at runtime in one of the following ways:
 
-1. If the left-hand-side operand *lhsExpression* is a field access expression
-   *e.f* (see :ref:`Field Access Expression`), possibly enclosed in parentheses,
+1. If *lhsExpression* is a field access expression
+   ``e.f`` (see :ref:`Field Access Expression`), possibly enclosed in parentheses,
    then:
 
    #. *lhsExpression* *e* is evaluated: if the evaluation of *e*
       completes abruptly, then so does the assignment expression.
-   #. Right-hand-side operand *rhsExpression* is evaluated: if the evaluation
+   #. *rhsExpression* is evaluated: if the evaluation
       completes abruptly, then so does the assignment expression.
-   #. Value of the right-hand-side operand as computed above is assigned
-      to the variable denoted by *e.f*.
+   #. Value of *rhsExpression* as computed above is assigned
+      to the variable denoted by ``e.f``.
 
 .. index::
    simple assignment operator
@@ -5534,18 +6048,18 @@ one of the following ways:
    assignment expression
    variable
 
-2. If the left-hand-side operand is an array reference expression (see
+2. If the *lhsExpression* is an array reference expression (see
    :ref:`Array Indexing Expression`), possibly enclosed in parentheses, then:
 
-   #. Array reference subexpression of the left-hand-side operand is evaluated.
+   #. Array reference subexpression of *lhsExpression* is evaluated.
       If this evaluation completes abruptly, then so does the assignment
-      expression. In that case, the right-hand-side operand and the index
+      expression. In that case, *rhsExpression* and the index
       subexpression are not evaluated, and the assignment does not occur.
-   #. If the evaluation completes normally, then the index subexpression of the
-      left-hand-side operand is evaluated. If this evaluation completes abruptly,
-      then so does the assignment expression. In that case, the right-hand-side
-      operand is not evaluated, and the assignment does not occur.
-   #. If the evaluation completes normally, then the right-hand-side operand is
+   #. If the evaluation completes normally, then the index subexpression of
+      *lhsExpression* is evaluated. If this evaluation completes abruptly,
+      then so does the assignment expression. In that case, *rhsExpression*
+      is not evaluated, and the assignment does not occur.
+   #. If the evaluation completes normally, then *rhsExpression* is
       evaluated. If this evaluation completes abruptly, then so does the
       assignment expression, and the assignment does not occur.
    #. If the evaluation completes normally, but the value of the index
@@ -5556,20 +6070,7 @@ one of the following ways:
       element of the array referred to by the value of the array reference
       subexpression.
 
-      That element is a variable of type ``SC``. If ``TC`` is type of the
-      left-hand-side operand of the assignment operator determined at compile
-      time, then there are two options:
-
-
-      - If ``TC`` is a primitive type, then ``SC`` can only be the same as ``TC``.
-
-        The value of the right-hand-side operand is converted to the type of the
-        selected array element. The value set conversion (see
-        :ref:`Implicit Conversions`) is performed to convert it to the
-        appropriate standard value set (not an extended-exponent value set).
-        The result of the conversion is stored into the array element.
-      - If ``TC`` is a reference type, then ``SC`` can be the same as ``TC`` or
-        a type that extends or implements ``TC``.
+      The value of *rhsExpression* is assigned to the array element.
 
 .. index::
    operand
@@ -5594,24 +6095,24 @@ one of the following ways:
    assignability
    runtime
 
-3. If the left-hand-side operand is a record access expression (see
+3. If *lhsExpression* is a record access expression (see
    :ref:`Record Indexing Expression`), possibly enclosed in parentheses, then:
 
-   #. Object reference subexpression of the left-hand-side operand is evaluated.
+   #. Object reference subexpression of *lhsExpression* is evaluated.
       If this evaluation completes abruptly, then so does the assignment
       expression.
-      In that case, the right-hand-side operand and the index subexpression are
+      In that case, *rhsExpression* and the index subexpression are
       not evaluated, and the assignment does not occur.
-   #. If the evaluation completes normally, the index subexpression of the
-      left-hand-side operand is evaluated. If this evaluation completes abruptly,
+   #. If the evaluation completes normally, the index subexpression of
+      *lhsExpression* is evaluated. If this evaluation completes abruptly,
       then so does the assignment expression.
-      In that case, the right-hand-side operand is not evaluated, and the
+      In the last case, *rhsExpression* is not evaluated, and the
       assignment does not occur.
-   #. If the evaluation completes normally, the right-hand-side operand is
+   #. If the evaluation completes normally, *rhsExpression* is
       evaluated. If this evaluation completes abruptly, then so does the
       assignment expression. In that case, the assignment does not occur.
    #. Otherwise, the value of the index subexpression is used as the ``key``.
-      In that case, the right-hand-side operand is used as the ``value``, and
+      In that case, the value of *rhsExpression* is used as the ``value``, and
       the key-value pair is stored in the record instance.
 
 .. index::
@@ -5634,25 +6135,25 @@ one of the following ways:
 
 If none of the above is true, then the following three steps are required:
 
-#. Left-hand-side operand is evaluated to produce a variable. If the
+#. *lhsExpression* is evaluated to produce a variable. If the
    evaluation completes abruptly, then so does the assignment expression.
-   In that case, the right-hand-side operand is not evaluated, and the
+   In that case, *rhsExpression* is not evaluated, and the
    assignment does not occur.
 
-#. If the evaluation completes normally, then the right-hand-side operand is
+#. If the evaluation completes normally, then *rhsExpression* is
    evaluated. If the evaluation completes abruptly, then so does the assignment
    expression. In that case, the assignment does not occur.
 
-#. If that evaluation completes normally, then the value of the right-hand-side
-   operand is converted to the type of the left-hand-side variable.
+#. If that evaluation completes normally, then the value of *rhsExpression*
+   is converted to the type of the left-hand-side variable.
    In that case, the result of the conversion is stored into the variable.
-   A :index:`compile-time error` occurs if type of the left-hand-side
-   variable is one of the following:
+   A :index:`compile-time error` occurs if type of *lhsExpression*
+   is one of the following:
 
    - ``readonly`` array (see :ref:`Readonly Parameters`), while the
-     converted type of the right-hand-side operand is a non-``readonly`` array;
+     converted type of *rhsExpression* is a non-``readonly`` array;
    - ``readonly`` tuple (see :ref:`Readonly Parameters`), while the
-     converted type of the right-hand-side operand is a non-``readonly`` tuple.
+     converted type of *rhsExpression* is a non-``readonly`` tuple.
 
 .. index::
    evaluation
@@ -5677,25 +6178,38 @@ Compound Assignment Operators
 .. meta:
     frontend_status: Done
 
-A compound assignment expression in the form *E1 op= E2* is equivalent to
-*E1 = ((E1) op (E2)) as T*, where ``T`` is type of *E1*, except that *E1*
-is evaluated only once. This expression can be evaluated at runtime in one
+A compound assignment expression in the form:
+
+``lhsExpression op= rhsExpression``
+
+is equivalent to
+
+``lhsExpression = ((lhsExpression) op (rhsExpression)) as T``
+
+where ``T`` is type of *lhsExpression*, except that *lhsExpression*
+is evaluated only once.
+
+While the nullish coalescing assignment (``??=``) only evaluates the right
+operand, and assigns to the left operand if the left operand is ``null`` or
+``undefined``.
+
+An assignment expression can be evaluated at runtime in one
 of the following ways:
 
-1. If the left-hand-side operand expression is not an indexing expression:
+1. If *lhsExpression* is not an indexing expression:
 
-   -  The left-hand-side operand is evaluated to produce a variable. If the
+   -  *lhsExpression* is evaluated to produce a variable. If the
       evaluation completes abruptly, then so does the assignment expression.
-      In that case, the right-hand-side operand is not evaluated, and no
+      In that case, *rhsExpression* is not evaluated, and no
       assignment occurs.
 
-   -  If the evaluation completes normally, then the value of the left-hand-side
-      operand is saved, and the right-hand-side operand is evaluated. If the
+   -  If the evaluation completes normally, then the value of *lhsExpression*
+      is saved, and *rhsExpression* is evaluated. If the
       evaluation completes abruptly, then so does the assignment expression.
       In that case, no assignment occurs.
 
    -  If the evaluation completes normally, then the saved value of the
-      left-hand-side variable, and the value of the right-hand-side operand are
+      left-hand-side variable, and the value of *rhsExpression* are
       used to perform the binary operation as indicated by the compound
       assignment operator. If the operation completes abruptly, then so does
       the assignment expression. In that case, no assignment occurs.
@@ -5720,18 +6234,19 @@ of the following ways:
    binary operation
    conversion
 
-2. If the left-hand-side operand expression is an array reference expression (see
+2. If *lhsExpression* is an array reference expression (see
    :ref:`Array Indexing Expression`), then:
 
-   -  Array reference subexpression of the left-hand-side operand is evaluated.
+   -  Array reference subexpression of *lhsExpression* is evaluated.
       If the evaluation completes abruptly, then so does the assignment
-      expression. In that case, the right-hand-side operand and the index
-      subexpression are not evaluated, and no assignment occurs.
+      expression. In that case, the index
+      subexpression, and *rhsExpression* are not evaluated,
+      and no assignment occurs.
 
-   -  If the evaluation completes normally, then the index subexpression of the
-      left-hand-side operand is evaluated. If the evaluation completes abruptly,
-      then so does the assignment expression. In that case, the right-hand-side
-      operand is not evaluated, and no assignment occurs.
+   -  If the evaluation completes normally, then the index subexpression of
+      *lhsExpression* is evaluated. If the evaluation completes abruptly,
+      then so does the assignment expression. In that case, *rhsExpression*
+      is not evaluated, and no assignment occurs.
 
    -  If the evaluation completes normally, the value of the array
       reference subexpression refers to an array, and the value of the
@@ -5742,21 +6257,21 @@ of the following ways:
    -  If the evaluation completes normally, then the value of the index
       subexpression is used to select an array element referred to by
       the value of the array reference subexpression. The value of this
-      element is saved, and then the right-hand-side operand is evaluated.
+      element is saved, and then *rhsExpression* is evaluated.
       If the evaluation completes abruptly, then so does the assignment
       expression. In that case, no assignment occurs.
 
    -  If the evaluation completes normally, consideration must be given
       to the saved value of the array element selected in the previous
       step. While this element is a variable of type ``S``, and ``T`` is
-      type of the left-hand-side operand of the assignment operator
+      type of *lhsExpression* of the assignment operator
       determined at compile time:
 
 
       - If ``T`` is a primitive type, then ``S`` is the same as ``T``.
 
-        The saved value of the array element, and the value of the
-        right-hand-side operand are used to perform the binary operation of the
+        The saved value of the array element, and the value of
+        *rhsExpression* are used to perform the binary operation of the
         compound assignment operator.
 
         If this operation completes abruptly, then so does the assignment
@@ -5770,7 +6285,7 @@ of the following ways:
 
         ``S`` must also be a ``string`` because the class ``string`` is the
         *final* class. The saved value of the array element, and the value of
-        the right-hand operand are used to perform the binary operation (string
+        *rhsExpression* are used to perform the binary operation (string
         concatenation) of the compound assignment operator '``+=``'. If
         this operation completes abruptly, then so does the assignment
         expression. In that case, no assignment occurs.
@@ -5811,30 +6326,30 @@ of the following ways:
    array
    string concatenation
 
-3. If the left-hand-side operand expression is a record access expression (see
+3. If *lhsExpression* is a record access expression (see
    :ref:`Record Indexing Expression`):
 
-   -  The object reference subexpression of the left-hand-side operand is
+   -  The object reference subexpression of *lhsExpression* is
       evaluated. If this evaluation completes abruptly, then so does the
-      assignment expression. In that case, the right-hand-side operand and
-      the index subexpression are not evaluated, and no assignment occurs.
+      assignment expression. In that case, the index subexpression
+      and *rhsExpression* are not evaluated, and no assignment occurs.
 
    -  If this evaluation completes normally, then the index subexpression of
-      the left-hand operand is evaluated. If the evaluation completes abruptly,
-      then so does the assignment expression. In that case, the right-hand-side
-      operand is not evaluated, and no assignment occurs.
+      *lhsExpression* is evaluated. If the evaluation completes abruptly,
+      then so does the assignment expression. In that case, *rhsExpression*
+      is not evaluated, and no assignment occurs.
 
    -  If this evaluation completes normally, the value of the object reference
-      subexpression and the value of index subexpression are saved, then the
-      right-hand-side operand is evaluated. If the evaluation completes
+      subexpression and the value of index subexpression are saved, then
+      *rhsExpression* is evaluated. If the evaluation completes
       abruptly, then so does the assignment expression. In that case, no
       assignment occurs.
 
    -  If this evaluation completes normally, the saved values of the object
       reference subexpression and index subexpression (as the *key*) are used
       to get the *value* that is mapped to the *key* (see
-      :ref:`Record Indexing Expression`), then this *value* and the value of the
-      right-hand-side operand are used to perform the binary operation as
+      :ref:`Record Indexing Expression`), then this *value* and the value of
+      *rhsExpression* are used to perform the binary operation as
       indicated by the compound assignment operator. If the operation
       completes abruptly, then so does the assignment expression. In that case,
       no assignment occurs.
@@ -5877,18 +6392,18 @@ Left-Hand-Side Expressions
 .. meta:
     frontend_status: Done
 
-*Expression* is a *left-hand-side expression* if it is one of the following:
+*Left-hand-side expression* is an *expression* that is one of the following:
 
 -  Named variable;
 -  Field or setter resultant from a field access (see
    :ref:`Field Access Expression`); or
 -  Array or record element access (see :ref:`Indexing Expressions`).
 
-A :index:`compile-time error` occurs if:
+A :index:`compile-time error` occurs in the following situations:
 
 -  *Expression* contains the chaining operator '``?.``' (see
    :ref:`Chaining Operator`);
--  *Expression* result is not a variable.
+-  Result of *expression* is not a variable.
 
 .. index::
    expression
@@ -5997,7 +6512,9 @@ String Interpolation Expressions
 
 '*String interpolation expression*' is a multiline string literal (a string
 literal delimited with backticks, see :ref:`Multiline String Literal` for
-details) that contains at least one *embedded expression*:
+details) that contains at least one *embedded expression*.
+
+The syntax of *string interpolation expression* is presented below:
 
 .. code-block:: abnf
 
@@ -6075,7 +6592,9 @@ Lambda Expressions
 (see :ref:`Type Parameters`), mandatory lambda signature, and its body. The
 definition of *lambda expression* is generally similar to that of a function
 declaration (see :ref:`Function Declarations`), except that a lambda expression
-has no function name specified, and can have types of parameters omitted:
+has no function name specified, and can have types of parameters omitted.
+
+The syntax of *lambda expression* is presented below:
 
 .. code-block:: abnf
 
@@ -6231,10 +6750,6 @@ The meanings of names, and of the keywords ``this`` and ``super`` (along with
 the accessibility of the referred declarations) are the same as in the
 surrounding context. However, lambda parameters introduce new names.
 
-If a *lambda body* is a single expression, then it is equivalent to the block
-with one return statement that returns that single expression
-*{ return singleExpression }*.
-
 If any local variable or formal parameter of the surrounding context is
 used but not declared in a lambda body, then the local variable or formal
 parameter is *captured* by the lambda.
@@ -6245,6 +6760,13 @@ defined in a method, then ``this`` is *captured* by the lambda.
 A :index:`compile-time error` occurs if a local variable is used in a lambda
 body but is neither declared in nor assigned before it.
 
+If a *lambda body* is a single ``expression`` it is treated as
+
+-  If the expression is a *call expression* with return type ``void``
+   the body is equivalent to the block: ``{ expression }``
+
+-  Otherwise, the body is equivalent to the block: ``{ return expression }``
+
 If *lambda signature* return type is not ``void`` (see :ref:`Type void`), and
 the execution path of the lambda body has no return statement (see
 :ref:`Return Statements`) or no single expression as a body, then a
@@ -6252,9 +6774,12 @@ the execution path of the lambda body has no return statement (see
 
 .. index::
    lambda body
+   lambda
    lambda expression
    keyword this
    keyword super
+   this
+   super
    runtime
    evaluation
    method body
@@ -6263,6 +6788,7 @@ the execution path of the lambda body has no return statement (see
    surrounding context
    accessibility
    lambda body
+   lambda signature
    instance member
    surrounding type
    return statement
@@ -6348,7 +6874,7 @@ lambda expression are saved to the internal state of the created instance.
 
 
 +-----------------------------------------------+--------------+
-| **Source Fragment**                           | **Output**   |
+|   Source Fragment                             |   Output     |
 +===============================================+==============+
 | .. code-block:: typescript                    ||             |
 |    :linenos:                                  |              |
@@ -6374,7 +6900,7 @@ variable is implied to change:
    original variable
 
 +-----------------------------------------------+--------------+
-| **Source Fragment**                           | **Output**   |
+|   Source Fragment                             |   Output     |
 +===============================================+==============+
 | .. code-block:: typescript                    ||             |
 |    :linenos:                                  |              |
@@ -6395,7 +6921,7 @@ can act as follows:
    original reference (x: T for x: Proxy<T>; x.ref = original-ref) if that
    captured variable is of non-primitive type.
 
-If the captured variable is defined as ``const``, then 
+If the captured variable is defined as ``const``, then
 proxying is not required.
 
 If the captured formal parameter can be neither boxed nor proxied, then
@@ -6414,7 +6940,7 @@ the implementation can require addition of a local variable as follows:
    variable
 
 +-----------------------------------+-----------------------------------+
-| **Source Code**                   | **Pseudo Code**                   |
+|   Source Code                     |   Pseudo Code                     |
 +===================================+===================================+
 | .. code-block:: typescript        | .. code-block:: typescript        |
 |    :linenos:                      |    :linenos:                      |
@@ -6439,28 +6965,28 @@ Constant Expressions
 *Constant expressions* are expressions with values that can be evaluated at
 compile time.
 
+The syntax of *constant expression* is presented below:
+
 .. code-block:: abnf
 
     constantExpression:
         expression
         ;
 
-A *constant expression* is an expression of a primitive type (see
-:ref:`Primitive Types`), or of type ``string``, or of enum type (see
-:ref:`Enumerations`) that completes normally while being composed only of the
-following:
+A *constant expression* is an expression of a value type (see
+:ref:`Value Types`), or of type ``string`` that completes normally
+while being composed only of the following:
 
 -  Literals of a primitive type, and literals of type ``string`` (see
    :ref:`Literals`);
-
--  Conversions to primitive types and conversions to type ``string`` (see
-   :ref:`Cast Expressions`);
 
 -  Enumeration type constants;
 
 -  Unary operators '``+``', '``-``', '``~``', and '``!``', but not '``++``'
    or '``--``' (see :ref:`Unary Plus`, :ref:`Unary Minus`,
    :ref:`Prefix Increment`, and :ref:`Prefix Decrement`);
+
+-  Casting conversions to numeric types (see :ref:`Cast Expression`);
 
 -  Multiplicative operators '``*``', '``/``', and '``%``' (see
    :ref:`Multiplicative Expressions`);
@@ -6521,6 +7047,30 @@ following:
    qualified name
    initializer
    compilation unit
+
+The examples of constant expressions are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    const a = 2
+
+    // Constant expressions:
+    1 + 2
+    a + 1
+    "aa" + "bb"
+    (a < 0) || (a > 5)
+
+**Note**. The following expressions are not constant expressions:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x = 2
+
+    // non-constant expressions:
+    x + 1
+    0x7f as short
 
 .. raw:: pdf
 

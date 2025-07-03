@@ -33,4 +33,16 @@ export final class CoroutineExtras {
      * that will be created or removed (in this case scaler is less than zero)
      */
     public static native scaleWorkersPool(scaler: int): void;
+
+    // taskpool api
+    // stop taskpool all workers after executes all taskpool tasks, for testSuite
+    public static native stopTaskpool(): void;
+    // increase taskpool workers
+    public static native increaseTaskpoolWorkersToN(workersNum: int): void;
+    // checks if worker has external scheduler
+    public static native workerHasExternalScheduler(): boolean;
+    // is taskpool using launch mode
+    public static native isTaskpoolUsingLaunchMode(): boolean;
+    // is taskpool supporting interop
+    public static native isTaskpoolSupportingInterop(): boolean;
 }

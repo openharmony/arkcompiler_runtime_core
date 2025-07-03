@@ -52,6 +52,9 @@ class AsyncLockManager {
             if (lock == undefined) {
                 throw new Error("AsyncLock " + name + " not found");
             }
+            if (name.includes("__AnonymousLockName__")) {
+                throw new Error("Lock cannot be found");
+            }
             let state = lock.query();
             return state;
         } finally {
@@ -79,7 +82,7 @@ class AsyncLockManager {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
 }
 
-const asyncLockManager = new AsyncLockManager();
+const asyncLockManager: AsyncLockManager;
 
 /**
  * Information about all lock operations on the AsyncLock instance.

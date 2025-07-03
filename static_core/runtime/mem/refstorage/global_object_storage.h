@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@ public:
 
     /// Update pointers to moved Objects in global storage.
     // NOTE(alovkov): take a closure from gc
-    void UpdateMovedRefs();
+    void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater);
 
     void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred);
 
@@ -279,7 +279,7 @@ private:
             blocksAvailable_++;
         }
 
-        void UpdateMovedRefs()
+        void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater)
         {
             os::memory::WriteLockHolder lk(mutex_);
             // NOLINTNEXTLINE(modernize-loop-convert)
@@ -287,10 +287,8 @@ private:
                 auto ref = storage_[index];
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
-                    if (obj != nullptr && obj->IsForwarded()) {
-                        auto newAddr = reinterpret_cast<ObjectHeader *>(GetForwardAddress(obj));
-                        LOG(DEBUG, GC) << "Global ref update from: " << obj << " to: " << newAddr;
-                        storage_[index] = ToUintPtr(newAddr);
+                    if (obj != nullptr && gcRootUpdater(&obj)) {
+                        storage_[index] = ToUintPtr(obj);
                     }
                 }
             }

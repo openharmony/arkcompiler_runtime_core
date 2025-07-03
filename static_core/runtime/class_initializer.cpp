@@ -266,13 +266,13 @@ template <MTModeT MODE>
 bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
 {
     const auto &options = Runtime::GetCurrent()->GetOptions();
-    switch (options.GetVerificationMode()) {
-        case VerificationMode::DISABLED:
+    switch (verifier::VerificationModeFromString(options.GetVerificationMode())) {
+        case verifier::VerificationMode::DISABLED:
             if (!klass->IsVerified()) {
                 klass->SetState(Class::State::VERIFIED);
             }
             return true;
-        case VerificationMode::AHEAD_OF_TIME:
+        case verifier::VerificationMode::AHEAD_OF_TIME:
             if (!klass->IsVerified()) {
                 if (!VerifyClass(klass)) {
                     klass->SetState(Class::State::ERRONEOUS);
@@ -281,7 +281,7 @@ bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
                 }
             }
             return true;
-        case VerificationMode::ON_THE_FLY:
+        case verifier::VerificationMode::ON_THE_FLY:
             if (options.IsArkAot()) {
                 LOG(FATAL, VERIFIER) << "On the fly verification mode is not compatible with ark_aot";
             }

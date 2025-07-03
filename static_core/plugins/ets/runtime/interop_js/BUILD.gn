@@ -58,11 +58,6 @@ ohos_source_set("ets_interop_js_napi_static") {
     "$ark_root/runtime:libarkruntime",
   ]
 
-  if ((ark_standalone_build || ark_static_standalone_build) &&
-      !ark_ets_hybrid) {
-    deps += [ ":install_nodejs" ]
-  }
-
   if (is_ohos && is_standard_system) {
     defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
     deps += [ ":etsstdlib_install" ]
@@ -87,14 +82,6 @@ ohos_shared_library("ets_interop_js_napi") {
   relative_install_dir = "module"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
-}
-
-action("install_nodejs") {
-  script = "$ark_root/scripts/install-third-party"
-
-  outputs = [ target_out_dir ]
-
-  args = [ "--node" ]
 }
 
 config("interop_js_public_config") {

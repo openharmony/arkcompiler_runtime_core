@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Type T is not compatible (see Type Compatibility) with Required<T>, and variables of Required<T> are to be
       initialized with valid object literals.
+tags: [compile-only, negative]
 ---*/
 
 {{t}} A {

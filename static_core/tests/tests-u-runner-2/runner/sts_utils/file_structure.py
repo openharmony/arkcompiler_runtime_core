@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Iterator
 
 from runner.logger import Log
 
@@ -33,14 +33,14 @@ class TestDirectory:
     path: Path
     name: str
 
-    parent: Optional[TestDirectory]
-    subdirs: List[TestDirectory]
+    parent: TestDirectory | None
+    subdirs: list[TestDirectory]
 
     def __init__(self, path: Path, *,
                  test_id: int = 0,
                  name: str = "",
-                 parent: Optional[TestDirectory] = None,
-                 subdirs: Optional[List[TestDirectory]] = None) -> None:
+                 parent: TestDirectory | None = None,
+                 subdirs: list[TestDirectory] | None = None) -> None:
 
         self.path = path
 
@@ -53,15 +53,15 @@ class TestDirectory:
         self.parent = parent
         self.subdirs = subdirs if subdirs is not None else []
 
-    def full_index(self) -> List[int]:
-        cur: Optional[TestDirectory] = self
+    def full_index(self) -> list[int]:
+        cur: TestDirectory | None = self
         result = []
         while cur is not None:
             result.append(cur.test_id)
             cur = cur.parent
         return list(reversed(result))
 
-    def iter_files(self, allowed_ext: Optional[List[str]] = None) -> Iterator[Path]:
+    def iter_files(self, allowed_ext: list[str] | None = None) -> Iterator[Path]:
         for filename in os.listdir(str(self.path)):
             filepath: Path = self.path / filename
             if allowed_ext and filepath.suffix not in allowed_ext:
@@ -72,7 +72,7 @@ class TestDirectory:
         test_dir.parent = self
         self.subdirs.append(test_dir)
 
-    def find_subdir_by_name(self, name: str) -> Optional[TestDirectory]:
+    def find_subdir_by_name(self, name: str) -> TestDirectory | None:
         # decrease complexity
         for sub_dir in self.subdirs:
             if sub_dir.name == name:
@@ -83,7 +83,7 @@ class TestDirectory:
         return len(os.listdir(str(self.path))) == 0
 
 
-def walk_test_subdirs(path: Path, parent: Optional[TestDirectory] = None) -> Iterator[TestDirectory]:
+def walk_test_subdirs(path: Path, parent: TestDirectory | None = None) -> Iterator[TestDirectory]:
     """
     Walks the file system from the CTS root, yielding TestDirectories, in correct order:
     For example, if only directories 1, 1/1, 1/1/1, 1/1/2, 1/2 exist, they will be yielded in that order.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 function main(): int {
     let failCounter: int = 0;
     let testResult: int = 0;
-    let arrayVar : {{.item.name}}[];
+    let arrayVar : FixedArray<{{.item.name}}> = [];
     let expectedType : Type;
     let arrayType : ArrayType;
-    let obj : {{.item.name}}[];
+    let obj : FixedArray<{{.item.name}}>;
     {% for array_size in item.array_sizes %}
       arrayVar = new {{.item.name}}[{{.array_size}}];
       for (let i = 0; i < {{.array_size}}; ++i) {
@@ -29,7 +29,7 @@ function main(): int {
       testResult = checkTestResult(arrayType.getElementType(), Type.of({{.item.init_value}}));
       printTestVerdict(testResult, "Type.of({{.item.name}}[]).getElementType() == {{.item.name}}");
       failCounter += testResult;
-      obj = arrayType.make({{.array_size}}) as {{.item.name}}[];
+      obj = arrayType.make({{.array_size}}) as FixedArray<{{.item.name}}>;
       testResult = checkTestResult(obj, arrayVar);
       printTestVerdict(testResult, "Type.of({{.item.name}}[]).make()");
       failCounter += testResult;
@@ -51,7 +51,7 @@ function checkTestResult(actual: Type, expected: Type) : int {
    return 1;
 }
 
-function checkTestResult(actual : {{.item.name}}[], expected : {{.item.name}}[]) : int {
+function checkTestResult(actual : FixedArray<{{.item.name}}>, expected : FixedArray<{{.item.name}}>) : int {
   console.print("\nACTUAL\n")
   for (let i: int = 0; i < actual.length; i++) {
      console.print(actual[i] + " ")

@@ -20,6 +20,8 @@ tags:
 - not-a-test
 ---*/
 
+export let gs: int = 0 // getter-setter
+
 export abstract class AC {
     i: number = 0;
     j: string = "";
@@ -36,10 +38,12 @@ export interface I {
 }
 
 export class CI implements I {
-    set i(i: number) { this.i = i }
-    get i(): number { return this.i }
-    set j(j: string) { this.j = j }
-    get j(): string { return this.j }
+    _i: number = 0
+    _j: string = ""
+    set i(i: number) {gs+=1; this._i = i }
+    get i(): number {gs+=2; return this._i }
+    set j(j: string) {gs+=4; this._j = j }
+    get j(): string {gs+=8; return this._j }
 }
 
 export class CA extends AC { }
@@ -60,11 +64,13 @@ export interface IOPT {
     j?: string;
 }
 
-//export class CIOPT implements IOPT {
-//    set i(i: number) { this.i = i }
-//    get i(): number { return this.i }
-//    set j(j: string) { this.j = j }
-//    get j(): string { return this.j }
-//}
+export class CIOPT implements IOPT {
+    _i?: number = 0
+    _j?: string = ""
+    set i(i?: number) {gs+=1; this._i = i }
+    get i(): number|undefined {gs+=2; return this._i }
+    set j(j?: string) {gs+=4; this._j = j }
+    get j(): string|undefined {gs+=8; return this._j }
+}
 
 export class CAOPT extends ACOPT { }

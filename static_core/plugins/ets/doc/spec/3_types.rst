@@ -51,20 +51,18 @@ presented as source code in |LANG|.
    type definition
    source code
 
-All |LANG| types are summarized in the following table:
+All |LANG| types are summarized in the table below:
 
-.. table::
-   :widths: 50, 50
 
    ========================= =========================
-   **Predefined Types**      **User-Defined Types**
+   Predefined Types          User-Defined Types
    ========================= =========================
    ``number``, ``byte``,     class types,
    ``short``, ``int``,       interface types,
    ``long``, ``float``,      array types,
    ``double``, ``char``,     fixed array types,
    ``boolean``,              tuple types,
-    
+
    ``string``,               union types,
 
    ``bigint``,               literal types,
@@ -72,43 +70,63 @@ All |LANG| types are summarized in the following table:
    ``Object``,               function types,
 
    ``never``, ``void``,      type parameters
- 
-   ``undefined``, ``null``   enumeration types  
+
+   ``undefined``, ``null``   enumeration types
    ========================= =========================
 
 **Note**. Type ``number`` is an alias to ``double``.
 
-Most *predefined types* have aliases to improve |TS| compatibility:
+.. index::
+   user-defined type
+   predefined type
+   class type
+   interface type
+   array type
+   fixed array type
+   tuple type
+   union type
+   literal type
+   function type
+   type parameter
+   enumeration type
+   alias
 
-+--------------+--------------------------+
-| Primary Name | Alias                    |
-+==============+==========================+
-| ``number``   |   ``Number``             |
-+--------------+--------------------------+
-| ``byte``     |   ``Byte``               |
-+--------------+--------------------------+
-| ``short``    |   ``Short``              |
-+--------------+--------------------------+
-| ``int``      |   ``Int``                |
-+--------------+--------------------------+
-| ``long``     |   ``Long``               |
-+--------------+--------------------------+
-| ``float``    |   ``Float``              |
-+--------------+--------------------------+
-| ``double``   |   ``Double``             |
-+--------------+--------------------------+
-| ``boolean``  |   ``Boolean``            |
-+--------------+--------------------------+
-| ``char``     |   ``Char``               |
-+--------------+--------------------------+
-| ``string``   |   ``String``             |
-+--------------+--------------------------+
-| ``bigint``   |   ``BigInt``             |
-+--------------+--------------------------+
-| ``Object``   |   ``object``             |
-+--------------+--------------------------+
+Most *predefined types* have aliases to improve |TS| compatibility as follows:
 
-Using primary named of *predefined types* is recommended in all cases.
+
++--------------+---------------+
+| Primary Name | Alias         |
++==============+===============+
+| ``number``   |   ``Number``  |
++--------------+---------------+
+| ``byte``     |   ``Byte``    |
++--------------+---------------+
+| ``short``    |   ``Short``   |
++--------------+---------------+
+| ``int``      |   ``Int``     |
++--------------+---------------+
+| ``long``     |   ``Long``    |
++--------------+---------------+
+| ``float``    |   ``Float``   |
++--------------+---------------+
+| ``double``   |   ``Double``  |
++--------------+---------------+
+| ``boolean``  |   ``Boolean`` |
++--------------+---------------+
+| ``char``     |   ``Char``    |
++--------------+---------------+
+| ``string``   |   ``String``  |
++--------------+---------------+
+| ``bigint``   |   ``BigInt``  |
++--------------+---------------+
+| ``Object``   |   ``object``  |
++--------------+---------------+
+
+Using primary names of *predefined types* is recommended in all cases.
+
+.. index::
+   predefined type
+   primary name
 
 |
 
@@ -122,13 +140,8 @@ Predefined Types
 
 Predefined types include the following:
 
--  Numeric types: ``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, and
-   ``double``;
-
--  Character type: ``char``;
-
--  Boolean type: ``boolean``;
- 
+-  :ref:`Value Types`;
+-  :ref:`Type Any`;
 -  :ref:`Type Object`;
 -  :ref:`Type never`;
 -  :ref:`Type void`;
@@ -136,73 +149,10 @@ Predefined types include the following:
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
--  :ref:`Array Types` (``Array<T>`` or ``T[]``);
--  :ref:`Fixed Array Types`.
+-  :ref:`Array Types` (``Array<T>`` or ``T[]`` or ``FixedArray<T>``).
 
 .. index::
-   predefined type
-   numeric type
-   character type
-   Boolean type
-
-|
-
-.. _Primitive Types:
-
-Primitive Types
-===============
-
-.. meta:
-    frontend_status: Done
-
-Types ``number``, ``byte``, ``short``, ``int``, ``long``, ``float``,
-``double``, ``char``, and ``boolean`` are called *primitive types*. 
-
-.. index::
-   primitive type
-
-|
-
-.. _Numeric Types:
-
-Numeric Types
-=============
-
-.. meta:
-    frontend_status: Done
-
-Integer (see :ref:`Integer Types and Operations`) and floating-point (see
-:ref:`Floating-Point Types and Operations`) types are *numeric types*.
-
-Larger type values include all values of smaller types:
-
--  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
-
-Consequently, a value of a smaller type can be assigned to a variable of a
-larger type.
-
-Type ``bigint`` does not belong to this hierarchy. There is no implicit
-conversion from a numeric type (see :ref:`Numeric Types`) to ``bigint``.
-Standard library (see :ref:`Standard Library`) class ``BigInt`` methods must be
-used to create ``bigint`` values from numeric types.
-
-.. index::
-   integer type
-   floating-point type
-   numeric type
-   double
-   float
-   long
-   int
-   short
-   byte
-   bigint
-   long
-   int
-   short
-   byte
-   string
-   BigInt
+   value type
 
 |
 
@@ -274,6 +224,8 @@ A type can be referred to in source code by the following:
    tuple type
    type in parentheses
 
+The syntax of *type* is presented below:
+
 .. code-block:: abnf
 
     type:
@@ -291,6 +243,9 @@ A type can be referred to in source code by the following:
         ;
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
+
+Types with the prefix ``readonly`` are discussed in
+:ref:`Readonly Array Types` and :ref:`Readonly Tuple Types`.
 
 The usage of types is presented by the example below:
 
@@ -345,17 +300,14 @@ has the lowest precedence as presented in the following example:
     d = (): string => { return "hi" } // ok
 
 
-If annotation is used in front of type in parentheses, then parentheses become
-a mandatory part of the annotation to prevent ambiguity.
+If annotation is used in front of type in parentheses, then the parentheses
+become a mandatory part of the annotation to prevent ambiguity.
 
 .. code-block:: typescript
    :linenos:
 
     let var_name1: @my_annotation() (A|B) // OK
     let var_name2: @my_annotation (A|B)  // Compile-time error
-
-
-|
 
 .. _Named Types:
 
@@ -433,6 +385,8 @@ interface type. A type reference is valid if its type arguments (see
    generic class
    instantiation
 
+The syntax of *type reference* is presented below:
+
 .. code-block:: abnf
 
     typeReference:
@@ -494,7 +448,7 @@ Value Types
 Predefined integer types (see :ref:`Integer Types and Operations`),
 floating-point types (see :ref:`Floating-Point Types and Operations`), the
 boolean type (see :ref:`Boolean Types and Operations`), character types
-(see :ref:`Character Type and Operations`), and user-defined enumeration
+(see :ref:`Character Type and Literals`), and user-defined enumeration
 types (see :ref:`Enumerations`) are *value types*. The values of such types do
 *not* share state with other values.
 
@@ -509,6 +463,49 @@ types (see :ref:`Enumerations`) are *value types*. The values of such types do
    user-defined type
    enumeration type
    value type
+
+|
+
+.. _Numeric Types:
+
+Numeric Types
+=============
+
+.. meta:
+    frontend_status: Done
+
+Integer (see :ref:`Integer Types and Operations`) and floating-point (see
+:ref:`Floating-Point Types and Operations`) types are *numeric types*.
+
+Larger type values include all values of smaller types:
+
+-  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
+
+A value of a smaller type can be assigned to a variable of a larger type as
+a consequence (see :ref:`Widening Numeric Conversions`).
+
+Type ``bigint`` does not belong to this hierarchy. No implicit conversion
+occurs from a numeric type (see :ref:`Numeric Types`) to ``bigint``.
+Standard library (see :ref:`Standard Library`) class ``BigInt`` methods must be
+used to create ``bigint`` values from numeric types.
+
+.. index::
+   integer type
+   floating-point type
+   numeric type
+   double
+   float
+   long
+   int
+   short
+   byte
+   bigint
+   long
+   int
+   short
+   byte
+   string
+   BigInt
 
 |
 
@@ -563,8 +560,6 @@ below.
      :ref:`Integer Bitwise Operators`);
 
 -  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
--  Cast operator (see :ref:`Cast Expressions`) that converts an integer value
-   to a value of any specified numeric type (see :ref:`Numeric Types`);
 -  String concatenation operator '``+``' (see :ref:`String Concatenation`) that,
    if one operand is ``string`` and the other is of an integer type, converts
    the integer operand to ``string`` with the decimal form, and then creates a
@@ -611,8 +606,8 @@ below.
    string concatenation operator
    operand
 
-If one operand is not of type ``long``, then the numeric promotion (see
-:ref:`Primitive Types Conversions`) must be used to widen it first to type
+If one operand is not of type ``long``, then the numeric conversion (see
+:ref:`Widening Numeric Conversions`) must be used to widen it first to type
 ``long``.
 
 If neither operand is of type ``long``, then:
@@ -621,10 +616,7 @@ If neither operand is of type ``long``, then:
 -  The result of the numerical operator is of type ``int``.
 
 If one operand (or neither operand) is of type ``int``, then the numeric
-promotion must be used to widen it first to type ``int``.
-
-Any integer type value can be converted to or from any numeric type (see
-:ref:`Numeric Types`).
+conversion must be used to widen it first to type ``int``.
 
 Conversions between integer types and type ``boolean`` are not allowed.
 
@@ -660,7 +652,7 @@ An integer operator can throw errors (see :ref:`Error Handling`) as follows:
    decrement operator
    additive expression
 
-Predefine constructors, methods, and constants for *integer types*
+Predefined constructors, methods, and constants for *integer types*
 are parts of the |LANG| standard library (see
 :ref:`Standard Library`).
 
@@ -718,10 +710,7 @@ discussed below.
    + Integer bitwise operators '``&``', '``^``', and '``|``' (see
      :ref:`Integer Bitwise Operators`);
 
-- Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
-
--  Cast operator (see :ref:`Cast Expressions`) that converts a floating-point
-   value to a value of any specified numeric type (see :ref:`Numeric Types`);
+-  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
 -  The string concatenation operator '``+``' (see :ref:`String Concatenation`)
    that, if one operand is of type ``string`` and the other is of a
    floating-point type, converts the floating-point type operand to type
@@ -769,15 +758,15 @@ If at least one operand of the numerical operator is of type ``double``,
 then the operation implementation uses the 64-bit floating-point arithmetic.
 The result of the numerical operator is a value of type ``double``.
 
-If the other operand is not of type ``double``, then the numeric promotion (see
-:ref:`Primitive Types Conversions`) must be used to widen it first to type
+If the other operand is not of type ``double``, then the numeric conversion (see
+:ref:`Widening Numeric Conversions`) must be used to widen it first to type
 ``double``.
 
 If neither operand is of type ``double``, then the operation implementation
 is to use the 32-bit floating-point arithmetic. The result of the numerical
 operator is a value of type ``float``.
 
-If the other operand is not of type ``float``, then the numeric promotion
+If the other operand is not of type ``float``, then the numeric conversion
 must be used to widen it first to type ``float``.
 
 Any floating-point type value can be cast to or from any numeric type (see
@@ -838,8 +827,8 @@ significant bit zero out of any two equally near representable values.
    IEEE 754
 
 |LANG| uses *round toward zero* to convert a floating-point value to an
-integer value (see :ref:`Primitive Types Conversions`). In this case it acts as
-if the number is truncated, and the mantissa bits are discarded.
+integer value (see :ref:`Numeric Casting Conversions`). In this case
+it acts as if the number is truncated, and the mantissa bits are discarded.
 The result of *rounding toward zero* is the value of that format that is
 closest to and no greater in magnitude than the infinitely precise result.
 
@@ -877,7 +866,7 @@ All numeric operations with a ``NaN`` operand result in ``NaN``.
    floating-point value
    throw
 
-Predefine constructors, methods, and constants for *floating-point types*
+Predefined constructors, methods, and constants for *floating-point types*
 are parts of the |LANG| standard library (see
 :ref:`Standard Library`).
 
@@ -940,14 +929,15 @@ Reference Types
 
 *Reference types* can be of the following kinds:
 
--  *Class* types (see :ref:`Classes`);
+-  *Class* types (see :ref:`Type Object` and :ref:`Classes`);
 -  *Interface* types (see :ref:`Interfaces`);
 -  :ref:`Array Types`;
--  :ref:`Fixed Array Types`;
+-  :ref:`Fixed-Size Array Types`;
 -  :ref:`Tuple Types`;
 -  :ref:`Function Types`;
 -  :ref:`Union Types`;
 -  :ref:`Literal Types`;
+-  :ref:`Type Any`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
 -  :ref:`Type never`;
@@ -961,7 +951,7 @@ Reference Types
    class type
    interface type
    array type
-   fixed array type
+   fixed-size array type
    function type
    union type
    string type
@@ -974,6 +964,21 @@ Reference Types
 
 |
 
+.. _Type Any:
+
+Type ``Any``
+************
+
+Type ``Any`` is the predefined type which is the supertype
+(see :ref:`Subtyping`) of all types except
+:ref:`Type void`.
+
+Specificaly, as type ``Any`` is supertype of :ref:`Type undefined`
+and :ref:`Type null` it is a predefined *nullish-type*
+(see :ref:`Nullish Types`).
+
+|
+
 .. _Type Object:
 
 Type ``Object``
@@ -982,9 +987,12 @@ Type ``Object``
 .. meta:
     frontend_status: Done
 
-Type ``Object`` is the supertype of all types except
-:ref:`Nullish Types` and :ref:`Type Parameters`.
-All subtypes of ``Object`` (see :ref:`Subtyping`) inherit the methods of class ``Object``
+Type ``Object`` is the predefined class type which is the supertype
+(see :ref:`Subtyping`) of all types except
+:ref:`Type void`, :ref:`Type undefined`, :ref:`Type null`,
+:ref:`Nullish Types`, :ref:`Type Parameters`, and :ref:`Union types`
+that contain type parameters.
+All subtypes of ``Object`` inherit the methods of class ``Object``
 (see :ref:`Inheritance`).
 All methods of class ``Object`` are described in full in :ref:`Standard Library`.
 
@@ -1006,17 +1014,16 @@ string representation of the object.
    inheritance
 
 The term *object* is used in the Specification to refer to
-an instance of any type that is a subtype of ``Object``
-or of type ``Object`` itself.
+an instance of any type.
 
-Pointers to these objects are called *references*.
+Pointers to objects are called *references*.
 Multiple references to an object are possible.
 
-Most objects have state. The state is stored in the field if an object is
-a class instance, or in a variable that is an element of an array object.
+Objects can have states. A state is stored in a fields if an object is
+a class instance, or in elements of an array or a tuple object.
 
 If two variables of any type except :ref:`Value Types` contain references
-to the same object, and the state of that 
+to the same object, and the state of that
 object is modified in the reference of either variable, then the state so
 modified can be seen in the reference of the other variable.
 
@@ -1088,8 +1095,8 @@ Type ``void``
 .. meta:
     frontend_status: Done
 
-Type ``void`` has no instance and no value. It is typically used as the
-return type if a function or a method returns no value:
+Type ``void`` has no instances. It is used as a return type to highlight that a
+function, a method, or a lambda returns no value:
 
 .. code-block:: typescript
    :linenos:
@@ -1132,9 +1139,8 @@ A :index:`compile-time error` occurs if:
    method
    type annotation
 
-Type ``void`` can be used as type argument that instantiates a generic type
-if a specific value of type argument is irrelevant. In this case, it is a
-synonym for type ``undefined`` (see :ref:`Type undefined`):
+Type ``void`` can be used also as type argument that instantiates a generic
+type with type ``undefined`` (see :ref:`Type undefined`) as follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1142,14 +1148,20 @@ synonym for type ``undefined`` (see :ref:`Type undefined`):
 .. code-block:: typescript
    :linenos:
 
-   class A<T>
-   let a = new A<void>() // ok, type parameter is irrelevant
-   let a = new A<undefined>() // ok, the same
+   class A<T> {
+      f: T
+      m(): T { return this.f }
+      constructor (f: T) { this.f = f }
+   }
+   let a1 = new A<void>(undefined)      // ok, type parameter is irrelevant
+   let a2 = new A<undefined>(undefined) // ok, the same
+
+   console.log (a1.f, a2.m()) // Will output "undefined" "undefined"
 
    function foo<T>(x: T) {}
 
    foo<void>(undefined) // ok
-   foo<void>(void) // compile-time error: void is used as value
+   foo<void>(void)      // compile-time error: void is used as value
 
 .. index::
    type void
@@ -1168,14 +1180,14 @@ Type ``undefined``
 .. meta:
     frontend_status: Done
 
-The only value of type ``undefined`` is the keyword ``undefined`` (see
+The only value of type ``undefined`` is the literal ``undefined`` (see
 :ref:`Undefined Literal`).
 
 Using type ``undefined`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
 
-Type ``undefined`` can be used as type argument to instantiate a generic
-type if the specific value of type argument is irrelevant:
+Type ``undefined`` can be used also as type argument to instantiate a generic
+type as follows:
 
 .. code-block-meta:
 
@@ -1207,7 +1219,7 @@ Type ``null``
 .. meta:
     frontend_status: Done
 
-The only value of type ``null`` is the keyword ``null`` (see
+The only value of type ``null`` is the literal ``null`` (see
 :ref:`Null Literal`).
 
 Using type ``null`` as type annotation is not recommended, except in
@@ -1230,12 +1242,11 @@ Type ``string``
 .. meta:
     frontend_status: Done
 
-Type ``string`` stores sequences of characters as
-Unicode UTF-16 code units. Type ``string`` includes all string literals, e.g.,
-'``abc``'.
+Type ``string`` stores sequences of characters as Unicode UTF-16 code units.
+Type ``string`` values are all string literals, e.g., '``abc``'.
 
-A ``string`` object is immutable, for the value of a ``string`` object cannot
-be changed after the object is created. The value of a ``string`` object can be
+A ``string`` object is immutable, the value of a ``string`` object cannot be
+changed after the object is created. The value of a ``string`` object can be
 shared.
 
 Type ``string`` has dual semantics:
@@ -1246,9 +1257,19 @@ Type ``string`` has dual semantics:
    ``string`` operations (see :ref:`String Concatenation`,
    :ref:`String Equality Operators`, and :ref:`String Relational Operators`).
 
-If the result is not a constant expression (see :ref:`Constant Expressions`),
-then the string concatenation operator '``+``' (see :ref:`String Concatenation`)
-can implicitly create a new ``string`` object.
+
+There are number of operators to act on ``string`` values as discussed below:
+
+-  Accessing the ``length`` property to get string length
+   as ``int`` type value;
+
+-  Concatenation operator '``+``' (see :ref:`String Concatenation`) produces
+   a value of type ``string``. If the result is not a constant expression
+   (see :ref:`Constant Expressions`), then the string concatenation operator
+   can implicitly create a new ``string`` object;
+
+-  Indexing of a string value (see :ref:`String Indexing Expression`) returns
+   a value of type ``string``. New ``string`` object can be implicitly created.
 
 Using ``string`` is recommended in all cases, although the name ``String``
 also refers to type ``string``.
@@ -1297,7 +1318,7 @@ Similarly to ``string``, ``bigint`` type has dual semantics:
 - If created, assigned, or passed as an argument, type ``bigint`` behaves
   in the same manner as a reference type (see :ref:`Reference Types`).
 - All applicable operations handle type ``bigint`` as a value type (see
-  :ref:`Value Types`). Operations are described in
+  :ref:`Value Types`). The operations are described in
   :ref:`Integer Types and Operations`.
 
 Using ``bigint`` is recommended in all cases, although the name ``BigInt``
@@ -1331,7 +1352,12 @@ Literal Types
 
 *Literal types* are aligned with some |LANG| literals (see :ref:`Literals`).
 Their names are the same as the names of their values, i.e., literals.
-Only three literal types are supported.
+Only following literal types are supported:
+
+- ``string`` literal types;
+- ``null`` literal type;
+- ``undefined`` literal type.
+
 
 .. code-block:: typescript
    :linenos:
@@ -1351,55 +1377,6 @@ Only three literal types are supported.
 
 |
 
-.. _Supertypes of Literal Types:
-
-Supertypes of Literal Types
-===========================
-
-.. meta:
-    frontend_status: Done
-
-The supertype for ``string`` literals (see :ref:`String Literals`) is type
-``string``. This affects overriding as shown in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {
-        foo(p: "1"): string { return "42" }
-    }
-    class Derived extends Base {
-        override foo(p: string): "1" { return "1" }
-    }
-    // Type "1" <: string
-
-    let base: Base = new Derived
-    let result: string = base.foo("1")
-    /* Argument "1" (value) is compatible to type "1" and to type string in
-       the overridden method
-       Function result of type string accepts "1" (value) of literal type "1"
-    */
-
-``Null`` and ``undefined`` literals (see :ref:`Null Literal` and
-:ref:`Undefined Literal`) have no supertype:
-
-.. code-block:: typescript
-   :linenos:
-
-    let o: Object = new Object
-    o = null      // compile-time error
-    o = undefined // compile-time error
-
-.. index::
-   literal type
-   supertype
-   string literal
-   null literal
-   undefined literal
-   override
-
-|
-
 .. _Operations on Literal Types:
 
 Operations on Literal Types
@@ -1408,10 +1385,10 @@ Operations on Literal Types
 .. meta:
     frontend_status: Done
 
-Operations on variables of literal types are identical to the operations
-of their supertypes. The resulting operation type is the type specified
-for the operation in the supertype. In most cases, it is the supertype
-itself:
+Operations on variables of string literal types are identical to the operations
+of their supertype ``string`` (see :ref:`Subtyping for Literal Types`). The
+resulting operation type is the type specified for the operation in the
+supertype:
 
 .. code-block:: typescript
    :linenos:
@@ -1423,6 +1400,9 @@ itself:
    literal type
    variable
    supertype
+   subtyping
+
+There are no operations for literal types ``null`` and ``undefined``.
 
 |
 
@@ -1438,23 +1418,28 @@ Array Types
 
 - :ref:`Resizable Array Types`; and
 
-- :ref:`Fixed Array Types` as an experimental feature.
+- :ref:`Fixed-Size Array Types` as an experimental feature.
 
-*Resizable array types* are recommended for most cases. *Fixed array types*
-can be used where performance is the major requirement.
+*Resizable array types* are recommended for most cases.
+*Fixed-size array types* can be used where performance is the major
+requirement.
 
-*Resizable arrays* differ from *fixed arrays* as follows:
+*Resizable arrays* differ from *fixed-size arrays* as follows:
 
-- Length of *fixed array* is set once. It can lead to better performance.
-- *Fixed arrays* have no methods defined.
+- Length of *fixed-size array* is set once. It can lead to better performance.
+- *Fixed-Size arrays* have no methods defined.
+
+
+**Note**. The term *array type* as used in this document applies to both
+*resizable array type* and *fixed-size array type*. The same holds true for
+*array value* and *array instance*.
+*Resizable arrays* and *fixed-size arrays* are not assignable to each other.
 
 .. index::
    array length
-
-**Note**. The term *array type* as used in this document applies to both
-*resizable array type* and *fixed array type*. The same holds true for *array
-value* and *array instance*.
-*Resizable arrays* and *fixed arrays* are not assignable to each other.
+   array type
+   resizable array type
+   fixed-size array
 
 |
 
@@ -1469,10 +1454,10 @@ Resizable Array Types
 There are two syntax forms of *resizable array type* with elements of type ``T``
 as follows:
 
-- ``T[]``
-- ``Array<T>``
+- ``T[]``, and
+- ``Array<T>``.
 
-The first form uses the following rule:
+The first form uses the following syntax:
 
 .. code-block:: abnf
 
@@ -1484,6 +1469,8 @@ The first form uses the following rule:
 (see :ref:`Type Identity`).
 
 .. index::
+   type identity
+   resizable array type
    type identity
 
 *Resizable array type* is the built-in type characterized by the following:
@@ -1501,16 +1488,23 @@ The first form uses the following rule:
    in the array declaration (see :ref:`Assignability`).
 
 .. index::
+   resizable array type
+   array length
+   non-negative integer number
+   constant-time operation
    array type
    integer
    array element
    element type
    array declaration
+   contiguous memory location
+   assignability
+   array declaration
    access
    array
 
 Two basic operations with array elements take elements out of, and put
-elements into an array by using the operator '``[]``' and index expression.
+elements into an array by using the '``[]``' operator .
 
 The same syntax can be used to work with :ref:`Indexable Types`,
 some of such types are parts of :ref:`Standard Library`.
@@ -1522,8 +1516,8 @@ The length of an array can be set and changed in runtime using methods defined
 in the standard library (see :ref:`Standard Library`).
 
 An array can be created by using :ref:`Array Literal`,
-:ref:`Array Creation Expressions`, or the constructors defined in the standard
-library (see :ref:`Standard Library`).
+:ref:`Resizable Array Creation Expressions`, or the constructors
+defined in the standard library (see :ref:`Standard Library`).
 
 |LANG| allows setting a new value to ``length`` to shrink an array and provide
 better |TS| compatibility. The new value must be less or equal to the previous
@@ -1534,6 +1528,9 @@ information sufficient to determine this) or a runtime error.
 .. index::
    method
    array length
+   array element
+   access
+   property length
    standard library
 
 The examples are presented below:
@@ -1571,11 +1568,43 @@ An array as an object is assignable to a variable of type ``Object``:
 
 .. index::
    alias
+   array element
+   two-dimensional array
+   assignability
    array type
    object
    array
    assignment
    variable
+
+|
+
+.. _Readonly Array Types:
+
+Readonly Array Types
+====================
+
+If an *array* type has the prefix ``readonly``, then
+its length cannot be changed and its elements
+cannot be modified after the initial assignment directly or through a function
+or method call. Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: readonly number [] = [1, 2, 3]
+    x[0] = 42 // compile-time error as array itself is readonly
+
+
+**Note.** In case of multidimensional arrays, all dimensions are ``readonly``.
+
+.. index::
+   prefix readonly
+   array
+   initial value
 
 |
 
@@ -1587,20 +1616,23 @@ Tuple Types
 .. meta:
     frontend_status: Done
 
+*Tuple type* is a reference type created as a fixed set of other types.
+
+The syntax of *tuple type* is presented below:
+
 .. code-block:: abnf
 
     tupleType:
         '[' (type (',' type)* ','?)? ']'
         ;
 
-*Tuple type* is a reference type created as a fixed set of other types.
 The value of a tuple type is a group of values of types that comprise the tuple
 type. Types are specified in the order as declared within the tuple type
 declaration. It implies that each element of a tuple has its own type.
 The operator '``[]``' (square brackets) is used to access the elements of a
 tuple in a manner similar to how the elements of an array are accessed.
 
-An index expression belongs to an integer type. The index of the first tuple
+An index expression must be of integer type. The index of the first tuple
 element is *0*. Only constant expressions can be used as the index providing
 access to tuple elements.
 
@@ -1625,6 +1657,7 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
 .. index::
    tuple type
    assignability
+   operator
    object
    class
    reference type
@@ -1633,8 +1666,36 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
    array element
    index expression
    constant expression
+   square bracket
+   compatibility
 
 |
+
+.. _Readonly Tuple Types:
+
+Readonly Tuple Types
+====================
+
+If an *tuple* type has the prefix ``readonly``, then its elements
+cannot be modified after the initial assignment directly or through a function
+or method call. Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: readonly [number, string] = [1, "abc"]
+    x[0] = 42 // compile-time error as tuple itself is readonly
+
+.. index::
+   prefix readonly
+   tuple
+   initial value
+
+|
+
 
 .. _Function Types:
 
@@ -1660,6 +1721,8 @@ A function type consists of the following:
    signature
    return type
    parameter
+
+The syntax of *function type* is presented below:
 
 .. code-block:: abnf
 
@@ -1696,6 +1759,7 @@ A type alias can set a name for a *function type* (see
 :ref:`Type Alias Declaration`):
 
 .. index::
+   alias
    rest parameter
    type alias
    function type
@@ -1742,10 +1806,9 @@ default value.
        // Types of p1 and p2 are identical
     }
 
-All function types are subtypes of ``Object`` (see
-:ref:`Type Object`). More details on function types assignability are
-provided in :ref:`Assignment-like Contexts`, and conversions in
-:ref:`Function Types Conversions`.
+
+More details on function types assignability are provided in
+:ref:`Subtyping for Function Types`.
 
 .. index::
    function type
@@ -1755,6 +1818,79 @@ provided in :ref:`Assignment-like Contexts`, and conversions in
    assignability
    context
    conversion
+   mandatory parameter
+   optional parameter
+
+|
+
+.. _Type Function:
+
+Type ``Function``
+=================
+
+.. meta:
+    frontend_status: Done
+
+Type ``Function`` is a predefined type that is a *direct superinterface*
+of any function type.
+
+A value of type ``Function`` cannot be called directly. A developer must use
+the ``unsafeCall`` method instead. This method checks the arguments of type
+``Function``, and calls the underlying function value if the number and types
+of the arguments are valid.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(n: number) {}
+
+   let f: Function = foo
+
+   f(1) // compile-time error: cannot be called
+
+   f.unsafeCall(3.14) // correct call and execution
+   f.unsafeCall() // run-time error: wrong number of arguments
+
+Another important property of type ``Function`` is ``name``.
+It is a string that contains the name associated with the function object
+in the following way:
+
+-  If a function or a method is assigned to a function object, the associated
+   name is the name of this function or method;
+
+-  If a lambda is assigned to a variable of ``Function`` type, the
+   associated name is the name of the variable;
+
+-  Otherwise, it is empty string.
+
+.. code-block:: typescript
+   :linenos:
+
+   function print_name (f: Function) {
+      console.log (f.name)
+   }
+
+   function foo() {}
+   print_name (foo) // output: "foo"
+
+   class A {
+      static sm() {}
+      m() {}
+   }
+   print_name (A.sm)      // output: "sm"
+   print_name (new A().m) // output: "m"
+
+   let x: Function = (): void => {}
+   print_name (x) // output: "x"
+
+   let y = x
+   print_name (y) // output: "x"
+
+   print_name (():void=>{}) // output: ""
+
+The definitions of the ``unsafeCall`` method, ``name`` property, and all other
+methods and properties of type ``Function`` are included in the |LANG|
+:ref:`Standard Library`.
 
 |
 
@@ -1768,21 +1904,22 @@ Union Types
    todo: support string literal in union
    todo: implement using common fields and methods, fix related issues
 
+
+*Union* type is a reference type created as a combination of other types.
+
+The syntax of *union type* is presented below:
+
 .. code-block:: abnf
 
     unionType:
         type ('|' type)*
         ;
 
-*Union* type is a reference type created as a combination of other types.
-The values of a *union* type are valid values of all types the union is
-created from.
+The values of a *union* type are valid values of all types the union is created
+from.
 
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
-
-If a *union* type contains more than one numeric type (see
-:ref:`Numeric Types`) then a :index:`compile-time error` occurs.
 
 .. index::
    union type
@@ -1791,24 +1928,10 @@ If a *union* type contains more than one numeric type (see
    type declaration
    circular reference
    union
-   compile-time error
    primitive type
    literal type
    primitive type
-
-Examples of incorrect union types are represented below:
-
-.. code-block:: typescript
-   :linenos:
-
-   type BadUnion1 = int | double // Compile-time error
-
-   let i = 1
-   let d = 1.0
-   let x = cond? i : d /* Compile-time error as conditional
-        expression contains an invalid union type int | double */
-
-   type BadUnion2 = 1 | 2  // Compile-time error: only types allowed
+   circular reference
 
 Typical usage examples of *union* type are represented below:
 
@@ -1841,11 +1964,9 @@ Typical usage examples of *union* type are represented below:
    animal = 42
    // One may assign the variable of the union type with any valid value
 
-    enum NumberEnum {One, Two}
     enum StringEnum {One = "One", Two = "Two"}
 
-    type Union1 = number | NumberEnum // compile-time error more than one numeric
-    type Union2 = string | StringEnum // OK, will be reduced during normalization
+    type Union1 = string | StringEnum // OK, will be reduced during normalization
 
 Different mechanisms can be used to get values of particular types from a
 *union*:
@@ -1868,14 +1989,14 @@ Different mechanisms can be used to get values of particular types from a
 
     animal.sleep () // Any animal can sleep
 
-The following example represents primitive types:
+The following example represents predefined types:
 
 .. code-block:: typescript
    :linenos:
 
-    type Primitive = number | boolean
-    let p: Primitive = 7
-    if (p instanceof number) { 
+    type Predefined = number | boolean
+    let p: Predefined = 7
+    if (p instanceof number) {
        // type of 'p' is number here
     }
 
@@ -1919,6 +2040,7 @@ values of the *union* type:
        // This test is to be resolved during program execution
     }
 
+
 .. index::
    union type
    literal value
@@ -1941,8 +2063,7 @@ general types.
 Formally, union type ``T``:sub:`1` | ... | ``T``:sub:`N`, where ``N`` > 1, can
 be reduced to type ``U``:sub:`1` | ... | ``U``:sub:`M`, where ``M`` <= ``N``,
 or even to a non-union type *V*. In this latter case *V* can be a primitive
-value type, or a literal type that changes the reference nature of the union
-type.
+type or a literal type.
 
 The normalization process presumes that the following steps are performed one
 after another:
@@ -1953,26 +2074,29 @@ after another:
    value type
    non-union type
    normalization
-   literal
+   literal type
+   primitive type
 
 #. All nested union types are linearized.
 #. All type aliases (if any and except recursive ones) are recursively replaced
    for non-alias types.
-#. Identical types within the union type are replaced for a single type with
+#. Identical types within a union type are replaced for a single type with
    account to the ``readonly`` type flag priority.
-#. If at least one type in the union is ``Object``, then all other non-nullish
+#. If at least one type in a union is ``Object``, then all other non-nullish
    types are removed.
 #. If present among union types, type ``never`` is removed.
-#. If one type in the union is ``string``, then all string literal types (if
-   any) are removed.
-#. The following procedure is performed recursively until no assignable
-   types remain, or the union type is reduced to
-   a single type:
+#. If one type in a union is ``string``, then all string literal types (if
+   any) and all enumerations with constants of type ``string``
+   (if any) are removed.
+#. If one type in a union is an integer type, then all enumerations with
+   constants of the same integer type or of a shorter type
+   (if any) are removed.
+#. If a union type includes two types ``T``:sub:`i` and ``T``:sub:`j` (i != j),
+   and ``T``:sub:`i` is subtype of ``T``:sub:`j` (see :ref:`Subtyping`), then
+   only ``T``:sub:`j` remains in the union type, and ``T``:sub:`i` is removed.
 
-   -  If a union type includes two types ``T``:sub:`i` and ``T``:sub:`j` (i != j),
-      and ``T``:sub:`i` is subtype of ``T``:sub:`j` (see
-      :ref:`Subtyping`), then only ``T``:sub:`j` remains in the union
-      type, and ``T``:sub:`i` is removed.
+   This procedure is performed recursively until no assignable type remains, or
+   the until the union type is reduced to a single type.
 
 .. index::
    union type
@@ -2010,6 +2134,12 @@ is presented in the examples below:
     (number[]) | (readonly number[]) // normalized as readonly number[]. Readonly version wins
 
     "1" | string | number // normalized as  string | number. Literal type value belongs to another type values
+
+    enum ES {A = "AA", B = "BB"}
+    string | ES // normalized as "string", as all enumeration constants values are of type "string"
+
+    enum EI {A, B}
+    int | EI // normalized as "int", as all enumeration constants values are of type "int"
 
     "1" | Object // normalized as Object. Object always wins
     AnyNonNullishType | Object // normalized as Object
@@ -2096,13 +2226,15 @@ A :index:`compile-time error` occurs otherwise:
 ===============
 
 .. meta:
-   frontend_status: None
+   frontend_status: Done
 
-A special form of union types are ``keyof`` types built by using the keyword
-``keyof``. The keyword ``keyof`` is applied to the class or interface type (see
-:ref:`Classes` and :ref:`Interfaces`). The resultant new type is a union of
-names (as string literal types)
-of all accessible members of the class or interface type.
+``Keyof`` types are a special form of union type that is built by using the
+keyword ``keyof``. The keyword ``keyof`` is applied to a class or an interface
+type (see :ref:`Classes` and :ref:`Interfaces`). The resultant new type is a
+union of names (as string literal types) of all accessible members (see
+:ref:`Accessible`) of the class or the interface type.
+
+The syntax of *keyof type* is presented below:
 
 .. code-block:: abnf
 
@@ -2117,9 +2249,9 @@ of all accessible members of the class or interface type.
    interface type
    semantics
 
-A :index:`compile-time error` occurs if ``typeReference`` is not a class or
-interface type. The semantics of type ``keyof`` is presented in the example
-below:
+A :index:`compile-time error` occurs if ``typeReference`` is neither a class
+nor an interface type. The semantics of type ``keyof`` is presented in the
+example below:
 
 
 .. code-block-meta:
@@ -2137,7 +2269,7 @@ below:
     a_keys = "any string different from field or method"
       // Compile-time error: invalid value for the type KeysOfA
 
-If the class or the interface is empty, then its type ``keyof`` is equivalent
+If a class or an interface is empty, then its type ``keyof`` is equivalent
 to type ``never``:
 
 .. code-block-meta:
@@ -2145,16 +2277,14 @@ to type ``never``:
 .. code-block:: typescript
    :linenos:
 
-    class A {} // Empty class 
+    class A {} // Empty class
     type KeysOfA = keyof A // never
 
 .. index::
    class
    interface type
-   type never
-   type keyof
-
-
+   never type
+   keyof type
 
 |
 
@@ -2173,7 +2303,8 @@ Nullish Types
 can be used as the type to specify a
 nullish version of type ``T``.
 
-All predefined and user-defined type declarations create non-nullish types.
+All predefined types, except :ref:`Type Any`, and all
+user-defined types are non-nullish types.
 Non-nullish types cannot have a ``null`` or ``undefined`` value at runtime.
 
 A variable declared to have type ``T | null`` can hold the values of type ``T``
@@ -2227,7 +2358,7 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
 
 -  Conversion from ``T | null`` or ``T | undefined`` to ``T``:
 
-   -  Cast expression (see :ref:`Cast Expressions` for details);
+   -  :ref:`Cast Expression`;
    -  Ensure-not-nullish expression (see :ref:`Ensure-Not-Nullish Expressions`
       for details);
 
@@ -2264,7 +2395,9 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
    cast expression
    ensure-not-nullish expression
    nullish-coalescing expression
+   nullish-safe option
    nullish value
+   nullish type
    safe method call
    safe field access
    safe indexing expression
@@ -2278,28 +2411,22 @@ Default Values for Types
 ************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 **Note**. This feature in |LANG| is experimental.
 
 The following types use so-called *default values* for variables that require
 no explicit initialization (see :ref:`Variable Declarations`):
 
-.. - All primitive types and *string* (see the table below).
-
-- Primitive types (see the table below);
-- Literal types;
-- All union types that have at least one ``undefined``.
+- :ref:`Value Types`;
+- ``undefined`` and all its supertypes
 
 .. -  Nullable reference types with the default value *null* (see :ref:`Literals`).
 
-All other types, including reference types, enumeration types, and type
-parameters have no default values. Variables of such types must be initialized
-explicitly with a value before these variables are used for the first time.
+All other types, including reference types, enumeration types, and type parameters
+have no default values.
 
-.. Default values of primitive types are as follows:
-
-Default values of primitive types are as follows:
+Default values of value types are as follows:
 
 .. index::
    default value
@@ -2308,6 +2435,7 @@ Default values of primitive types are as follows:
    literal type
    nullable reference type
    primitive type
+   undefined type
    type parameter
    reference type
    enumeration type
@@ -2335,22 +2463,7 @@ Default values of primitive types are as follows:
 | ``boolean``  | ``false``          |
 +--------------+--------------------+
 
-Default values of literal types are literals of such types:
-
-.. code-block:: typescript
-   :linenos:
-
-    let a: "string literal"
-    let b: null
-    let c: undefined
-
-    printThem (a, b, c)
-    function printThem (p1: "string literal", p2: null, p3: undefined) {
-        console.log (p1, p2, p3)
-        // Output: string literal null undefined
-    }
-
-The default value of a union type that contains type ``undefined`` is ``undefined``.
+``undefined`` value is a default value of each type it can be assigned to.
 
 .. code-block-meta:
 
@@ -2377,7 +2490,7 @@ The default value of a union type that contains type ``undefined`` is ``undefine
    boolean
    type
    null
-   undefined
+   undefined type
    data type
 
 -------------

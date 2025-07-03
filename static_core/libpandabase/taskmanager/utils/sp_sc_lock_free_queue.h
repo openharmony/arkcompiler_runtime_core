@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "coherency_line_size.h"
 #include <array>
 #include <atomic>
-#include <optional>
 
 namespace ark::taskmanager::internal {
 
@@ -42,7 +41,7 @@ class SPSCLockFreeQueue {
         std::atomic<QueueNode *> next = nullptr;
     };
 
-    using QueueNodeAllocatorType = typename Allocator::template rebind<QueueNode>::other;
+    using QueueNodeAllocatorType = typename std::allocator_traits<Allocator>::template rebind_alloc<QueueNode>;
     template <class U, class OtherAllocator>
     friend class SPSCLockFreeQueue;
 
@@ -50,63 +49,79 @@ public:
     SPSCLockFreeQueue()
     {
         auto *node = GetNewQueueNode();
-        // Atomic with release order reason: other threads should see correct value
-        head_.store(node, std::memory_order_release);
-        // Atomic with release order reason: other threads should see correct value
-        tail_.store(node, std::memory_order_release);
+        // Atomic with relaxed order reason: no order requirement
+        head_.store(node, std::memory_order_relaxed);
+        // Atomic with relaxed order reason: no order requirement
+        tail_.store(node, std::memory_order_relaxed);
     }
+    ~SPSCLockFreeQueue()
+    {
+        ASSERT(pushIndex_ == popIndex_);
+        ASSERT(head_ == tail_);
+        // Atomic with relaxed order reason: no order requirement
+        auto head = head_.load(std::memory_order_relaxed);
+        DeleteQueueNode(head);
+    }
+
     NO_COPY_SEMANTIC(SPSCLockFreeQueue);
     NO_MOVE_SEMANTIC(SPSCLockFreeQueue);
 
     void Push(T &&val)
     {
-        // Atomic with acquire order reason: gets correct value
-        auto *tail = tail_.load(std::memory_order_acquire);
-        // Atomic with acquire order reason: gets correct value
-        auto pushIndex = pushIndex_.load(std::memory_order_acquire);
-        if (UNLIKELY(GetNodeIndex(pushIndex) == 0 && pushIndex != 0)) {
+        // Atomic with relaxed order reason: gets local variable
+        auto *tail = tail_.load(std::memory_order_relaxed);
+        // Atomic with relaxed order reason: gets local variable
+        auto pushIndex = pushIndex_.load(std::memory_order_relaxed);
+        if UNLIKELY (GetNodeIndex(pushIndex) == 0) {
             auto *node = GetNewQueueNode();
-            // Atomic with release order reason: other threads should see correct value
-            tail->next.store(node, std::memory_order_release);
+            // Atomic with relaxed order reason: set in local variable
+            tail->next.store(node, std::memory_order_relaxed);
             node->buffer[0] = std::move(val);
-            // Atomic with release order reason: other threads should see correct value
-            tail_.store(node, std::memory_order_release);
+            // Atomic with relaxed order reason: set in local variable
+            tail_.store(node, std::memory_order_relaxed);
         } else {
             tail->buffer[GetNodeIndex(pushIndex)] = std::move(val);
         }
-        ASSERT(pushIndex != SIZE_MAX);
         // Atomic with release order reason: other threads should see correct value
         pushIndex_.store(pushIndex + 1U, std::memory_order_release);
     }
 
-    std::optional<T> Pop()
+    bool TryPop(T *val)
     {
-        // Atomic with acquire order reason: gets correct value
-        auto *head = head_.load(std::memory_order_acquire);
-        // Atomic With acquire order reason: gets correct value
+        ASSERT(val != nullptr);
+        // Atomic with relaxed order reason: gets local variable
+        auto *head = head_.load(std::memory_order_relaxed);
+        // Atomic With relaxed order reason: gets local variable
+        auto popIndex = popIndex_.load(std::memory_order_relaxed);
+        // Atomic with acquire order reason: need observe on pushes local variables
         auto pushIndex = pushIndex_.load(std::memory_order_acquire);
-        // Atomic with acquire order reason: gets correct value
-        auto popIndex = popIndex_.load(std::memory_order_acquire);
         if (popIndex == pushIndex) {
-            return std::nullopt;
+            return false;
         }
 
-        T val;
-        if (UNLIKELY(GetNodeIndex(popIndex) == 0 && popIndex != 0)) {
-            // Atomic with acquire order reason: gets correct value
-            auto *nextHead = head->next.load(std::memory_order_acquire);
+        if UNLIKELY (GetNodeIndex(popIndex) == 0) {
+            // Atomic with relaxed order reason: gets local variable
+            auto *nextHead = head->next.load(std::memory_order_relaxed);
             ASSERT(nextHead != nullptr);
-            // Atomic with release order reason: other threads should see correct value
-            head_.store(nextHead, std::memory_order_release);
+            // Atomic with relaxed order reason: set in local variable
+            head_.store(nextHead, std::memory_order_relaxed);
             DeleteQueueNode(head);
-            val = std::move(nextHead->buffer[0]);
+            *val = std::move(nextHead->buffer[0]);
         } else {
-            val = std::move(head->buffer[GetNodeIndex(popIndex)]);
+            *val = std::move(head->buffer[GetNodeIndex(popIndex)]);
         }
         ASSERT(popIndex != SIZE_MAX);
-        // Atomic with release order reason: other threads should see correct value
-        popIndex_.store(popIndex + 1, std::memory_order_release);
+        // Atomic with relaxed order reason: set in local variable
+        popIndex_.store(popIndex + 1, std::memory_order_relaxed);
 
+        return true;
+    }
+
+    T Pop()
+    {
+        T val;
+        while (!TryPop(&val)) {
+        }
         return val;
     }
 
@@ -117,20 +132,11 @@ public:
 
     size_t inline Size() const
     {
-        // Atomic with acquire order reason: gets correct value
-        auto popIndex = popIndex_.load(std::memory_order_acquire);
-        // Atomic with acquire order reason: gets correct value
-        auto pushIndex = pushIndex_.load(std::memory_order_acquire);
+        // Atomic with relaxed order reason: gets correct value
+        auto pushIndex = pushIndex_.load(std::memory_order_relaxed);
+        // Atomic with relaxed order reason: gets correct value
+        auto popIndex = popIndex_.load(std::memory_order_relaxed);
         return pushIndex - popIndex;
-    }
-
-    ~SPSCLockFreeQueue()
-    {
-        ASSERT(pushIndex_ == popIndex_);
-        ASSERT(head_ == tail_);
-        // Atomic with acquire order reason: gets correct value
-        auto head = head_.load(std::memory_order_acquire);
-        DeleteQueueNode(head);
     }
 
 private:
@@ -157,8 +163,8 @@ private:
     alignas(ark::COHERENCY_LINE_SIZE) std::atomic<QueueNode *> head_ = {nullptr};
     alignas(ark::COHERENCY_LINE_SIZE) std::atomic<QueueNode *> tail_ = {nullptr};
 
-    alignas(ark::COHERENCY_LINE_SIZE) std::atomic<size_t> popIndex_ = {0UL};
-    alignas(ark::COHERENCY_LINE_SIZE) std::atomic<size_t> pushIndex_ = {0UL};
+    alignas(ark::COHERENCY_LINE_SIZE) std::atomic<size_t> popIndex_ = {1UL};
+    alignas(ark::COHERENCY_LINE_SIZE) std::atomic<size_t> pushIndex_ = {1UL};
 };
 
 }  // namespace ark::taskmanager::internal

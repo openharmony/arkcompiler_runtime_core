@@ -18,7 +18,7 @@ cases:
   - use: |-
       let a : FixedArray<string> = ["a", "b", "c"]
   - use: |-
-      let a : FixedArray<char> = ["a"]
+      let a : FixedArray<Char> = [c'a']
   - use: |-
       let a : FixedArray<byte> = [4]
   - use: |-

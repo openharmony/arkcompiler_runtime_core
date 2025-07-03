@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as FuncTest from "@generated/function_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as FuncTest from "function_test";
 
 loadLibrary("ani_function");
 
@@ -82,14 +82,23 @@ function test_string_return_value() {
 
 function test_from_callback() {
     let foo = FuncTest.makeFoo();
-    foo.add(10, NUMBER_TWENTY, (error: Error, data?: int) => {
-        assertEQ(data, 30);
-        if (!error.message) {
-            console.log("main finsih test async success ", data);
-        } else {
-            console.log("main finsih test async ERROR ", error);
-        }
-    })
+    let p = new Promise<int>((resolve, reject) => {
+        foo.add(10, NUMBER_TWENTY, (error: BusinessError, data?: int) => {
+            if (error.message) {
+                reject(error);
+            } else {
+                resolve(data!);
+            }
+        });
+    });
+    let res: int;
+    let err: BusinessError = new BusinessError();
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    assertEQ(res, 30);
 }
 
 function test_static_func_add() {
@@ -146,5 +155,5 @@ function main() {
     suite.addTest("test new class with two args", test_new_class_with_two_args);
 
     suite.addTest("test static property", test_static_property);
-    System.exit(suite.run());
+    exit(suite.run());
 }

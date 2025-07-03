@@ -47,8 +47,9 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
         // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
         // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
         method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
-        BuildIntrinsic();
-        return;
+        if (TryBuildIntrinsic()) {
+            return;
+        }
     }
     // Here "GetMethodById" can be used without additional checks, result may be nullptr and it is normal situation
     method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
@@ -170,12 +171,10 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
-        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
+        Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId_, SLOT_KIND);
@@ -184,8 +183,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ =
                 GetGraph()->CreateInstCallStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchStatic(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -201,16 +198,12 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ = GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_,
                                                               method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     } else if (method_ == nullptr || Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveVirtual(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(Builder()->GetMethod(), methodId_, SLOT_KIND);
@@ -220,8 +213,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -233,11 +224,11 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     [[maybe_unused]] uint32_t classId)
 {
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
+    if constexpr (OPCODE == Opcode::CallStatic) {
         BuildCallStaticInst(classId);
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
+    if constexpr (OPCODE == Opcode::CallVirtual) {
         BuildCallVirtualInst();
     }
     if (UNLIKELY(call_ == nullptr)) {
@@ -553,6 +544,23 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     Builder()->BuildMonitor(bcInst_, Builder()->GetArgDefinition(bcInst_, 0, ACC_READ), isEnter);
 }
 
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+bool InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::TryBuildIntrinsic()
+{
+    auto runtime = GetRuntime();
+    auto isMethodStatic = runtime->IsMethodStatic(method_);
+    auto isMethodFinal = runtime->IsMethodFinal(method_);
+    auto isClassFinal = runtime->IsClassFinal(runtime->GetClass(method_));
+    if (isMethodStatic || isMethodFinal || isClassFinal) {
+        BuildIntrinsic();
+        return true;
+    }
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Skips building intrinsic '"
+                                    << GetIntrinsicName(runtime->GetIntrinsicId(method_))
+                                    << "' since the method and class is not final.";
+    return false;
+}
+
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
 void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildIntrinsic()
@@ -673,30 +681,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)

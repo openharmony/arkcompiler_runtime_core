@@ -423,6 +423,75 @@ TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_011)
     ASSERT_EQ(env_->Object_CallMethodByName_Int_A(obj, "intByNameMethod", "II:I", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
+
+TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_int res = 0;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Int(nullptr, object, "intByNameMethod", "II:I", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Int_A(nullptr, object, "intByNameMethod", "II:I", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(nullptr, "intByNameMethod", "II:I", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(nullptr, "intByNameMethod", "II:I", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(object, nullptr, "II:I", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(object, nullptr, "II:I", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(object, "intByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(object, "intByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(object, "intByNameMethod", "II:I", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int_A(object, "intByNameMethod", "II:I", nullptr, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_int res = 0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Int(object, methodName.data(), "II:I", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Int_A(object, methodName.data(), "II:I", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodIntByNameTest, object_call_method_by_name_int_014)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_int res = 0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Int(object, "intByNameMethod", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Int_A(object, "intByNameMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

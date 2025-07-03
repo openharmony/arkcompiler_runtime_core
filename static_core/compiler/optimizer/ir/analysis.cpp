@@ -513,6 +513,43 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm)
     return std::nullopt;
 }
 
+bool CheckArrayFieldObject(RuntimeInterface::ArrayField kind, Inst *inst)
+{
+    auto loadObject = inst->CastToLoadObject();
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    auto type = loadObject->GetObjectType();
+    auto field = loadObject->GetObjField();
+    if (type != ObjectType::MEM_STATIC && type != ObjectType::MEM_OBJECT) {
+        return false;
+    }
+    return runtime->IsFieldArray(kind, field);
+}
+
+bool CheckArrayField(RuntimeInterface::ArrayField kind, Inst *inst, Inst *&arrayOriginRef)
+{
+    while (inst != nullptr) {
+        switch (inst->GetOpcode()) {
+            case Opcode::LoadObject:
+                if (!CheckArrayFieldObject(kind, inst)) {
+                    return false;
+                }
+                inst = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+                break;
+            case Opcode::LenArray:
+                inst = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+                break;
+            case Opcode::Parameter:
+                if (arrayOriginRef == nullptr) {
+                    arrayOriginRef = inst;
+                }
+                return inst == arrayOriginRef;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
 ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
                                                                            Inst *stopSearch, BasicBlock *targetBlock)
 {

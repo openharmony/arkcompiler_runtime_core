@@ -26,7 +26,7 @@ syntax:
   "tokenizer": {
     "root": [
       [
-        "/\\b(abstract|else|internal|static|as|enum|launch|switch|async|export|let|super|await|extends|native|this|break|false|new|throw|case|final|null|true|class|for|override|try|const|function|package|undefined|constructor|if|private|while|continue|implements|protected|default|import|public|do|interface|return|boolean|double|number|byte|float|short|bigint|int|string|char|long|void|catch|namespace|throws)\\b/",
+        "/\\b(abstract|else|internal|static|as|enum|switch|async|export|let|super|await|extends|native|this|break|false|new|throw|case|final|null|true|class|for|override|try|const|function|package|undefined|constructor|if|private|while|continue|implements|protected|default|import|public|do|interface|return|boolean|double|number|byte|float|short|bigint|int|string|char|long|void|catch|namespace|throws)\\b/",
         "keyword"
       ],
       [

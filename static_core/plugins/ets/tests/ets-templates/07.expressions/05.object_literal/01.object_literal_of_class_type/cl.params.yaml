@@ -51,8 +51,8 @@ cases:
           }
       use: |-
           let a: A = { b: { c: { age: 42, name: "John" }}}
-          assertTrue( a.b.c.name == "John" )
-          assertTrue( a.b.c.age == 42 )
+          assertEQ( a!.b!.c!.name, "John" )
+          assertEQ( a!.b!.c!.age, 42 )
 
     - decl: |-
           class A {

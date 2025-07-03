@@ -74,6 +74,8 @@ public:
 
     PANDA_PUBLIC_API uint32_t GetNumArgSlots() const;
 
+    uint32_t GetNumMandatoryArgs();
+
     EtsType GetArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
@@ -188,14 +190,20 @@ public:
         return (GetAccessFlags() & ACC_CRITICAL_NATIVE) != 0;
     }
 
-    bool IsBindedNativeFunction() const
+    bool IsBoundNativeFunction() const
     {
+        ASSERT(!IsIntrinsic());
         return GetPandaMethod()->GetNativePointer() != nullptr;
     }
 
     bool IsFunction() const
     {
-        return (GetAccessFlags() & ACC_FUNCTION) != 0;
+        return GetClass()->IsModule();
+    }
+
+    bool IsIntrinsic() const
+    {
+        return GetPandaMethod()->IsIntrinsic();
     }
 
     bool IsDeprecatedNativeAPI() const
@@ -235,23 +243,25 @@ public:
         return name->GetMutf8().rfind(SETTER_BEGIN, 0) == 0;
     }
 
-    bool RegisterNativeMethod(const void *ptr)
+    void RegisterNative(const void *ptr)
     {
-        return RegisterNative(ptr, false);
-    }
+        ASSERT(!IsIntrinsic());
+        ASSERT(IsNative());
+        ASSERT(!IsBoundNativeFunction());
 
-    bool RegisterNativeFunction(const void *ptr)
-    {
-        return RegisterNative(ptr, true);
+        Method *m = GetPandaMethod();
+
+        m->SetNativePointer(const_cast<void *>(ptr));
     }
 
     bool RegisterNativeDeprecated(void *impl)
     {
+        ASSERT(!IsIntrinsic());
         ASSERT(IsNative());
-        ASSERT(!IsFunction());
-        if (IsBindedNativeFunction()) {
+        if (IsBoundNativeFunction()) {
             return false;
         }
+
         Method *m = GetPandaMethod();
         m->SetAccessFlags(m->GetAccessFlags() | ACC_DEPRECATED_NATIVE_API);
         m->SetNativePointer(impl);
@@ -260,11 +270,12 @@ public:
 
     bool UnregisterNativeDeprecated()
     {
+        ASSERT(!IsIntrinsic());
         ASSERT(IsNative());
-        ASSERT(!IsFunction());
-        if (!IsBindedNativeFunction()) {
+        if (!IsBoundNativeFunction()) {
             return false;
         }
+
         Method *m = GetPandaMethod();
         m->SetNativePointer(nullptr);
         m->SetAccessFlags(m->GetAccessFlags() & ~ACC_DEPRECATED_NATIVE_API);
@@ -356,21 +367,7 @@ public:
     NO_MOVE_SEMANTIC(EtsMethod);
 
 private:
-    bool RegisterNative(const void *ptr, bool isFunction)
-    {
-        ASSERT(IsNative());
-        if (IsBindedNativeFunction()) {
-            return false;
-        }
-        ASSERT(!IsFunction());
-        Method *m = GetPandaMethod();
-        if (isFunction) {
-            // NOTE: ACC_FUNCTION flag must be set during class loading, #22482
-            m->SetAccessFlags(m->GetAccessFlags() | ACC_FUNCTION);
-        }
-        m->SetNativePointer(const_cast<void *>(ptr));
-        return true;
-    }
+    std::optional<uint32_t> TryGetMinArgCount();
 };
 
 }  // namespace ark::ets

@@ -14,30 +14,30 @@
 ---
 cases:
     - decl: |-
-          // override-equivalent signatures, different throws clause
-          class Ex extends Exception {}
+          // override-equivalent signatures
+          class Ex extends Error {}
           class A {
-              constructor(p: number) throws { if (p < 0) throw new Ex() }
+              constructor(p: number) { if (p < 0) throw new Ex() }
               constructor(v: double) {}
           }
       use: return
       tags: negative, compile-only
 
     - decl: |-
-          // override-equivalent signatures, different throws clause
-          class Ex extends Exception {}
+          // override-equivalent signatures
+          class Ex extends Error {}
           class A {
-              constructor(p: Number) throws { if (p < 0) throw new Ex() }
+              constructor(p: Number) { if (p < 0) throw new Ex() }
               constructor(v: Double) {}
           }
       use: return
       tags: negative, compile-only
 
     - decl: |-
-          // override-equivalent signatures, different throws clause
-          class Ex extends Exception {}
+          // override-equivalent signatures
+          class Ex extends Error {}
           class A {
-              constructor(p: string) throws { if (p < 0) throw new Ex() }
+              constructor(p: string) { if (p < 0) throw new Ex() }
               constructor(v: String) {}
           }
       use: return
@@ -46,9 +46,9 @@ cases:
     - decl: |-
           type B = A
           // override-equivalent signatures
-          class Ex extends Exception {}
+          class Ex extends Error {}
           class A {
-              constructor(p: A) throws { if (p instanceof Error) throw new Ex() }
+              constructor(p: A) { if (p instanceof Error) throw new Ex() }
               constructor(v: B) {}
           }
       use: return
@@ -57,69 +57,47 @@ cases:
     - decl: |-
           type B = A
           // override-equivalent signatures
-          class Ex extends Exception {}
+          class Ex extends Error {}
           class A {
-              constructor(p: A|string) throws { if (p instanceof A) throw new Ex() }
+              constructor(p: A|string) { if (p instanceof A) throw new Ex() }
               constructor(v: string|B) {}
           }
       use: return
       tags: negative, compile-only
 
     - decl: |-
-          // primitives and boxed, different throws clauses
-          class Ex extends Exception {}
-          let ex: Ex = new Ex()
+          // primitives and boxed
           class A {
               t: string = ""
               getType(): string {
                   return this.t
               }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: byte) throws { if (p == 0) throw ex; else this.t = "byte" }
               constructor(p: Byte) { this.t = "Byte" }
               constructor(p: short) { this.t = "short" }
-              constructor(p: Short) throws { if (p == 0) throw ex; else this.t = "Short" }
-              constructor(p: int) throws { if (p == 0) throw ex; else this.t = "int" }
               constructor(p: Int) { this.t = "Int" }
               constructor(p: long) { this.t = "long" }
-              constructor(p: Long) throws { if (p == 0) throw ex; else this.t = "Long" }
-              constructor(p: char) throws { if (p == 0) throw ex; else this.t = "char" }
               constructor(p: Char) { this.t = "Char" }
               constructor(p: boolean) { this.t = "boolean" }
-              constructor(p: Boolean) { this.t = "Boolean" }
-              constructor(p: float) throws { if (p == 0) throw ex; else this.t = "float" }
               constructor(p: Float) { this.t = "Float" }
               constructor(p: double) { this.t = "double" }
-              constructor(p: Double) throws { if (p == 0) throw ex; else this.t = "Double" }
           }
       use: |-
-          try {
-              assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
-              assertTrue(new A(new Short(-1 as short)).getType() == "Short")
-              assertTrue(new A(new Int(-1 as int)).getType() == "Int")
-              assertTrue(new A(new Long(-1 as long)).getType() == "Long")
-              assertTrue(new A(new Char(c'A')).getType() == "Char")
-              assertTrue(new A(new Boolean(false)).getType() == "Boolean")
-              assertTrue(new A(new Float(3.14 as float)).getType() == "Float")
-              assertTrue(new A(new Double(3.14)).getType() == "Double")
-              assertTrue(new A(-1 as long).getType() == "long")
-              assertTrue(new A(-1).getType() == "int")
-              assertTrue(new A(-1 as short).getType() == "short")
-              assertTrue(new A(-1 as byte).getType() == "byte")
-              assertTrue(new A(c'A').getType() == "char")
-              assertTrue(new A(false).getType() == "boolean")
-              assertTrue(new A(3.14).getType() == "double")
-              assertTrue(new A(3.14 as float).getType() == "float")
-          } catch (e) {
-              assertTrue(false)
-          }
+          assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
+          assertTrue(new A(new Int(-1 as int)).getType() == "Int")
+          assertTrue(new A(new Char(c'A')).getType() == "Char")
+          assertTrue(new A(new Float(3.14 as float)).getType() == "Float")
+          assertTrue(new A(-1 as long).getType() == "long")
+          assertTrue(new A(-1 as short).getType() == "short")
+          assertTrue(new A(false).getType() == "boolean")
+          assertTrue(new A(3.14).getType() == "double")
 
     - decl: |-
-          // enums, different throws clauses
+          // enums
           enum Color { Red, Green=82, Blue }
           enum Size { S="small", M="medium", L="large" }
           enum Status { ready, set, go }
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               t: string = ""
@@ -127,9 +105,9 @@ cases:
                   return this.t
               }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: Color) throws { if (p.getValue() == 1) throw ex; else this.t = "Color" }
+              constructor(p: Color) { if (p.valueOf() == 1) throw ex; else this.t = "Color" }
               constructor(p: Size) { this.t = "Size" }
-              constructor(p: Status) throws { if (p.getValue() == 1) throw ex; else this.t = "Status" }
+              constructor(p: Status) { if (p.valueOf() == 1) throw ex; else this.t = "Status" }
           }
       use: |-
           try {
@@ -141,9 +119,7 @@ cases:
           }
 
     - decl: |-
-          // arrays, different throws clauses
-          class Ex extends Exception {}
-          let ex: Ex = new Ex()
+          // arrays
           class A {
               t: string = ""
               getType(): string {
@@ -151,63 +127,35 @@ cases:
               }
               constructor() {}
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: A[]) { this.t = "A" }
-              constructor(p: Object[]) throws { if (p.length == 0) throw ex; else this.t = "Object" }
-              constructor(p: byte[]) { this.t = "byte" }
-              constructor(p: short[]) throws { if (p.length == 0) throw ex; else this.t = "short" }
-              constructor(p: int[]) { this.t = "int" }
-              constructor(p: long[]) throws { if (p.length == 0) throw ex; else this.t = "long" }
-              constructor(p: char[]) { this.t = "char" }
-              constructor(p: boolean[]) { this.t = "boolean" }
-              constructor(p: float[]) throws { if (p.length == 0) throw ex; else this.t = "float" }
-              constructor(p: double[]) throws { if (p.length == 0) throw ex; else this.t = "double" }
-              constructor(p: Byte[]) { this.t = "Byte" }
-              constructor(p: Short[]) throws { if (p.length == 0) throw ex; else this.t = "Short" }
-              constructor(p: Int[]) { this.t = "Int" }
-              constructor(p: Long[]) throws { if (p.length == 0) throw ex; else this.t = "Long" }
-              constructor(p: Char[]) throws { if (p.length == 0) throw ex; else this.t = "Char" }
-              constructor(p: Boolean[]) { this.t = "Boolean" }
-              constructor(p: Float[]) throws { if (p.length == 0) throw ex; else this.t = "Float" }
-              constructor(p: Double[]) { this.t = "Double" }
+              constructor(p: FixedArray<A>) { this.t = "A" }
+              constructor(p: FixedArray<char>) { this.t = "char" }
+              constructor(p: FixedArray<byte>) { this.t = "byte" }
+              constructor(p: FixedArray<int>) { this.t = "int" }
+              constructor(p: FixedArray<boolean>) { this.t = "boolean" }
+              constructor(p: FixedArray<Double>) { this.t = "Double" }
           }
       use: |-
-          try {
-              assertTrue(new A([-1 as byte]).getType() == "byte")
-              assertTrue(new A([-1 as short]).getType() == "short")
-              assertTrue(new A([-1 as int]).getType() == "int")
-              assertTrue(new A([-1 as long]).getType() == "long")
-              assertTrue(new A([c'A']).getType() == "char")
-              assertTrue(new A([false]).getType() == "boolean")
-              assertTrue(new A([3.14 as float]).getType() == "float")
-              assertTrue(new A([3.14]).getType() == "double")
-              assertTrue(new A([new Byte(-1 as byte)]).getType() == "Byte")
-              assertTrue(new A([new Short(-1 as short)]).getType() == "Short")
-              assertTrue(new A([new Int(-1)]).getType() == "Int")
-              assertTrue(new A([new Long(-1 as long)]).getType() == "Long")
-              assertTrue(new A([new Char(c'A')]).getType() == "Char")
-              assertTrue(new A([new Boolean(false)]).getType() == "Boolean")
-              assertTrue(new A([new Float(3.14 as float)]).getType() == "Float")
-              assertTrue(new A([new Double(3.14)]).getType() == "Double")
-              assertTrue(new A([new Object()]).getType() == "Object")
-              assertTrue(new A(new A[1]).getType() == "A")
-          } catch (e) {
-              assertTrue(false)
-          }
+          assertTrue(new A([-1 as byte]).getType() == "byte")
+          assertTrue(new A([-1 as int]).getType() == "int")
+          assertTrue(new A([c'A']).getType() == "char")
+          assertTrue(new A([false]).getType() == "boolean")
+          assertTrue(new A([new Double(3.14)]).getType() == "Double")
+          assertTrue(new A(new A[1]).getType() == "A")
 
     - decl: |-
-          // tuples, different throws clauses
+          // tuples
           type T = [number, string]
           type R = [number, boolean]
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               t: string = ""
               getType(): string {
                   return this.t
               }
-              constructor() throws { throw ex }
+              constructor() { throw ex }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: T) throws { if (p[0] == 0) throw ex; else this.t = "T" }
+              constructor(p: T) { if (p[0] == 0) throw ex; else this.t = "T" }
               constructor(p: R) { this.t = "R" }
           }
       use: |-
@@ -226,16 +174,16 @@ cases:
           // unions, different throw clauses
           type USN = string | number
           type USB = string | Boolean
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               t: string = ""
               getType(): string {
                   return this.t
               }
-              constructor() throws { throw ex }
+              constructor() { throw ex }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: USN) throws { if (p instanceof Error) throw ex; else this.t = "USN" }
+              constructor(p: USN) { if (p instanceof Error) throw ex; else this.t = "USN" }
               constructor(p: USB) { this.t = "USB" }
           }
       use: |-
@@ -256,16 +204,16 @@ cases:
           // function types, different throw clauses
           type FF=(p: number) => string
           type EE=(p: string) => number
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               t: string = ""
               getType(): string {
                   return this.t
               }
-              constructor() throws { throw ex }
+              constructor() { throw ex }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: FF) throws { if (p == this.t) throw ex; else this.t = "FF" }
+              constructor(p: FF) { if (p == this.t) throw ex; else this.t = "FF" }
               constructor(p: EE) { this.t = "EE" }
           }
           function fff(v: number): string {
@@ -289,18 +237,18 @@ cases:
           type SN=string|null
           type SU=string|undefined
           type SNU=string|null|undefined
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               t: string = ""
               getType(): string {
                   return this.t
               }
-              constructor() throws { throw ex }
+              constructor() { throw ex }
               constructor(p: Object|null|undefined) { this.t = "should never be called" }
-              constructor(p: SN) throws { if (this == ex) throw ex; else this.t = "SN" }
+              constructor(p: SN) { if (this == ex) throw ex; else this.t = "SN" }
               constructor(p: SU) { this.t = "SU" }
-              constructor(p: SNU) throws { if (this == ex) throw ex; this.t = "SNU" }
+              constructor(p: SNU) { if (this == ex) throw ex; this.t = "SNU" }
               constructor(p: S) { this.t = "S" }
           }
       use: |-

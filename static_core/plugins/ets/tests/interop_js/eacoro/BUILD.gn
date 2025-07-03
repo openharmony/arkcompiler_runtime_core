@@ -16,12 +16,22 @@ import("$ark_root/plugins/ets/tests/interop_js/interop_tests.gni")
 
 interop_test("attach_thread_test") {
   js = [ "attach_thread_test.js" ]
+  js_module = [ "helpers.js" ]
   ets = "attach_test.ets"
   sources = [ "attach_thread_test.cpp" ]
 }
 
+interop_test("eaworker_test") {
+  js = [ "eaworker_test.js" ]
+  js_module = [ "helpers.js" ]
+  ets = "eaworker_test.ets"
+}
+
 group("eacoro_tests") {
   if (ark_ets_hybrid) {
-    deps = [ ":attach_thread_test" ]
+    deps = [
+      ":attach_thread_test",
+      ":eaworker_test",
+    ]
   }
 }

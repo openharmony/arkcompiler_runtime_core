@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -52,7 +52,7 @@ class Platform(PlatformBase):
 
     @property
     def langs(self) -> List[str]:
-        return self.args_langs if self.args_langs else ['ts', 'js']
+        return list(self.args_langs) if self.args_langs else ['ts', 'js']
 
     def run_unit(self, bu: BenchUnit) -> None:
         if self.tsc:

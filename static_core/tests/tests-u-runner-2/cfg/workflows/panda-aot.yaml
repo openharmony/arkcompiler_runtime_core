@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runner-api-level: 0.0.0.1
 type: workflow
-workflow-name: arkts-aot
+workflow-name: panda-aot
 parameters:
     # common
     build: ${PANDA_BUILD}
@@ -23,6 +22,7 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
+    enable-es2panda: True
     enable-verifier: True
     extension: ${parameters.extension}
     # ark and ark_aot
@@ -32,14 +32,11 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     ark-args: [ ]
+    compiler-enable-jit: "false"
     ark-full-args:
         - ${parameters.ark-args}
         - "--enable-an:force"
     aot-args: [ ]
-    aot-full-args:
-        - ${parameters.aot-args}
-        - "--compiler-check-final=true"
-        - "--compiler-ignore-failures=false"
 steps:
     imports:
         only-es2panda:
@@ -48,6 +45,7 @@ steps:
             work-dir: ${parameters.work-dir}
             extension: ${parameters.extension}
             load-runtimes: ${parameters.load-runtimes}
+            enable-es2panda: ${parameters.enable-es2panda}
             enable-verifier: ${parameters.enable-verifier}
             es2panda-timeout: ${parameters.es2panda-timeout}
             verifier-timeout: ${parameters.verifier-timeout}
@@ -59,7 +57,7 @@ steps:
             full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
             load-runtimes: ${parameters.load-runtimes}
             aot-timeout: ${parameters.aot-timeout}
-            aot-args: ${parameters.aot-full-args}
+            aot-args: ${parameters.aot-args}
         only-runtime:
             ark-timeout: ${parameters.ark-timeout}
             build: ${parameters.build}
@@ -68,6 +66,7 @@ steps:
             gc-type: ${parameters.gc-type}
             full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
             load-runtimes: ${parameters.load-runtimes}
+            compiler-enable-jit: ${parameters.compiler-enable-jit}
             ark-args:
                 - ${parameters.ark-full-args}
                 - "--aot-files=${parameters.paoc-output-file}"

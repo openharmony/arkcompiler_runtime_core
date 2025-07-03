@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 #
 
 from pathlib import Path
-from typing import Tuple
 
-from runner.sts_utils.constants import NEGATIVE_PREFIX, NEGATIVE_EXECUTION_PREFIX, SKIP_PREFIX
+from runner.sts_utils.constants import NEGATIVE_EXECUTION_PREFIX, NEGATIVE_PREFIX, SKIP_PREFIX
 
 
 def is_negative(path: Path) -> bool:
@@ -29,7 +28,7 @@ def should_be_skipped(path: Path) -> bool:
     return path.name.startswith(SKIP_PREFIX)
 
 
-def strip_template(path: Path) -> Tuple[str, int]:
+def strip_template(path: Path) -> tuple[str, int]:
     stem = path.stem
     i = path.stem.rfind("_")
     if i == -1:

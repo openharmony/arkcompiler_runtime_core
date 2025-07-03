@@ -32,6 +32,8 @@
 
       Intrinsics:
         header: plugins/ets/runtime/intrinsics_declaration.h
+        inlining_expansion_inl_h: plugins/ets/compiler/intrinsics_inlining_expansion_ets.inl.h
+        inlining_expansion_switch_case_inl: plugins/ets/compiler/intrinsics_inlining_expansion_switch_case_ets.inl
         ir_build_static_call_inl: plugins/ets/compiler/intrinsics_ir_build_static_call_ets.inl
         ir_build_virtual_call_inl: plugins/ets/compiler/intrinsics_ir_build_virtual_call_ets.inl
         ir_build_inl_h: plugins/ets/compiler/intrinsics_ir_build_ets.inl.h
@@ -63,6 +65,7 @@
         - plugins_string_builder: plugins/ets/irtoc_scripts/string_builder.irt
         - plugins_string: plugins/ets/irtoc_scripts/string.irt
         - plugins_to_string_cache: plugins/ets/irtoc_scripts/to_string_cache.irt
+        - plugins_typed_arrays: plugins/ets/irtoc_scripts/typed_arrays.irt
 
       Metadatas:
         - RecordMetadata:
@@ -79,8 +82,8 @@
             header_path: plugins/ets/assembler/extension/ets_meta.h
       compiler_extensions:
         header_path_compiler_inst_builder_extension: plugins/ets/compiler/optimizer/ir_builder/ets_inst_builder.h
+        header_path_compiler_interface_extension: plugins/ets/compiler/ets_compiler_interface.h
         header_path_implementation_codegen: plugins/ets/compiler/optimizer/ets_codegen_extensions.h
-        launch_call_codegen: LaunchCallCodegen
         load_immediate_codegen: LoadImmediateCodegen
         get_native_method_codegen: EtsGetNativeMethod
         get_native_method_managed_class_codegen: EtsGetNativeMethodManagedClass

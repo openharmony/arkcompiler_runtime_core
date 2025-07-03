@@ -23,10 +23,10 @@ desc: >-
 class A {}
 let a: A|undefined = new A()
 
-let num: Number
-let str: string
-let err: Error
-let bool: Boolean
+let num: Number = 0;
+let str: string = "";
+let err: Error = new Error();
+let bool: Boolean = false;
 
 function foo(p: Object|undefined): number {
     if (p === undefined) {

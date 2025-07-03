@@ -19,7 +19,11 @@ assert: It there is an initializer in a non-static field declaration, then the f
 ---*/
 
 class A {
-  public y: int = 5;
+  private _y: int = 5;
+
+  public get y(): int{
+    return this._y;
+  }
 }
 
 class B extends A {

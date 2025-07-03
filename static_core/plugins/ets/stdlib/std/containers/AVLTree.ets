@@ -99,7 +99,6 @@ function legalLeftKey<K extends Comparable<Object>, V>(node: Node<K, V> | null, 
     }
 
     let leftKey: K = node!.key;
-    assertLT(leftKey.compareTo(key), 0);
 }
 
 function legalRightKey<K extends Comparable<Object>, V>(node: Node<K, V> | null, key: K): void {
@@ -108,7 +107,6 @@ function legalRightKey<K extends Comparable<Object>, V>(node: Node<K, V> | null,
     }
 
     let rightKey: K = node!.key ;
-    assertLT(0, rightKey.compareTo(key));
 }
 
 function inv<K extends Comparable<Object>, V>(node: Node<K, V> | null): void {
@@ -122,8 +120,6 @@ function inv<K extends Comparable<Object>, V>(node: Node<K, V> | null): void {
         legalLeftKey(node!.left, node!.key);
         legalRightKey(node!.right, node!.key);
 
-        assertEQ(node!.height, max(hl, hr) + 1);
-        assertLE(abs(hl - hr), 2);
     }
 }
 
@@ -150,8 +146,6 @@ function balanceTree<K extends Comparable<Object>, V>(node: Node<K, V> | null): 
         let hr = height(rootNode.right);
 
         if (hl > hr + 2) {
-            assertTrue(!(isEmpty(rootNode.left)), "rootNode.left is empty!");
-            assertTrue(!(isLeaf(rootNode.left)), "rootNode.left is leaf!");
             let leftNode = rootNode.left!;
             if (height(leftNode.left) >= height(leftNode.right)) {
                 rootNode.left = leftNode.right;
@@ -162,8 +156,6 @@ function balanceTree<K extends Comparable<Object>, V>(node: Node<K, V> | null): 
 
                 return leftNode;
             } else {
-                assertTrue(!(isEmpty(leftNode.right)), "leftNode.right is empty!");
-                assertTrue(!(isLeaf(leftNode.right)), "leftNode.right is leaf!");
                 let lrNode = leftNode.right!;
 
                 leftNode.right = lrNode.left;
@@ -178,8 +170,6 @@ function balanceTree<K extends Comparable<Object>, V>(node: Node<K, V> | null): 
                 return lrNode;
             }
         } else if (hr > hl + 2) {
-            assertTrue(!(isEmpty(rootNode.right)), "rootNode.right is empty!");
-            assertTrue(!(isLeaf(rootNode.right)), "rootNode.right is leaf!");
             let rightNode = rootNode.right!;
             if (height(rightNode.right) >= height(rightNode.left)) {
                 rootNode.right = rightNode.left;
@@ -190,8 +180,6 @@ function balanceTree<K extends Comparable<Object>, V>(node: Node<K, V> | null): 
 
                 return rightNode;
             } else {
-                assertTrue(!(isEmpty(rightNode.left)), "rightNode.left is empty!")
-                assertTrue(!(isLeaf(rightNode.left)), "rightNode.left is leaf!");
                 let rlNode = rightNode.left!;
 
                 rightNode.left = rlNode.right;
@@ -216,8 +204,6 @@ function balanceTree<K extends Comparable<Object>, V>(node: Node<K, V> | null): 
 
 function setLeft<K extends Comparable<Object>, V>(node: Node<K, V>, tree: Node<K, V> | null): void {
     let tree1 = balanceTree(tree);
-    assertTrue(isNode(node), "Value " + node + " is not a node!");
-
     let n = node;
     if (n.left != tree1) {
         n.left = tree1;
@@ -228,7 +214,6 @@ function setLeft<K extends Comparable<Object>, V>(node: Node<K, V>, tree: Node<K
 
 function setRight<K extends Comparable<Object>, V>(node: Node<K, V>, tree: Node<K, V> | null): void {
     let tree1 = balanceTree(tree);
-    assertTrue(isNode(node), "Value " + node + " is not a node!");
 
     let n = node;
     if (n.right != tree1) {
@@ -316,7 +301,6 @@ function minElt<K extends Comparable<Object>, V>(node: Node<K, V> | null): Node<
 }
 
 function removeMinElt<K extends Comparable<Object>, V>(node: Node<K, V>): Node<K, V> | null {
-    assertTrue(!(isEmpty(node)), "Tree " + node + " is empty!");
     if (isLeaf(node)) {
         return null;
     }
@@ -343,8 +327,6 @@ export function mergeTree<K extends Comparable<Object>, V>(t1: Node<K, V> | null
     let nt2 = t2 as Node<K, V>;
 
     let tree: Node<K, V> = minElt(nt2) as Node<K, V>;
-
-    assertTrue(!(isEmpty(tree)), "Tree " + tree + " is empty!");
 
     if (isLeaf(tree)) {
         let leaf = tree;

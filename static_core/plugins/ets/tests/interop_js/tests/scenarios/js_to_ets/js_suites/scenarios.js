@@ -264,18 +264,6 @@ export function functionSpreadParameter(arg1, arg2) {
 	return arg1 + arg2; // transpiled from Typescript code: export function functionSpreadParameter(arg1: number, arg2: number)
 }
 
-// export function functionOverloaded() {}
-
-// export function functionOverloaded(arg) {}
-
-// export function functionOverload() {
-// 	let value = 1;
-// 	functionOverloaded();
-// 	functionOverloaded(value);
-// 	return value;
-// }
-
-
 export function functionArgStringLiteralType(arg) {
 	return arg;
 	// transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +17,14 @@
 
 import os
 from pathlib import Path
-from typing import Tuple, Dict, List, Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateSyntaxError
+from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError, select_autoescape
 
 from runner import common_exceptions
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
 from runner.options.config import Config
-from runner.sts_utils.constants import \
-    SKIP_PREFIX, \
-    VARIABLE_START_STRING, \
-    TEMPLATE_EXTENSION, OUT_EXTENSION
+from runner.sts_utils.constants import OUT_EXTENSION, SKIP_PREFIX, TEMPLATE_EXTENSION, VARIABLE_START_STRING
 from runner.sts_utils.exceptions import InvalidFileFormatException, UnknownTemplateException
 from runner.sts_utils.file_structure import walk_test_subdirs
 from runner.sts_utils.metainformation import InvalidMetaException, find_all_metas
@@ -48,12 +44,12 @@ class StdlibTemplatesGenerator(IGenerator):
         )
 
     @staticmethod
-    def __deduplicate_key_content(key: str, key_uniq_suffix: int) -> Tuple[str, int]:
+    def __deduplicate_key_content(key: str, key_uniq_suffix: int) -> tuple[str, int]:
         key_updated = str(key) + "_" + str(key_uniq_suffix).rjust(3, '0')
         key_uniq_suffix += 1
         return key_updated, key_uniq_suffix
 
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         """
         Renders all templates and saves them.
         """
@@ -64,7 +60,7 @@ class StdlibTemplatesGenerator(IGenerator):
             generated_tests.extend(generated_tests_tmp)
         return generated_tests
 
-    def render_and_write_templates(self, root_path: Path, dirpath: Path, outpath: Path) -> List[str]:
+    def render_and_write_templates(self, root_path: Path, dirpath: Path, outpath: Path) -> list[str]:
         """
         Recursively walk the FS, save rendered templates
         Loads parameters and renders all templates in `dirpath`.
@@ -88,7 +84,7 @@ class StdlibTemplatesGenerator(IGenerator):
                 generated_test_list.append(str(output_filepath))
         return generated_test_list
 
-    def __render_template(self, filepath: str, params: Any = None) -> str:
+    def __render_template(self, filepath: str, params: dict[str, list] | None = None) -> str:
         """
         Renders a single template and returns result as string
         """
@@ -106,7 +102,7 @@ class StdlibTemplatesGenerator(IGenerator):
             _LOGGER.default(message)
             raise UnknownTemplateException(filepath=filepath, exception=common_exp) from common_exp
 
-    def __split_into_tests(self, text: str, filepath: str) -> Dict[str, str]:
+    def __split_into_tests(self, text: str, filepath: str) -> dict[str, str]:
         """
         Splits rendered template into multiple tests.
         'filepath' is needed for exceptions

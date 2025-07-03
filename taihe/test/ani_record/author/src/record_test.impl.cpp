@@ -101,7 +101,7 @@ map<string, string> CreateStringString(int32_t a)
 map<string, int32_t> GetMapfromArray(array_view<::record_test::Data> d)
 {
     map<string, int32_t> m;
-    for (int i = 0; i < d.size(); ++i) {
+    for (std::size_t i = 0; i < d.size(); ++i) {
         m.emplace(d[i].a, d[i].b);
     }
     return m;
@@ -109,11 +109,11 @@ map<string, int32_t> GetMapfromArray(array_view<::record_test::Data> d)
 
 ::record_test::Data GetDatafromMap(map_view<string, ::record_test::Data> m, string_view k)
 {
-    auto iter = m.find(k);
+    auto iter = m.find_item(k);
     if (iter == nullptr) {
         return {"su", 7};
     }
-    return {iter->a, iter->b};
+    return {iter->second.a, iter->second.b};
 }
 
 void ForeachMap(map_view<string, string> my_map)
@@ -537,7 +537,6 @@ map<string, array<string>> Mapfunc40()
 map<string, record_test::TypeUnion> Mapfunc41()
 {
     int32_t const value = 123;
-
     map<string, record_test::TypeUnion> result;
     result.emplace("key1", record_test::TypeUnion::make_a(value));
     result.emplace("key2", record_test::TypeUnion::make_b(true));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,54 @@ inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThr
         return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType, IS_VOLATILE>(obj, offset));
     }
     return Get<ObjectHeader *, IS_VOLATILE>(obj, offset);
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjects(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                        ObjectHeader *value)
+{
+    auto *barrierSet = GetBarrierSet();
+    if (NEED_WRITE_BARRIER && barrierSet->IsPreBarrierEnabled()) {
+        FillObjsWithPreBarrier<IS_VOLATILE, IS_DYN>(objArr, dataOffset, count, elemSize, value);
+    } else {
+        FillObjsNoBarrier<IS_VOLATILE, IS_DYN>(objArr, dataOffset, count, elemSize, value);
+    }
+    if (NEED_WRITE_BARRIER && (!mem::IsEmptyBarrier(barrierSet->GetPostType()))) {
+        barrierSet->PostBarrier(objArr, dataOffset, count * elemSize);
+    }
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjsWithPreBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                                   ObjectHeader *value)
+{
+    auto *barrierSet = GetBarrierSet();
+    for (size_t i = 0; i < count; i++) {
+        auto offset = dataOffset + elemSize * i;
+        barrierSet->PreBarrier(GetObject<IS_VOLATILE, false, IS_DYN>(objArr, offset));
+        if (!IS_DYN) {
+            Set<ObjectPointerType, IS_VOLATILE>(objArr, offset, ToObjPtrType(value));
+        } else {
+            Set<ObjectHeader *, IS_VOLATILE>(objArr, offset, value);
+        }
+    }
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjsNoBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                              ObjectHeader *value)
+{
+    for (size_t i = 0; i < count; i++) {
+        auto offset = dataOffset + elemSize * i;
+        if (!IS_DYN) {
+            Set<ObjectPointerType, IS_VOLATILE>(objArr, offset, ToObjPtrType(value));
+        } else {
+            Set<ObjectHeader *, IS_VOLATILE>(objArr, offset, value);
+        }
+    }
 }
 
 /* static */
@@ -344,13 +392,14 @@ inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offs
 }
 
 /* static */
-template <typename T>
+template <typename T, bool USE_UBYTE_ARITHMETIC>
 // CC-OFFNXT(G.FUD.06) perf critical
 inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                  [[maybe_unused]] T value,
                                                  [[maybe_unused]] std::memory_order memoryOrder)
 {
-    if constexpr (std::is_same_v<T, uint8_t>) {  // NOLINT(readability-braces-around-statements)
+    if constexpr (std::is_same_v<T, uint8_t> &&
+                  !USE_UBYTE_ARITHMETIC) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do add for boolean";
         UNREACHABLE();
     } else {                                          // NOLINT(readability-misleading-indentation)
@@ -373,6 +422,36 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
             // Atomic with parameterized order reason: memory order passed as argument
             return atomicAddr->fetch_add(value, memoryOrder);
         }
+    }
+}
+
+/* static */
+template <typename T, bool USE_UBYTE_ARITHMETIC>
+// CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+inline std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> ObjectAccessor::GetAndSubFieldPrimitive(
+    // CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+    [[maybe_unused]] void *obj, [[maybe_unused]] size_t offset, [[maybe_unused]] T value,
+    // CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+    [[maybe_unused]] std::memory_order memoryOrder)
+{
+    if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
+        // Atmoic fetch_add only defined in the atomic specializations for integral and pointer
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+        // Atomic with parameterized order reason: memory order passed as argument
+        T oldValue = atomicAddr->load(memoryOrder);
+        T newValue;
+        do {
+            newValue = oldValue - value;
+        } while (!atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder));
+        return oldValue;
+    } else {  // NOLINT(readability-misleading-indentation, readability-else-after-return)
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+        // Atomic with parameterized order reason: memory order passed as argument
+        return atomicAddr->fetch_sub(value, memoryOrder);
     }
 }
 

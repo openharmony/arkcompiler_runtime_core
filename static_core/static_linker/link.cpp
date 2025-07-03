@@ -89,6 +89,48 @@ bool CollectAbcFiles(const std::vector<std::string> &files, std::vector<std::str
     return true;
 }
 
+bool ReadDependenciesFromConfig(const ark::static_linker::Options &options, ark::static_linker::Config &conf)
+{
+    if (options.IsStripUnused() && options.GetStripUnusedSkiplist().empty()) {
+        // treat all classes as entry point
+        conf.allFileIsEntry = true;
+        return true;
+    }
+    if (!options.GetStripUnusedSkiplist().empty() && !options.IsStripUnused()) {
+        std::cerr << "Please set `strip-unused` if you want to strip abc." << std::endl;
+        return false;
+    }
+
+    auto inputs = options.GetStripUnusedSkiplist();
+    if (inputs.size() == 1) {
+        std::string fileListName = inputs[0];
+        auto dotPos = fileListName.rfind('.');
+        if (dotPos == std::string::npos || fileListName[0] != '@') {
+            return true;
+        }
+        auto suffix = fileListName.substr(dotPos + 1);
+        if (suffix != "txt") {
+            return true;
+        }
+
+        std::ifstream ifs;
+        std::string line;
+        auto input = fileListName.substr(1);
+        conf.entryNames.clear();
+        ifs.open(input);
+        if (!ifs.is_open()) {
+            std::cerr << "Failed to open config file '" << input << "'" << std::endl;
+            return false;
+        }
+
+        while (std::getline(ifs, line)) {
+            conf.entryNames.insert(line);
+        }
+        ifs.close();
+    }
+    return true;
+}
+
 }  // namespace
 
 int main(int argc, const char *argv[])
@@ -132,6 +174,12 @@ int main(int argc, const char *argv[])
 
     classesVecToSet(options.GetPartialClasses(), conf.partial);
     classesVecToSet(options.GetRemainsPartialClasses(), conf.remainsPartial);
+    std::transform(options.GetStripUnusedSkiplist().begin(), options.GetStripUnusedSkiplist().end(),
+                   std::inserter(conf.entryNames, conf.entryNames.begin()), [](const std::string &s) { return s; });
+
+    if (!ReadDependenciesFromConfig(options, conf)) {
+        return PrintHelp(paParser);
+    }
 
     auto res = ark::static_linker::Link(conf, options.GetOutput(), abcFiles);
 

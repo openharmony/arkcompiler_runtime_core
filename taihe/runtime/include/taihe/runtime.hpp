@@ -12,20 +12,73 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_RUNTIME_HPP
-#define TAIHE_RUNTIME_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_
+#define RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_
+// NOLINTBEGIN
 
+#if __has_include(<ani.h>)
+#include <ani.h>
+#elif __has_include(<ani/ani.h>)
+#include <ani/ani.h>
+#else
+#error "ani.h not found. Please ensure the Ani SDK is correctly installed."
+#endif
+
+#include <taihe/object.hpp>
 #include <taihe/string.hpp>
 
-#include <ani.h>
-
 namespace taihe {
-void set_env(ani_env *env);
-ani_env *get_env();
-void set_business_error(int32_t err_code, taihe::string_view msg);
+// Error handling functions
+
 void set_error(taihe::string_view msg);
+void set_business_error(int32_t err_code, taihe::string_view msg);
 void reset_error();
 bool has_error();
 }  // namespace taihe
 
-#endif // TAIHE_RUNTIME_HPP
+namespace taihe {
+// VM and Environment related functions
+
+void set_vm(ani_vm *vm);
+ani_vm *get_vm();
+
+inline ani_env *get_env()
+{
+    ani_env *env = nullptr;
+    get_vm()->GetEnv(ANI_VERSION_1, &env);
+    return env;
+}
+
+class env_guard {
+    ani_env *env;
+    bool is_temporary;
+
+public:
+    env_guard()
+    {
+        is_temporary = get_vm()->GetEnv(ANI_VERSION_1, &env) != ANI_OK;
+        if (is_temporary) {
+            get_vm()->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
+        }
+    }
+
+    ~env_guard()
+    {
+        if (is_temporary) {
+            get_vm()->DetachCurrentThread();
+        }
+    }
+
+    env_guard(env_guard const &) = delete;
+    env_guard &operator=(env_guard const &) = delete;
+    env_guard(env_guard &&) = delete;
+    env_guard &operator=(env_guard &&) = delete;
+
+    ani_env *get_env()
+    {
+        return env;
+    }
+};
+}  // namespace taihe
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_RUNTIME_HPP_

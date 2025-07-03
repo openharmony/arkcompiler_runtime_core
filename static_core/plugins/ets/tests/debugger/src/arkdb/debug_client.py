@@ -23,11 +23,12 @@ from typing import Any, AsyncIterator, Callable, Dict, List, Literal, Optional, 
 
 import trio
 import trio_cdp
-from cdp import debugger, runtime
+from cdp import debugger, runtime, profiler
 
 from arkdb.compiler import StringCodeCompiler
 from arkdb.debug_connection import ArkConnection, Proxy, ScriptsCache, SourcesCache, connect_cdp
 from arkdb.extensions import debugger as ext_debugger
+from arkdb.extensions import profiler as ext_profiler
 
 T: TypeAlias = trio_cdp.T
 
@@ -233,6 +234,21 @@ class DebuggerClient:
 
     async def step_over(self) -> debugger.Paused:
         return await self.send_and_wait_for_paused(debugger.step_over())
+
+    async def profiler_enable(self) -> None:
+        await self.connection.send(profiler.enable())
+
+    async def profiler_set_sampling_interval(self, interval: int) -> None:
+        await self.connection.send(profiler.set_sampling_interval(interval))
+
+    async def profiler_start(self) -> None:
+        await self.connection.send(profiler.start())
+
+    async def profiler_stop(self) -> ext_profiler.ProfileArray:
+        return await self.connection.send(ext_profiler.profiler_stop())
+
+    async def profiler_disable(self) -> None:
+        await self.connection.send(profiler.disable())
 
     def _create_on_execution_contexts_cleared(self, nursery: trio.Nursery):
         def _on_execution_contexts_cleared(_: runtime.ExecutionContextsCleared):

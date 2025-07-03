@@ -17,17 +17,81 @@ package std.core;
 
 export namespace Intl {
 
-    export interface RelativeTimeFormatOptions {
-        localeMatcher?: RelativeTimeFormatLocaleMatcher;
-        numeric?: RelativeTimeFormatNumeric;
-        style?: RelativeTimeFormatStyle;
-    }
-
     export interface ResolvedRelativeTimeFormatOptions {
-        locale: UnicodeBCP47LocaleIdentifier;
+        locale: string;
         numberingSystem: string;
         numeric: RelativeTimeFormatNumeric;
         style: RelativeTimeFormatStyle;
+    }
+
+    export class RelativeTimeFormatOptions {
+        public numeric: RelativeTimeFormatNumeric = "always";
+        public style: RelativeTimeFormatStyle = "long";
+        public localeMatcher?: RelativeTimeFormatLocaleMatcher;
+
+        constructor(options?: RelativeTimeFormatOptions) {
+            if (options !== undefined) {
+                this.numeric = options.numeric ?? "always";
+                this.style = options.style ?? "long";
+                this.localeMatcher = options.localeMatcher;
+            }
+        }
+
+        public static isEmpty(options: RelativeTimeFormatOptions): boolean {
+            return options.numeric === undefined &&
+                options.style === undefined &&
+                options.localeMatcher === undefined;
+        }
+
+        public toString(): string {
+            return JSON.stringify(this);
+        }
+    }
+
+    class ResolvedRelativeTimeFormatOptionsImpl implements ResolvedRelativeTimeFormatOptions {
+        private _locale: string;
+        private _numberingSystem: string;
+        private _numeric: RelativeTimeFormatNumeric;
+        private _style: RelativeTimeFormatStyle;
+
+        constructor(locale: string, numberingSystem: string) {
+            this._locale = locale;
+            this._numberingSystem = numberingSystem;
+            this._numeric = 'always';
+            this._style = 'long';
+        }
+
+        get locale(): string {
+            return this._locale;
+        }
+
+        set locale(value: string) {
+            this._locale = value;
+        }
+
+        get numberingSystem(): string {
+            return this._numberingSystem;
+        }
+
+        set numberingSystem(value: string) {
+            this._numberingSystem = value;
+        }
+
+        get numeric(): RelativeTimeFormatNumeric {
+            return this._numeric;
+        }
+
+        set numeric(value: RelativeTimeFormatNumeric) {
+            this._numeric = value;
+        }
+
+        get style(): RelativeTimeFormatStyle {
+            return this._style;
+        }
+
+        set style(value: RelativeTimeFormatStyle) {
+            this._style = value;
+        }
     }
 
     export interface RelativeTimeFormatPart {
@@ -36,4 +100,64 @@ export namespace Intl {
         value: string;
     }
 
+    export class RelativeTimeFormat {
+        private static readonly DEFAULT_OPTIONS: RelativeTimeFormatOptions = {
+            numeric: "always",
+            style: "long"
+        };
+        private readonly locale: string | undefined
+        private readonly options: RelativeTimeFormatOptions
+
+        constructor(locales?: string | string[], options?: RelativeTimeFormatOptions) {
+            if (locales !== undefined) {
+                const useLookup = options?.localeMatcher === 'lookup'
+                this.locale = useLookup ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
+            } else {
+                this.locale = undefined
+            }
+            const resolved: RelativeTimeFormatOptions = {
+                numeric: options?.numeric ?? RelativeTimeFormat.DEFAULT_OPTIONS.numeric,
+                style: options?.style ?? RelativeTimeFormat.DEFAULT_OPTIONS.style,
+                localeMatcher: options?.localeMatcher
+            }
+
+            this.options = resolved
+        }
+
+        public static $_invoke(locales?: string | string[], options?: RelativeTimeFormatOptions): RelativeTimeFormat {
+            return new RelativeTimeFormat(locales, options)
+        }
+
+        format(value: number, unit: RelativeTimeFormatUnit): string {
+            return this.formatImpl(value, unit)
+        }
+
+        formatToParts(value: number, unit: RelativeTimeFormatUnit): RelativeTimeFormatPart[] {
+            let val = this.formatImpl(value, unit)
+            let part: RelativeTimeFormatPart = {type: 'literal', value: val}
+            return [part]
+        }
+
+        resolvedOptions(): ResolvedRelativeTimeFormatOptions {
+            const opt = this.resolvedOptionsImpl()
+            opt.numeric = this.options.numeric ?? 'always';
+            opt.style = this.options.style ?? 'long';
+            return opt
+        }
+
+        static supportedLocalesOf(locales: string, options?: RelativeTimeFormatOptions): string[] {
+            return RelativeTimeFormat.supportedLocalesOfImpl([locales], options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
+        }
+
+        static supportedLocalesOf(locales: string[], options?: RelativeTimeFormatOptions): string[] {
+            return RelativeTimeFormat.supportedLocalesOfImpl(locales, options ?? RelativeTimeFormat.DEFAULT_OPTIONS)
+        }
+
+        private native formatImpl(value: number, unit: string): string
+        private native resolvedOptionsImpl(): ResolvedRelativeTimeFormatOptions
+
+        private static supportedLocalesOfImpl(locales: string[], options: RelativeTimeFormatOptions): string[] {
+            return options.localeMatcher === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
+        }
+    }
 }

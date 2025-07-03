@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,11 +71,9 @@ LightTaskTimeTimeStats::LightTaskTimeTimeStats(size_t countOfWorkers)
     }
 }
 
-void LightTaskTimeTimeStats::CollectLifeAndExecutionTimes(TaskProperties prop, uint64_t lifeTime,
-                                                          uint64_t executionTime)
+void LightTaskTimeTimeStats::CollectLifeAndExecutionTimes(QueueId id, uint64_t lifeTime, uint64_t executionTime)
 {
-    auto propHash = TaskProperties::Hash()(prop);
-    auto &meanTimeStats = statisticsContainerPerThread_[containerId_][propHash];
+    auto &meanTimeStats = statisticsContainerPerThread_[containerId_][id];
 
     meanTimeStats.sumExecutionTime += executionTime;
     meanTimeStats.sumLifeTime += lifeTime;
@@ -91,39 +89,25 @@ void LightTaskTimeTimeStats::CollectLifeAndExecutionTimes(TaskProperties prop, u
 std::vector<std::string> LightTaskTimeTimeStats::GetTaskStatistics()
 {
     std::vector<std::string> resultData;
-    for (auto prop : GetAllTaskProperties()) {
-        if (GetCountOfTasksWithProperties(prop) == 0) {
+    for (QueueId id = 0; id < MAX_ID_COUNT; id++) {
+        if (GetCountOfTasksWithProperties(id) == 0) {
             continue;
         }
-        resultData.push_back(GetStatisticsForProperties(prop));
+        resultData.push_back(GetStatisticsForProperties(id));
     }
     return resultData;
 }
 
-std::vector<TaskProperties> LightTaskTimeTimeStats::GetAllTaskProperties()
-{
-    std::vector<TaskProperties> allTaskProperties;
-    for (TaskType taskType : ALL_TASK_TYPES) {
-        for (VMType vmType : ALL_VM_TYPES) {
-            for (TaskExecutionMode executionMode : ALL_TASK_EXECUTION_MODES) {
-                allTaskProperties.emplace_back(taskType, vmType, executionMode);
-            }
-        }
-    }
-    return allTaskProperties;
-}
-
-std::string LightTaskTimeTimeStats::GetStatisticsForProperties(TaskProperties prop)
+std::string LightTaskTimeTimeStats::GetStatisticsForProperties(QueueId id)
 {
     std::stringstream stream;
-    auto propHash = TaskProperties::Hash()(prop);
     uint64_t sumLifeTime = 0;
     uint64_t sumExecutionTime = 0;
     uint64_t maxLifeTime = 0;
     uint64_t maxExecutionTime = 0;
     size_t sumTaskCount = 0;
     for (const auto &statisticsContainer : statisticsContainerPerThread_) {
-        const auto &meanStatistics = statisticsContainer[propHash];
+        const auto &meanStatistics = statisticsContainer[id];
         sumLifeTime += meanStatistics.sumLifeTime;
         sumExecutionTime += meanStatistics.sumExecutionTime;
 
@@ -134,18 +118,17 @@ std::string LightTaskTimeTimeStats::GetStatisticsForProperties(TaskProperties pr
     }
     auto meanLifeTime = static_cast<double>(sumLifeTime) / sumTaskCount;
     auto meanExecutionTime = static_cast<double>(sumExecutionTime) / sumTaskCount;
-    stream << "Task " << prop << ": mean life time: " << meanLifeTime << "us; max life time: " << maxLifeTime
+    stream << "TaskQueueId: " << id << "; mean life time: " << meanLifeTime << "us; max life time: " << maxLifeTime
            << "us; mean execution time: " << meanExecutionTime << "us; "
            << "max execution time: " << maxExecutionTime << "us; count of tasks: " << sumTaskCount << ";";
     return stream.str();
 }
 
-size_t LightTaskTimeTimeStats::GetCountOfTasksWithProperties(TaskProperties prop)
+size_t LightTaskTimeTimeStats::GetCountOfTasksWithProperties(QueueId id)
 {
-    auto propHash = TaskProperties::Hash()(prop);
     size_t sumTaskCount = 0;
     for (const auto &statisticsContainer : statisticsContainerPerThread_) {
-        const auto &meanStatistics = statisticsContainer[propHash];
+        const auto &meanStatistics = statisticsContainer[id];
         sumTaskCount += meanStatistics.countOfTasks;
     }
     return sumTaskCount;

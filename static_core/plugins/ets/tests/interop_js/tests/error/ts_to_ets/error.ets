@@ -48,9 +48,9 @@ function testCustomThrowError(): boolean {
         res = false;
     } catch (e: Error) {
         console.log(e instanceof Error);
-        let errObj: ESObject = (e as ESError).getValue()
-        let msg: ESObject = errObj.getProperty('message')
-        let code: ESObject = errObj.getProperty('code')
+        let errObj: ESValue = (e as ESError).getValue()
+        let msg: ESValue = errObj.getProperty('message')
+        let code: ESValue = errObj.getProperty('code')
         res = (e instanceof Error) && (msg.toString() == CustomErrorMessage) &&
               (code.toNumber() == CustomErrorCode);
     }

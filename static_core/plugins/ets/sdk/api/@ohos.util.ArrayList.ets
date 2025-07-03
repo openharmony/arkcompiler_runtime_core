@@ -21,10 +21,20 @@ const IncorrectBufferSizeId: number = 10200009;
 const CapacityErrorCodeId: number = 10200062;
 const INT_MAX_VALUE_OFFSET: number = 4294967296;
 
-export class ArrayList<T> implements Iterable<T> {
+export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buffer;
+        const len = buf.length;
+        let arrayObj: Record<String, NullishType> = {};
+        for (let i = 0; i < len; i++) {
+            arrayObj[String(i)] = buf[i];
+        }
+        return arrayObj;
+    }
 
     /**
      * property: The number of elements in the ArrayList.
@@ -60,7 +70,7 @@ export class ArrayList<T> implements Iterable<T> {
         }
 
         if (this.length == this.capacity) {
-            this.increaseCap((this.capacity * 1.5) as int);
+            this.increaseCap((this.capacity * 1.5).toInt());
         }
         this.buffer.push(element);
         return true;
@@ -79,12 +89,12 @@ export class ArrayList<T> implements Iterable<T> {
 
         if (this.length + 1 <= this.capacity) {
             this.buffer.push(element); // length++
-            for (let i: int = this.length - 1 as int; i > index; i--) {
+            for (let i: int = (this.length - 1).toInt(); i > index; i--) {
                 this.buffer[i] = this.buffer[i - 1];
             }
-            this.buffer[index as int] = element;
+            this.buffer[index.toInt()] = element;
         } else {
-            this.increaseCap((this.capacity * 1.5) as int);
+            this.increaseCap((this.capacity * 1.5).toInt());
 
             let newBuffer: Array<T> = new Array<T>(this.capacity);
             newBuffer.length = 0;
@@ -92,7 +102,7 @@ export class ArrayList<T> implements Iterable<T> {
                 newBuffer.push(this.buffer[i]);
             }
             newBuffer.push(element);
-            for (let i: int = index as int; i < this.length; i++) {
+            for (let i: int = index.toInt(); i < this.length; i++) {
                 newBuffer.push(this.buffer[i]);
             }
 
@@ -151,7 +161,7 @@ export class ArrayList<T> implements Iterable<T> {
 
         let delItem: T = this.buffer[index];
 
-        for (let i: int = index as int + 1; i < this.length; i++) {
+        for (let i: int = index.toInt() + 1; i < this.length; i++) {
             this.buffer[i - 1] = this.buffer[i];
         }
         this.buffer.length--
@@ -186,7 +196,7 @@ export class ArrayList<T> implements Iterable<T> {
         this.checkEmptyContainer();
         this.checkRange(fromIndex, toIndex);
 
-        for (let i: int = fromIndex as int, j: int = toIndex as int; j < this.length; i++, j++) {
+        for (let i: int = fromIndex.toInt(), j: int = toIndex.toInt(); j < this.length; i++, j++) {
             this.buffer[i] = this.buffer[j];
         }
 
@@ -201,7 +211,7 @@ export class ArrayList<T> implements Iterable<T> {
      */
     public replaceAllElements(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => T): void {
         for (let i: int = 0; i < this.length; i++) {
-            this.buffer[i] = callbackfn(this.buffer[i], i as number, this);
+            this.buffer[i] = callbackfn(this.buffer[i], i.toDouble(), this);
         }
     }
 
@@ -213,7 +223,7 @@ export class ArrayList<T> implements Iterable<T> {
      */
     public forEach(callbackfn: (value: T, index: number, arrList: ArrayList<T>) => void): void {
        for (let i: int = 0; i < this.length; i++) {
-            callbackfn(this.buffer[i], i as number, this);
+            callbackfn(this.buffer[i], i.toDouble(), this);
         }
     }
 
@@ -241,8 +251,8 @@ export class ArrayList<T> implements Iterable<T> {
         this.checkRange(fromIndex, toIndex);
 
         let subArrLength = toIndex - fromIndex;
-        let newBuffer: ArrayList<T> = new ArrayList<T>(subArrLength as int);
-        for (let i: int = fromIndex as int; i < toIndex; i++) {
+        let newBuffer: ArrayList<T> = new ArrayList<T>(subArrLength.toInt());
+        for (let i: int = fromIndex.toInt(); i < toIndex; i++) {
             newBuffer.add(this.buffer[i]);
         }
 
@@ -344,7 +354,7 @@ export class ArrayList<T> implements Iterable<T> {
         }
 
         if (newCapacity > this.capacity) {
-            this.increaseCap(newCapacity as int);
+            this.increaseCap(newCapacity.toInt());
         }
     }
 
@@ -356,7 +366,7 @@ export class ArrayList<T> implements Iterable<T> {
         for (let i: int = 0; i < this.length; i++) {
             newBuffer[i] = this.buffer[i];
         }
-        this.capacity = this.length as int;
+        this.capacity = this.length.toInt();
 
         this.buffer = newBuffer;
     }

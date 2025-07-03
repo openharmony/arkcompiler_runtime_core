@@ -33,7 +33,7 @@ function HoistableInput(): int {
     let c:int = 0;
     // [prehead 1]
     for (let i:int = 0; i < I; i++) {
-        c = c1 / 3;    
+        c = c1 / 3;
         if (c > 0) {
             // 'c' != 0 here, 'v / c' can be hosisted to [prehead 2] but still
             // shouldn't be hoisted into [prehead 1]. Since 'c1 / 2' will be hoisted,
@@ -45,7 +45,7 @@ function HoistableInput(): int {
             }
         }
     }
-    
+
     return u;
 }
 
@@ -77,7 +77,7 @@ function DomCheckOutside(): int {
             }
         }
     }
-    
+
     return u;
 }
 
@@ -100,11 +100,11 @@ function InvalidBoundsOutside(): int {
             // 'NO_HOIST' in 'v / c'.
             // [prehead 2]
             for (let j:int = 0; j < I; j++) {
-                u = v / c;        
+                u = v / c;
             }
         }
     }
-    
+
     return u;
 }
 
@@ -130,7 +130,7 @@ function ValidBoundsOutside(): int {
             }
         }
     }
-    
+
     return u;
 }
 
@@ -150,7 +150,7 @@ let RES = -3;
 
 function NullCheck(): int {
     let nulref = __noinline__getnull();
-    let x : char = '\0';
+    let x : char = c'\0';
     for (let i = 0; i < 3; i++) {
         if (nulref != null) {
             RES += nulref.indexOf(x);

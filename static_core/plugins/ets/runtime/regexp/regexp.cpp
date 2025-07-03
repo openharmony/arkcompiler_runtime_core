@@ -57,10 +57,10 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16,
     if (flagDotAll_) {
         flags |= PCRE2_DOTALL;
     }
-    utf16_ |= flagUnicode_;
-    if (utf16_) {
+    if (flagUnicode_) {
         flags |= PCRE2_UTF;
     }
+    utf16_ |= flagUnicode_;
     PandaVector<uint8_t> preparedPattern = pattern;
     auto patternIsCorrect = EtsRegExp::PreparePattern(preparedPattern, utf16_);
     if (!patternIsCorrect) {
@@ -85,10 +85,9 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16,
     return re_ != nullptr;
 }
 
-ark::RegExpMatchResult<PandaString> EtsRegExp::Execute(const PandaVector<uint8_t> &str, const int len,
-                                                       const int startOffset)
+RegExpExecResult EtsRegExp::Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset)
 {
-    ark::RegExpMatchResult<PandaString> result;
+    RegExpExecResult result;
     if (utf16_) {
         result = RegExp16::Execute(re_, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
     } else {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,10 +139,17 @@ TEST_F(StackLikeAllocatorTest, NonDefaultAlignmentTest)
 
 TEST_F(StackLikeAllocatorTest, CycledAllocateFreeForHugeFramesTest)
 {
+// Note: we only have 4GB of memory on arm32, so we need to limit the max size of the stack like allocator
+// details can be found in #26461
+#ifdef PANDA_TARGET_ARM32
+    constexpr size_t ITERATIONS = 512;
+    constexpr size_t FRAME_SIZE = 256;
+    constexpr int CYCLE_COUNT = 16;
+#else
     constexpr size_t ITERATIONS = 1024;
     constexpr size_t FRAME_SIZE = 512;
     constexpr int CYCLE_COUNT = 16;
-
+#endif
     StackLikeAllocator<> alloc;
     std::vector<std::pair<void *, size_t>> vec;
 

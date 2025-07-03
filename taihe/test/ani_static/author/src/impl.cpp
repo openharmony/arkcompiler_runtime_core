@@ -22,7 +22,7 @@ namespace {
 int32_t add_impl(int32_t a, int32_t b)
 {
     if (a == 0) {
-        taihe::set_error("some error happen in add impl");
+        taihe::set_business_error(1, "some error happen in add impl");
         return b;
     } else {
         std::cout << "add impl " << a + b << std::endl;
@@ -96,7 +96,16 @@ int32_t static_func(int32_t a, int32_t b)
     return taihe::make_holder<ITest, ::staticTest::ITest>();
 }
 
+::taihe::string getName()
+{
+    TH_THROW(std::runtime_error, "getName not implemented");
 }
+
+void setName(::taihe::string_view a)
+{
+    TH_THROW(std::runtime_error, "setName not implemented");
+}
+}  // namespace
 
 // because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
@@ -106,4 +115,6 @@ TH_EXPORT_CPP_API_getIBase(getIBase_impl);
 TH_EXPORT_CPP_API_getIBase_test(getIBase_test_impl);
 TH_EXPORT_CPP_API_static_func(static_func);
 TH_EXPORT_CPP_API_ctor_func(ctor_func);
+TH_EXPORT_CPP_API_getName(getName);
+TH_EXPORT_CPP_API_setName(setName);
 // NOLINTEND

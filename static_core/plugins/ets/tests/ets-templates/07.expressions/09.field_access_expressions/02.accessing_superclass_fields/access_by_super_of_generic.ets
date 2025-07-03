@@ -21,7 +21,11 @@ desc: >-
 ---*/
 
 class A {
-  public x: int = 1;
+  private _x: int = 1;
+
+  get x(): int{
+    return this._x;
+  }
 }
 
 class B extends A{

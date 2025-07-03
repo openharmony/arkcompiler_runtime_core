@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 let b1: int | null = 0;
 let b2: int | null = 0;
@@ -43,9 +45,9 @@ function main(): int {
             assertEQ(el, queueInt.pop());
         }
         assertEQ(queueInt.size, 0);
-        let p1 = launch queueIntGetEnddata();
+        let p1 = launch<void, () => void>(queueIntGetEnddata);
         queueInt.push(elementsNum);
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 1);
     });
     ArrayBlockingQueueTestsuite.addTest("GetEndTestInt003", () =>
@@ -64,9 +66,9 @@ function main(): int {
             assertEQ(el, queueInt.pop());
         }
         assertEQ(queueInt.size, 0);
-        let p1 = launch queueIntGetEnddata();
+        let p1 = launch<void, () => void>(queueIntGetEnddata);
         queueInt.push(elementsNum);
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 1);
     });
     ArrayBlockingQueueTestsuite.addTest("GetEndTestInt004", () =>
@@ -85,12 +87,12 @@ function main(): int {
             assertEQ(el, queueInt.pop());
         }
         assertEQ(queueInt.size, 0);
-        let p1 = launch queueIntGetEnddata();
+        let p1 = launch<void, () => void>(queueIntGetEnddata);
         let a1: int = 10;
         let a2: int = 20;
         queueInt.push(a1);
         queueInt.push(a2);
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 2);
     });
     ArrayBlockingQueueTestsuite.addTest("GetEndTestInt005", () =>
@@ -98,14 +100,14 @@ function main(): int {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
-        let p1 = launch queueIntGetEndB1data();
-        let p2 = launch queueIntAddTwodata();
-        let p3 = launch queueIntGetEndB2data();
-        let p4 = launch queueIntAddTwodata();
-        await p1;
-        await p2;
-        await p3;
-        await p4;
+        let p1 = launch<void, () => void>(queueIntGetEndB1data);
+        let p2 = launch<void, () => void>(queueIntAddTwodata);
+        let p3 = launch<void, () => void>(queueIntGetEndB2data);
+        let p4 = launch<void, () => void>(queueIntAddTwodata);
+        p1.Await();
+        p2.Await();
+        p3.Await();
+        p4.Await();
         assertFalse(queueInt.isEmpty());
     });
     ArrayBlockingQueueTestsuite.addTest("GetEndTestInt006", () =>
@@ -114,13 +116,13 @@ function main(): int {
             queueInt.pop();
         }
         queueInt.push(10);
-        let p1 = launch queueIntGetEnddata();
-        let p2 = launch queueIntGetEnddata();
+        let p1 = launch<void, () => void>(queueIntGetEnddata);
+        let p2 = launch<void, () => void>(queueIntGetEnddata);
         queueInt.push(20);
-        await p1;
-        await p2;
-        let p3 = launch queueIntGetEnddata();
-        await p3;
+        p1.Await();
+        p2.Await();
+        let p3 = launch<void, () => void>(queueIntGetEnddata);
+        p3.Await();
         assertEQ(queueInt.getEnd(), 20);
     });
 

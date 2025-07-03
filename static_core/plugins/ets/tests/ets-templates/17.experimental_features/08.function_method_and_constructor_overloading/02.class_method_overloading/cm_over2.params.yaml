@@ -42,102 +42,49 @@ cases:
       tags: negative, compile-only
 
     - decl: |-
-          class Ex extends Exception {}
-          // override-equivalent signatures, difference in throws clause
+          // primitives and boxed, different return types
           class A {
-              meth(p: number): string throws { if (p > 0) throw new Ex(); else return "" }
-              meth(p: double): string { return "" + p }
-          }
-      use: return
-      tags: negative, compile-only
-
-    - decl: |-
-          class Ex extends Exception {}
-          type B = A
-          // override-equivalent signatures, difference in throws clause
-          class A {
-              meth(p: A): string { return "" }
-              meth(p: B): string throws { if (p instanceof A) throw new Ex(); else return "" }
-          }
-      use: return
-      tags: negative, compile-only
-
-    - decl: |-
-          class Ex extends Exception {}
-          // override-equivalent signatures, difference in throws clause
-          class A {
-              meth(p: A|string|null): Ex { return new Ex() }
-              meth(p: string|A|null): Ex throws { if (p instanceof string) throw new Ex(); else return new Ex() }
-          }
-      use: return
-      tags: negative, compile-only
-
-    - decl: |-
-          // primitives and boxed, different return types and throws clauses
-          class Ex extends Exception {}
-          let ex: Ex = new Ex()
-          class A {
-              meth(p: byte): byte throws { if (p == 0) throw ex; else return Byte.MIN_VALUE }
               meth(p: Byte): Byte { return Byte.MAX_VALUE as Byte }
               meth(p: short): short { return Short.MIN_VALUE }
-              meth(p: Short): Short throws { if (p == 0) throw ex; else return Short.MAX_VALUE as Short }
-              meth(p: int): int throws { if (p == 0) throw ex; else return Int.MIN_VALUE }
               meth(p: Int): Int { return Int.MAX_VALUE as Int }
               meth(p: long): long { return Long.MIN_VALUE }
-              meth(p: Long): Long throws { if (p == 0) throw ex; else return Long.MAX_VALUE as Long }
-              meth(p: char): char throws { if (p == 0) throw ex; else return Char.MIN_VALUE as char }
               meth(p: Char): Char { return Char.MAX_VALUE as Char }
               meth(p: boolean): boolean { return false as boolean }
-              meth(p: Boolean): Boolean throws { return true as Boolean }
-              meth(p: float): float throws { if (p == 0) throw ex; else return Float.MIN_VALUE }
               meth(p: Float): Float { return Float.MAX_VALUE as Float }
               meth(p: double): double { return Double.MIN_VALUE }
-              meth(p: Double): Double throws { if (p == 0) throw ex; else return Double.MAX_VALUE as Double }
           }
       use: |-
           let a: A = new A()
-          try {
-              assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
-              assertEQ( a.meth(new Short(-1 as short)), Short.MAX_VALUE )
-              assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
-              assertEQ( a.meth(new Long(-1 as long)), Long.MAX_VALUE )
-              assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
-              assertEQ( a.meth(new Boolean(false)), true )
-              assertEQ( a.meth(new Float(3.14 as float)), Float.MAX_VALUE )
-              assertEQ( a.meth(new Double(3.14)), Double.MAX_VALUE )
-              assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
-              assertEQ( a.meth(-1 as int), Int.MIN_VALUE )
-              assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
-              assertEQ( a.meth(-1 as byte), Byte.MIN_VALUE )
-              assertEQ( a.meth(c'A'), Char.MIN_VALUE )
-              assertEQ( a.meth(false), false )
-              assertEQ( a.meth(3.14), Double.MIN_VALUE )
-              assertEQ( a.meth(3.14 as float), Float.MIN_VALUE )
-          } catch (e) {
-              assertTrue( false, "Unexpected exception" )
-          }
+          assertEQ( a.meth(new Byte(-1 as byte)), Byte.MAX_VALUE )
+          assertEQ( a.meth(new Int(-1 as int)), Int.MAX_VALUE )
+          assertEQ( a.meth(new Char(c'A')), Char.MAX_VALUE )
+          assertEQ( a.meth(new Float(3.14 as float)), Float.MAX_VALUE )
+          assertEQ( a.meth(-1 as long), Long.MIN_VALUE )
+          assertEQ( a.meth(-1 as short), Short.MIN_VALUE )
+          assertEQ( a.meth(false), false )
+          assertEQ( a.meth(3.14), Double.MIN_VALUE )
 
     - decl: |-
-          // arrays of primitives and boxed, different return types and throws clauses
-          class Ex extends Exception {}
+          // arrays of primitives and boxed, different return types
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: byte[]): byte throws { if (p.length == 0) throw ex; else return Byte.MIN_VALUE }
+              meth(p: byte[]): byte { if (p.length == 0) throw ex; else return Byte.MIN_VALUE }
               meth(p: Byte[]): Byte { return Byte.MAX_VALUE as Byte }
               meth(p: short[]): short { return Short.MIN_VALUE }
-              meth(p: Short[]): Short throws { if (p.length == 0) throw ex; else return Short.MAX_VALUE as Short }
-              meth(p: int[]): int throws { if (p.length == 0) throw ex; else return Int.MIN_VALUE }
+              meth(p: Short[]): Short { if (p.length == 0) throw ex; else return Short.MAX_VALUE as Short }
+              meth(p: int[]): int { if (p.length == 0) throw ex; else return Int.MIN_VALUE }
               meth(p: Int[]): Int { return Int.MAX_VALUE as Int }
               meth(p: long[]): long { return Long.MIN_VALUE }
-              meth(p: Long[]): Long throws { if (p.length == 0) throw ex; else return Long.MAX_VALUE as Long }
-              meth(p: char[]): char throws { if (p.length == 0) throw ex; else return Char.MIN_VALUE as char }
+              meth(p: Long[]): long { if (p.length == 0) throw ex; else return Long.MAX_VALUE as Long }
+              meth(p: char[]): char { if (p.length == 0) throw ex; else return Char.MIN_VALUE as char }
               meth(p: Char[]): Char { return Char.MAX_VALUE as Char }
               meth(p: boolean[]): boolean { return false }
-              meth(p: Boolean[]): Boolean throws { return true as Boolean }
-              meth(p: float[]): float throws { if (p.length == 0) throw ex; else return Float.MIN_VALUE }
+              meth(p: Boolean[]): Boolean { return true as Boolean }
+              meth(p: float[]): float { if (p.length == 0) throw ex; else return Float.MIN_VALUE }
               meth(p: Float[]): Float { return Float.MAX_VALUE as Float }
               meth(p: double[]): double { return Double.MIN_VALUE }
-              meth(p: Double[]): Double throws { if (p.length == 0) throw ex; else return Double.MAX_VALUE as Double }
+              meth(p: Double[]): Double { if (p.length == 0) throw ex; else return Double.MAX_VALUE as Double }
           }
       use: |-
           let a: A = new A()
@@ -159,20 +106,20 @@ cases:
               assertEQ( a.meth([3.14]), Double.MIN_VALUE )
               assertEQ( a.meth([3.14 as float]), Float.MIN_VALUE )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
-          // enums, different return types and throws clauses
+          // enums, different return types
           enum Color { Red, Green=82, Blue }
           enum Size { S="small", M="medium", L="large" }
           enum Status { ready, set, go }
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: Color): void throws { if (p.getValue() >= 2) throw ex }
+              meth(p: Color): void { if (p.valueOf() >= 2) throw ex }
               meth(p: Size): string { return "Size" }
-              meth(p: Status): Size throws { if (p.getValue() >= 2) throw ex; else return Size.L }
+              meth(p: Status): Size { if (p.valueOf() >= 2) throw ex; else return Size.L }
           }
       use: |-
           let a: A = new A()
@@ -181,19 +128,19 @@ cases:
               assertEQ( a.meth(Size.L), "Size" )
               assertEQ( a.meth(Status.ready), Size.L )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
-          // tuples, different return types and throws clauses
+          // tuples, different return types
           type T = [number, string]
           type R = [number, boolean]
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               meth(p: Object): string { return "" } // should never be called
               meth(p: T): int { return 33 }
-              meth(p: R): string throws { if (p[0] == 0) throw ex; else return "R" }
+              meth(p: R): string { if (p[0] == 0) throw ex; else return "R" }
           }
       use: |-
           let a: A = new A()
@@ -207,18 +154,18 @@ cases:
               r = [42.0, true]
               assertEQ( a.meth(r), "R" )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
-          // unions, different return types and throws clauses
+          // unions, different return types
           type U=number|string
           type V=Boolean|Double
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               meth(p: Object): string { return "" } // should never be called
-              meth(p: U): int throws {
+              meth(p: U): int {
                   if (p instanceof Number) {
                       throw ex
                   } else {
@@ -237,18 +184,18 @@ cases:
               v = new Double(1.5)
               assertEQ( a.meth(v), 1.0 )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
-          // function types, different return types and throws clauses
+          // function types, different return types
           type FF=(p: number) => string
           type EE=(p: string) => number
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               meth(p: Object): string { return "" } // should never be called
-              meth(p: FF): string throws {
+              meth(p: FF): string {
                   if (ex instanceof Ex) {
                       return "FF"
                   } else {
@@ -269,23 +216,23 @@ cases:
               assertEQ( a.meth(fff), "FF" )
               assertEQ( a.meth(eee), 12 )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }
 
     - decl: |-
-          // nullish types with different return types and throws clauses
+          // nullish types with different return types
           type S=string
           type SN=string|null
           type SU=string|undefined
           type SNU=string|null|undefined
-          class Ex extends Exception {}
+          class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
               meth(p: Object|null|undefined): string { return "" } // should never be called
-              meth(p: SN): string throws { if (ex instanceof Ex) return "SN"; else throw ex }
+              meth(p: SN): string { if (ex instanceof Ex) return "SN"; else throw ex }
               meth(p: SU): number { return 1.0 }
-              meth(p: SNU): boolean throws { if (p==null) throw ex; else return true }
-              meth(p: S): Exception { return ex }
+              meth(p: SNU): boolean { if (p==null) throw ex; else return true }
+              meth(p: S): Error { return ex }
           }
       use: |-
           let a: A = new A()
@@ -305,5 +252,5 @@ cases:
               snu = undefined
               assertEQ( a.meth(snu), true )
           } catch (e) {
-              assertTrue( false, "Unexpected exception" )
+              assertTrue( false, "Unexpected error" )
           }

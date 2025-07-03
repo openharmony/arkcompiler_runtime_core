@@ -20,6 +20,10 @@ namespace ark::ets::ani::testing {
 class TupleValueGetItemDoubleTest : public AniGTestTupleOps {
 public:
     static constexpr ani_double EXPECTED_RESULT = 3.14;
+    static constexpr ani_double EXPECTED_RESULT_2 = 2.71;
+    static constexpr ani_double EXPECTED_RESULT_3 = 1.61;
+    static constexpr ani_double EXPECTED_RESULT_4 = 0.59;
+    static constexpr ani_double EXPECTED_RESULT_5 = 10.0;
 };
 
 TEST_F(TupleValueGetItemDoubleTest, tupleValueGetItemDouble)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemDoubleTest, tupleValueGetItemDoubleIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_double_test", "getDoubleTuple");
     ani_double result = 0.0;
     ASSERT_EQ(env_->TupleValue_GetItem_Double(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemDoubleTest, tupleValueGetItemDoubleIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_double_test", "getDoubleTuple");
+    ani_double result = 0.0;
+    ASSERT_EQ(env_->TupleValue_GetItem_Double(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemDoubleTest, tupleValueGetItemDoubleCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_double_test", "getDoubleTuple");
+
+    const std::array<ani_double, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                       EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_double result = 0.0;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Double(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemDoubleTest, tupleValueGetItemDoubleNullResult)

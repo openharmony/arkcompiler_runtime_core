@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <filesystem>
 #include <utility>
 #include "include/class.h"
 #include "jit/profiling_data.h"
@@ -185,15 +186,23 @@ public:
 
     void SaveProfile()
     {
-        pgoFilePath_ = CreateTmpFileName();
         auto *runtime = Runtime::GetCurrent();
-
+        if (!runtime->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
+            return;
+        }
         ProfilingSaver profileSaver;
         classCtxStr_ = runtime->GetClassLinker()->GetClassContextForAot(true);
         auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
         profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
-                                 profiledPandaFiles);
+                                 writtenMethodsFinal, profiledPandaFiles);
+    }
+
+    void LoadProfileFail(ProfilingLoader &profilingLoader)
+    {
+        auto profileCtxOrError = profilingLoader.LoadProfile(PandaString(pgoFilePath_));
+        ASSERT_FALSE(profileCtxOrError.HasValue());
     }
 
     void LoadProfile(ProfilingLoader &profilingLoader)
@@ -261,6 +270,14 @@ public:
         }
     }
 
+    void InitPGOFilePath()
+    {
+        pgoFilePath_ = CreateTmpFileName();
+        if (std::filesystem::exists(pgoFilePath_)) {
+            std::filesystem::remove(pgoFilePath_);
+        }
+    }
+
 private:
     PandaRunner runner_;
     std::map<std::string, ark::Class *> classMap_;
@@ -272,6 +289,7 @@ private:
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 {
+    InitPGOFilePath();
     CreateRunner().GetRuntimeOptions().SetInterpreterType("cpp");
     CollectProfile();
     SaveProfile();
@@ -287,6 +305,7 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
 {
+    InitPGOFilePath();
     CreateRunner();
     CollectProfile();
     SaveProfile();
@@ -295,6 +314,115 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
         ProfilingLoader profilingLoader;
         LoadProfile(profilingLoader);
         CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(true);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(true);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithJit)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(true);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithJit)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(true);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithoutJitAndProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfileFail(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithoutJitAndProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfileFail(profilingLoader);
     }
 
     Runtime::Destroy();

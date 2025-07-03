@@ -15,25 +15,25 @@
 import { getArray, returnCustomArray, createStringRecord,createInt8Array, RecordObject,handler} from "indexed_type"
 import {createProxy} from "proxy"
 
-const arr = ['A','B','C'];
+const arr: FixedArray<string> = ['A','B','C'];
 
 function getArrValueByIndex():boolean{
-    const jsArray = getArray(arr) as string[];
+    const jsArray = getArray(arr) as FixedArray<string>;
     return jsArray[0] == 'A';
 }
 
 function changeArrValueByIndex():boolean{
-    let jsArray = getArray(arr) as string[];
+    let jsArray = getArray(arr) as FixedArray<string>;
     jsArray[0] = 'D';
     return jsArray[0] == 'D';
 }
 
 function checkLengthArr():boolean{
-    const jsArray:string[] = getArray(arr) as string[];
-    return jsArray.length as number == arr.length as number
+    const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
+    return jsArray.length as number == arr.length
 }
 function checkAllArrValue():boolean{
-    const jsArray:string[] = getArray(arr) as string[];
+    const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
     return jsArray[0] == 'A' && jsArray[1] == 'B' && jsArray[2] == 'C'
 }
 
@@ -44,17 +44,17 @@ function getCustomArrValueByIndex():boolean{
 }
 
 function changeCustomArrValueByIndex():boolean{
-    let jsArray = returnCustomArray(arr) as string[];
+    let jsArray = returnCustomArray(arr) as FixedArray<string>;
     jsArray[0] = 'D';
     return jsArray[0] == 'D';
 }
 function checkLengthCustomArr():boolean{
-    const jsArray:string[] = returnCustomArray(arr);
-    return jsArray.length as number == arr.length as number;
+    const jsArray:FixedArray<string> = returnCustomArray(arr);
+    return jsArray.length as number == arr.length;
 }
 
 function checkAllCustomArrValue():boolean{
-    const jsArray:string[] = returnCustomArray(arr);
+    const jsArray:FixedArray<string> = returnCustomArray(arr);
     return jsArray[0] == 'A' && jsArray[1] == 'B' && jsArray[2] == 'C';
 }
 

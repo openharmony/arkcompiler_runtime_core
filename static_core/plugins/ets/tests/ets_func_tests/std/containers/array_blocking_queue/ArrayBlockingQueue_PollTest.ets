@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 const elementsNum: int = 10;
 const stressNum: int = 100;
 
@@ -57,13 +60,13 @@ function main(): int {
         for (let i = 0; i < stressNum; i++) {
             sMTQueueInt.add(i);
         }
-        let promises = new Array<Promise<void>>(100);
+        let jobs = new Array<Job<void>>(100);
         let p = 0;
         for (let i = 0; i < stressNum; i++) {
-            promises[p++] = launch sQueuePollData();
+            jobs[p++] = launch<void, () => void>(sQueuePollData);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
         assertEQ(sMTQueueInt.size, 0);
     });

@@ -24,8 +24,8 @@ function foo{{c}}
 function main() {
     let f1 = foo
     let f2 = f1
-    assertNE(f1, foo)
-    assertNE(f2, foo)
+    assertEQ(f1, foo)
+    assertEQ(f2, foo)
     assertEQ(f1, f2)
 }
 

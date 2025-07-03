@@ -13,9 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
 desc: Using union as T for Readonly<T>
 ---*/
+
 
 interface I {
   i: number;
@@ -24,25 +27,22 @@ interface I {
 
 class A implements I {
   i = 1.7;
-  j = "";
+  j = "A";
 }
 
 class C {
   i: number = 2.6;
-  j: string = "";
+  j: string = "C";
 }
 
-function foo(i: Readonly<A|C>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  if(i.j != null) {
-    v += 2;
-  }
-  return v;
+function foo(i: Readonly<A|C>, a: number, b: string) {
+  assertEQ(i.i, a)
+  assertEQ(i.j, b)
 }
 
 function main() {
-  assertTrue( foo( {i: 1.7, j: "str"} ) == 3 )
+  let i: Readonly<{{c.class}}> = {{c.argument}}
+  foo( i, {{c.num}}, {{c.str}} )
 }
+
+{% endfor %}

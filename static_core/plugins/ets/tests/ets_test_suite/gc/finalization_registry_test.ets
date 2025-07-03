@@ -15,16 +15,16 @@
 
 let removed_object_callbacks: boolean[] = new boolean[4];
 // Make it global beacuse optimizer is free to kill local variables
-let object1 : Object | null = null;
-let object2 : Object | null = null;
-let object3 : Object | null = null;
+let object1: Object | null = null;
+let object2: Object | null = null;
+let object3: Object | null = null;
 let registry: FinalizationRegistry<String> | null = null;
 let unusedRegistry: FinalizationRegistry<String> | null = null;
 let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
 
 function doFullGC() {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
     }
@@ -45,7 +45,7 @@ function emptyArgCallback(): void {
     removed_object_callbacks[3] = true;
 }
 
-function finalizationRegistryTest(registry: FinalizationRegistry<String> | null): void {
+function registerTest(registry: FinalizationRegistry<String> | null): void {
     object1 = new Object();
     let object1_token = new Object();
     let object1_callbackArg = new String("First object removed");
@@ -87,12 +87,171 @@ function finalizationRegistryTest(registry: FinalizationRegistry<String> | null)
     doFullGC();
 }
 
+//========================= CTOR tests ===========================================
+let is_empty = false;
+let is_param = false;
+
+let registryEmpty: FinalizationRegistry<String> | null = null;
+let registryParams: FinalizationRegistry<String> | null = null;
+
+function finalizationEmptyCtorTestHelper(): void {
+    registryEmpty = new FinalizationRegistry<String>((): void => {
+        is_empty = true;
+    });
+
+    let o2 = new Object();
+
+    registryEmpty!.register(o2, "", o2);
+
+}
+
+function finalizationRegistryConstructorTestParamsHelper(): void {  // void {
+    let o1 = new Object();
+
+    registryParams = new FinalizationRegistry<String>((string: String) => {
+        is_param = true;
+    });
+    registryParams!.register(o1, "RegisterObject", o1);
+}
+
+function ctorTests() {
+    finalizationEmptyCtorTestHelper();
+    finalizationRegistryConstructorTestParamsHelper();
+
+    doFullGC();
+    Coroutine.Schedule();
+
+    assertTrue(is_empty, "The callback with empty ctor was not called");
+    assertTrue(is_param, "The callback with parameters ctor was not called");
+
+}
+//==================== GetSize Tests
+
+function getSizeTests(): void {
+
+    let finreg = new FinalizationRegistry<String>((string: String) => { console.log("Size callback"); });
+    assertEQ(0, finreg!.getSize(), "Start size of finreg is not empty");
+
+    let o1 = new Object();
+    let o2 = new Object();
+    let rem_token = new Object();
+
+    finreg!.register(o1!, "first_object", o1!);
+    finreg!.register(o2!, "second_object", o2!);
+
+    //add two objects - size must be size == 2
+    assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+    //add for  objects with same token - size must be size == 4 + 2
+    finreg!.register(new Object, "first_dummy", rem_token);
+    finreg!.register(new Object, "second_dummy", rem_token);
+
+    assertEQ(finreg!.getSize(), 2 + 2, "finalizationGetSizeTest: size is invalid");
+
+    finreg!.unregister(rem_token);
+    assertEQ(finreg!.getSize(), 2, "finalizationGetSizeTest: size after register invalid");
+
+    finreg!.unregister(o2!);
+    finreg!.unregister(o1!);
+    assertEQ(0, finreg.getSize(), "finalizationGetSizeTest: Size is invalid");
+
+}
+//=========================== Unregister tests ====================================
+let done_callbacks: boolean[] = new boolean[2];
+let registryUnreg: FinalizationRegistry<String> | null = null;
+let tokenUse: Object | null = null;
+let tokenUnuse1: Object | null = null;
+let tokenUnuse2: Object | null = null;
+let counterUnreg = 0;
+
+function callBackUnreg(string: String): void {
+    counterUnreg = counterUnreg + 1;
+}
+
+
+function unregisterHelper(reg: FinalizationRegistry<string> | null) {
+
+    for (let i = 0; i < done_callbacks.length; i++) {
+        done_callbacks[i] = false;
+    }
+
+    let o1 = new Object();
+    let o2 = new Object();
+
+    reg!.register(o2, "second", o2);
+    reg!.register(o1, "first", o1);
+
+    reg!.unregister(o2);
+
+
+}
+
+function unregisterHelper1() {
+    registryUnreg!.register(new Object(), "First Unused_Object", tokenUnuse1!);
+    registryUnreg!.register(new Object(), "First_use_Object", tokenUse!);
+
+    registryUnreg!.register(new Object(), "Second_use_Object", tokenUse!);
+    registryUnreg!.register(new Object(), "Second Unused Object", tokenUnuse1!);
+
+    registryUnreg!.unregister(tokenUnuse1!);
+
+}
+
+function unregisterHelper2() {
+    registryUnreg!.register(new Object(), "Third_Use_Object", tokenUse!);
+    registryUnreg!.register(new Object(), "Fourth_Use_Object", tokenUse!);
+
+    registryUnreg!.register(new Object(), "Third_Unused_Object", tokenUnuse2!)
+    registryUnreg!.register(new Object(), "Fourth_Unused_Object", tokenUnuse2!);
+
+    registryUnreg!.unregister(tokenUnuse2!);
+}
+
+let regUnreg: FinalizationRegistry<string> | null = null;
+
+function unregisterTests() {
+
+    regUnreg = new FinalizationRegistry<String>((string: String) => {
+        if (string.equals("first")) {
+            done_callbacks[0] = true;
+        } else if (string.equals("second")) {
+            done_callbacks[1] = true;
+        }
+        else {
+            assertTrue(false, "This code not must be called ");
+        }
+    });
+
+    unregisterHelper(regUnreg!);
+    doFullGC();
+    Coroutine.Schedule();
+
+    assertTrue(done_callbacks[0], "Callback first must  called! ");
+    assertFalse(done_callbacks[1], "Callback second should not  be called! ");
+
+    tokenUse = new Object();
+    tokenUnuse1 = new Object();
+    tokenUnuse2 = new Object();
+
+    registryUnreg = new FinalizationRegistry<String>((string: String) => {
+        counterUnreg++;
+    });
+
+    unregisterHelper1();
+    unregisterHelper2();
+
+    doFullGC();
+    Coroutine.Schedule();
+
+    assertEQ(4, counterUnreg, "Counter for calling of unregister is not valid");
+
+}
+
 function main(): void {
     for (let i = 0; i < removed_object_callbacks.length; i++) {
         removed_object_callbacks[i] = false;
     }
     registry = new FinalizationRegistry<String>(callback);
-    finalizationRegistryTest(registry);
+    registerTest(registry);
     // Check that we successfully remove FinalizationRegistry instance
     // elemets and this cause no error during collection.
     doFullGC();
@@ -106,4 +265,9 @@ function main(): void {
     assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
     assertTrue(removed_object_callbacks[3], "Fouth callback hasn't been called");
     assertNE(registry, null, "Instance still alive");
+
+    ctorTests();
+    getSizeTests();
+    unregisterTests();
+
 }

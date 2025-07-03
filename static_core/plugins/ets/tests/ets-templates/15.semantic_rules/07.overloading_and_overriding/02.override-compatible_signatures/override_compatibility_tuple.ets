@@ -57,7 +57,7 @@ let bd: TPL_BD = [new Base(), new Derived()]
 let db: TPL_DB = [new Derived(), new Base()]
 let dd: TPL_DD = [new Derived(), new Derived()]
 let bbb: TPL_BBB = [new Base(), [new Base(), new Base()]]
-let bbb: TPL_BBD = [new Base(), [new Base(), new Derived()]]
+let bbd: TPL_BBD = [new Base(), [new Base(), new Derived()]]
 let ddd: TPL_DDD = [new Derived(), [new Derived(), new Derived()]]
 
 function main(): void {

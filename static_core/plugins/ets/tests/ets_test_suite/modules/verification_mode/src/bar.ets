@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [foo.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { foo } from "./foo";
 
 export function bar(): void {

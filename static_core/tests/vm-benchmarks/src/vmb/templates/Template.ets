@@ -47,16 +47,16 @@ let SYS_GC_PAUSE: int = $gc;
 function log(msg: String): void {
     // timestamp is needed by GC parser
     let now: long = Date.now() as long;
-    console.log(now + " " + msg);
+    console.info(now + " " + msg);
 }
 
 function doGC(): void throws {
     if (SYS_GC_PAUSE >= 0) {
         log("Force GC");
-        let gc = GC.startGC(GC.FULL_CAUSE);
+        let gc = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gc);
         log("Force GC");
-        gc = GC.startGC(GC.FULL_CAUSE);
+        gc = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gc);
         // No sleep in ETS: sleep(SYS_GC_PAUSE)
     }
@@ -72,7 +72,7 @@ let totalOps: long = 0;
 let totalMs: long = 0;
 let iter: int = 0;
 
-function runIters(phase: String, count: int, time: int): void throws {
+function runIters(phase: String, count: int, time: int, bench: $state_name): void throws {
     let iterMs: long = time * S2MS;
     totalOps = 0;
     totalMs = 0;
@@ -96,10 +96,8 @@ function runIters(phase: String, count: int, time: int): void throws {
     }
 }
 
-let bench: $state_name;
-
 function main(): void throws {
-    bench = new $state_name();
+    let bench: $state_name = new $state_name();
     log("Startup execution started: " + (Date.now() as long));
 
     $state_params
@@ -148,11 +146,11 @@ function main(): void throws {
         // Re-entering runIters in warmup loop to allow profiler complete the method.
         // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
         for (let wi: int = 0; wi < WI; ++wi) {
-            runIters("Warmup", 1, WT);
+            runIters("Warmup", 1, WT, bench);
         }
     }
     iter = 1;
-    runIters("Iter", MI, IT);
+    runIters("Iter", MI, IT, bench);
     log("Benchmark result: $bench_name " + 1.0*totalMs*MS2NS/totalOps);
 
 
@@ -187,7 +185,7 @@ class Consumer {
     public static pseudorand: long = Date.now() as long;
 
     public static consumeBool(boolc: boolean): void throws {
-        if (boolc == Consumer.boola && boolc == Consumer. boolb) {
+        if (boolc == Consumer.boola && boolc == Consumer.boolb) {
             throw new NullPointerError();
         }
     }

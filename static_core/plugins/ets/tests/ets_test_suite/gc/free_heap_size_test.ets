@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-import { random } from "std/math"
-
 function AllocMemoryAndReturnFreeHeapSize(): long throws {
-    const ALLOC_SIZE = 10000;
-    let mem = new long[ALLOC_SIZE];
+    const ALLOC_SIZE: int = 10000;
+    let mem: FixedArray<long> = new long[ALLOC_SIZE];
     return GC.getFreeHeapSize();
 }
 
 function main(): void throws {
     // Free allocations done during runtime creation (i.e. application RuntimeLinker)
-    GC.startGC(GC.FULL_CAUSE);
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     let free_size_in_start = GC.getFreeHeapSize();
     let free_size_after_new = AllocMemoryAndReturnFreeHeapSize();
-    GC.startGC(GC.FULL_CAUSE);
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     let free_size_after_gc = GC.getFreeHeapSize();
 
     assertLT(0, free_size_in_start);

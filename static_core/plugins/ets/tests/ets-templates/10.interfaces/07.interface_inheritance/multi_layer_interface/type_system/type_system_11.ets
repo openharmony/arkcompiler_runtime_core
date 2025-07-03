@@ -18,12 +18,12 @@ desc: Use generic interfaces and class implementations to verify the correctness
 tags: [compile-only, negative]
 ---*/
 
-interface Box<T> {
+interface BBox<T> {
     value: T;
 }
 
-interface StringBox extends Box<string> {}
+interface StringBBox extends BBox<string> {}
 
-class MyStringBox implements StringBox {
+class MyStringBBox implements StringBBox {
     value = 123;
 }

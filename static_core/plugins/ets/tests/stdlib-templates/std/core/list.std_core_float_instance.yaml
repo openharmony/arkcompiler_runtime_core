@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,213 +14,213 @@
 - {
     method_name: unboxed,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: float,
     init_object_data: "[0.0 as float, 1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float]",
-    expected_data_type: "float[]",
+    expected_data_type: "FixedArray<float>",
     expected_test_data: "[0.0 as float, 1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
-    method_name: byteValue,
+    method_name: toByte,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: byte,
     init_object_data: "[0.0 as float, 1.0 as float, Byte.MIN_VALUE as byte, Byte.MAX_VALUE as byte]",
-    expected_data_type: "byte[]",
+    expected_data_type: "FixedArray<byte>",
     expected_test_data: "[0 as byte, 1 as byte, Byte.MIN_VALUE as byte, Byte.MAX_VALUE as byte]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: shortValue,
+    method_name: toShort,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: short,
     init_object_data: "[0.0 as float, 1.0 as byte, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
-    expected_data_type: "short[]",
+    expected_data_type: "FixedArray<short>",
     expected_test_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: intValue,
+    method_name: toInt,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
-    param_list: {},    
+    param_list: {},
     method_return_type: int,
     init_object_data: "[0.0 as float, 1.0 as float, Int.MIN_VALUE as float, Int.MAX_VALUE as float]",
-    expected_data_type: "int[]",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0 as int, 1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]",
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: longValue,
+    method_name: toLong,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     method_return_type: long,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     init_object_data: "[0.0 as float, 1.0 as float, Long.MIN_VALUE as float, Long.MAX_VALUE as float]",
-    expected_data_type: "long[]",
+    expected_data_type: "FixedArray<long>",
     expected_test_data: "[0 as long, 1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
     verify_test_result_function: comparePrimitiveValue
-  } 
+  }
 - {
-    method_name: floatValue,
+    method_name: toFloat,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: float,
     init_object_data: "[0 as byte, 1 as byte, Float.MIN_VALUE as byte, Float.MAX_VALUE as byte]",
-    expected_data_type: "float[]",
+    expected_data_type: "FixedArray<float>",
     expected_test_data: "[0 as float, 1 as float, Float.MIN_VALUE as byte, Float.MAX_VALUE as byte]",
     verify_test_result_function: compareFloatPointValue
-  } 
+  }
 - {
-    method_name: doubleValue,
+    method_name: toDouble,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: double,
     init_object_data: "[0.0 as float, 1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float]",
-    expected_data_type: "double[]",
+    expected_data_type: "FixedArray<double>",
     expected_test_data: "[0.0 as double, 1.0 as double, Float.MIN_VALUE as double, Float.MAX_VALUE as double]",
     verify_test_result_function: compareFloatPointValue
-  } 
+  }
 - {
     method_name: toString,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: String,
     init_object_data: "[0.0 as float, 1.0 as float, Float.MIN_VALUE as float, Float.MAX_VALUE as float]",
-    expected_data_type: "String[]",
+    expected_data_type: "FixedArray<String>",
     expected_test_data: '["0", "1", "1e-45", "3.4028235e+38"]',
     verify_test_result_function: compareStringTrivial
-  } 
+  }
 - {
     method_name: $_hashCode,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     param_init_data_types: {},
     param_types: {},
     param_list: {},
     method_return_type: int,
     init_object_data: "[0 as float, 1 as float, Int.MIN_VALUE as float, Int.MAX_VALUE as float]",
-    expected_data_type: "int[]",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: '[0 as int, 1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]',
     verify_test_result_function: comparePrimitiveValue
   }
 - {
     method_name: add,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[0 as float, 1 as float, (-1) as float]",
-    param_init_data_types: {"param1": "float[]"},
+    param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
     param_list: {"param1": "[0 as float, 1 as float, (-1) as float]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
-    expected_data_type: "float[]",
-    
+    expected_data_type: "FixedArray<float>",
+
     expected_test_data: "[0 as float, 2 as float, (-2) as float]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
     method_name: sub,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[0 as float, 1 as float, (-1) as float]",
-    param_init_data_types: {"param1": "float[]"},
+    param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
     param_list: {"param1": "[0 as float, 1 as float, (-1) as float]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
-    expected_data_type: "float[]",
-    
+    expected_data_type: "FixedArray<float>",
+
     expected_test_data: "[0 as float, 0 as float, 0 as float]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
     method_name: mul,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[0 as float, 1 as float, (-1) as float, 1 as float]",
-    param_init_data_types: {"param1": "float[]"},
+    param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
     param_list: {"param1": "[0 as float, 1 as float, (-1) as float, (-1) as float]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
-    expected_data_type: "float[]",
-    
+    expected_data_type: "FixedArray<float>",
+
     expected_test_data: "[0 as float, 1 as float, 1 as float, (-1) as float]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
     method_name: div,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[0 as float, 1 as float, (-1) as float, 1 as float]",
-    param_init_data_types: {"param1": "float[]"},
+    param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
     param_list: {"param1": "[1 as float, 1 as float, (-1) as float, (-1) as float]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
-    expected_data_type: "float[]",
+    expected_data_type: "FixedArray<float>",
     expected_test_data: "[0 as float, 1 as float, 1 as float, (-1) as float]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
     method_name: isLessThan,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, 125 as float, 126 as float, 126 as float, 127 as float, 127 as float, (-127) as float, (-127) as float, (-128) as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[false, true, false, true, true, true, false, true, false, false]",
     verify_test_result_function: comparePrimitiveValue,
@@ -228,20 +228,20 @@
 - {
     method_name: isLessEqualThan,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, 125 as float, 126 as float, 126 as float, 127 as float, 127 as float, (-127) as float, (-127) as float, (-128) as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[false, true, true, true, true, true, false, true, false, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -249,20 +249,20 @@
 - {
     method_name: isGreaterThan,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, 125 as float, 126 as float, 126 as float, 127 as float, 127 as float, (-127) as float, (-127) as float, (-128) as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[true, false, false, false, false, false, true, false, true, false]",
     verify_test_result_function: comparePrimitiveValue,
@@ -270,20 +270,20 @@
 - {
     method_name: isGreaterEqualThan,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, 125 as float, 126 as float, 126 as float, 127 as float, 127 as float, (-127) as float, (-127) as float, (-128) as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[true, false, true, false, false, false, true, false, true, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -291,20 +291,20 @@
 - {
     method_name: equals,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, 125 as float, 126 as float, 126 as float, 127 as float, 127 as float, (-127) as float, (-127) as float, (-128) as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[false, false, true, false, false, false, false, false, false, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -312,20 +312,20 @@
 - {
     method_name: compareTo,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[126 as float, (-128) as float, 126 as float, (-128) as float]",
 
     param_list: {"param1" : "[125 as float, (-128) as float, 127 as float, (-128) as float]"},
-    param_init_data_types: {"param1": "float[]"} ,
+    param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
-    
+
     method_return_type: int,
-    
+
     expected_data_item_type: int,
-    expected_data_type: "int[]",
-    
+    expected_data_type: "FixedArray<int>",
+
 
     expected_test_data: "[1, 0, -1, 0]",
     verify_test_result_function: compareCompareToResult,
@@ -334,7 +334,7 @@
 - {
     method_name: isSafeInteger,
     object_type: Float,
-    init_object_data_type: "float[]",
+    init_object_data_type: "FixedArray<float>",
     init_object_type: float,
     init_object_data: "[(-1) as float, 0 as float, 1 as float, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5 as float, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]",
 
@@ -342,12 +342,12 @@
     param_init_data_types: {},
     param_types: {},
     param_nature: {},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
-    
+    expected_data_type: "FixedArray<boolean>",
+
 
     expected_test_data: "[true, true, true, true, false, false, true, false]",
     verify_test_result_function: comparePrimitiveValue

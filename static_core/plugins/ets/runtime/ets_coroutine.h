@@ -44,11 +44,12 @@ public:
      */
     template <class T>
     static T *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR)
+                     std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR,
+                     CoroutinePriority priority = CoroutinePriority::MEDIUM_PRIORITY)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, std::move(epInfo), type);
+                                               context, std::move(epInfo), type, priority);
         co->Initialize();
         return co;
     }
@@ -126,6 +127,8 @@ public:
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
 
+    void ListUnhandledEventsOnProgramExit() override;
+
     LocalStorage &GetLocalStorage()
     {
         return localStorage_;
@@ -134,10 +137,19 @@ public:
     // event handlers
     void OnHostWorkerChanged() override;
 
+    /// @brief print stack and exit the program
+    [[noreturn]] void HandleUncaughtException() override;
+
+    static constexpr CoroutinePriority ASYNC_CALL = CoroutinePriority::HIGH_PRIORITY;
+    static constexpr CoroutinePriority PROMISE_CALLBACK = CoroutinePriority::HIGH_PRIORITY;
+    static constexpr CoroutinePriority TIMER_CALLBACK = CoroutinePriority::MEDIUM_PRIORITY;
+    static constexpr CoroutinePriority LAUNCH = CoroutinePriority::MEDIUM_PRIORITY;
+
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
     explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type);
+                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type,
+                          CoroutinePriority priority);
 
 private:
     panda_file::Type GetReturnType();
@@ -146,6 +158,9 @@ private:
 
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
+
+    void ListUnhandledJobs();
+    void ListUnhandledPromises();
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};

@@ -15,47 +15,316 @@
 
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
+#include "plugins/ets/stdlib/native/core/IntlLanguageTag.h"
+#include "plugins/ets/stdlib/native/core/IntlLocale.h"
 #include "libpandabase/macros.h"
 #include "unicode/locid.h"
+#include "unicode/localebuilder.h"
 #include "unicode/localematcher.h"
 #include "stdlib_ani_helpers.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstring>
+#include <memory>
 #include <string>
 #include <array>
+#include <set>
+#include <sstream>
 
 namespace ark::ets::stdlib {
 
-icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
+template <typename... Args>
+static void ThrowRangeError(ani_env *env, Args &&...args)
 {
-    int32_t count;
-    const icu::Locale *availableLocales = icu::Locale::getAvailableLocales(count);
-    icu::Locale defaultLocale = icu::Locale::getDefault();
+    std::stringstream message;
+    (message << ... << args);
+    ThrowNewError(env, "Lstd/core/RangeError;", message.str().c_str(), "Lstd/core/String;:V");
+}
+
+std::vector<std::string> GetAvailableLocales()
+{
+    int32_t availableCount;
+    std::vector<std::string> availableLocales;
+    const icu::Locale *locales = icu::Locale::getAvailableLocales(availableCount);
+    availableLocales.reserve(availableCount);
+    for (int32_t i = 0; i < availableCount; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        availableLocales.emplace_back(intl::ToStdStringLanguageTag(locales[i]));
+    }
+    return availableLocales;
+}
+
+std::string BestAvailableLocale(const std::vector<std::string> &availableLocales, const std::string &locale)
+{
+    // 1. Let candidate be locale.
+    std::string localeCandidate = locale;
+    std::string undefined = std::string();
+    // 2. Repeat,
+    uint32_t length = availableLocales.size();
+    while (!localeCandidate.empty()) {
+        // a. If availableLocales contains an element equal to candidate, return candidate.
+        for (uint32_t i = 0; i < length; ++i) {
+            const std::string &itemStr = availableLocales[i];
+            if (itemStr == localeCandidate) {
+                return localeCandidate;
+            }
+        }
+        // b. Let pos be the character index of the last occurrence of "-" (U+002D) within candidate.
+        //    If that character does not occur, return undefined.
+        size_t pos = localeCandidate.rfind('-');
+        if (pos == std::string::npos) {
+            return undefined;
+        }
+        // c. If pos ≥ 2 and the character "-" occurs at index pos-2 of candidate, decrease pos by 2.
+        if (pos >= intl::INTL_INDEX_TWO && localeCandidate[pos - intl::INTL_INDEX_TWO] == '-') {
+            pos -= intl::INTL_INDEX_TWO;
+        }
+        // d. Let candidate be the substring of candidate from position 0, inclusive, to position pos, exclusive.
+        localeCandidate.resize(pos);
+    }
+    return undefined;
+}
+
+static std::string GetDefaultLocaleTag()
+{
+    icu::Locale defaultLocale;
+
+    const char *defaultLocaleName = defaultLocale.getName();
+    if (strcmp(defaultLocaleName, "en_US_POSIX") == 0 || strcmp(defaultLocaleName, "c") == 0) {
+        return "en-US";
+    }
+
+    if (defaultLocale.isBogus() == TRUE) {
+        return "und";
+    }
+
+    UErrorCode error = U_ZERO_ERROR;
+    auto defaultLocaleTag = defaultLocale.toLanguageTag<std::string>(error);
+    ANI_FATAL_IF(U_FAILURE(error));
+
+    return defaultLocaleTag;
+}
+
+static std::vector<std::string> ToStringList(ani_env *env, ani_array_ref aniList)
+{
+    ani_size len;
+    ANI_FATAL_IF_ERROR(env->Array_GetLength(aniList, &len));
+
+    std::vector<std::string> result;
+    result.reserve(len);
+
+    for (ani_size i = 0; i < len; i++) {
+        ani_ref aniRef;
+        ANI_FATAL_IF_ERROR(env->Array_Get_Ref(aniList, i, &aniRef));
+
+        auto item = ConvertFromAniString(env, reinterpret_cast<ani_string>(aniRef));
+        result.push_back(item);
+    }
+    return result;
+}
+
+static ani_array_ref ToAniStrArray(ani_env *env, std::vector<std::string> strings)
+{
+    ani_class stringClass;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/String;", &stringClass));
+
+    ani_array_ref array;
+    if (strings.empty()) {
+        ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, 0, nullptr, &array));
+        return array;
+    }
+    auto first = intl::StdStrToAni(env, strings[0]);
+    ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, strings.size(), first, &array));
+    for (size_t i = 1; i < strings.size(); ++i) {
+        auto item = intl::StdStrToAni(env, strings[i]);
+        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(array, i, item));
+    }
+    return array;
+}
+
+ani_status CanonicalizeLocaleList(ani_env *env, std::vector<std::string> &seen,
+                                  std::vector<std::string> &requestedLocales)
+{
+    if (seen.empty()) {
+        return ANI_PENDING_ERROR;
+    }
+    auto len = seen.size();
+    for (size_t i = 0; i < len; i++) {
+        std::string localeCStr = seen[i];
+        if (!intl::IsStructurallyValidLanguageTag(localeCStr)) {
+            ThrowRangeError(env, "invalid locale");
+            return ANI_PENDING_ERROR;
+        }
+        if (localeCStr.length() == 0) {
+            ThrowRangeError(env, "invalid locale");
+            return ANI_PENDING_ERROR;
+        }
+
+        std::transform(localeCStr.begin(), localeCStr.end(), localeCStr.begin(), intl::AsciiAlphaToLower);
+        UErrorCode success = U_ZERO_ERROR;
+        icu::Locale formalLocale = icu::Locale::forLanguageTag(seen[i], success);
+        if ((U_FAILURE(success) != 0) || (formalLocale.isBogus() != 0)) {
+            ThrowRangeError(env, "invalid locale");
+            return ANI_PENDING_ERROR;
+        }
+        // Resets the LocaleBuilder to match the locale.
+        // Returns an instance of Locale created from the fields set on this builder.
+        formalLocale = icu::LocaleBuilder().setLocale(formalLocale).build(success);
+        // Canonicalize the locale ID of this object according to CLDR.
+        formalLocale.canonicalize(success);
+        if ((U_FAILURE(success) != 0) || (formalLocale.isBogus() != 0)) {
+            ThrowRangeError(env, "invalid locale");
+            return ANI_PENDING_ERROR;
+        }
+        std::string languageTag = intl::ToStdStringLanguageTag(formalLocale);
+        if (std::find(requestedLocales.begin(), requestedLocales.end(), languageTag) == requestedLocales.end()) {
+            requestedLocales.push_back(languageTag);
+        }
+    }
+    return ANI_OK;
+}
+
+static icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
+{
+    UErrorCode error = U_ZERO_ERROR;
+
+    const icu::Locale defaultLocale = icu::Locale::forLanguageTag(GetDefaultLocaleTag(), error);
+    ANI_FATAL_IF(U_FAILURE(error));
+
     icu::LocaleMatcher::Builder builder;
     builder.setDefaultLocale(&defaultLocale);
+
+    int32_t count;
+    const icu::Locale *availableLocales = icu::Locale::getAvailableLocales(count);
     for (int32_t i = 0; i < count; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         builder.addSupportedLocale(availableLocales[i]);
     }
+
     return builder.build(success);
 }
 
-ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_string locale)
+icu::Locale GetLocale(ani_env *env, std::string &locTag)
 {
-    UErrorCode success = U_ZERO_ERROR;
-    auto locTag = ConvertFromAniString(env, locale);
-    auto str =
-        BuildLocaleMatcher(success).getBestMatchForListString(locTag, success)->toLanguageTag<std::string>(success);
-    if (UNLIKELY(U_FAILURE(success))) {
-        std::string message = "Unable to find bestfit match for" + locTag;
-        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(locTag.c_str()), status);
+    if (UNLIKELY(U_FAILURE(status))) {
+        const auto errorMessage = std::string("Language tag '").append(locTag).append("' is invalid or not supported");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", errorMessage.c_str(), "Lstd/core/String;:V");
         return nullptr;
     }
-    return intl::StdStrToAni(env, str);
+    return locale;
 }
 
-std::string LookupLocale(const std::string &locTag, const icu::Locale *availableLocales, const int32_t count)
+ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+{
+    auto tags = ToStringList(env, locales);
+    for (const auto &tag : tags) {
+        if (!intl::IsStructurallyValidLanguageTag(tag)) {
+            ThrowRangeError(env, "Incorrect locale information provided");
+        }
+    }
+    auto success = UErrorCode::U_ZERO_ERROR;
+    auto matcher = BuildLocaleMatcher(success);
+    if (UNLIKELY(U_FAILURE(success))) {
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to build locale matcher", "Lstd/core/String;:V");
+        return nullptr;
+    }
+    auto it = intl::LanguageTagListIterator(tags);
+    auto bestfit = matcher.getBestMatchResult(it, success);
+    if (UNLIKELY(U_FAILURE(success))) {
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to get best match result", "Lstd/core/String;:V");
+        return nullptr;
+    }
+    auto locale = bestfit.makeResolvedLocale(success);
+    if (UNLIKELY(U_FAILURE(success))) {
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to make resolved locale", "Lstd/core/String;:V");
+        return nullptr;
+    }
+    auto tag = locale.toLanguageTag<std::string>(success);
+    if (UNLIKELY(U_FAILURE(success))) {
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to convert locale into language tag",
+                      "Lstd/core/String;:V");
+        return nullptr;
+    }
+    if (tag == "en_US_POSIX" || tag == "c") {
+        tag = "en-US";
+    }
+    return intl::StdStrToAni(env, tag);
+}
+
+std::vector<std::string> LookupLocales(std::vector<std::string> &availableLocales,
+                                       std::vector<std::string> &requestedLocales)
+{
+    auto length = requestedLocales.size();
+    std::vector<std::string> convertedLocales;
+    convertedLocales.reserve(length);
+    std::vector<uint32_t> indexAvailableLocales;
+    indexAvailableLocales.reserve(length);
+    for (uint32_t i = 0; i < length; ++i) {
+        convertedLocales.push_back(requestedLocales[i]);
+    }
+    // 1. For each element locale of requestedLocales in List order, do
+    //    a. Let noExtensionsLocale be the String value that is locale with all Unicode locale extension sequences
+    //       removed.
+    //    b. Let availableLocale be BestAvailableLocale(availableLocales, noExtensionsLocale).
+    //    c. If availableLocale is not undefined, append locale to the end of result.
+
+    for (uint32_t i = 0; i < length; ++i) {
+        intl::ParsedLocale foundationResult = intl::HandleLocale(convertedLocales[i]);
+        std::string availableLocale = BestAvailableLocale(availableLocales, foundationResult.base);
+        if (!availableLocale.empty()) {
+            indexAvailableLocales.push_back(i);
+        }
+    }
+    // 2. Let result be a new empty List.
+    std::vector<std::string> result;
+    result.reserve(length);
+    for (unsigned int indexAvailableLocale : indexAvailableLocales) {
+        result.push_back(requestedLocales[indexAvailableLocale]);
+    }
+    // 3. Return result.
+    return result;
+}
+
+ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+{
+    auto tags = ToStringList(env, locales);
+
+    auto success = UErrorCode::U_ZERO_ERROR;
+    auto matcher = BuildLocaleMatcher(success);
+    if (UNLIKELY(U_FAILURE(success))) {
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Unable to build locale matcher", "Lstd/core/String;:V");
+        return nullptr;
+    }
+
+    auto result = std::vector<std::string>();
+    for (const auto &tag : tags) {
+        if (!intl::IsStructurallyValidLanguageTag(tag)) {
+            ThrowRangeError(env, "Incorrect locale information provided");
+            return nullptr;
+        }
+        success = UErrorCode::U_ZERO_ERROR;
+        auto desired = icu::Locale::forLanguageTag(tag, success);
+        auto matched = matcher.getBestMatchResult(desired, success);
+        if (UNLIKELY(U_FAILURE(success))) {
+            continue;
+        }
+        if (matched.getSupportedIndex() < 0) {
+            continue;
+        }
+        auto bestfit = desired.toLanguageTag<std::string>(success);
+        if (UNLIKELY(U_FAILURE(success))) {
+            continue;
+        }
+        result.push_back(bestfit);
+    }
+    return ToAniStrArray(env, result);
+}
+
+static std::string LookupLocale(const std::string &locTag, const icu::Locale *availableLocales, const int32_t count)
 {
     UErrorCode success = U_ZERO_ERROR;
     auto locP = icu::StringPiece(locTag.c_str());
@@ -90,22 +359,41 @@ ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klas
         ANI_FATAL_IF_ERROR(env->Array_Get_Ref(locales, i, &locale));
 
         auto locTag = ConvertFromAniString(env, reinterpret_cast<ani_string>(locale));
+        if (!intl::IsStructurallyValidLanguageTag(locTag)) {
+            ThrowRangeError(env, "Incorrect locale information provided");
+        }
 
         bestLoc = LookupLocale(locTag, availableLocales, availableCount);
         if (!bestLoc.empty()) {
             return intl::StdStrToAni(env, bestLoc);
         }
     }
-    auto str = icu::Locale::getDefault().toLanguageTag<std::string>(success);
-    return intl::StdStrToAni(env, str);
+    return intl::StdStrToAni(env, GetDefaultLocaleTag());
+}
+
+ani_array_ref StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+{
+    auto tags = ToStringList(env, locales);
+    auto availableLocales = GetAvailableLocales();
+    std::vector<std::string> requestedLocales;
+    ani_status status = CanonicalizeLocaleList(env, tags, requestedLocales);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
+    auto result = LookupLocales(availableLocales, requestedLocales);
+    return ToAniStrArray(env, result);
 }
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)
 {
-    const auto methods = std::array {ani_native_function {"bestFitLocale", "Lstd/core/String;:Lstd/core/String;",
+    const auto methods = std::array {ani_native_function {"bestFitLocale", "[Lstd/core/String;:Lstd/core/String;",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocale)},
                                      ani_native_function {"lookupLocale", "[Lstd/core/String;:Lstd/core/String;",
-                                                          reinterpret_cast<void *>(StdCoreIntlLookupLocale)}};
+                                                          reinterpret_cast<void *>(StdCoreIntlLookupLocale)},
+                                     ani_native_function {"bestFitLocales", "[Lstd/core/String;:[Lstd/core/String;",
+                                                          reinterpret_cast<void *>(StdCoreIntlBestFitLocales)},
+                                     ani_native_function {"lookupLocales", "[Lstd/core/String;:[Lstd/core/String;",
+                                                          reinterpret_cast<void *>(StdCoreIntlLookupLocales)}};
 
     ani_class localeMatchClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/LocaleMatch;", &localeMatchClass));

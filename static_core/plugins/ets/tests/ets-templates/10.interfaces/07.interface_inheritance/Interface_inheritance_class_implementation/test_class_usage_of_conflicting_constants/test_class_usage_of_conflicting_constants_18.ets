@@ -36,5 +36,5 @@ class EnumConflictClass implements EnumConflictInterface {
 function main(): void {
   const instance = new EnumConflictClass();
   assertEQ(instance.CONST, 'enumConflictValue');
-  assertEQ(instance.getEnumValue() as number, 1);
+  assertEQ(instance.getEnumValue().valueOf(), 1);
 }

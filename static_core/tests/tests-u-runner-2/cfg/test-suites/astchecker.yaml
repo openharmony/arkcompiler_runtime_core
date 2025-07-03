@@ -14,8 +14,8 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: astchecker
-list-root: ${PANDA_SOURCE_PATH}/ets_frontend/ets2panda/test/test-lists/astchecker
-test-root: ${PANDA_SOURCE_PATH}/ets_frontend/ets2panda/test
+list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/astchecker
+test-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
 
 parameters:
   work-dir: ${WORK_DIR}/${suite-name}

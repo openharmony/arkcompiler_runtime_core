@@ -12,25 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_CALLBACK_ABI_H
-#define TAIHE_CALLBACK_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
 
-#include <taihe/common.h>
+#include <taihe/object.abi.h>
 
-struct TCallbackData {
-    TRefCount m_count;
-    void (*m_free)(struct TCallbackData *);
-    void *m_func;
-};
-
+// TCallback
+// Represents a callback structure containing a pointer to the data block
+// and a function pointer.
+// # Members
+// - `vtbl_ptr`: A pointer to the function associated with the callback.
+// - `data_ptr`: A pointer to the data block.
 struct TCallback {
-    struct TCallbackData *data_ptr;
+    void *vtbl_ptr;
+    struct DataBlockHead *data_ptr;
 };
-
-TH_EXPORT void tcallback_init(struct TCallbackData *data_ptr, void *func, void (*free)(struct TCallbackData *));
-
-TH_EXPORT struct TCallbackData *tcallback_dup(struct TCallbackData *data_ptr);
-
-TH_EXPORT void tcallback_drop(struct TCallbackData *data_ptr);
-
-#endif // TAIHE_CALLBACK_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_

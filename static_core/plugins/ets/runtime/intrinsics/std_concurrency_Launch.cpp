@@ -23,9 +23,12 @@
 #include "types/ets_method.h"
 #include "types/ets_type.h"
 #include "types/ets_job.h"
+#include "types/ets_promise.h"
 #include "types/ets_typeapi_create.h"
 #include "types/ets_type_comptime_traits.h"
 #include "mem/vm_handle.h"
+
+#include <type_traits>
 
 namespace ark::ets::intrinsics {
 static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> func)
@@ -85,9 +88,11 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
     return realArgs;
 }
 
-extern "C" {
-EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
+template <typename CoroResult>
+ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postToMain = false)
 {
+    static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
+
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (func == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -116,31 +121,61 @@ EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
     }
 
     // create the coro and put it to the ready queue
-    EtsJob *job = EtsJob::Create(coro);
-    if (UNLIKELY(job == nullptr)) {
+    CoroResult *coroResult = CoroResult::Create(coro);
+    if (UNLIKELY(coroResult == nullptr)) {
         return nullptr;
     }
-    EtsHandle<EtsJob> jobHandle(coro, job);
+    EtsHandle<CoroResult> coroResultHandle(coro, coroResult);
 
     PandaEtsVM *etsVm = coro->GetPandaVM();
     auto *coroManager = coro->GetCoroutineManager();
-    auto jobRef = etsVm->GetGlobalObjectStorage()->Add(job, mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(jobRef, coroManager);
+    auto ref = etsVm->GetGlobalObjectStorage()->Add(coroResultHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, coroManager);
 
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
-
-    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
-                                                            CoroutineLaunchMode::DEFAULT);
+    auto mode = postToMain ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+    bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
+                                                            EtsCoroutine::LAUNCH, abortFlag);
     if (UNLIKELY(!launchResult)) {
+        // Launch failed. The exception in the current coro should be already set by Launch(),
+        // just return null as the result and clean up the allocated resources.
+        ASSERT(coro->HasPendingException());
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
-        ThrowOutOfMemoryError("OOM");
         return nullptr;
     }
 
-    return jobHandle.GetPtr();
+    return coroResultHandle.GetPtr();
+}
+
+extern "C" {
+EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
+{
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, true));
+}
+}
+
+extern "C" {
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
+{
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U));
+}
+
+void EtsLaunchSameWorker(EtsObject *callback)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    EtsHandleScope scope(coro);
+    VMHandle<EtsObject> hCallback(coro, callback->GetCoreType());
+    PandaVector<Value> args = {Value(hCallback->GetCoreType())};
+    auto *method = ResolveInvokeMethod(coro, hCallback);
+    auto *coroMan = coro->GetCoroutineManager();
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
+    [[maybe_unused]] auto launched =
+        coroMan->Launch(evt, method->GetPandaMethod(), std::move(args), CoroutineLaunchMode::SAME_WORKER,
+                        EtsCoroutine::TIMER_CALLBACK, true);
+    ASSERT(launched);
 }
 }
 }  // namespace ark::ets::intrinsics

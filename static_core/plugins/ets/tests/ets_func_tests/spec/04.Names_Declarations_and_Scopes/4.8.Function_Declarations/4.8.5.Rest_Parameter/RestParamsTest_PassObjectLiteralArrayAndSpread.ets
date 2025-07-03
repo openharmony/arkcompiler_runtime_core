@@ -35,7 +35,7 @@ class TupleT {
 
 class Testee extends Base {
 
-    public spread(prefix: String, ...values: Object[]): int {
+    public spread(prefix: String, ...values: TupleT[]): int {
         return 42;
     }
 

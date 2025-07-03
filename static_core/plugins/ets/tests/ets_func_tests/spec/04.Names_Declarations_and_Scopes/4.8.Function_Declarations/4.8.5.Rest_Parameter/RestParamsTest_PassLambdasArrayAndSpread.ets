@@ -31,7 +31,7 @@ type StringToIntN = StringToInt|null;
 
 class Testee extends Base {
 
-    public callLambda(...lValues: StringToIntN[]): int {
+    public callLambda(...lValues: StringToInt[]): int {
         let sum: int = 0;
         for(let call of lValues) {
             if(call != null) sum += call("Hello");
@@ -39,7 +39,7 @@ class Testee extends Base {
         return sum;
     }
 
-    public callLambda(prefix: String, ...lValues: StringToIntN[]): int {
+    public callLambda(prefix: String, ...lValues: StringToInt[]): int {
         let sum: int = 0;
         for(let call of lValues) {
             if(call != null) sum += call(prefix);

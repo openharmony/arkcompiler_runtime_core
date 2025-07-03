@@ -29,7 +29,7 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 }
 
 template <typename T>
-Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsCoroutine *coro)
 {
     auto ptypes = PlatformTypes(coro);
     EtsClass *boxClass = nullptr;
@@ -52,7 +52,13 @@ Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
         boxClass = ptypes->coreDouble;
     }
     ASSERT(boxClass->IsBoxed());
-    return boxClass->GetRuntimeClass();
+    return boxClass;
+}
+
+template <typename T>
+Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+{
+    return GetEtsBoxClass(coro)->GetRuntimeClass();
 }
 
 }  // namespace ark::ets

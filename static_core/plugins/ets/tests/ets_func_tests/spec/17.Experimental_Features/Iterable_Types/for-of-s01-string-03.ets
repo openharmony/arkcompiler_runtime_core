@@ -18,7 +18,7 @@ desc: 8.9 for-of Statements. 17.4, 17.5.1 - iterable
 tags: []
 ---*/
 
-function doit(ch : char) : char[] {
+function doit(ch : char) : FixedArray<char> {
     return [ch, ch];
 }
 

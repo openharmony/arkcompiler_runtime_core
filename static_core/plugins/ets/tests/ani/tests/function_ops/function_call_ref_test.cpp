@@ -427,6 +427,30 @@ TEST_F(FunctionCallRefTest, function_call_ref_009)
     GetStdString(static_cast<ani_string>(value), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 }
+
+TEST_F(FunctionCallRefTest, function_call_ref_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].i = INT_VAL1;
+    args[1U].i = INT_VAL2;
+
+    ani_ref result = nullptr;
+    ASSERT_EQ(env_->c_api->Function_Call_Ref(nullptr, fn, &result, INT_VAL1, INT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Ref_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Ref(nullptr, &result, INT_VAL1, INT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Ref_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Ref(fn, nullptr, INT_VAL1, INT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Ref_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Ref(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Ref_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

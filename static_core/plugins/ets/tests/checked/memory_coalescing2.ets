@@ -98,7 +98,7 @@ class A {
 
 export class Test {
 
-    private static __noinline__fnSumII(u: double[], v: double[]): void {
+    private static __noinline__fnSumII(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.i1 = 0;
         t.i2 = 0;
@@ -112,7 +112,7 @@ export class Test {
         }
     }
 
-    private static __noinline__fnSumIF(u: double[], v: double[]): void {
+    private static __noinline__fnSumIF(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.i2 = 0;
         t.f1 = 0;
@@ -126,7 +126,7 @@ export class Test {
         }
     }
 
-    private static __noinline__fnSumFF(u: double[], v: double[]): void {
+    private static __noinline__fnSumFF(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.f1 = 0;
         t.f2 = 0;
@@ -140,7 +140,7 @@ export class Test {
         }
     }
 
-    private static __noinline__fnSumLL(u: double[], v: double[]): void {
+    private static __noinline__fnSumLL(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.l1 = 0;
         t.l2 = 0;
@@ -154,7 +154,7 @@ export class Test {
         }
     }
 
-    private static __noinline__fnSumLD(u: double[], v: double[]): void {
+    private static __noinline__fnSumLD(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.l2 = 0;
         t.d1 = 0;
@@ -168,7 +168,7 @@ export class Test {
         }
     }
 
-    private static __noinline__fnSumDD(u: double[], v: double[]): void {
+    private static __noinline__fnSumDD(u: FixedArray<double>, v: FixedArray<double>): void {
         let t: A = new A();
         t.d1 = 0;
         t.d2 = 0;
@@ -184,8 +184,8 @@ export class Test {
 
      __noinline__test(n: int): void {
         let i: int;
-        let u: double[] = new double[n];
-        let v: double[] = new double[n];
+        let u: FixedArray<double> = new double[n];
+        let v: FixedArray<double> = new double[n];
         let vv1: double = 0;
         let vv2: double = 0;
         let vv3: double = 0;

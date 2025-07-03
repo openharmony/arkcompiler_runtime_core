@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,8 @@ class TestSuiteConfigTest1(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
 
@@ -60,8 +61,10 @@ class TestSuiteConfigTest1(unittest.TestCase):
         args = [
             self.workflow_name, self.test_suite_name, "--show-progress", "--verbose", "short",
             "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
+            "--report-dir", "my-report-dir",
             "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
-            "--llvm-cov-profdata-out-path", ".", "--llvm-cov-html-out-path", ".",
+            "--report-dir", "my-report-dir",
+            "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
             "--time-edges", "1,10,100,500"
         ]
         actual = CliOptions(args).data

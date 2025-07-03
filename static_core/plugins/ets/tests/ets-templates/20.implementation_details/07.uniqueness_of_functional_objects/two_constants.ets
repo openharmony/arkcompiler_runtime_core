@@ -24,9 +24,9 @@ function foo{{c}}
 function main() {
     const f1 = foo
     const f2 = foo
-    assertNE(f1, foo)
-    assertNE(f2, foo)
-    assertNE(f1, f2)
+    assertEQ(f1, foo)
+    assertEQ(f2, foo)
+    assertEQ(f1, f2)
 }
 
 {% endfor %}

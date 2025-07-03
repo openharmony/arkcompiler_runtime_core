@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_PROXY_JS_PROXY_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_PROXY_JS_PROXY_H_
 
+#include "include/mem/panda_containers.h"
 #include "runtime/include/class.h"
 #include "runtime/include/method.h"
 
@@ -30,6 +31,7 @@ class JSProxy {
 public:
     static JSProxy *CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMethods);
     static JSProxy *CreateFunctionProxy(EtsClass *functionInterface);
+    static JSProxy *CreateInterfaceProxy(const PandaSet<Class *> &interfaces, std::string &interfaceName);
 
     EtsClass *GetProxyClass() const
     {
@@ -52,6 +54,8 @@ public:
 private:
     explicit JSProxy(EtsClass *proxyKlass) : proxyKlass_(proxyKlass) {}
 
+    static JSProxy *CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<Method *> targetMethods,
+                                const PandaVector<Class *> &interfaces, void *callBridge);
     EtsClass *const proxyKlass_ {};
     // NOTE(vpukhov): add flag if original class has final methods or public fields
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state

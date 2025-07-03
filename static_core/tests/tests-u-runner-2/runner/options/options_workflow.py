@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +17,16 @@
 import re
 from functools import cached_property
 from os import path
-from typing import Dict, Any, List, Optional, Union
+from typing import Any, Optional, cast
 
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.logger import Log
-from runner.options.macros import Macros, ParameterNotFound, MacroNotExpanded
+from runner.options.macros import MacroNotExpanded, Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.step import Step, StepKind
-from runner.utils import load_config, indent as utils_indent, has_macro, get_config_workflow_folder
+from runner.utils import get_config_workflow_folder, has_macro, load_config
+from runner.utils import indent as utils_indent
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -40,7 +41,7 @@ class WorkflowOptions(IOptions):
     __IMPORTS = "imports"
     __TYPE = "type"
 
-    def __init__(self, cfg_content: Dict[str, Any], parent_test_suite: TestSuiteOptions,
+    def __init__(self, cfg_content: dict[str, Any], parent_test_suite: TestSuiteOptions,  # type: ignore[explicit-any]
                  *, parent_workflow: Optional['WorkflowOptions'] = None) -> None:
         super().__init__(None)
         self._parent = parent_test_suite if parent_workflow is None else parent_workflow
@@ -48,7 +49,7 @@ class WorkflowOptions(IOptions):
         self.__name = cfg_content[self.__WORKFLOW] if not inner else cfg_content[self.__WORKFLOW_NAME]
         self.__data = cfg_content[f"{self.__name}.data"] if not inner else cfg_content
         self.__test_suite = parent_test_suite
-        self.__steps: List[Step] = []
+        self.__steps: list[Step] = []
         if not inner:
             self.__parameters = dict((arg_key[(len(self.__name) + len(self.__PARAMETERS) + 2):], arg_value)
                                      for arg_key, arg_value in cfg_content.items()
@@ -76,8 +77,8 @@ class WorkflowOptions(IOptions):
         return "\n".join(result)
 
     @staticmethod
-    def __check_type(step_type: StepKind, actual_count: int, expected_max_count: int) -> None:
-        if actual_count > expected_max_count:
+    def __check_type(step_type: StepKind, actual_count: int, expected_max_count: int | None) -> None:
+        if expected_max_count is not None and actual_count > expected_max_count:
             raise InvalidConfiguration(
                 f"Property 'step-type: {step_type.value}' can be set at only one step, "
                 f"but it is set at {actual_count} steps.")
@@ -87,43 +88,43 @@ class WorkflowOptions(IOptions):
         return str(self.__name)
 
     @cached_property
-    def steps(self) -> List[Step]:
+    def steps(self) -> list[Step]:
         return self.__steps
 
     @cached_property
-    def parameters(self) -> Dict[str, Any]:
+    def parameters(self) -> dict[str, Any]:   # type: ignore[explicit-any]
         return self.__parameters
 
     def get_command_line(self) -> str:
         options = ' '.join([
         ])
-        options_str = re.sub(r'\s+', ' ', options, re.IGNORECASE | re.DOTALL)
+        options_str = re.sub(r'\s+', ' ', options, flags=re.IGNORECASE | re.DOTALL)
 
         return options_str
 
-    def get_parameter(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+    def get_parameter(self, key: str, default: Any | None = None) -> Any | None: # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
     def check_binary_artifacts(self) -> None:
         for step in self.steps:
             if step.executable_path is not None and not step.executable_path.is_file():
-                raise FileNotFoundError(
+                raise FileNotFoundException(
                     f"Specified binary at {step.executable_path} was not found")
 
     def check_types(self) -> None:
-        types: Dict[StepKind, int] = {}
+        types: dict[StepKind, int] = {}
         for step in self.steps:
             types[step.step_kind] = types.get(step.step_kind, 0) + 1
         self.__check_type(StepKind.COMPILER, types.get(StepKind.COMPILER, 0), 1)
-        self.__check_type(StepKind.COMPILER, types.get(StepKind.COMPILER, 0), 1)
         self.__check_type(StepKind.VERIFIER, types.get(StepKind.VERIFIER, 0), 1)
-        self.__check_type(StepKind.RUNTIME, types.get(StepKind.RUNTIME, 0), 1)
+        self.__check_type(StepKind.AOT, types.get(StepKind.AOT, 0), 1)
+        self.__check_type(StepKind.RUNTIME, types.get(StepKind.RUNTIME, 0), None)
 
     def pretty_str(self) -> str:
-        result: List[str] = [step.pretty_str() for step in self.steps if str(step.executable_path) and step.enabled]
+        result: list[str] = [step.pretty_str() for step in self.steps if str(step.executable_path) and step.enabled]
         return '\n'.join(result)
 
-    def __expand_macro_for_param(self, value_in_workflow: Union[str, List], param: str) -> Union[str, List]:
+    def __expand_macro_for_param(self, value_in_workflow: str | list, param: str) -> str | list:
         if (isinstance(value_in_workflow, str) and has_macro(value_in_workflow) and
                 not self.__test_suite.is_defined_in_collections(param)):
             return self.__expand_macro_for_str(value_in_workflow)
@@ -131,7 +132,7 @@ class WorkflowOptions(IOptions):
             return self.__expand_macro_for_list(value_in_workflow)
         return value_in_workflow
 
-    def __prepare_imported_configs(self, imported_configs: Dict[str, Any]) -> None:
+    def __prepare_imported_configs(self, imported_configs: dict[str, dict[str, str]]) -> None:
         for config_name, config_content in imported_configs.items():
             config_name = str(path.join(get_config_workflow_folder(), f"{config_name}.yaml"))
             args = {}
@@ -139,7 +140,7 @@ class WorkflowOptions(IOptions):
                 args.update(self.__prepare_imported_config(param, param_value))
             self.__load_imported_config(config_name, args)
 
-    def __prepare_imported_config(self, param: str, param_value: Any) -> Dict[str, Any]:
+    def __prepare_imported_config(self, param: str, param_value: Any) -> dict[str, Any]:  # type: ignore[explicit-any]
         args = {}
         if isinstance(param_value, str) and param_value.find(self.__PARAMETERS) >= 0:
             param_value = param_value.replace(f"${{{self.__PARAMETERS}.", "").replace("}", "")
@@ -148,20 +149,21 @@ class WorkflowOptions(IOptions):
             args[param] = self.__prepare_list(param_value)
         return args
 
-    def __prepare_list(self, param_value: List[str]) -> List[str]:
+    def __prepare_list(self, param_value: list[str]) -> list[str]:
         result_list = []
         for item in param_value:
-            item = Macros.correct_macro(item, self)
-            for sub_item in (item if isinstance(item, list) else [item]):
+            corrected_item = Macros.correct_macro(item, self)
+            for sub_item in (corrected_item if isinstance(corrected_item, list) else [corrected_item]):
                 if sub_item and sub_item in self.__parameters and self.__parameters[sub_item]:
                     result_list.append(self.__parameters[sub_item])
-                elif item:
+                elif corrected_item:
                     result_list.append(sub_item)
         return result_list
 
-    def __load_imported_config(self, cfg_path: str, actual_params: Dict[str, Any]) -> None:
+    def __load_imported_config(self, cfg_path: str,         # type: ignore[explicit-any]
+                               actual_params: dict[str, Any]) -> None:
         cfg_content = load_config(str(cfg_path))
-        params = cfg_content.get(self.__PARAMETERS, {})
+        params = cast(dict, cfg_content.get(self.__PARAMETERS, {}))
         for param, _ in params.items():
             if param in actual_params:
                 params[param] = actual_params[param]
@@ -174,14 +176,14 @@ class WorkflowOptions(IOptions):
             if param_name not in self.__parameters:
                 self.__parameters[param_name] = param_value
 
-    def __load_steps(self, steps: Dict[str, Any]) -> None:
+    def __load_steps(self, steps: dict[str, dict]) -> None:
         for step_name, step_content in steps.items():
             if step_name == self.__IMPORTS:
                 self.__prepare_imported_configs(step_content)
             else:
                 self.__load_step(step_name, step_content)
 
-    def __load_step(self, step_name: str, step_content: Dict[str, Any]) -> None:
+    def __load_step(self, step_name: str, step_content: dict[str, str | list]) -> None:
         _LOGGER.all(f"Going to load step '{step_name}'")
         for (step_item, step_value) in step_content.items():
             if isinstance(step_value, str):
@@ -198,7 +200,7 @@ class WorkflowOptions(IOptions):
         step = Step(step_name, step_content)
         self.__steps.append(step)
 
-    def __expand_macro_for_str(self, value_in_workflow: str) -> Union[str, List[str]]:
+    def __expand_macro_for_str(self, value_in_workflow: str) -> str | list[str]:
         try:
             return Macros.correct_macro(value_in_workflow, self)
         except ParameterNotFound as pnf:
@@ -207,8 +209,8 @@ class WorkflowOptions(IOptions):
             _LOGGER.all(str(pnf))
         return value_in_workflow
 
-    def __expand_macro_for_list(self, value_in_workflow: list) -> Union[str, List[str]]:
-        expanded_in_workflow: List[str] = []
+    def __expand_macro_for_list(self, value_in_workflow: list) -> str | list[str]:
+        expanded_in_workflow: list[str] = []
         for value in value_in_workflow:
             try:
                 expanded_value = Macros.correct_macro(value, self)

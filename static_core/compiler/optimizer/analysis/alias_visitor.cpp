@@ -207,10 +207,6 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::CallVirtual:
             case Opcode::CallResolvedVirtual:
             case Opcode::CallDynamic:
-            case Opcode::CallLaunchStatic:
-            case Opcode::CallResolvedLaunchStatic:
-            case Opcode::CallLaunchVirtual:
-            case Opcode::CallResolvedLaunchVirtual:
             case Opcode::Call:
             case Opcode::Bitcast:
             case Opcode::Cast:
@@ -577,22 +573,6 @@ void AliasVisitor::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
     VisitCall(v, inst);
 }
 void AliasVisitor::VisitCallDynamic(GraphVisitor *v, Inst *inst)
-{
-    VisitCall(v, inst);
-}
-void AliasVisitor::VisitCallLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    VisitCall(v, inst);
-}
-void AliasVisitor::VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst)
-{
-    VisitCall(v, inst);
-}
-void AliasVisitor::VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst)
-{
-    VisitCall(v, inst);
-}
-void AliasVisitor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
 {
     VisitCall(v, inst);
 }

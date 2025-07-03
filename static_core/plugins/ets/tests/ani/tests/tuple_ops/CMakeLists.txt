@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ani_test_tuple_ops_tuple_set_element
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuple.ets
+ani_add_gtest(ani_test_tuplevalue_getnumberofitem
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getnumberofitem_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tuplevalue_getnumberofitem_test.ets
 )
 
 ani_add_gtest(ani_test_tuplevalue_getitem_boolean

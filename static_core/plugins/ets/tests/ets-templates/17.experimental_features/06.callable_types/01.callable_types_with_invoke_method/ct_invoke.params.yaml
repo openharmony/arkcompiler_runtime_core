@@ -234,32 +234,6 @@ cases:
           }
 
     - decl: |-
-          // exception propagation from invoke
-          class MyException extends Exception {}
-          class B {
-              static $_invoke(p: boolean): string throws {
-                  if (p) {
-                      throw new MyException()
-                  }
-                  return 'B'
-              }
-          }
-          class C extends B {
-              $_invoke(): C { return new C() }
-          }
-          function foo(p: boolean): string throws {
-              return C(p)
-          }
-      use: |-
-          let x: string
-          try {
-              x = foo(true)
-              return 1
-          } catch (e) {
-              if (!(e instanceof MyException)) return 1
-          }
-
-    - decl: |-
           // call chain of invoke
           class A<T> {
               static $_invoke(): number { return 42.0 }

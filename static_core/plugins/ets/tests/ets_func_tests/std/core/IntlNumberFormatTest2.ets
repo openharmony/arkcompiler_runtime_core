@@ -33,8 +33,8 @@ function check(result: number, message: string): int {
     return fail;
 }
 
-const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
-const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
+const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru"];
+const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU"];
 const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
@@ -103,7 +103,6 @@ function positiveNumbersAsStrings(): Array<string> {
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
     expected[RU] = String.fromCharCode(49, 160, 50, 51, 52, 44, 53);
-    expected[IR] = String.fromCharCode(1777, 1644, 1778, 1779, 1780, 1643, 1781);
     return expected;
 }
 
@@ -123,7 +122,6 @@ function negativeNumbersAsStrings(): Array<string> {
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
     expected[RU] = String.fromCharCode(45, 49, 160, 50 ,51 ,52, 44, 53);
-    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1644, 1778, 1779, 1780, 1643, 1781);
     return expected;
 }
 
@@ -143,7 +141,6 @@ function negativeInfsAsStrings(): Array<string> {
     expected[JP] = expected[EN];
     expected[GE] = expected[EN];
     expected[RU] = expected[EN];
-    expected[IR] = String.fromCharCode(8206, 8722, 8734);
     return expected;
 }
 
@@ -162,7 +159,6 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
     separators[JP] = String.fromCharCode(32, 65374, 32);
     separators[GE] = separators[EN];
     separators[RU] = separators[EN];
-    separators[IR] = separators[EN];
     return separators;
 }
 

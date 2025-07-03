@@ -19,7 +19,7 @@
  * that will be resolved in another coroutine
  */
 
-function foo() {}
+async function foo() {}
 
 let resolvePromiseFn: ((value: String) => void) | null = null;
 
@@ -28,7 +28,7 @@ function main() {
         resolvePromiseFn = resolve;
     });
 
-    let p2 = launch foo();
+    let p2 = foo();
 
     let p3 = p1.then<Number>((value: String): Number => {
         assertEQ(value, "Panda");

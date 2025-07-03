@@ -16,7 +16,7 @@
 function UseAndCheckScheduleGcTest(): void {
     let detected = false;
     try {
-        GC.scheduleGcAfterNthAlloc(1, GC.YOUNG_CAUSE);
+        GC.scheduleGcAfterNthAlloc(1, GC.Cause.YOUNG);
     } catch (e: UnsupportedOperationException) {
         detected = true;
     }

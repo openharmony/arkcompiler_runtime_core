@@ -48,11 +48,11 @@ class Trash {
     }
 }
 
-function newUndefiningReviver(...keys: string[]): (k: string, v: NullishType) => NullishType {
+function newUndefiningReviver(...keys: FixedArray<string>): (k: string, v: NullishType) => NullishType {
     return (key: string, val: NullishType) => Array.from<string>(keys).indexOf(key) != -1 ? undefined : val
 }
 
-function newNullingReviver(...keys: string[]): (k: string, v: NullishType) => NullishType {
+function newNullingReviver(...keys: FixedArray<string>): (k: string, v: NullishType) => NullishType {
     return (key: string, val: NullishType) => Array.from<string>(keys).indexOf(key) != -1 ? null : val
 }
 
@@ -74,7 +74,7 @@ function replacingReviver(key: string, val: NullishType): NullishType {
     }
 }
 
-const POINT_TYPE = typeFor([] as Point[])
+const POINT_TYPE = typeFor([] as FixedArray<Point>)
 
 function jsonParseUsingUndefinedReviver(): int {
     const point = new Point(1, 2)
@@ -97,12 +97,12 @@ function jsonParseUsingRevivierWhichReturnsUndefined(): int {
     return RESULT_SUCCESS
 }
 
-const STRING_ARRAY_TYPE = Type.of([] as string[])
+const STRING_ARRAY_TYPE = Type.of([] as FixedArray<string>)
 
 function jsonParseArrayUsingReviverWhichReturnsUndefined(): int {
-    const parsedArray = JSON.parse<Nullish<string>[]>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
+    const parsedArray = JSON.parse<FixedArray<Nullish<string>>>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
 
-    Assertions.assertArrayEquals([null, "two"] as Nullish<string>[], parsedArray)
+    Assertions.assertArrayEquals([null, "two"] as FixedArray<Nullish<string>>, parsedArray)
 
     return RESULT_SUCCESS
 }
@@ -122,7 +122,7 @@ function jsonParseUsingReplacingReviver(): int {
 
     const trash = new Trash(new Point(10, 20))
     const trashJson = JSON.stringify(trash)
-    const trashType = typeFor([] as Trash[])
+    const trashType = typeFor([] as FixedArray<Trash>)
 
     let parsedTrash = JSON.parse<Trash>(trashJson, newUndefiningReviver("point"), trashType)
 
@@ -138,14 +138,14 @@ function jsonParseUsingReplacingReviver(): int {
 }
 
 function jsonParseArrayWithReplacingReviver(): int {
-    const romans: Nullish<string>[] = ["I", "II"]
+    const romans: FixedArray<Nullish<string>> = ["I", "II"]
 
     const replacements = new Map<string, NullishType>()
 
-    const replacedRomans: Nullish<string>[] = ["I"]
+    const replacedRomans: FixedArray<Nullish<string>> = ["I"]
     replacements.set("", replacedRomans)
 
-    const parsedRomans = JSON.parse<Nullish<string>[]>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
+    const parsedRomans = JSON.parse<FixedArray<Nullish<string>>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
     Assertions.assertArrayEquals(parsedRomans, replacedRomans)
 
     return RESULT_SUCCESS
@@ -163,6 +163,18 @@ function consolePrint(color: Color, text: string): void {
     console.print("\x1b[0m")
 }
 
+class BooleanTestClass {
+    public flag: boolean = false;
+}
+
+function jsonParseWithBoolean(): int {
+    let str = '{"flag":true}'
+    let type = Type.from<BooleanTestClass>()
+    let ret = JSON.parse<BooleanTestClass>(str, type) as BooleanTestClass
+    Assertions.assertEquals(ret.flag, true)
+    return RESULT_SUCCESS
+}
+
 function main(): int {
     let failures = RESULT_SUCCESS
 
@@ -172,6 +184,7 @@ function main(): int {
     //failures += test(jsonParseArrayUsingReviverWhichReturnsUndefined, "JSON.parse(array) using 'reviver' which returns 'undefined'")
     failures += test(jsonParseUsingReplacingReviver, "JSON.parse() using replacing 'reviver'")
     failures += test(jsonParseArrayWithReplacingReviver, "JSON.parse(array) using replacing 'reviver'")
+    failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
 
     if (failures == RESULT_SUCCESS) {
         consolePrint(Color.Green, "PASSED: ")
@@ -212,7 +225,7 @@ function test(testAction: () => int, testName: string): int {
     }
 }
 
-function typeFor<T>(a: T[]): Type {
+function typeFor<T>(a: FixedArray<T>): Type {
     return (Type.of(a) as ArrayType).getElementType()
 }
 
@@ -229,7 +242,7 @@ class Assertions {
         assertTrue( actual,  "expected true but was false")
     }
 
-    static assertArrayEquals<T>(expected: T[] | undefined | null, actual: T[] | undefined | null): void {
+    static assertArrayEquals<T>(expected: FixedArray<T> | undefined | null, actual: FixedArray<T> | undefined | null): void {
         if (expected === null) {
             assertTrue( actual === null,  `expected 'null' but was [${actual}]`)
         } else if (expected === undefined) {

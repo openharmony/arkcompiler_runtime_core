@@ -37,7 +37,7 @@ function checkEtsError(): boolean {
 
 function checkNumError(): boolean {
     try { throwNum() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
+        let errObj: ESValue = (e as ESError).getValue()
         return errObj.toNumber() == 0
     }
     return false
@@ -45,7 +45,7 @@ function checkNumError(): boolean {
 
 function checkStrError(): boolean {
     try { throwStr() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
+        let errObj: ESValue = (e as ESError).getValue()
         return errObj.toString() == 'hello'
     }
     return false
@@ -53,9 +53,9 @@ function checkStrError(): boolean {
 
 function checkObjError(): boolean {
     try { throwObj() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
-        let a: ESObject = errObj.getProperty('a')
-        let b: ESObject = errObj.getProperty('b')
+        let errObj: ESValue = (e as ESError).getValue()
+        let a: ESValue = errObj.getProperty('a')
+        let b: ESValue = errObj.getProperty('b')
         return (a.toNumber() == 1) && (b.toNumber() == 2)
     }
     return false
@@ -63,9 +63,9 @@ function checkObjError(): boolean {
 
 function checkSubClassError(): boolean {
     try { throwErrorSubClass() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
-        let extraField: ESObject = errObj.getProperty('extraField')
-        let foo: ESObject = errObj.getProperty('foo')
+        let errObj: ESValue = (e as ESError).getValue()
+        let extraField: ESValue = errObj.getProperty('extraField')
+        let foo: ESValue = errObj.getProperty('foo')
         return (extraField.toNumber() == 123) && (foo.invoke().toNumber() == 456)
     }
     return false
@@ -73,9 +73,9 @@ function checkSubClassError(): boolean {
 
 function checkErrorData(): boolean {
     try { throwError1() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
-        let msg: ESObject = errObj.getProperty('message')
-        let data: ESObject = msg.getProperty('data')
+        let errObj: ESValue = (e as ESError).getValue()
+        let msg: ESValue = errObj.getProperty('message')
+        let data: ESValue = msg.getProperty('data')
         return data.toNumber() == 123
     }
     return false
@@ -90,10 +90,10 @@ function checkErrorMsg(): boolean {
 
 function checkErrorCause(): boolean {
     try { throwError3() } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
-        let cur_msg: ESObject = errObj.getProperty('message')
-        let cause: ESObject = errObj.getProperty('cause')
-        let org_msg: ESObject = cause.getProperty('message')
+        let errObj: ESValue = (e as ESError).getValue()
+        let cur_msg: ESValue = errObj.getProperty('message')
+        let cause: ESValue = errObj.getProperty('cause')
+        let org_msg: ESValue = cause.getProperty('message')
         return cur_msg.toString() == "current error" && org_msg.toString() == "original error"
     }
     return false

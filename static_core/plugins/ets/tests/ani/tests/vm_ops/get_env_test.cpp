@@ -32,10 +32,23 @@ TEST_F(GetEnvTest, testGetEnv)
     ASSERT_EQ(env->GetVersion(&version), ANI_OK);
 }
 
-TEST_F(GetEnvTest, invalid_vm)
+TEST_F(GetEnvTest, different_versions)
 {
-    ani_env *env {nullptr};
-    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
+        ani_env *env = nullptr;
+        if (i == ANI_VERSION_1) {
+            ASSERT_EQ(vm_->GetEnv(i, &env), ANI_OK);
+            ASSERT_NE(env, nullptr);
+        } else {
+            ASSERT_EQ(vm_->GetEnv(i, &env), ANI_ERROR);
+        }
+    }
 }
 
+TEST_F(GetEnvTest, invalid_argument)
+{
+    ani_env *env = nullptr;
+    ASSERT_EQ(vm_->c_api->GetEnv(nullptr, ANI_VERSION_1, &env), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing

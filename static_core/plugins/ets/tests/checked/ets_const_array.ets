@@ -32,7 +32,7 @@
 //! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_str"
 
 function const_array_str(idx: int): String {
-    let a: String[] = ["ab", "cd", "ef"];
+    let a: FixedArray<String> = ["ab", "cd", "ef"];
     return a[idx];
 }
 
@@ -64,7 +64,7 @@ function test_const_array_str(): int {
 //! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_int"
 
 function const_array_int(idx: int): int {
-    let a: int[] = [5, 8, 13];
+    let a: FixedArray<int> = [5, 8, 13];
     return a[idx];
 }
 

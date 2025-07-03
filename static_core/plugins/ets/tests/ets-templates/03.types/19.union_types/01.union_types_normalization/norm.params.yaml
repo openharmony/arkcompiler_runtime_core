@@ -104,8 +104,6 @@ cases:
               assertEQ(v, 'abc')
               v = '\u0000' + '\u0000' + '\u0000'
               assertEQ(v, '\u0000\u0000\u0000')
-              v = c'X'
-              assertEQ(v, 'X')
       neg:
           - |-
               v = new Char(c'\u0000')
@@ -126,7 +124,7 @@ cases:
           - |-
               v = new String('1')
               assertEQ(v, '1')
-              v = c'3'
+              v = new Char(c'3').toString()
               assertEQ(v, '3')
       neg:
           - |-

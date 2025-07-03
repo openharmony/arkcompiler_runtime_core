@@ -20,6 +20,7 @@ function main(): int {
     LinkedBlockingQueueTestsuite.addTest("getEndEmpty", getEndEmptyTest)
     LinkedBlockingQueueTestsuite.addTest("getEndOne", getEndOneTest)
     LinkedBlockingQueueTestsuite.addTest("getEndCapacity", getEndCapacityTest)
+    LinkedBlockingQueueTestsuite.addTest("getEndConcurrent", getEndConcurrentTest)
     return LinkedBlockingQueueTestsuite.run()
 }
 
@@ -75,4 +76,36 @@ function getEndCapacityTest() {
     testBQ.add(testBQ.capacity - 1)
     assertEQ(testBQ.getEnd(), testBQ.capacity - 1)
     assertEQ(testBQ.size, testBQ.capacity)
+}
+
+const JOB_COUNT = 3
+const PUSH_COUNT_PER_JOB = 5
+function getEndConcurrentTest() {
+    let testBlockingQueue = new LinkedBlockingQueue<int>(JOB_COUNT * PUSH_COUNT_PER_JOB)
+    let flag: AtomicFlag = new AtomicFlag(false)
+    let lock = new AsyncLock()
+    let jobs: Job<Promise<void>>[] = []
+    for (let i = 0; i < JOB_COUNT; i++) {
+        jobs.push(launch<Promise<void>, (a0: LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => Promise<void>>(getEndConcurrent, testBlockingQueue, lock, flag))
+    }
+    for (let i = 0; i < JOB_COUNT; i++) {
+        jobs[i].Await()
+    }
+    if (flag.get()) {
+        throw new Error("assert testBQ == val failed in getEndConcurrentTest")
+    }
+}
+
+async function getEndConcurrent(testBQ: LinkedBlockingQueue<int>, lock: AsyncLock, flag: AtomicFlag) {
+    let arrPromise = new Array<Promise<void>>(PUSH_COUNT_PER_JOB)
+    for (let i: int = 0; i < PUSH_COUNT_PER_JOB; i++) {
+        let val = i
+        arrPromise[i] = lock.lockAsync(() => {
+            testBQ.push(val)
+            if (testBQ.getEnd() != val) {
+                flag.set(true)
+            }
+        })
+    }
+    await Promise.all(arrPromise)
 }

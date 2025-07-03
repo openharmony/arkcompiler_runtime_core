@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -130,13 +130,17 @@ def GenerateStringEquals(lang, dynamic, compression)
             }
             length := Cast(length1.u32).u64
         else
-            # assume STRING_LENGTH_OFFSET == OBJECT_CLASS_OFFSET + 4
-            class_and_length1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u64
-            class_and_length2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u64
-            If(class_and_length1, class_and_length2).NE.Unlikely.b {
+            class1 := load_class(str1)
+            class2 := load_class(str2)
+            If(class1, class2).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
-            length := Shr(class_and_length1, 32).u64
+            length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+            If(length1, length2).NE.Unlikely.b {
+                Goto(:NotEqual)
+            }
+            length := Cast(length1.u32).u64
         end
         length := unpack_length(length, compression, length_shift)
         If(length, 8).GT.b {
@@ -217,6 +221,40 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
+  store_class(_start, string_klass)
+  # Update the TLAB state
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  # Return a pointer to the newly allocated string
+  _allocated_string := _start
+end
+
+# Try to allocate String in TLAB.
+# The result is either a pointer to a new string or null if there is no enough space in TLAB.
+# this is a version that does not do allocation tracking due to the bug #24977
+macro(:allocate_string_tlab_no_debug) do |string_klass, data_size|
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # Add sizeof(String) and do align
+  _data_size := Cast(data_size).word
+  _size := AndI(AddI(_data_size).Imm(Constants::STRING_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
+  # Load pointer to the TLAB from TLS
+  _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+  # Load pointer to the start address of free memory in the TLAB
+  _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+  # Load pointer to the end address of free memory in the TLAB
+  _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+  # Check if there is enough space
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+  end
+  # Store class of the object
   StoreI(_start, string_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
   # Update the TLAB state
   StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
@@ -253,7 +291,7 @@ macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
-  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  store_class(_start, array_klass)
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
@@ -291,7 +329,7 @@ macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
-  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  store_class(_start, array_klass)
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
@@ -318,7 +356,7 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
 
     # There is no check of the argument against NullPointer as
     # it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     hashcode := LoadI(str).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     data_size := unpack_length(Cast(length).u64, string_compression_enabled, 1)
@@ -367,7 +405,7 @@ end  # def GenerateCreateStringFromStringTlab
 ###
 # Checks if starting from arr_data the specified number of chars (char_count) can be compressed
 #
-# Utf16 char is ASCII if (uft16_char - 1U < utf::UTF8_1B_MAX)
+# Utf16 char is ASCII if (utf16_char - 1U < utf::UTF8_1B_MAX)
 # See runtime/include/coretypes/string.h - IsASCIICharacter
 #
 scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
@@ -402,7 +440,7 @@ scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
 Label(:CanBeCompressedLoop)
     i5 := Phi(i4, i6).u64
     ch := Load(arr_data, ShlI(i5).Imm(1).u64).u16
-    If(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely.b {
+    If(SubI(ch).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely.b {
       compressable3 := Cast(0).b
       Goto(:CanBeCompressedLoopDone)
     }
@@ -496,19 +534,18 @@ end  # compress_u16_to_u8_chars
 # Copy dwords (8-bytes)
 #
 scoped_macro(:copy_dwords) do |src, dst, size|
-    count := AndI(size).Imm(~0x7).u64
-    i1 := Cast(0).u64
+    count := AndI(size).Imm(~0x7).word
+    i1 := Cast(0).word
 Label(:CopyLoop_8b)
-    i := Phi(i1, i2).u64
-    If(i, count).AE.Unlikely.b {
+    i := Phi(i1, i2).word
+    If(i, count).AE.Unlikely {
         Goto(:End)
     }
-    Store(dst, i, Load(src, i).u64).u64
-    i2 := AddI(i).Imm(8).u64
+    Store(dst, i, Load(src, i).word).word
+    i2 := AddI(i).Imm(8).word
     Goto(:CopyLoop_8b)
 Label(:End)
 end # copy_dwords
-
 
 ###
 # Copy u8 chars from src to dst
@@ -519,14 +556,14 @@ scoped_macro(:copy_u8_chars) do |src, dst, count|
     copy_dwords(src, dst, len)
 
     # copy the tail if needed
-    i1 := AndI(len).Imm(~0x7).u64
+    i1 := AndI(len).Imm(~0x7).word
 Label(:CopyLoop)
-    i := Phi(i1, i2).u64
-    If(i, len).AE.Unlikely.b {
+    i := Phi(i1, i2).word
+    If(i, len).AE.Unlikely {
         Goto(:End)
     }
     Store(dst, i, Load(src, i).u8).u8
-    i2 := AddI(i).Imm(1).u64
+    i2 := AddI(i).Imm(1).word
     Goto(:CopyLoop)
 
 Label(:End)
@@ -881,7 +918,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
     src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     src_str_data := Add(src_str_data, Cast(offset).u64).ptr
 
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     char_count := Sub(ex6, bx6).u32
 
     # Allocate a new string

@@ -53,8 +53,8 @@ cases:
           assertEQ( res, "1234" )
 
     - use: |-
-          let v: float;
-          for (v of [1.1,2.2,3.3,4.4] as float[]) res += v
+          let v: Float;
+          for (v of [1.1f,2.2f,3.3f,4.4f] as Float[]) res += v
           assertEQ( res, "1.12.23.34.4" )
 
     - use: |-

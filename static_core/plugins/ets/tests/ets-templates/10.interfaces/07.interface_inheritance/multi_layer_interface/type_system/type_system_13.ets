@@ -18,7 +18,7 @@ desc: Inherit a generic class in a class and implement an interface to verify th
 tags: [compile-only, negative]
 ---*/
 
-class Box<T> {
+class BBox<T> {
     value: T;
     constructor(value: T) {
         this.value = value;
@@ -29,7 +29,7 @@ interface Printable {
     print(): string;
 }
 
-class StringBox extends Box<number> implements Printable {
+class StringBBox extends BBox<number> implements Printable {
     print(): number {
         return 123;
     }

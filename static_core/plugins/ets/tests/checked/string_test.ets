@@ -27,7 +27,7 @@ function main(): void {
     assertEQ(str1.getLength(), 0, "String is not empty");
     assertTrue(str1.isEmpty(), "String is not empty");
 
-    let chars: char[] = [c'a', c'B', c'C', c'd', c'e', c'g', c'X', c'Y', c'z'];
+    let chars: FixedArray<char> = [c'a', c'B', c'C', c'd', c'e', c'g', c'X', c'Y', c'z'];
     let str2: String = new String(chars);  // "aBCdegXYz"
     assertEQ(str2.charAt(0), c'a', "Wrong str2.charAt(0)");
     assertEQ(str2.charAt(1), c'B', "Wrong str2.charAt(1)");

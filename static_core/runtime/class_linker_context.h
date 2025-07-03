@@ -137,12 +137,10 @@ public:
         return true;
     }
 
-    void UpdateGCRoots()
+    void UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
     {
         for (auto &root : roots_) {
-            if (root->IsForwarded()) {
-                root = ::ark::mem::GetForwardAddress(root);
-            }
+            gcRootUpdater(&root);
         }
     }
 
@@ -193,7 +191,7 @@ private:
     os::memory::RecursiveMutex classesLock_;
     PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loadedClasses_
         GUARDED_BY(classesLock_);
-    PandaVector<ObjectPointer<ObjectHeader>> roots_;
+    PandaVector<ObjectHeader *> roots_;
     std::atomic<mem::Reference *> refToLinker_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };

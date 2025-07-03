@@ -20,49 +20,49 @@ function checkTypeBigInt(): boolean {
 }
 
 function checkConversionBigIntToInt(): boolean {
-    const val = Number(tsBigInt) as int;
+    const val = Double.toInt(Number(tsBigInt));
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToNumber(): boolean {
-    const val = Number(tsBigInt) as number;
+    const val = Number(tsBigInt);
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToFloat(): boolean {
-    const val = Number(tsBigInt) as float;
+    const val = Double.toFloat(Number(tsBigInt));
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToByte(): boolean {
-    const val = Number(tsBigInt) as byte;
+    const val = Double.toByte(Number(tsBigInt));
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToShort(): boolean {
-    const val = Number(tsBigInt) as short;
+    const val = Double.toShort(Number(tsBigInt));
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToLong(): boolean {
-    const val = Number(tsBigInt) as long;
+    const val = Double.toLong(Number(tsBigInt));
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToDouble(): boolean {
-    const val = Number(tsBigInt) as double;
+    const val = Number(tsBigInt);
 
     return typeof val == 'number';
 }
 
 function checkConversionBigIntToChar(): boolean {
-    const val = Number(tsBigInt) as char;
+    const val = Int.toChar(Double.toInt(Number(tsBigInt)));
 
     return typeof val == 'number';
 }

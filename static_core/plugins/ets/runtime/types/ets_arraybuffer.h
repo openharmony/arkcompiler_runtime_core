@@ -48,6 +48,11 @@ public:
         return reinterpret_cast<EtsEscompatArrayBuffer *>(arrayBuffer);
     }
 
+    static constexpr size_t GetClassSize()
+    {
+        return sizeof(EtsEscompatArrayBuffer);
+    }
+
     /**
      * Creates a byte array in non-movable space.
      * @param length of created array.
@@ -58,7 +63,7 @@ public:
         return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
     }
 
-    ALWAYS_INLINE static EtsLong GetAddress(EtsByteArray *array)
+    ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
     {
         return reinterpret_cast<EtsLong>(array->GetData<void>());
     }
@@ -112,7 +117,7 @@ public:
     }
 
     /// @brief Returns non-null data for a non-detached buffer
-    void *GetData()
+    void *GetData() const
     {
         ASSERT(!WasDetached());
         return reinterpret_cast<void *>(nativeData_);
@@ -136,7 +141,7 @@ public:
 
     bool IsExternal() const
     {
-        return managedData_ == nullptr;
+        return ObjectAccessor::GetObject(this, GetManagedDataOffset()) == nullptr;
     }
 
     bool IsDetachable() const
@@ -144,7 +149,7 @@ public:
         return !WasDetached() && IsExternal();
     }
 
-    EtsByte At(EtsInt pos)
+    EtsByte At(EtsInt pos) const
     {
         if (!DoBoundaryCheck(pos)) {
             return 0;
@@ -179,10 +184,49 @@ public:
         ASSERT(res == 0);
     }
 
+    static constexpr size_t GetByteLengthOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, byteLength_);
+    }
+
+    static constexpr size_t GetNativeDataOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, nativeData_);
+    }
+
     static constexpr size_t GetManagedDataOffset()
     {
         return MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_);
     }
+
+    static constexpr size_t GetIsResizableOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
+    }
+
+    template <typename T>
+    T GetElement(uint32_t index, uint32_t offset);
+    template <typename T>
+    void SetElement(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetVolatileElement(uint32_t index, uint32_t offset);
+    template <typename T>
+    void SetVolatileElement(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    std::pair<bool, T> CompareAndExchangeElement(uint32_t index, uint32_t offset, T oldElement, T newElement,
+                                                 bool strong);
+    template <typename T>
+    T ExchangeElement(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetAndAdd(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetAndSub(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetAndBitwiseOr(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetAndBitwiseAnd(uint32_t index, uint32_t offset, T element);
+    template <typename T>
+    T GetAndBitwiseXor(uint32_t index, uint32_t offset, T element);
 
 private:
     struct FinalizationInfo final {
@@ -245,10 +289,10 @@ private:
      */
     void InitializeByDefault(EtsCoroutine *coro, size_t length)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_),
-                                  AllocateNonMovableArray(length));
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), AllocateNonMovableArray(length));
         byteLength_ = length;
-        nativeData_ = GetAddress(managedData_);
+        nativeData_ =
+            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
         ASSERT(nativeData_ != 0);
         isResizable_ = ToEtsBoolean(false);
     }
@@ -257,7 +301,7 @@ private:
     void InitBufferByExternalData(EtsCoroutine *coro, const EtsHandle<EtsEscompatArrayBuffer> &arrayBufferHandle,
                                   void *data, EtsFinalize finalizerFunction, void *finalizerHint, size_t length)
     {
-        managedData_ = nullptr;
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), nullptr);
         byteLength_ = length;
         nativeData_ = reinterpret_cast<EtsLong>(data);
         ASSERT(nativeData_ != 0);
@@ -270,7 +314,7 @@ private:
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
      */
-    bool DoBoundaryCheck(EtsInt pos)
+    bool DoBoundaryCheck(EtsInt pos) const
     {
         if (pos < 0 || pos >= byteLength_) {
             PandaString message = "ArrayBuffer position ";
@@ -283,6 +327,16 @@ private:
     }
 
 private:
+    // ClassLinker reorders fileds based on them size. Object pointer size can be different for different configs
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+    // Managed array used in this `ArrayBuffer`, null if buffer is external
+    ObjectPointer<EtsByteArray> managedData_;
+    // Contains pointer to either managed non-movable data or external data.
+    // Null if `ArrayBuffer` was detached, non-null otherwise
+    EtsLong nativeData_;
+    EtsInt byteLength_;
+    EtsBoolean isResizable_;
+#else
     // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
     EtsInt byteLength_;
@@ -290,60 +344,12 @@ private:
     // Null if `ArrayBuffer` was detached, non-null otherwise
     EtsLong nativeData_;
     EtsBoolean isResizable_;
+#endif
 
     friend class test::EtsArrayBufferTest;
     friend class test::EtsEscompatArrayBufferMembers;
 };
 
-class EtsEscompatSharedMemory : public EtsObject {
-public:
-    EtsEscompatSharedMemory() = delete;
-    ~EtsEscompatSharedMemory() = delete;
-
-    NO_COPY_SEMANTIC(EtsEscompatSharedMemory);
-    NO_MOVE_SEMANTIC(EtsEscompatSharedMemory);
-
-    static constexpr size_t GetDataOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatSharedMemory, data_);
-    }
-
-    ObjectPointer<EtsByteArray> GetData()
-    {
-        return data_;
-    }
-
-    EtsLong GetWaiterPtr()
-    {
-        return waiterPtr_;
-    }
-
-private:
-    ObjectPointer<EtsByteArray> data_;
-    EtsLong waiterPtr_;
-};
-
-class EtsEscompatSharedArrayBuffer : public EtsObject {
-public:
-    EtsEscompatSharedArrayBuffer() = delete;
-    ~EtsEscompatSharedArrayBuffer() = delete;
-
-    NO_COPY_SEMANTIC(EtsEscompatSharedArrayBuffer);
-    NO_MOVE_SEMANTIC(EtsEscompatSharedArrayBuffer);
-
-    static constexpr size_t GetSharedMemoryOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatSharedArrayBuffer, sharedMemory_);
-    }
-
-    ObjectPointer<EtsEscompatSharedMemory> GetSharedMemory()
-    {
-        return sharedMemory_;
-    }
-
-private:
-    ObjectPointer<EtsEscompatSharedMemory> sharedMemory_;
-};
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H

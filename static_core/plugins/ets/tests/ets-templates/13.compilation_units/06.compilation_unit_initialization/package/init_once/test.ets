@@ -15,17 +15,17 @@
 
 /*---
 desc: Compilation unit should be initialized only once
+tags: [no-warmup]
 files:
 - ./global/module.ets
 - ./pkg/module.ets
 ---*/
 
 import {i} from "./global";
-
 import {foo} from "./pkg";
 
 function main() {
-  i++;
+  i++
 
   assertEQ(i, 1, "i != 1");
   assertEQ(i + 1, foo(), "i != foo()");

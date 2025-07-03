@@ -23,15 +23,15 @@ statements:
   - block: 'enum Enum { v1, v2 }'
   - block: 'const b: int = 1;'
   - block: 'class Dict { constructor(x: int, y: int) {} }'
-  - block: |- 
+  - block: |-
           let i: int = 1;
           do i++; while (i < 10)
             x = i;
-  - block: |- 
+  - block: |-
           let i: int = 1;
           while (i < 10) i++
             x = i;
-  - block: |- 
+  - block: |-
           for (let i: int = 0; i < 10; i++) {
             x = i;
           }
@@ -48,9 +48,9 @@ statements:
           }
   - block: 'assertTrue( true )'
   - block: |-
-          class Ex extends Exception {}
+          class Ex extends Error {}
           try {
-            throw new Exception();
+            throw new Error();
           } catch (e) {
             x = 0;
           }

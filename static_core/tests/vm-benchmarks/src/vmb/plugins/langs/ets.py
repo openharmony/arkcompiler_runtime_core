@@ -36,11 +36,11 @@ class Lang(LangBase):
         r'^\s*(public\s+)?(static\s+)?'
         r'(?P<param>\w+)\s*'
         r':\s*(?P<type>\w+)\s*'
-        r'(\s*=\s*.+)?(;)?\s*$')
+        r'(\s*=\s*.+)?(;)?\s*$')  # possible initialization
 
     def __init__(self) -> None:
         super().__init__()
-        self.src = {'.ets', '.ts'}
+        self.src = {'.ets'}
         self.ext = '.ets'
 
     @property

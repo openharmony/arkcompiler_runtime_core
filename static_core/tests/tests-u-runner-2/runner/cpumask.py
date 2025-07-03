@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Dict
 
+from runner.common_exceptions import InvalidConfiguration, RunnerException
 from runner.logger import Log
 from runner.utils import remove_prefix
 
@@ -33,10 +33,10 @@ class CPUMask:
 
     def __init__(self, mask: str) -> None:
         self.done = False
-        self.saved_state: Dict[int, Dict[str, str]] = {}
+        self.saved_state: dict[int, dict[str, str]] = {}
         self.cpumask = list(map(lambda x: x == '1', mask))
         if not any(self.cpumask):
-            raise ValueError(f'Wrong cpumask: {mask}')
+            raise InvalidConfiguration(f'Wrong cpumask: {mask}')
 
     def apply(self) -> None:
         _LOGGER.all("---before_suite:")
@@ -55,11 +55,11 @@ class CPUMask:
             subprocess.run(cmd, stderr=subprocess.STDOUT, check=True)
 
         result = subprocess.run(
-            f'{self.sh} ls -1 -d {str(self.cpu_root / "cpu[0-9]*")}',
+            f'{self.sh} ls -1 -d {self.cpu_root / "cpu[0-9]*"!s}',
             capture_output=True, text=True, check=True)
         out = filter(lambda i: not i.startswith('ls:'), result.stdout.splitlines())
         if not out:
-            raise RuntimeError('Get cpus failed!')
+            raise RunnerException('Get cpus failed!')
         all_cores = sorted([
             int(remove_prefix(os.path.split(c)[1], 'cpu'))
             for c in out if str(self.cpu_root) in c])

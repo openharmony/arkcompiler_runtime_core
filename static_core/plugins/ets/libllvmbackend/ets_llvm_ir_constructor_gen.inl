@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -413,4 +413,75 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
     charIndex->addIncoming(charIndex2, charFoundBb);
     ValueMapAdd(inst, charIndex);
     return true;
+}
+
+bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
+{
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    auto getEntryId = [inst]() {
+        switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED;
+            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED;
+            default:
+                UNREACHABLE();
+        }
+    };
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+    auto call = CreateFastPathCall(inst, getEntryId(), {GetInputValue(inst, 0), klass});
+    MarkAsAllocation(call);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitFloat32ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt32Ty());
+}
+
+bool LLVMIrConstructor::EmitFloat64ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt64Ty());
+}
+
+bool LLVMIrConstructor::EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid,
+                                                   llvm::IntegerType *bitcastType)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+    auto val = GetInputValue(inst, 1U);
+    auto bitcast = builder_.CreateBitCast(val, bitcastType);
+
+    auto ref = GetInputValue(inst, 0);
+    auto beginPos = GetInputValue(inst, 2U);
+    auto endPos = GetInputValue(inst, 3U);
+    ArenaVector<llvm::Value *> args({ref, bitcast, beginPos, endPos}, GetGraph()->GetLocalAllocator()->Adapter());
+    CreateFastPathCall(inst, eid, args);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitReadString(Inst *inst)
+{
+    auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_MEM;
+    auto buf = GetInputValue(inst, 0);
+    auto len = GetInputValue(inst, 1);
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+
+    auto result = CreateFastPathCall(inst, entryId, {buf, len, klass});
+
+    MarkAsAllocation(result);
+    ValueMapAdd(inst, result);
+
+    return true;
+}
+
+bool LLVMIrConstructor::EmitWriteString(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::WRITE_STRING_TO_MEM, 2U);
 }

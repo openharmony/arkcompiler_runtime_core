@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameShortTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_short length;
+    ani_short length = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "length", &length), ANI_OK);
     ASSERT_EQ(length, 4275U);
 }
@@ -39,16 +39,33 @@ TEST_F(ObjectGetPropertyByNameShortTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_short year;
+    ani_short year = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "year", &year), ANI_OK);
     ASSERT_EQ(year, 1989U);
+}
+
+TEST_F(ObjectGetPropertyByNameShortTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_short length = 0U;
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Short(nullptr, car, "year", &length), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameShortTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_short length = 0U;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "yearA", &length), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "", &length), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameShortTest, invalid_argument)
 {
     ani_object car = NewCar();
 
-    ani_short length;
+    ani_short length = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(nullptr, "length", &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, nullptr, &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "length", nullptr), ANI_INVALID_ARGS);
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameShortTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_short model;
+    ani_short model = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "model", &model), ANI_INVALID_TYPE);
 }
 

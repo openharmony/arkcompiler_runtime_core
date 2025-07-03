@@ -55,6 +55,8 @@ interface ReadonlyLightWeightSet<T> extends Iterable<T> {
 export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
     private buckets: LightWeightMap<T, T>;
 
+    private static readonly SHIFT_COUNT = 31;
+
     private iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
         while (true) {
             const v = x.next();
@@ -178,10 +180,27 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @param key the value to find the index of
      *
-     * @returns the index of the value, or -1 if the value is not found
+     * @returns the index of the value, or a negative position if the value is not found
      */
     getIndexOf(key: T): number {
-        return this.buckets.getIndexOfKey(key);
+        const index = this.buckets.getIndexOfKey(key);
+        if (index >= 0) {
+            return index;
+        } else {
+            const hashCode = this.hash(key);
+            let low: int = 0;
+            let high: int = this.buckets.length as int - 1;
+            while (low <= high) {
+                const mid = (low + high) >>> 1;
+                const midHash = this.hash(this.buckets.getKeyAt(mid)!);
+                if (midHash < hashCode) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            return -(low + 1);
+        }
     }
 
     /**
@@ -263,5 +282,22 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
     toString(): String {
         const res: Array<T> = this.toArray();
         return res.join(',');
+    }
+
+    private hash(key: T): int {
+        if (key === null) {
+            return 0;
+        }
+        if (key === undefined) {
+            return 1;
+        }
+
+        const keyHash: int = key!.$_hashCode();
+        const positiveMask: int = 1 << LightWeightSet.SHIFT_COUNT;
+        if (keyHash >= 0) {
+            return (keyHash | positiveMask)
+        } else {
+            return (keyHash & (~positiveMask))
+        }
     }
 }

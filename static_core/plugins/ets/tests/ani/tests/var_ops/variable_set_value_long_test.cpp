@@ -118,7 +118,7 @@ TEST_F(VariableSetValueLongTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "longValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_long values[] = {3L, 6L, 9L};
+    const ani_long values[] = {3L, 0, -9};
     ani_long result = 0L;
     for (ani_long value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Long(variable, value), ANI_OK);

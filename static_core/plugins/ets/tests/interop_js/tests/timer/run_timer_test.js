@@ -29,7 +29,6 @@ function runTest(test) {
 	const etsOpts = {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-		'coroutine-enable-external-scheduling': 'true',
 	};
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');

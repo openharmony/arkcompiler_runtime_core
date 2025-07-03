@@ -202,6 +202,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/loop_unswitch.cpp
         optimizer/optimizations/loop_unroll.cpp
         optimizer/optimizations/lse.cpp
+        optimizer/optimizations/lower_boxed_boolean.cpp
         optimizer/optimizations/memory_barriers.cpp
         optimizer/optimizations/memory_coalescing.cpp
         optimizer/optimizations/native_call_optimization.cpp
@@ -368,6 +369,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/vn_test.cpp
     tests/class_hash_table_test.cpp
     tests/linear_order_test.cpp
+    tests/profiling_merger_test.cpp
     tests/profiling_runner_test.cpp
 )
 set_source_files_properties(tests/loop_unroll_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")

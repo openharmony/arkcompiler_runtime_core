@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets {
@@ -47,5 +48,39 @@ void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
     }
     Value arg(lambda->GetCoreType());
     invoke->GetPandaMethod()->InvokeVoid(coro, &arg);
+}
+
+EtsString *ManglingUtils::GetDisplayNameStringFromField(EtsField *field)
+{
+    auto fieldNameData = field->GetCoreType()->GetName();
+    auto fieldNameLength = fieldNameData.utf16Length;
+    std::string_view fieldName(utf::Mutf8AsCString(fieldNameData.data), fieldNameLength);
+    if (fieldName.rfind(PROPERTY, 0) == 0) {
+        ASSERT(fieldNameLength >= PROPERTY_PREFIX_LENGTH);
+        return EtsString::Resolve(
+            fieldNameData.data + PROPERTY_PREFIX_LENGTH,  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            fieldNameLength - PROPERTY_PREFIX_LENGTH);
+    }
+    return EtsString::Resolve(fieldNameData.data, fieldNameData.utf16Length);
+}
+
+EtsField *ManglingUtils::GetFieldIDByDisplayName(EtsClass *klass, const PandaString &name, const char *sig)
+{
+    auto u8name = utf::CStringAsMutf8(name.c_str());
+    auto *field = EtsField::FromRuntimeField(klass->GetRuntimeClass()->GetInstanceFieldByName(u8name));
+    if (field == nullptr && !klass->GetRuntimeClass()->GetInterfaces().empty()) {
+        auto mangledName = PandaString(PROPERTY) + name;
+        u8name = utf::CStringAsMutf8(mangledName.c_str());
+        field = EtsField::FromRuntimeField(klass->GetRuntimeClass()->GetInstanceFieldByName(u8name));
+    }
+
+    if (sig != nullptr && field != nullptr) {
+        auto fieldTypeDescriptor = reinterpret_cast<const uint8_t *>(field->GetTypeDescriptor());
+        if (utf::CompareMUtf8ToMUtf8(fieldTypeDescriptor, reinterpret_cast<const uint8_t *>(sig)) != 0) {
+            return nullptr;
+        }
+    }
+
+    return field;
 }
 }  // namespace ark::ets

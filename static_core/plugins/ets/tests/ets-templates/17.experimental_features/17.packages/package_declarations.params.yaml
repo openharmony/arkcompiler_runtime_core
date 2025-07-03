@@ -18,5 +18,9 @@ package_declarations:
     import {Uint8Array as Bytes} from 'std/core'
   - |
     package P1
-    const MY_PI = Math.PI
-    const MY_E = Math.E
+    const MY_PI:number
+    const MY_E: number
+    static {
+      MY_PI = Math.PI
+      MY_E = Math.E
+    }

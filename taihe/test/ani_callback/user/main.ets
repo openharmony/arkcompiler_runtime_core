@@ -12,25 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as lib from "@generated/callbackTest";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as lib from "callbackTest";
 
 loadLibrary("ani_callback");
 
 function test_void_input_void_output() {
-    lib.test_cb_v(() => {
+    lib.testCbV(() => {
         console.log("void input void output callback!");
     });
 }
 
 function test_int_input_void_output() {
-    lib.test_cb_i((a) => {
+    lib.testCbI((a) => {
         assertEQ(a, 1);
     });
 }
 
 function test_string_boolean_input() {
-    lib.test_cb_s((a, b) => {
+    lib.testCbS((a, b) => {
         if (b) {
             assertEQ(a, "hello");
         }
@@ -38,14 +38,14 @@ function test_string_boolean_input() {
 }
 
 function test_string_return_value() {
-    let result = lib.test_cb_rs((a) => {
+    let result = lib.testCbRs((a) => {
         return "my return value";
     });
     assertEQ(result, "my return value");
 }
 
 function test_struct_input() {
-    lib.test_cb_struct((a) => {
+    lib.testCbStruct((a) => {
         let data:
             lib.Data = {a: (a.a + "main"), b: (a.b + "main"), c: (a.c + 100)};
         assertEQ(data.a, "amain");
@@ -53,6 +53,32 @@ function test_struct_input() {
         assertEQ(data.c, 101);
         return data;
     });
+}
+
+function test_int_string_return_value(){
+    let instance: lib.MyInterface = lib.getInterface();
+    let result =instance.testCbIntString((a,b)=>{
+        assertEQ(a, 10);
+        assertEQ(b, 100);
+    });
+    assertEQ(result, "testCbIntString");
+}
+
+function test_int_bool_return_value(){
+    let instance: lib.MyInterface = lib.getInterface();
+    let result =instance.testCbIntBool((a,b)=>{
+        assertEQ(a, 100);
+        assertEQ(b, 1000000000 as double);
+    });
+    assertEQ(result, true);
+}
+
+function test_int_enum_return_value(){
+    let instance: lib.MyInterface = lib.getInterface();
+    let result = instance.testCbEnum((a)=>{
+        assertEQ(a,10);
+    })
+    assertEQ(result.toString(), "123");
 }
 
 function main() {
@@ -65,5 +91,8 @@ function main() {
     suite.addTest("test string return value", test_string_return_value);
     suite.addTest("test struct input", test_struct_input);
 
-    System.exit(suite.run());
+    suite.addTest("test int string return value", test_int_string_return_value);
+    suite.addTest("test int bool return value", test_int_bool_return_value);
+    suite.addTest("test int enum return value", test_int_enum_return_value);
+    exit(suite.run());
 }

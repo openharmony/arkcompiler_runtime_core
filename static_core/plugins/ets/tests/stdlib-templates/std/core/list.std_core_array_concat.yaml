@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "boolean[]",
-    method_signature: { first: "boolean[]", second: "boolean[]" },
+    result_type: "FixedArray<boolean>",
+    method_signature: { first: "FixedArray<boolean>", second: "FixedArray<boolean>" },
     method_signature_desc: { first: "boolean_array", second: "boolean_array" },
     method_throws: "false",
     method_test_index_data:
@@ -42,8 +42,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "byte[]",
-    method_signature: { first: "byte[]", second: "byte[]" },
+    result_type: "FixedArray<byte>",
+    method_signature: { first: "FixedArray<byte>", second: "FixedArray<byte>" },
     method_signature_desc: { first: "byte_array", second: "byte_array" },
     method_throws: "false",
     method_test_index_data:
@@ -67,8 +67,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "short[]",
-    method_signature: { first: "short[]", second: "short[]" },
+    result_type: "FixedArray<short>",
+    method_signature: { first: "FixedArray<short>", second: "FixedArray<short>" },
     method_signature_desc: { first: "short_array", second: "short_array" },
     method_throws: "false",
     method_test_index_data:
@@ -92,8 +92,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "int[]",
-    method_signature: { first: "int[]", second: "int[]" },
+    result_type: "FixedArray<int>",
+    method_signature: { first: "FixedArray<int>", second: "FixedArray<int>" },
     method_signature_desc: { first: "int_array", second: "int_array" },
     method_throws: "false",
     method_test_index_data:
@@ -117,8 +117,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "long[]",
-    method_signature: { first: "long[]", second: "long[]" },
+    result_type: "FixedArray<long>",
+    method_signature: { first: "FixedArray<long>", second: "FixedArray<long>" },
     method_signature_desc: { first: "long_array", second: "long_array" },
     method_throws: "false",
     method_test_index_data:
@@ -142,8 +142,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "float[]",
-    method_signature: { first: "float[]", second: "float[]" },
+    result_type: "FixedArray<float>",
+    method_signature: { first: "FixedArray<float>", second: "FixedArray<float>" },
     method_signature_desc: { first: "float_array", second: "float_array" },
     method_throws: "false",
     method_test_index_data:
@@ -167,8 +167,8 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "double[]",
-    method_signature: { first: "double[]", second: "double[]" },
+    result_type: "FixedArray<double>",
+    method_signature: { first: "FixedArray<double>", second: "FixedArray<double>" },
     method_signature_desc: { first: "double_array", second: "double_array" },
     method_throws: "false",
     method_test_index_data:
@@ -192,24 +192,24 @@
     method_name: concat,
     method_nature: function,
     result_nature: array,
-    result_type: "char[]",
-    method_signature: { first: "char[]", second: "char[]" },
+    result_type: "FixedArray<char>",
+    method_signature: { first: "FixedArray<char>", second: "FixedArray<char>" },
     method_signature_desc: { first: "char_array", second: "char_array" },
     method_throws: "false",
     method_test_index_data:
       {
-        test1: { first: "['a']", second: "['z']" },
-        test2: { first: "['a', 'b']", second: "['y', 'z']" },
+        test1: { first: "[c'a']", second: "[c'z']" },
+        test2: { first: "[c'a', c'b']", second: "[c'y', c'z']" },
         test3: { first: "[]", second: "[]" },
-        test4: { first: "['x', 'y']", second: "[]" },
-        test5: { first: "[]", second: "['x', 'y', 'z']" },
+        test4: { first: "[c'x', c'y']", second: "[]" },
+        test5: { first: "[]", second: "[c'x', c'y', c'z']" },
       },
     method_expected_data:
       {
-        test1: "['a', 'z']",
-        test2: "['a', 'b', 'y', 'z']",
+        test1: "[c'a', c'z']",
+        test2: "[c'a', c'b', c'y', c'z']",
         test3: "[]",
-        test4: "['x', 'y']",
-        test5: "['x', 'y', 'z']",
+        test4: "[c'x', c'y']",
+        test5: "[c'x', c'y', c'z']",
       },
   }

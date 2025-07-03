@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_ARRAY_HPP
-#define TAIHE_ARRAY_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_
+#define RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_
+// NOLINTBEGIN
 
 #include <taihe/array.abi.h>
 #include <taihe/common.hpp>
@@ -27,9 +28,6 @@
 #include <utility>
 #include <vector>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename cpp_owner_t>
 struct array_view;
@@ -52,11 +50,7 @@ struct array_view {
 
     array_view(pointer data, size_type size) noexcept : m_size(size), m_data(data) {}  // main constructor
 
-    template <typename C>
-    array_view(std::initializer_list<C> value) noexcept
-        : array_view(value.begin(), static_cast<size_type>(value.size()))
-    {
-    }
+    array_view() noexcept : m_size(0), m_data(nullptr) {}
 
     template <typename C, size_type N>
     array_view(C (&value)[N]) noexcept : array_view(value, N)
@@ -73,12 +67,12 @@ struct array_view {
     {
     }
 
-    template <typename C, size_t N>
+    template <typename C, std::size_t N>
     array_view(std::array<C, N> &value) noexcept : array_view(value.data(), static_cast<size_type>(value.size()))
     {
     }
 
-    template <typename C, size_t N>
+    template <typename C, std::size_t N>
     array_view(std::array<C, N> const &value) noexcept : array_view(value.data(), static_cast<size_type>(value.size()))
     {
     }
@@ -211,7 +205,11 @@ protected:
 
 struct copy_data_t {};
 
+constexpr inline copy_data_t copy_data;
+
 struct move_data_t {};
+
+constexpr inline move_data_t move_data;
 
 template <typename cpp_owner_t>
 struct array : public array_view<cpp_owner_t> {
@@ -220,26 +218,26 @@ struct array : public array_view<cpp_owner_t> {
 
     explicit array(pointer data, size_type size) noexcept : array_view<cpp_owner_t>(data, size) {}  // main constructor
 
-    template <typename C>
-    array(copy_data_t, C *data, size_type size) noexcept
-        : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    template <typename Iterator>
+    array(copy_data_t, Iterator begin, size_type size) noexcept
+        : array_view<cpp_owner_t>(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
-        std::uninitialized_copy_n(data, size, this->m_data);
+        std::uninitialized_copy_n(begin, size, this->m_data);
     }
 
-    template <typename C>
-    array(move_data_t, C *data, size_type size) noexcept
-        : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    template <typename Iterator>
+    array(move_data_t, Iterator begin, size_type size) noexcept
+        : array_view<cpp_owner_t>(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
-        std::uninitialized_move_n(data, size, this->m_data);
+        std::uninitialized_move_n(begin, size, this->m_data);
     }
 
-    array(size_type size) : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    explicit array(size_type size) : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
         std::uninitialized_default_construct_n(this->m_data, size);
     }
 
-    array(size_type size, cpp_owner_t const &value)
+    explicit array(size_type size, cpp_owner_t const &value)
         : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
         std::uninitialized_fill_n(this->m_data, size, value);
@@ -255,14 +253,11 @@ struct array : public array_view<cpp_owner_t> {
         return array(size, value);
     }
 
-    template <typename value_type>
-    array(std::initializer_list<value_type> value) noexcept : array(copy_data_t {}, value.begin(), value.size())
-    {
-    }
+    array(std::initializer_list<cpp_owner_t> value) noexcept : array(copy_data, value.begin(), value.size()) {}
 
-    array(array_view<cpp_owner_t> const &other) : array(copy_data_t {}, other.data(), other.size()) {}
+    array(array_view<cpp_owner_t> const &other) : array(copy_data, other.data(), other.size()) {}
 
-    array(array<cpp_owner_t> const &other) : array(copy_data_t {}, other.data(), other.size()) {}
+    array(array<cpp_owner_t> const &other) : array(copy_data, other.data(), other.size()) {}
 
     array(array<cpp_owner_t> &&other) : array(std::exchange(other.m_data, nullptr), std::exchange(other.m_size, 0)) {}
 
@@ -285,33 +280,6 @@ struct array : public array_view<cpp_owner_t> {
 };
 
 template <typename cpp_owner_t>
-inline std::size_t hash_impl(adl_helper_t, array_view<cpp_owner_t> val)
-{
-    std::size_t seed = 0;
-    static constexpr std::size_t GOLDEN_RATIO_CONSTANT = 0x9e3779b9;
-    static constexpr std::size_t LEFT_SHIFT_BITS = 6;
-    static constexpr std::size_t RIGHT_SHIFT_BITS = 2;
-    for (std::size_t i = 0; i < val.size(); i++) {
-        seed ^= hash(val[i]) + GOLDEN_RATIO_CONSTANT + (seed << LEFT_SHIFT_BITS) + (seed >> RIGHT_SHIFT_BITS);
-    }
-    return seed;
-}
-
-template <typename cpp_owner_t>
-inline bool same_impl(adl_helper_t, array_view<cpp_owner_t> lhs, array_view<cpp_owner_t> rhs)
-{
-    if (lhs.size() != rhs.size()) {
-        return false;
-    }
-    for (std::size_t i = 0; i < lhs.size() && i < rhs.size(); i++) {
-        if (!same(lhs[i], rhs[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-template <typename cpp_owner_t>
 struct as_abi<array_view<cpp_owner_t>> {
     using type = TArray;
 };
@@ -326,6 +294,21 @@ struct as_param<array<cpp_owner_t>> {
     using type = array_view<cpp_owner_t>;
 };
 }  // namespace taihe
-// NOLINTEND
 
-#endif // TAIHE_ARRAY_HPP
+template <typename cpp_owner_t>
+struct std::hash<taihe::array<cpp_owner_t>> {
+    std::size_t operator()(taihe::array_view<cpp_owner_t> val) const
+    {
+        std::size_t seed = 0;
+        static constexpr std::size_t GOLDEN_RATIO_CONSTANT = 0x9e3779b9;
+        static constexpr std::size_t LEFT_SHIFT_BITS = 6;
+        static constexpr std::size_t RIGHT_SHIFT_BITS = 2;
+        for (std::size_t i = 0; i < val.size(); i++) {
+            seed ^= (seed << LEFT_SHIFT_BITS) + (seed >> RIGHT_SHIFT_BITS) + GOLDEN_RATIO_CONSTANT +
+                    std::hash<cpp_owner_t>()(val[i]);
+        }
+        return seed;
+    }
+};
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_

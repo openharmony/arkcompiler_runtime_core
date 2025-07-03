@@ -12,13 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_OPTIONAL_ABI_H
-#define TAIHE_OPTIONAL_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_OPTIONAL_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_OPTIONAL_ABI_H_
 
 #include <taihe/common.h>
 
+// TOptional
+// Represents an optional value structure containing a pointer to the data.
+// # Members
+// - `m_data`: A pointer to the data in the optional value.
 struct TOptional {
     void const *m_data;
 };
-
-#endif // TAIHE_OPTIONAL_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_OPTIONAL_ABI_H_

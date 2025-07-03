@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 // This test checks if the coroutine statistics engine works correctly.
 
 function sync_f(a: int): String {
@@ -25,10 +27,10 @@ async function async_f(a: int): Promise<String> {
 
 export function main(): int {
     for (let i = 0; i < 10; ++i) {
-        launch sync_f(5);
+        launch<String, (i: int) => String>(sync_f, 5);
     }
     for (let i = 0; i < 10; ++i) {
-        await launch sync_f(5);
+        launch<String, (i: int) => String>(sync_f, 5).Await();
     }
     for (let i = 0; i < 10; ++i) {
         async_f(5);

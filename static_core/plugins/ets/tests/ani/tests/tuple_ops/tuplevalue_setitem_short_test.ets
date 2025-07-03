@@ -18,5 +18,5 @@ function getShortTuple(): [short, short, short, short, short] {
 }
 
 function getCharTuple(): [char, char, char, char, char] {
-    return ['H', 'e', 'l', 'l', 'o'];
+    return [c'H', c'e', c'l', c'l', c'o']
 }

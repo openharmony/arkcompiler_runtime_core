@@ -38,8 +38,8 @@ general:
     build: $panda_build
     coverage:
         use-llvm-cov: false
-        llvm-cov-profdata-out-path: null
-        llvm-cov-html-out-path: null
+        profdata-files-dir: null
+        coverage-html-report-dir: null
     ets-stdlib-root: null
     force-download: false
     full-gc-bombing-frequency: 0

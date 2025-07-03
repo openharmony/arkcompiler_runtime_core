@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [module2.ets, module3.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import * as foo from "@foo/foo"
 import * as bar from "@bar/bar"
 import * as module2 from "./module2"
@@ -30,7 +35,7 @@ function getCurrentLinker() {
 function testLazyLoading() {
     const appLinker = getCurrentLinker();
 
-    // disabled as runtime verication is enabled
+    // disabled as runtime verification is enabled
     const verifierEnabled: boolean = true;
 
     if (!verifierEnabled) {
@@ -54,7 +59,7 @@ function testLazyLoading() {
 function triggerGC() {
     // Check that garbage collection does not break user-defined RuntimeLinker
     expectNoThrow((): void throws => {
-        const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+        const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         if(gcId > 0) {
         GC.waitForFinishGC(gcId);
     }
@@ -108,7 +113,7 @@ function testStdCoreProxy() {
 }
 
 function testArrayClass() {
-    const arr = new foo.Dummy[0]
+    const arr: FixedArray<foo.Dummy> = new foo.Dummy[0]
     const arrClass = Class.of(arr);
     assertNE(arrClass, undefined);
 

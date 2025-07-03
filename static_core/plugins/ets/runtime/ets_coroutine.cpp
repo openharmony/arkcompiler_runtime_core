@@ -34,8 +34,10 @@ namespace ark::ets {
 ExternalIfaceTable EtsCoroutine::emptyExternalIfaceTable_ = ExternalIfaceTable();
 
 EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type)
-    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo), type)
+                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type,
+                           CoroutinePriority priority)
+    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo), type,
+                priority)
 {
     ASSERT(vm != nullptr);
 }
@@ -139,7 +141,9 @@ void EtsCoroutine::RequestJobCompletion(mem::Reference *jobRef, Value returnValu
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
-        ClearException();
+        if (!HasAbortFlag()) {
+            ClearException();
+        }
         LOG(INFO, COROUTINES) << "Coroutine \"" << GetName()
                               << "\" completed with an exception: " << exc->ClassAddr<Class>()->GetName();
         EtsJob::EtsJobFail(hjob.GetPtr(), EtsObject::FromCoreType(exc));
@@ -177,6 +181,13 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
                 << returnValue.GetAs<ObjectHeader *>() << ">";
         }
     }
+    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
+        // If the retObject is a rejected Promise, the reject reason will be set as an exception.
+        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
+        if (retObject == nullptr) {
+            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
+        }
+    }
     if (HasPendingException()) {
         // An exception may occur while boxin primitive return value in GetReturnValueAsObject
         auto *exc = GetException();
@@ -185,12 +196,6 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
                               << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
         intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc), ToEtsBoolean(false));
         return;
-    }
-    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
-        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
-        if (retObject == nullptr) {
-            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
-        }
     }
     intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject, ToEtsBoolean(false));
 }
@@ -254,6 +259,38 @@ void EtsCoroutine::OnHostWorkerChanged()
     auto *worker = GetWorker();
     auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+}
+
+[[noreturn]] void EtsCoroutine::HandleUncaughtException()
+{
+    ASSERT(HasPendingException());
+    GetPandaVM()->HandleUncaughtException();
+    UNREACHABLE();
+}
+
+void EtsCoroutine::ListUnhandledJobs()
+{
+    auto *vm = GetPandaVM();
+    vm->ListUnhandledFailedJobs();
+}
+
+void EtsCoroutine::ListUnhandledPromises()
+{
+    auto *vm = GetPandaVM();
+    vm->ListUnhandledRejectedPromises();
+}
+
+void EtsCoroutine::ListUnhandledEventsOnProgramExit()
+{
+    if (Runtime::GetOptions().IsArkAot()) {
+        return;
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        ListUnhandledJobs();
+    }
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
+        ListUnhandledPromises();
+    }
 }
 
 }  // namespace ark::ets

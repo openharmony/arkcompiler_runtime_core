@@ -15,7 +15,10 @@
 
 package error.test;
 
-export let err = new Error('This is a Error');
+export let err: Error;
+static {
+  err = new Error('This is a Error')
+}
 
 export function ErrorFunc(message: string): void {
   throw new Error(message);

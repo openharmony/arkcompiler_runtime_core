@@ -11,6 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_add_gtest(ani_test_promise_ops_new
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/promise_new_test.cpp
+)
+
 ani_add_gtest(ani_test_promise_ops_resolve
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/promise_resolve_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/promise_resolve_test.ets

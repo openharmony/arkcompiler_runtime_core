@@ -25,10 +25,10 @@ function main(): int {
   let b = 1;
 
   try {
-    let i: int = (a = 2) + v[0].length + (v[0][0] = new byte[10]).length + (b = 2);
+    let i: int = (a = 2) + v[0].length as int + (v[0][0] = new byte[10]).length as int + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
-  } catch (e: ArrayIndexOutOfBoundsError) {
+  } catch (e: RangeError) {
     return 1;
   } catch (e) {
     return 1;

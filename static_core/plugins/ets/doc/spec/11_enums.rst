@@ -19,12 +19,14 @@ Enumerations
     frontend_status: Done
 
 Enumeration type ``enum`` specifies a distinct user-defined type with an
-associated set of named constants that define its possible values:
+associated set of named constants that define its possible values.
+
+The syntax of *enumeration declaration* is presented below:
 
 .. code-block:: abnf
 
     enumDeclaration:
-        'const'? 'enum' identifier '{' enumConstantList? '}'
+        'const'? 'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -40,18 +42,27 @@ associated set of named constants that define its possible values:
    type enum
    user-defined type
    constant
+   named constant
 
 Type ``const enum`` is supported for source-level compatibility with |TS|.
 Type ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
-Qualification by type is mandatory to access the enumeration constant:
+Enumerations with explicitly specifed type values are described here 
+:ref:`Enumeration with explicit type`.
+
+Qualification by type is mandatory to access the enumeration constant, except
+enumeration constant initialization expressions:
 
 .. code-block:: typescript
    :linenos:
 
     enum Color { Red, Green, Blue }
     let c: Color = Color.Red
+
+    enum Flags { Read, Write, ReadWrite = Read | Write }
+    // No need to use Flags.Read | Flags.Write in initialization
+
 
 If enumeration type is exported, then all enumeration constants are
 exported along with the mandatory qualification.
@@ -61,9 +72,11 @@ are exported along with the mandatory qualification ``Color``.
 
 .. index::
    source-level compatibility
+   const enum
    semantics
    qualification
    access
+   accessibility
    enumeration constant
    enumeration type
    enum constant
@@ -72,19 +85,36 @@ are exported along with the mandatory qualification ``Color``.
 The value of an enum constant can be set as follows:
 
 -  Explicitly to a numeric constant expression (expression of type ``int`` or
-   ``long``) or to a constant expression of type ``string``; or
+   ``long`` ) or to a constant expression of type ``string``; or
 -  Implicitly by omitting the constant expression.
 
-
 If constant expression is omitted, then the value of the enum constant is set
-implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
+implicitly to an integer value (see :ref:`Enumeration Integer Values`).
 
-A :index:`compile-time error` occurs if ``integer`` and ``string`` type
-enumeration constants are combined in one enumeration.
+A :index:`compile-time error` occurs if integer or ``string`` type enumeration
+constants are combined in one enumeration.
+
+.. index::
+   enum constant
+   numeric constant expression
+   type int
+   constant expression
+   numeric value
+   enumeration constant
+   integer type
+   string type
+   enumeration
+
+A type all enumeration constant values belongs is called *enumeration base type*.
+It is either ``int``, or ``long``, or ``string``.
+
+.. index::
+   enumeration base type
 
 Any enumeration constant is of type ``enumeration``. Implicit conversion (see
 :ref:`Enumeration to Constants Type Conversions`) of an enumeration constant
-to integer types or type ``string`` depends on the type of constants.
+to integer types or type ``string`` depends on the type of
+constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
 a :index:`compile-time error` occurs.
@@ -92,12 +122,12 @@ a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    enum E1 { A, B = "hello" } // compile-time error
+    enum E1 { A, B = "hello" }     // compile-time error
     enum E2 { A = 5, B = "hello" } // compile-time error
-    enum E3 { A = 5, A = 77 } // compile-time error
-    enum E4 { A = 5, B = 5 } // OK! values can be the same
+    enum E3 { A = 5, A = 77 }      // compile-time error
+    enum E4 { A = 5, B = 5 }       // OK! values can be the same
 
-The corner case - empty enum is suppported for the compatibilty with |TS|. 
+Empty ``enum`` is supported as a corner case for compatibility with |TS|.
 
 .. code-block:: typescript
    :linenos:
@@ -106,15 +136,14 @@ The corner case - empty enum is suppported for the compatibilty with |TS|.
 
 
 .. index::
-   enum constant
-   string
+   enumeration constant
+   type enumeration
+   conversion
+   type string
    constant
    expression
-   numeric value
-   integer
-   numeric constant expression
-   constant expression
-   enumeration constant
+   enum
+   compatibility
 
 |
 
@@ -138,7 +167,11 @@ explicitly:
    enum constant
    enumeration constant
    integer type
+   value
    expression
+   constant expression
+   type int
+   type long
 
 .. code-block:: typescript
    :linenos:
@@ -146,8 +179,8 @@ explicitly:
     enum Background { White = 0xFF, Grey = 0x7F, Black = 0x00 }
     enum LongEnum { A = 0x7FFF_FFFF_1, B, C }
 
-The choice which type ``int`` or ``long`` to be used is performed on the same 
-prinicple as for integer literals (see :ref:`Integer Literals`).
+Choosing which type to use---``int`` or ``long``---is based on the same
+principle as for integer literals (see :ref:`Integer Literals`).
 
 If all constants have no value, then the first constant is assigned
 the value zero. The other constant is assigned the value of the
@@ -171,6 +204,10 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
     enum Color { Red, Blue = 5, Green }
 
 .. index::
+   type int
+   type long
+   integer literal
+   assignment
    constant
    value
    assignment
@@ -193,7 +230,7 @@ A string value for enumeration constants must be set explicitly:
     enum Commands { Open = "fopen", Close = "fclose" }
 
 .. index::
-   string
+   string value
    value
    enumeration
    enumeration constant
@@ -213,9 +250,8 @@ using the method ``toString``:
 
 .. index::
    enumeration constant
+   type string
    method
-   conversion
-   string
 
 .. code-block:: typescript
    :linenos:
@@ -234,11 +270,20 @@ type to get the name of the constant:
     let c: Color = Color.Green
     console.log(Color[c]) // prints: Green
 
+If several enumeration constants have the same value, then the textually last
+constant has the priority:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E { One = 1, one = 1, oNe = 1 }
+    console.log(E[1 as E]) // prints: oNe
+
+
 Additional methods available for enumeration types and constants are discussed
 in :ref:`Enumeration Methods` in the chapter Experimental Features.
 
 .. index::
-   enumeration constant
    method
    enumeration type
    constant

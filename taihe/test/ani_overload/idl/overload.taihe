@@ -64,10 +64,7 @@ interface OverloadInterface {
     OverloadFuncPoint(a: Array<i32>): i32;
 
     @overload("overloadFunc")
-    OverloadFuncPoint1(a: Array<f32>): f32;
-
-    @overload("overloadFunc")
-    OverloadFuncArrayBuffer(a: Array<u8>): u8;
+    OverloadFuncArrayBuffer(a: @arraybuffer Array<u8>): u8;
 
     @overload("overloadFunc")
     OverloadFunc5param1(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64): void;
@@ -163,16 +160,16 @@ interface OverloadInterface {
     OverloadFunc10param2(p0: i8, p1: Mystruct, p2: Color, p3: Array<f32>, p4: Array<f64>, p5: Array<bool>, p6: Array<String>, p7: Array<i8>, p8:Array<i16>, p9:Array<i32>): void;
 
     @overload("overloadFunc")
-    OverloadFunc10param3(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64, p5: bool, p6: String, p7: Array<u8>, p8:Mystruct, p9:Color): void;
+    OverloadFunc10param3(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64, p5: bool, p6: String, p7: @arraybuffer Array<u8>, p8:Mystruct, p9:Color): void;
 
     @overload("overloadFunc")
-    OverloadFunc10param4(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64, p5: bool, p6: String, p7: Array<i8>, p8:Array<u8>, p9:Color): void;
+    OverloadFunc10param4(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64, p5: bool, p6: String, p7: Array<i8>, p8:@arraybuffer Array<u8>, p9:Color): void;
 
     @overload("overloadFunc")
-    OverloadFuncEnumRecord(p1:Color, p2:Map<String, i16>): void;
+    OverloadFuncEnumRecord(p1:Color, p2:@record Map<String, i16>): void;
 
     @overload("overloadFunc")
-    OverloadFuncArrayRecord(p1:Array<i32>, p2:Map<String, i16>): void;
+    OverloadFuncArrayRecord(p1:Array<i32>, p2:@record Map<String, i16>): void;
 }
 
 

@@ -324,24 +324,12 @@ public:
 
         std::cout << "], p9 = " << p9 << std::endl;
     }
+
     // NOLINTEND(readability-function-size)
 
     int32_t OverloadFuncPoint(array_view<int32_t> a)
     {
         std::cout << "OverloadFuncPoint: a = [";
-        for (size_t i = 0; i < a.size(); ++i) {
-            std::cout << a.data()[i];
-            if (i < a.size() - 1) {
-                std::cout << ", ";
-            }
-        }
-        std::cout << "]" << std::endl;
-        return a.data()[0];
-    }
-
-    float OverloadFuncPoint1(array_view<float> a)
-    {
-        std::cout << "OverloadFuncPoint1: a = [";
         for (size_t i = 0; i < a.size(); ++i) {
             std::cout << a.data()[i];
             if (i < a.size() - 1) {
@@ -383,7 +371,7 @@ public:
 
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_get_interface(get_interface);
 // NOLINTEND

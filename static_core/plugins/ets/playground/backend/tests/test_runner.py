@@ -289,7 +289,7 @@ async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
                         opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets",
-                              "--verification-enabled=true", "--verification-mode=on-the-fly", "ETSGLOBAL::main"],
+                              "--verification-mode=on-the-fly", "ETSGLOBAL::main"],
                         stderr=b"runtime verify error",
                         return_code=1),
 

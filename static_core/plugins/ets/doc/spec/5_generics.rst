@@ -93,6 +93,8 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
    out-variance
    in-variance
 
+The syntax of *type parameter* is presented below:
+
 .. code-block:: abnf
 
     typeParameters:
@@ -126,43 +128,16 @@ section.
    generic class
    generic interface
    generic function
-   generic lambda
+   lambda
    generic instantiation
    class
    interface
    function
-   instantiation
    type parameter
-   ordinary type
-   parameterized class
-   parameterized interface
-   parameterized function
-   type-parameterized declaration
    parameterization
-   lambda
    array
    type alias
    method
-   type parameter
-
-No type parameter has a default value, and initialization is mandatory for
-variables and fields of a type parameter (see :ref:`Field Initialization`):
-
-.. code-block:: typescript
-   :linenos:
-
-    class G<T> {
-        field: T // compile-time error, field is not initialized
-        function foo() {
-            let t: T // compile-time error, variable is not initialized
-        }
-    }
-
-.. index::
-   default value
-   type parameter
-   value
-   field initialization
 
 |
 
@@ -175,19 +150,17 @@ Type Parameter Constraint
     frontend_status: Done
 
 If possible instantiations need to be constrained, then an individual
-*constraint* can be set for each type parameter.
+*constraint* can be set for each type parameter after the keyword ``extends``.
+A constraint can have the form of any type. If no constraint is specified,
+then the contraint is :ref:`Type Any`, so the lack of an explicit constraint
+effectively means ``extends Any``. As consequence such type parameter
+is not compatible with :ref:`Type Object`, and has no methods or fields
+available for use.
 
-A constraint of any type parameter can follow the keyword ``extends``. The
-constraint is denoted as any type except the case when constraint is a signle
-final class (see :ref:`Final Classes`) or becomes a single final class as a
-result of union normalization (see :ref:`Union Types Normalization`). Then a
-:index:`compile-time error` occurs.
-If no constraint is declared, then the type parameter is not compatible with
-``Object``, and has no methods or fields available for use. Lack of constraint
-effectively means  ``extends Object|null|undefined``. If type parameter *T* has
-type constraint *S*, then the actual type of the generic instantiation must be
-assignable to *S* (see :ref:`Assignability`). If the constraint *S* is a
-non-nullish type (see :ref:`Nullish Types`), then *T* is also non-nullish.
+If type parameter *T* has type constraint
+*S*, then the actual type of the generic instantiation must be a subtype of 
+*S* (see :ref:`Subtyping`). If the constraint *S* is a non-nullish type
+(see :ref:`Nullish Types`), then *T* is also non-nullish.
 
 .. index::
    constraint
@@ -195,15 +168,17 @@ non-nullish type (see :ref:`Nullish Types`), then *T* is also non-nullish.
    type parameter
    keyword extends
    type reference
+   union normalization
+   union type normalization
    object
+   compatibility
+   assignability
    nullish-type
    non-nullish-type
    type argument
    generic instantiation
    instantiation
-   constraint
-   string name
-   union type
+
 
 .. code-block:: typescript
    :linenos:
@@ -235,7 +210,7 @@ non-nullish type (see :ref:`Nullish Types`), then *T* is also non-nullish.
     }
     class B <T extends keyof A> {}
     let b1 = new B<'f1'>    // OK
-    let b2 = new B<'f0'>    // Compiel-time error as 'f0' does not fit the constraint
+    let b2 = new B<'f0'>    // Compile-time error as 'f0' does not fit the constraint
     let b3 = new B<keyof A> // OK
 
 
@@ -256,10 +231,6 @@ section depends on itself.
    generic
    generic declaration
    type parameter
-   unqualified identifier
-   generic declaration
-   constraint
-   compile-time error
 
 .. code-block:: typescript
    :linenos:
@@ -317,11 +288,10 @@ in the examples below:
    type parameter
    generic type
    type argument
-   type parameter default
+   default type
    instantiation
    class
    function
-   compile-time error
 
 .. code-block-meta:
     expect-cte:
@@ -365,49 +335,60 @@ Type Parameter Variance
 .. meta:
     frontend_status: Done
 
-Normally, two different argument types used to instantiate a generic class or
-interface are handled as different and unrelated types (*invariance*). |LANG|
-supports type parameter variance that allows such instantiations become base
-classes and derived classes (:ref:`Invariance, Covariance and Contravariance`), or vice versa
-(:ref:`Invariance, Covariance and Contravariance`),
-depending on the relationship of inheritance between
-argument types.
+Normally, two different instantiations of the same generic class or
+interface (like ``Array<number>`` and ``Array<string>``) are handled
+as different and unrelated types.
+|LANG| supports type parameter variance that allows *subtyping*
+relationship between such instantiations (See :ref:`Subtyping`),
+depending on the *subtyping* relationship between argument types.
 
 .. index::
    type parameter
    variance
    generic class
+   subtyping
    argument type
    invariance
-   contravariance
-   covariance
    instantiation
-   inheritance
-   derived class
-   base class
 
-Special markers are used to specify *declaration-site variance*. The
-markers are to be added to generic parameter declarations. The markers are
-expressed as keywords ``in`` or ``out`` (a *variance modifier* that specifies
-the variance of the type parameter).
+When declaring *type parameters* of a generic type, special keywords ``in`` or
+``out`` (called *variance modifiers*) are used to specify the variance of the
+type parameter (see :ref:`Invariance, Covariance and Contravariance`).
 
-Type parameters with the keyword ``out`` are *covariant* (see
-:ref:`Invariance, Covariance and Contravariance`), and can be used in the out-position only:
+Type parameters with the keyword ``out`` are *covariant* . Covariant type
+parameters can be used in the out-position only as follows:
 
-   - Methods may have ``out`` type parameters as return types
-   - Fields of ``out`` type parameters as type should be ``readonly``.
+   - Methods can have ``out`` type parameters as return types;
+   - Fields that have ``out`` type parameters as type must be ``readonly``.
+   - Otherwise, a :index:`compile-time error` occurs.
 
-Otherwise a :index:`compile-time error` occurs.
+.. index::
+   type parameter
+   generic type
+   keyword in
+   keyword out
+   variance modifier
+   variance
+   invariance
+   covariance
+   contravariance
 
-Type parameters with the keyword ``in`` are *contravariant* (see
-:ref:`Invariance, Covariance and Contravariance`), and can be used in the in-position only:
+Type parameters with the keyword ``in`` are *contravariant*.
+Contravariant type parameters can be used in the in-position only as follows:
 
-   - Methods may have ``in`` type parameters as parameter types
-
-Otherwise a :index:`compile-time error` occurs.
+   - Methods can have ``in`` type parameters as parameter types. 
+   - Otherwise, a :index:`compile-time error` occurs.
 
 Type parameters with no variance modifier are implicitly *invariant*, and can
 occur in any position.
+
+.. index::
+   type parameter
+   keyword in
+   contravariant
+   in-position
+   invariant
+   variance modifier
 
 .. code-block:: typescript
    :linenos:
@@ -425,7 +406,7 @@ occur in any position.
        method (p: T3): T3 {...}
     }
 
-In case of function types (see :ref:`Function Types`) variance interleaving
+In case of function types (see :ref:`Function Types`), variance interleaving
 occurs.
 
 .. code-block:: typescript
@@ -439,57 +420,20 @@ occurs.
        // and further more
     }
 
+
 .. index::
    function type
-   declaration-site variance
-   generic parameter
-   declaration
-   keyword in
-   keyword out
-   variance modifier
-   covariance
-   contravariance
-   variance
-   invariant
-   interleaving
-   generic
-   type parameter
-   variance modifier
-   in-position
-   out-position
+   variance interleaving
 
-A :index:`compile-time error` occurs if a function, method, or constructor
-type parameters have a variance modifier specified.
-
-*Variance* is used to describe the subtyping (see :ref:`Subtyping`) operation
-on parameterized types (see :ref:`Generics`). The variance of the corresponding
-type parameter *F* defines the subtyping between ``T<A>`` and ``T<B>`` (in the
-case of declaration-site variance with two different types ``A`` <: ``B``) as
-follows:
-
--  Covariant -- :ref:`Invariance, Covariance and Contravariance` (*out F*): ``T<A>`` <: ``T<B>``;
--  Contravariant -- :ref:`Invariance, Covariance and Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
--  Invariant -- default (*F*).
+A :index:`compile-time error` occurs if function or method type parameters
+have a variance modifier specified.
 
 .. index::
+   function
+   method
    type parameter
    variance modifier
-   function
-   subtyping
-   supertyping
-   method
-   constructor
    variance
-   covariance
-   contravariance
-   covariant
-   contravariant
-   invariant
-   invariance
-   type-parameterized declaration
-   parameterized type
-   subtyping
-   declaration-site variance
 
 |
 
@@ -522,17 +466,20 @@ method, function, or lambda is created.
     }
 
 .. index::
-   value type
    generic class
-   generic instantiation
    interface
-   alias
+   type alias
    method
    function
+   lambda
    lambda declaration
    instantiation
    non-generic entity
+   type parameter
+   type argument
    class
+   union
+   array
 
 |
 
@@ -544,7 +491,9 @@ Type Arguments
 .. meta:
     frontend_status: Done
 
-Type arguments are a non-empty list of types that are used for instantiation.
+*Type arguments* are non-empty lists of types that are used for instantiation.
+
+The syntax of *type arguments* is presented below:
 
 .. code-block:: abnf
 
@@ -559,7 +508,7 @@ arguments:
    :linenos:
 
     Array<number>                     // instantiated with type number
-    Array<0|1>                        // instantiated with union type
+    Array<number|string>              // instantiated with union type
     Array<number[]>                   // instantiated with array type
     Array<[number, string, boolean]>  // instantiated with tuple type
     Array<()=>void>                   // instantiated with function type
@@ -612,12 +561,9 @@ type parameters to substitute corresponding type parameters of a generic:
 
 .. index::
    instantiation
-   generic entity
-   non-generic entity
-   function declaration
+   generic
    type argument
    type parameter
-   generic
 
 A :index:`compile-time error` occurs if type arguments are provided for
 non-generic class, interface, type alias, method, function, or lambda.
@@ -636,6 +582,23 @@ declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
 *C*:sub:`i` (see :ref:`Assignability`). All subtypes of the type listed
 in the corresponding constraint have each type argument *T*:sub:`i` of the
 parameterized declaration ranging over them.
+
+.. index::
+   type argument
+   class
+   interface
+   type alias
+   method
+   function
+   lambda
+   generic
+   instantiation
+   generic declaration
+   assignability
+   assignable type
+   constraint
+   subtype
+   parameterized declaration
 
 A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 *well-formed* if **all** of the following is true:
@@ -656,18 +619,20 @@ Any two generic instantiations are considered *provably distinct* if:
 -  Any of their type arguments is provably distinct.
 
 .. index::
-   instantiation
    generic instantiation
-   type argument
    generic declaration
    type parameter
+   type argument
+   assignability
    constraint
-   compatibility
-   type parameter constraint
-   compile-time error
+   instantiation
+   well-formed instantiation
    class type
+   generic type
    interface type
    function
+   type argument
+   type parameter
    provably distinct instantiation
    parameterization
    distinct generic declaration
@@ -701,16 +666,14 @@ Implicit instantiation is only possible for generic functions, methods, and
 lambdas.
 
 .. index::
-   implicit instantiation
    instantiation
    type argument
+   type inference
+   generic
    context
-   non-parameterized entity
    method
-   class
-   interface
-   constructor
    function
+   lambda
 
 |
 
@@ -723,12 +686,13 @@ Utility Types
     frontend_status: Done
 
 |LANG| supports several embedded types, called *utility* types. Utility types
-allow constructing new types by adjusting properties of initial types.
+allow constructing new types by adjusting properties of initial types. If the
+initial types are class or interface, then the resultant utility types are also
+handled as class or interface types.
 
 .. index::
    embedded type
    utility type
-   extended functionality
 
 |
 
@@ -809,12 +773,13 @@ It is represented in the example below:
 
 .. index::
    type
+   assignability
+   assignable type
    variable
    initialization
+   object literal
    class
    user-defined getter
-   object
-   literal
    getter
    setter
 
@@ -862,15 +827,17 @@ Type ``T`` is not assignable (see :ref:`Assignability`) to
 valid object literals.
 
 .. index::
+   type
+   interface type
    utility type
+   assignability
+   assignable type
    property
    method
    getter
    setter
-   class
-   interface type
    type
-   literal
+   object literal
 
 |
 
@@ -902,8 +869,14 @@ represented in the example below:
     myIssue.title = "Two" // compile-time error: readonly property
 
 .. index::
+   type
    utility type
    type readonly
+   constructed value
+   method
+   reassignment
+   assignability
+   assignable type
    property
    interface type
    getter
@@ -976,10 +949,9 @@ Type ``V`` has no restrictions.
 A special form of object literals is supported for instances of type ``Record``
 (see :ref:`Object Literal of Record Type`).
 
-Access to ``Record<K, V>`` values is performed by an *indexing expression*
-like *r[index]*, where *r* is an instance of type ``Record``, and *index*
-is the expression of type ``K``. See :ref:`Record Indexing Expression` for
-details.
+Access to ``Record<K, V>`` values is performed by an *indexing expression* like
+*r[index]*, where *r* is an instance of type ``Record``, and *index* is the
+expression of type ``K``. See :ref:`Record Indexing Expression` for details.
 
 Variables of type ``Record<K, V>`` can be initialized with help of valid object
 literals of record type (see :ref:`Object Literal of Record Type`). Where
@@ -1005,14 +977,19 @@ an indexing expression is of type ``V``. In this case it is ``number``.
 
 .. index::
    object literal
-   object
    literal
    instance
    Record type
    access
    indexing expression
    index expression
+   index
    number
+   expression
+   variable
+   compatibility
+   value type
+   value
 
 |
 
@@ -1025,8 +1002,9 @@ Utility Type Private Fields
     frontend_status: Done
 
 Utility types are built on top of other types. Private fields of the initial
-type stay in the utility type but they are not accessible and cannot be
-accessed in any way. It is represented in the example below:
+type stay in the utility type but they are not accessible (see
+:ref:`Accessible`) and cannot be accessed in any way. It is represented in the
+example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1054,6 +1032,7 @@ accessed in any way. It is represented in the example below:
    private field
    type
    access
+   accessibility
 
 .. raw:: pdf
 

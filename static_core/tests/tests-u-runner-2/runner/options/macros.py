@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,8 @@
 #
 
 from os import environ
-from typing import List, Union, Tuple, Optional
 
-from runner.common_exceptions import ParameterNotFound, MacroNotExpanded
+from runner.common_exceptions import MacroNotExpanded, ParameterNotFound
 from runner.logger import Log
 from runner.options.local_env import LocalEnv
 from runner.options.options import IOptions
@@ -45,12 +44,12 @@ class Macros:
         return macro.replace("-", "_")
 
     @classmethod
-    def expand_macros_in_path(cls, value: str, config: IOptions) -> Optional[str]:
+    def expand_macros_in_path(cls, value: str, config: IOptions) -> str | None:
         corrected = cls.correct_macro(value, config)
         return expand_file_name(corrected) if isinstance(corrected, str) else None
 
     @classmethod
-    def correct_macro(cls, raw_value: str, config: IOptions) -> Union[str, List[str]]:
+    def correct_macro(cls, raw_value: str, config: IOptions) -> str | list[str]:
         """
         Macro can be expanded into single value of str or to list of str
         :param raw_value: the source line with one or several macros
@@ -80,9 +79,9 @@ class Macros:
         return result_list[0] if len(result_list) == 1 else result_list
 
     @classmethod
-    def __process(cls, result: str, raw_value: str, config: IOptions) -> Tuple[str, List[str]]:
-        not_found: List[str] = []
-        prop_value: Optional[Union[str, List[str]]] = None
+    def __process(cls, result: str, raw_value: str, config: IOptions) -> tuple[str, list[str]]:
+        not_found: list[str] = []
+        prop_value: str | list[str] | None = None
         for macro in get_all_macros(result):
             prop_value = environ.get(macro)
             if prop_value is not None:

@@ -125,10 +125,7 @@ static std::unique_ptr<icu::Locale> ToICULocale(ani_env *env, ani_object self)
 
     ani_boolean localeIsUndefined = ANI_FALSE;
     ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(localeRef, &localeIsUndefined));
-
-    if (localeIsUndefined == ANI_TRUE) {
-        return std::make_unique<icu::Locale>(icu::Locale::getDefault());
-    }
+    ANI_FATAL_IF(localeIsUndefined == ANI_TRUE);
 
     auto locale = static_cast<ani_string>(localeRef);
     ASSERT(locale != nullptr);
@@ -324,7 +321,7 @@ static ani_status ConfigureLocaleOptions(ani_env *env, icu::Locale *locale, ani_
 
     UErrorCode icuStatus = U_ZERO_ERROR;
     if (hourCycleUndefined == ANI_TRUE) {
-        if (*locale != icu::Locale::getChinese()) {
+        if (strcmp(locale->getLanguage(), icu::Locale::getChinese().getLanguage()) != 0) {
             return ANI_OK;
         }
 

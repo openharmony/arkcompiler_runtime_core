@@ -18,7 +18,7 @@ import { Chrono } from 'std/time';
 
 const MS2NS = 1000000;
 
-export class A2j {
+export class S2d {
 
     state: number = 0
     totalTime: number = 0;

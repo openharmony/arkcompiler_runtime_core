@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,11 @@ class WorkDir:
     def __init__(self, config: Config, default_work_dir: Path):
         self.__config = config
         self.__default_work_dir = default_work_dir
-        shutil.rmtree(self.intermediate, ignore_errors=True)
         shutil.rmtree(self.report, ignore_errors=True)
 
     @property
     def report(self) -> Path:
-        return self.root / "report"
+        return self.root / self.__config.general.report_dir_name
 
     @property
     def gen(self) -> Path:

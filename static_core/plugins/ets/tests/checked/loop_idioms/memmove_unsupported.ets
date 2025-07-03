@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function check(arr1:Object, arr2:Object): boolean {
+function check(arr1: Object, arr2: Object): boolean {
     if (arr1.toString() != arr2.toString()) {
         console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
         return true;
@@ -29,35 +29,32 @@ class TestUnsupported {
     //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static noAlias_underIf(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static noAlias_underIf(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         return check(TestUnsupported.__noinline__noAlias_underIf(src, dst), [6, 7, 8, 4, 5]);
     }
 
-    static __noinline__noAlias_underIf(src:int[], dst:int[]): int[]
-    {
+    static __noinline__noAlias_underIf(src: FixedArray<int>, dst: FixedArray<int>): FixedArray<int> {
         if (src != dst) {
-            for (let i:int = 0; i < src.length; i++) {
+            for (let i: int = 0; i < src.length; i++) {
                 dst[i] = src[i];
             }
         }
         return dst;
     }
-    
+
     //! CHECKER       TestUnsupported2
     //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
     //! METHOD        "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_boundscheck(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static patternMissmatch_boundscheck(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         let x = GLOBAL_OFFS;
-        for (let i:int = 0; i < src.length; i++) {
+        for (let i: int = 0; i < src.length; i++) {
             dst[i + GLOBAL_OFFS] = src[i];
         }
         return check(dst, [1, 6, 7, 8, 5]);
@@ -68,14 +65,13 @@ class TestUnsupported {
     //! METHOD        "memmove_unsupported.TestUnsupported::subIdx"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static subIdx(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static subIdx(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         let x = GLOBAL_OFFS;
-        for (let i:int = src.length; i > 0 ; i--) {
-            dst[dst.length-i] = src[src.length-i];
+        for (let i: int = src.length; i > 0; i--) {
+            dst[dst.length - i] = src[src.length - i];
         }
         return check(dst, [1, 2, 6, 7, 8]);
     }

@@ -48,15 +48,15 @@ class TestGCOld {
     private static nodes : long = 0;
     private static actuallyMut : long = 0;
     private static mutatorSum : long = 0;
-    private static aexport : int[] = [];
+    private static aexport : FixedArray<int> = [];
 
-    private static trees : (TreeNode | undefined)[] = [undefined];
+    private static trees : FixedArray<TreeNode | undefined> = [undefined];
     private static where : int = 0;
     private static rnd = new Random();
 
     private static init() : void {
         let ntrees : int = ((TestGCOld.size * TestGCOld.MEG) / TestGCOld.treeSize) as int;
-        TestGCOld.trees = new TreeNode[ntrees];
+        TestGCOld.trees = new (TreeNode | undefined)[ntrees];
 
         console.println("Allocating " + ntrees + " trees.");
         console.println("  (" + (ntrees * TestGCOld.treeSize) + " bytes)");
@@ -159,8 +159,8 @@ class TestGCOld {
     }
 
     private static swapSubtreesForOldGen() : void {
-        let index1 : int = TestGCOld.rnd.nextInt(TestGCOld.trees.length);
-        let index2 : int = TestGCOld.rnd.nextInt(TestGCOld.trees.length);
+        let index1 : int = TestGCOld.rnd.nextInt(TestGCOld.trees.length as int);
+        let index2 : int = TestGCOld.rnd.nextInt(TestGCOld.trees.length as int);
         let depth : int = TestGCOld.rnd.nextInt(TestGCOld.treeHeight);
         let path : int = TestGCOld.rnd.nextInt(TestGCOld.treeHeight);
         let tn1  : TreeNode | undefined = TestGCOld.trees[index1];

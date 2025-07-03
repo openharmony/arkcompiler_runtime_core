@@ -49,7 +49,7 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref)
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Ref(box, fieldString, string), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStringValue", box, string), ANI_TRUE);
 
@@ -109,6 +109,19 @@ TEST_F(ObjectSetFieldRefTest, set_field_ref2)
 
     ASSERT_EQ(env_->Object_SetField_Ref(boxc, fieldStr, str), ANI_OK);
     ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_ref_test", "checkStrValue", boxc, str), ANI_TRUE);
+}
+
+TEST_F(ObjectSetFieldRefTest, set_field_ref_invalid_args_env)
+{
+    ani_object box {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
+    GetTestData(&box, &fieldInt, &fieldString);
+
+    ani_string string {};
+    ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Ref(nullptr, box, fieldString, string), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldRefTest, set_field_ref_invalid_field_type)

@@ -15,15 +15,15 @@
 
 // This test checks that nested promises are returned and awaited correctly
 
-function foo(p: string): string {
+async function foo(p: string): Promise<string> {
     return p + p;
 }
 
-function bar(): Promise<string> {
-    return launch foo('A');
+async function bar() {
+    return foo('A');
 }
 
 function main() {
-    let res: Promise<Promise<string>> = launch bar();
+    let res: Promise<Promise<string>> = bar();
     assertEQ((await res), 'AA');
 }

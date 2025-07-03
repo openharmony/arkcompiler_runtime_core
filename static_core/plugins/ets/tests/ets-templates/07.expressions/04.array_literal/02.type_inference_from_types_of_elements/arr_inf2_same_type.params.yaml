@@ -251,14 +251,14 @@ cases:
 
     # array of nullish
     - decl: |-
-          let a: Error|null
-          let b: Error|null = new Error
+          let a: Error|undefined
+          let b: Error|undefined = new Error
       val: '[a, b]'
       type: '(Error|null)[]'
 
     - decl: |-
-          let a: Error|null
-          let b: Error|null = new Error
+          let a: Error|undefined
+          let b: Error|undefined = new Error
       val: '[[a], [b]]'
       type: '(Error|null)[][]'
 

@@ -13,19 +13,72 @@
  * limitations under the License.
  */
 
-function main(): int {
-    let failures: int = 0;
+const emptyArray: string[] = []
 
-    // ownKeys
-    failures += test(reflectOwnKeys(), "Reflect.ownKeys");
+function compareArray(first: string[], second: string[]) {
+    arktest.assertEQ(first.length, second.length)
+    for (let i = 0; i < first.length; i++) {
+        arktest.assertEQ(first[i], second[i])
+    }
+}
 
-    return test(failures, "All tests run");
+function booleanTest() {
+    compareArray(Reflect.ownKeys(true), emptyArray)
+    compareArray(Reflect.ownKeys(false), emptyArray)
+}
+
+function byteTest() {
+    compareArray(Reflect.ownKeys(0 as byte), emptyArray)
+    compareArray(Reflect.ownKeys(Byte.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Byte.MAX_VALUE), emptyArray)
+}
+
+function charTest() {
+    compareArray(Reflect.ownKeys(c'\0'), emptyArray)
+    compareArray(Reflect.ownKeys(c'1'), emptyArray)
+}
+
+function shortTest() {
+    compareArray(Reflect.ownKeys(0 as short), emptyArray)
+    compareArray(Reflect.ownKeys(Short.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Short.MAX_VALUE), emptyArray)
+}
+
+function intTest() {
+    compareArray(Reflect.ownKeys(0), emptyArray)
+    compareArray(Reflect.ownKeys(Int.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Int.MAX_VALUE), emptyArray)
+}
+
+function longTest() {
+    compareArray(Reflect.ownKeys(0 as long), emptyArray)
+    compareArray(Reflect.ownKeys(Long.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Long.MAX_VALUE), emptyArray)
+}
+
+function floatTest() {
+    compareArray(Reflect.ownKeys(Double.toFloat(0.0)), emptyArray)
+    compareArray(Reflect.ownKeys(Float.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Float.MAX_VALUE), emptyArray)
+}
+
+function doubleTest() {
+    compareArray(Reflect.ownKeys(0.0), emptyArray)
+    compareArray(Reflect.ownKeys(Double.MIN_VALUE), emptyArray)
+    compareArray(Reflect.ownKeys(Double.MAX_VALUE), emptyArray)
+}
+
+function stringTest() {
+    let str = ''
+    compareArray(Reflect.ownKeys(str), ['length'])
+    str = 'abc'
+    compareArray(Reflect.ownKeys(str), ['0', '1', '2', 'length'])
 }
 
 class Point2D {
-    static axisnum: number = 2
-    x: number
-    y: number
+    public static axisnum: number = 2
+    public x: number
+    public y: number
     constructor (x_: number, y_: number) {
         this.x = x_
         this.y = y_
@@ -33,79 +86,70 @@ class Point2D {
 }
 
 class Point3D extends Point2D {
-    static axisnum: number = 3
-    z: number
+    public static axisnum: number = 3
+    public z: number
     constructor (x_: number, y_: number, z_: number) {
         super(x_, y_)
         this.z = z_
     }
 }
 
-function arraysAreEqual(a: string[], b: string[]): boolean {
-    let alen = a.length
-    if (alen != b.length) {
-        return false
-    }
-    for (let i = 0; i < alen; i++) {
-        if (a[i] != b[i]) {
-            return false
-        }
-    }
-    return true
+function classTest() {
+    let p1 = new Point2D(1, 2)
+    compareArray(Reflect.ownKeys(p1), ['x', 'y'])
+    let p2 = new Point3D(3, 4, 5)
+    compareArray(Reflect.ownKeys(p2), ['x', 'y', 'z'])
 }
 
-function reflectOwnKeys(): int {
-    let result: int = 0
+function fixedArrayTest() {
+    let arr: FixedArray<int> = []
+    compareArray(Reflect.ownKeys(arr), ['length'])
+    arr = [1, 20, 30]
+    compareArray(Reflect.ownKeys(arr), ['0', '1', '2', 'length'])
 
-    let c: char = c'c'
-    let bo: boolean = true
-    let bt: byte = 10
-    let sh: short = 20
-    let i: int = 30
-    let lo: long = 40
-    let fl: float = 50.0
-    let dou: double = 60.0
+    let arr2: FixedArray<Point2D> = [new Point2D(7, 9), new Point3D(0, 0, 1)]
+    compareArray(Reflect.ownKeys(arr2), ['0', '1', 'length'])
+}
 
-    let arr: number[] = [10, 20, 30]
-    let emptyarr: number[] = []
+function arrayTest() {
+    let arr: Array<number> = []
+    compareArray(Reflect.ownKeys(arr), ['length'])
+    arr = [1.0, 12.5, 5.0]
+    compareArray(Reflect.ownKeys(arr), ['0', '1', '2', 'length'])
 
-    let str: string = "abc"
-    let emptystr: string = ""
+    let arr2: Array<Point2D> = [new Point2D(0, 1), new Point3D(0, 1, 2)]
+    compareArray(Reflect.ownKeys(arr2), ['0', '1', 'length'])
 
-    let cl: Point2D = new Point3D(10, 20, 30)
+    let arr3 = new Array<int>()
+    compareArray(Reflect.ownKeys(arr3), ['length'])
 
+    let arr4 = new Array<int>(5)
+    compareArray(Reflect.ownKeys(arr4), ['0', '1', '2', '3', '4', 'length'])
+}
+
+function lambdaTest() {
     let lambda: (a: number) => number = (a: number): number => {
         return a + 1
     }
+    compareArray(Reflect.ownKeys(lambda), ["length", "name"])
 
-    let emptyArr: string[] = []
-
-    result += arraysAreEqual(Reflect.ownKeys(c), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(bo), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(bt), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(sh), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(i), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(lo), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(fl), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(dou), emptyArr) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(arr), ["0", "1", "2", "length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(emptyarr), ["length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(str), ["0", "1", "2", "length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(emptystr), ["length"]) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(cl), ["x", "y", "z"]) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(lambda), ["length", "name"]) ? 0 : 1
-
-    return result
+    compareArray(Reflect.ownKeys(arrayTest), ["length", "name"])
 }
 
-function test(result: int, message: String ): int {
-    if (result == 0) {
-      console.log('PASSED: ' + message);
-      return 0;
-    }
-    console.log('FAILED: ' + message);
-    return 1;
+function main(): int {
+    const suite = new arktest.ArkTestsuite('Reflect.ownKeys tests')
+    suite.addTest('for boolean', booleanTest)
+    suite.addTest('for byte', byteTest)
+    suite.addTest('for char', charTest)
+    suite.addTest('for short', shortTest)
+    suite.addTest('for int', intTest)
+    suite.addTest('for long', longTest)
+    suite.addTest('for float', floatTest)
+    suite.addTest('for double', doubleTest)
+    suite.addTest('for string', stringTest)
+    suite.addTest('for class', classTest)
+    suite.addTest('for FixedArray', fixedArrayTest)
+    suite.addTest('for Array', arrayTest)
+    suite.addTest('for lambda', lambdaTest)
+    return suite.run()
 }

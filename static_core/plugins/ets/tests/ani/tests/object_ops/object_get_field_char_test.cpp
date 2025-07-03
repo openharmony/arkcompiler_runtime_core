@@ -46,10 +46,21 @@ TEST_F(ObjectGetFieldCharTest, get_field_char)
     ani_field fieldIndex {};
     GetTestData(&sarah, &field, &fieldIndex);
 
-    ani_char index;
+    ani_char index = '\0';
     ani_char xx = 'a';
     ASSERT_EQ(env_->Object_GetField_Char(sarah, fieldIndex, &index), ANI_OK);
     ASSERT_EQ(index, xx);
+}
+
+TEST_F(ObjectGetFieldCharTest, get_field_char_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldIndex {};
+    GetTestData(&sarah, &field, &fieldIndex);
+
+    ani_char index = '\0';
+    ASSERT_EQ(env_->c_api->Object_GetField_Char(nullptr, sarah, fieldIndex, &index), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldCharTest, get_field_char_invalid_field_type)
@@ -59,7 +70,7 @@ TEST_F(ObjectGetFieldCharTest, get_field_char_invalid_field_type)
     ani_field fieldIndex {};
     GetTestData(&sarah, &field, &fieldIndex);
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetField_Char(sarah, field, &index), ANI_INVALID_TYPE);
 }
 
@@ -70,7 +81,7 @@ TEST_F(ObjectGetFieldCharTest, invalid_argument1)
     ani_field fieldIndex {};
     GetTestData(&sarah, &field, &fieldIndex);
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetField_Char(nullptr, field, &index), ANI_INVALID_ARGS);
 }
 
@@ -81,7 +92,7 @@ TEST_F(ObjectGetFieldCharTest, invalid_argument2)
     ani_field fieldIndex {};
     GetTestData(&sarah, &field, &fieldIndex);
 
-    ani_char index;
+    ani_char index = '\0';
     ASSERT_EQ(env_->Object_GetField_Char(sarah, nullptr, &index), ANI_INVALID_ARGS);
 }
 

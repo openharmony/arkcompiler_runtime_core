@@ -26,17 +26,17 @@ class A {
 
     public charMethodVoidParam(): char
     {
-        return 'A';
+        return c'A';
     }
 
     public charMethodMultipleParam(a0: byte, a1: boolean, a2: float, a3: float, a4: byte): char
     {
         if (a1) {
-            return 'A';
+            return c'A';
         } else if (a2 > a3) {
-            return 'B';
+            return c'B';
         } else {
-            return 'C';
+            return c'C';
         }
     }
 
@@ -63,7 +63,7 @@ final class B extends A {
 
     public subCharMethodVoidParam(): char
     {
-        return 'W';
+        return c'W';
     }
 }
 

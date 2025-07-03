@@ -14,8 +14,11 @@
 .language eTS
 
 .record escompat.Date <external>
+.record std.core.ETSGLOBAL <external> {
+	std.core.Console console <static, external, access.field=public>
+}
 .record std.core.Console <external>
-.function void std.core.Console.println(std.core.Console a0, f64 a1) <external>
+.function void std.core.Console.println(std.core.Console a0, f64 a1) <external, access.function=public>
 .function f64 escompat.Date.now() <external>
 
 .function void test_loop(A a0, B a1, i32 a2) {
@@ -43,8 +46,8 @@ exit:
     fmovi.64 v0, 1000
     fdiv2.64 v0
     sta.64 v1
-    newobj v0, std.core.Console
-    call.short std.core.Console.println, v0, v1
+    ldstatic.obj std.core.ETSGLOBAL.console
+    call.acc.short std.core.Console.println:(std.core.Console,f64), v1, 0x0
     return.void
 }
 
@@ -60,7 +63,7 @@ exit:
     call test_loop, v0, v1, v3
 
     call.short print_test_time, v2
-    
+
     call.short epilog, v1
     return
 }

@@ -16,21 +16,22 @@
 let error = new Error();
 
 class Thenable implements PromiseLike<Error> {
-    then<U, E>(_?: (value: Error) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: Error) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
         return Promise.resolve<E>(onRejected!(error));
     }
 }
 
 Promise.any([new Thenable()]).then<void, void>((value: Error): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: AggregateError): void => {
     if (err.errors.length != 1) {
-        console.log("Test failed. Expected errors count 1 but got " + err.errors.length + ".");
+        console.log('Test failed. Expected errors count 1 but got ' + err.errors.length + '.');
         return;
     }
     if (err.errors[0] != error) {
-        console.log("Test failed. The promise should be rejected by the specified value.");
+        console.log('Test failed. The promise should be rejected by the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "package": "HarA",
+        "baseUrl": ".",
+        "paths": {
+            "HarB": [
+                "./test_path/aaa"
+            ],
+            "std": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/std"
+            ],
+            "escompat": [
+                "${PANDA_ROOT}/plugins/ets/stdlib/escompat"
+            ],
+            "dynamic_import_tests/xxx": [
+                "./test_path/aaa/c.d.ets"
+            ]
+        },
+        "dynamicPaths": {
+            "dynamic_import_tests/a": {
+                "language": "js",
+                "declPath": "./test_path/aaa/a.d.ets",
+                "ohmUrl": "./test_path/aaa/a.d.ets"
+            },
+            "dynamic_import_tests/xxx": {
+                "language": "js",
+                "declPath": "./test_path/aaa/foo.d.ets",
+                "ohmUrl": "./test_path/aaa/foo.d.ets"
+            }
+        }
+    }
+}

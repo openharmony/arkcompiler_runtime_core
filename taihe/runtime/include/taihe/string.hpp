@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_STRING_HPP
-#define TAIHE_STRING_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_STRING_HPP_
+#define RUNTIME_INCLUDE_TAIHE_STRING_HPP_
+// NOLINTBEGIN
 
 #include <taihe/string.abi.h>
 #include <taihe/common.hpp>
 
+#include <algorithm>
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
@@ -28,9 +30,6 @@
 #include <string_view>
 #include <utility>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 struct string_view;
 struct string;
@@ -45,11 +44,11 @@ struct string_view {
 
     explicit string_view(struct TString handle) : m_handle(handle) {}
 
-    string_view(char const *value TH_NONNULL) : string_view(tstr_new_ref(value, strlen(value))) {}
+    string_view(char const *value TH_NONNULL) : string_view(tstr_new_ref(value, std::strlen(value))) {}
 
     string_view(char const *value TH_NONNULL, size_type size) : string_view(tstr_new_ref(value, size)) {}
 
-    string_view(std::initializer_list<char> value) : string_view(value.begin(), static_cast<uint32_t>(value.size())) {}
+    string_view(std::initializer_list<char> value) : string_view(value.begin(), value.size()) {}
 
     string_view(std::string_view value) : string_view(value.data(), value.size()) {}
 
@@ -147,7 +146,7 @@ struct string_view {
 
     friend struct string;
 
-    friend string concat(string_view left, string_view right);
+    friend string concat(std::initializer_list<string_view> sv_list);
     friend string_view substr(string_view sv, std::size_t pos, std::size_t len);
     friend string operator+(string_view left, string_view right);
     string_view substr(std::size_t pos, std::size_t len) const;
@@ -163,7 +162,7 @@ struct string : public string_view {
 
     string(char const *value TH_NONNULL, size_type size) : string(tstr_new(value, size)) {}
 
-    string(std::initializer_list<char> value) : string(value.begin(), static_cast<uint32_t>(value.size())) {}
+    string(std::initializer_list<char> value) : string(value.begin(), value.size()) {}
 
     string(std::string_view value) : string(value.data(), value.size()) {}
 
@@ -197,14 +196,15 @@ struct string : public string_view {
     string &operator+=(string_view other);
 };
 
-inline string concat(string_view left, string_view right)
+inline string concat(std::initializer_list<string_view> sv_list)
 {
-    return string(tstr_concat(left.m_handle, right.m_handle));
+    static_assert(alignof(string_view) == alignof(struct TString));
+    return string(tstr_concat(sv_list.size(), reinterpret_cast<struct TString const *>(sv_list.begin())));
 }
 
 inline string operator+(string_view left, string_view right)
 {
-    return string(tstr_concat(left.m_handle, right.m_handle));
+    return concat({left, right});
 }
 
 inline string &string::operator+=(string_view other)
@@ -273,8 +273,8 @@ template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
 inline string to_string(T value)
 {
     char buffer[32];
-    std::to_chars_result result = std::to_chars(std::begin(buffer),
-        std::end(buffer), value, std::chars_format::general);
+    std::to_chars_result result =
+        std::to_chars(std::begin(buffer), std::end(buffer), value, std::chars_format::general);
     if (result.ec != std::errc {}) {
         TH_THROW(std::runtime_error, "Conversion to char failed");
     }
@@ -292,16 +292,6 @@ string to_string(T value)
     }
 }
 
-inline std::size_t hash_impl(adl_helper_t, string_view val)
-{
-    return std::hash<std::string_view> {}(val);
-}
-
-inline bool same_impl(adl_helper_t, string_view lhs, string_view rhs)
-{
-    return lhs == rhs;
-}
-
 template <>
 struct as_abi<string_view> {
     using type = TString;
@@ -317,6 +307,13 @@ struct as_param<string> {
     using type = string_view;
 };
 }  // namespace taihe
-// NOLINTEND
 
-#endif // TAIHE_STRING_HPP
+template <>
+struct std::hash<taihe::string> {
+    std::size_t operator()(taihe::string_view sv) const noexcept
+    {
+        return std::hash<std::string_view>()(std::string_view(sv));
+    }
+};
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_STRING_HPP_

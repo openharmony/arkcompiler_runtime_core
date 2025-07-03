@@ -399,6 +399,76 @@ TEST_F(CallObjectMethodCharByNameTest, object_call_method_by_name_char_010)
     ASSERT_EQ(env_->Object_CallMethodByName_Char_A(obj, "jf", "C:C", &sum, args), ANI_OK);
     ASSERT_EQ(sum, value);
 }
+
+TEST_F(CallObjectMethodCharByNameTest, object_call_method_by_name_char_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].c = VAL1;
+    args[1U].c = VAL2;
+
+    ani_char res = VAL;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Char(nullptr, object, "charByNameMethod", "CC:C", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Char_A(nullptr, object, "charByNameMethod", "CC:C", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(nullptr, "charByNameMethod", "CC:C", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char_A(nullptr, "charByNameMethod", "CC:C", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(object, nullptr, "CC:C", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char_A(object, nullptr, "CC:C", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(object, "charByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char_A(object, "charByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(object, "charByNameMethod", "CC:C", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char_A(object, "charByNameMethod", "CC:C", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodCharByNameTest, object_call_method_by_name_char_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].c = VAL1;
+    args[1U].c = VAL2;
+
+    ani_char res = VAL;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Char(object, methodName.data(), "CC:C", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Char_A(object, methodName.data(), "CC:C", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodCharByNameTest, object_call_method_by_name_char_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].c = VAL1;
+    args[1U].c = VAL2;
+
+    ani_char res = VAL;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Char(object, "charByNameMethod", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Char_A(object, "charByNameMethod", methodName.data(), &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

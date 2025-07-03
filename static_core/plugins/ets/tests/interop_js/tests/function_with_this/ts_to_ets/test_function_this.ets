@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/function_with_this/ts_to_ets/function_this')
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/function_with_this/ts_to_ets/function_this')
 
 function testBaseClass() {
     let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')
@@ -32,47 +32,47 @@ function testChildClass() {
 
 function testBaseFunc() {
     let obj = module.getProperty('baseFunc').invoke()
-    assertTrue(ESObject.areStrictlyEqual(obj, ESObject.Undefined))
+    assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     return true
 }
 
 function testChildFunc() {
     let obj = module.getProperty('childFunc').invoke()
-    assertTrue(ESObject.areStrictlyEqual(obj, ESObject.Undefined))
+    assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     return true
 }
 
 function testFooBaseObjInvoke() {
     let fooBaseObj = module.getProperty('fooBaseObj')
     let result = fooBaseObj.getProperty('foo').invoke()
-    assertTrue(ESObject.areStrictlyEqual(result, ESObject.Undefined))
+    assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     return true
 }
 
 function testFooBaseObjInvokeMethod() {
     let fooBaseObj = module.getProperty('fooBaseObj')
     let result = fooBaseObj.invokeMethod('fooFunc')
-    assertTrue(ESObject.areStrictlyEqual(result, fooBaseObj))
+    assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
     return true
 }
 
 function testFooChildObjInvoke() {
     let fooChildObj = module.getProperty('fooChildObj')
     let result = fooChildObj.getProperty('foo').invoke()
-    assertTrue(ESObject.areStrictlyEqual(result, ESObject.Undefined))
+    assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     return true
 }
 
 function testFooChildObjInvokeMethod() {
     let fooChildObj = module.getProperty('fooChildObj')
     let result = fooChildObj.invokeMethod('fooFunc')
-    assertTrue(ESObject.areStrictlyEqual(result, fooChildObj))
+    assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
     return true
 }
 
 function testArrowFuncInvoke() {
     let result = module.getProperty('arrowFunc').invoke()
-    assertTrue(ESObject.areStrictlyEqual(result, ESObject.Undefined))
+    assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     return true
 }
 

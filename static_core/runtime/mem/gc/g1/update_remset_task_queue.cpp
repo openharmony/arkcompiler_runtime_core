@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,16 +72,15 @@ void UpdateRemsetTaskQueue<LanguageConfig>::StartProcessCards()
         return;
     }
     ASSERT(taskRunner_);
-    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
     hasTaskInTaskmanager_ = true;
-    this->GetGC()->GetWorkersTaskQueue()->AddTask(std::move(processCardsTask));
+    this->GetGC()->GetWorkersTaskQueue()->AddForegroundTask(taskRunner_);
 }
 
 template <class LanguageConfig>
 void UpdateRemsetTaskQueue<LanguageConfig>::ContinueProcessCards()
 {
     if (taskRunnerWaiterId_ != taskmanager::INVALID_WAITER_ID) {
-        taskmanager::TaskScheduler::GetTaskScheduler()->SignalWaitList(taskRunnerWaiterId_);
+        this->GetGC()->GetWorkersTaskQueue()->SignalWaitList(taskRunnerWaiterId_);
     } else {
         StartProcessCards();
     }
@@ -98,7 +97,7 @@ void UpdateRemsetTaskQueue<LanguageConfig>::CreateWorkerImpl()
 template <class LanguageConfig>
 void UpdateRemsetTaskQueue<LanguageConfig>::DestroyWorkerImpl()
 {
-    taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(UPDATE_REMSET_TASK_PROPERTIES);
+    this->GetGC()->GetWorkersTaskQueue()->WaitForegroundTasks();
     [[maybe_unused]] os::memory::LockHolder lh(this->updateRemsetLock_);
     ASSERT(!hasTaskInTaskmanager_);
 }
@@ -107,19 +106,15 @@ template <class LanguageConfig>
 void UpdateRemsetTaskQueue<LanguageConfig>::AddToWaitList()
 {
     ASSERT(taskRunner_);
-    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
-    taskRunnerWaiterId_ =
-        taskmanager::TaskScheduler::GetTaskScheduler()->AddTaskToWaitList(std::move(processCardsTask));
+    taskRunnerWaiterId_ = this->GetGC()->GetWorkersTaskQueue()->AddForegroundTaskInWaitList(taskRunner_);
 }
 
 template <class LanguageConfig>
 void UpdateRemsetTaskQueue<LanguageConfig>::AddToWaitListWithTimeout()
 {
     ASSERT(taskRunner_);
-    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
     static constexpr uint64_t TIMEOUT_MS = 1U;
-    taskRunnerWaiterId_ = taskmanager::TaskScheduler::GetTaskScheduler()->AddTaskToWaitListWithTimeout(
-        std::move(processCardsTask), TIMEOUT_MS);
+    taskRunnerWaiterId_ = this->GetGC()->GetWorkersTaskQueue()->AddForegroundTaskInWaitList(taskRunner_, TIMEOUT_MS);
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetTaskQueue);

@@ -192,9 +192,13 @@ TEST_F(GetEnumItemTest, invalid_arg_enum)
     ASSERT_EQ(env_->Enum_GetEnumItemByName(nullptr, "RED", &red), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, nullptr, &red), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByName(nullptr, aniEnum, "RED", &red), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "", &red), ANI_NOT_FOUND);
 
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(nullptr, 0U, &red), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, -1U, &red), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Enum_GetEnumItemByIndex(aniEnum, 0U, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Enum_GetEnumItemByIndex(nullptr, aniEnum, 0U, &red), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

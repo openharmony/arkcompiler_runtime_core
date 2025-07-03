@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 import os
 import pytest  # type: ignore
 from unittest import TestCase
-from vmb.shell import ShellUnix
+from vmb.shell import ShellUnix, ShellResult, ShellHdc
 
 here = os.path.realpath(os.path.dirname(__file__))
 sh = ShellUnix()
@@ -57,3 +57,18 @@ def test_unix_measure_time() -> None:
     test = TestCase()
     test.assertTrue(res.tm > 0.9)
     test.assertTrue(res.rss > 0)
+
+
+def test_hilog_output() -> None:
+    hilog_out = '''
+        04-01 13:01:22.555  8146  8146 I A00000/com.example.helllopanda/VMB: 123456 Starting testOne
+        04-01 13:02:22.555  8146  8146 I A00000/com.example.helllopanda/VMB: 123456 Iter 1:3 ops, 3 ns/op
+        04-01 13:02:54.111  8146  8146 I A00000/com.example.helllopanda/VMB: 123456 Benchmark result: testOne 3 ns/op
+    '''
+    res = ShellResult()
+    res.out = hilog_out
+    res.replace_out(ShellHdc.hilog_re)
+    TestCase().assertEqual(res.out,
+                           "123456 Starting testOne\n" +
+                           "123456 Iter 1:3 ops, 3 ns/op\n" +
+                           "123456 Benchmark result: testOne 3 ns/op")

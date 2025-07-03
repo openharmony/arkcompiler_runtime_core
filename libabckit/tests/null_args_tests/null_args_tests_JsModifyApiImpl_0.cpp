@@ -21,7 +21,7 @@
 #include "libabckit/include/c/extensions/js/metadata_js.h"
 #include "libabckit/include/c/ir_core.h"
 #include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
+#include "libabckit/include/c/isa/isa_static.h"
 
 #include "helpers/helpers.h"
 #include "helpers/helpers_nullptr.h"

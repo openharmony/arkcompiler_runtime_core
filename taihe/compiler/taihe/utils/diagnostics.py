@@ -22,38 +22,25 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from sys import stderr
 from typing import (
-    TYPE_CHECKING,
     ClassVar,
-    Optional,
     TextIO,
     TypeVar,
 )
 
-if TYPE_CHECKING:
-    from taihe.utils.sources import SourceLocation
+from typing_extensions import override
 
+from taihe.utils.logging import AnsiStyle, should_use_color
+from taihe.utils.sources import SourceLocation
 
 T = TypeVar("T")
 
 
-class AnsiStyle:
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    BLUE = "\033[33m"
-    YELLOW = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-
-    RESET = "\033[39m"
-    BRIGHT = "\033[1m"
-    RESET_ALL = "\033[0m"
-
-
-def _passthrough(x):
+def _passthrough(x: str) -> str:
     return x
 
 
-def _discard(x):
+def _discard(x: str) -> str:
+    del x
     return ""
 
 
@@ -65,7 +52,7 @@ FilterT = Callable[[str], str]
 ###################
 
 
-class Level(IntEnum):
+class Severity(IntEnum):
     NOTE = 0
     WARN = 1
     ERROR = 2
@@ -76,72 +63,110 @@ class Level(IntEnum):
 class DiagBase(ABC):
     """The base class for diagnostic messages."""
 
-    LEVEL: ClassVar[Level]
-    LEVEL_DESC: ClassVar[str]
+    SEVERITY: ClassVar[Severity]
+    SEVERITY_DESC: ClassVar[str]
     STYLE: ClassVar[str]
 
-    loc: Optional["SourceLocation"] = field(kw_only=True)
+    loc: SourceLocation | None = field(kw_only=True)
     """The source location where the diagnostic refers to."""
 
+    def __str__(self) -> str:
+        return self.format_message(_discard)
+
+    @abstractmethod
+    def describe(self) -> str:
+        """Concise, human-readable description of the diagnostic message.
+
+        Subclasses must implement this method to explain the specific issue.
+
+        Example: "redefinition of ..."
+        """
+
     def notes(self) -> Iterable["DiagNote"]:
-        """Returns the associated notes."""
+        """Returns an iterable of associated diagnostic notes.
+
+        Notes provide additional context or suggestions related to the main diagnostic.
+        By default, a diagnostic has no associated notes.
+        """
         return ()
 
-    def _format(self, f: FilterT) -> str:
+    def format_message(self, f: FilterT) -> str:
+        """Formats the diagnostic message, optionally applying ANSI styling.
+
+        Args:
+            f: A filter for ANSI codes applied to parts of the string for styling.
+
+        Returns:
+            A string representing the formatted diagnostic message,
+            including location, severity, and description.
+
+        Example:
+            "example.taihe:7:20: error: redefinition of ..."
+        """
         return (
             f"{f(AnsiStyle.BRIGHT)}{self.loc or '???'}: "  # "example.taihe:7:20: "
-            f"{f(self.STYLE)}{self.LEVEL_DESC}{f(AnsiStyle.RESET)}: "  # "error: "
-            f"{self.format_msg}{f(AnsiStyle.RESET_ALL)}"  # "redefinition of ..."
+            f"{f(self.STYLE)}{self.SEVERITY_DESC}{f(AnsiStyle.RESET)}: "  # "error: "
+            f"{self.describe()}{f(AnsiStyle.RESET_ALL)}"  # "redefinition of ..."
         )
 
-    def __str__(self) -> str:
-        return self._format(_discard)
 
-    @property
-    @abstractmethod
-    def format_msg(self) -> str: 
-        ...
-
-
-######################################
-# Base classes with different levels #
-######################################
+##########################################
+# Base classes with different severities #
+##########################################
 
 
 @dataclass
 class DiagNote(DiagBase):
-    LEVEL = Level.NOTE
-    LEVEL_DESC = "note"
+    SEVERITY = Severity.NOTE
+    SEVERITY_DESC = "note"
     STYLE = AnsiStyle.CYAN
 
 
 @dataclass
 class DiagWarn(DiagBase):
-    LEVEL = Level.WARN
-    LEVEL_DESC = "warning"
+    SEVERITY = Severity.WARN
+    SEVERITY_DESC = "warning"
     STYLE = AnsiStyle.MAGENTA
 
 
 @dataclass
 class DiagError(DiagBase, Exception):
-    LEVEL = Level.ERROR
-    LEVEL_DESC = "error"
+    SEVERITY = Severity.ERROR
+    SEVERITY_DESC = "error"
     STYLE = AnsiStyle.RED
 
 
 @dataclass
 class DiagFatalError(DiagError):
-    LEVEL = Level.FATAL
-    LEVEL_DESC = "fatal"
+    SEVERITY = Severity.FATAL
+    SEVERITY_DESC = "fatal"
 
 
 ########################
 
 
-class AbstractDiagnosticsManager(ABC):
+class DiagnosticsManager(ABC):
+    _max_severity_seen: Severity = Severity.NOTE
+
+    def has_reached_severity(self, severity: Severity):
+        return self._max_severity_seen >= severity
+
+    @property
+    def has_error(self):
+        return self.has_reached_severity(Severity.ERROR)
+
+    @property
+    def has_fatal_error(self):
+        return self.has_reached_severity(Severity.FATAL)
+
+    def reset_severity(self):
+        """Resets the current maximum diagnostic severity."""
+        self._max_severity_seen = Severity.NOTE
+
     @abstractmethod
-    def emit(self, diag: DiagBase) -> None: 
-        ...
+    def emit(self, diag: DiagBase) -> None:
+        """Emits a new diagnostic message, don't forget to call it in subclasses."""
+        self._max_severity_seen = max(self._max_severity_seen, diag.SEVERITY)
 
     @contextmanager
     def capture_error(self):
@@ -185,16 +210,24 @@ class AbstractDiagnosticsManager(ABC):
         return no_error
 
 
-class DiagnosticsManager(AbstractDiagnosticsManager):
+class ConsoleDiagnosticsManager(DiagnosticsManager):
     """Manages diagnostic messages."""
 
     def __init__(self, out: TextIO = stderr):
         self._out = out
-        if self._out.isatty():
+        if should_use_color(self._out):
             self._color_filter_fn = _passthrough
         else:
             self._color_filter_fn = _discard
-        self.reset_max_level()
+
+    @override
+    def emit(self, diag: DiagBase) -> None:
+        """Emits a new diagnostic message."""
+        super().emit(diag)
+        self._render(diag)
+        for n in diag.notes():
+            self._render(n)
+        stderr.flush()
 
     def _write(self, s: str):
         self._out.write(s)
@@ -202,61 +235,38 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
     def _flush(self):
         self._out.flush()
 
-    # TODO: could be slow.
-    def _render_source_location(self, loc: "SourceLocation"):
+    def _render_source_location(self, loc: SourceLocation):
         MAX_LINE_NO_SPACE = 5
-        if not loc.has_pos:
+        if not loc.span:
             return
 
-        line_contents = loc.file.read()
+        line_contents = loc.file.read().splitlines()
 
-        if loc.start_row < 1 or loc.stop_row > len(line_contents):
+        if loc.span.start.row < 1 or loc.span.stop.row > len(line_contents):
             return
 
         for line, line_content in enumerate(line_contents, 1):
-            if line < loc.start_row or line > loc.stop_row:
+            if line < loc.span.start.row or line > loc.span.stop.row:
                 continue
 
-            line_content = line_content.rstrip("\n")
-
-            # The first line: content.
-            self._write(f"{line:{MAX_LINE_NO_SPACE}} | " f"{line_content}\n")
-
-            # The second line: marker.
             markers = "".join(
                 (
                     " "
-                    if (line == loc.start_row and col < loc.start_col)
-                    or (line == loc.stop_row and col > loc.stop_col)
+                    if (line == loc.span.start.row and col < loc.span.start.col)
+                    or (line == loc.span.stop.row and col > loc.span.stop.col)
                     else "^"
                 )
                 for col in range(1, len(line_content) + 1)
             )
 
             f = self._color_filter_fn
+
             self._write(
-                f"{'':{MAX_LINE_NO_SPACE}} | "
-                f"{f(AnsiStyle.GREEN + AnsiStyle.BRIGHT)}{markers}{f(AnsiStyle.RESET_ALL)}\n"
+                f"{line:{MAX_LINE_NO_SPACE}} | {line_content}\n"
+                f"{'':{MAX_LINE_NO_SPACE}} | {f(AnsiStyle.GREEN + AnsiStyle.BRIGHT)}{markers}{f(AnsiStyle.RESET_ALL)}\n"
             )
 
     def _render(self, d: DiagBase):
-        self._write(f"{d._format(self._color_filter_fn)}\n")
+        self._write(f"{d.format_message(self._color_filter_fn)}\n")
         if d.loc:
             self._render_source_location(d.loc)
-
-    def emit(self, diag: DiagBase) -> None:
-        """Emits a new diagnostic message."""
-        self._max_level_record = max(self._max_level_record, diag.LEVEL)
-        self._render(diag)
-        for n in diag.notes():
-            self._render(n)
-        stderr.flush()
-
-    def reset_max_level(self):
-        self._max_level_record = -1
-
-    def current_max_level(self):
-        return self._max_level_record
-
-    def has_errors(self):
-        return self.current_max_level() >= Level.ERROR

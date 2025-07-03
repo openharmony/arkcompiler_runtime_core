@@ -79,5 +79,4 @@ cases:
             callee(1)
           }
       use: |-
-          bar((): void => {}) // CTE: No matching call signature
-
+          bar((a: int, b: int): void => {}) // CTE: No matching call signature

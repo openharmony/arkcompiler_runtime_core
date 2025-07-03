@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldLongTest, get_field_long)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_long age {};
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetField_Long(sarah, fieldAge, &age), ANI_OK);
     ASSERT_EQ(age, 24L);
+}
+
+TEST_F(ObjectGetFieldLongTest, get_field_long_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_long age = 0L;
+    ASSERT_EQ(env_->c_api->Object_GetField_Long(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldLongTest, get_field_long_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldLongTest, get_field_long_invalid_field_type)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_long age {};
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetField_Long(sarah, field, &age), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldLongTest, invalid_argument1)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_long age {};
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetField_Long(nullptr, field, &age), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldLongTest, invalid_argument2)
     ani_field fieldAge {};
     GetTestData(&sarah, &field, &fieldAge);
 
-    ani_long age {};
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetField_Long(sarah, nullptr, &age), ANI_INVALID_ARGS);
 }
 

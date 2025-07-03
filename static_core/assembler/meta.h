@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -400,63 +400,80 @@ private:
                                                                              std::string_view value);
     std::optional<Metadata::Error> MeetExpElementValueAttribute(std::string_view attribute, std::string_view value);
 
+    AnnotationElementBuilder *GetOrCreateAnnotationElementBuilder() const
+    {
+        if (!annotationElementBuilder_) {
+            annotationElementBuilder_ = std::make_unique<AnnotationElementBuilder>();
+        }
+        return annotationElementBuilder_.get();
+    }
+
+    AnnotationBuilder *GetOrCreateAnnotationBuilder() const
+    {
+        if (!annotationBuilder_) {
+            annotationBuilder_ = std::make_unique<AnnotationBuilder>();
+        }
+        return annotationBuilder_.get();
+    }
+
     void InitializeAnnotationBuilder(std::string_view name)
     {
         if (IsParseAnnotation()) {
             ResetAnnotationBuilder();
         }
 
-        annotationBuilder_.Initialize(name);
+        GetOrCreateAnnotationBuilder()->Initialize(name);
     }
 
     void ResetAnnotationBuilder()
     {
         ASSERT(IsParseAnnotation());
 
-        if (IsParseAnnotationElement() && annotationElementBuilder_.IsCompleted()) {
+        if (IsParseAnnotationElement() && GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
             ResetAnnotationElementBuilder();
         }
 
-        if (annotationBuilder_.HasId()) {
-            idMap_.insert({annotationBuilder_.GetId(), annotationBuilder_.CreateAnnotationData()});
+        if (GetOrCreateAnnotationBuilder()->HasId()) {
+            idMap_.insert(
+                {GetOrCreateAnnotationBuilder()->GetId(), GetOrCreateAnnotationBuilder()->CreateAnnotationData()});
         } else {
-            annotationBuilder_.AddAnnnotationDataToVector(&annotations_);
+            GetOrCreateAnnotationBuilder()->AddAnnnotationDataToVector(&annotations_);
         }
 
-        annotationBuilder_.Reset();
+        GetOrCreateAnnotationBuilder()->Reset();
     }
 
     bool IsParseAnnotation() const
     {
-        return annotationBuilder_.IsInitialized();
+        return GetOrCreateAnnotationBuilder()->IsInitialized();
     }
 
     void InitializeAnnotationElementBuilder(std::string_view name)
     {
-        if (IsParseAnnotationElement() && annotationElementBuilder_.IsCompleted()) {
+        if (IsParseAnnotationElement() && GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
             ResetAnnotationElementBuilder();
         }
 
-        annotationElementBuilder_.Initialize(name);
+        GetOrCreateAnnotationElementBuilder()->Initialize(name);
     }
 
     void ResetAnnotationElementBuilder()
     {
         ASSERT(IsParseAnnotationElement());
-        ASSERT(annotationElementBuilder_.IsCompleted());
+        ASSERT(GetOrCreateAnnotationElementBuilder()->IsCompleted());
 
-        annotationBuilder_.AddElement(annotationElementBuilder_.CreateAnnotationElement());
+        GetOrCreateAnnotationBuilder()->AddElement(GetOrCreateAnnotationElementBuilder()->CreateAnnotationElement());
 
-        annotationElementBuilder_.Reset();
+        GetOrCreateAnnotationElementBuilder()->Reset();
     }
 
     bool IsParseAnnotationElement() const
     {
-        return annotationElementBuilder_.IsInitialized();
+        return GetOrCreateAnnotationElementBuilder()->IsInitialized();
     }
 
-    AnnotationBuilder annotationBuilder_;
-    AnnotationElementBuilder annotationElementBuilder_;
+    mutable std::unique_ptr<AnnotationBuilder> annotationBuilder_;
+    mutable std::unique_ptr<AnnotationElementBuilder> annotationElementBuilder_;
     std::vector<AnnotationData> annotations_;
     std::unordered_map<std::string, std::unique_ptr<AnnotationData>> idMap_;
 };

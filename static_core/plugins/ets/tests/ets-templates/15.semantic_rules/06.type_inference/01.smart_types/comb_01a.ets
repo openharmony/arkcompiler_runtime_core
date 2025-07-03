@@ -23,14 +23,14 @@ desc: >-
 class A {}
 let a: A|undefined = new A()
 
-let num: Number
-let str: string
-let err: Error
-let bool: Boolean
+let num: Number = 0;
+let str: string = "";
+let err: Error = new Error();
+let bool: Boolean = false;
 
-let not_undef: number|string|Error|boolean
-let not_num: string|Error|boolean
-let not_err: string|boolean
+let not_undef: number|string|Error|boolean = false;
+let not_num: string|Error|boolean = false;
+let not_err: string|boolean = false;
 
 function foo(p: number|string|undefined|Error|boolean): number {
     if (p === undefined) {

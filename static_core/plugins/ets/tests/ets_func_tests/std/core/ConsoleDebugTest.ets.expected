@@ -14,8 +14,14 @@
 Debug message
 42
 undefined
+null
+
 Debug: Database connection established
 Query params: ConsoleDebugTest.QueryParams {id: 1, filter: active}
 System status: ConsoleDebugTest.Info {level: debug, message: System check, details: ConsoleDebugTest.SystemInfo {memory: 1.2GB, cpu: 45%}}
-Active connections: [ConsoleDebugTest.Connection {id: 1, user: user1}, ConsoleDebugTest.Connection {id: 2, user: user2}]
 Caught error: Error: Test error
+%d
+1
+1 2
+37 37
+19.5 19.5

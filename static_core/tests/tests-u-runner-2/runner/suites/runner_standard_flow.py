@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import pytz
 
@@ -28,6 +27,7 @@ from runner.cpumask import CPUMask
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.options.config import Config
+from runner.options.step import StepKind
 from runner.runner_file_based import RunnerFileBased
 from runner.suites.test_suite import TestSuite
 from runner.suites.work_dir import WorkDir
@@ -45,7 +45,7 @@ class RunnerStandardFlow(RunnerFileBased):
 
         self.__aot_check()
 
-        self.test_env = TestEnv(
+        self.test_env: TestEnv = TestEnv(
             config=config,
             cmd_prefix=self.cmd_prefix,
             cmd_env=self.cmd_env,
@@ -55,13 +55,15 @@ class RunnerStandardFlow(RunnerFileBased):
             coverage=LlvmCov(self.config.general.build, self.work_dir),
         )
 
+        self.__remove_intermediate_files()
+
         test_suite: TestSuite = TestSuite(self.test_env)
         self.tests = set(test_suite.process(self.config.test_suite.ets.force_generate))
         self.list_root = test_suite.list_root
         self.test_root = self.test_env.work_dir.gen
 
         cpu_mask = self.config.test_suite.get_parameter("mask")
-        self.cpu_mask: Optional[CPUMask] = CPUMask(cpu_mask) \
+        self.cpu_mask: CPUMask | None = CPUMask(cpu_mask) \
             if cpu_mask is not None and isinstance(cpu_mask, str) else None
 
     @property
@@ -101,3 +103,11 @@ class RunnerStandardFlow(RunnerFileBased):
                     f"configuration file {self.config.workflow.name}. The expected option `--aot-file` absent."
                 )
             _LOGGER.default("AOT check PASSED")
+
+    def __remove_intermediate_files(self) -> None:
+        compiler_step = [step for step in self.steps if step.step_kind == StepKind.COMPILER and step.enabled]
+        if compiler_step:
+            shutil.rmtree(self.test_env.work_dir.intermediate, ignore_errors=True)
+            _LOGGER.default(f"Intermediate folder {self.test_env.work_dir.intermediate} has been removed. "
+                            f"Check whether it exists: {self.test_env.work_dir.intermediate.exists()}")
+        self.test_env.work_dir.intermediate.mkdir(parents=True, exist_ok=True)

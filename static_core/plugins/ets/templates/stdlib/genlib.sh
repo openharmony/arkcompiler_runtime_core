@@ -19,6 +19,7 @@ readonly GENPATH="${SCRIPT_DIR}/../../stdlib"
 readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
 readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
+readonly GEN_STDINTEROP_PATH="${1:-${GENPATH}}/std/interop/js"
 readonly ARR="${GEN_ESCOMPAT_PATH}/Array.ets"
 readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.ets"
 readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.ets"
@@ -28,6 +29,7 @@ readonly TYPED_ARR="${GEN_ESCOMPAT_PATH}/TypedArrays.ets"
 readonly TYPED_UARR="${GEN_ESCOMPAT_PATH}/TypedUArrays.ets"
 readonly FUNC="${GEN_STDCORE_PATH}/Function.ets"
 readonly TUP="${GEN_STDCORE_PATH}/Tuple.ets"
+readonly INTEROP_TRANSFER_HELPER="${GEN_STDINTEROP_PATH}/InteropTransferHelper.ets"
 
 cd "$SCRIPT_DIR"
 
@@ -42,6 +44,7 @@ function format_file() {
 
 mkdir -p "${GEN_ESCOMPAT_PATH}"
 mkdir -p "${GEN_STDCORE_PATH}"
+mkdir -p "${GEN_STDINTEROP_PATH}"
 
 # Generate Array
 echo "Generating ${ARR}"
@@ -73,5 +76,9 @@ echo "Generating ${FUNC}"
 # Generate Tuples
 echo "Generating ${TUP}"
 "${JINJA_PATH}" "${SCRIPT_DIR}/Tuple.ets.j2" -o "${TUP}"
+
+# Generate InteropTransferHelper
+echo "Generating ${INTEROP_TRANSFER_HELPER}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/InteropTransferHelper.ets.j2" -o "${INTEROP_TRANSFER_HELPER}"
 
 exit 0

@@ -441,10 +441,10 @@ static void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &a
     auto entry = aotClass.FindMethodCodeEntry(methodIndex);
     if (entry != nullptr) {
         method->SetCompiledEntryPoint(entry);
-        LOG(INFO, AOT) << "Found AOT entrypoint ["
-                       << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).data()) << ":"
-                       << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).end())
-                       << "] for method: " << method->GetFullName();
+        LOG(DEBUG, AOT) << "Found AOT entrypoint ["
+                        << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).data()) << ":"
+                        << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).end())
+                        << "] for method: " << method->GetFullName();
 
         EVENT_AOT_ENTRYPOINT_FOUND(method->GetFullName());
         ASSERT(aotClass.FindMethodHeader(methodIndex)->methodId == method->GetFileId().GetOffset());

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as IfaceTest from "@generated/keep_name_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as IfaceTest from "keep_name_test";
 
 loadLibrary("ani_keep_name");
 
@@ -96,5 +96,5 @@ function main() {
     suite.addTest("setIfaceName", setIfaceName)
     suite.addTest("printFooName", printFooName)
     suite.addTest("setSubFooName", setSubFooName)
-    System.exit(suite.run())
+    exit(suite.run())
 }

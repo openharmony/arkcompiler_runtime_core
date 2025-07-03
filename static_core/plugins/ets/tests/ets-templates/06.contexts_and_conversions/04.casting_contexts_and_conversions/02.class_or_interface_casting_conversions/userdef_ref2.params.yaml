@@ -44,10 +44,10 @@ cases:
       class Z<V> extends S<V> implements T<V> {
           res: int = 42;
       }
-    stype: S<Exception>
-    sval: new Z<Exception>()
-    dtype: T<Exception>
-    dval: src as T<Exception>
+    stype: S<Error>
+    sval: new Z<Error>()
+    dtype: T<Error>
+    dval: src as T<Error>
 
   - defs: |-
       interface T<V> {

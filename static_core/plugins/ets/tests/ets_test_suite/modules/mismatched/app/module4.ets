@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 import { ExtendsFinal } from "@mismatched/extends_final";
 import { isFinal } from "@mismatched/final";
 import { Ability } from "@spawn/ability";

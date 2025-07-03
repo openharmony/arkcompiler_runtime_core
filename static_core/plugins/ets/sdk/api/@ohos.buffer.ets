@@ -36,9 +36,9 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
 
 function fillInPaddingBase64(str: string): string {
     let base64Divisible: int = 4;
-    let remainder: int = str.length % base64Divisible as int;
+    let remainder: int = Double.toInt(str.length % base64Divisible);
     const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
-    return str.padRight(c'=', str.length as int + paddingCount);
+    return str.padRight(c'=', str.length.toInt() + paddingCount);
 }
 
 /**
@@ -376,7 +376,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      */
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         const resolvedSource = getArrayBufferFrom(source);
-        const sourceBytesLength = resolvedSource.byteLength as int;
+        const sourceBytesLength = resolvedSource.byteLength.toInt();
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
@@ -386,7 +386,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private length: int
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
         }
         public override $_iterator(): IterableIterator<number> {
             return this
@@ -395,7 +395,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             if (this.idx < 0 || this.idx >= this.length) {
                 return new IteratorResult<number>()
             }
-            return new IteratorResult<number>(false, this.idx++ as number)
+            return new IteratorResult<number>(false, (this.idx++).toDouble())
         }
     }
 
@@ -404,7 +404,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private parent: Buffer
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
             this.parent = parent
         }
         public override $_iterator(): IterableIterator<number> {
@@ -423,7 +423,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private parent: Buffer
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
             this.parent = parent
         }
         public override $_iterator(): IterableIterator<[number, number]> {
@@ -472,7 +472,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public toString(): string {
             let resolvedEncoding: string = "utf8";
             let resolvedStart: int = 0;
-            let resolvedEnd: int = buffer.byteLength(this.buffer) as int;
+            let resolvedEnd: int = buffer.byteLength(this.buffer).toInt();
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -487,18 +487,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
-            let resolvedEnd: int = this.length as int;
+            let resolvedEnd: int = (this.length).toInt();
             if (start && !isNaN(start!) && start! > 0) {
-                resolvedStart = start as int;
+                resolvedStart = start.toInt();
             }
             if (end && !isNaN(end!)) {
-                resolvedEnd = end as int;
+                resolvedEnd = end.toInt();
             }
             let bufLength = this.length;
             if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
                  return '';
             }
-            resolvedEnd = resolvedEnd > bufLength ? bufLength as int : resolvedEnd
+            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -601,7 +601,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
                 return false;
             }
             for (let j: int = 0; j < searchBuffer.length; j++) {
-                if (this.at(startIndex as int + j) != searchBuffer.at(j)) {
+                if (this.at(startIndex.toInt() + j) != searchBuffer.at(j)) {
                     return false;
                 }
             }
@@ -663,9 +663,9 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         {
             const resolvedTarget = getArrayBufferFrom(target);
             const resolvedSource = this.buffer;
-            const resolvedTargetStart = (targetStart ?? 0) as int;
-            const resolvedSourceStart = (sourceStart ?? 0) as int;
-            const resolvedSourceEnd = (sourceEnd ?? this.length) as int;
+            const resolvedTargetStart = (targetStart ?? 0).toInt();
+            const resolvedSourceStart = (sourceStart ?? 0).toInt();
+            const resolvedSourceEnd = (sourceEnd ?? this.length).toInt();
 
             if (resolvedTargetStart < 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0.
@@ -753,8 +753,8 @@ Received value is: ${resolvedEnd}`)
                 klass = parts[parts.length - 1];
             }
 
-            const offsetInt = offset as int;
-            const resolvedEndInt = resolvedEnd as int;
+            const offsetInt = offset.toInt();
+            const resolvedEndInt = resolvedEnd.toInt();
             const resolvedEncoding: BufferEncoding = encoding ?? "utf-8";
 
             switch (klass) {
@@ -762,25 +762,25 @@ Received value is: ${resolvedEnd}`)
                     let buff = ArrayBuffer.from(value as string,
                                                 resolvedEncoding as string);
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, buff.at((i % buff.byteLength) as int) as byte);
+                        this.buffer.set(i, buff.at((i % buff.byteLength).toInt()).toByte());
                     }
                     return this;
                 case "number":
                     let asNum = value as number;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asNum as byte);
+                        this.buffer.set(i, asNum.toByte());
                     }
                     return this;
                 case "Buffer":
                     let asBuf = value as Buffer;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asBuf.at((i % asBuf.length) as int));
+                        this.buffer.set(i, asBuf.at((i % asBuf.length).toInt()));
                     }
                     return this;
                 case "Uint8Array":
                     let asU8a = value as Uint8Array;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asU8a.at(i % asU8a.length)! as byte);
+                        this.buffer.set(i, asU8a.at(i % asU8a.length)!.toByte());
                     }
                     return this;
                 default:
@@ -847,9 +847,21 @@ Received value is: ${value}`)
          * @returns { Buffer } Returns a new Buffer that references the same memory as the original
          */
         public subarray(start?: number, end?: number): Buffer {
-            const resolvedStart = start ?? 0 as number;
-            const resolvedEnd = end ?? this.length;
-            return new Buffer(this.buffer.slice(resolvedStart, resolvedEnd));
+            if (start == undefined || isNaN(start!)) {
+                start = 0
+            }
+            if (end == undefined || isNaN(end!)) {
+                end = this.length
+            }
+            let e = end!
+            if (e > this.length) {
+                e = this.length
+            }
+            let s = start!
+            if (s < 0 || e < 0 || e <= s) {
+                return new Buffer(new ArrayBuffer(0))
+            }
+            return new Buffer(this.buffer.slice(s, e));
         }
 
         /**
@@ -1126,7 +1138,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
-                this.buffer.set((offset + i) as int, strBuffer.at(i));
+                this.buffer.set((offset + i).toInt(), strBuffer.at(i));
             }
             return Math.min(resolvedLength, byteLen);
         }

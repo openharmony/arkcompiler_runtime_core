@@ -300,3 +300,5 @@
 # move from exclude to ignore list on 4/12
 #24840
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
+# 17363 incorrect test runner work with cyclic dependency with modules
+13.compilation_units/06.compilation_unit_initialization/module/cyclic_dependency/test2.ets

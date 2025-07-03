@@ -14,8 +14,8 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: ets-es-checked
-test-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/ets_es_checked
-list-root: ${PANDA_SOURCE_PATH}/runtime_core/static_core/plugins/ets/tests/test-lists/ets-es-checked
+test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/ets_es_checked
+list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-es-checked
 generator-class: runner.extensions.generators.ets_es_checked.ets_es_checked_generator.EsCheckedGenerator
 
 parameters:

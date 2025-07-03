@@ -54,6 +54,28 @@ TEST_F(ArraySetGetRegionLongTest, GetLongArrayRegionErrorTests)
     ani_long nativeBuffer[LENGTH_10] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    // Should change to ANI_OK when std lib array will work according to spec
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_ERROR);
+}
+
+TEST_F(ArraySetGetRegionLongTest, SetFixedLongArrayRegionErrorTests)
+{
+    ani_array_long array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Long(LENGTH_5, &array), ANI_OK);
+    ani_long nativeBuffer[LENGTH_10] = {0};
+    const ani_size offset1 = -1;
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Long(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
+}
+
+TEST_F(ArraySetGetRegionLongTest, GetFixedLongArrayRegionErrorTests)
+{
+    ani_array_long array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Long(LENGTH_5, &array), ANI_OK);
+    ani_long nativeBuffer[LENGTH_10] = {0};
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_GetRegion_Long(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_OK);
 }
 
@@ -142,7 +164,7 @@ TEST_F(ArraySetGetRegionLongTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionLongTest, SetSpecialValueToArrayTest)
 {
     ani_array_long array = nullptr;
-    ASSERT_EQ(env_->Array_New_Long(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Long(LENGTH_5, &array), ANI_OK);
     ani_long max = std::numeric_limits<int64_t>::max();
     ani_long min = std::numeric_limits<int64_t>::min();
     const std::array<ani_long, LENGTH_5> nativeBuffer = {min, max, 0, -1, 1};
@@ -160,7 +182,7 @@ TEST_F(ArraySetGetRegionLongTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionLongTest, SetGetUnionToArrayTest)
 {
     ani_array_long array = nullptr;
-    ASSERT_EQ(env_->Array_New_Long(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Long(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_long, LENGTH_5> nativeBuffer = {TEST_VALUE1, TEST_VALUE2, TEST_VALUE3, TEST_VALUE4, TEST_VALUE5};
     ASSERT_EQ(env_->Array_SetRegion_Long(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -194,7 +216,7 @@ TEST_F(ArraySetGetRegionLongTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionLongTest, SetGetStabilityToArrayTest)
 {
     ani_array_long array = nullptr;
-    ASSERT_EQ(env_->Array_New_Long(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Long(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_long, LENGTH_5> nativeBuffer = {TEST_VALUE1, TEST_VALUE2, TEST_VALUE3, TEST_VALUE4, TEST_VALUE5};
     std::array<ani_long, LENGTH_5> nativeBuffer2 = {};

@@ -25,6 +25,6 @@ class A {
 }
 
 function main() {
-    assertEQ(A.r - (A.b ? {{v.v1}} : {{v.v2}}), c'\u0000')
+    assertEQ((A.r - (A.b ? {{v.v1}} : {{v.v2}})) as Char, c'\u0000')
 }
 {%- endfor %}

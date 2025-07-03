@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-let p1 = Promise.resolve<string>("abc");
-let p2 = Promise.resolve<string>("def");
-let p3 = Promise.resolve<string>("xyz");
+let p1 = Promise.resolve<string>('abc');
+let p2 = Promise.resolve<string>('def');
+let p3 = Promise.resolve<string>('xyz');
 Promise.allSettled([p1, p2, p3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 3) {
-        console.log("Test failed. Expected a string array of length 3 but got length " + values.length + ".");
+        console.log('Test failed. Expected a string array of length 3 but got length ' + values.length + '.');
         return;
     }
-    if (values[0].status != "fulfilled" || values[1].status != "fulfilled" || values[2].status != "fulfilled") {
-        console.log("Test failed. Expected all elements have status 'fulfilled'.");
+    if (values[0].status != 'fulfilled' || values[1].status != 'fulfilled' || values[2].status != 'fulfilled') {
+        console.log('Test failed. Expected all elements have status \'fulfilled\'.');
         return;
     }
-    if ((values[0] as PromiseFulfilledResult<string>).value != "abc") {
-        console.log("Test failed. Unexpected value of the element 0.");
+    if ((values[0] as PromiseFulfilledResult<string>).value != 'abc') {
+        console.log('Test failed. Unexpected value of the element 0.');
         return;
     }
-    if ((values[1] as PromiseFulfilledResult<string>).value != "def") {
-        console.log("Test failed. Unexpected value of the element 1.");
+    if ((values[1] as PromiseFulfilledResult<string>).value != 'def') {
+        console.log('Test failed. Unexpected value of the element 1.');
         return;
     }
-    if ((values[2] as PromiseFulfilledResult<string>).value != "xyz") {
-        console.log("Test failed. Unexpected value of the element 2.");
+    if ((values[2] as PromiseFulfilledResult<string>).value != 'xyz') {
+        console.log('Test failed. Unexpected value of the element 2.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
-}).catch((e: Object): void => {
-    console.log("Test failed: " + e);
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+}).catch((e: Error): void => {
+    console.log('Test failed: ' + e);
 });

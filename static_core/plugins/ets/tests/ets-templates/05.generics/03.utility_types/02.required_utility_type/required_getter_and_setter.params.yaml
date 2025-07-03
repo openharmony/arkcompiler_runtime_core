@@ -17,5 +17,5 @@ types:
   - class
 
 cases:
-  - assertNE( a.i, 1 ) # getter
-  - a.i = 1.2 # setter
+  - assertEQ( a._i, 1.9 ) # getter
+  - a._i = 1.2 # setter

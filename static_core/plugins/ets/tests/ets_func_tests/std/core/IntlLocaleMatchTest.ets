@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,56 +13,53 @@
  * limitations under the License.
  */
 
-const success: int = 0;
-const fail: int = 1;
-let en_US: string = intlBestFitLocale("en-US");
-let zh_CN: string = intlBestFitLocale("zh-CN");
-let ru_RU = intlBestFitLocale("ru-RU");
-let er_ER = "er-or" // Fake locale
-let localeList: string[] = [er_ER, ru_RU, zh_CN, en_US];
+const en_US: string = "en-US"
+const zh_CN: string = "zh-CN"
+const ru_RU = "ru-RU"
+const er_ER = "er-OR" // Fake locale
+const badLocale = "test"
+const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
 
-function main(): int {
-    let failures: int = 0;
-    failures += check(testBestFitLocaleMatchList(), "Intl bestfit locale match list");
-    failures += check(testLookupLocaleMatchSingle(), "Intl lookup locale match single");
-    failures += check(testLookupLocaleMatchList(), "Intl lookup locale match list");
-    return failures;
+function main() throws {
+    testBestFitLocaleMatchList()
+    testLookupLocaleMatchSingle()
+    testLookupLocaleMatchList()
+    negativeTestLanguageTag()
 }
 
-function check(result: int, message: string): int {
-    if (result == 0) {
-        return success;
-    }
-    console.println("\nFAILED: " + message);
-    return fail;
+function testBestFitLocaleMatchList() {
+    arktest.assertEQ(intlBestFitLocale(localeList), ru_RU)
+
+    const result = intlBestFitLocales(localeList)
+    arktest.assertEQ(result.length, 3)
+    arktest.assertEQ(result[0], ru_RU)
+    arktest.assertEQ(result[1], zh_CN)
+    arktest.assertEQ(result[2], en_US)
 }
 
-function testBestFitLocaleMatchList(): int {
-    let result = intlBestFitLocale(localeList);
-    // First existing locale should be selected
-    if (result != ru_RU) {
-        console.log(result, "!=", ru_RU)
-        return fail;
-    }
-    return success
+function testLookupLocaleMatchSingle() {
+    arktest.assertEQ(intlLookUpLocale(en_US), en_US)
+
+    const result = intlLookUpLocales(en_US)
+    arktest.assertEQ(result.length, 1)
+    arktest.assertEQ(result[0], en_US)
 }
 
-function testLookupLocaleMatchSingle(): int {
-    let result = intlLookUpLocale(en_US);
-    if (result != en_US) {
-        console.log(result, "!=", en_US)
-        return fail;
-    }
-    return success;
+function testLookupLocaleMatchList() {
+    arktest.assertEQ(intlLookUpLocale(localeList), ru_RU)
+
+    let result = intlLookUpLocales(localeList)
+    arktest.assertEQ(result.length, 3)
+    arktest.assertEQ(result[0], ru_RU)
+    arktest.assertEQ(result[1], zh_CN)
+    arktest.assertEQ(result[2], en_US)
 }
 
-function testLookupLocaleMatchList(): int {
-    let result = intlLookUpLocale(localeList);
-    // First existing locale should be selected
-    if (result != ru_RU) {
-        console.log(result, "!=", ru_RU)
-        return fail;
-    }
-    return success;
+function negativeTestLanguageTag() {
+    expectError((): void => { intlBestFitLocale(badLocale) })
+    expectError((): void => { intlBestFitLocales(badLocale) })
+    expectError((): void => { intlBestFitLocales([badLocale]) })
+    expectError((): void => { intlLookUpLocale(badLocale) })
+    expectError((): void => { intlLookUpLocales(badLocale) })
+    expectError((): void => { intlLookUpLocales([badLocale]) })
 }
-

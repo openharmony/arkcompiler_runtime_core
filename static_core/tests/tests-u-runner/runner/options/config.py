@@ -56,12 +56,33 @@ class Config:
     @cached_property
     @value(
         yaml_path="test-suites",
-        cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system", "astchecker", "srcdumper",
-                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom",
-                  "ets_ts_subset", "declgen_ets2ts_cts", "declgen_ets2ts_func_tests",
-                  "declgen_ets2ts_runtime", "ets_sdk", "declgen_ts2ets_cts", "recheck"],
+        cli_name=[
+            "test_suites",
+            "test262",
+            "parser",
+            "declgenparser",
+            "hermes",
+            "system",
+            "astchecker",
+            "srcdumper",
+            "ets_func_tests",
+            "ets_runtime",
+            "ets_cts",
+            "ets_gc_stress",
+            "ets_es_checked",
+            "ets_custom",
+            "ets_ts_subset",
+            "declgen_ets2ts_cts",
+            "declgen_ets2ts_func_tests",
+            "declgen_ets2ts_runtime",
+            "ets_sdk",
+            "declgen_ts2ets_cts",
+            "recheck",
+            "declgen_ets2ets",
+            "declgen_ets2etsisolated",
+        ],
         cast_to_type=_to_test_suites,
-        required=True
+        required=True,
     )
     def test_suites(self) -> Set[str]:
         return set([])
@@ -85,21 +106,23 @@ class Config:
         ConfigKeeper.get().save(self.general.generate_config, data)
 
     def get_command_line(self) -> str:
-        _test_suites = ['--' + suite.replace('_', '-') for suite in self.test_suites]
-        options = ' '.join([
-            ' '.join(_test_suites),
-            self.general.get_command_line(),
-            self.report.get_command_line(),
-            self.es2panda.get_command_line(),
-            self.verifier.get_command_line(),
-            self.quick.get_command_line(),
-            self.ark_aot.get_command_line(),
-            self.ark.get_command_line(),
-            self.time_report.get_command_line(),
-            self.test_lists.get_command_line(),
-            self.ets.get_command_line()
-        ])
-        options_str = re.sub(r'\s+', ' ', options, re.IGNORECASE | re.DOTALL)
+        _test_suites = ["--" + suite.replace("_", "-") for suite in self.test_suites]
+        options = " ".join(
+            [
+                " ".join(_test_suites),
+                self.general.get_command_line(),
+                self.report.get_command_line(),
+                self.es2panda.get_command_line(),
+                self.verifier.get_command_line(),
+                self.quick.get_command_line(),
+                self.ark_aot.get_command_line(),
+                self.ark.get_command_line(),
+                self.time_report.get_command_line(),
+                self.test_lists.get_command_line(),
+                self.ets.get_command_line(),
+            ]
+        )
+        options_str = re.sub(r"\s+", " ", options, re.IGNORECASE | re.DOTALL)
 
         return options_str
 
@@ -116,5 +139,5 @@ class Config:
             "ark": self.ark.to_dict(),
             "time-report": self.time_report.to_dict(),
             "test-lists": self.test_lists.to_dict(),
-            "ets": self.ets.to_dict()
+            "ets": self.ets.to_dict(),
         }

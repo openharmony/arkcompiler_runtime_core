@@ -14,19 +14,20 @@
  */
 
 class Thenable implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve(onFulfilled!("resolved")) as PromiseLike<U|E>;
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve(onFulfilled!('resolved')) as PromiseLike<U | E>;
     }
 };
 
 let thenable = new Thenable();
 let p = Promise.resolve<string>(thenable);
 p.then<void, void>((value: string): void => {
-    if (value == "resolved") {
-        console.log("Test passed.");
+    if (value == 'resolved') {
+        console.log('Test passed.');
     } else {
-        console.log("Test failed. The promise should be resolved by the provided value.");
+        console.log('Test failed. The promise should be resolved by the provided value.');
     }
-}, (error: Object): void => {
-    console.log("Test failed. The promise should be resolved.");
+}, (error: Error): void => {
+    console.log('Test failed. The promise should be resolved.');
 });

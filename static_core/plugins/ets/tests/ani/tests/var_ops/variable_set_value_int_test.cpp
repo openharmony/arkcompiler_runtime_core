@@ -120,7 +120,7 @@ TEST_F(VariableSetValueIntTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "intValue", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_int values[] = {3U, 6U, 9U};
+    const ani_int values[] = {3U, 0, -9};
     ani_int result = 0;
     for (ani_int value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Int(variable, value), ANI_OK);

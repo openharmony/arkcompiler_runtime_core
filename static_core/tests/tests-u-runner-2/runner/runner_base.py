@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,34 +15,23 @@
 # limitations under the License.
 #
 
-import multiprocessing
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
-from typing import List, Set, Tuple, Optional, Dict, Any
 
 import pytz
 from tqdm import tqdm
 
 from runner.logger import Log
-from runner.options.cli_args_wrapper import CliArgsWrapper
 from runner.options.config import Config
 from runner.test_base import Test
 from runner.utils import correct_path
 
 _LOGGER = Log.get_logger(__file__)
 
-worker_cli_wrapper_args: Optional[Dict[str, Any]] = None
 
-
-def init_worker(shared_args: Optional[Dict[str, Any]]) -> None:
-    global worker_cli_wrapper_args
-    worker_cli_wrapper_args = shared_args
-
-
-def run_test(pair: Tuple[Test, int]) -> Test:
-    CliArgsWrapper.args = worker_cli_wrapper_args
+def run_test(pair: tuple[Test, int]) -> Test:
     return pair[0].run(pair[1])
 
 
@@ -51,11 +40,11 @@ class Runner(ABC):
         # Roots:
         # directory where test files are located - it's either set explicitly to the absolute value
         # or the current folder (where this python file is located!) parent
-        self.test_root: Optional[Path] = None
+        self.test_root: Path | None = None
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
-        self.list_root: Optional[Path] = config.test_suite.list_root
+        self.list_root: Path | None = config.test_suite.list_root
         if self.list_root is not None:
             _LOGGER.summary(f"LIST_ROOT set to {self.list_root}")
 
@@ -68,18 +57,18 @@ class Runner(ABC):
         # Lists:
         # excluded test is a test what should not be loaded and should be tried to run
         # excluded_list: either absolute path or path relative from list_root to the file with the list of such tests
-        self.excluded_lists: List[str] = []
-        self.excluded_tests: Set[str] = set([])
+        self.excluded_lists: list[str] = []
+        self.excluded_tests: set[str] = set([])
         # ignored test is a test what should be loaded and executed, but its failure should be ignored
         # ignored_list: either absolute path or path relative from list_root to the file with the list of such tests
         # aka: kfl stands for `known failures list`
-        self.ignored_lists: List[str] = []
-        self.ignored_tests: Set[str] = set([])
+        self.ignored_lists: list[str] = []
+        self.ignored_tests: set[str] = set([])
         # list of file names, each is a name of a test. Every test should be executed
         # So, it can contain ignored tests, but cannot contain excluded tests
-        self.tests: Set[Test] = set([])
+        self.tests: set[Test] = set([])
         # list of results of every executed test
-        self.results: List[Test] = []
+        self.results: list[Test] = []
         # name of file with a list of only tests what should be executed
         # if it's specified other tests are not executed
         self.explicit_list = correct_path(self.list_root, config.test_suite.test_lists.explicit_list) \
@@ -101,7 +90,7 @@ class Runner(ABC):
         self.update_excluded = config.test_suite.test_lists.update_excluded
 
     @staticmethod
-    def add_tests_param(tests: Set[Test], repeat: int) -> List[Tuple[Test, int]]:
+    def add_tests_param(tests: set[Test], repeat: int) -> list[tuple[Test, int]]:
         return [(test, repeat) for test in tests]
 
     @abstractmethod
@@ -117,23 +106,10 @@ class Runner(ABC):
         with ThreadPoolExecutor(self.config.general.processes) as executor:
             results = executor.map(
                 run_test,
-                self.add_tests_param(self.tests, repeat),
-                chunksize=self.config.general.chunksize)
+                self.add_tests_param(self.tests, repeat))
             if self.config.general.show_progress:
                 results = tqdm(results, total=len(self.tests))
             self.results = list(results)
-
-    def run_processes(self, repeat: int) -> None:
-        _LOGGER.all(f"Start test running with {self.config.general.processes} processes")
-        with multiprocessing.Pool(processes=self.config.general.processes,
-                                  initializer=init_worker, initargs=(CliArgsWrapper.args,)) as pool:
-            results = pool.imap_unordered(run_test, self.add_tests_param(self.tests, repeat),
-                                          chunksize=self.config.general.chunksize)
-            if self.config.general.show_progress:
-                results = tqdm(results, total=len(self.tests))
-            self.results = list(results)
-            pool.close()
-            pool.join()
 
     def before_suite(self) -> None:
         pass

@@ -14,7 +14,7 @@
 ---
 cases:
     - decl: |-
-          function foo(...p: number[]): int {
+          function foo(...p: number[]): number {
               return p.length
           }
       use: |-

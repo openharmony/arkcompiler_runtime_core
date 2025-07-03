@@ -15,7 +15,7 @@
 
 function main() {
     let size = 10;
-    let arr: boolean[] = [];
+    let arr: FixedArray<boolean> = [];
     for (let iter = 0; iter < 1000; ++iter) {
         try {
             arr = GC.allocatePinnedBooleanArray(size);

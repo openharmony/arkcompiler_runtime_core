@@ -17,6 +17,8 @@ set -e
 SCRIPT_DIR=$(realpath "$(dirname "${0}")")
 ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
+cd "${SCRIPT_DIR}"
+
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 
 activate_venv

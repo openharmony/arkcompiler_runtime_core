@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_STUBS_H
 
 #include <cstdint>
+#include "plugins/ets/runtime/types/ets_bigint.h"
 
 namespace ark::ets {
 
@@ -35,6 +36,8 @@ inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref);
 
 // Comparison slowpath for value-typed references
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2);
+
+bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2);
 
 // Obtain owner class of method in ets frames
 inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth);

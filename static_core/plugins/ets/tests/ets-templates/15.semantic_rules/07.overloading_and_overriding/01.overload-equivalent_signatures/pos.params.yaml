@@ -88,8 +88,8 @@ cases:
 
   - decl: |-
       class A {
-          public met(a: Object[]) {}
-          public met(a: Object[][]) {}
+          public met(a: FixedArray<Object>) {}
+          public met(a: FixedArray<FixedArray<Object>>) {}
       }
     tags: [compile-only]
 

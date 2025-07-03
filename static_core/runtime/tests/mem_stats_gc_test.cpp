@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,17 +150,6 @@ constexpr size_t OBJECTS_SIZE[] = {
     512,  // FreeList: aligned
     1025  // FreeList: not aligned
 };
-
-TEST_F(MemStatsGCTest, GenGcTest)
-{
-    constexpr uint64_t OBJECTS_COUNT = 80;
-    constexpr uint64_t TRIES = 4;
-
-    SetupRuntime("gen-gc");
-    for (size_t objectSize : OBJECTS_SIZE) {
-        MemStatsTest<OBJECTS_COUNT>(TRIES, objectSize);
-    }
-}
 
 TEST_F(MemStatsGCTest, StwGcTest)
 {

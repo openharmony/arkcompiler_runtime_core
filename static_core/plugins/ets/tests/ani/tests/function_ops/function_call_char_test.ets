@@ -15,7 +15,7 @@
 
 namespace ops {
 function sub(c0: char, c1: char): char {
-    let c: Char = new Char('0');
+    let c: Char = new Char(c'0');
     if (c0 > c1) {
         c = c0 - c1 as char;
     } else {
@@ -49,13 +49,13 @@ namespace A {
         };
         return lambdaFunction(value1, value2);
     }
-    
+
     export function recursiveFunction(value: int): char {
         if (value <= 0) {
-            return 'A';
+            return c'A';
         }
         if (value === 1) {
-            return 'Z';
+            return c'Z';
         }
         return recursiveFunction(value - 1);
     }

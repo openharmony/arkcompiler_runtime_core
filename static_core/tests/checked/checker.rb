@@ -206,6 +206,8 @@ class Checker
     @disasm_method_scope = nil
     # Current search scope
     @disasm_scope = nil
+
+    @run_idx = 0
   end
 
   def init_run
@@ -273,6 +275,8 @@ class Checker
         aborted_sig = value
       when :env
         env = value
+      when :aot_file
+        @aot_file = value
       end
     end
     raise ":abort and :result cannot be set at the same time, :abort = #{aborted_sig}, :result = #{expected_result}" if aborted_sig != 0 && expected_result != 0
@@ -728,6 +732,11 @@ class Checker
       FileUtils.rm_rf("#{@cwd}/events.csv")
       FileUtils.rm_rf("#{@cwd}/disasm.txt")
       FileUtils.rm_rf("#{@cwd}/console.out")
+   else
+      @run_idx += 1
+      FileUtils.mv "#{@cwd}/events.csv", "#{@cwd}/events-#{@run_idx}.csv", force: true
+      FileUtils.mv "#{@cwd}/disasm.txt", "#{@cwd}/disasm-#{@run_idx}.txt", force: true
+      FileUtils.mv "#{@cwd}/console.out", "#{@cwd}/console-#{@run_idx}.out", force: true
    end
   end
 end

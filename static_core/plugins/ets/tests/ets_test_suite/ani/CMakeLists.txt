@@ -12,26 +12,36 @@
 # limitations under the License.
 
 # Build rules for example_lib native
+
+set(GEN_ANI_ETSNAPI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
 panda_add_library(example_lib SHARED example_lib.cpp)
+
+set_target_properties(example_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ANI_ETSNAPI_LIB_DIR})
+
 panda_target_link_libraries(example_lib arkruntime gtest)
+
 panda_target_include_directories(example_lib
-    PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime
-    PRIVATE ${PANDA_ROOT}
+   PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
 )
 
+set(PANDA_RUN_PREFIX
+    LD_LIBRARY_PATH=${GEN_ANI_ETSNAPI_LIB_DIR} 
+    ${PANDA_RUN_PREFIX})
+
 run_int_jit_aot_ets_code("${CMAKE_CURRENT_SOURCE_DIR}/example_lib.ets"
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${GEN_ANI_ETSNAPI_LIB_DIR}"
     ets_test_ani_example_lib)
 
 add_dependencies(ets_test_ani_example_lib example_lib)
 add_dependencies(ets_test_ani_example_lib-ets-int-cpp example_lib)
 add_dependencies(ets_test_ani_example_lib-ets-int-irtoc example_lib)
-if (PANDA_LLVM_AOT)
+if (TARGET ets_test_ani_example_lib-ets-llvmaot)
     add_dependencies(ets_test_ani_example_lib-ets-llvmaot example_lib)
 endif()
-if (ets_test_ani_example_lib-ets-aot)
+if (TARGET ets_test_ani_example_lib-ets-aot)
     add_dependencies(ets_test_ani_example_lib-ets-aot example_lib)
 endif()
-if (ets_test_ani_example_lib-ets-jit )
+if (TARGET ets_test_ani_example_lib-ets-jit)
     add_dependencies(ets_test_ani_example_lib-ets-jit example_lib)
 endif()

@@ -19,14 +19,14 @@ desc: Correct char literals
 
 function main() {
     // check escaped characters
-    let escaped_chars: char[] = [ c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"' ]
-    let escaped_vals: int[] = [ 8, 12, 10, 13, 9, 11, 92, 39, 34 ]
+    let escaped_chars: Char[] = [ c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"' ]
+    let escaped_vals: Int[] = [ 8, 12, 10, 13, 9, 11, 92, 39, 34 ]
     for (let i = 0; i < escaped_chars.length; i++) {
-        assertEQ( escaped_chars[i] as int, escaped_vals[i] )
+        assertEQ( escaped_chars[i], escaped_vals[i].toChar() )
     }
 
     // check hex-formatted characters
-    let hex_chars: char[] = [ c'\x00', c'\x01', c'\x02', c'\x03', c'\x04', c'\x05', c'\x06',
+    let hex_chars: Char[] = [ c'\x00', c'\x01', c'\x02', c'\x03', c'\x04', c'\x05', c'\x06',
         c'\x07', c'\x08', c'\x09', c'\x0a', c'\x0b', c'\x0c', c'\x0d', c'\x0e', c'\x0f',
         c'\x10', c'\x11', c'\x12', c'\x13', c'\x14', c'\x15', c'\x16', c'\x17', c'\x18',
         c'\x19', c'\x1a', c'\x1b', c'\x1c', c'\x1d', c'\x1e', c'\x1f', c'\x20', c'\x21',
@@ -42,12 +42,12 @@ function main() {
         c'\x73', c'\x74', c'\x75', c'\x76', c'\x77', c'\x78', c'\x79', c'\x7a', c'\x7b',
         c'\x7c', c'\x7d', c'\x7e', c'\x7f'
     ]
-    for (let i = 0; i < 128; i++) {
-        assertEQ( hex_chars[i] as int, i )
+    for (let i: Int = 0; i < 128; i++) {
+        assertEQ( hex_chars[i], i.toChar() )
     }
 
     // check unicode-formatted characters
-    let unicode_chars: char[] = [ c'\u0041', c'\u0429', c'\u0811', c'\u0bf9', c'\u0fe1', c'\u13c9',
+    let unicode_chars: Char[] = [ c'\u0041', c'\u0429', c'\u0811', c'\u0bf9', c'\u0fe1', c'\u13c9',
         c'\u17b1', c'\u1b99', c'\u1f81', c'\u2369', c'\u2751', c'\u2b39', c'\u2f21', c'\u3309',
         c'\u36f1', c'\u3ad9', c'\u3ec1', c'\u42a9', c'\u4691', c'\u4a79', c'\u4e61', c'\u5249',
         c'\u5631', c'\u5a19', c'\u5e01', c'\u61e9', c'\u65d1', c'\u69b9', c'\u6da1', c'\u7189',
@@ -58,7 +58,7 @@ function main() {
         c'\uf271', c'\uf659', c'\ufa41', c'\ufe29'
     ]
     let j = 0;
-    for (let i = 65; i < 65536; i += 1000) {
-        assertEQ( unicode_chars[j++] as int, i )
+    for (let i: Int = 65; i < 65536; i += 1000) {
+        assertEQ( unicode_chars[j++], i.toChar() )
     }
 }

@@ -19,4 +19,12 @@ interface Foo {
     with_this(@sts_this thiz: Opaque): void;
 }
 
+struct RGB {
+    @!sts_inject_into_interface("""color: string;""")
+    @!sts_inject_into_class("""color: string = "red";""")
+    r: i32;
+    g: i32;
+    b: i32;
+}
+
 function makeFoo(): Foo;

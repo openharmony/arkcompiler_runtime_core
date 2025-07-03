@@ -18,6 +18,7 @@
 #include "intrinsics.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "libpandafile/type_helper.h"
+#include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "runtime/cha.h"
 #include "runtime/jit/profiling_data.h"
@@ -328,6 +329,14 @@ bool PandaRuntimeInterface::IsMethodExternal(MethodPtr parentMethod, MethodPtr c
         return true;
     }
     return MethodCast(parentMethod)->GetPandaFile() != MethodCast(calleeMethod)->GetPandaFile();
+}
+
+bool PandaRuntimeInterface::IsClassExternal(MethodPtr method, ClassPtr calleeClass) const
+{
+    if (calleeClass == nullptr) {
+        return true;
+    }
+    return MethodCast(method)->GetPandaFile() != ClassCast(calleeClass)->GetPandaFile();
 }
 
 compiler::DataType::Type PandaRuntimeInterface::GetMethodReturnType(MethodPtr parentMethod, MethodId id) const
@@ -741,7 +750,23 @@ bool PandaRuntimeInterface::HasFieldMetadata(FieldPtr field) const
     return (reinterpret_cast<uintptr_t>(field) & 1U) == 0;
 }
 
-uint64_t PandaRuntimeInterface::GetStaticFieldValue(FieldPtr fieldPtr) const
+double PandaRuntimeInterface::GetStaticFieldFloatValue(FieldPtr fieldPtr) const
+{
+    auto *field = FieldCast(fieldPtr);
+    auto type = GetFieldType(fieldPtr);
+    auto klass = field->GetClass();
+    ASSERT(compiler::DataType::IsFloatType(type));
+    switch (compiler::DataType::ShiftByType(type, Arch::NONE)) {
+        case 2U:
+            return klass->GetFieldPrimitive<float>(*field);
+        case 3U:
+            return klass->GetFieldPrimitive<double>(*field);
+        default:
+            UNREACHABLE();
+    }
+}
+
+uint64_t PandaRuntimeInterface::GetStaticFieldIntegerValue(FieldPtr fieldPtr) const
 {
     auto *field = FieldCast(fieldPtr);
     auto type = GetFieldType(fieldPtr);

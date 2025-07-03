@@ -30,7 +30,7 @@ cases:
 
     - decl: |-
           async function foo(p: int): Promise<Int> {
-              return launch ((x:int): int => x + x)(p)
+              return (async (x:int): Promise<int> => x + x)(p)
           }
       use: |-
           // Promise of primitive
@@ -46,7 +46,7 @@ cases:
 
     - decl: |-
           async function foo(p: Double): Promise<Double> {
-              return launch ((x: Double): Double => x + x)(p)
+              return (async (x: Double): Promise<Double> => x + x)(p)
           }
       use: |-
           // Promise of boxed
@@ -63,7 +63,7 @@ cases:
 
     - decl: |-
           async function foo(p: int): Promise<string> {
-              return launch ((x: string): string => x + x)(`${p}`)
+              return (async (x: string): Promise<string> => x + x)(`${p}`)
           }
       use: |-
           // Promise of string
@@ -80,7 +80,7 @@ cases:
 
     - decl: |-
           async function foo(p: int): Promise<String> {
-              return launch ((x: int): String => new String(`${x}`))(p)
+              return (async (x: int): Promise<String> => new String(`${x}`))(p)
           }
       use: |-
           // Promise of String
@@ -100,7 +100,7 @@ cases:
           class A {}
 
           async function foo(p: Object): Promise<Object> {
-              return launch ((x: Object): Object => x)(p)
+              return (async (x: Object): Promise<Object> => x)(p)
           }
       use: |-
           // Promise of Object
@@ -116,7 +116,7 @@ cases:
 
     - decl: |-
           async function foo(p: Number|undefined): Promise<Number|undefined> {
-              return launch ((x: Number|undefined): Number|undefined => x instanceof Number ? x + 1 : x)(p)
+              return (async (x: Number|undefined): Promise<Number|undefined> => x instanceof Number ? x + 1 : x)(p)
           }
       use: |-
           // Promise of nullish
@@ -132,7 +132,7 @@ cases:
 
     - decl: |-
           async function foo(p: Number|null): Promise<Number|null> {
-              return launch ((x: Number|null): Number|null => x instanceof Number ? x + 1 : x)(p)
+              return (async (x: Number|null): Promise<Number|null> => x instanceof Number ? x + 1 : x)(p)
           }
       use: |-
           // Promise of nullish
@@ -148,10 +148,10 @@ cases:
 
     - decl: |-
           async function foo(p: Int|null|undefined): Promise<Int|null|undefined> {
-              let q = (p: Int|null|undefined): Int|null|undefined => {
+              let q = async (p: Int|null|undefined): Promise<Int|null|undefined> => {
                   return p == null || p == undefined ? p : p + 1
               }
-              return launch q(p)
+              return q(p)
           }
       use: |-
           // Promise of nullish
@@ -171,11 +171,11 @@ cases:
 
     - decl: |-
           async function foo(p: string): Promise<string> {
-              return launch ((x: string): string => x + x)(p)
+              return (async (x: string): Promise<string> => x + x)(p)
           }
 
           async function bar(p: string): Promise<Promise<string>> {
-              return launch ((x: string): Promise<string> => foo(x))(p)
+              return (async (x: string): Promise<Promise<string>> => foo(x))(p)
           }
       use: |-
           // Promise of promise
@@ -192,7 +192,7 @@ cases:
 
     - decl: |-
           async function foo(): Promise<int[]> {
-              return launch ((): int[] => [1, 2, 3])()
+              return launch<int[], () => int[]>((): int[] => [1, 2, 3]).Await()
           }
       use: |-
           // Promise of array
@@ -211,7 +211,7 @@ cases:
           type FT = (p: string) => string
           async function foo(): Promise<FT> {
               let f = (p: string): string => p + p
-              return launch ((): FT => f)()
+              return (async (): Promise<FT> => f)()
           }
       use: |-
           // Promise of function
@@ -230,8 +230,8 @@ cases:
     - decl: |-
           type UT = number | string | boolean
           async function foo(p: int): Promise<UT> {
-              let f = (x: int): UT => x == 0 ? true : x > 0 ? new Number(x) : `${x}`
-              return launch f(p)
+              let f = async (x: int): Promise<UT> => x == 0 ? true : x > 0 ? new Number(x) : `${x}`
+              return f(p)
           }
       use: |-
           // Promise of union
@@ -239,21 +239,21 @@ cases:
           assertTrue(q as string == '-1')
 
     - decl: |-
-          async function foo(p: int): Promise<[boolean, Error]> {
-              return [p > 0, new Error()] as [boolean, Error]
+          async function foo(p: int): Promise<[Boolean, Error]> {
+              return [p > 0, new Error()] as [Boolean, Error]
           }
       use: |-
           // Promise of tuple
-          let q: [boolean, Error] = await foo(42)
+          let q: [Boolean, Error] = await foo(42)
           assertTrue(q[0] && (q[1] instanceof Error))
 
     - decl: |-
-          async function foo(p: int): Promise<[boolean, Error]> {
-              return launch ((x: int): [boolean, Error] => [x > 0, new Error()])(p)
+          async function foo(p: int): Promise<[Boolean, Error]> {
+              return launch<[Boolean, Error], (x: int) => [Boolean, Error]>((x: int): [Boolean, Error] => [x > 0, new Error()], p).Await()
           }
       use: |-
           // Promise of tuple
-          let q: [boolean, Error] = await foo(42)
+          let q: [Boolean, Error] = await foo(42)
           assertTrue(q[0] && (q[1] instanceof Error))
 
     - decl: |-
@@ -267,7 +267,7 @@ cases:
 
     - decl: |-
           async function foo(p: string): Promise<BigInt> {
-              return launch ((x: BigInt): BigInt => x)(new BigInt(p))
+              return (async (x: BigInt): Promise<BigInt> => x)(new BigInt(p))
           }
       use: |-
           // Promise of BigInt
@@ -285,7 +285,7 @@ cases:
 
     - decl: |-
           async function foo(p: bigint): Promise<bigint> {
-              return launch ((x: bigint): bigint => x)(p)
+              return (async (x: bigint): Promise<bigint> => x)(p)
           }
       use: |-
           // Promise of bigint
@@ -316,7 +316,7 @@ cases:
 
     - decl: |-
           async function foo(p: number, q: number): Promise<Number> {
-              return launch ((x: number): number => x + q)(p)
+              return (async (x: number): Promise<number> => x + q)(p)
           }
       use: |-
           // Array of promises
@@ -350,7 +350,7 @@ cases:
           enum Color { Red, Green, Blue }
 
           async function foo(p: int): Promise<Color> {
-              return launch ((x: int): Color => p > 0 ? Color.Green : Color.Blue)(p)
+              return (async (x: int): Promise<Color> => p > 0 ? Color.Green : Color.Blue)(p)
           }
       use: |-
           // Promise of enum
@@ -370,7 +370,7 @@ cases:
           enum Color { R="red", G="green", B="blue" }
 
           async function foo(p: int): Promise<Color> {
-              return launch ((x: int): Color => x > 0 ? Color.G : Color.B)(p)
+              return (async (x: int): Promise<Color> => x > 0 ? Color.G : Color.B)(p)
           }
       use: |-
           // Promise of string-based enum
@@ -400,7 +400,7 @@ cases:
               return p
           }
           async function foo<T>(p: T): Promise<T> {
-              return launch bar(p)
+              return launch<T, (t: T) => T>(bar, p).Await()
           }
 
           class A<T> {
@@ -434,7 +434,7 @@ cases:
               fld: Promise<string>|null|undefined
           }
           async function foo(p: number): Promise<string> {
-              return launch ((x: number): string => '' + x)(p)
+              return (async (x: number): Promise<string> => '' + x)(p)
           }
       use: |-
           // Promise in object literal
@@ -448,7 +448,7 @@ cases:
           }
       use: |-
           // Launch in argument lambda
-          let r = await foo((): Promise<string> => launch ((): string => s)())
+          let r = await foo((): Promise<string> => (async (): Promise<string> => s)())
           assertTrue(r == 'ABC')
 
     - decl: |-
@@ -458,7 +458,7 @@ cases:
           }
       use: |-
           // Launch in argument lambda
-          let r = await foo((): Promise<string> => launch ((): string => s)())
+          let r = await foo((): Promise<string> => (async (): Promise<string> => s)())
           assertTrue(r == 'ABC')
 
     - decl: |-
@@ -468,7 +468,7 @@ cases:
           }
       use: |-
           // Launch in trailing lambda
-          let r = await foo() { return launch ((): string => s)() }
+          let r = await foo(async (): Promise<string> => s)
           assertTrue(r == 'ABC')
 
     - decl: |-
@@ -478,7 +478,7 @@ cases:
           }
       use: |-
           // Launch in trailing lambda
-          let r = await foo() { return launch ((): string => s)() }
+          let r = await foo(async (): Promise<string> => s)
           assertTrue(r == 'ABC')
 
     - decl: |-

@@ -43,6 +43,8 @@ bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch);
 bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch);
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst);
 std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm);
+bool CheckArrayFieldObject(RuntimeInterface::ArrayField kind, Inst *inst);
+bool CheckArrayField(RuntimeInterface::ArrayField kind, Inst *inst, Inst *&arrayOriginRef);
 
 // If object input has known class, return pointer to the class, else returns nullptr
 RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum = 0);

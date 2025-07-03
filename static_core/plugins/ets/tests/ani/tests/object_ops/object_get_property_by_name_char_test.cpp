@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameCharTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_char type;
+    ani_char type = '\0';
     ani_char typee = 'a';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "type", &type), ANI_OK);
     ASSERT_EQ(type, typee);
@@ -40,15 +40,32 @@ TEST_F(ObjectGetPropertyByNameCharTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_char band;
+    ani_char band = '\0';
     ani_char bandd = 'z';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "band", &band), ANI_OK);
     ASSERT_EQ(band, bandd);
 }
 
+TEST_F(ObjectGetPropertyByNameCharTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_char type = '\0';
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Char(nullptr, car, "band", &type), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameCharTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_char model = '\0';
+    ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "bandA", &model), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "", &model), ANI_NOT_FOUND);
+}
+
 TEST_F(ObjectGetPropertyByNameCharTest, invalid_argument1)
 {
-    ani_char type;
+    ani_char type = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(nullptr, "type", &type), ANI_INVALID_ARGS);
 }
 
@@ -56,7 +73,7 @@ TEST_F(ObjectGetPropertyByNameCharTest, invalid_argument2)
 {
     ani_object car = NewCar();
 
-    ani_char type;
+    ani_char type = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, nullptr, &type), ANI_INVALID_ARGS);
 }
 
@@ -71,7 +88,7 @@ TEST_F(ObjectGetPropertyByNameCharTest, get_field_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_char manufacturer;
+    ani_char manufacturer = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "manufacturer", &manufacturer), ANI_INVALID_TYPE);
 }
 
@@ -79,7 +96,7 @@ TEST_F(ObjectGetPropertyByNameCharTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_char model;
+    ani_char model = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "model", &model), ANI_INVALID_TYPE);
 }
 

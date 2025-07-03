@@ -483,6 +483,73 @@ TEST_F(CallObjectMethodByNameDoubleTest, object_call_method_by_name_double_011)
     ASSERT_EQ(env_->Object_CallMethodByName_Double_A(obj, "doubleMethod", "DD:D", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
+
+TEST_F(CallObjectMethodByNameDoubleTest, object_call_method_by_name_double_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+
+    ani_double res = 0.0;
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Double(nullptr, object, "doubleMethod", "DD:D", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Double_A(nullptr, object, "doubleMethod", "DD:D", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(nullptr, "doubleMethod", "DD:D", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double_A(nullptr, "doubleMethod", "DD:D", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(object, nullptr, "DD:D", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double_A(object, nullptr, "DD:D", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(object, "doubleMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double_A(object, "doubleMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(object, "doubleMethod", "DD:D", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double_A(object, "doubleMethod", "DD:D", nullptr, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByNameDoubleTest, object_call_method_by_name_double_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+
+    ani_double res = 0.0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Double(object, methodName.data(), "DD:D", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Double_A(object, methodName.data(), "DD:D", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNameDoubleTest, object_call_method_by_name_double_014)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].d = VAL1;
+    args[1U].d = VAL2;
+
+    ani_double res = 0.0;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Double(object, methodName.data(), "", &res, VAL1, VAL2), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Double_A(object, methodName.data(), "", &res, args), ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

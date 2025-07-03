@@ -21,6 +21,7 @@ set(ETS_SDK_NATIVE_SRC
     api/ani_textencoder.cpp
     api/ani_textencoder_helper.cpp
     api/ani_textdecoder.cpp
+    api/ani_stringdecoder.cpp
 )
 
 set(ETS_SDK_SO_LOC "${PANDA_BINARY_ROOT}/lib")

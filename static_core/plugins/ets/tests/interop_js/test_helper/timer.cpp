@@ -26,14 +26,14 @@ static uint32_t nextTimerId = 0;
 static std::unordered_map<uint32_t, TimerInfo *> timers;
 
 TimerInfo::TimerInfo(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, bool repeat)
-    : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat)
+    : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat), timer(new uv_timer_t())
 {
     timerId = nextTimerId++;
     timers[timerId] = this;
-    timer.data = this;
+    timer->data = this;
     uv_loop_t *loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
-    uv_timer_init(loop, &timer);
+    uv_timer_init(loop, timer);
 }
 
 TimerInfo::~TimerInfo()
@@ -43,8 +43,8 @@ TimerInfo::~TimerInfo()
         napi_delete_reference(env, ref);
     }
     timers.erase(timerId);
-    uv_timer_stop(&timer);
-    uv_close(reinterpret_cast<uv_handle_t *>(&timer), nullptr);
+    uv_timer_stop(timer);
+    uv_close(reinterpret_cast<uv_handle_t *>(timer), kTimerCloseCallback);
 }
 
 static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, int32_t timeout, bool repeat)
@@ -91,7 +91,7 @@ static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref>
     auto *timerInfo = new TimerInfo(env, cb, std::move(cbArgs), repeat);
 
     uv_update_time(loop);
-    uv_timer_start(&timerInfo->timer, timerCallback, timeout, timeout > 0 ? timeout : 1);
+    uv_timer_start(timerInfo->timer, timerCallback, timeout, timeout > 0 ? timeout : 1);
     uv_async_send(&loop->wq_async);
 
     napi_value timerId = nullptr;

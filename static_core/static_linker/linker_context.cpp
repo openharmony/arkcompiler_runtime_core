@@ -781,6 +781,127 @@ void Context::ComputeLayout()
     cont_.ComputeLayout();
 }
 
+bool Context::MethodFind(const std::string &className, const std::string &methodName,
+                         std::map<std::string, panda_file::BaseClassItem *> &classesMap)
+{
+    auto it = classesMap.find(className);
+    if (it != classesMap.end() && !it->second->IsForeign()) {
+        auto classItem = static_cast<panda_file::ClassItem *>(it->second);
+        auto methodNameItem = std::make_unique<panda_file::StringItem>(methodName);
+        auto range = classItem->FindMethod(methodNameItem.get());
+        if (range.first != range.second) {
+            classItem->SetDependencyMark();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Context::FileFind(const std::string &fileName, std::map<std::string, panda_file::BaseClassItem *> &classesMap)
+{
+    bool found = false;
+    auto dotPos = fileName.rfind('.');
+    if (dotPos == std::string::npos) {
+        return found;
+    }
+    auto suffix = fileName.substr(dotPos + 1);
+    if (suffix != "ets" && suffix != "sts") {
+        return found;
+    }
+
+    auto fileNameFromEntry = fileName.substr(0, dotPos);
+    std::replace(fileNameFromEntry.begin(), fileNameFromEntry.end(), '.', '/');
+    fileNameFromEntry.insert(fileNameFromEntry.begin(), 'L');
+
+    for (auto &entry : classesMap) {
+        auto classItemName = entry.first;
+        auto lastSlash = classItemName.rfind('/');
+        if (lastSlash != std::string::npos) {
+            auto fileNameFromClass = classItemName.substr(0, lastSlash);
+            if (fileNameFromEntry == fileNameFromClass) {
+                entry.second->SetDependencyMark();
+                found = true;
+            }
+        }
+    }
+    return found;
+}
+
+bool Context::HandleEntryDependencies()
+{
+    auto &cm = *cont_.GetClassMap();
+    for (const auto &name : conf_.entryNames) {
+        auto dotPos = name.rfind('.');
+        auto firstSlash = name.find('/');
+        auto lastSlash = name.rfind('/');
+        if (dotPos != std::string::npos && dotPos != 0 && dotPos < name.size() - 1) {
+            // if entry is filename
+            if (FileFind(name, cm)) {
+                continue;
+            }
+        } else if (firstSlash != std::string::npos && lastSlash != std::string::npos && lastSlash > firstSlash) {
+            // if entry is method
+            auto classNameFromEntry = name.substr(0, lastSlash);
+            classNameFromEntry.insert(classNameFromEntry.begin(), 'L');
+            classNameFromEntry += ";";
+            auto methodNameFromEntry = name.substr(lastSlash + 1);
+            if (MethodFind(classNameFromEntry, methodNameFromEntry, cm)) {
+                continue;
+            }
+        }
+        // try look up as classname for last try
+        auto className = name + ";";
+        className.insert(className.begin(), 'L');
+        auto it = cm.find(className);
+        if (it != cm.end()) {
+            it->second->SetDependencyMark();
+        } else {
+            Error("Entry not found", {ErrorDetail("Entry", name)});
+            return false;
+        }
+    }
+    return true;
+}
+
+void Context::TryDelete()
+{
+    if (!conf_.allFileIsEntry && conf_.entryNames.empty()) {
+        return;
+    }
+    for (auto &name : conf_.entryNames) {
+        if (name == "*") {
+            conf_.allFileIsEntry = true;
+        }
+    }
+    auto &cm = *cont_.GetClassMap();
+    if (conf_.allFileIsEntry) {
+        for (auto &entry : cm) {
+            if (entry.second->GetItemType() == panda_file::ItemTypes::CLASS_ITEM) {
+                entry.second->SetDependencyMark();
+            }
+        }
+    } else {
+        if (!HandleEntryDependencies()) {
+            return;
+        }
+    }
+    // All LiteralarrayMap should be reserved
+    cont_.MarkLiteralarrayMap();
+    patcher_.AddStringDependency();
+    // patches may not be available after items delete, try delete patches before delete items.
+    patcher_.TryDeletePatch();
+    // delete class index map.
+    for (auto it = cm.begin(); it != cm.end();) {
+        if (it->second->GetDependencyMark()) {
+            ++it;
+        } else {
+            it = cm.erase(it);
+        }
+    }
+    cont_.DeleteForeignItems();
+    cont_.DeleteItems();
+}
+
 void Context::Patch()
 {
     patcher_.Patch({0, patcher_.GetSize()});

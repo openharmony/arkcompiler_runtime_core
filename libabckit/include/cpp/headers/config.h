@@ -19,7 +19,7 @@
 #include "../../c/metadata_core.h"
 #include "../../c/ir_core.h"
 #include "../../c/isa/isa_dynamic.h"
-#include "../../../src/include_v2/c/isa/isa_static.h"
+#include "../../c/isa/isa_static.h"
 #include "../../c/extensions/arkts/metadata_arkts.h"
 #include "../../c/extensions/js/metadata_js.h"
 

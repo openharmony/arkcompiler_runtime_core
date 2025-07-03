@@ -30,6 +30,15 @@ coretypes:
 - managed_class: std.core.Type
   mirror_class: ark::ets::EtsTypeAPIType
 
+- managed_class: escompat.ArrayBuffer
+  mirror_class: ark::ets::EtsEscompatArrayBuffer
+
+- managed_class: std.interop.ESValue
+  mirror_class: ark::ets::interop::js::ESValue
+
+- managed_class: std.core.RuntimeLinker
+  mirror_class: ark::ets::EtsRuntimeLinker
+
 intrinsics_namespace: ark::ets::interop::js::intrinsics
 
 
@@ -94,6 +103,17 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
+
+  - name: JSRuntimeIsJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: isJSValue
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeIsJSValueIntrinsic
+    clear_flags: [can_throw, heap_inv, no_cse]    
 
   - name: JSRuntimeNewJSValueBigInt
     space: ets
@@ -1018,3 +1038,64 @@ intrinsics:
       args: [std.core.Object, i64]
     impl: ark::ets::interop::js::intrinsics::PromiseInteropRejectIntrinsic
     clear_flags: [can_throw]
+
+####################
+# std.js.InteropTransferHelper #
+####################
+  - name: InteropTransferHelperTransferArrayBufferToStaticImpl
+    space: ets
+    class_name: std.interop.js.InteropTransferHelper
+    method_name: transferArrayBufferToStaticImpl
+    static: true
+    signature:
+      ret: escompat.ArrayBuffer
+      args: [std.interop.ESValue]
+    impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic
+    clear_flags: []
+
+  - name: InteropTransferHelperTransferArrayBufferToDynamicImpl
+    space: ets
+    class_name: std.interop.js.InteropTransferHelper
+    method_name: transferArrayBufferToDynamicImpl
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [escompat.ArrayBuffer]
+    impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic
+    clear_flags: []
+
+  - name: InteropTransferHelperCreateDynamicTypedArray
+    space: ets
+    class_name: std.interop.js.InteropTransferHelper
+    method_name: createDynamicTypedArray
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [escompat.ArrayBuffer, i32, f64, f64]
+    impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicTypedArrayIntrinsic
+    clear_flags: []
+
+  - name: InteropTransferHelperCreateDynamicDataView
+    space: ets
+    class_name: std.interop.js.InteropTransferHelper
+    method_name: createDynamicDataView
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [escompat.ArrayBuffer, f64, f64]
+    impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicDataViewIntrinsic
+    clear_flags: []
+
+####################
+# std.interop.InteropContext #
+####################
+  - name: InteropContextSetInteropRuntimeLinkerImpl
+    space: ets
+    class_name: std.interop.InteropContext
+    method_name: setInteropRuntimeLinker
+    static: true
+    signature:
+      ret: void
+      args: [std.core.RuntimeLinker]
+    impl: ark::ets::interop::js::intrinsics::InteropContextSetInteropRuntimeLinkerImplIntrinsic
+    clear_flags: []

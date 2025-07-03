@@ -13,52 +13,52 @@
  * limitations under the License.
  */
 
-let r1 = Promise.reject<string>(new Error("rejected 0"))
-let f1 = Promise.resolve<string>("fulfilled 1");
-let r2 = Promise.reject<string>(new Error("rejected 2"));
-let f2 = Promise.resolve<string>("fulfilled 3");
-let r3 = Promise.reject<string>(new Error("rejected 4"));
-let f3 = Promise.resolve<string>("fulfilled 5");
+let r1 = Promise.reject<string>(new Error('rejected 0'))
+let f1 = Promise.resolve<string>('fulfilled 1');
+let r2 = Promise.reject<string>(new Error('rejected 2'));
+let f2 = Promise.resolve<string>('fulfilled 3');
+let r3 = Promise.reject<string>(new Error('rejected 4'));
+let f3 = Promise.resolve<string>('fulfilled 5');
 Promise.allSettled([r1, f1, r2, f2, r3, f3]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 6) {
-        console.log("Test failed. Expected a string array of length 6 but got length " + values.length + ".");
+        console.log('Test failed. Expected a string array of length 6 but got length ' + values.length + '.');
         return;
     }
-    if (values[0].status != "rejected" || values[2].status != "rejected" || values[4].status != "rejected") {
-        console.log("Test failed. Expected elements 0, 2, 4 have status 'rejected'.");
+    if (values[0].status != 'rejected' || values[2].status != 'rejected' || values[4].status != 'rejected') {
+        console.log('Test failed. Expected elements 0, 2, 4 have status \'rejected\'.');
         return;
     }
-    if (values[1].status != "fulfilled" || values[3].status != "fulfilled" || values[5].status != "fulfilled") {
-        console.log("Test failed. Expected elements 1, 3, 5 have status 'fulfilled'.");
+    if (values[1].status != 'fulfilled' || values[3].status != 'fulfilled' || values[5].status != 'fulfilled') {
+        console.log('Test failed. Expected elements 1, 3, 5 have status \'fulfilled\'.');
         return;
     }
-    if ((values[0] as PromiseRejectedResult).reason.message != "rejected 0") {
-        console.log("Test failed. Unexpected value of the element 0.");
+    if ((values[0] as PromiseRejectedResult).reason.message != 'rejected 0') {
+        console.log('Test failed. Unexpected value of the element 0.');
         return;
     }
-    if ((values[1] as PromiseFulfilledResult<string>).value != "fulfilled 1") {
-        console.log("Test failed. Unexpected value of the element 1.");
+    if ((values[1] as PromiseFulfilledResult<string>).value != 'fulfilled 1') {
+        console.log('Test failed. Unexpected value of the element 1.');
         return;
     }
-    if ((values[2] as PromiseRejectedResult).reason.message != "rejected 2") {
-        console.log("Test failed. Unexpected value of the element 2.");
+    if ((values[2] as PromiseRejectedResult).reason.message != 'rejected 2') {
+        console.log('Test failed. Unexpected value of the element 2.');
         return;
     }
-    if ((values[3] as PromiseFulfilledResult<string>).value != "fulfilled 3") {
-        console.log("Test failed. Unexpected value of the element 3.");
+    if ((values[3] as PromiseFulfilledResult<string>).value != 'fulfilled 3') {
+        console.log('Test failed. Unexpected value of the element 3.');
         return;
     }
-    if ((values[4] as PromiseRejectedResult).reason.message != "rejected 4") {
-        console.log("Test failed. Unexpected value of the element 4.");
+    if ((values[4] as PromiseRejectedResult).reason.message != 'rejected 4') {
+        console.log('Test failed. Unexpected value of the element 4.');
         return;
     }
-    if ((values[5] as PromiseFulfilledResult<string>).value != "fulfilled 5") {
-        console.log("Test failed. Unexpected value of the element 5.");
+    if ((values[5] as PromiseFulfilledResult<string>).value != 'fulfilled 5') {
+        console.log('Test failed. Unexpected value of the element 5.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
-}).catch((e: Object): void => {
-    console.log("Test failed: " + e);
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+}).catch((e: Error): void => {
+    console.log('Test failed: ' + e);
 });

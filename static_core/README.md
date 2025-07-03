@@ -14,6 +14,7 @@ Detailed info:
 1. [How to use es2panda, ark, ark_aot, verifier](#how-to-use-es2panda-ark-ark_aot-verifier)
 1. [Build modes](#build-modes)
 1. [Toolchains](#toolchains)
+1. [Enable CPU features](#enable-cpu-features)
 1. [Plugins system](#plugins-system)
 1. [Building with GN (still not all targets are supported)](#building-with-gn)
 1. [Building with LLVM Backend](#building-with-llvm-backend)
@@ -203,6 +204,16 @@ All types of toolchains are located by path: `runtime_core/static_core/cmake/too
 You can already see how the toolchain name is built and what it is used for. By analogy, so for all the others.
 
 For more details, see the [build system](cmake/README.md).
+
+## Enable CPU features
+
+To specify what CPU features will be supported by the target CPU, the `PANDA_TARGET_CPU_FEATURES` variable may be set.
+This list of the features will be passed into numerous custom tools during the building of the VM itself, e.g., in
+[irtoc](irtoc/README.md) and influence what instructions will be selected by these tools:
+
+```
+$ cmake -DPANDA_TARGET_CPU_FEATURES=jscvt,atomics
+```
 
 ## Plugins system
 

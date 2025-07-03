@@ -29,6 +29,7 @@ class InteropCtx;
 }  // namespace ark::ets::interop::js
 
 namespace ark::ets::interop::js::ets_proxy {
+class SharedReferenceStorageVerifier;
 namespace testing {
 class SharedReferenceStorage1GTest;
 }  // namespace testing
@@ -58,6 +59,9 @@ public:
     PANDA_PUBLIC_API SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
                                                          const PreInitJSObjectCallback &preInitCallback = nullptr);
     SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+
+    SharedReference *CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+
     SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
     PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject) const;
@@ -76,7 +80,7 @@ public:
     void VisitRoots(const GCRootVisitor &visitor) override;
 
     /// Update ref in the storage for EtsObject-s after moving phase
-    void UpdateRefs() override;
+    void UpdateRefs(const GCRootUpdater &gcRootUpdater) override;
 
     /// Remove all unmarked refs after XGC (can be run concurrently)
     void SweepUnmarkedRefs();
@@ -105,11 +109,16 @@ public:
     }
 
     static constexpr size_t MAX_POOL_SIZE = (sizeof(void *) > 4) ? 1_GB : 64_MB;
+    static constexpr std::string_view PROXY_NAPI_WRAPPER = "_proxynapiwrapper";
 
 private:
     SharedReferenceStorage(PandaEtsVM *vm, void *data, size_t size) : SharedReferencePool(data, size), vm_(vm) {}
     NO_COPY_SEMANTIC(SharedReferenceStorage);
     NO_MOVE_SEMANTIC(SharedReferenceStorage);
+
+    template <SharedReference::InitFn REF_INIT>
+    SharedReference *CreateRefCommon(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                     const PreInitJSObjectCallback &callback = nullptr);
 
     PANDA_PUBLIC_API static SharedReferenceStorage *GetCurrent()
     {
@@ -159,6 +168,7 @@ private:
     friend class testing::SharedReferenceStorage1GTest;
     // Allocator calls our protected ctor
     friend class mem::Allocator;
+    friend class SharedReferenceStorageVerifier;
 
     PANDA_PUBLIC_API static SharedReferenceStorage *sharedStorage_;
 

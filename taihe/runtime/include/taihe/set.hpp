@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_SET_HPP
-#define TAIHE_SET_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_SET_HPP_
+#define RUNTIME_INCLUDE_TAIHE_SET_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.hpp>
 
@@ -21,9 +22,6 @@
 
 #define SET_GROWTH_FACTOR 2
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename K>
 struct set_view;
@@ -33,17 +31,20 @@ struct set;
 
 template <typename K>
 struct set_view {
+public:
+    using item_t = K const;
+
     void reserve(std::size_t cap) const
     {
         if (cap == 0) {
             return;
         }
-        item_t **bucket = reinterpret_cast<item_t **>(calloc(cap, sizeof(item_t *)));
+        node_t **bucket = reinterpret_cast<node_t **>(calloc(cap, sizeof(node_t *)));
         for (std::size_t i = 0; i < m_handle->cap; i++) {
-            item_t *current = m_handle->bucket[i];
+            node_t *current = m_handle->bucket[i];
             while (current) {
-                item_t *next = current->next;
-                std::size_t index = taihe::hash(current->key) % cap;
+                node_t *next = current->next;
+                std::size_t index = std::hash<K>()(current->item) % cap;
                 current->next = bucket[index];
                 bucket[index] = current;
                 current = next;
@@ -59,6 +60,11 @@ struct set_view {
         return m_handle->size;
     }
 
+    bool empty() const noexcept
+    {
+        return m_handle->size == 0;
+    }
+
     std::size_t capacity() const noexcept
     {
         return m_handle->cap;
@@ -68,7 +74,7 @@ struct set_view {
     {
         for (std::size_t i = 0; i < m_handle->cap; i++) {
             while (m_handle->bucket[i]) {
-                item_t *next = m_handle->bucket[i]->next;
+                node_t *next = m_handle->bucket[i]->next;
                 delete m_handle->bucket[i];
                 m_handle->bucket[i] = next;
             }
@@ -76,104 +82,104 @@ struct set_view {
         m_handle->size = 0;
     }
 
-    bool emplace(as_param_t<K> key) const
+    template <bool cover = false>
+    std::pair<item_t *, bool> emplace(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
-        item_t *current = m_handle->bucket[index];
-        while (current) {
-            if (taihe::same(current->key, key)) {
-                return false;
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t **current_ptr = &m_handle->bucket[index];
+        while (*current_ptr) {
+            if ((*current_ptr)->item == key) {
+                if (cover) {
+                    node_t *replaced = new node_t {
+                        .item = key,
+                        .next = (*current_ptr)->next,
+                    };
+                    node_t *current = *current_ptr;
+                    *current_ptr = replaced;
+                    delete current;
+                }
+                return {&(*current_ptr)->item, false};
             }
-            current = current->next;
+            current_ptr = &(*current_ptr)->next;
         }
-        item_t *item = new item_t {
-            .key = key,
+        node_t *node = new node_t {
+            .item = key,
             .next = m_handle->bucket[index],
         };
-        m_handle->bucket[index] = item;
+        m_handle->bucket[index] = node;
         m_handle->size++;
         std::size_t required_cap = m_handle->size;
         if (required_cap >= m_handle->cap) {
             reserve(required_cap * SET_GROWTH_FACTOR);
         }
-        return true;
+        return {&node->item, true};
     }
 
-    bool find(as_param_t<K> key) const
+    item_t *find_item(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
-        item_t *current = m_handle->bucket[index];
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t *current = m_handle->bucket[index];
         while (current) {
-            if (taihe::same(current->key, key)) {
-                return true;
+            if (current->item == key) {
+                return &current->item;
             }
             current = current->next;
+        }
+        return nullptr;
+    }
+
+    // TODO: Change the return type to item_t *
+    bool find(as_param_t<K> key) const
+    {
+        item_t *item = find_item(key);
+        if (item) {
+            return true;
         }
         return false;
     }
 
     bool erase(as_param_t<K> key) const
     {
-        std::size_t index = taihe::hash(key) % m_handle->cap;
-        item_t **current_ptr = &m_handle->bucket[index];
+        std::size_t index = std::hash<K>()(key) % m_handle->cap;
+        node_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (taihe::same((*current_ptr)->key, key)) {
-                item_t *current = *current_ptr;
+            if ((*current_ptr)->item == key) {
+                node_t *current = *current_ptr;
                 *current_ptr = (*current_ptr)->next;
                 delete current;
                 m_handle->size--;
                 return true;
-            } else {
-                current_ptr = &(*current_ptr)->next;
             }
+            current_ptr = &(*current_ptr)->next;
         }
         return false;
     }
 
-    template <typename Visitor>
-    void accept(Visitor &&visitor)
-    {
-        for (std::size_t i = 0; i < m_handle->cap; i++) {
-            item_t *current = m_handle->bucket[i];
-            while (current) {
-                visitor(current->key);
-                current = current->next;
-            }
-        }
-    }
-
-    template <typename Visitor>
-    void accept(Visitor &&visitor) const
-    {
-        for (std::size_t i = 0; i < m_handle->cap; i++) {
-            item_t *current = m_handle->bucket[i];
-            while (current) {
-                visitor(current->key);
-                current = current->next;
-            }
-        }
-    }
-
-    struct item_t {
-        K key;
-        item_t *next;
+    struct node_t {
+        item_t item;
+        node_t *next;
     };
 
     struct iterator {
         using iterator_category = std::forward_iterator_tag;
-        using value_type = K const &;
+        using value_type = item_t;
         using difference_type = std::ptrdiff_t;
-        using pointer = K const *;
-        using reference = K const &;
+        using pointer = value_type *;
+        using reference = value_type &;
 
-        iterator(item_t **bucket, item_t *current, std::size_t index, std::size_t cap)
+        iterator(node_t **bucket, node_t *current, std::size_t index, std::size_t cap)
             : bucket(bucket), current(current), index(index), cap(cap)
         {
         }
 
-        value_type operator*() const
+        reference operator*() const
         {
-            return current->key;
+            return current->item;
+        }
+
+        pointer operator->() const
+        {
+            return &current->item;
         }
 
         iterator &operator++()
@@ -192,9 +198,9 @@ struct set_view {
 
         iterator operator++(int)
         {
-            iterator tmp = *this;
+            iterator ocp = *this;
             ++(*this);
-            return tmp;
+            return ocp;
         }
 
         bool operator==(iterator const &other) const
@@ -208,8 +214,8 @@ struct set_view {
         }
 
     private:
-        item_t **bucket;
-        item_t *current;
+        node_t **bucket;
+        node_t *current;
         std::size_t index;
         std::size_t cap;
     };
@@ -229,41 +235,59 @@ struct set_view {
         return iterator(m_handle->bucket, nullptr, m_handle->cap, m_handle->cap);
     }
 
-    iterator cbegin() const
+    using const_iterator = iterator;
+
+    const_iterator cbegin() const
     {
         return begin();
     }
 
-    iterator cend() const
+    const_iterator cend() const
     {
         return end();
     }
 
+    template <typename Visitor>
+    void accept(Visitor &&visitor) const
+    {
+        for (std::size_t i = 0; i < m_handle->cap; i++) {
+            node_t *current = m_handle->bucket[i];
+            while (current) {
+                visitor(current->item);
+                current = current->next;
+            }
+        }
+    }
+
 private:
-    struct data_t {
+    struct handle_t {
         TRefCount count;
         std::size_t cap;
-        item_t **bucket;
+        node_t **bucket;
         std::size_t size;
     } *m_handle;
 
-    explicit set_view(data_t *handle) : m_handle(handle) {}
+    explicit set_view(handle_t *handle) : m_handle(handle) {}
 
     friend struct set<K>;
 
-    friend bool taihe::same_impl(adl_helper_t, set_view lhs, set_view rhs);
-    friend std::size_t taihe::hash_impl(adl_helper_t, set_view val);
+    friend struct std::hash<set<K>>;
+
+    friend bool operator==(set_view lhs, set_view rhs)
+    {
+        return lhs.m_handle == rhs.m_handle;
+    }
 };
 
 template <typename K>
 struct set : set_view<K> {
-    using typename set_view<K>::item_t;
-    using typename set_view<K>::data_t;
+    using typename set_view<K>::node_t;
+    using typename set_view<K>::handle_t;
     using set_view<K>::m_handle;
 
-    explicit set(std::size_t cap = 16) : set(reinterpret_cast<data_t *>(calloc(1, sizeof(data_t))))
+    explicit set(std::size_t cap = 16) : set(reinterpret_cast<handle_t *>(calloc(1, sizeof(handle_t))))
     {
-        item_t **bucket = reinterpret_cast<item_t **>(calloc(cap, sizeof(item_t *)));
+        node_t **bucket = reinterpret_cast<node_t **>(calloc(cap, sizeof(node_t *)));
         tref_set(&m_handle->count, 1);
         m_handle->cap = cap;
         m_handle->bucket = bucket;
@@ -305,20 +329,8 @@ struct set : set_view<K> {
     }
 
 private:
-    explicit set(data_t *handle) : set_view<K>(handle) {}
+    explicit set(handle_t *handle) : set_view<K>(handle) {}
 };
-
-template <typename K>
-inline bool same_impl(adl_helper_t, set_view<K> lhs, set_view<K> rhs)
-{
-    return lhs.m_handle == rhs.m_handle;
-}
-
-template <typename K>
-inline std::size_t hash_impl(adl_helper_t, set_view<K> val)
-{
-    return reinterpret_cast<std::size_t>(val.m_handle);
-}
 
 template <typename K>
 struct as_abi<set<K>> {
@@ -335,10 +347,17 @@ struct as_param<set<K>> {
     using type = set_view<K>;
 };
 }  // namespace taihe
-// NOLINTEND
+
+template <typename K>
+struct std::hash<taihe::set<K>> {
+    std::size_t operator()(taihe::set_view<K> val) const noexcept
+    {
+        return reinterpret_cast<std::size_t>(val.m_handle);
+    }
+};
 
 #ifdef SET_GROWTH_FACTOR
 #undef SET_GROWTH_FACTOR
-#endif // SET_GROWTH_FACTOR
-
-#endif // TAIHE_SET_HPP
+#endif
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_SET_HPP_

@@ -15,21 +15,35 @@
 
 package conversion_types.test;
 
-const buffer = new ArrayBuffer(1);
-const dataView = new DataView(buffer);
-dataView.setUint8(0, 255)
-
-const globStsString: String = new String("Hello");
-const globStsNumber: Number = new Number(42 as number);
-const globStsInt: Int = new Int(42);
-const globStsByte: Byte = new Byte(126 as byte);
-const globStsShort: Short = new Short(4242 as short);
-const globStsLong: Long = new Long(42 as long);
-const globStsFloat: Float = new Float(42.42 as float);
-const globStsDouble: Double = new Double(42.42 as double);
-const globStsChar: Char = new Char('a');
-const globStsBoolean: Boolean = new Boolean(true);
-const globStsBigInt: BigInt = new BigInt(42);
+const buffer: ArrayBuffer;
+const dataView: DataView;
+const globStsString: String;
+const globStsNumber: Number;
+const globStsInt: Int;
+const globStsByte: Byte;
+const globStsShort: Short;
+const globStsLong: Long;
+const globStsFloat: Float;
+const globStsDouble: Double;
+const globStsChar: Char;
+const globStsBoolean: Boolean;
+const globStsBigInt: BigInt;
+static {
+    buffer = new ArrayBuffer(1);
+    dataView = new DataView(buffer);
+    dataView.setUint8(0, 255)
+    globStsString = new String("Hello");
+    globStsNumber = new Number(42 as number);
+    globStsInt = new Int(42);
+    globStsByte = new Byte(126 as byte);
+    globStsShort = new Short(4242 as short);
+    globStsLong = new Long(42 as long);
+    globStsFloat = new Float(42.42 as float);
+    globStsDouble = new Double(42.42 as double);
+    globStsChar = new Char(c'a');
+    globStsBoolean = new Boolean(true);
+    globStsBigInt = new BigInt(42);
+}
 
 class DeferentIntTypes {
     systemHexadecimal = 16;
@@ -46,7 +60,7 @@ class DeferentIntTypes {
 }
 
 class DeferentStringTypes {
-    ch: char = 'a';
+    ch: char = c'a';
     str: string = "hello";
     lit: "one" | "two" = "one";
 }

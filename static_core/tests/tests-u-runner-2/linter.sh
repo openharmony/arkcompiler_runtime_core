@@ -28,18 +28,22 @@ activate_venv
 set +e
 
 EXIT_CODE=0
-RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner
+RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner-2
 
 cd "${RUNNER_DIR}"
 
-pylint --rcfile .pylintrc runner main.py runner_test.py
+echo "Pylint /runner, main.py"
+pylint --rcfile .pylintrc runner main.py --ignore=test262,config_test,reports,runner_file_based.py
+pylint --rcfile .pylintrc runner/extensions/generators/test262/ runner/test/config_test runner/reports runner/runner_file_based.py --disable=duplicate-code
 save_exit_code ${EXIT_CODE} $?
 EXIT_CODE=$?
 
+echo "MyPy main.py"
 mypy main.py
 save_exit_code ${EXIT_CODE} $?
 EXIT_CODE=$?
 
+echo "MyPy /runner"
 mypy -p runner
 save_exit_code ${EXIT_CODE} $?
 EXIT_CODE=$?

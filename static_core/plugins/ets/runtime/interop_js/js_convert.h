@@ -368,40 +368,6 @@ JSCONVERT_UNWRAP(Promise)
     return hpromise.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsEscompatArrayBuffer *);
-
-JSCONVERT_WRAP(ArrayBuffer)
-{
-    napi_value buf;
-    void *data;
-    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
-    NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
-    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()), etsVal->GetByteLength(),
-                reinterpret_cast<uint8_t *>(data));
-    return buf;
-}
-
-JSCONVERT_UNWRAP(ArrayBuffer)
-{
-    bool isArraybuf = false;
-    NAPI_CHECK_FATAL(napi_is_arraybuffer(env, jsVal, &isArraybuf));
-    if (!isArraybuf) {
-        InteropCtx::Fatal("Passed object is not an ArrayBuffer!");
-        UNREACHABLE();
-    }
-    void *data = nullptr;
-    size_t byteLength = 0;
-    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
-    NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, jsVal, &data, &byteLength));
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(currentCoro);
-    void *etsData = nullptr;
-    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(currentCoro, byteLength, &etsData);
-    EtsHandle<EtsEscompatArrayBuffer> hbuffer(currentCoro, arrayBuffer);
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
-    return hbuffer.GetPtr();
-}
-
 JSCONVERT_DEFINE_TYPE(EtsNull, EtsObject *);
 JSCONVERT_WRAP(EtsNull)
 {
@@ -427,31 +393,37 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
+    napi_status jsStatus;
+    auto coro = EtsCoroutine::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
-        // No access to jsvalue after this line
-        napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
-        if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
-            return {};
-        }
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_get_named_property(env, jsVal, name, &jsVal);
+    }
+    if (jsStatus != napi_ok) {
+        return {};
     }
     return T::UnwrapWithNullCheck(ctx, env, jsVal);
 }
 
 template <typename T>
-[[nodiscard]] static ALWAYS_INLINE inline bool JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
-                                                                typename T::cpptype etsPropVal)
+ALWAYS_INLINE inline void JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, const char *name,
+                                           typename T::cpptype etsPropVal)
 {
     auto env = ctx->GetJSEnv();
     napi_value jsVal = jsvalue->GetNapiValue(env);
     napi_value jsPropVal = T::WrapWithNullCheck(env, etsPropVal);
     if (UNLIKELY(jsPropVal == nullptr)) {
-        return false;
+        return;
     }
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
-    // No access to jsvalue after this line
-    napi_status rc = napi_set_named_property(env, jsVal, name, jsPropVal);
-    return rc != napi_pending_exception && !NapiThrownGeneric(rc);
+    auto coro = EtsCoroutine::GetCurrent();
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_set_named_property(env, jsVal, name, jsPropVal);
+    }
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+    }
 }
 
 }  // namespace ark::ets::interop::js

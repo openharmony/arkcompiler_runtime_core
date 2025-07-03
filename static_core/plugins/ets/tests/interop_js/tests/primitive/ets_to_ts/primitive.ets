@@ -55,7 +55,7 @@ function getLongBoxed(): Long {
 }
 
 function getFloatPrimitive(): float {
-    return 1.0
+    return 1.0f
 }
 
 function getFloatBoxed(): Float {

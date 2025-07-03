@@ -1,0 +1,72 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+type: workflow
+workflow-name: panda-aot-pgo
+parameters:
+    # common
+    build: ${PANDA_BUILD}
+    work-dir: ${parameters.work-dir}
+    load-runtimes: ${parameters.load-runtimes}
+    # es2panda and verifier
+    opt-level: 2
+    es2panda-timeout: 30
+    verifier-timeout: 30
+    enable-es2panda: True
+    enable-verifier: True
+    extension: ${parameters.extension}
+    # ark and ark_aot
+    ark-profile-timeout: 180
+    aot-timeout: 30
+    ark-timeout: 180
+    aot-args: [ ]
+    gc-type: g1-gc
+    full-gc-bombing-frequency: 0
+    heap-verifier: fail_on_verification
+    ark-args: [ ]
+steps:
+    imports:
+        only-es2panda:
+            opt-level: ${parameters.opt-level}
+            build: ${parameters.build}
+            work-dir: ${parameters.work-dir}
+            extension: ${parameters.extension}
+            load-runtimes: ${parameters.load-runtimes}
+            enable-es2panda: ${parameters.enable-es2panda}
+            enable-verifier: ${parameters.enable-verifier}
+            es2panda-timeout: ${parameters.es2panda-timeout}
+            verifier-timeout: ${parameters.verifier-timeout}
+        ark-aot-pgo:
+            build: ${parameters.build}
+            work-dir: ${parameters.work-dir}
+            heap-verifier: ${parameters.heap-verifier}
+            gc-type: ${parameters.gc-type}
+            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+            load-runtimes: ${parameters.load-runtimes}
+            compiler-enable-jit: "true"
+            ark-timeout: ${parameters.ark-profile-timeout}
+            aot-timeout: ${parameters.aot-timeout}
+            aot-args: ${parameters.aot-args}
+        only-runtime:
+            ark-timeout: ${parameters.ark-timeout}
+            build: ${parameters.build}
+            work-dir: ${parameters.work-dir}
+            heap-verifier: ${parameters.heap-verifier}
+            gc-type: ${parameters.gc-type}
+            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+            load-runtimes: ${parameters.load-runtimes}
+            compiler-enable-jit: "false"
+            ark-args:
+                - ${parameters.ark-full-args}
+                - "--aot-files=${parameters.paoc-output-file}"
+                - "--enable-an:force"

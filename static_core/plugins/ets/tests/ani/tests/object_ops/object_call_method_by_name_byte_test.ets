@@ -75,7 +75,7 @@ class B implements ji {
     }
 
     calculateSum(value1: byte, value2: char, value3: int): byte {
-        let aChar: char = 'A';
+        let aChar: char = c'A';
         if (value2 == aChar) {
             return this.data - value1 as byte;
         }

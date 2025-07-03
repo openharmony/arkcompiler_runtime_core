@@ -51,7 +51,7 @@ function FullGCWeakRefsMarkingCheck(): void
     let wr_with_reachable = new WeakRef<Object>(reachable_obj);
     // Run Full GC for referent collection
     try {
-        let gc_id = GC.startGC(GC.FULL_CAUSE);
+        let gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gc_id);
     } catch (e) {
         throw new Error("Unexpected exception during GC");

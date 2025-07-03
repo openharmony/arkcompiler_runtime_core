@@ -12,10 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getDataMaythrow, maythrow, noReturnBusinessError, noReturnMaythrow} from "@generated/maythrow";
-import * as System from "std/core/System";
-
-import {BusinessError} from "./@ohos.base.ets"
+import {BusinessError} from "@ohos.base";
+import {getDataMaythrow, maythrow, noReturnBusinessError, noReturnMaythrow} from "maythrow";
 
 loadLibrary("ani_maythrow");
 
@@ -80,5 +78,5 @@ function main() {
         check_error_when_return_complex_object)
     suite.addTest("check error when no return", check_error_when_no_return)
     suite.addTest("check business error", check_business_error)
-    System.exit(suite.run())
+    exit(suite.run())
 }

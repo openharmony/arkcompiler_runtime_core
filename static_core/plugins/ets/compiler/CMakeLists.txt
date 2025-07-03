@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,7 @@ file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 set(COMPILER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ir_builder/ets_inst_builder.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_intrinsics_inlining_expansion.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_intrinsics_peephole.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_codegen_extensions.cpp
   ${PANDA_ETS_PLUGIN_SOURCE}/compiler/ir_build_intrinsics_ets.cpp

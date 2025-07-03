@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 
 import argparse
 from functools import cached_property
-from typing import Dict, Optional, Any, cast
+from typing import Any, cast
 
 from runner.options.options import IOptions
 from runner.utils import make_dir_if_not_exist
@@ -25,10 +25,10 @@ from runner.utils import make_dir_if_not_exist
 
 class CoverageOptions(IOptions):
     __USE_LLVM_COV = "use-llvm-cov"
-    __LLVM_PROFDATA_OUT_PATH = "llvm-cov-profdata-out-path"
-    __LLVM_COV_HTML_OUT_PATH = "llvm-cov-html-out-path"
+    __LLVM_PROFDATA_OUT_PATH = "profdata-files-dir"
+    __LLVM_COV_HTML_OUT_PATH = "coverage-html-report-dir"
 
-    def __init__(self, args: Dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__(args)
         self.__parameters = args
 
@@ -53,11 +53,11 @@ class CoverageOptions(IOptions):
         return cast(bool, self.__parameters[self.__USE_LLVM_COV])
 
     @cached_property
-    def llvm_profdata_out_path(self) -> Optional[str]:
+    def profdata_files_dir(self) -> str | None:
         value = self.__parameters[self.__LLVM_PROFDATA_OUT_PATH]
         return str(value) if value is not None else value
 
     @cached_property
-    def llvm_cov_html_out_path(self) -> Optional[str]:
+    def coverage_html_report_dir(self) -> str | None:
         value = self.__parameters[self.__LLVM_COV_HTML_OUT_PATH]
         return str(value) if value is not None else value

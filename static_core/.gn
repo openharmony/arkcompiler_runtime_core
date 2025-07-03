@@ -19,5 +19,15 @@ buildconfig = "//build/config/BUILDCONFIG.gn"
 secondary_source = "//gn"
 script_executable = "/usr/bin/env"
 
-exec_script("//scripts/install-third-party")
+if (!defined(ark_standalone_build)) {
+  ark_standalone_build = false
+}
+
+if (!ark_standalone_build) {
+  third_party_script_args = [ "--node" ]
+  exec_script("//scripts/install-third-party", third_party_script_args)
+} else {
+  exec_script("//scripts/install-third-party")
+}
+
 exec_script("//gn/build/fixup-third-party.sh")

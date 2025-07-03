@@ -32,4 +32,4 @@ interface PlayString {
 function makePlayStringIface(): PlayString;
 function to_f32(a: String): f32;
 function from_f32(a: f32): String;
-function concatString2(s:String, n: i32, sArr: Array<String>, b: bool, buffer: Array<u8>): String;
+function concatString2(s:String, n: i32, sArr: Array<String>, b: bool, buffer: @arraybuffer Array<u8>): String;

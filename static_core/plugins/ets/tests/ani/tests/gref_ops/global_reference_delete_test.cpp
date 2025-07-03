@@ -57,4 +57,14 @@ TEST_F(GlobalReferenceDeleteTest, delete_object_local_ref)
     ASSERT_EQ(env_->GlobalReference_Delete(objectRef), ANI_INCORRECT_REF);
 }
 
+TEST_F(GlobalReferenceDeleteTest, invalid_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_ref undefinedGRef;
+    ASSERT_EQ(env_->GlobalReference_Create(undefinedRef, &undefinedGRef), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->GlobalReference_Delete(nullptr, undefinedGRef), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

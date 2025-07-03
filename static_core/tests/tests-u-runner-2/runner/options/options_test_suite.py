@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 import argparse
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Dict, Any, List, cast
+from typing import Any, cast
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
@@ -58,21 +58,21 @@ class TestSuiteOptions(IOptions):
     __DEFAULT_WITH_JS = False
     __WORK_DIR = "work-dir"
 
-    def __init__(self, args: Dict[str, Any], parent: IOptions):
+    def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(None)
         self.__name: str = cast(str, args[self.__TEST_SUITE])
         if not isinstance(parent, GeneralOptions):
             raise InvalidConfiguration(
                 "Incorrect configuration: test suite parent is not GeneralOptions")
         self._parent: GeneralOptions = parent
-        self.__parameters: Dict[str, Any] = self.__process_parameters(args)
+        self.__parameters: dict[str, Any] = self.__process_parameters(args) # type: ignore[explicit-any]
         self.__data = args[f"{self.__name}.data"]
         self.__default_list_root: Path = self._parent.static_core_root / 'tests' / 'tests-u-runner' / 'test-lists'
-        self.__list_root: Optional[str] = self.__data[self.__LIST_ROOT] \
+        self.__list_root: str | None = self.__data[self.__LIST_ROOT] \
             if self.__data[self.__LIST_ROOT] else str(self.__default_list_root)
-        self.__test_root: Optional[str] = self.__data[self.__TEST_ROOT] \
+        self.__test_root: str | None = self.__data[self.__TEST_ROOT] \
             if self.__data[self.__TEST_ROOT] else None
-        self.__collections: List[CollectionsOptions] = []
+        self.__collections: list[CollectionsOptions] = []
         self.test_lists = TestListsOptions(self.__parameters)
         self.ets = ETSOptions(self.__parameters)
         self.groups = GroupsOptions(self.__parameters)
@@ -97,10 +97,9 @@ class TestSuiteOptions(IOptions):
 
     @property
     def work_dir(self) -> str:
-        if self.__WORK_DIR in self.__parameters:
-            return str(self.__parameters[self.__WORK_DIR])
-        else:
+        if self.__WORK_DIR not in self.__parameters:
             raise InvalidConfiguration("work-dir is not specified")
+        return str(self.__parameters[self.__WORK_DIR])
 
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser) -> None:
@@ -130,24 +129,24 @@ class TestSuiteOptions(IOptions):
         GroupsOptions.add_cli_args(parser)
 
     @staticmethod
-    def __fill_collection(content: Dict) -> Dict:
+    def __fill_collection(content: dict) -> dict:
         for _, prop_value in content.items():
-            TestSuiteOptions.__fill_collection_props(prop_value)
+            if isinstance(prop_value, dict):
+                TestSuiteOptions.__fill_collection_props(prop_value)
         return content
 
     @staticmethod
-    def __fill_collection_props(prop_value: Any) -> None:
-        if isinstance(prop_value, dict):
-            for sub_key, sub_value in prop_value.items():
-                if isinstance(sub_value, list):
-                    prop_value[sub_key] = " ".join(sub_value)
+    def __fill_collection_props(prop_value: dict) -> None:
+        for sub_key, sub_value in prop_value.items():
+            if isinstance(sub_value, list):
+                prop_value[sub_key] = " ".join(sub_value)
 
     @cached_property
     def suite_name(self) -> str:
         return self.__name
 
     @cached_property
-    def collections(self) -> List[CollectionsOptions]:
+    def collections(self) -> list[CollectionsOptions]:
         return self.__collections
 
     @cached_property
@@ -163,20 +162,20 @@ class TestSuiteOptions(IOptions):
         return str(self.__parameters.get(self.__FILTER, self.__DEFAULT_FILTER))
 
     @cached_property
-    def parameters(self) -> Dict[str, Any]:
+    def parameters(self) -> dict[str, Any]: # type: ignore[explicit-any]
         return self.__parameters
 
-    def extension(self, collection: Optional[CollectionsOptions] = None) -> str:
+    def extension(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__EXTENSION, self.__DEFAULT_EXTENSION, collection))
 
-    def with_js(self, collection: Optional[CollectionsOptions] = None) -> bool:
+    def with_js(self, collection: CollectionsOptions | None = None) -> bool:
         return bool(self.get_parameter(self.__WITH_JS, self.__DEFAULT_WITH_JS, collection))
 
-    def load_runtimes(self, collection: Optional[CollectionsOptions] = None) -> str:
+    def load_runtimes(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__LOAD_RUNTIMES, self.__DEFAULT_LOAD_RUNTIMES, collection))
 
-    def get_parameter(self, key: str, default: Optional[Any] = None,
-                      collection: Optional[CollectionsOptions] = None) -> Optional[Any]:
+    def get_parameter(self, key: str, default: Any | None = None,   # type: ignore[explicit-any]
+                      collection: CollectionsOptions | None = None) -> Any | None:
         if collection is not None:
             value = collection.get_parameter(key, None)
             if value is not None:
@@ -217,8 +216,8 @@ class TestSuiteOptions(IOptions):
                 if new_coll_value != coll_value:
                     collection.parameters[coll_param] = new_coll_value
 
-    def __process_parameters(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        result: Dict[str, Any] = {}
+    def __process_parameters(self, args: dict[str, Any]) -> dict[str, Any]:  # type: ignore[explicit-any]
+        result: dict[str, Any] = {}  # type: ignore[explicit-any]
         for param_name, param_value in args.items():
             if param_name.startswith(f"{self.__name}.{self.__PARAMETERS}."):
                 param_name = convert_underscore(param_name[(len(self.__name) + len(self.__PARAMETERS) + 2):])

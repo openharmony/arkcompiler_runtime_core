@@ -23,7 +23,7 @@ tags: [compile-only, negative]
 
 
 function main() {
-    let SyntaxFormOne: String[] = ["Hello", "World", "Of", "ArkTS"];
+    let SyntaxFormOne: FixedArray<String> = ["Hello", "World", "Of", "ArkTS"];
     SyntaxFormOne.length = 5; // CTE: Attempting to increase the length of the array by assignment to length causes a compile-time error
 
 }

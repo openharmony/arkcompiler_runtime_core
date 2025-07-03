@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -21,7 +21,7 @@ class GetUndefinedTest : public AniTest {};
 
 TEST_F(GetUndefinedTest, get_undefined)
 {
-    ani_ref ref;
+    ani_ref ref = nullptr;
     ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
 
     auto isUndefined = CallEtsFunction<ani_boolean>("get_undefined_test", "isUndefined", ref);
@@ -33,4 +33,14 @@ TEST_F(GetUndefinedTest, invalid_argument)
     ASSERT_EQ(env_->GetUndefined(nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(GetUndefinedTest, testGetUndefined)
+{
+    ani_ref ref = nullptr;
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
+        ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+        auto isUndefined = CallEtsFunction<ani_boolean>("get_undefined_test", "isUndefined", ref);
+        ASSERT_EQ(isUndefined, ANI_TRUE);
+    }
+}
 }  // namespace ark::ets::ani::testing

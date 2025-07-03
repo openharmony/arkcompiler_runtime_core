@@ -32,7 +32,7 @@ export function SumString(a: string, b: string): string {
     return a + b;
 }
 
-export function ReplaceFirst(arr: Simple[], e: Simple): Simple[] {
+export function ReplaceFirst(arr: FixedArray<Simple>, e: Simple): FixedArray<Simple> {
     arr[0] = e;
     return arr;
 }

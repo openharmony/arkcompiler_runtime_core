@@ -20,14 +20,21 @@ package std.core;
 
 
 
+native function getFunctionObjectNameFromAnnotation(func: Object): string;
+
+export @interface NamedFunctionObject {
+    name: string;
+}
+
 type __T = object | null | undefined;
 
 export interface Function {
-    unsafeCall(...r: __T[]): __T
+    unsafeCall(...r: FixedArray<__T>): __T
+    get name(): string;
 }
 
 export interface FunctionN<R> extends Function {
-    invokeN(...r: __T[]): R;
+    invokeN(...r: FixedArray<__T>): R;
 }
 
 export interface __FunctionN extends FunctionN<__T> {}
@@ -38,7 +45,7 @@ export abstract class LambdaN implements __FunctionN {}
 export interface FunctionR0<in PR, out R>
     extends Function, __FunctionR1
 {
-    invokeR0(...r: PR[]): R;
+    invokeR0(...r: FixedArray<PR>): R;
 }
 export interface Function0<out R>
     extends FunctionR0<__T, R>, __Function1
@@ -48,80 +55,89 @@ export interface Function0<out R>
 export interface __FunctionR0 extends FunctionR0<__T, __T> {}
 export interface __Function0 extends Function0<__T> {}
 export abstract class LambdaR0 implements __FunctionR0 {
-    abstract invokeR0(...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR0(...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         return this.invokeR0(...r)
     }
-    final invokeR1(p1: __T, ...r: __T[]): __T {
+    final invokeR1(p1: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1]))
     }
-    final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
+    final invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2]))
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3]))
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4]))
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5]))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda0 implements __Function0 {
     abstract invoke0(): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 0) { throw new ArgumentsUnderapplicationError() }
         return this.invoke0()
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke1 (p1: __T): __T {
         return this.invoke0()
@@ -171,55 +187,55 @@ export abstract class Lambda0 implements __Function0 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke0()
     }
-    final invokeR0(...r: __T[]): __T {
+    final invokeR0(...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR1(p1: __T, ...r: __T[]): __T {
+    final invokeR1(p1: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
+    final invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke0()
     }
 }
@@ -227,7 +243,7 @@ export abstract class Lambda0 implements __Function0 {
 export interface FunctionR1<in P1, in PR, out R>
     extends Function, __FunctionR2
 {
-    invokeR1(p1: P1, ...r: PR[]): R;
+    invokeR1(p1: P1, ...r: FixedArray<PR>): R;
 }
 export interface Function1<in P1, out R>
     extends FunctionR1<P1, __T, R>, __Function2
@@ -237,78 +253,87 @@ export interface Function1<in P1, out R>
 export interface __FunctionR1 extends FunctionR1<__T, __T, __T> {}
 export interface __Function1 extends Function1<__T, __T> {}
 export abstract class LambdaR1 implements __FunctionR1 {
-    abstract invokeR1(p1: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR1(p1: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR1(r[0], 
             ...Runtime.removeFrontElementsStub(r, 1))
     }
-    final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
+    final invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2]))
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3]))
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4]))
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5]))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda1 implements __Function1 {
     abstract invoke1(p1: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
         return this.invoke1(r[0])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke2 (p1: __T, p2: __T): __T {
         return this.invoke1(p1)
@@ -355,52 +380,52 @@ export abstract class Lambda1 implements __Function1 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke1(p1)
     }
-    final invokeR1(p1: __T, ...r: __T[]): __T {
+    final invokeR1(p1: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
+    final invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke1(p1)
     }
 }
@@ -408,7 +433,7 @@ export abstract class Lambda1 implements __Function1 {
 export interface FunctionR2<in P1, in P2, in PR, out R>
     extends Function, __FunctionR3
 {
-    invokeR2(p1: P1, p2: P2, ...r: PR[]): R;
+    invokeR2(p1: P1, p2: P2, ...r: FixedArray<PR>): R;
 }
 export interface Function2<in P1, in P2, out R>
     extends FunctionR2<P1, P2, __T, R>, __Function3
@@ -418,74 +443,83 @@ export interface Function2<in P1, in P2, out R>
 export interface __FunctionR2 extends FunctionR2<__T, __T, __T, __T> {}
 export interface __Function2 extends Function2<__T, __T, __T> {}
 export abstract class LambdaR2 implements __FunctionR2 {
-    abstract invokeR2(p1: __T, p2: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR2(r[0], r[1], 
             ...Runtime.removeFrontElementsStub(r, 2))
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3]))
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4]))
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5]))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda2 implements __Function2 {
     abstract invoke2(p1: __T, p2: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
         return this.invoke2(r[0], r[1])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke3 (p1: __T, p2: __T, p3: __T): __T {
         return this.invoke2(p1, p2)
@@ -529,49 +563,49 @@ export abstract class Lambda2 implements __Function2 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR2(p1: __T, p2: __T, ...r: __T[]): __T {
+    final invokeR2(p1: __T, p2: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke2(p1, p2)
     }
 }
@@ -579,7 +613,7 @@ export abstract class Lambda2 implements __Function2 {
 export interface FunctionR3<in P1, in P2, in P3, in PR, out R>
     extends Function, __FunctionR4
 {
-    invokeR3(p1: P1, p2: P2, p3: P3, ...r: PR[]): R;
+    invokeR3(p1: P1, p2: P2, p3: P3, ...r: FixedArray<PR>): R;
 }
 export interface Function3<in P1, in P2, in P3, out R>
     extends FunctionR3<P1, P2, P3, __T, R>, __Function4
@@ -589,70 +623,79 @@ export interface Function3<in P1, in P2, in P3, out R>
 export interface __FunctionR3 extends FunctionR3<__T, __T, __T, __T, __T> {}
 export interface __Function3 extends Function3<__T, __T, __T, __T> {}
 export abstract class LambdaR3 implements __FunctionR3 {
-    abstract invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR3(r[0], r[1], r[2], 
             ...Runtime.removeFrontElementsStub(r, 3))
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4]))
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5]))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda3 implements __Function3 {
     abstract invoke3(p1: __T, p2: __T, p3: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
         return this.invoke3(r[0], r[1], r[2])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke4 (p1: __T, p2: __T, p3: __T, p4: __T): __T {
         return this.invoke3(p1, p2, p3)
@@ -693,46 +736,46 @@ export abstract class Lambda3 implements __Function3 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: __T[]): __T {
+    final invokeR3(p1: __T, p2: __T, p3: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke3(p1, p2, p3)
     }
 }
@@ -740,7 +783,7 @@ export abstract class Lambda3 implements __Function3 {
 export interface FunctionR4<in P1, in P2, in P3, in P4, in PR, out R>
     extends Function, __FunctionR5
 {
-    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: PR[]): R;
+    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: FixedArray<PR>): R;
 }
 export interface Function4<in P1, in P2, in P3, in P4, out R>
     extends FunctionR4<P1, P2, P3, P4, __T, R>, __Function5
@@ -750,66 +793,75 @@ export interface Function4<in P1, in P2, in P3, in P4, out R>
 export interface __FunctionR4 extends FunctionR4<__T, __T, __T, __T, __T, __T> {}
 export interface __Function4 extends Function4<__T, __T, __T, __T, __T> {}
 export abstract class LambdaR4 implements __FunctionR4 {
-    abstract invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR4(r[0], r[1], r[2], r[3], 
             ...Runtime.removeFrontElementsStub(r, 4))
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5]))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda4 implements __Function4 {
     abstract invoke4(p1: __T, p2: __T, p3: __T, p4: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
         return this.invoke4(r[0], r[1], r[2], r[3])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke5 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T): __T {
         return this.invoke4(p1, p2, p3, p4)
@@ -847,43 +899,43 @@ export abstract class Lambda4 implements __Function4 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: __T[]): __T {
+    final invokeR4(p1: __T, p2: __T, p3: __T, p4: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke4(p1, p2, p3, p4)
     }
 }
@@ -891,7 +943,7 @@ export abstract class Lambda4 implements __Function4 {
 export interface FunctionR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
     extends Function, __FunctionR6
 {
-    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: PR[]): R;
+    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: FixedArray<PR>): R;
 }
 export interface Function5<in P1, in P2, in P3, in P4, in P5, out R>
     extends FunctionR5<P1, P2, P3, P4, P5, __T, R>, __Function6
@@ -901,62 +953,71 @@ export interface Function5<in P1, in P2, in P3, in P4, in P5, out R>
 export interface __FunctionR5 extends FunctionR5<__T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function5 extends Function5<__T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR5 implements __FunctionR5 {
-    abstract invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR5(r[0], r[1], r[2], r[3], r[4], 
             ...Runtime.removeFrontElementsStub(r, 5))
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6]))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda5 implements __Function5 {
     abstract invoke5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
         return this.invoke5(r[0], r[1], r[2], r[3], r[4])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke6 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
@@ -991,40 +1052,40 @@ export abstract class Lambda5 implements __Function5 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: __T[]): __T {
+    final invokeR5(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
 }
@@ -1032,7 +1093,7 @@ export abstract class Lambda5 implements __Function5 {
 export interface FunctionR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
     extends Function, __FunctionR7
 {
-    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: PR[]): R;
+    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: FixedArray<PR>): R;
 }
 export interface Function6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
     extends FunctionR6<P1, P2, P3, P4, P5, P6, __T, R>, __Function7
@@ -1042,58 +1103,67 @@ export interface Function6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
 export interface __FunctionR6 extends FunctionR6<__T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function6 extends Function6<__T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR6 implements __FunctionR6 {
-    abstract invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR6(r[0], r[1], r[2], r[3], r[4], r[5], 
             ...Runtime.removeFrontElementsStub(r, 6))
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7]))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda6 implements __Function6 {
     abstract invoke6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
         return this.invoke6(r[0], r[1], r[2], r[3], r[4], r[5])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke7 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
@@ -1125,37 +1195,37 @@ export abstract class Lambda6 implements __Function6 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: __T[]): __T {
+    final invokeR6(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
 }
@@ -1163,7 +1233,7 @@ export abstract class Lambda6 implements __Function6 {
 export interface FunctionR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
     extends Function, __FunctionR8
 {
-    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: PR[]): R;
+    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: FixedArray<PR>): R;
 }
 export interface Function7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
     extends FunctionR7<P1, P2, P3, P4, P5, P6, P7, __T, R>, __Function8
@@ -1173,54 +1243,63 @@ export interface Function7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out 
 export interface __FunctionR7 extends FunctionR7<__T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function7 extends Function7<__T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR7 implements __FunctionR7 {
-    abstract invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6], 
             ...Runtime.removeFrontElementsStub(r, 7))
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8]))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda7 implements __Function7 {
     abstract invoke7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
         return this.invoke7(r[0], r[1], r[2], r[3], r[4], r[5], r[6])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke8 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
@@ -1249,34 +1328,34 @@ export abstract class Lambda7 implements __Function7 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: __T[]): __T {
+    final invokeR7(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
 }
@@ -1284,7 +1363,7 @@ export abstract class Lambda7 implements __Function7 {
 export interface FunctionR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
     extends Function, __FunctionR9
 {
-    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: PR[]): R;
+    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: FixedArray<PR>): R;
 }
 export interface Function8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
     extends FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, __T, R>, __Function9
@@ -1294,50 +1373,59 @@ export interface Function8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P
 export interface __FunctionR8 extends FunctionR8<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function8 extends Function8<__T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR8 implements __FunctionR8 {
-    abstract invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 
             ...Runtime.removeFrontElementsStub(r, 8))
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9]))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda8 implements __Function8 {
     abstract invoke8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
         return this.invoke8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke9 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
@@ -1363,31 +1451,31 @@ export abstract class Lambda8 implements __Function8 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: __T[]): __T {
+    final invokeR8(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
 }
@@ -1395,7 +1483,7 @@ export abstract class Lambda8 implements __Function8 {
 export interface FunctionR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
     extends Function, __FunctionR10
 {
-    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: PR[]): R;
+    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: FixedArray<PR>): R;
 }
 export interface Function9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
     extends FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, __T, R>, __Function10
@@ -1405,46 +1493,55 @@ export interface Function9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P
 export interface __FunctionR9 extends FunctionR9<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function9 extends Function9<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR9 implements __FunctionR9 {
-    abstract invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], 
             ...Runtime.removeFrontElementsStub(r, 9))
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10]))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda9 implements __Function9 {
     abstract invoke9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
         return this.invoke9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke10 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
@@ -1467,28 +1564,28 @@ export abstract class Lambda9 implements __Function9 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: __T[]): __T {
+    final invokeR9(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
 }
@@ -1496,7 +1593,7 @@ export abstract class Lambda9 implements __Function9 {
 export interface FunctionR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
     extends Function, __FunctionR11
 {
-    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: PR[]): R;
+    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: FixedArray<PR>): R;
 }
 export interface Function10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
     extends FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, __T, R>, __Function11
@@ -1506,42 +1603,51 @@ export interface Function10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR10 extends FunctionR10<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function10 extends Function10<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR10 implements __FunctionR10 {
-    abstract invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], 
             ...Runtime.removeFrontElementsStub(r, 10))
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11]))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda10 implements __Function10 {
     abstract invoke10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
         return this.invoke10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke11 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
@@ -1561,25 +1667,25 @@ export abstract class Lambda10 implements __Function10 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: __T[]): __T {
+    final invokeR10(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
 }
@@ -1587,7 +1693,7 @@ export abstract class Lambda10 implements __Function10 {
 export interface FunctionR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
     extends Function, __FunctionR12
 {
-    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: PR[]): R;
+    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: FixedArray<PR>): R;
 }
 export interface Function11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
     extends FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, __T, R>, __Function12
@@ -1597,38 +1703,47 @@ export interface Function11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR11 extends FunctionR11<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function11 extends Function11<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR11 implements __FunctionR11 {
-    abstract invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], 
             ...Runtime.removeFrontElementsStub(r, 11))
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12]))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda11 implements __Function11 {
     abstract invoke11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
         return this.invoke11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke12 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
@@ -1645,22 +1760,22 @@ export abstract class Lambda11 implements __Function11 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: __T[]): __T {
+    final invokeR11(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
 }
@@ -1668,7 +1783,7 @@ export abstract class Lambda11 implements __Function11 {
 export interface FunctionR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
     extends Function, __FunctionR13
 {
-    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: PR[]): R;
+    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: FixedArray<PR>): R;
 }
 export interface Function12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
     extends FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, __T, R>, __Function13
@@ -1678,34 +1793,43 @@ export interface Function12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR12 extends FunctionR12<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function12 extends Function12<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR12 implements __FunctionR12 {
-    abstract invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], 
             ...Runtime.removeFrontElementsStub(r, 12))
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13]))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15, p16]))
     }
 }
 export abstract class Lambda12 implements __Function12 {
     abstract invoke12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
         return this.invoke12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke13 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
@@ -1719,19 +1843,19 @@ export abstract class Lambda12 implements __Function12 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: __T[]): __T {
+    final invokeR12(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, ...r: FixedArray<__T>): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
 }
@@ -1739,7 +1863,7 @@ export abstract class Lambda12 implements __Function12 {
 export interface FunctionR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
     extends Function, __FunctionR14
 {
-    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: PR[]): R;
+    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: FixedArray<PR>): R;
 }
 export interface Function13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
     extends FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, __T, R>, __Function14
@@ -1749,30 +1873,39 @@ export interface Function13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR13 extends FunctionR13<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function13 extends Function13<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR13 implements __FunctionR13 {
-    abstract invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], 
             ...Runtime.removeFrontElementsStub(r, 13))
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14]))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15, p16]))
     }
 }
 export abstract class Lambda13 implements __Function13 {
     abstract invoke13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
         return this.invoke13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke14 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
@@ -1783,16 +1916,16 @@ export abstract class Lambda13 implements __Function13 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: __T[]): __T {
+    final invokeR13(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, ...r: FixedArray<__T>): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
 }
@@ -1800,7 +1933,7 @@ export abstract class Lambda13 implements __Function13 {
 export interface FunctionR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
     extends Function, __FunctionR15
 {
-    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: PR[]): R;
+    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: FixedArray<PR>): R;
 }
 export interface Function14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
     extends FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, __T, R>, __Function15
@@ -1810,26 +1943,35 @@ export interface Function14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR14 extends FunctionR14<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function14 extends Function14<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR14 implements __FunctionR14 {
-    abstract invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], 
             ...Runtime.removeFrontElementsStub(r, 14))
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15]))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15, p16]))
     }
 }
 export abstract class Lambda14 implements __Function14 {
     abstract invoke14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
         return this.invoke14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke15 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T): __T {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
@@ -1837,13 +1979,13 @@ export abstract class Lambda14 implements __Function14 {
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: __T[]): __T {
+    final invokeR14(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, ...r: FixedArray<__T>): __T {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
 }
@@ -1851,7 +1993,7 @@ export abstract class Lambda14 implements __Function14 {
 export interface FunctionR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
     extends Function, __FunctionR16
 {
-    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: PR[]): R;
+    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: FixedArray<PR>): R;
 }
 export interface Function15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
     extends FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, __T, R>, __Function16
@@ -1861,30 +2003,39 @@ export interface Function15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR15 extends FunctionR15<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function15 extends Function15<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR15 implements __FunctionR15 {
-    abstract invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], 
             ...Runtime.removeFrontElementsStub(r, 15))
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invokeR15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, 
             ...Runtime.addFrontElementsStub(r, [p16]))
     }
 }
 export abstract class Lambda15 implements __Function15 {
     abstract invoke15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
         return this.invoke15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14])
+    }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke16 (p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
-    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: __T[]): __T {
+    final invokeR15(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, ...r: FixedArray<__T>): __T {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
 }
@@ -1892,7 +2043,7 @@ export abstract class Lambda15 implements __Function15 {
 export interface FunctionR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
     extends Function
 {
-    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: PR[]): R;
+    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<PR>): R;
 }
 export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
     extends FunctionR16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, __T, R>
@@ -1902,8 +2053,13 @@ export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 export interface __FunctionR16 extends FunctionR16<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export interface __Function16 extends Function16<__T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T, __T> {}
 export abstract class LambdaR16 implements __FunctionR16 {
-    abstract invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T;
-    final unsafeCall(...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
+    abstract invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T;
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
         return this.invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], 
             ...Runtime.removeFrontElementsStub(r, 16))
@@ -1911,11 +2067,15 @@ export abstract class LambdaR16 implements __FunctionR16 {
 }
 export abstract class Lambda16 implements __Function16 {
     abstract invoke16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T): __T;
-    final unsafeCall(...r: __T[]): __T {
+    final unsafeCall(...r: FixedArray<__T>): __T {
         if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
         return this.invoke16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15])
     }
-    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: __T[]): __T {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+    final invokeR16(p1: __T, p2: __T, p3: __T, p4: __T, p5: __T, p6: __T, p7: __T, p8: __T, p9: __T, p10: __T, p11: __T, p12: __T, p13: __T, p14: __T, p15: __T, p16: __T, ...r: FixedArray<__T>): __T {
         return this.invoke16(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
     }
 }

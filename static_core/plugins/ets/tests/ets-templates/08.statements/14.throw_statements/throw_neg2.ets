@@ -15,24 +15,18 @@ limitations under the License.
 
 /*---
 desc: Throw statements cause an exception to be thrown. If no such try statement is found, then the UncaughtExceptionError is thrown.
-tags: [negative]
 params: UncaughtExceptionError expected
+tags: [negative]
 ---*/
 
-class Ex extends Exception {}
-class Fx extends Exception {}
+class Ex extends Error {}
 
-function getEx(): Exception {
+function getEx(): Ex {
     return new Ex();
 }
 
-function main(): int {
-    try {
-        throw getEx();
-    } catch (e: Fx) {
-        return 0;
-    } catch (e: Error) {
-        return 0;
-    }
-    return 0;
+let t1 = 1, t2 = 2
+
+function main() {
+    if (t1 != t2) throw getEx();
 }

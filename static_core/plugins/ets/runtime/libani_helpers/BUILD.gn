@@ -34,6 +34,9 @@ ohos_source_set("ani_helpers_static") {
     "ani_signature_builder.cpp",
     "concurrency_helpers.cpp",
   ]
+  if (ark_ets_interop_js) {
+    deps = [ "interop_js:hybridgref_static" ]
+  }
 
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
@@ -42,7 +45,6 @@ ohos_source_set("ani_helpers_static") {
 ohos_shared_library("ani_helpers") {
   public_configs = [ ":ani_helpers_config" ]
   deps = [ ":ani_helpers_static" ]
-  relative_install_dir = "ndk"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }

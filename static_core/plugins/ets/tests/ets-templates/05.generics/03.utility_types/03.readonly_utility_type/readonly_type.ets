@@ -28,27 +28,22 @@ interface I {
 
 class A implements I {
   i = 1.7;
-  j = "";
+  j = "A";
 }
 
 class C {
   i: number = 2.6;
-  j: string = "";
+  j: string = "C";
 }
 
-function foo(i: Readonly<A>|Readonly<C>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  if(i.j != null) {
-    v += 2;
-  }
-  return v;
+function foo(i: Readonly<A>|Readonly<C>, a: number, b: string) {
+  assertEQ(i.i, a)
+  assertEQ(i.j, b)
 }
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
+  let i: Readonly<{{c.class}}> = {{c.argument}}
+  foo( i, {{c.num}}, {{c.str}} )
 }
 
 {% endfor %}

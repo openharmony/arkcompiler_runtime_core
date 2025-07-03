@@ -25,7 +25,61 @@ package std.core;
 {%- elif T == 'boolean' and arg == '' %}
 {%- set prec = '((%s) ? 1 : 0) < ((%s) ? 1 : 0)' %}
 {%- endif %}
-function bubbleSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
+
+{%- if T not in ['NullishType', 'boolean', 'char'] and arg == '' %}
+function copyPart(dst: FixedArray<{{T}}>, counter: int, src: FixedArray<{{T}}>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number): FixedArray<{{T}}> {
+    const result:FixedArray<{{T}}> = new {{T}}[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number, begin: int = 0, end: int = 0): FixedArray<{{T}}> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<{{T}}> = new {{T}}[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<{{T}}> = new {{T}}[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
+{%- endif %}
+
+function bubbleSort(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     let was = true
     while (was) {
         was = false
@@ -40,7 +94,7 @@ function bubbleSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
     }
 }
 
-function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}, initIndex: int = startIndex): void {
+function insertionSort(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
@@ -73,7 +127,7 @@ function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}, init
 }
 
 {%- if T != "boolean" %}
-function heapSortUp(arr: {{T}}[], idxFromStart: int, startIndex: int, heapRoot: int{{arg}}): void {
+function heapSortUp(arr: FixedArray<{{T}}>, idxFromStart: int, startIndex: int, heapRoot: int{{arg}}): void {
     const tmp = arr[startIndex + idxFromStart]
     while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
@@ -87,7 +141,7 @@ function heapSortUp(arr: {{T}}[], idxFromStart: int, startIndex: int, heapRoot: 
 }
 
 // Build max heap with root in startIndex given its children are roots of valid heaps
-function heapSortDown(arr: {{T}}[], idxFromStart: int, startIndex: int, endIndex: int{{arg}}): void {
+function heapSortDown(arr: FixedArray<{{T}}>, idxFromStart: int, startIndex: int, endIndex: int{{arg}}): void {
     let heapRoot = startIndex + idxFromStart
     let arrIndex = heapRoot
     let childIndex = startIndex + idxFromStart * 2 + 1
@@ -110,7 +164,7 @@ function heapSortDown(arr: {{T}}[], idxFromStart: int, startIndex: int, endIndex
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot{{fwdArg}})
 }
 
-export function heapSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
+export function heapSort(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex{{fwdArg}})
@@ -126,7 +180,7 @@ export function heapSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): v
 }
 
 // Put median of three array elements to arr[index1]
-function median3(arr: {{T}}[], index1: int, index2: int, index3: int{{arg}}): void {
+function median3(arr: FixedArray<{{T}}>, index1: int, index2: int, index3: int{{arg}}): void {
     let swap_idx = index2
     if ({{prec % ('arr[index1]', 'arr[index2]')}}) {
         if ({{prec % ('arr[index3]', 'arr[index1]')}}) {
@@ -150,7 +204,7 @@ function median3(arr: {{T}}[], index1: int, index2: int, index3: int{{arg}}): vo
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the right
-function quickSortSplit(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): int {
+function quickSortSplit(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -184,7 +238,7 @@ function quickSortSplit(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): in
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the left
-function quickSortSplitLeft(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): int {
+function quickSortSplitLeft(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -216,7 +270,7 @@ function quickSortSplitLeft(arr: {{T}}[], startIndex: int, endIndex: int{{arg}})
 }
 
 {% for quickUpTo in [3, 40] %}
-function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int, maxDepth: int{{arg}}{{initIndex}}): void {
+function quickSortImpl{{quickUpTo}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int, maxDepth: int{{arg}}{{initIndex}}): void {
     {%- set fwdInitIndex = initIndex.split(':')[0] %}
     while (endIndex - startIndex > {{quickUpTo}}) {
         if (--maxDepth == 0) {
@@ -251,7 +305,7 @@ function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int
 }
 {%- endfor %}
 
-function quickSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
+function quickSort(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     let size = endIndex - startIndex
     if (size <= 1) {
         return
@@ -282,7 +336,7 @@ function quickSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
  * sort(arr, 0, arr.length)
  * ```
  */
-export function sort{{sortNameSuff}}(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
+export function sort{{sortNameSuff}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new ArrayIndexOutOfBoundsError("sort: bounds verification failed")
     }
@@ -314,19 +368,19 @@ export function sort{{sortNameSuff}}(arr: {{T}}[], startIndex: int, endIndex: in
  *
  * @param arr an array to sort
  */
-export function sort_subarray(arr: {{T}}[], mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
+export function sort_subarray(arr: FixedArray<{{T}}>, mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
 }
 
-export function sort_subarray(arr: {{T}}[], startIndex: int, mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
+export function sort_subarray(arr: FixedArray<{{T}}>, startIndex: int, mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
 {% if T != "NullishType" -%}
 
 {%- if T == 'byte' %}
-function countSort(arr: byte[], startIndex: int, endIndex: int): void {
-    const cnts = new int[256]
+function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
+    const cnts : FixedArray<int> = new int[256]
     for (let i = startIndex; i < endIndex; i++) {
         cnts[arr[i] + 128]++
     }
@@ -338,7 +392,7 @@ function countSort(arr: byte[], startIndex: int, endIndex: int): void {
     }
 }
 {%- elif T == 'boolean' %}
-function countSortTruthCnt(arr: boolean[], startIndex: int, endIndex: int): int {
+function countSortTruthCnt(arr: FixedArray<boolean>, startIndex: int, endIndex: int): int {
     let truthCnt = 0
     for (let i = startIndex; i < endIndex; i++) {
         if (arr[i]) {
@@ -348,7 +402,7 @@ function countSortTruthCnt(arr: boolean[], startIndex: int, endIndex: int): int 
     return truthCnt
 }
 
-function countSortBools(arr: boolean[], startIndex: int, endIndex: int): void {
+function countSortBools(arr: FixedArray<boolean>, startIndex: int, endIndex: int): void {
     const truthCnt = countSortTruthCnt(arr, startIndex, endIndex)
     for (let i = startIndex; i < endIndex - truthCnt; i++) {
             arr[i] = false
@@ -357,7 +411,7 @@ function countSortBools(arr: boolean[], startIndex: int, endIndex: int): void {
         arr[endIndex - truthCnt + i] = true
     }
 }
-function countSortBoolsInv(arr: boolean[], startIndex: int, endIndex: int): void {
+function countSortBoolsInv(arr: FixedArray<boolean>, startIndex: int, endIndex: int): void {
     const truthCnt = countSortTruthCnt(arr, startIndex, endIndex)
     for (let i = 0; i < truthCnt; i++) {
         arr[startIndex + i] = true
@@ -368,26 +422,22 @@ function countSortBoolsInv(arr: boolean[], startIndex: int, endIndex: int): void
 }
 {%- endif %}
 
-export function sort(arr: {{T}}[], startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
 class test_SortData{{T}} {
     name: string
-    arr: {{T}}[]
+    arr: FixedArray<{{T}}>
 
-    constructor(name: string, arr: {{T}}[]) {
+    constructor(name: string, arr: FixedArray<{{T}}>) {
         this.name = name
         this.arr = arr
     }
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: {{T}}[]): {{T}}[] {
-    let c = new {{T}}[arr.length]
+function test_sortCopy(arr: FixedArray<{{T}}>): FixedArray<{{T}}> {
+    let c : FixedArray<{{T}}> = new {{T}}[arr.length]
     for (let i = 0; i < arr.length; i++) {
         c[i] = arr[i]
     }
@@ -406,7 +456,7 @@ function test_sortAllOnCmpInv_{{T}}(l: {{T}}, r: {{T}}): boolean {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: {{T}}[], startIndex: int, endIndex: int) {
+function test_printArr(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int) {
     for (let i = startIndex; i < endIndex; i++) {
         console.print(arr[i] + ' ')
     }
@@ -419,7 +469,7 @@ function test_printArr(arr: {{T}}[], startIndex: int, endIndex: int) {
  * we need access to all sub sorts that are used. Hence this part of "tests"
  * is located here. All related entities are prefixed whith `test_` to stand out
  */
-export function test_sortAllOn(arr: {{T}}[]) {
+export function test_sortAllOn(arr: FixedArray<{{T}}>) {
     {%- for name, arg in [('', ''), ('_subarray', ', test_sortAllOnCmpFwd_' + T), ('_subarray', ', test_sortAllOnCmpInv_' + T)] %}
     // block for comparator `{{arg[3:]}}`
     if (true) {

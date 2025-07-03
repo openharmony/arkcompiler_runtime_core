@@ -17,6 +17,10 @@ regression/25112.ets
 regression/15278_0.ets
 regression/15278_1.ets
 
+#22791
+regression/16158_0.ets
+regression/16158_2.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_8.ets
@@ -38,7 +42,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
-spec/03.types/References_Types/Type_undefined/undefined-union-array-type_1.ets
 
 #19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
@@ -53,7 +56,6 @@ spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefin
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
 
 #19947
-spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
 spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
 
 #19960
@@ -71,9 +73,6 @@ spec/03.types/References_Types/Tuples_type/func_tuple_1.ets
 
 #15394
 spec/03.types/References_Types/Tuples_type/tuple_write_6.ets
-
-#23081
-spec/03.types/References_Types/Tuples_type/tuple_write_7.ets
 
 # Union issues: undefined not supported yet
 spec/03.types/References_Types/unions/union_generics_03.ets
@@ -149,10 +148,6 @@ spec/07.expressions/7.32.Lambda_Expressions/incorrectVariableDeclaration.ets
 spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_01.ets
 spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_02.ets
 spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_03.ets
-
-#24348 (accessors)
-spec/09.classes/Accessor_Declarations/issue-13330_7.ets
-spec/09.classes/Accessor_Declarations/issue-15142_10.ets
 
 #24349 (accessors)
 spec/09.classes/Accessor_Declarations/issue-15142_7.ets
@@ -244,12 +239,10 @@ spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_expor
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_06.ets
 
 ### Negative tests (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_unexported_class.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/01.selective_export_directive/selective_export_directive_02.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_04.ets
 
 #19710
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
@@ -266,11 +259,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/n
 #19953
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-short-nonzero-expres
-
-#19529
-spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0018.ets
-spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0041.ets
-
 
 #14040 Annotations not yet implemented
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
@@ -340,13 +328,12 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#24088
-std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
+#25264
+std/core/ConsoleArrayTest.ets
 
-#16242
-std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
-std/core/std_core_char_static_Char_isValidCodePoint.ets
-std/core/std_core_string_String_localeCompare_string_005.ets
+#25014
+std/core/ConsoleErrorTest.ets
+std/core/ConsoleAssertTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets

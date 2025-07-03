@@ -25,6 +25,35 @@
 
 namespace ark::ets {
 
+void EtsPlatformTypes::InitializeCaches()
+{
+    auto *charClass = this->coreString;
+    asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
+                                                             ark::SpaceType::SPACE_TYPE_OBJECT);
+
+    for (uint32_t i = 0; i < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE; ++i) {
+        auto *str = EtsString::CreateNewStringFromCharCode(i);
+        asciiCharCache_->Set(i, str);
+    }
+}
+
+void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
+{
+    if (asciiCharCache_ != nullptr) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
+    }
+}
+
+void EtsPlatformTypes::UpdateCachesVmRefs(const GCRootUpdater &updater) const
+{
+    if (asciiCharCache_ != nullptr) {
+        auto *obj = static_cast<ark::ObjectHeader *>(asciiCharCache_->GetCoreType());
+        if (updater(&obj)) {
+            asciiCharCache_ = reinterpret_cast<EtsTypedObjectArray<EtsString> *>(obj);
+        }
+    }
+}
+
 EtsPlatformTypes const *PlatformTypes(PandaEtsVM *vm)
 {
     return vm->GetClassLinker()->GetEtsClassLinkerExtension()->GetPlatformTypes();
@@ -73,6 +102,7 @@ static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *sign
     return method;
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
@@ -80,7 +110,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     auto const findType = [classLinker](std::string_view descriptor) { return FindType(classLinker, descriptor); };
-
+    coreString = findType(STRING);
     coreBoolean = findType(BOX_BOOLEAN);
     coreByte = findType(BOX_BYTE);
     coreChar = findType(BOX_CHAR);
@@ -88,6 +118,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreInt = findType(BOX_INT);
     coreLong = findType(BOX_LONG);
     coreFloat = findType(BOX_FLOAT);
+    coreObject = findType(OBJECT);
     coreDouble = findType(BOX_DOUBLE);
     escompatBigint = findType(BIG_INT);
     coreFunction = findType(FUNCTION);
@@ -96,7 +127,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreBootRuntimeLinker = findType(BOOT_RUNTIME_LINKER);
     coreAbcFile = findType(ABC_FILE);
     coreAbcRuntimeLinker = findType(ABC_RUNTIME_LINKER);
-
+    memoryRuntimeLinker = findType(MEMORY_RUNTIME_LINKER);
     corePromise = findType(PROMISE);
     corePromiseSubscribeOnAnotherPromise =
         FindMethod<false>(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
@@ -120,7 +151,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreMethod = findType(METHOD);
     coreParameter = findType(PARAMETER);
 
-    escompatSharedMemory = findType(SHARED_MEMORY);
     interopJSValue = findType(JS_VALUE);
 
     coreTupleN = findType(TUPLEN);
@@ -131,6 +161,22 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
     coreFinalizationRegistryExecCleanup =
         FindMethod<true>(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");
+
+    escompatRecord = findType(RECORD);
+    escompatRecordGetter = FindMethod<false>(escompatRecord, GET_INDEX_METHOD, nullptr);
+    escompatRecordSetter = FindMethod<false>(escompatRecord, SET_INDEX_METHOD, nullptr);
+
+    escompatProcess = findType(PROCESS);
+    escompatProcessListUnhandledJobs = FindMethod<true>(escompatProcess, "listUnhandledJobs", "Lescompat/Array;:V");
+    escompatProcessListUnhandledPromises =
+        FindMethod<true>(escompatProcess, "listUnhandledPromises", "Lescompat/Array;:V");
+
+    coreTuple = findType(TUPLE);
+    escompatRegExpExecArray = findType(REG_EXP_EXEC_ARRAY);
+    escompatJsonReplacer = findType(JSON_REPLACER);
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        InitializeCaches();
+    }
 }
 
 }  // namespace ark::ets

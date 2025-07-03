@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as record_test from "@generated/record_test";
-import {Color, Data, ICpu, ICpuInfo, ICpuZero, Pair} from "@generated/record_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as record_test from "record_test";
+import {Color, Data, ICpu, ICpuInfo, ICpuZero, Pair} from "record_test";
 
 loadLibrary("ani_record");
 
@@ -167,7 +167,7 @@ function main() {
     suite.addTest("testMapfunc49", testMapfunc49)
     suite.addTest("testMapfunc50", testMapfunc50)
     suite.addTest("testMapfunc51", testMapfunc51)
-    System.exit(suite.run())
+    exit(suite.run())
     console.log("##############record ut end#############")
 }
 

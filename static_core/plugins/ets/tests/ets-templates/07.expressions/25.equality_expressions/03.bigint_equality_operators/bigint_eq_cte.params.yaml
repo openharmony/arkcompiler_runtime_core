@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ cases:
     - { rtype: 'BigInt', rval: '-2344350531n', op: '==', ltype: 'Float', lval: '0.1' }
     - { rtype: 'BigInt', rval: '13433553955n', op: '==', ltype: 'Double', lval: '4E10' }
     - { rtype: 'BigInt', rval: '90009113640n', op: '==', ltype: 'String', lval: '"test"' }
-    - { rtype: 'BigInt', rval: '12001201300n', op: '==', ltype: 'BigInt[]', lval: '[6666666n]' }
+    - { rtype: 'BigInt', rval: '12001201300n', op: '==', ltype: 'FixedArray<BigInt>', lval: '[6666666n]' }
     - { rtype: 'BigInt', rval: '-5001359991n', op: '==', ltype: 'TestClass', lval: 'new TestClass()' }
 
     - { ltype: 'BigInt', lval: '0n', op: '!=', rtype: 'Boolean', rval: 'false' }
@@ -33,7 +33,7 @@ cases:
     - { rtype: 'BigInt', rval: '-742340234n', op: '!=', ltype: 'Double', lval: '1E19' }
     - { rtype: 'BigInt', rval: '9000000000n', op: '!=', ltype: 'Float', lval: '0.0001' }
     - { rtype: 'BigInt', rval: '1031031030n', op: '!=', ltype: 'String', lval: '"stststrstr"' }
-    - { rtype: 'BigInt', rval: '-190003456n', op: '!=', ltype: 'BigInt[]', lval: '[909090n]' }
+    - { rtype: 'BigInt', rval: '-190003456n', op: '!=', ltype: 'FixedArray<BigInt>', lval: '[909090n]' }
     - { rtype: 'BigInt', rval: '-111111111n', op: '!=', ltype: 'TestClass', lval: 'new TestClass()' }
 
     - { ltype: 'BigInt', lval: '908111101999991344149943n', op: '===', rtype: 'Boolean', rval: 'false' }
@@ -45,7 +45,7 @@ cases:
     - { rtype: 'BigInt', rval: '2443090434349n', op: '===', ltype: 'Double', lval: '-0.7543221' }
     - { rtype: 'BigInt', rval: '1330392582584n', op: '===', ltype: 'Rloat', lval: '1.111111' }
     - { rtype: 'BigInt', rval: '-234390000000n', op: '===', ltype: 'String', lval: '"hello world!"' }
-    - { rtype: 'BigInt', rval: '-190090009000n', op: '===', ltype: 'BigInt[]', lval: '[900000009n]' }
+    - { rtype: 'BigInt', rval: '-190090009000n', op: '===', ltype: 'FixedArray<BigInt>', lval: '[900000009n]' }
     - { rtype: 'BigInt', rval: '9999999999999n', op: '===', ltype: 'TestClass', lval: 'new TestClass()' }
 
     - { ltype: 'BigInt', lval: '777777777777777777777777777777777n"', op: '!==', rtype: 'Boolean', rval: 'false' }
@@ -57,5 +57,5 @@ cases:
     - { rtype: 'BigInt', rval: '0n', op: '!==', ltype: 'Double', lval: 'Infinity' }
     - { rtype: 'BigInt', rval: '-1n', op: '!==', ltype: 'float', lval: '12345.0' }
     - { rtype: 'BigInt', rval: '424231348n', op: '!==', ltype: 'String', lval: '"test1"' }
-    - { rtype: 'BigInt', rval: '924212343n', op: '!==', ltype: 'BigInt[]', lval: '[13440003143n]' }
+    - { rtype: 'BigInt', rval: '924212343n', op: '!==', ltype: 'FixedArray<BigInt>', lval: '[13440003143n]' }
     - { rtype: 'BigInt', rval: '-10000000n', op: '!==', ltype: 'TestClass', lval: 'new TestClass()' }

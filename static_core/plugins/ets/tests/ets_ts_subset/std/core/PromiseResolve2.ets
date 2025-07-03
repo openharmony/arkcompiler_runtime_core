@@ -15,10 +15,10 @@
 
 let p = Promise.resolve<number>(7).then<void, void>((value: number): void => {
     if (value != 7) {
-        console.log("Test failed. The promise shoule be fulfilled by 7 but got " + value + ".");
+        console.log('Test failed. The promise shoule be fulfilled by 7 but got ' + value + '.');
         return;
     }
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise shouldn`t be rejected.");
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise shouldn`t be rejected.');
 });

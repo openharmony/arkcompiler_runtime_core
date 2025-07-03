@@ -59,7 +59,7 @@ export class ArrayAsListInt implements ListInt {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new Int[capacity];
+            let newData : FixedArray<Int> = new Int[capacity];
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i];
             }
@@ -116,7 +116,9 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popFront(): Int {
-        assertLT(0, this.curSize, "No data to popFront from ArrayAsList!")
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popFront from ArrayAsList!")
+        }
         let res: Int = this.data[0];
         for (let i = 1; i < this.curSize; ++i) {
             this.data[i-1] = this.data[i];
@@ -132,7 +134,7 @@ export class ArrayAsListInt implements ListInt {
      */
     public override pushBack(e: Int): void {
         if (this.curSize == this.data.length) {
-            let newData = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
+            let newData : FixedArray<Int> = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
             }
@@ -148,7 +150,9 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popBack(): Int {
-        assertLT(0, this.curSize, "No data to popBack in ArrayAsList!")
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popBack from ArrayAsList!")
+        }
         --this.curSize;
         return this.data[this.curSize];
     }
@@ -305,6 +309,6 @@ export class ArrayAsListInt implements ListInt {
     }
 
 */
-    private data: Int[] = [];
+    private data: FixedArray<Int> = [];
     private curSize: int;
 }

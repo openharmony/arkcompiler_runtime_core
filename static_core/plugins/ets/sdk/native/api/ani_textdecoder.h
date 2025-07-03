@@ -61,7 +61,6 @@ public:
     {
         return tranTool_.get();
     }
-
     bool IsUnicode() const
     {
         uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::UNICODE_FLG);

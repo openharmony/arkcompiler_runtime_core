@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {
@@ -76,7 +79,8 @@ class Test {
     private static native loadFile(path: string): byte[] | undefined;
 
     private static getAdditionalFilesList(): string[] {
-        const abcFiles = ProcessManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
+        let procManager = new StdProcess.ProcessManager();
+        const abcFiles = procManager.getEnvironmentVar("ADDITIONAL_ABC_FILES");
         assertLT(0, abcFiles.length, "this test must have additional abc files")
         return abcFiles.split(":");
     }
@@ -170,7 +174,7 @@ class Test {
 
     private static triggerGC() {
         expectNoThrow((): void throws => {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
         });
     }
 
@@ -249,7 +253,7 @@ class Test {
         const promises = new Array<Promise<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            promises.push(launch Test.addSingleAbcFile(linker, allAbcFiles[i]));
+            promises.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
         }
         // Try to load a class from "additional1.ets"
         expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },

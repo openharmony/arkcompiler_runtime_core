@@ -33,7 +33,7 @@ function check_exceptions(): void {
     exception_catched = false;
     try {
         GC.postponeGCStart();
-        let gc_id = GC.startGC(GC.THRESHOLD_CAUSE);
+        let gc_id = GC.startGC(GC.Cause.THRESHOLD);
         GC.waitForFinishGC(gc_id);
     } catch(error: IllegalStateException) {
         exception_catched = true;
@@ -55,7 +55,7 @@ function main(): void {
     // Run GC for preventing a race between setting postpone GC start
     // and a collection in the GC thread
     try {
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
+        let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
@@ -67,7 +67,7 @@ function main(): void {
         obj_addr[i] = GC.getObjectAddress(new_object)
     }
     try {
-        let young_gc_id = GC.startGC(GC.YOUNG_CAUSE);
+        let young_gc_id = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(young_gc_id);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
@@ -80,10 +80,10 @@ function main(): void {
     let young_object: Object = new Object();
     let young_object_addr: long = GC.getObjectAddress(young_object);
     try {
-        assertEQ(GC.YOUNG_SPACE, GC.getObjectSpaceType(young_object), "The object is not in young");
+        assertEQ(GC.ObjectSpaceType.YOUNG, GC.getObjectSpaceType(young_object), "The object is not in young");
         GC.postponeGCEnd();
         // Check that the object will be moved after executing postpone end function.
-        let gc_id = GC.startGC(GC.YOUNG_CAUSE);
+        let gc_id = GC.startGC(GC.Cause.YOUNG);
         GC.waitForFinishGC(gc_id);
         assertNE(young_object_addr, GC.getObjectAddress(young_object), "The object hasn't been moved");
     } catch (e) {

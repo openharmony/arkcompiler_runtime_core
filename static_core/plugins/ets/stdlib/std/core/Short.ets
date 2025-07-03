@@ -38,15 +38,6 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     }
 
     /**
-     * Constructs a new Short instance with provided initial value
-     *
-     * @param value the initial value
-     */
-    public constructor(value: Short) {
-        this.value = value.shortValue();
-    }
-
-    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
@@ -92,8 +83,8 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns value as short
      */
-    public override byteValue(): byte {
-        return this.value as byte;
+    public override toByte(): byte {
+        return (this.value).toByte();
     }
 
     /**
@@ -101,17 +92,17 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns value as short
      */
-    public override shortValue(): short {
+    public override toShort(): short {
         return this.value;
     }
 
     /**
      * Returns value of this instance
      *
-     * @returns value as short
+     * @returns value as int
      */
-    public override intValue(): int {
-        return this.value as int;
+    public override toInt(): int {
+        return Short.toInt(this.value);
     }
 
     /**
@@ -119,8 +110,8 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns value as long
      */
-    public override longValue(): long {
-        return this.value as long;
+    public override toLong(): long {
+        return this.value.toLong();
     }
 
     /**
@@ -128,8 +119,8 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns value as float
      */
-    public override floatValue(): float {
-        return this.value as float;
+    public override toFloat(): float {
+        return Short.toFloat(this.value);
     }
 
     /**
@@ -137,8 +128,82 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns value as double
      */
-    public override doubleValue(): double {
-        return this.value as double;
+    public override toDouble(): double {
+        return Short.toDouble(this.value);
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: short): byte;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: short): int;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: short): long;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: short): float;
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: short): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: short): char;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toShort(value: short): short {
+        return value;
     }
 
     /**
@@ -179,7 +244,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns representation of this instance
      */
     public override $_hashCode(): int {
-        return this.intValue();
+        return this.toInt();
     }
 
     /**
@@ -210,7 +275,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the addition
      */
     public add(other: Short): Short {
-        return Short.valueOf((this.value + other.shortValue()) as short)
+        return Short.valueOf((this.value + other.toShort()).toShort())
     }
 
     /**
@@ -221,7 +286,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the subtraction
      */
     public sub(other: Short): Short {
-        return Short.valueOf((this.value - other.shortValue()) as short)
+        return Short.valueOf((this.value - other.toShort()).toShort())
     }
 
     /**
@@ -232,7 +297,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the multiplication
      */
     public mul(other: Short): Short {
-        return Short.valueOf((this.value * other.shortValue()) as short)
+        return Short.valueOf((this.value * other.toShort()).toShort())
     }
 
     /**
@@ -243,7 +308,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns Result of the division
      */
     public div(other: Short): Short {
-        return Short.valueOf((this.value / other.shortValue()) as short)
+        return Short.valueOf((this.value / other.toShort()).toShort())
     }
 
     /**
@@ -254,7 +319,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Short): boolean {
-        return this.value < other.shortValue();
+        return this.value < other.toShort();
     }
 
     /**
@@ -265,7 +330,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Short): boolean {
-        return this.value <= other.shortValue();
+        return this.value <= other.toShort();
     }
 
     /**
@@ -276,7 +341,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Short): boolean {
-        return this.value > other.shortValue();
+        return this.value > other.toShort();
     }
 
     /**
@@ -287,7 +352,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Short): boolean {
-        return this.value >= other.shortValue();
+        return this.value >= other.toShort();
     }
 
     /**
@@ -303,7 +368,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-                return Short.valueOf(num as short)
+                return Short.valueOf(num.toShort())
             }
         }
         throw new JSONTypeError("Cannot create Short from JSON", new ErrorOptions(json as Object))

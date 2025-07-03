@@ -202,6 +202,15 @@ interop_test("ea_cycle_test") {
   sources = [ "ea_coro/ea_test_module.cpp" ]
 }
 
+interop_test("mark_test_xgc") {
+  js = [
+    "test_mark_test_xgc/mark_test_xgc.js",
+    "test_mark_test_xgc/mark_test_xgc_utils.js",
+  ]
+  ets = "test_mark_test_xgc/mark_test_xgc.ets"
+  sources = [ "mark_test_utils.cpp" ]
+}
+
 group("xgc_tests") {
   if (ark_ets_hybrid) {
     deps = [
@@ -218,6 +227,7 @@ group("xgc_tests") {
       ":mark_test_mass_ref",
       ":mark_test_passive_xgc",
       ":mark_test_sts_ref_js",
+      ":mark_test_xgc",
       ":remark_cycle_test",
       ":sweep_cycle_test",
       ":sweep_js2sts_test",

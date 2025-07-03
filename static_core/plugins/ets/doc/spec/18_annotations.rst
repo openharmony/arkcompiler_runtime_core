@@ -16,7 +16,7 @@ Annotations
 ###########
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 *Annotation* is a special language element that changes the semantics of
 the declaration to which it is applied by adding metadata.
@@ -42,7 +42,7 @@ An annotation must be placed immediately before the declaration to which it is
 applied. An annotation can include arguments as in the example above.
 
 For an annotation to be used, the name of the annotation must be prefixed with
-the character '``@``' (e.g., ``@MyAnno``). No spaces and line separators are
+the character '``@``' (e.g., ``@MyAnno``). No white space and line separator is
 allowed between the character '``@``' and the name:
 
 .. index::
@@ -63,8 +63,8 @@ allowed between the character '``@``' and the name:
     @ ClassAuthor({authorName: "Bob"}) // compile-time error, space is forbidden
 
 A :index:`compile-time error` occurs if the annotation name is not accessible
-at the place of usage. An annotation declaration can be exported and used in
-other compilation units.
+(see :ref:`Accessible`) at the place of usage. An annotation declaration can be
+exported and used in other compilation units.
 
 Multiple annotations can be applied to a single declaration:
 
@@ -78,6 +78,8 @@ Multiple annotations can be applied to a single declaration:
 .. index::
    annotation
    access
+   accessibility
+   annotation declaration
    compilation unit
 
 |
@@ -91,7 +93,9 @@ Declaring Annotations
     frontend_status: Done
 
 Declaring an *annotation* is similar to declaring an interface where the
-keyword ``interface`` is prefixed with the character '``@``':
+keyword ``interface`` is prefixed with the character '``@``'.
+
+The syntax of *annotation declaration* is presented below:
 
 .. code-block:: abnf
 
@@ -119,11 +123,11 @@ occurs if the value of this expression cannot be evaluated at compile time.
    interface
    keyword interface
    prefix
+   keyword export
    annotation field
    constant expression
    compile time
    initializer
-   keyword export
    type
 
 *Annotation* must be defined at the top level. Otherwise, a
@@ -140,8 +144,8 @@ The name of an *annotation* cannot coincide with the name of another entity:
 
     class Position {/*body*/} // compile-time error: duplicate identifier
 
-An annotation declaration does not define a type, and a type alias can be
-neither applied to the annotation, nor used as an interface:
+An annotation declaration defines no type, and no type alias can be applied to
+the annotation or used as an interface:
 
 .. code-block:: typescript
    :linenos:
@@ -154,6 +158,8 @@ neither applied to the annotation, nor used as an interface:
 .. index::
    annotation
    type alias
+   inheritance
+   annotation declaration
    interface
    entity
 
@@ -181,11 +187,15 @@ an *annotation field*.
 
 .. index::
    annotation field
+   type for annotation field
    numeric type
-   boolean
+   boolean type
+   type boolean
    string
+   type string
    enumeration type
    array
+   multidimensional array
 
 |
 
@@ -195,7 +205,7 @@ Using Annotations
 *****************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The following syntax is used to apply an annotation to a declaration,
 and to define the values of annotation fields:
@@ -229,8 +239,12 @@ a :index:`compile-time error` occurs.
 
 .. index::
    annotation
+   annotation declaration
+   syntax
+   declaration
    annotation field
    object literal
+   value
    expression
 
 The usage of annotation is presented in the example below. The annotations in
@@ -250,10 +264,10 @@ this example are applied to class declarations:
 
 Annotations can be applied to the following:
 
-- :ref:`Top-Level Declarations`, except abstract class declarations;
+- :ref:`Top-Level Declarations`;
 
 - Class members (see :ref:`Class Body`) or interface members (see
-  :ref:`Interface Body`), except members of abstract class declarations;
+  :ref:`Interface Body`);
 
 - Type usage (see :ref:`Using Types`);
 
@@ -266,9 +280,14 @@ Annotations can be applied to the following:
 
 .. index::
    annotation
-   non-abstract class
    declaration
+   class declaration
+   top-level declaration
+   class
+   interface
    method
+   parameter
+   lambda expression
    function
 
 Otherwise, a :index:`compile-time error` occurs:
@@ -276,8 +295,10 @@ Otherwise, a :index:`compile-time error` occurs:
 .. code-block:: typescript
    :linenos:
 
-    @MyAnno()
-    abstract class A {} // compile-time error
+
+    function foo () {
+           @MyAnno() let local = 1 // compile-time error
+    }
 
 Repeatable annotations are not supported, i.e., an annotation cannot be applied
 to an entity more than once:
@@ -346,6 +367,8 @@ omitted after the annotation name:
    array type
    annotation
    array literal
+   parenthesis
+   annotation name
 
 |
 
@@ -378,6 +401,8 @@ same manner.
 
 .. index::
    field annotation
+   annotation declaration
+   field
    notation
    expression
    object literal
@@ -395,8 +420,8 @@ Exporting and Importing Annotations
 An annotation can be exported and imported. However, a few forms of export and
 import directives are supported.
 
-To export an annotation, the annotation declaration must be marked with the
-keyword ``export`` as follows:
+An annotation declaration to be exported must be marked with the keyword
+``export`` as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -420,6 +445,8 @@ annotation is accessed by its qualified name:
    export
    import
    annotation
+   annotation declaration
+   keyword export
    import directive
    imported module
    qualified name
@@ -456,11 +483,14 @@ Annotations are forbidden in the following cases:
 - Rename in import.
 
 .. index::
-   export
-   import
+   export type
+   import type
    annotation
    type
    notation
+   import annotation
+   export default
+   import default
 
 .. code-block:: typescript
    :linenos:
@@ -477,7 +507,7 @@ Ambient Annotations
 .. meta:
     frontend_status: Done
 
-*Ambient annotations* can be specified in :ref:`Declaration Modules` only.
+The syntax of *ambient annotations* is presented below:
 
 .. code-block:: abnf
 
@@ -557,6 +587,7 @@ the declaration that implements the ambient declaration:
    annotation
    ambient declaration
    declaration
+   implementation
 
 |
 
@@ -564,6 +595,9 @@ the declaration that implements the ambient declaration:
 
 Standard Annotations
 ********************
+
+.. meta:
+    frontend_status: Done
 
 *Standard annotation* is an annotation that is defined in :ref:`Standard Library`,
 or implicitly defined in the compiler (*built-in annotation*).
@@ -586,7 +620,7 @@ Retention Annotation
 ====================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *@Retention* is a standard annotation that is used to annotate a declaration
 of another annotation.
@@ -601,8 +635,16 @@ used as follows:
     @Retention({policy: "RUNTIME"})
     @interface MyAnno {} // this annotation uses "RUNTIME" policy
 
-    @MyAnno // 
+    @MyAnno //
     class C {}
+
+.. index::
+   retention annotation
+   standard annotation
+   annotation
+   declaration
+   declaration annotation
+   field
 
 The value of this field determines at which point an annotation is used,
 and discarded after use.
@@ -637,6 +679,66 @@ As ``@Retention`` has a single field, it can be used with a short notation
     @Retention("SOURCE")
     @interface Author {name: string} // this annotation uses "SOURCE" policy
 
+.. index::
+   source
+   runtime
+   value
+   field
+   compile time
+   bytecode
+   metadata
+   annotation
+   policy
+   bytecode file
+   string literal
+   notation
+
+|
+
+.. _Runtime Access to Annotations:
+
+Runtime Access to Annotations
+*****************************
+
+.. meta:
+    frontend_status: None
+
+For an annotation with *retention policy* (see :ref:`Retention Annotation`)
+``BYTECODE`` or ``RUNTIME`` an abstract class with the name of the annotation
+is implicitly declared. All fields of this class are ``readonly``.
+If a field is of an array type, the array type is also ``readonly``.
+
+For the following annotation:
+
+.. code-block:: typescript
+   :linenos:
+
+    @Retention("RUNTIME")
+    @interface MyAnno {
+        name: string
+        attrs: number[]
+    }
+
+the abstract class is declared:
+
+.. code-block:: typescript
+   :linenos:
+
+    abstract class MyAnno {
+        readonly name: string
+        readonly attrs: readonly number[]
+    }
+
+The following example shows the use of such class:
+
+.. code-block:: typescript
+   :linenos:
+
+    @MyAnno({name: "someName", attr: [1, 2]})
+    class A {}
+
+    let my: MyAnno = // call of reflection library to get instance of annotation for type A
+    console.log(my.name) // output: someName
 
 .. raw:: pdf
 

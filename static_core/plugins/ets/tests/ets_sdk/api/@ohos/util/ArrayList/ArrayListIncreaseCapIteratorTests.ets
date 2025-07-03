@@ -54,8 +54,7 @@ class TestData {
     static readonly testObject2 = [0, 1, 2, undefined];
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
-    static readonly arrayResult8 = `{"DEFAULT_CAPACITY":10,"capacity":10,"buffer":["string",1,` +
-        `{"age":10,"name":"zhang"},null,null,true,[0,1,2,null]]}`;
+    static readonly arrayResult8 = `{"0":"string","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true,"6":[0,1,2,null]}`;
 }
 
 function testIncreaseCapacityToBiggerValue() {

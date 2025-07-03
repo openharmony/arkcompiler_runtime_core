@@ -32,6 +32,7 @@
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 
 namespace ark::mem {
 
@@ -61,6 +62,10 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
         }
         case GCType::G1_GC: {
             ret = Initialize<GCType::G1_GC>(memStats, multithreadingMode, createPygoteSpace);
+            break;
+        }
+        case GCType::CMC_GC: {
+            ret = Initialize<GCType::CMC_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         default:
@@ -118,7 +123,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
             return nullptr;
         }
     }
-    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size << " cls: " << cls;
     ObjectHeader *object = InitObjectHeaderAtMem(cls, mem);
     bool isObjectFinalizable = IsObjectFinalized(cls);
     if (UNLIKELY(isObjectFinalizable || GetNotificationManager()->HasAllocationListeners())) {
@@ -219,7 +224,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
         }
         return nullptr;
     }
-    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size << " cls: " << cls;
     auto *object = InitObjectHeaderAtMem(cls, mem);
     // cls can be null for first class creation, when we create ClassRoot::Class
     // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)

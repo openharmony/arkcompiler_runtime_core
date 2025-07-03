@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,18 +88,22 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DisposeGlobalHandle(uint
 
 template <>
 inline void GlobalHandleStorage<coretypes::TaggedType>::DealUpdateObject(std::array<Node, GLOBAL_BLOCK_SIZE> *block,
-                                                                         size_t index)
+                                                                         size_t index,
+                                                                         const GCRootUpdater &gcRootUpdater)
 {
     coretypes::TaggedValue obj(block->at(index).GetObject());
-    if (obj.IsHeapObject() && obj.GetHeapObject()->IsForwarded()) {
-        coretypes::TaggedValue value(ark::mem::GetForwardAddress(obj.GetHeapObject()));
-        block->at(index).SetObject(value.GetRawData());
+    if (obj.IsHeapObject()) {
+        ObjectHeader *objH = obj.GetHeapObject();
+        if (gcRootUpdater(&objH)) {
+            coretypes::TaggedValue value(objH);
+            block->at(index).SetObject(value.GetRawData());
+        };
     }
 }
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject()
+inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject(const GCRootUpdater &gcRootUpdater)
 {
     if (globalNodes_->empty()) {
         return;
@@ -108,13 +112,13 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject()
     for (size_t i = 0; i < globalNodes_->size() - 1; i++) {
         auto block = globalNodes_->at(i);
         for (size_t j = 0; j < GLOBAL_BLOCK_SIZE; j++) {
-            DealUpdateObject(block, j);
+            DealUpdateObject(block, j, gcRootUpdater);
         }
     }
 
     auto block = globalNodes_->back();
     for (int32_t i = 0; i < count_; i++) {
-        DealUpdateObject(block, i);
+        DealUpdateObject(block, i, gcRootUpdater);
     }
 }
 

@@ -197,8 +197,8 @@ options:
   lang:
     - ets
   type: uint32_t
-  default: 3
-  description: Limit on the number of exclusive coroutines workers
+  default: 15
+  description: Limit on the number of exclusive coroutines workers, 12 for 1.0 interop(native path), 3 for managed path create EAWorker.
 
 - name: coroutine-enable-features
   description: Specify a list of experimental features
@@ -223,6 +223,16 @@ options:
   default: false
   description: Collect coroutine stats and dump it at the end of the program
 
+- name: taskpool-mode
+  lang:
+    - ets
+  type: std::string
+  default: eaworker
+  possible_values:
+    - eaworker
+    - launch
+  description: taskpool using eaworker or launch as execution engine
+
 - name: native-library-path
   lang:
     - ets
@@ -231,9 +241,19 @@ options:
   description: Pathes to find native libraries
   delimiter: ":"
 
-- name: coroutine-enable-external-scheduling
-  lang:
-    - ets
+- name: load-in-boot
   type: bool
   default: false
-  description: Enable external coroutine scheduling (e.g. in event loop)
+  description: Load entrypoint panda file in boot-panda-files
+
+- name: list-unhandled-on-exit
+  description: Collect rejected promises/jobs and throw if there is at least one unhandled on program exit
+  sub_options:
+  - name: promises
+    type: bool
+    default: false
+    description: "promises"
+  - name: jobs
+    type: bool
+    default: false
+    description: "jobs"

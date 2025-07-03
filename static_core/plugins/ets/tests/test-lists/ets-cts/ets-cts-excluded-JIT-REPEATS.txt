@@ -1,50 +1,13 @@
-# RUNTIME_TIMEOUT - it required more than 600sec
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/nase2.ets
-17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.ets
-
-# fails in JIT mode with --opt-level=0
-02.lexical_elements/09.literals/09.undefined_literal/undef_literal1.ets
-04.names_declarations_and_scopes/05.scopes/interface_level1.ets
-04.names_declarations_and_scopes/05.scopes/interface_level2.ets
-07.expressions/09.field_access_expressions/safe_field_access_0.ets
-07.expressions/09.field_access_expressions/safe_field_access_1.ets
-15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
-15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
-15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
-
-# fails in JIT mode with --opt-level=2
-04.names_declarations_and_scopes/05.scopes/interface_level1.ets
-04.names_declarations_and_scopes/05.scopes/interface_level2.ets
-
-# 16032 Timeouts
-escompat/ArrayTest.ets
-
-# 17744 Tests creating BigInt from Double.MAX_VALUE don't fit in 300 sec timeout
-03.types/14.type_bigint/bint_8.ets
-03.types/14.type_bigint/bint_args_8.ets
-03.types/14.type_bigint/bint_arr_8.ets
-03.types/14.type_bigint/bint_clss_8.ets
-03.types/14.type_bigint/bint_fdef_8.ets
-03.types/14.type_bigint/bint_fld_8.ets
-03.types/14.type_bigint/bint_fld_gen_8.ets
-03.types/14.type_bigint/bint_lmbd_8.ets
-03.types/14.type_bigint/bint_tup_8.ets
-03.types/14.type_bigint/bint_un_8.ets
-
-# Aborts with ERRNO: 11 (Resource temporarily unavailable)
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_23.ets
-
-# 22848
-08.statements/08.for_statements/for_loop_parameters_12.ets
-
-# 17053 Cannot create array of nullish tuples
-#07.expressions/04.array_literal/array_literal_13.ets
-
 #24595
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
 
-# 17964 Segmentation fault with too many repeated calls
+# 17964 Segmentation fault due to limitation of the number of coroutines with too many repeated calls
+07.expressions/13.chaining_operator/chop_asyn_func.ets
+13.compilation_units/12.program_exit/program_entry_error_coroutine.ets
+13.compilation_units/12.program_exit/program_entry_error_coroutines.ets
+13.compilation_units/12.program_exit/program_entry_normal_coroutine.ets
+13.compilation_units/12.program_exit/program_entry_normal_coroutines.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_2.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_4.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_8.ets
@@ -82,6 +45,9 @@ escompat/ArrayTest.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_42.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_6.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_8.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_3.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_4.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_5.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_1.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_16.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_17.ets
@@ -122,6 +88,17 @@ escompat/ArrayTest.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_7.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_8.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_9.ets
+17.experimental_features/15.coroutines/coroutines_ext_0.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions8.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions13.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions15.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions25.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions29.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method8.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method17.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method26.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method27.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method28.ets
 
 #24226 RUNTIME_TIMEOUT - it required more than 600sec
 20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_0.ets

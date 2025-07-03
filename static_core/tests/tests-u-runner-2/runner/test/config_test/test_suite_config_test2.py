@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ import os
 import shutil
 import unittest
 from pathlib import Path
-from typing import List
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import IncorrectEnumValue
@@ -37,7 +36,8 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
 
@@ -53,7 +53,7 @@ class TestSuiteConfigTest2(unittest.TestCase):
         cls.test_suite_path.unlink(missing_ok=True)
 
     def test_empty_args(self) -> None:
-        args: List[str] = []
+        args: list[str] = []
         with self.assertRaises(InvalidConfiguration):
             CliOptions(args)
 
@@ -64,7 +64,7 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
     def test_option_without_value(self) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose"]
-        with self.assertRaises(BaseException):
+        with self.assertRaises(IncorrectEnumValue):
             CliOptions(args)
 
     def test_option_with_incorrect_value(self) -> None:

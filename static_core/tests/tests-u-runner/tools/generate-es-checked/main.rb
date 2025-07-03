@@ -24,6 +24,7 @@ require 'fileutils'
 require 'optparse'
 require 'set'
 require 'etc'
+require 'timeout'
 
 require_relative 'src/types'
 require_relative 'src/value_dumper'
@@ -128,7 +129,9 @@ end
 class Generator
     attr_reader :test_count, :tests_failed, :test_files, :tests_excluded
 
+    # ts-node with certain npm versions can hang or crash during the tests
     NODE_RETRIES = 5
+    NODE_TIMEOUT = 900
 
     module SpecialAction
         # value is priority, greater value = higher priority
@@ -324,7 +327,9 @@ class Generator
             stdout_str = ""
             errors = []
             NODE_RETRIES.times do |i|
-                stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                Timeout.timeout(NODE_TIMEOUT) {
+                    stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                }
                 break
             rescue => e
                 puts "NOTE: node failed for #{k}, retry: #{i + 1}/#{NODE_RETRIES}"

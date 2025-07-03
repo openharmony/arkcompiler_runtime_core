@@ -20,7 +20,7 @@ class Arrays {
     return copy;
   }
 
-  static copy(src: Number[]): Array<Number> {
+  static copy(src: FixedArray<Number>): Array<Number> {
     const copy = new Array<Number>(src.length);
     for (let i = 0;i < src.length;i++) copy[i] = src[i];
     return copy;
@@ -43,7 +43,7 @@ class Arrays {
   }
 
     // NOTE(smirnovandrei) may be left: ArrayLike can help to avoid this code duplication (the same code as equals(ReadonlyArray))
-  static equals<T>(left: Number[], right: Array<T>): boolean {
+  static equals<T>(left: FixedArray<Number>, right: Array<T>): boolean {
     if (left.length != right.length) return false;
 
     for (let i = 0;i < left.length;i++) {
@@ -54,7 +54,7 @@ class Arrays {
   }
 }
 
-const TEST_ARRAY: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
+const TEST_ARRAY: FixedArray<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 
 function main(): int {
     let failedTestsCount = 0;

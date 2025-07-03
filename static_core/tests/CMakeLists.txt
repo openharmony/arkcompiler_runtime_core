@@ -455,7 +455,7 @@ function(add_test_file)
         add_dependencies(${suite} ${target}-verifier)
     endif()
 
-    set(gc_types "stw" "gen-gc" "g1-gc")
+    set(gc_types "stw" "g1-gc")
     if (NOT PANDA_TARGET_ARM32) # Arm32 is not supported in the Irtoc
         if (PANDA_LLVM_INTERPRETER)
             set(interp_types "cpp" "irtoc" "llvm")
@@ -1054,7 +1054,7 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-06.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-07.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-08.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-09.pa" SKIP_VERIFICATION)
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-10.pa")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-10.pa" RUNTIME_OPTIONS --load-in-boot)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-11.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-12.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsics-13.pa" EXPECTED_STDOUT "23")
@@ -1269,7 +1269,7 @@ add_test_file(FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/fail_in_runtime_ahead_of_time.pa"
   SKIP_VERIFICATION
   SKIP_AOT SKIP_OSR
-  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-enabled=true"
+  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-mode=ahead-of-time"
   RUNTIME_FAIL_TEST
   DEBUG_LOG_MESSAGE "Bad call incompatible parameter"
 )
@@ -1277,7 +1277,7 @@ add_test_file(FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/fail_in_runtime_on_the_fly.pa"
   SKIP_VERIFICATION
   SKIP_AOT SKIP_OSR
-  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-enabled=true --verification-mode=on-the-fly"
+  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-mode=on-the-fly"
   RUNTIME_FAIL_TEST
   DEBUG_LOG_MESSAGE "Bad call incompatible parameter"
 )
@@ -1285,6 +1285,6 @@ add_test_file(FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/pass_in_runtime_on_the_fly.pa"
   SKIP_VERIFICATION
   SKIP_AOT SKIP_OSR
-  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-enabled=true --verification-mode=on-the-fly"
+  RUNTIME_OPTIONS "${PATCHED_RUNTIME_OPTIONS}" "--verification-mode=on-the-fly"
 )
 endif()

@@ -18,13 +18,9 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/os/mutex.h"
-#include "unicode/numberformatter.h"
-#include "unicode/numberrangeformatter.h"
-#include "unicode/locid.h"
+#include "IntlNumberFormatters.h"
 #include "unicode/coll.h"
-#include "unicode/unistr.h"
 
-#include <string>
 #include <unordered_map>
 #include <memory>
 #include <iterator>
@@ -41,18 +37,15 @@ public:
     IntlFormattersCache();
     ~IntlFormattersCache() = default;
 
-    icu::number::LocalizedNumberFormatter &NumFmtsCacheInvalidation(const std::string &locTag, const icu::Locale &loc);
+    LocNumFmt &NumFmtsCacheInvalidation(ani_env *env, const ParsedOptions &options, ani_status &status);
 
-    icu::number::LocalizedNumberRangeFormatter &NumRangeFmtsCacheInvalidation(const std::string &locTag,
-                                                                              const icu::Locale &loc);
+    LocNumRangeFmt &NumRangeFmtsCacheInvalidation(ani_env *env, const ParsedOptions &options, ani_status &status);
 
 private:
-    using LocNumFmt = icu::number::LocalizedNumberFormatter;
-    using LocNumRangeFmt = icu::number::LocalizedNumberRangeFormatter;
-
     struct NumberFormatters {
         std::unique_ptr<LocNumFmt> numFmt;
         std::unique_ptr<LocNumRangeFmt> numRangeFmt;
+        std::unique_ptr<ParsedOptions> options;
     };
 
     using CacheUMap = std::unordered_map<std::string, NumberFormatters>;

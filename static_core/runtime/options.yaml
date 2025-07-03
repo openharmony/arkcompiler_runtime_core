@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -118,10 +118,15 @@ options:
   default: false
   description: Is debugger enabled on runtime create
 
-- name: sampling-profiler-enable
+- name: sampling-profiler-create
   type: bool
   default: false
-  description: Is the sampling profiler enabled during execution time
+  description: Is the sampling profiler created and available during runtime execution
+
+- name: sampling-profiler-startup-run
+  type: bool
+  default: false
+  description: Is the sampling profiler runned on runtime startup
 
 - name: sampling-profiler-interval
   type: uint32_t
@@ -256,6 +261,7 @@ options:
     - stw
     - gen-gc
     - g1-gc
+    - cmc-gc
   description: Type of used GC
 
 - name: ic-enable
@@ -690,6 +696,11 @@ options:
     - simple-strategy
   description: Type of native gc trigger
 
+- name: profiler-enabled
+  type: bool
+  default: true
+  description: whether open the pgo profiler when jit diabled
+
 - name: profilesaver-sleeping-time-ms
   type: uint32_t
   default: 2000
@@ -710,11 +721,6 @@ options:
   default: false
   description: whether current vm is zygote
 
-- name: verification-enabled
-  type: bool
-  default: false
-  description: Whether to enable verification
-
 - name: verification-mode
   type: std::string
   default: disabled
@@ -722,7 +728,7 @@ options:
     - disabled
     - on-the-fly
     - ahead-of-time
-  description: Verification mode. If verification-enabled option is turned on, the default value is ahead-of-time.
+  description: Verification mode.
 
 - name: verification-update-cache
   type: bool
@@ -796,13 +802,18 @@ options:
   default: "strip.native.min.abc"
   description: snapshot file
 
+- name: boot-an-location
+  type: std::string
+  default: "/data/service/el1/public/for-all-app/framework_ark_cache"
+  description: default path to .an files for boot panda files, try to load ARK .an file from this dir if not empty when enable-an
+
 - name: enable-an
-  description: Try to load ARK .an file base on abc file location
+  description: Try to load ARK .an file for boot panda files from boot-an-location or base on abc file location
   sub_options:
   - name: force
     type: bool
     default: false
-    description: Crash if there is no .an file for location based on .abc file
+    description: Crash if there is no .an file for both location based on .abc file and boot-an-location
 
 - name: verify-call-stack
   type: bool
@@ -883,7 +894,7 @@ options:
 
 - name: coroutines-stack-mem-limit
   type: uint64_t
-  default: 134217728
+  default: 268435456
   description: defines the total amount of memory that can be used for stackful coroutine stacks allocation (in bytes)
 
 - name: use-coroutine-pool
@@ -916,3 +927,13 @@ options:
   - no-task-stats
   - light-task-stats
   description: Set type of task stats that will collect task manager metrics, if use set `no-task-stats` there will be no stats collection
+
+- name: load-in-boot
+  type: bool
+  default: false
+  description: Load entrypoint panda file in boot-panda-files
+
+- name: use-string-caches
+  type: bool
+  default: true
+  description: Whether to create cache for strings created from integer/floating point numbers.

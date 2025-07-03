@@ -23,8 +23,7 @@ from shutil import rmtree
 from string import Template
 from dataclasses import asdict
 from collections import namedtuple
-from vmb.helpers import get_plugin, read_list_file, \
-    log_time, create_file, die, force_link
+from vmb.helpers import get_plugin, read_list_file, log_time, create_file, die, force_link
 from vmb.unit import BenchUnit, BENCH_PREFIX
 from vmb.cli import Args
 from vmb.lang import LangBase
@@ -78,8 +77,13 @@ class BenchGenerator:
         paths = [cwd.joinpath(p) for p in read_list_file(lst)]
         files = []
         for p in paths:
-            x = BenchGenerator.search_test_files_in_dir(p, p, ext, allowed_dir_name)
-            files += x
+            if not p.exists():
+                log.error('Path `%s` not found!', str(p))
+            elif p.is_file():  # add file from test list unconditionally
+                files.append(SrcPath(p, Path('.')))
+            else:
+                x = BenchGenerator.search_test_files_in_dir(p, p, ext, allowed_dir_name)
+                files += x
         return files
 
     @staticmethod
@@ -129,26 +133,35 @@ class BenchGenerator:
         return import_lines
 
     @staticmethod
-    def check_common_files(full: Path, lang_name: str) -> str:
+    def check_common_files(full: Path, lang_name: str, includes: List[str]) -> str:
         """Check if there is 'common' code at ../common/ets/*.ets.
 
         This feature is actually meaningless now
         and added only for the compatibility with existing tests
         """
+        src = ''
+        include_paths = [f for sublist in [x.split() for x in includes] for f in sublist]
+        if include_paths:
+            log.trace("Includes: %s", ';'.join(include_paths))
+            for inc in include_paths:
+                include = full.parent.joinpath(inc)
+                if not include.exists():
+                    log.error('Include %s does not exist!', str(include))
+                    continue
+                with open(include, 'r', encoding="utf-8") as f:
+                    src += f.read()
         if full.parent.name != lang_name:
-            return ''
+            return src
         common = full.parent.parent.joinpath('common', lang_name)
         common = common if common.is_dir() else \
             full.parent.parent.parent.joinpath('common', lang_name)
         if common.is_dir():
-            src = ''
             log.trace('Common dir: %s', common)
             for p in common.glob(f'*.{lang_name}'):
                 log.trace('Common file: %s', p)
                 with open(p, 'r', encoding="utf-8") as f:
                     src += f.read()
-            return src
-        return ''
+        return src
 
     @staticmethod
     def check_resources(full: Path, lang_name: str, dest: Path) -> bool:
@@ -217,7 +230,7 @@ class BenchGenerator:
         values.imports = BenchGenerator.process_imports(
             lang_impl, values.imports, bench_dir, src)
         values.common = BenchGenerator.check_common_files(
-            src.full, lang_impl.short_name)
+            src.full, lang_impl.short_name, values.includes)
         tpl_values = asdict(values)
         # create links to extra dirs if any
         custom_values = {
@@ -241,6 +254,18 @@ class BenchGenerator:
                 src.full, bench_dir, values, outext)
         return BenchUnit(bench_dir, src=src.full, tags=tags, bugs=bugs)
 
+    @staticmethod
+    def create_links(bu: BenchUnit, settings: Optional[GenSettings], src: SrcPath) -> None:
+        if not settings:
+            return
+        if settings.link_to_src:
+            link = bu.path.joinpath(
+                f'{BENCH_PREFIX}{bu.name}{Path(src.full).suffix}')
+            force_link(link, src.full)
+        for s in settings.link_to_other_src:
+            for other in Path(src.full).parent.glob(f'*{s}'):
+                force_link(bu.path.joinpath(other.name), other)
+
     def get_lang(self, lang: str) -> LangBase:
         lang_plugin = get_plugin('langs', lang, extra=self.extra_plug_dir)
         lang_impl: LangBase = lang_plugin.Lang()
@@ -256,7 +281,8 @@ class BenchGenerator:
             with open(template_path, 'r', encoding="utf-8") as f:
                 tpl = Template(f.read())
             return tpl
-        raise RuntimeError(f'Template {name} not found!')
+        die(True, f'Template {name} not found!')
+        return Template('')  # make mypy happy
 
     def process_source_file(self, src: Path, lang: LangBase) -> Iterable[TemplateVars]:
         with open(src, 'r', encoding="utf-8") as f:
@@ -276,20 +302,16 @@ class BenchGenerator:
 
     def add_bu(self, bus: List[BenchUnit], template: Template,
                lang_impl: LangBase, src: SrcPath, variant: TemplateVars,
-               settings: Optional[GenSettings], out_ext: str) -> BenchUnit:
+               settings: Optional[GenSettings], out_ext: str) -> None:
         try:
             bu = BenchGenerator.emit_bench_variant(
                 variant, template, lang_impl, src, self.out_dir, out_ext)
-            if settings and settings.link_to_src:
-                link = bu.path.joinpath(
-                    f'{BENCH_PREFIX}{bu.name}{Path(src.full).suffix}')
-                force_link(link, src.full)
+            self.create_links(bu, settings, src)
             bus.append(bu)
         # pylint: disable-next=broad-exception-caught
         except Exception as e:
             log.error(e)
             die(self.abort, 'Aborting on first fail...')
-        return bu
 
     def generate(self, lang: str,
                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
@@ -314,8 +336,8 @@ class BenchGenerator:
 
 
 @log_time
-def generate_main_regular(args: Args,
-                          settings: Optional[GenSettings] = None) -> List[BenchUnit]:
+def generate_main(args: Args,
+                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
     """Command: Generate benches from doclets."""
     log.info("Starting GEN phase...")
     log.trace("GEN phase args:  %s", args)
@@ -325,91 +347,6 @@ def generate_main_regular(args: Args,
         bus += generator.generate(lang, settings=settings)
     log.passed('Generated %d bench units', len(bus))
     return bus
-
-
-def generate_mode(mode: str, lang: str,
-                  generator: BenchGenerator,
-                  settings: Optional[GenSettings] = None, arkjs_suffix: str = '') -> List[BenchUnit]:
-    """Generate benchmark sources for requested language."""
-    log.trace("Interop GEN for mode: %s", mode)
-    bus: List[BenchUnit] = []
-    lang_impl = generator.get_lang(lang)
-    src_ext = lang_impl.src
-    out_ext = lang_impl.ext
-    template_name = f'Template{lang_impl.ext}'
-    if settings:  # override if set in platform
-        src_ext = settings.src
-        out_ext = settings.out
-        template_name = settings.template
-    template = generator.get_template(template_name)
-    for src in BenchGenerator.search_test_files(generator.paths, ext=src_ext, allowed_dir_name=mode):
-        for variant in generator.process_source_file(src.full, lang_impl):
-            bu = generator.add_bu(bus, template, lang_impl, src,
-                                  variant, settings, out_ext)
-            if mode == 'bu_a2j' and lang == 'ets':
-                create_interop_runner(generator, variant, bu, arkjs_suffix=arkjs_suffix)
-    return tags_workaround(bus, mode)
-
-
-def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit, arkjs_suffix: str = ''):
-    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.tpl_js')
-    runner_js = runner_template.substitute({'METHOD': variant.method_name,
-                                            'STATE': variant.state_name,
-                                            'NAME': variant.bench_name})
-    runner_file = bu.path.joinpath('InteropRunner.js')
-    log.trace("Generating %s", str(runner_file))
-    with create_file(runner_file) as f:
-        f.write(runner_js)
-
-
-def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:
-    if not bus:
-        return bus
-    for bu in bus:
-        if hasattr(bu, 'tags') and bu.tags:
-            continue  # Note need to find out why this is sometimes not the case
-        tags: Set[str] = set()
-        tags.add(mode)
-        bu.tags = tags
-    return bus
-
-
-@log_time
-def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> List[BenchUnit]:
-    """Command: Generate benches from doclets."""
-    log.info("Starting interop GEN phase...",)
-    bus: List[BenchUnit] = []
-    if not generator:
-        log.warning("Generator for interop is not defined, stop")
-        return bus  # empty
-    # Note a2a and a2j templates are like in arkts_host
-    bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
-                         out='.ets',
-                         link_to_src=False))
-    bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
-                         out='.ets',
-                         link_to_src=False), arkjs_suffix=arkjs_suffix)
-    bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='TemplateInteropJ2A' + arkjs_suffix + '.tpl_js',
-                         out='.js',
-                         link_to_src=False))
-    bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='Template.tpl_js',
-                         out='.js',
-                         link_to_src=False))
-    log.passed('Generated %d bench units', len(bus))
-    return sorted(bus, key=lambda x: x.path)
-
-
-def generate_main(args: Args,
-                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
-    if args.langs and 'interop' in args.langs:
-        return generate_main_interop(BenchGenerator(args))
-    if args.langs and 'interop_arkjs' in args.langs:
-        return generate_main_interop(BenchGenerator(args), arkjs_suffix='_arkjs')
-    return generate_main_regular(args, settings)
 
 
 if __name__ == '__main__':

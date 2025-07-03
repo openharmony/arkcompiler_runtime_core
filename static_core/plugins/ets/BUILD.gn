@@ -113,6 +113,7 @@ if (!(ark_standalone_build ||
       "./sdk/api/@ohos.util.PlainArray.ets",
       "./sdk/api/@ohos.util.Queue.ets",
       "./sdk/api/@ohos.util.Stack.ets",
+      "./sdk/api/@ohos.util.stream.ets",
       "./sdk/api/@ohos.util.ets",
       "./sdk/api/@ohos.util.TreeMap.ets",
       "./sdk/api/@ohos.util.TreeSet.ets",
@@ -132,7 +133,10 @@ if (!(ark_standalone_build ||
 
   generate_static_abc("ets2abc_commonsdk_arkts") {
     base_url = "./sdk/arkts"
-    files = [ "./sdk/arkts/@arkts.math.Decimal.ets" ]
+    files = [
+      "./sdk/arkts/@arkts.math.Decimal.ets",
+      "./sdk/arkts/@arkts.collections.ets",
+    ]
     is_boot_abc = "True"
     device_dst_file = "/system/framework/ets2abc_commonsdk_arkts.abc"
   }
@@ -148,6 +152,7 @@ if (!(ark_standalone_build ||
     ]
     sources = [
       "$ark_root/plugins/ets/sdk/native/api/Util.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_stringdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder_helper.cpp",
@@ -365,6 +370,7 @@ if (with_stdlib) {
       deps = [
         "$ark_root/tools/ark_js_napi_cli:HybridXGCTests",
         "tests/interop_js/eacoro:eacoro_tests",
+        "tests/interop_js/taskpool:taskpool_tests",
         "tests/interop_js/xgc:xgc_tests",
       ]
     }

@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let buf = new SharedArrayBuffer(4);
+
+import { launch } from "std/concurrency"
+
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -75,10 +78,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         Atomics.store(flag, 0, 0);
-        let p1 = launch replaceAll();
-        let p2 = launch replaceAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(replaceAll);
+        let p2 = launch<void, () => void>(replaceAll);
+        p1.Await();
+        p2.Await();
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re"
             assertEQ(concurrentHashMapOne.get(i), newVal);
@@ -90,10 +93,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch replaceAll();
-        let p2 = launch isEmptyFun();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(replaceAll);
+        let p2 = launch<void, () => void>(isEmptyFun);
+        p1.Await();
+        p2.Await();
         assertEQ(Atomics.load(flag, 0), 10);
         for (let i = 0; i < 10; i++) {
             let reVal = arrValues[i] + "-re";
@@ -106,10 +109,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch replaceAllBack();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(replaceAllBack);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
         assertTrue(Atomics.load(flag, 0) >= 0);
     });
@@ -119,10 +122,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch replaceAll();
-        let p2 = launch removeAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(replaceAll);
+        let p2 = launch<void, () => void>(removeAllBack);
+        p1.Await();
+        p2.Await();
         let flagCounter: int = 0;
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";

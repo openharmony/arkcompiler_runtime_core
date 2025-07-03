@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ void RefBlock::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType ro
     }
 }
 
-void RefBlock::UpdateMovedRefs()
+void RefBlock::UpdateMovedRefs([[maybe_unused]] const GCRootUpdater &gcRootUpdater)
 {
     for (auto *block : *this) {
         if (block->IsEmpty()) {
@@ -80,17 +80,16 @@ void RefBlock::UpdateMovedRefs()
                 continue;
             }
 
-            auto objectPointer = block->refs_[index];
-            auto *object = objectPointer.ReinterpretCast<ObjectHeader *>();
-            auto obj = reinterpret_cast<ObjectHeader *>(object);
+            auto *obj = block->refs_[index].ReinterpretCast<ObjectHeader *>();
 
-            if (!obj->IsForwarded()) {
+            if (!gcRootUpdater(&obj)) {
                 continue;
             }
 
-            LOG(DEBUG, GC) << " Update pointer for obj: " << mem::GetDebugInfoAboutObject(obj);
-            ObjectHeader *forwardAddress = GetForwardAddress(obj);
-            block->refs_[index] = reinterpret_cast<ObjectHeader *>(forwardAddress);
+            auto *movedObject = block->refs_[index].ReinterpretCast<ObjectHeader *>();
+
+            LOG_IF(obj != movedObject, DEBUG, GC) << " Update pointer for obj: " << mem::GetDebugInfoAboutObject(obj);
+            block->refs_[index] = obj;
         }
     }
 }

@@ -117,6 +117,7 @@ private:
     using MethodsVec = std::vector<EtsMethodSet *>;
 
     std::pair<FieldsVec, MethodsVec> CalculateProperties(const OverloadsMap *overloads);
+    void SetBaseWrapperMethods(napi_env env, const EtsClassWrapper::MethodsVec &methods);
     void UpdatePropsWithBaseClasses(PropsMap *props);
     void CollectConstructors(PropsMap *props);
     void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);

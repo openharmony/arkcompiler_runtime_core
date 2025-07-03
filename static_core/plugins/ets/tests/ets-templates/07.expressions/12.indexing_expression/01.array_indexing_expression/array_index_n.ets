@@ -19,7 +19,7 @@ desc: For an array indexing, a type of index expression must be of a numeric typ
 tags: [compile-only, negative]
 ---*/
 
-let arr: number[] = [1, 2, 3]
+let arr: FixedArray<number> = [1, 2, 3]
 
 function main() {
     arr[{{c.index}}] = 0;

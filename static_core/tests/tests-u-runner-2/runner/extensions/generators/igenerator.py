@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
@@ -30,11 +29,11 @@ class IGenerator(ABC):
         self._source: Path = Path(source)
         self._target: Path = Path(target)
         self._config: Config = config
-        self.generated_tests: List[str] = []
+        self.generated_tests: list[str] = []
 
         if not self._source.is_dir():
-            raise InvalidConfiguration(f"{str(self._source.absolute())} must be a directory")
+            raise InvalidConfiguration(f"{self._source.absolute()!s} must be a directory")
 
     @abstractmethod
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         pass

@@ -104,7 +104,8 @@ string FromI32(int32_t a)
     return taihe::to_string(a);
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_AddI8(AddI8);
 TH_EXPORT_CPP_API_SubI16(SubI16);

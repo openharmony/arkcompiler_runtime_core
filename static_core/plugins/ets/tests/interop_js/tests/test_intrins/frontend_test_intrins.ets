@@ -108,55 +108,55 @@ function testStringOps(): boolean {
 }
 
 function testBuiltinArrayAny(): boolean {
-    let v: JSValue[] = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
+    let v: FixedArray<JSValue> = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
     let r = "object:,1.23,foo,[object Object]";
-    // v = identity(identity(v)) as JSValue[]; // TODO(vpukhov): jscast
+    // v = identity(identity(v)) as FixedArray<JSValue>; // TODO(vpukhov): jscast
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayBoolean(): boolean {
-    let v: boolean[] = [true, false, true];
+    let v: FixedArray<boolean> = [true, false, true];
     let r = "object:true,false,true";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInt(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let r = "object:111,222";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayNumber(): boolean {
-    let v: double[] = [11.1, 22.2];
+    let v: FixedArray<double> = [11.1, 22.2];
     let r = "object:11.1,22.2";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayString(): boolean {
-    let v: String[] = ["foo0", "foo1"];
+    let v: FixedArray<String> = ["foo0", "foo1"];
     let r = "object:foo0,foo1";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayObject(): boolean {
-    let v: Object[] = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1];
+    let v: FixedArray<Object> = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1];
     let r = "object:,[object Object],foo,1";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayMultidim(): boolean {
-    let v: double[][] = [[11.1, 22.2], [33.3, 44.4]];
+    let v: FixedArray<FixedArray<double>> = [[11.1, 22.2], [33.3, 44.4]];
     let r = "object:11.1,22.2,33.3,44.4";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInstanceof(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let ctor = JSRuntime.getGlobal().Array;
     return JSRuntime.instanceOfDynamic(identity(v), ctor);
 }
 function testInitArrayComponent(): boolean {
-    // TODO(vpukhov): relies on jscast BadClass[]
+    // TODO(vpukhov): relies on jscast FixedArray<BadClass>
     return true;
 }
 
@@ -252,8 +252,8 @@ function testTypecheckGetProp(): boolean {
     obj.prop = 1.23;
     try {
         obj.prop as String;
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -261,8 +261,8 @@ function testTypecheckGetProp(): boolean {
 function testTypecheckJscall(): boolean {
     try {
         identity(123) as String;
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -274,8 +274,8 @@ function testTypecheckCallets(): boolean {
         }
 
         applyArgs(etsfn, 123);
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -303,8 +303,8 @@ function testSetThrows(): boolean {
 function testJscallResolutionThrows1(): boolean {
     try {
         nonexisting();
-    } catch (e: ESError) {
-        return "object:TypeError: call target is not a function" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: call target is not a function" == vstringify(e);
     }
     throw unreachable();
 }
@@ -312,8 +312,8 @@ function testJscallResolutionThrows1(): boolean {
 function testJscallResolutionThrows2(): boolean {
     try {
         nonexisting.nonexisting();
-    } catch (e: ESError) {
-        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e);
     }
     throw unreachable();
 }
@@ -331,7 +331,7 @@ function testJscallResolutionThrows3(): boolean {
 function gcJsruntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let fullGcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+        let fullGcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
         // if main coro is executed first, the test will return false
         Coroutine.Schedule();

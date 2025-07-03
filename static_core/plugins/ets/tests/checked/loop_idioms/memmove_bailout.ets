@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function check(arr1:Object, arr2:Object): boolean {
+function check(arr1: Object, arr2: Object): boolean {
     if (arr1.toString() != arr2.toString()) {
         console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
         return true;
@@ -27,16 +27,14 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::mayAlias"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static mayAlias(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static mayAlias(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         return check(TestBailout.__noinline__mayAlias(src, dst), [6, 7, 8, 4, 5]);
     }
 
-    static __noinline__mayAlias(src:int[], dst:int[]): int[]
-    {
-        for (let i:int = 0; i < src.length; i++) {
+    static __noinline__mayAlias(src: FixedArray<int>, dst: FixedArray<int>): FixedArray<int> {
+        for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
         return dst;
@@ -47,12 +45,11 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets1"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_offsets1(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static patternMissmatch_offsets1(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
-        for (let i:int = 0; i < src.length; i++) {
+        for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[src.length - 1 - i];
         }
         return check(dst, [8, 7, 6, 4, 5]);
@@ -63,12 +60,11 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::patternMissmatch_offsets2"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static patternMissmatch_offsets2(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: int[] = [1, 2, 3, 4, 5];
+    static patternMissmatch_offsets2(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<int> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
-        for (let i:int = 0; i < src.length; i++) {
+        for (let i: int = 0; i < src.length; i++) {
             dst[dst.length - 1 - i] = src[i];
         }
         return check(dst, [1, 2, 8, 7, 6]);
@@ -79,12 +75,11 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::refArray"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static refArray(): boolean
-    {
+    static refArray(): boolean {
         let src = new Array<int>(6, 7, 8);
         let dst = new Array<int>(1, 2, 3, 4, 5);
         let offs = dst.length - src.length;
-        for (let i:int = 0; i < src.length; i++) {
+        for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
         return check(dst, [6, 7, 8, 4, 5]);
@@ -95,14 +90,13 @@ class TestBailout {
     //! METHOD        "memmove_bailout.TestBailout::differentTypes"
     //! PASS_AFTER    "LoopIdioms"
     //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
-    static differentTypes(): boolean
-    {
-        let src: int[] = [6, 7, 8];
-        let dst: long[] = [1, 2, 3, 4, 5];
+    static differentTypes(): boolean {
+        let src: FixedArray<int> = [6, 7, 8];
+        let dst: FixedArray<long> = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
-        for (let i:int = 0; i < src.length; i++) {
+        for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
-        return check(dst, [6, 7,  8, 4, 5]);
+        return check(dst, [6, 7, 8, 4, 5]);
     }
 }

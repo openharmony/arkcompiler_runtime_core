@@ -20,6 +20,10 @@ namespace ark::ets::ani::testing {
 class TupleValueGetItemLongTest : public AniGTestTupleOps {
 public:
     static constexpr ani_long EXPECTED_RESULT = 300L;
+    static constexpr ani_long EXPECTED_RESULT_2 = 200L;
+    static constexpr ani_long EXPECTED_RESULT_3 = 100L;
+    static constexpr ani_long EXPECTED_RESULT_4 = 50L;
+    static constexpr ani_long EXPECTED_RESULT_5 = 1000L;
 };
 
 TEST_F(TupleValueGetItemLongTest, tupleValueGetItemLong)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemLongTest, tupleValueGetItemLongIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_long_test", "getLongTuple");
     ani_long result = 0L;
     ASSERT_EQ(env_->TupleValue_GetItem_Long(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemLongTest, tupleValueGetItemIntIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_long_test", "getLongTuple");
+    ani_long result = 0L;
+    ASSERT_EQ(env_->TupleValue_GetItem_Long(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemLongTest, tupleValueGetItemIntCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_long_test", "getLongTuple");
+
+    const std::array<ani_long, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                     EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_long result = 0L;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Long(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemLongTest, tupleValueGetItemLongNullResult)

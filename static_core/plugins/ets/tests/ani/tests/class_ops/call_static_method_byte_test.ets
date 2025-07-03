@@ -17,7 +17,7 @@ class Operations {
     static sum(a0: byte, a1: byte): byte {
         return a0 + a1 as byte;
     }
-};
+}
 
 class A {
     static funcA(a0: byte, a1: byte): byte {
@@ -31,9 +31,52 @@ class A {
     static funcB(a0: byte, a1: byte): byte {
         return A.funcA(a0, a1);
     }
-};
+}
+
 class B extends A{
     static funcB(a0: byte, a1: byte): byte {
         return a1 - a0 as byte;
     }
-};
+}
+
+class C extends A{
+}
+
+class D extends A{
+    static funcA(a0: byte, a1: byte): byte {
+        return a1 - a0 as byte;
+    }
+}
+
+class E extends A{
+    static funcA(a0: byte, a1: byte): byte {
+        return A.funcA(a0, a1);
+    }
+}
+
+class F {
+    static increment(a0: byte, a1: byte): void {
+        F.count += a0;
+        F.count += a1;
+    }
+
+    static getCount(): byte {
+        return F.count;
+    }
+
+    static count: byte = 0;
+}
+
+class G {
+    public static publicMethod(a0: byte, a1: byte): byte {
+        return a0 + a1 as byte;
+    }
+
+    private static privateMethod(a0: byte, a1: byte): byte {
+        return a1 - a0 as byte;
+    }
+
+    static callPrivateMethod(a0: byte, a1: byte): byte {
+        return G.privateMethod(a0, a1);
+    }
+}

@@ -40,16 +40,6 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Constructs a new Double instance with provided initial value
-     *
-     * @param value the initial value
-     *
-     */
-    public constructor(value: Double) {
-        this.value = value.doubleValue();
-    }
-
-    /**
      * Constructs a new Double instance from string
      *
      * @param value string that may contain a number
@@ -204,8 +194,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as byte
      * @tag arkts
      */
-    public override byteValue(): byte {
-        return this.value as byte;
+    public override toByte(): byte {
+        return this.value.toByte();
     }
 
     /**
@@ -214,8 +204,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as short
      * @tag arkts
      */
-    public override shortValue(): short {
-        return this.value as short;
+    public override toShort(): short {
+        return this.value.toShort();
     }
 
     /**
@@ -224,8 +214,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as int
      * @tag arkts
      */
-    public override intValue(): int {
-        return this.value as int;
+    public override toInt(): int {
+        return this.value.toInt();
     }
 
     /**
@@ -234,8 +224,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as long
      * @tag arkts
      */
-    public override longValue(): long {
-        return this.value as long;
+    public override toLong(): long {
+        return this.value.toLong();
     }
 
     /**
@@ -244,8 +234,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as float
      * @tag arkts
      */
-    public override floatValue(): float {
-        return this.value as float;
+    public override toFloat(): float {
+        return this.value.toFloat();
     }
 
     /**
@@ -254,9 +244,85 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns value as double
      * @tag arkts
      */
-    public override doubleValue(): double {
+    public override toDouble(): double {
         return this.value;
     }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     * @tag arkts
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toDouble(value: double): double {
+        return value;
+    }
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: double): char;
+
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: double): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: double): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: double): int;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: double): long;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: double): float;
 
     /**
      * Compares this instance to other Double object
@@ -270,7 +336,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override compareTo(other: Double): int {
-        return (this.value - other.unboxed()) as int;
+        return (this.value - other).toInt();
     }
 
     /**
@@ -294,7 +360,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     public toString(d: Number): String {
-        return Double.toString(this.value, d as int);
+        return Double.toString(this.value, d.toInt());
     }
 
     /**
@@ -308,23 +374,18 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Accepts a locale and returns string in language-sensitive representation
-     *
-     * @remark
-     * Implemented as native function,  @see `toLocaleString()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#741).
-     * @returns result of the conversion in a local representation
-     *
-     */
-    public native toLocaleString(locale: String): String;
-
-    /**
      * Without an argument method returns just toString value
      *
      * @returns result of the conversion
      *
      */
     public toLocaleString(): String {
-        return this.toLocaleString("")
+        return new Intl.NumberFormat().format(this.value)
+    }
+
+    public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
+        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options)
+        return formatter.format(this.value)
     }
 
     /**
@@ -334,7 +395,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public override $_hashCode(): int {
-        return this.intValue();
+        return this.toInt();
     }
 
     /**
@@ -472,7 +533,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public add(other: Double): Double {
-        return Double.valueOf((this.value + other.doubleValue()) as double)
+        return Double.valueOf((this.value + other.toDouble()) as double)
     }
 
     /**
@@ -484,7 +545,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public sub(other: Double): Double {
-        return Double.valueOf((this.value - other.doubleValue()) as double)
+        return Double.valueOf((this.value - other.toDouble()) as double)
     }
 
     /**
@@ -496,7 +557,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public mul(other: Double): Double {
-        return Double.valueOf((this.value * other.doubleValue()) as double)
+        return Double.valueOf((this.value * other.toDouble()) as double)
     }
 
     /**
@@ -508,7 +569,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public div(other: Double): Double {
-        return Double.valueOf((this.value / other.doubleValue()) as double)
+        return Double.valueOf((this.value / other.toDouble()) as double)
     }
 
     /**
@@ -520,7 +581,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public isLessThan(other: Double): boolean {
-        return this.value < other.doubleValue();
+        return this.value < other.toDouble();
     }
 
     /**
@@ -532,7 +593,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public isLessEqualThan(other: Double): boolean {
-        return this.value <= other.doubleValue();
+        return this.value <= other.toDouble();
     }
 
     /**
@@ -544,7 +605,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public isGreaterThan(other: Double): boolean {
-        return this.value > other.doubleValue();
+        return this.value > other.toDouble();
     }
 
     /**
@@ -556,7 +617,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @tag arkts
      */
     public isGreaterEqualThan(other: Double): boolean {
-        return this.value >= other.doubleValue();
+        return this.value >= other.toDouble();
     }
 
     /**
@@ -633,7 +694,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
         if ((r < 2.0 || r > 36.0) && r != 0.0) {
             return NaN;
         } else {
-            return Double.parseIntCore(s.trim(), r as int);
+            return Double.parseIntCore(s.trim(), Double.toInt(r));
         }
     }
 

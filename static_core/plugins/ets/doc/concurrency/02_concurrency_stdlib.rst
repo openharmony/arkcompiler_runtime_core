@@ -11,14 +11,14 @@
     limitations under the License.
 
 #########################
-ArkTS Concurrency: stdlib
+Concurrency: stdlib
 #########################
 
 ********
 Overview
 ********
 
-In general we have several directions for concurrency in ArkTS stdlib:
+In general we have several directions for concurrency in |LANG| stdlib:
 
 - interfaces for coroutines
 - concurrency/async primitives required for the compatibility with JS/TS
@@ -39,6 +39,8 @@ Job is the class which represent the job/task executing on the coroutine.
 
 Job object represents the job which will be scheduled and executed. There is no guarantee that it will be executed on the same thread when it was created.
 
+If coroutine completes normally, it puts its return value to the linked Job instance and marks the Job as successfully completed.
+
 If the during execution job function throws error this error will be propagated to the `Await` method and rethrown. 
 
 In general Job class have these public API:
@@ -57,6 +59,13 @@ In general Job class have these public API:
     }
   }
 
+------------------
+Exception handling
+------------------
+
+The exception thrown during execution can be handled at the `Await` via try-catch block.
+
+In case if exception thrown, but `Await` method never called - an UnhandledExceptionHandler should be called upon the whole program completion.
 
 .. _Concurrency launch:
 
@@ -77,6 +86,13 @@ For creation of the coroutine you should use standard library function ``launch`
 Where `coroFun` is either lambda, either static method or function.
 
 The created coroutine will be scheduled on the one of the coroutine worker threads and can be rescheduled to another later.
+
+========
+Schedule
+========
+
+The `Schedule` is the method of `Coroutine` class which notifies Scheduler that current coroutine could be suspended at this moment, 
+so if it is non-empty execution queue - current coroutine will be suspended and best suspended coroutine will be scheduled on current coroutine worker.
 
 ***************************************
 JS/TS compatible concurrency primitives
@@ -149,11 +165,19 @@ The following methods are used as follows:
 
         finally(onFinally?: () => void throws): Promise<T> 
 
+
+---------------------------
+Unhandled rejected promises
+---------------------------
+
+In case of unhandled rejection of promise either custom handler provided for promise rejection and it will be called,
+either default promise rejection handler will be called upon the whole program completion.
+
 ****************************
 Concurrency extensions
 ****************************
 
-Besides JS/TS compatible concurrency primitives, there are some extensions in ArkTS which introduce some additional concurrency functionality. 
+Besides JS/TS compatible concurrency primitives, there are some extensions in |LANG| which introduce some additional concurrency functionality. 
 
 ========
 TaskPool
@@ -185,13 +209,17 @@ except one requirement which is applicable for all M:N coroutines: we shouldn't 
 
 In general TaskPool provides structured concurrency features. I.e. it allow you to start some set of tasks, cancel task, wait for tasks, etc.
 
+The tasks are executed on the Coroutine Workers. The cross-language interoperability is forbidden in tasks.
+
 For detailed information about TaskPool please take a look at standard library documentation.
+
+Experimental: it is an option to use EACoroutines for the TaskPool, in this case it is allowed to use cross-language interoperability in the Tasks.
 
 =========
 AsyncLock
 =========
 
-For objects shared between different concurrent domains, it is crucial to have some machinery to provide some machinery for synchronization. One of the ways to guarantee thread-safe access to the object is Locking machinery. For this we introduce AsyncLock in ArkTS.
+For objects shared between different concurrent domains, it is crucial to have some machinery to provide some machinery for synchronization. One of the ways to guarantee thread-safe access to the object is Locking machinery. For this we introduce AsyncLock in |LANG|.
 
 For languages with coroutines which are executing on the more than one CPU core we may need such synchronization primitive as Lock. But we can't use OS-level lock, since there are queue of coroutines waiting for execution on this core.
 
@@ -199,7 +227,7 @@ For this we need introduce special type of lock, which will not block the whole 
 
 .. uml:: os_based_lock_deadlock_seq.plantuml
 
-In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For ArkTS we can introduce special class `AsyncLock`, which have method `async` for running code 
+In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For |LANG| we can introduce special class `AsyncLock`, which have method `async` for running code 
 
 .. code-block:: ts
     :linenos:

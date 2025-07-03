@@ -1070,7 +1070,6 @@ void Amd64Encoder::EncodeCastToBool(Reg dst, Reg src)
 void Amd64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow)
 {
     ASSERT(IsLabelValid(slow));
-    ASSERT(IsJsNumberCast());
     ASSERT(src.IsFloat() && dst.IsScalar());
 
     CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
@@ -1090,6 +1089,28 @@ void Amd64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::Labe
     GetMasm()->jo(*slowLabel);
 
     GetMasm()->bind(end);
+}
+
+void Amd64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // infinite and big numbers will overflow here to INT64_MIN. If src is NaN, cvttsd2si itself returns zero.
+    GetMasm()->cvttsd2si(ArchReg(dst, DOUBLE_WORD_SIZE), ArchVReg(src));
+    // save the result to tmp
+    GetMasm()->mov(ArchReg(tmp, DOUBLE_WORD_SIZE), ArchReg(dst, DOUBLE_WORD_SIZE));
+    // 'and' the result with 0xffff
+    constexpr uint32_t UTF16_CHAR_MASK = 0xffff;
+    GetMasm()->and_(ArchReg(dst), asmjit::imm(UTF16_CHAR_MASK));
+    // check INT64_MIN
+    GetMasm()->cmp(ArchReg(tmp, DOUBLE_WORD_SIZE), asmjit::imm(1));
+    // 'mov' never affects the flags
+    GetMasm()->mov(ArchReg(tmp, DOUBLE_WORD_SIZE), failureResult);
+    // ... and we may move conditionally the failureResult into dst for overflow only
+    GetMasm()->cmovo(ArchReg(dst), ArchReg(tmp));
 }
 
 void Amd64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)
@@ -2615,7 +2636,7 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     BindLabel(doneId);
 }
 
-void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Amd64Encoder::EncodeRoundToPInfReturnScalar(Reg dst, Reg src)
 {
     if (src.GetType() == FLOAT32_TYPE) {
         EncodeRoundToPInfFloat(dst, src);
@@ -2624,6 +2645,46 @@ void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     } else {
         UNREACHABLE();
     }
+}
+
+void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
+{
+    ASSERT(src.GetType() == FLOAT64_TYPE);
+    ASSERT(dst.GetType() == FLOAT64_TYPE);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t HALF = 0x3FE0000000000000;  // double precision representation of 0.5
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t ONE = 0x3FF0000000000000;  // double precision representation of 1.0
+
+    ScopedTmpRegF64 ceil(this);
+    GetMasm()->roundsd(ArchVReg(ceil), ArchVReg(src), asmjit::imm(0b10));
+
+    // calculate ceil(val) - val
+    ScopedTmpRegF64 diff(this);
+    GetMasm()->movapd(ArchVReg(diff), ArchVReg(ceil));
+    GetMasm()->subsd(ArchVReg(diff), ArchVReg(src));
+
+    // load 0.5 constant and compare
+    ScopedTmpRegF64 constReg(this);
+    ScopedTmpRegU64 tmpReg(this);
+    GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(HALF));
+    GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+    GetMasm()->comisd(ArchVReg(diff), ArchVReg(constReg));
+
+    // if difference > 0.5, subtract 1 from result
+    auto done = GetMasm()->newLabel();
+    GetMasm()->jbe(done);  // If difference <= 0.5, jump to end
+
+    // Load 1.0 and subtract
+    GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(ONE));
+    GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+    GetMasm()->subsd(ArchVReg(ceil), ArchVReg(constReg));
+
+    GetMasm()->bind(done);
+
+    // move result to destination register
+    GetMasm()->movapd(ArchVReg(dst), ArchVReg(ceil));
 }
 
 template <typename T>

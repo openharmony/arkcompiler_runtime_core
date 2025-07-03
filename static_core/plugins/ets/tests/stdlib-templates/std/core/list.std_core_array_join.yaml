@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "boolean[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<boolean>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "boolean_array", delimiter: "String"},
     method_test_index_data:
@@ -58,7 +58,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "byte[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<byte>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "byte_array", delimiter: "String"},
     method_test_index_data:
@@ -84,7 +84,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "short[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<short>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "short_array", delimiter: "String"},
     method_test_index_data:
@@ -112,7 +112,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "int[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<int>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "int_array", delimiter: "String"},
     method_test_index_data:
@@ -139,7 +139,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "long[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<long>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "long_array", delimiter: "String"},
     method_test_index_data:
@@ -166,7 +166,7 @@
     result_nature: Object,
     method_nature: function,
     result_type: String,
-    method_signature: { arr: "float[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<float>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "float_array", delimiter: "String"},
     method_test_index_data:
@@ -207,7 +207,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "double[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<double>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "double_array", delimiter: "String"},
     method_test_index_data:
@@ -249,7 +249,7 @@
     method_nature: function,
     result_nature: Object,
     result_type: String,
-    method_signature: { arr: "char[]", delimiter: "String" },
+    method_signature: { arr: "FixedArray<char>", delimiter: "String" },
     method_throws: "false",
     method_signature_desc: {first: "char_array", delimiter: "String"},
     method_test_index_data:

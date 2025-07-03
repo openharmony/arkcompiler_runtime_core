@@ -34,11 +34,18 @@ function main() {
     suite.addTest("ArrayList subArrayList with change subArrayList", testSubArrayListWithChange);
     suite.addTest("ArrayList subArrayList with empty container", testSubArrayListEmptyContainer);
     suite.addTest("ArrayList subArrayList with start index = 0 and end index = length - 1", testSubArrayListFullRange);
+    suite.addTest("ArrayList JSON stringify", testArrayListJsonStringify);
 
     return suite.run();
 }
 
+class Temp {
+    age: number = 0;
+    name: string = "";
+}
+
 class TestData {
+    static readonly testNumber0: number = 0;
     static readonly testNumber1: number = 1;
     static readonly testNumber3: number = 3;
     static readonly testNumber5: number = 5;
@@ -47,9 +54,14 @@ class TestData {
     static readonly forString: String[] = ["ssss", "2", "%", "Z"];
     static readonly forBoolean: Boolean[] = [true, false, false, true];
     static readonly forObject: Object[] = [[1], [2, 3, 4], [1, 2], [5]];
+    static readonly testString1: string = "zhangsan";
+    static readonly testString2: string = "insert";
+    static readonly testObject: Temp = { age: 10, name: "zhang"};
+    static readonly testTrue: Boolean = true;
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
     static readonly result6: Number[] = [2, 3, 4];
     static readonly result7: Number[] = [2, 3, 4, 5];
+    static readonly result8: String = `{"0":"zhangsan","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true}`;
 }
 
 function testSortNumbers() {
@@ -285,6 +297,21 @@ function testSubArrayListFullRange() {
         assertEQ(subArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
     assertEQ(subArrayList.length, TestData.testNumber5, "SubArrayList length should be 5");
+}
+
+function testArrayListJsonStringify() {
+    let arrayList: ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null | Object> =
+    new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>();
+    arrayList.add(TestData.testString1);
+    arrayList.add(TestData.testNumber1);
+    arrayList.add(TestData.testObject);
+    arrayList.add(undefined);
+    arrayList.add(null);
+    arrayList.add(TestData.testTrue);
+    arrayList.insert(TestData.testString2, TestData.testNumber0);
+    arrayList.removeByIndex(TestData.testNumber0);
+    let jsonResult = JSON.stringify(arrayList);
+    assertEQ(jsonResult, TestData.result8, `jsonResult should be ${TestData.result8}`);
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

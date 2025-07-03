@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #ifndef PANDA_RUNTIME_THREAD_STATUS_H_
 #define PANDA_RUNTIME_THREAD_STATUS_H_
+
+#include <cstdint>
 
 namespace ark {
 
@@ -33,6 +35,8 @@ enum class ThreadStatus : uint16_t {
     TERMINATING,
     FINISHED,
 };
+
+enum ThreadFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, SAFEPOINT_REQUEST = 8 };
 
 }  // namespace ark
 

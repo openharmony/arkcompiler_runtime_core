@@ -17,6 +17,7 @@ export native function sum(a: int, b: int): int;
 export native function sum(a: int, b: int, c: int): int;
 export native function concat(s0: String, s1: String, s2: String): String;
 export native function concat(s0: String, s1: String): String;
+export native function recursiveFunction(value: int): int;
 
 function checkSum(): boolean {
     return sum(8, 16) == 24;

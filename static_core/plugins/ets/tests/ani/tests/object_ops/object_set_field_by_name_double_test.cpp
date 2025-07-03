@@ -52,7 +52,7 @@ TEST_F(ObjectSetFieldByNameDoubleTest, set_field01)
     ani_object animal = NewAnimal();
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "age", static_cast<ani_double>(CMP_VALUE)), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_double_test", "checkObjectField", animal,
                                                static_cast<ani_double>(CMP_VALUE)),
@@ -72,28 +72,34 @@ TEST_F(ObjectSetFieldByNameDoubleTest, set_field01)
     }
 }
 
+TEST_F(ObjectSetFieldByNameDoubleTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Double(nullptr, animal, "age", CMP_VALUE), ANI_INVALID_ARGS);
+}
+
 TEST_F(ObjectSetFieldByNameDoubleTest, not_found_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "x", static_cast<ani_double>(SET_VALUE)), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "x", SET_VALUE), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "", SET_VALUE), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameDoubleTest, invalid_type)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "name", static_cast<ani_double>(SET_VALUE)), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, "name", SET_VALUE), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectSetFieldByNameDoubleTest, invalid_object)
 {
-    ASSERT_EQ(env_->Object_SetFieldByName_Double(nullptr, "x", static_cast<ani_double>(SET_VALUE)), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Double(nullptr, "x", SET_VALUE), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameDoubleTest, invalid_name)
 {
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, nullptr, static_cast<ani_double>(SET_VALUE)),
-              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_SetFieldByName_Double(animal, nullptr, SET_VALUE), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

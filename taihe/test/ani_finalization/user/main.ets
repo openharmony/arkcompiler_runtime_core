@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Test from "@generated/finalization_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as Test from "finalization_test";
 
 loadLibrary("ani_finalization");
 
 function doFullGC() {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
     }
@@ -52,5 +52,5 @@ function main() {
 
     suite.addTest("test finalization", test_finalization);
 
-    System.exit(suite.run());
+    exit(suite.run());
 }

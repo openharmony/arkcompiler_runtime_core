@@ -116,4 +116,12 @@ TEST_F(GlobalReferenceCreateTest, global_reference_create_test)
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }
 
+TEST_F(GlobalReferenceCreateTest, invalid_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_ref gref {};
+    ASSERT_EQ(env_->c_api->GlobalReference_Create(nullptr, undefinedRef, &gref), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

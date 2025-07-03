@@ -18,7 +18,27 @@ interface IBase {
 
     @on_off
     offSet(a: () => void): void;
+
+    @on_off
+    @overload("mytest")
+    mytestNew();
+
+    @on_off("type_name")
+    onTest(): i32;
 }
+
+@on_off
+@overload("mytest")
+function mytestGlobalnew(): i32;
+
+@class
+interface Color {
+    add(a: i32): i32;
+}
+
+@on_off
+@static("Color")
+function onGlobalnew(): i32;
 
 function getIBase(a: String, b: String): IBase;
 
@@ -53,3 +73,16 @@ function onFooStatic(a: () => void): void;
 @static("BaseCls")
 @on_off
 function offFooStatic(a: () => void): void;
+
+// same number of param
+@on_off("funcI")
+function onFuncI(a: (b: i32) => void): void;
+
+@on_off("funcB")
+function onFuncB(a: (b: bool) => void): void;
+
+@on_off("funcI")
+function offFuncI(a: (b: i32) => void): void;
+
+@on_off("funcB")
+function offFuncB(a: (b: bool) => void): void;

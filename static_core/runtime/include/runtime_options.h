@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,32 +20,6 @@
 #include "runtime/plugins.h"
 
 namespace ark {
-/// @brief Verification mode
-enum class VerificationMode {
-    DISABLED,       // No verification
-    ON_THE_FLY,     // Verify methods before they are executed (used by panda/ark executable)
-    AHEAD_OF_TIME,  // Verify methods at startup (used by verifier executable)
-    DEBUG           // Debug verification by enabling breakpoints (used by verifier executable)
-};
-
-static inline bool IsEnabled(VerificationMode mode)
-{
-    return mode != VerificationMode::DISABLED;
-}
-
-static inline VerificationMode VerificationModeFromString(const std::string &mode)
-{
-    if (mode == "on-the-fly") {
-        return VerificationMode::ON_THE_FLY;
-    }
-    if (mode == "ahead-of-time") {
-        return VerificationMode::AHEAD_OF_TIME;
-    }
-    if (mode == "debug") {
-        return VerificationMode::DEBUG;
-    }
-    return VerificationMode::DISABLED;
-}
 
 /**
  * @brief Class represents runtime options
@@ -84,21 +58,6 @@ public:
     void SetFingerprint(const std::string &in)
     {
         fingerPrint_.assign(in);
-    }
-
-    VerificationMode GetVerificationMode() const
-    {
-        return verificationMode_;
-    }
-
-    void SetVerificationMode(VerificationMode in)
-    {
-        verificationMode_ = in;
-    }
-
-    void SetVerificationMode(const std::string &mode)
-    {
-        verificationMode_ = VerificationModeFromString(mode);
     }
 
     bool IsVerifyRuntimeLibraries() const
@@ -241,7 +200,6 @@ private:
     std::string fingerPrint_ {"unknown"};
     void *unwindstack_ {nullptr};
     void *crashConnect_ {nullptr};
-    VerificationMode verificationMode_ {VerificationMode::DISABLED};
     bool verifyRuntimeLibraries_ {false};
 };
 }  // namespace ark

@@ -30,21 +30,22 @@ using HandlerBase = panda::ecmascript::HandlerBase;
 class DynamicObjectDescriptorInterface {
     // GetProperty is used to get the value of a property and its ic information
     // from a dynamic object with the given name.
-    virtual std::pair<JSTaggedValue, HandlerBase> GetProperty(ThreadHolder *thread, BaseObject *obj, char *name) = 0;
+    virtual std::pair<JSTaggedValue, HandlerBase> GetProperty(ThreadHolder *thread, const BaseObject *obj,
+                                                              const char *name) const = 0;
 
     // SetProperty is used to set the value of a property and get its ic information
     // from a dynamic object with the given name.
-    virtual std::pair<bool, HandlerBase> SetProperty(ThreadHolder *thread, BaseObject *obj, char *name,
+    virtual std::pair<bool, HandlerBase> SetProperty(ThreadHolder *thread, BaseObject *obj, const char *name,
                                                      JSTaggedValue value) = 0;
 
     // GetElementByIdx is used to get the value of an element and its ic information
     // from a dynamic object with the give index.
-    virtual std::pair<JSTaggedValue, HandlerBase> GetElementByIdx(ThreadHolder *thread, BaseObject *obj,
-                                                                  uint32_t index) = 0;
+    virtual std::pair<JSTaggedValue, HandlerBase> GetElementByIdx(ThreadHolder *thread, const BaseObject *obj,
+                                                                  const uint32_t index) const = 0;
 
     // SetElementByIdx is used to set the value of an element and get its ic information
     // from a dynamic object with the given index.
-    virtual std::pair<bool, HandlerBase> SetElementByIdx(ThreadHolder *thread, BaseObject *obj, uint32_t index,
+    virtual std::pair<bool, HandlerBase> SetElementByIdx(ThreadHolder *thread, BaseObject *obj, const uint32_t index,
                                                          JSTaggedValue value) = 0;
 };
 

@@ -61,4 +61,13 @@ TEST_F(WeakReferenceDeleteTest, from_object_gref)
     ASSERT_EQ(env_->WeakReference_Delete(wref), ANI_OK);
 }
 
+TEST_F(WeakReferenceDeleteTest, invalid_env)
+{
+    ani_ref undefinedRef;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+    ani_wref wref {};
+    ASSERT_EQ(env_->WeakReference_Create(undefinedRef, &wref), ANI_OK);
+    ASSERT_EQ(env_->c_api->WeakReference_Delete(nullptr, wref), ANI_INVALID_ARGS);
+}
+
 }  // namespace ark::ets::ani::testing

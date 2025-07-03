@@ -122,6 +122,7 @@ struct LiteralArray {
                 case panda_file::LiteralTag::SETTER:
                 case panda_file::LiteralTag::GENERATORMETHOD:
                 case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
+                case panda_file::LiteralTag::ETS_IMPLEMENTS:
                     return true;
                 default:
                     return false;

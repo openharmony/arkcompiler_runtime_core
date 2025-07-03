@@ -52,6 +52,7 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, ui
 {
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
+    /* nothing prevents this assertion from failing! */
     ASSERT(newBuf != nullptr);
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
@@ -631,7 +632,10 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 
     // May trigger GC
     auto *cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = LongToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
@@ -659,7 +663,10 @@ ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     auto *cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = FloatToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
@@ -673,7 +680,10 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        auto *str = DoubleToStringCache::GetNoCache(v);
+        return StringBuilderAppendString(sbHandle->GetCoreType(), str);
+    }
     auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }

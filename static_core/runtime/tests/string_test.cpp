@@ -427,7 +427,7 @@ TEST_F(StringTest, GetUtf8Length)
     std::vector<uint8_t> data = {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};
     String *str =
         String::CreateFromUtf8(data.data(), data.size(), GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_EQ(str->GetUtf8Length(), data.size() - 1);
+    ASSERT_EQ(str->GetUtf8Length(), data.size());
 }
 
 TEST_F(StringTest, GetDataUtf8)

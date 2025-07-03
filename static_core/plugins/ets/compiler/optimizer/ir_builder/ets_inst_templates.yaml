@@ -14,11 +14,6 @@
   ets: |-
     % name = inst.opcode.upcase.split('_')[1]
     % case name
-    % when "LAUNCH"
-    %   is_range = inst.opcode.include? 'range'
-    %   is_virtual = inst.opcode.include? 'virt'
-    %   acc_read = inst.acc_read?
-    BuildLaunch<Opcode::<%= is_virtual ? 'CallLaunchVirtual' : 'CallLaunchStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>>(instruction);
     % when "LDOBJ"
     if (graph_->IsAbcKit()) {
       BuildLdObjByName<true>(instruction, <%= get_type(inst.dtype) %>);

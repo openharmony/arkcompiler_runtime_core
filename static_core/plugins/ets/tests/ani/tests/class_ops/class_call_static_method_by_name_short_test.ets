@@ -52,3 +52,59 @@ class B extends A{
     }
 };
 }
+
+class A {
+    static funcA(a0: short, a1: short): short {
+        return a0 + a1 as short;
+    }
+
+    static funcA(a0: int, a1: int): int {
+        return a1 - a0 as int;
+    }
+
+    static funcB(a0: short, a1: short): short {
+        return A.funcA(a0, a1);
+    }
+};
+class B extends A{
+    static funcB(a0: short, a1: short): short {
+        return a1 - a0 as short;
+    }
+};
+class C extends A{
+};
+class D extends A{
+    static funcA(a0: short, a1: short): short {
+        return a1 - a0 as short;
+    }
+};
+class E extends A{
+    static funcA(a0: short, a1: short): short {
+        return A.funcA(a0, a1);
+    }
+};
+class F {
+    static increment(a0: short, a1: short): void {
+        F.count += a0;
+        F.count += a1;
+    }
+
+    static getCount(): short {
+        return F.count;
+    }
+
+    static count: short = 0;
+}
+class G {
+    public static publicMethod(a0: short, a1: short): short {
+        return a0 + a1 as short;
+    }
+
+    private static privateMethod(a0: short, a1: short): short {
+        return a1 - a0 as short;
+    }
+
+    static callPrivateMethod(a0: short, a1: short): short {
+        return G.privateMethod(a0, a1);
+    }
+}

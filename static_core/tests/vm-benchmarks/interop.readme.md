@@ -1,5 +1,7 @@
 # Developing and running interop benchmarks in VMB
 
+Note: This approach is outdated. For actual docs see [this manual](./examples/benchmarks/interop/readme.md)
+
 ## Preparing project
 
 - ensure your runtime core and ets frontend are on latest version
@@ -31,22 +33,22 @@ Within the bench unit, VMB searches for files matching the pattern "bench_%bench
 
 ### Naming convention
 
-A benchmark suite should contain four bench units: pure JS, pure ArkTS, ArkTS invokes JS, JS invokes ArkTS. To distinguish those within a suite, bench units should be suffixed with `j2j`, `a2a`, `a2j`, or `j2a`, respectively. First letter represents the runtime invoking a certain feature and (optionally) handling the invocation outcome , while the latter indicates a runtime the feature is executed in.
+A benchmark suite should contain four bench units: dynamic runtime (pure JS), static runtime (pure ArkTS), static invokes dynamic (ArkTS invokes JS), dynamic invokes static (JS invokes ArkTS). To distinguish those within a suite, bench units should be suffixed with `d2d`, `s2s`, `s2d`, or `d2s`, respectively. Letter `d` here stands for _dynamic_ and `s` for _static_. First letter represents the runtime invoking a certain feature and (optionally) handling the invocation outcome, while the latter indicates a runtime the feature is executed in.
 
 ### Sample structure
 
 ```
 *
 └── feature_name
-    ├── bu_feature_name_a2j
+    ├── bu_feature_name_s2d
     │   ├── bench_a2j.ets
     │   └── test_import.js
-    ├── bu_feature_name_j2a
+    ├── bu_feature_name_d2s
     │   ├── bench_a2j.ets
     │   └── bench_a2j.js
-    ├── bu_feature_name_j2j
-    │   └── bench_a2j.js
-    └── bu_feature_name_a2a
+    ├── bu_feature_name_d2d
+    │   └── bench_j2j.js
+    └── bu_feature_name_s2s
         └── bench_j2a.ets
 
 ```

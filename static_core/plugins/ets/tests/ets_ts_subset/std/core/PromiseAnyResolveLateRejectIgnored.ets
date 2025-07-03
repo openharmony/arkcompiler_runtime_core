@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 class Resolve implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve().then<U>((): U|PromiseLike<U> => {
-            return onFulfilled!("abc");
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, _?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
+            return onFulfilled!('abc');
         })
     }
 }
 
 class LateReject implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve().then<U>((): U|PromiseLike<U> => {
-            let v = onFulfilled!("def");
-            onRejected!("xyz");
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
+            let v = onFulfilled!('def');
+            onRejected!(new Error('xyz'));
             return v;
         });
     }
@@ -32,11 +34,11 @@ class LateReject implements PromiseLike<string> {
 
 let thenable: PromiseLike<string>[] = [new Resolve(), new LateReject()];
 Promise.any(thenable).then<void, void>((value: string): void => {
-    if (value != "abc") {
-        console.log("Test failed. The promise should be resolve by the specified value.");
+    if (value != 'abc') {
+        console.log('Test failed. The promise should be resolve by the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 }, (err: AggregateError): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test failed. The promise should not be rejected.');
 });

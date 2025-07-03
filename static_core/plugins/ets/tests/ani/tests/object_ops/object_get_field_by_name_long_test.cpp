@@ -30,30 +30,39 @@ TEST_F(ObjectGetFieldByNameLongTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_long age;
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "age", &age), ANI_OK);
     ASSERT_EQ(age, 2L);
+}
+
+TEST_F(ObjectGetFieldByNameLongTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_long age = 0L;
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Long(nullptr, animal, "age", &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameLongTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_long age;
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "x", &age), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "", &age), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameLongTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_long age;
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, "name", &age), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameLongTest, invalid_object)
 {
-    ani_long age;
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(nullptr, "age", &age), ANI_INVALID_ARGS);
 }
 
@@ -61,7 +70,7 @@ TEST_F(ObjectGetFieldByNameLongTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_long age;
+    ani_long age = 0L;
     ASSERT_EQ(env_->Object_GetFieldByName_Long(animal, nullptr, &age), ANI_INVALID_ARGS);
 }
 

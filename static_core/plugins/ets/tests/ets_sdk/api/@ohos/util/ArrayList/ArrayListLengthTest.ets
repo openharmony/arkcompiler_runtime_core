@@ -25,6 +25,7 @@ function main() {
 
     suite.addTest("Testing ArrayList length is ok", testArrayListLength0001);
     suite.addTest("Testing ArrayList constructor support dataType", testArrayListConstructor0001);
+    suite.addTest("Testing ArrayList add different dataType data", testArrayListAdd0001);
     suite.addTest("Testing ArrayList add special string", testArrayListAdd0002);
     suite.addTest("Testing ArrayList insert data in start and end", testArrayListInsert0001);
     suite.addTest("Testing ArrayList insert special string", testArrayListInsert0002);
@@ -45,6 +46,34 @@ function testArrayListConstructor0001() {
     Int16Array | Int32Array | undefined | null | Uint8Array | Uint16Array | Uint32Array |
     BigInt64Array | BigUint64Array>();
     assertEQ(arrayList.length, 0, "The length of a newly created ArrayList with various data types should be 0");
+}
+
+function testArrayListAdd0001() {
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    Object>();
+    arrayList.add("zhang san");
+    arrayList.add(1);
+    let temp: Temp = {
+        age: 10, name: "zhang"
+    };
+    arrayList.add(temp);
+    arrayList.add(undefined);
+    arrayList.add(null);
+    arrayList.add(true);
+    arrayList.insert("insert", 0);
+    arrayList.add([0, 1, 2, 4]);
+    arrayList.removeByIndex(0);
+
+    assertEQ(arrayList[0], "zhang san", "The first element should be 'zhang san'");
+    assertEQ(arrayList[1], 1, "The second element should be 1");
+    assertEQ(arrayList[2], temp, "The third element should match the Temp object");
+    assertEQ(arrayList[3], undefined, "The fourth element should be undefined");
+    assertEQ(arrayList[4], null, "The fifth element should be null");
+    assertEQ(arrayList[5], true, "The sixth element should be true");
+    for (let i = 0; i < 4; i++) {
+        assertEQ((arrayList[6]! as Array<int>)[i], [0, 1, 2, 4][i],
+            `The element at index ${i} of the seventh element should be ${[0, 1, 2, 4][i]}`);
+    }
 }
 
 function testArrayListAdd0002() {

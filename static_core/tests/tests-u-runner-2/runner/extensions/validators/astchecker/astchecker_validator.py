@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,9 @@
 #
 
 import json
-from json import JSONDecoder, JSONDecodeError
-from typing import Tuple, Any, Dict
+from json import JSONDecodeError, JSONDecoder
 
-from runner import utils, common_exceptions
+from runner import common_exceptions, utils
 from runner.extensions.validators.astchecker.util_astchecker import UtilASTChecker
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
@@ -37,8 +36,8 @@ class AstCheckerValidator(BaseValidator):
         self.add(StepKind.COMPILER.value, AstCheckerValidator.es2panda_result_validator)
 
     @staticmethod
-    def handle_error_dump(input_string: str) -> Tuple[str, dict]:
-        actual_output = str()
+    def handle_error_dump(input_string: str) -> tuple[str, dict]:
+        actual_output = ""
         errors_list = []
         not_handled_errors = []
         lines = input_string.splitlines()
@@ -69,8 +68,8 @@ class AstCheckerValidator(BaseValidator):
     @staticmethod
     def es2panda_result_validator(test: object, step_name: str, actual_output: str, _2: str,
                                   return_code: int) -> bool:
-        error = str()
-        dump: Dict[str, Any] = {}
+        error = ""
+        dump: dict[str, str | list | dict] = {}
         if not isinstance(test, TestStandardFlow):
             raise common_exceptions.UnknownException(
                 "AstCheckerValidator works only with tests of TestStandardFlow inherits. "
@@ -80,7 +79,8 @@ class AstCheckerValidator(BaseValidator):
         try:
             error, dump = AstCheckerValidator.handle_error_dump(actual_output)
         except ValueError as err:
-            raise ValueError(f'Output from file: {test.path}.\nThrows JSON error: {err}.') from err
+            raise UtilASTChecker.AstCheckerException(
+                f'Output from file: {test.path}.\nThrows JSON error: {err}.') from err
 
         test_cases = AstCheckerValidator.__util.parse_tests(utils.read_file(test.path))
         passed = AstCheckerValidator.__util.run_tests(test.path, test_cases, dump, error=error)

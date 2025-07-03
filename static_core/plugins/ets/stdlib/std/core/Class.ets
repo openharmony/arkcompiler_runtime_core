@@ -22,6 +22,7 @@ export final class Class {
     private name: string | undefined
     private superClass: Class | undefined
     private flags: int
+    private typeMetaData: long
 
     private constructor() { throw new Error("Class constructor called") }
     private native getNameInternal(): string;

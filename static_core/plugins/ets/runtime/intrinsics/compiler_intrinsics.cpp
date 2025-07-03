@@ -358,7 +358,9 @@ extern "C" uint8_t CompilerEtsIstrue(ObjectHeader *obj)
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
                                                     [[maybe_unused]] uint64_t unused)
 {
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringCache::GetNoCache(bit_cast<double>(number));
+    }
     return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number));
 }
 

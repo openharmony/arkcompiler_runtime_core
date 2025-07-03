@@ -15,9 +15,6 @@
 
 import HashMap from "@ohos.util.HashMap";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
     const suite = new ArkTestsuite("HashMap API HasKey HasValue tests")
 

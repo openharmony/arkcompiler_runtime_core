@@ -1535,7 +1535,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
         auto &param = func.params[paramIdx];
         auto &paramItem = paramItems[protoIdx];
-        if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities)) {
+        if (!AddAnnotations(&paramItem, items, param.GetOrCreateMetadata(), program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;

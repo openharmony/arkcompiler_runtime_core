@@ -19,8 +19,10 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/string-inl.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
+#include <cmath>
 
 namespace ark::ets {
 
@@ -99,6 +101,68 @@ public:
         coretypes::String *s =
             coretypes::String::CreateFromUtf16(utf16, length, ctx, Runtime::GetCurrent()->GetPandaVM());
         return reinterpret_cast<EtsString *>(s);
+    }
+
+    using CharCodeArray = EtsTypedObjectArray<EtsBoxPrimitive<EtsDouble>>;
+
+    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes)
+    {
+        const size_t length = charCodes->GetLength();
+        if (length == 0) {
+            return CreateNewEmptyString();
+        }
+
+        // allocator may trig gc and move the 'charCodes' array, need to hold it
+        EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(coroutine);
+        EtsHandle arrayHandle(coroutine, charCodes);
+
+        auto isCompressed = [](CharCodeArray *codes) -> bool {
+            if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
+                return false;
+            }
+
+            for (size_t i = 0; i < codes->GetLength(); ++i) {
+                if (!IsASCIICharacter(CodeToChar(codes->Get(i)->GetValue()))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        auto copyCharsIntoString = [](CharCodeArray *codes, auto *dstData) {
+            Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, codes->GetLength());
+            for (size_t i = 0; i < codes->GetLength(); ++i) {
+                to[i] = CodeToChar(codes->Get(i)->GetValue());
+            }
+        };
+
+        bool compress = isCompressed(arrayHandle.GetPtr());
+        EtsString *s = AllocateNonInitializedString(length, compress);
+        if (compress) {
+            copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataMUtf8());
+        } else {
+            copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataUtf16());
+        }
+        return s;
+    }
+
+    static EtsString *CreateNewStringFromCharCode(EtsDouble charCode)
+    {
+        constexpr size_t SINGLE_CHAR_LENGTH = 1U;
+        uint16_t character = CodeToChar(charCode);
+        bool compress = Runtime::GetOptions().IsRuntimeCompressedStringsEnabled() && IsASCIICharacter(character);
+        EtsString *s = AllocateNonInitializedString(SINGLE_CHAR_LENGTH, compress);
+        auto putCharacterIntoString = [character](auto *dstData) {
+            Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, SINGLE_CHAR_LENGTH);
+            to[0] = character;
+        };
+        if (compress) {
+            putCharacterIntoString(s->GetDataMUtf8());
+        } else {
+            putCharacterIntoString(s->GetDataUtf16());
+        }
+        return s;
     }
 
     static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray)
@@ -355,9 +419,9 @@ public:
     std::string_view ConvertToStringView(PandaVector<uint8_t> *buf)
     {
         if (IsUtf16()) {
-            size_t len = utf::Utf16ToMUtf8Size(GetDataUtf16(), GetUtf16Length()) - 1;
+            size_t len = utf::Utf16ToUtf8Size(GetDataUtf16(), GetUtf16Length(), false) - 1;
             buf->reserve(len);
-            utf::ConvertRegionUtf16ToMUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0);
+            utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0, false);
             return {utf::Mutf8AsCString(buf->data()), len};
         }
         return {utf::Mutf8AsCString(GetDataMUtf8()), static_cast<size_t>(GetLength())};
@@ -478,6 +542,12 @@ private:
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         return reinterpret_cast<EtsString *>(
             coretypes::String::AllocStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
+    }
+
+    static uint16_t CodeToChar(double code)
+    {
+        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
+        return static_cast<uint16_t>(static_cast<int64_t>(std::fmod(code, UTF16_CHAR_DIVIDER)));
     }
 };
 

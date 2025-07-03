@@ -18,6 +18,9 @@
 
 #include "libpandabase/utils/time.h"
 #include <algorithm>
+#include "libpandabase/os/mutex.h"
+#include <atomic>
+#include <functional>
 #include <optional>
 #include <list>
 #include <limits>
@@ -77,6 +80,7 @@ public:
      */
     std::optional<T> GetReadyValue()
     {
+        os::memory::WriteLockHolder wlh(lock_);
         auto currentTime = time::GetCurrentTimeInMillis(true);
         for (auto iter = waitList_.begin(); iter != waitList_.end(); iter = next(iter)) {
             if (currentTime >= iter->GetTargetTime()) {
@@ -88,9 +92,35 @@ public:
         return std::nullopt;
     }
 
+    template <class Callback>
+    size_t ProcessWaitList(Callback callback)
+    {
+        static constexpr size_t BUFFER_MAX_SIZE = 128U;
+        std::array<T, BUFFER_MAX_SIZE> bufferOfElems {};
+        size_t sizeOfBuffer = 0;
+        {
+            os::memory::WriteLockHolder wlh(lock_);
+            auto currentTime = time::GetCurrentTimeInMillis(true);
+            auto iter = waitList_.begin();
+            while (iter != waitList_.end() && sizeOfBuffer < BUFFER_MAX_SIZE) {
+                if (currentTime >= iter->GetTargetTime()) {
+                    bufferOfElems[sizeOfBuffer++] = iter->GetValue();
+                    iter = waitList_.erase(iter);
+                } else {
+                    iter = next(iter);
+                }
+            }
+        }
+        for (size_t i = 0; i < sizeOfBuffer; i++) {
+            callback(std::move(bufferOfElems[i]));
+        }
+        return sizeOfBuffer;
+    }
+
     /// @returns true if there is a value with a targetTime less or equal to current time. Otherwise false.
     bool HaveReadyValue() const
     {
+        os::memory::ReadLockHolder rlh(lock_);
         auto currentTime = time::GetCurrentTimeInMillis(true);
         for (auto iter = waitList_.begin(); iter != waitList_.end(); iter = next(iter)) {
             if (currentTime >= iter->GetTargetTime()) {
@@ -103,6 +133,7 @@ public:
     /// @brief adds value in waitQueues_ with timeToWait if it's setted.
     WaiterId AddValueToWait(T value, uint64_t timeToWait = std::numeric_limits<uint64_t>().max())
     {
+        os::memory::WriteLockHolder wlh(lock_);
         addCounter_++;
         uint64_t currentTime = time::GetCurrentTimeInMillis(true);
         uint64_t targetTime = 0;
@@ -121,6 +152,7 @@ public:
     /// @returns value with specified WaiterId. It it doesn't exists returns std::nullopt.
     std::optional<T> GetValueById(WaiterId id)
     {
+        os::memory::WriteLockHolder wlh(lock_);
         auto waitValue =
             std::find_if(waitList_.begin(), waitList_.end(), [id](const auto &value) { return value.GetId() == id; });
         if (waitValue == waitList_.end()) {
@@ -134,6 +166,7 @@ public:
 private:
     std::list<WaitValue> waitList_;
     size_t addCounter_ = 0U;
+    os::memory::RWLock mutable lock_;
 };
 
 }  // namespace ark::taskmanager

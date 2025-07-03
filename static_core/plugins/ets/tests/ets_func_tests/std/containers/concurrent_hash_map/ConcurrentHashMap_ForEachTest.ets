@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-let buf = new SharedArrayBuffer(4);
+import { launch } from "std/concurrency"
+
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 let del: int = 0;
 
@@ -108,10 +110,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch forEachZero();
-        let p2 = launch setAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachZero);
+        let p2 = launch<void, () => void>(setAll);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithoutAndTest_002", () =>
@@ -121,10 +123,10 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch forEachZero();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachZero);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithoutAndTest_003", () =>
@@ -133,10 +135,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch forEachZero();
-        let p2 = launch getAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachZero);
+        let p2 = launch<void, () => void>(getAll);
+        p1.Await();
+        p2.Await();
         assertEQ(Atomics.load(flag, 0), 10);
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithoutAndTest_004", () =>
@@ -145,10 +147,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch clearAll();
-        let p2 = launch forEachZero();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(clearAll);
+        let p2 = launch<void, () => void>(forEachZero);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithOneAndTest_001", () =>
@@ -156,10 +158,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch setAll();
-        let p2 = launch forEachOne();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(forEachOne);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithOneAndTest_002", () =>
@@ -169,10 +171,10 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch deleteAllBack();
-        let p2 = launch forEachOne();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAllBack);
+        let p2 = launch<void, () => void>(forEachOne);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithOneAndTest_003", () =>
@@ -182,10 +184,10 @@ function main(): int {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch forEachOne();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(forEachOne);
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             assertEQ(concurrentHashMapOne.get(i), arrValuesTest[i]);
         }
@@ -196,10 +198,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch clearAll();
-        let p2 = launch forEachOne();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(clearAll);
+        let p2 = launch<void, () => void>(forEachOne);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithTwoAndTest_001", () =>
@@ -207,10 +209,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch setAll();
-        let p2 = launch forEachTwo();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(forEachTwo);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithTwoAndTest_002", () =>
@@ -220,10 +222,10 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch forEachTwo();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachTwo);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithTwoAndTest_003", () =>
@@ -234,10 +236,10 @@ function main(): int {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch forEachTwo();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(forEachTwo);
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             assertEQ(concurrentHashMapOne.get(i), arrValuesTest[i]);
             if (concurrentHashMapOne.has(i)) {
@@ -251,10 +253,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch clearAll();
-        let p2 = launch forEachTwo();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(clearAll);
+        let p2 = launch<void, () => void>(forEachTwo);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithThreeAndTest_001", () =>
@@ -262,10 +264,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
-        let p1 = launch setAll();
-        let p2 = launch forEachThree();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(forEachThree);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithThreeAndTest_002", () =>
@@ -275,10 +277,10 @@ function main(): int {
         Atomics.store(flag, 0, 0);
         del = 0;
         setAll();
-        let p1 = launch forEachThree();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachThree);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapForEachTestsuite.addTest("forEachWithThreeAndTest_003", () =>
@@ -287,10 +289,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch getAll();
-        let p2 = launch forEachThree();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(getAll);
+        let p2 = launch<void, () => void>(forEachThree);
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             assertEQ(concurrentHashMapOne.get(i), arrValuesTest[i]);
             if (concurrentHashMapOne.has(i)) {
@@ -304,10 +306,10 @@ function main(): int {
         assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch clearAll();
-        let p2 = launch forEachThree();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(clearAll);
+        let p2 = launch<void, () => void>(forEachThree);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.isEmpty());
     });
 

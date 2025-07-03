@@ -203,7 +203,7 @@ int64_t InstBuilder::GetInstructionJumpOffset(const BytecodeInstruction* inst) {
 // NOLINTNEXTLINE(readability-function-size)
 bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* inst) {
     switch(inst->GetOpcode()) {
-% runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/, /^ets.typeof/, /^monitor/, /launch/, /^ets.call.name/ ]
+% runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/, /^ets.typeof/, /^monitor/, /^ets.call.name/ ]
 % Panda::instructions.each do |inst|
     // NOLINTNEXTLINE(bugprone-branch-clone)
     case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:

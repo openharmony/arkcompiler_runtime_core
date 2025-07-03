@@ -21,7 +21,7 @@ import {
 } from 'main_js';
 
 const stsInt = 2;
-const arr: int[] = [];
+const arr: FixedArray<int> = [];
 
 // NOTE: (alexanderpolenov) issue(18238) access by string index
 // function checkValueDynamicObject(): boolean {

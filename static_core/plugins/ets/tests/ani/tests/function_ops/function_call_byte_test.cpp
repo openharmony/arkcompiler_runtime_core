@@ -361,6 +361,30 @@ TEST_F(FunctionCallByteTest, function_call_byte_009)
     ASSERT_EQ(env_->Function_Call_Byte(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, value3 + value4);
 }
+
+TEST_F(FunctionCallByteTest, function_call_byte_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].b = BYTE_VAL1;
+    args[1U].b = BYTE_VAL2;
+
+    ani_byte result = 0;
+    ASSERT_EQ(env_->c_api->Function_Call_Byte(nullptr, fn, &result, BYTE_VAL1, BYTE_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Byte_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Byte(nullptr, &result, BYTE_VAL1, BYTE_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Byte_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Byte(fn, nullptr, BYTE_VAL1, BYTE_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Byte_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Byte(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Byte_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 class MyClass {
-  handle(arr: string[], idx: int): int {
+  handle(arr: FixedArray<string>, idx: int): int {
     console.log("buisiness logic...")
     arr[0] = "b"
     return idx

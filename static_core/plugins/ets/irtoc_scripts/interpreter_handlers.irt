@@ -303,8 +303,8 @@ end
           result_1 := 0
         end
       } Else {
-        v1cls := GetInstanceClass(v1).ref
-        v2cls := GetInstanceClass(v2).ref
+        v1cls := load_class(v1)
+        v2cls := load_class(v2)
         If(And(is_valuetyped_cls(v1cls), is_valuetyped_cls(v2cls)).b, 0).EQ.Likely {
           result_2 := 0
         } Else {

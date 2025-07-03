@@ -12,14 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_ARRAY_ABI_H
-#define TAIHE_ARRAY_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_ARRAY_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_ARRAY_ABI_H_
 
 #include <taihe/common.h>
 
+// TArray
+// Represents a dynamic array structure containing the size and data pointer.
+// # Members
+// - `m_size`: The size of the array.
+// - `m_data`: A pointer to the data in the array.
 struct TArray {
     size_t m_size;
     void *m_data;
 };
-
-#endif // TAIHE_ARRAY_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_ARRAY_ABI_H_

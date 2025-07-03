@@ -106,10 +106,11 @@ cases:
           assertEQ(a.length, 4)
 
     - decl: |-
-          function bar(i: int): char {
-              return (i + 1) as char
+          function bar(i: Int): Char {
+              let v: Int = i + 1 
+              return v.toChar()
           }
-          let a: char[] = []
+          let a: Char[] = []
       use: |-
           // assignment context, array of chars
           a = [bar(42), bar(43), bar(44), ]
@@ -315,10 +316,10 @@ cases:
           let a: Number[]|String[]|Boolean[]|null
       use: |-
           // assignment context, union of arrays
-          a = [1, 2, 43]
-          assertEQ((a as Number[])[0], 1)
-          assertEQ((a as Number[])[1], 2)
-          assertEQ((a as Number[])[2], 43)
+          a = [1.0, 2.0, 43.0]
+          assertEQ((a as Number[])[0], 1.0)
+          assertEQ((a as Number[])[1], 2.0)
+          assertEQ((a as Number[])[2], 43.0)
           assertEQ((a as Number[]).length, 3)
 
     - decl: |-

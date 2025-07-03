@@ -49,7 +49,7 @@ TEST_F(ObjectSetFieldCharTest, set_field_char)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_char_test", "checkCharValue", pack, zoerValue), ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Char(pack, fieldChar, maxCharValue), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_char_test", "checkCharValue", pack, maxCharValue),
                   ANI_TRUE);
@@ -65,6 +65,17 @@ TEST_F(ObjectSetFieldCharTest, set_field_char)
         ASSERT_EQ(env_->Object_GetField_Char(pack, fieldChar, &value), ANI_OK);
         ASSERT_EQ(value, zoerValue);
     }
+}
+
+TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldChar {};
+    ani_field fieldString {};
+    GetTestDataForChar(&pack, &fieldChar, &fieldString);
+
+    const char maxCharValue = 'a';
+    ASSERT_EQ(env_->c_api->Object_SetField_Char(nullptr, pack, fieldChar, maxCharValue), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldCharTest, set_field_char_invalid_field_type)

@@ -17,10 +17,25 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_LOCALE_MATCH_H
 
 #include <ani.h>
+#include "unicode/locid.h"
+#include <unicode/localematcher.h>
+#include <unicode/utypes.h>
+#include <vector>
+#include <string>
 
 namespace ark::ets::stdlib {
+std::vector<std::string> GetAvailableLocales();
 
+icu::Locale GetLocale(ani_env *env, std::string &locTag);
 ani_status RegisterIntlLocaleMatch(ani_env *env);
+
+ani_string StdCoreIntlBestFitLocale(ani_env *env, ani_class klass, ani_array_ref locales);
+
+ani_string StdCoreIntlLookupLocale(ani_env *env, ani_class klass, ani_array_ref locales);
+
+ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, ani_class klass, ani_array_ref locales);
+
+ani_array_ref StdCoreIntlLookupLocales(ani_env *env, ani_class klass, ani_array_ref locales);
 
 }  // namespace ark::ets::stdlib
 

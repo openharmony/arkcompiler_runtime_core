@@ -15,6 +15,9 @@
 
 import {AtomicFlag} from "std/debug/concurrency"
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 class Event {
     public Wait() {
         while (this.flag.get() != true) {
@@ -36,18 +39,18 @@ function foo() : int {
     return 42;
 }
 
-function bar(p: Promise<int>) : int {
-    return await p;
+function bar(p: Job<int>) : int {
+    return p.Await();
 }
 
 function main() {
-    let p1 = launch foo();
+    let p1 = launch<int, () => int>(foo);
     for (let i = 0; i < 2; ++i) {
-        let p2 = launch bar(p1);
+        let p2 = launch<int, (p: Job<int>) => int>(bar, p1);
     }
     // NOTE(panferovi): for more determinism we need to make sure
     // that bar coroutines are waiting for its awakening
     event.Fire();
-    let result = await p1;
+    let result = p1.Await();
     assertEQ(result, 42);
 }

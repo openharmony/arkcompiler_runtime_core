@@ -170,40 +170,6 @@ export abstract class Value extends Object {
 
     // -----
 
-    public static of(v: Boolean): Value {
-        return new BooleanValue(BooleanType.REF, v)
-    }
-
-    public static of(v: Char): Value {
-        return new CharValue(CharType.REF, v)
-    }
-
-    public static of(v: Byte): Value {
-        return new ByteValue(ByteType.REF, v)
-    }
-
-    public static of(v: Short): Value {
-        return new ShortValue(ShortType.REF, v)
-    }
-
-    public static of(v: Int): Value {
-        return new IntValue(IntType.REF, v)
-    }
-
-    public static of(v: Long): Value {
-        return new LongValue(LongType.REF, v)
-    }
-
-    public static of(v: Float): Value {
-        return new FloatValue(FloatType.REF, v)
-    }
-
-    public static of(v: Double): Value {
-        return new DoubleValue(DoubleType.REF, v)
-    }
-
-    // -----
-
     /**
      * Returns value of this object
      *
@@ -261,35 +227,35 @@ export abstract class Value extends Object {
 
     // -----
 
-    public static of(v: boolean[]): Value {
+    public static of(v: FixedArray<boolean>): Value {
         return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
     }
 
-    public static of(v: char[]): Value {
+    public static of(v: FixedArray<char>): Value {
         return new ArrayValue(ArrayType.CHAR_VAL, v)
     }
 
-    public static of(v: byte[]): Value {
+    public static of(v: FixedArray<byte>): Value {
         return new ArrayValue(ArrayType.BYTE_VAL, v)
     }
 
-    public static of(v: short[]): Value {
+    public static of(v: FixedArray<short>): Value {
         return new ArrayValue(ArrayType.SHORT_VAL, v)
     }
 
-    public static of(v: int[]): Value {
+    public static of(v: FixedArray<int>): Value {
         return new ArrayValue(ArrayType.INT_VAL, v)
     }
 
-    public static of(v: long[]): Value {
+    public static of(v: FixedArray<long>): Value {
         return new ArrayValue(ArrayType.LONG_VAL, v)
     }
 
-    public static of(v: float[]): Value {
+    public static of(v: FixedArray<float>): Value {
         return new ArrayValue(ArrayType.FLOAT_VAL, v)
     }
 
-    public static of(v: double[]): Value {
+    public static of(v: FixedArray<double>): Value {
         return new ArrayValue(ArrayType.DOUBLE_VAL, v)
     }
 
@@ -778,10 +744,6 @@ export final class BooleanValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: BooleanType, data: Boolean) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -817,10 +779,6 @@ export final class ByteValue extends Value {
     internal constructor(typ: ByteType, data: byte) {
         this.typ = typ
         this.data = data
-    }
-
-    internal constructor(typ: ByteType, data: Byte) {
-        this(typ, data.unboxed())
     }
 
     public override toPrint(depth: int): string {
@@ -860,10 +818,6 @@ export final class ShortValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: ShortType, data: Short) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -899,10 +853,6 @@ export final class CharValue extends Value {
     internal constructor(typ: CharType, data: char) {
         this.typ = typ
         this.data = data
-    }
-
-    internal constructor(typ: CharType, data: Char) {
-        this(typ, data.unboxed())
     }
 
     public override toPrint(depth: int): string {
@@ -942,10 +892,6 @@ export final class IntValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: IntType, data: Int) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -981,10 +927,6 @@ export final class FloatValue extends Value {
     internal constructor(typ: FloatType, data: float) {
         this.typ = typ
         this.data = data
-    }
-
-    internal constructor(typ: FloatType, data: Float) {
-        this(typ, data.unboxed())
     }
 
     public override toPrint(depth: int): string {
@@ -1024,10 +966,6 @@ export final class DoubleValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: DoubleType, data: Double) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -1063,10 +1001,6 @@ export final class LongValue extends Value {
     internal constructor(typ: LongType, data: long) {
         this.typ = typ
         this.data = data
-    }
-
-    internal constructor(typ: LongType, data: Long) {
-        this(typ, data.unboxed())
     }
 
     public override toPrint(depth: int): string {

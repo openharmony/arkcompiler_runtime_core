@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,9 @@ import logging
 import sys
 import random
 import string
+import shutil
 from pathlib import Path
+from string import Template
 from typing import Union, Dict, Any, Callable, List, Iterable, Optional
 from time import time
 from enum import Enum
@@ -267,9 +269,38 @@ class ColorFormatter(logging.Formatter):
 
 def create_file(path: Union[str, Path]):
     """Create file in `safe` manner."""
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     return os.fdopen(
         os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o664),
         mode='w', encoding='utf-8')
+
+
+def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
+    log.trace('Copy: %s -> %s', str(src), str(dst))
+    s = Path(src)
+    d = Path(dst)
+    if not s.exists():
+        raise RuntimeError(f'File not found: {src}')
+    d.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(s, d)
+
+
+def copy_files(src: Union[str, Path], dst: Union[str, Path], pattern: str = '*') -> None:
+    log.trace('Copy: %s%s -> %s', str(src), pattern, str(dst))
+    s = Path(src)
+    d = Path(dst)
+    if not s.exists():
+        raise RuntimeError(f'File not found: {src}')
+    d.mkdir(parents=True, exist_ok=True)
+    for f in s.glob(pattern):
+        shutil.copy(f, d.joinpath(f.name))
+
+
+def create_file_from_template(tpl: Union[str, Path], dst: Union[str, Path], **kwargs) -> None:
+    with open(tpl, 'r', encoding="utf-8") as src:
+        template = Template(src.read())
+        with create_file(dst) as f:
+            f.write(template.substitute(**kwargs))
 
 
 def load_file(path: Union[str, Path]) -> str:
@@ -280,7 +311,21 @@ def load_file(path: Union[str, Path]) -> str:
     return fd.read()
 
 
+def load_json(path: Union[str, Path]) -> Any:
+    json_path = Path(path)
+    if not json_path.exists():
+        raise RuntimeError(f'File not found: {path}')
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            j = json.load(f)
+    except json.JSONDecodeError as e:
+        log.error('Bad json: %s\n%s', str(path), str(e))
+        raise RuntimeError from e
+    return j
+
+
 def force_link(link: Path, dest: Path) -> None:
+    log.trace('Force link: %s -> %s', str(link), str(dest))
     if link.exists():
         link.unlink()
     link.symlink_to(dest)

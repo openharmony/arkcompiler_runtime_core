@@ -25,7 +25,7 @@ function main() {
         exceptionWasCatched = true;
     }
     eaWorkers.forEach((eaWorker: EAWorker) => {
-        eaWorker.stop();
+        eaWorker.join();
     });
     assertTrue(exceptionWasCatched);
 }

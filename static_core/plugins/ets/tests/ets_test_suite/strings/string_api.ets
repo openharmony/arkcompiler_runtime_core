@@ -21,10 +21,10 @@ function main(): void {
     let chars: char[] = [c'a', c'B', c'C', c'd', c'e', c'g', c'X', c'Y', c'z'];
     let str2: String = new String(chars);  // "aBCdegXYz"
     assertEQ(str2.charAt(0), c'a', "Wrong str2.charAt(0)");
-    assertEQ(str2.charAt(1), c'B', "Wrong str2.charAt(1)");
-    assertEQ(str2.charAt(2), c'C', "Wrong str2.charAt(2)");
-    assertEQ(str2.charAt(8), c'z', "Wrong str2.charAt(8)");
-    assertNE(str2.charAt(8), c'Z', "Wrong str2.charAt(8): invalid character case");
+    assertEQ(str2.charAt(2), c'B', "Wrong str2.charAt(2)");
+    assertEQ(str2.charAt(4), c'C', "Wrong str2.charAt(4)");
+    assertEQ(str2.charAt(16), c'z', "Wrong str2.charAt(16)");
+    assertNE(str2.charAt(16), c'Z', "Wrong str2.charAt(16): invalid character case");
 
     let cb: StringBuilder = new StringBuilder("abc123");
     let str3: String = "abc123";

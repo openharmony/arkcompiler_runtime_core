@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 class Fulfill implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return new Promise<U>((resolve: (value: U|PromiseLike<U>) => void) => {
-            resolve(onFulfilled!("abc"));
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, _?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return new Promise<U>((resolve: (value: U | PromiseLike<U>) => void) => {
+            resolve(onFulfilled!('abc'));
         });
     }
 }
 
 class Reject implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return new Promise<U>((resolve: (value: U|PromiseLike<U>) => void) => {
-            let v = onFulfilled!("def");
-            onRejected!("xyz");
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return new Promise<U>((resolve: (value: U | PromiseLike<U>) => void) => {
+            let v = onFulfilled!('def');
+            onRejected!(new Error('xyz'));
             resolve(v);
         });
     }
@@ -32,11 +34,11 @@ class Reject implements PromiseLike<string> {
 
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
 Promise.any(thenable).then<void, void>((value: string): void => {
-    if (value != "abc") {
-        console.log("Test failed. The promise should be resolved by the specified value.");
+    if (value != 'abc') {
+        console.log('Test failed. The promise should be resolved by the specified value.');
         return;
     }
-    console.log("Test passed.");
-}, (error: Object): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
 });

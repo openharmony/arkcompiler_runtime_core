@@ -24,7 +24,7 @@ export function bar0(): void {
     try {
         foo0()
     } catch (e: Error) {
-        let errObj: ESObject = (e as ESError).getValue()
+        let errObj: ESValue = (e as ESError).getValue()
         console.log("e ets: " + errObj.toNumber())
         throw e
     }

@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { OverrideBase2 } from "@multiple_override/override_base2";
 import { Ability } from "@spawn/ability";
 

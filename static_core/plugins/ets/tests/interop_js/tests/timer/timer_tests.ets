@@ -341,3 +341,35 @@ function testSetIntervalWithString(): void {
     }, delay)
     globalTest!.checkpoint(1);
 }
+
+function testClearTimerCrossWorker()
+{
+    globalTest = new Test(0);
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    let delay = 100;
+
+    /// Clear worker timer from main worker
+    {
+        let isCleared = new AtomicFlag(false);
+        let workerTimerCb = () => {
+            setTimeout(() => { while (!isCleared.get()) {} }, 0);
+            return setTimeout(() => { assertTrue(false); }, delay);
+        };
+        let id = launch<number, () => number>(workerTimerCb).Await();
+        clearTimeout(id);
+        isCleared.set(true);
+    }
+
+    /// Clear main timer from worker
+    {
+        let triedToClear = false;
+        let id = setTimeout(() => { assertTrue(triedToClear); }, delay);
+        try {
+            launch<void, (id: number) => void>(clearTimeout, id).Await();
+        } catch (e) {
+            assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
+            triedToClear = true;
+        }
+        assertTrue(triedToClear);
+    }
+}

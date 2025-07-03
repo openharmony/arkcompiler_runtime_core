@@ -59,6 +59,8 @@ function main(): int {
     async with breakpoint_walker(code) as walker:
         cap = walker.capture
         async for paused in walker:
+            if len(paused.hit_breakpoints()) == 0:
+                continue
             vars = await paused.frame().scope().mirror_variables()
             a = arkts_str(vars["a"])
             await walker.log_layout("%s", a)
@@ -156,7 +158,7 @@ async def test_arkts_primitive(
         ("Float", 1),
         ("double", 1),
         ("Double", 1),
-        ("char", ("'A'", "A")),
+        ("char", ("c'A'", "A")),
         ("string", ("'AA'", "AA")),
         ("Char", ("c'A'", '"A"')),  # Char object will be output as String
         ("Char", ("new Char(c'A')", '"A"')),  # Char object will be output as String
@@ -170,6 +172,8 @@ async def test_arkts_primitive(
 
     async with breakpoint_walker(code) as walker:
         async for paused in walker:
+            if len(paused.hit_breakpoints()) == 0:
+                continue
             label = paused.hit_breakpoints()[0].label
             await walker.log_layout("Breakpoint: '%s'", label)
             log.info("Capture:\n%s", "\n".join(paused.capture.stdout))

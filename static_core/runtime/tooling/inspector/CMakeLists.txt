@@ -37,6 +37,7 @@ set(ARKINSPECTOR_ROOTS
     types/debugger_call_function_on_request.cpp
     types/exception_details.cpp
     types/location.cpp
+    types/profile_result.cpp
     types/remote_object.cpp
     types/object_preview.cpp
     types/scope.cpp
@@ -80,6 +81,7 @@ else()
     list(APPEND ARKINSPECTOR_LINKED_LIBRARIES toolchain_websocket)
     set(ARKINSPECTOR_INCLUDES
         ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler/toolchain/
+        ${PANDA_ROOT}/runtime/tooling/
     )
 endif()
 

@@ -58,7 +58,7 @@ function main(): int {
     let s: string = ""
     try {
       s = s + ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val()
-    } catch (e: ArrayIndexOutOfBoundsError) {
+    } catch (e: RangeError) {
         if (result == "A2B1C0V" && s == "") {
             return 0
         }

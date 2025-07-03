@@ -50,7 +50,7 @@ TEST_F(ObjectSetFieldIntTest, set_field_int)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_int_test", "checkIntValue", pack, 0), ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetField_Int(pack, fieldInt, value1), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_int_test", "checkIntValue", pack, value1), ANI_TRUE);
 
@@ -64,6 +64,16 @@ TEST_F(ObjectSetFieldIntTest, set_field_int)
         ASSERT_EQ(env_->Object_GetField_Int(pack, fieldInt, &result), ANI_OK);
         ASSERT_EQ(result, value2);
     }
+}
+
+TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_args_env)
+{
+    ani_object pack {};
+    ani_field fieldInt {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldInt, &fieldString);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Int(nullptr, pack, fieldInt, 2U), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldIntTest, set_field_int_invalid_field_type)

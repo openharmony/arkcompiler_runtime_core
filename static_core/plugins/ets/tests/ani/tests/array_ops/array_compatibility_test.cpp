@@ -42,14 +42,13 @@ TEST_F(CompatibilityTest, SetShortArrayRegionErrorTests)
     EtsObject *managedObjArray = s.ToInternalType(reinterpret_cast<ani_object>(managedArray));
     EtsObject *escompatObjArray = s.ToInternalType(reinterpret_cast<ani_object>(escompatArray));
 
-    // Next asserts will fail after fix, should be inversed
     ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), objArray->GetClass()->GetRuntimeClass());
-    ASSERT_NE(managedObjArray->GetClass()->GetRuntimeClass(), arrayClass);
-    ASSERT_NE(managedObjArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
+    ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), arrayClass);
+    ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
 
     // Next asserts will not fail, but Array_New_Type implementation should be adapted and assert shoul be inversed
-    ASSERT_NE(arrayClass, objArray->GetClass()->GetRuntimeClass());
-    ASSERT_NE(objArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
+    ASSERT_EQ(arrayClass, objArray->GetClass()->GetRuntimeClass());
+    ASSERT_EQ(objArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
 
     // Next assert should not change
     ASSERT_EQ(arrayClass, escompatObjArray->GetClass()->GetRuntimeClass());

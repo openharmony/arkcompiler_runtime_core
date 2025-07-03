@@ -19,10 +19,11 @@ add_custom_target(ets_test_suite_coroutines)
 #
 # add_ets_coroutines_test(FILE ets_file
 #                         [SKIP_ARM32_COMPILER]
+#                         [LIST_UNHANDLED]
 #                         [OPTIONS "--gc-type=epsilon"]
 #                         IMPL "THREADED" "STACKFUL"
 #                         OPTION_SETS_THREADED "DEFAULT"
-#                         OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL" "JS_POOL" "MIGRATION_AWAIT"
+#                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATION_AWAIT"
 #                         WORKERS "AUTO" "ONE"
 #                         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
 # )
@@ -30,12 +31,12 @@ add_custom_target(ets_test_suite_coroutines)
 #                         THREADED DEFAULT AUTO INT
 #                         THREADED DEFAULT AUTO JIT
 #                         ...
-#                         STACKFUL JS_POOL ONE JITOSR
+#                         STACKFUL ONE JITOSR
 #
 # SKIP_ARM32_COMPILER and OPTIONS will apply to all tests
 function(add_ets_coroutines_test)
     set(prefix ARG)
-    set(noValues SKIP_ARM32_COMPILER)
+    set(noValues SKIP_ARM32_COMPILER LIST_UNHANDLED)
     set(singleValues FILE)
     set(multiValues OPTIONS IMPL OPTION_SETS_THREADED OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
@@ -45,6 +46,10 @@ function(add_ets_coroutines_test)
     endif()
 
     get_filename_component(test_name "${ARG_FILE}" NAME_WE)
+
+    if (ARG_LIST_UNHANDLED)
+        set(list_unhandled_option "--list-unhandled-on-exit:jobs,promises")
+    endif()
 
     foreach(impl ${ARG_IMPL})
         string(TOLOWER "${impl}" impl_name)
@@ -76,13 +81,31 @@ function(add_ets_coroutines_test)
                              FILE ${ARG_FILE}
                              ${SKIP_ARM32_COMPILER}
                              TEST_NAME "${test_name}_${impl_name}_${options_name}_workers_${workers_count}"
-                             OPTIONS ${ARG_OPTIONS} ${impl_option} ${additional_options} ${workers_option}
+                             OPTIONS ${ARG_OPTIONS} ${impl_option} ${additional_options} ${workers_option} ${list_unhandled_option}
                              MODE ${ARG_MODE}
                 )
             endforeach()
         endforeach()
     endforeach()
 endfunction()
+
+add_ets_coroutines_test(FILE allhandled_rejection.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE unhandled_rejection.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
 
 add_ets_coroutines_test(FILE async_call.ets
                         SKIP_ARM32_COMPILER
@@ -119,8 +142,8 @@ add_ets_coroutines_test(FILE await.ets
 
 add_ets_coroutines_test(FILE launch_launch.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL" # Issue 24058
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
 )
@@ -153,7 +176,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE launch_instr_array.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
+                            IMPL "STACKFUL" "THREADED"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "AUTO" "ONE"
@@ -244,6 +267,15 @@ if (NOT PANDA_TARGET_ARM32)
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
+
+    add_ets_coroutines_test(FILE eworker_unlimited.ets
+                            SKIP_ARM32_COMPILER
+                            OPTIONS "--coroutine-e-workers-limit=100500"
+                            IMPL "STACKFUL"
+                            OPTION_SETS_STACKFUL "DEFAULT"
+                            WORKERS "ONE"
+                            MODE "INT"
+    )
 endif()
 
 add_ets_coroutines_test(FILE eworker_id.ets
@@ -257,11 +289,11 @@ add_ets_coroutines_test(FILE eworker_id.ets
 # # Issue 12886
 add_ets_coroutines_test(FILE launch_return.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL" # Issue 24058
                         OPTION_SETS_THREADED "DEFAULT"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
-                        MODE "INT" "JIT"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE launch_yield.ets
@@ -313,7 +345,7 @@ add_ets_coroutines_test(FILE stats.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE elauncher_id.ets
+add_ets_coroutines_test(FILE eaworker_coroutines.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
@@ -365,6 +397,46 @@ add_ets_coroutines_test(FILE await_migrate.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "MIGRATION_AWAIT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE job_test.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE execution_order.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "ONE"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE eworker_parameter.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE await_async_return_reject_promise.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE eworker_post_to_main.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT"
 )

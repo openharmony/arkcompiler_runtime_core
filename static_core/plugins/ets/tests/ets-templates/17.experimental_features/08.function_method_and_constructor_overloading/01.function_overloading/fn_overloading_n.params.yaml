@@ -18,7 +18,7 @@ cases:
       function foo(): void {}
 
   - defs: |-
-      function foo(): void throws {}
+      function foo(): void throws {}  // CTE on 'throws' expected
       function foo(): void {}
 
   - defs: |-
@@ -54,21 +54,6 @@ cases:
       function foo<V, T>(a: V, b: T): int {
         return 1;
       }
-
-  - defs: |-
-      function foo<T>(a: T) throws {
-        throw ArithmeticError;
-      }
-      function foo<T>(a: T) {
-        return;
-      }
-
-  - defs: |-
-      function bar<T>(a: T) throws {
-        throw ArithmeticError;
-      }
-      function foo<V>(a: (a: V) throws) rethrows {}
-      function foo<T>(a: (a: T) throws) rethrows {}
 
   - defs: |-
       interface I {}

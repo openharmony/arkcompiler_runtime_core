@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,8 @@ class TestSuiteConfigTest3(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
 
