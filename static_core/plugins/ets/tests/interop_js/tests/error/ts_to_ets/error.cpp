@@ -35,4 +35,8 @@ TEST_F(EtsErrorTSToETSTest, testCustomThrowError)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCustomThrowError"));
 }
 
+TEST_F(EtsErrorTSToETSTest, testRangeError)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testRangeError"));
+}
 }  // namespace ark::ets::interop::js::testing

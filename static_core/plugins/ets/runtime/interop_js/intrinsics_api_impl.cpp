@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/coroutines/stackful_coroutine.h"
+#include "types/ets_object.h"
 
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -732,18 +733,16 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
         return static_cast<uint8_t>(false);
     }
     auto cls = reinterpret_cast<EtsClass *>(clsObj);
-
-    // Check if object has SharedReference
-    ets_proxy::SharedReference *sharedRef = [=] {
-        napi_value jsValue = JSConvertJSValue::Wrap(env, object);
-        return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
-    }();
-    auto result = false;
-    if (sharedRef != nullptr) {
-        EtsObject *etsObject = sharedRef->GetEtsObject();
-        result = cls->IsAssignableFrom(etsObject->GetClass());
+    napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+    if (jsValue == nullptr) {
+        return static_cast<uint8_t>(false);
     }
-
+    auto etsObjectRes = JSConvertEtsObject::UnwrapImpl(ctx, env, jsValue);
+    if (!etsObjectRes.has_value()) {
+        return static_cast<uint8_t>(false);
+    }
+    EtsObject *etsObject = etsObjectRes.value();
+    bool result = cls->IsAssignableFrom(etsObject->GetClass());
     return static_cast<uint8_t>(result);
 }
 
