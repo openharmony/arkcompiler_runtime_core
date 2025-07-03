@@ -33,6 +33,10 @@ class Function : public ViewInResource<AbckitCoreFunction *, const File *> {
     /// @brief to access private constructor
     friend class core::Class;
     /// @brief to access private constructor
+    friend class core::Interface;
+    /// @brief to access private constructor
+    friend class core::Enum;
+    /// @brief to access private constructor
     friend class core::Namespace;
     /// @brief to access private constructor
     friend class core::Module;

@@ -68,6 +68,13 @@ public:
      */
     ~ModuleField() override = default;
 
+    /**
+     * @brief Returns name.
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
 private:
     ModuleField(AbckitCoreModuleField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
     const ApiConfig *conf_;
@@ -129,6 +136,13 @@ public:
      */
     ~ClassField() override = default;
 
+    /**
+     * @brief Returns name.
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
 private:
     ClassField(AbckitCoreClassField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
     const ApiConfig *conf_;
@@ -149,6 +163,8 @@ protected:
  */
 class InterfaceField : public View<AbckitCoreInterfaceField *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class core::Interface;
     /// @brief abckit::DefaultHash<InterfaceField>
     friend class abckit::DefaultHash<InterfaceField>;
 
@@ -188,6 +204,13 @@ public:
      */
     ~InterfaceField() override = default;
 
+    /**
+     * @brief Returns name.
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
 private:
     InterfaceField(AbckitCoreInterfaceField *field, const ApiConfig *conf) : View(field), conf_(conf) {};
     const ApiConfig *conf_;
@@ -208,6 +231,8 @@ protected:
  */
 class EnumField : public View<AbckitCoreEnumField *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class core::Enum;
     /// @brief abckit::DefaultHash<EnumField>
     friend class abckit::DefaultHash<EnumField>;
 
@@ -246,6 +271,13 @@ public:
      * @brief Destroy the EnumField object
      */
     ~EnumField() override = default;
+
+    /**
+     * @brief Returns name.
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
 
 private:
     EnumField(AbckitCoreEnumField *field, const ApiConfig *conf) : View(field), conf_(conf) {};

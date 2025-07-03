@@ -66,6 +66,28 @@ inline std::vector<core::Class> Module::GetClasses() const
     return classes;
 }
 
+inline std::vector<core::Interface> Module::GetInterfaces() const
+{
+    std::vector<core::Interface> interfaces;
+
+    GetInterfacesInner(interfaces);
+
+    CheckError(GetApiConfig());
+
+    return interfaces;
+}
+
+inline std::vector<core::Enum> Module::GetEnums() const
+{
+    std::vector<core::Enum> enums;
+
+    GetEnumsInner(enums);
+
+    CheckError(GetApiConfig());
+
+    return enums;
+}
+
 inline std::vector<core::Function> Module::GetTopLevelFunctions() const
 {
     std::vector<core::Function> functions;
@@ -75,6 +97,17 @@ inline std::vector<core::Function> Module::GetTopLevelFunctions() const
     CheckError(GetApiConfig());
 
     return functions;
+}
+
+inline std::vector<core::ModuleField> Module::GetFields() const
+{
+    std::vector<core::ModuleField> fields;
+
+    GetFieldsInner(fields);
+
+    CheckError(GetApiConfig());
+
+    return fields;
 }
 
 inline std::vector<core::AnnotationInterface> Module::GetAnnotationInterfaces() const
@@ -161,6 +194,32 @@ inline bool Module::EnumerateClasses(const std::function<bool(core::Class)> &cb)
     return isNormalExit;
 }
 
+inline bool Module::EnumerateInterfaces(const std::function<bool(core::Interface)> &cb) const
+{
+    Payload<const std::function<bool(core::Interface)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateInterfaces(
+        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Interface)> &> *>(data);
+            return payload.data(core::Interface(iface, payload.config, payload.resource));
+        });
+    CheckError(GetApiConfig());
+    return isNormalExit;
+}
+
+inline bool Module::EnumerateEnums(const std::function<bool(core::Enum)> &cb) const
+{
+    Payload<const std::function<bool(core::Enum)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    auto isNormalExit =
+        GetApiConfig()->cIapi_->moduleEnumerateEnums(GetView(), &payload, [](AbckitCoreEnum *enm, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Enum)> &> *>(data);
+            return payload.data(core::Enum(enm, payload.config, payload.resource));
+        });
+    CheckError(GetApiConfig());
+    return isNormalExit;
+}
+
 inline bool Module::EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const
 {
     Payload<const std::function<bool(core::ImportDescriptor)> &> payload {cb, GetApiConfig(), GetResource()};
@@ -187,6 +246,32 @@ inline bool Module::GetClassesInner(std::vector<core::Class> &classes) const
     return isNormalExit;
 }
 
+inline bool Module::GetInterfacesInner(std::vector<core::Interface> &interfaces) const
+{
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
+
+    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateInterfaces(
+        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+            payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
+            return true;
+        });
+    return isNormalExit;
+}
+
+inline bool Module::GetEnumsInner(std::vector<core::Enum> &enums) const
+{
+    Payload<std::vector<core::Enum> *> payload {&enums, GetApiConfig(), GetResource()};
+
+    auto isNormalExit =
+        GetApiConfig()->cIapi_->moduleEnumerateEnums(GetView(), &payload, [](AbckitCoreEnum *enm, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Enum> *> *>(data);
+            payload.data->push_back(core::Enum(enm, payload.config, payload.resource));
+            return true;
+        });
+    return isNormalExit;
+}
+
 inline bool Module::GetTopLevelFunctionsInner(std::vector<core::Function> &functions) const
 {
     Payload<std::vector<core::Function> *> payload {&functions, GetApiConfig(), GetResource()};
@@ -195,6 +280,19 @@ inline bool Module::GetTopLevelFunctionsInner(std::vector<core::Function> &funct
         GetView(), &payload, [](AbckitCoreFunction *func, void *data) {
             const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
             payload.data->push_back(core::Function(func, payload.config, payload.resource));
+            return true;
+        });
+    return isNormalExit;
+}
+
+inline bool Module::GetFieldsInner(std::vector<core::ModuleField> &fields) const
+{
+    Payload<std::vector<core::ModuleField> *> payload {&fields, GetApiConfig(), GetResource()};
+
+    auto isNormalExit = GetApiConfig()->cIapi_->moduleEnumerateFields(
+        GetView(), &payload, [](AbckitCoreModuleField *field, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::ModuleField> *> *>(data);
+            payload.data->push_back(core::ModuleField(field, payload.config));
             return true;
         });
     return isNormalExit;

@@ -46,7 +46,13 @@ namespace core {
 class Module;
 class Namespace;
 class Class;
+class Interface;
+class Enum;
 class Function;
+class ModuleField;
+class ClassField;
+class InterfaceField;
+class EnumField;
 class Annotation;
 class AnnotationInterface;
 class AnnotationElement;
@@ -100,8 +106,20 @@ class ApiConfig final {
     friend core::Namespace;
     /// \relates abckit::core::Class
     friend core::Class;
+    /// \relates abckit::core::Interface
+    friend core::Interface;
+    /// \relates abckit::core::Enum
+    friend core::Enum;
     /// \relates abckit::core::Function
     friend core::Function;
+    /// \relates abckit::core::ModuleField
+    friend core::ModuleField;
+    /// \relates abckit::core::ClassField
+    friend core::ClassField;
+    /// \relates abckit::core::InterfaceField
+    friend core::InterfaceField;
+    /// \relates abckit::core::EnumField
+    friend core::EnumField;
     /// \relates abckit::core::Annotation
     friend core::Annotation;
     /// \relates abckit::core::AnnotationInterface

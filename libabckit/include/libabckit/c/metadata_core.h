@@ -953,6 +953,45 @@ struct CAPI_EXPORT AbckitInspectApi {
                                      bool (*cb)(AbckitCoreInterfaceField *field, void *data));
 
     /* ========================================
+     * Enum
+     * ======================================== */
+
+    /**
+     * @brief Returns name for enum `enm`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] enm - Enum to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Allocates
+     */
+    AbckitString *(*enumGetName)(AbckitCoreEnum *enm);
+
+    /**
+     * @brief Enumerates methods of enum `enm`, invoking callback `cb` for each method.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] enm - Enum to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*enumEnumerateMethods)(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *func, void *data));
+
+    /**
+     * @brief Enumerates fields of enum `enm`, invoking callback `cb` for each field.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] enm - Enum to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*enumEnumerateFields)(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
+
+    /* ========================================
      * Module Field
      * ======================================== */
 

@@ -98,6 +98,34 @@ TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetClasses)
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
+// Test: test-kind=mock, api=Module::GetInterfaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetInterfaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreModule(f).GetInterfaces();
+        ASSERT_TRUE(CheckMockedApi("ModuleEnumerateInterfaces"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Module::GetEnums, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetEnums)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreModule(f).GetEnums();
+        ASSERT_TRUE(CheckMockedApi("ModuleEnumerateEnums"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
 // Test: test-kind=mock, api=Module::GetTopLevelFunctions, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetTopLevelFunctions)
 {
@@ -107,6 +135,20 @@ TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetTopLevelFunctions)
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         abckit::mock::helpers::GetMockCoreModule(f).GetTopLevelFunctions();
         ASSERT_TRUE(CheckMockedApi("ModuleEnumerateTopLevelFunctions"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Module::GetFields, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestModule, Module_GetFields)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreModule(f).GetFields();
+        ASSERT_TRUE(CheckMockedApi("ModuleEnumerateFields"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());

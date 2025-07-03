@@ -387,12 +387,32 @@ struct AbckitCoreFunction {
     }
 };
 
+struct AbckitArktsNamespacePayload {
+    /*
+     * In ArkTS2 namespace is defined by corresponding pandasm::Record.
+     */
+    std::variant<ark::pandasm::Record *> cl;
+
+    ark::pandasm::Record *GetStaticClass()
+    {
+        return std::get<ark::pandasm::Record *>(cl);
+    }
+};
+
 struct AbckitArktsNamespace {
+    AbckitArktsNamespacePayload impl;
     AbckitCoreNamespace *core = nullptr;
     /*
      * To store links to the wrapped methods.
      */
     std::unique_ptr<AbckitCoreFunction> f;
+
+    explicit AbckitArktsNamespace(ark::pandasm::Record *record)
+    {
+        impl.cl = reinterpret_cast<ark::pandasm::Record *>(record);
+    }
+
+    AbckitArktsNamespace() = default;
 };
 
 struct AbckitCoreNamespace {
@@ -427,6 +447,13 @@ struct AbckitCoreNamespace {
     AbckitArktsNamespace *GetArkTSImpl()
     {
         return std::get<std::unique_ptr<AbckitArktsNamespace>>(impl).get();
+    }
+
+    AbckitCoreNamespace(AbckitCoreModule *m, AbckitArktsNamespace ns)
+    {
+        ns.core = this;
+        impl = std::make_unique<AbckitArktsNamespace>(std::move(ns));
+        owningModule = m;
     }
 };
 
@@ -500,6 +527,9 @@ struct AbckitCoreModule {
      * Tables to store and find wrapped entities by their name.
      */
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreClass>> ct;
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreNamespace>> nt;
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreInterface>> it;
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreEnum>> et;
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreAnnotationInterface>> at;
     std::vector<std::unique_ptr<AbckitCoreNamespace>> namespaces;
     std::vector<std::unique_ptr<AbckitCoreInterface>> interfaces;
@@ -543,7 +573,38 @@ struct AbckitCoreModule {
     {
         ct.emplace(name, std::move(klass));
     }
+
+    template <typename AbckitCoreType>
+    void InsertInstance(const std::string &name, std::unique_ptr<AbckitCoreType> &&instance);
 };
+
+template <>
+inline void AbckitCoreModule::InsertInstance<AbckitCoreClass>(const std::string &name,
+                                                              std::unique_ptr<AbckitCoreClass> &&instance)
+{
+    ct.emplace(name, std::move(instance));
+}
+
+template <>
+inline void AbckitCoreModule::InsertInstance<AbckitCoreNamespace>(const std::string &name,
+                                                                  std::unique_ptr<AbckitCoreNamespace> &&instance)
+{
+    nt.emplace(name, std::move(instance));
+}
+
+template <>
+inline void AbckitCoreModule::InsertInstance<AbckitCoreInterface>(const std::string &name,
+                                                                  std::unique_ptr<AbckitCoreInterface> &&instance)
+{
+    it.emplace(name, std::move(instance));
+}
+
+template <>
+inline void AbckitCoreModule::InsertInstance<AbckitCoreEnum>(const std::string &name,
+                                                             std::unique_ptr<AbckitCoreEnum> &&instance)
+{
+    et.emplace(name, std::move(instance));
+}
 
 struct AbckitString {
     std::string_view impl;
@@ -961,7 +1022,7 @@ struct AbckitCoreModuleField {
     /*
      * To refer to the properties of the origin module.
      */
-    AbckitCoreModule *mod = nullptr;
+    AbckitCoreModule *owner = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsModuleField>> impl;
     AbckitArktsModuleField *GetArkTSImpl()
@@ -994,7 +1055,7 @@ struct AbckitCoreClassField {
     /*
      * To refer to the properties of the origin class.
      */
-    AbckitCoreClass *klass = nullptr;
+    AbckitCoreClass *owner = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsClassField>> impl;
     AbckitArktsClassField *GetArkTSImpl()
@@ -1017,13 +1078,17 @@ struct AbckitCoreInterfaceField {
      */
     AbckitType *type = nullptr;
     /*
+     * Access flag of the field.
+     */
+    uint32_t flag = 0;
+    /*
      * Table to store the annotations of the field.
      */
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
     /*
      * To refer to the properties of the origin interface.
      */
-    AbckitCoreInterface *iface = nullptr;
+    AbckitCoreInterface *owner = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsInterfaceField>> impl;
     AbckitArktsInterfaceField *GetArkTSImpl()
@@ -1056,7 +1121,7 @@ struct AbckitCoreEnumField {
     /*
      * To refer to the properties of the origin enum.
      */
-    AbckitCoreEnum *enm = nullptr;
+    AbckitCoreEnum *owner = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsEnumField>> impl;
     AbckitArktsEnumField *GetArkTSImpl()
@@ -1065,8 +1130,26 @@ struct AbckitCoreEnumField {
     }
 };
 
+struct AbckitArktsInterfacePayload {
+    /*
+     * In ArkTS2 interface is defined by corresponding pandasm::Record.
+     */
+    std::variant<ark::pandasm::Record *> cl;
+
+    ark::pandasm::Record *GetStaticClass()
+    {
+        return std::get<ark::pandasm::Record *>(cl);
+    }
+};
+
 struct AbckitArktsInterface {
+    AbckitArktsInterfacePayload impl;
     AbckitCoreInterface *core = nullptr;
+
+    explicit AbckitArktsInterface(ark::pandasm::Record *record)
+    {
+        impl.cl = reinterpret_cast<ark::pandasm::Record *>(record);
+    };
 };
 
 struct AbckitCoreInterface {
@@ -1081,7 +1164,7 @@ struct AbckitCoreInterface {
     /*
      * Table to store the methods of the interface.
      */
-    std::unordered_map<std::string, std::unique_ptr<AbckitCoreFunction>> methods;
+    std::vector<std::unique_ptr<AbckitCoreFunction>> methods;
     /*
      * Table to store the fields of the interface.
      */
@@ -1104,25 +1187,54 @@ struct AbckitCoreInterface {
     {
         return std::get<std::unique_ptr<AbckitArktsInterface>>(impl).get();
     }
+
+    AbckitCoreInterface(AbckitCoreModule *module, AbckitArktsInterface iface)
+    {
+        iface.core = this;
+        impl = std::make_unique<AbckitArktsInterface>(iface);
+        owningModule = module;
+    }
+};
+
+struct AbckitArktsEnumPayload {
+    /*
+     * In ArkTS2 enum is defined by corresponding pandasm::Record.
+     */
+    std::variant<ark::pandasm::Record *> cl;
+
+    ark::pandasm::Record *GetStaticClass()
+    {
+        return std::get<ark::pandasm::Record *>(cl);
+    }
 };
 
 struct AbckitArktsEnum {
+    AbckitArktsEnumPayload impl;
     AbckitCoreEnum *core = nullptr;
+
+    explicit AbckitArktsEnum(ark::pandasm::Record *record)
+    {
+        impl.cl = reinterpret_cast<ark::pandasm::Record *>(record);
+    };
 };
 
 struct AbckitCoreEnum {
     /*
      * Back link to the module.
      */
-    AbckitCoreModule *module = nullptr;
+    AbckitCoreModule *owningModule = nullptr;
     /*
      * Name of the enum.
      */
     AbckitString *name = nullptr;
     /*
+     * Table to store the methods of the enum.
+     */
+    std::vector<std::unique_ptr<AbckitCoreFunction>> methods;
+    /*
      * Table to store the fields of the enum.
      */
-    std::unordered_map<std::string, std::unique_ptr<AbckitCoreEnumField>> fields;
+    std::vector<std::unique_ptr<AbckitCoreEnumField>> fields;
     /*
      * Table to store the annotations of the enum.
      */
@@ -1132,6 +1244,13 @@ struct AbckitCoreEnum {
     AbckitArktsEnum *GetArkTSImpl()
     {
         return std::get<std::unique_ptr<AbckitArktsEnum>>(impl).get();
+    }
+
+    AbckitCoreEnum(AbckitCoreModule *module, AbckitArktsEnum enm)
+    {
+        enm.core = this;
+        impl = std::make_unique<AbckitArktsEnum>(enm);
+        owningModule = module;
     }
 };
 
