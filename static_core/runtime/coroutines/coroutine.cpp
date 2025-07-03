@@ -36,6 +36,7 @@ Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, Co
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
                                          std::move(epInfo), type, priority);
+    ASSERT(co != nullptr);
     co->Initialize();
     return co;
 }
