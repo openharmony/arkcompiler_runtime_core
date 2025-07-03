@@ -27,7 +27,7 @@ TEST_F(ArraySetRefTest, SetRefErrorTests)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
     ani_ref ref = nullptr;
@@ -44,7 +44,7 @@ TEST_F(ArraySetRefTest, FixedSetRefErrorTests)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
     ani_ref ref = nullptr;
@@ -77,7 +77,7 @@ TEST_F(ArraySetRefTest, SetRefErrorValueToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
 
@@ -89,7 +89,7 @@ TEST_F(ArraySetRefTest, FixedSetRefErrorValueToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
@@ -101,7 +101,7 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
@@ -150,7 +150,7 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
     ani_ref ref1 = nullptr;
     auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));

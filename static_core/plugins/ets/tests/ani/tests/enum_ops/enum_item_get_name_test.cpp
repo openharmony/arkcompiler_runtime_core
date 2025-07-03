@@ -24,7 +24,7 @@ TEST_F(EnumItemGetNameTest, get_enum_item_name_1)
     std::string itemName;
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -47,7 +47,7 @@ TEST_F(EnumItemGetNameTest, get_enum_item_name_1)
     ASSERT_STREQ(itemName.data(), "BLUE");
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/ColorInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.ColorInt", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
     ani_enum_item redInt {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumInt, "REDINT", &redInt), ANI_OK);
@@ -75,7 +75,7 @@ TEST_F(EnumItemGetNameTest, get_enum_item_name_2)
     std::string itemName;
 
     ani_enum aniEnumStr {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/ColorString;", &aniEnumStr), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.ColorString", &aniEnumStr), ANI_OK);
     ASSERT_NE(aniEnumStr, nullptr);
     ani_enum_item redStr {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnumStr, "REDSTR", &redStr), ANI_OK);
@@ -101,7 +101,7 @@ TEST_F(EnumItemGetNameTest, get_enum_item_name_2)
 TEST_F(EnumItemGetNameTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -116,7 +116,7 @@ TEST_F(EnumItemGetNameTest, invalid_arg_enum)
 TEST_F(EnumItemGetNameTest, get_enum_item_name_combine_scenes)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -137,7 +137,7 @@ TEST_F(EnumItemGetNameTest, get_enum_item_name_combine_scenes)
 TEST_F(EnumItemGetNameTest, enum_get_name_test_one_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_name_test/OneItem;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_name_test.OneItem", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item one {};

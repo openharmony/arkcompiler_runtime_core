@@ -22,15 +22,15 @@ class NamespaceFindEnumTest : public AniTest {};
 TEST_F(NamespaceFindEnumTest, namespace_find_enum)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnumInt {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorInt;", &aniEnumInt), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorInt", &aniEnumInt), ANI_OK);
     ASSERT_NE(aniEnumInt, nullptr);
 
     ani_enum aniEnumString {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorString;", &aniEnumString), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorString", &aniEnumString), ANI_OK);
     ASSERT_NE(aniEnumString, nullptr);
 
     ani_enum_item green {};
@@ -44,13 +44,13 @@ TEST_F(NamespaceFindEnumTest, namespace_find_enum)
 TEST_F(NamespaceFindEnumTest, find_enum_many_times)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum aniEnum {};
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
-        ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColor;", &aniEnum), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindEnum(ns, "Color", &aniEnum), ANI_OK);
         ASSERT_NE(aniEnum, nullptr);
     }
 }
@@ -58,13 +58,13 @@ TEST_F(NamespaceFindEnumTest, find_enum_many_times)
 TEST_F(NamespaceFindEnumTest, invalid_args)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->c_api->Namespace_FindEnum(nullptr, ns, "L#Color;", &en), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Namespace_FindEnum(nullptr, ns, "#Color", &en), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(nullptr, "L#Color;", &en), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindEnum(nullptr, "#Color", &en), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Namespace_FindEnum(ns, nullptr, &en), ANI_INVALID_ARGS);
 
@@ -72,72 +72,72 @@ TEST_F(NamespaceFindEnumTest, invalid_args)
 
     ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#ColorA", &en), ANI_NOT_FOUND);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "L#Color;", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "#Color", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(NamespaceFindEnumTest, find_enum_sub_namespace)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace tmp {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LsubnsA;", &tmp), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "subnsA", &tmp), ANI_OK);
     ASSERT_NE(tmp, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LNotFound;", &en), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColor;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "NotFound", &en), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "Color", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LsubnsB;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "subnsB", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorInt;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorInt", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 }
 
 TEST_F(NamespaceFindEnumTest, find_enum_sub_namespace_many_times)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace ns1 {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LsubnsA;", &ns1), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "subnsA", &ns1), ANI_OK);
     ASSERT_NE(ns1, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns1, "LColor;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns1, "Color", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LsubnsB;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "subnsB", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorInt;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorInt", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColorString;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "ColorString", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LtestEnum;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "testEnum", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 }
 
 TEST_F(NamespaceFindEnumTest, find_enum_same_name)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_enum_test/enumns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_enum_test.enumns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_enum en {};
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColor;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "Color", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LsubnsA;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "subnsA", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ASSERT_EQ(env_->Namespace_FindEnum(ns, "LColor;", &en), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindEnum(ns, "Color", &en), ANI_OK);
     ASSERT_NE(en, nullptr);
 }
 

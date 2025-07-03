@@ -27,22 +27,22 @@ public:
 TEST_F(FindNamespaceTest, has_namespace)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.geometry", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 }
 
 TEST_F(FindNamespaceTest, namespace_not_found)
 {
     ani_namespace ns;
-    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/bla-bla-bla", &ns), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.bla-bla-bla", &ns), ANI_NOT_FOUND);
 }
 
 TEST_F(FindNamespaceTest, invalid_arguments)
 {
     ani_namespace ns {};
     ASSERT_EQ(env_->FindNamespace(nullptr, &ns), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/geometry;", nullptr), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->c_api->FindNamespace(nullptr, "Lgeometry;", &ns), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.geometry", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FindNamespace(nullptr, "geometry", &ns), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->FindNamespace("", &ns), ANI_NOT_FOUND);
     ASSERT_EQ(env_->FindNamespace("\t", &ns), ANI_NOT_FOUND);
 }
@@ -50,17 +50,17 @@ TEST_F(FindNamespaceTest, invalid_arguments)
 TEST_F(FindNamespaceTest, namespace_is_not_class)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lfind_namespace_test/geometry;", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("find_namespace_test.geometry", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(FindNamespaceTest, find_namespace_combine_scenes_002)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/nameA/nameB;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.nameA.nameB", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "II:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "ii:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 
     ani_value args[2U];
@@ -74,11 +74,11 @@ TEST_F(FindNamespaceTest, find_namespace_combine_scenes_002)
 TEST_F(FindNamespaceTest, find_namespace_combine_scenes_003)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lfind_namespace_test/spaceA/spaceB/spaceC;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("find_namespace_test.spaceA.spaceB.spaceC", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "II:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "int_method", "ii:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 
     ani_value args[2U];

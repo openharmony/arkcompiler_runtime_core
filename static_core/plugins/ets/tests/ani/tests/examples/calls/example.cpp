@@ -23,7 +23,7 @@ public:
     // CC-OFFNXT(G.FMT.10-CPP) project code style
     static constexpr const char *MODULE_NAME = "example";
     // CC-OFFNXT(G.FMT.10-CPP) project code style
-    static constexpr const char *TEST_CLASS_DESCRIPTOR = "Lexample/Test;";
+    static constexpr const char *TEST_CLASS_DESCRIPTOR = "example.Test";
 };
 
 // NOLINTBEGIN(readability-magic-numbers)

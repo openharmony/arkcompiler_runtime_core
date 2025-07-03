@@ -24,7 +24,7 @@ public:
         auto packRef = CallEtsFunction<ani_ref>("object_set_field_long_test", "newPackageObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_long_test/Package;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_long_test.Package", &cls), ANI_OK);
 
         ani_field fieldLong {};
         ASSERT_EQ(env_->Class_FindField(cls, "long_value", &fieldLong), ANI_OK);

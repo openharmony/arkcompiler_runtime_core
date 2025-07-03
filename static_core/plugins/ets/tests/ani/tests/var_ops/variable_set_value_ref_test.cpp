@@ -25,7 +25,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_ref_test/anyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("variable_set_value_ref_test.anyns", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -104,11 +104,11 @@ TEST_F(VariableSetValueRefTest, invalid_value)
 TEST_F(VariableSetValueRefTest, composite_case_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":Lstd/core/String;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":C{std.core.String}", &method), ANI_OK);
 
     ani_ref sum = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &sum), ANI_OK);
@@ -177,7 +177,7 @@ TEST_F(VariableSetValueRefTest, composite_case_2)
 TEST_F(VariableSetValueRefTest, composite_case_3)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "second", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_variable variable1 {};

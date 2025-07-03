@@ -26,11 +26,11 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/A;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.A", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_void_test/A;", &newMethod),
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":C{object_call_method_by_name_void_test.A}", &newMethod),
                   ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
@@ -48,7 +48,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_normal)
     args[1U].l = VAL2;
     ani_long value {};
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", "JJ:V", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", "ll:", args), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", nullptr, &value), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);
 }
@@ -78,8 +78,8 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_abnorma
     args[1U].l = VAL2;
     ani_long value {};
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "xxxxxxx", "JJ:V", args), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", "JJ:J", &value), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "xxxxxxx", "ll:", args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", "ll:l", &value), ANI_NOT_FOUND);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid_object)
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid
     ani_value args[2U];
     args[0U].l = VAL1;
     args[1U].l = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(nullptr, "voidMethod", "JJ:V", args), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(nullptr, "voidMethod", "ll:", args), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid_method)
@@ -99,7 +99,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid
     args[0U].l = VAL1;
     args[1U].l = VAL2;
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, nullptr, "JJ:V", args), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, nullptr, "ll:", args), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid_args)
@@ -107,7 +107,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_a_invalid
     ani_object object {};
     GetMethodData(&object);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", "JJ:V", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", "ll:", nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_normal)
@@ -116,7 +116,7 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_normal)
     GetMethodData(&object);
 
     ani_long value {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "voidMethod", "JJ:V", VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "voidMethod", "ll:", VAL1, VAL2), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", nullptr, &value), ANI_OK);
     ASSERT_EQ(value, VAL1 + VAL2);
 }
@@ -138,12 +138,12 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_abnormal)
     GetMethodData(&object);
 
     ani_long value {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "xxxxxxxxx", "JJ:V", VAL1, VAL2), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", "JJ:J", &value), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "xxxxxxxxx", "ll:", VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Long(object, "getValue", "ll:l", &value), ANI_NOT_FOUND);
 }
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_invalid_object)
 {
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(nullptr, "voidMethod", "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(nullptr, "voidMethod", "ll:", VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_invalid_method)
@@ -151,17 +151,17 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_invalid_m
     ani_object object {};
     GetMethodData(&object);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, nullptr, "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, nullptr, "ll:", VAL1, VAL2), ANI_INVALID_ARGS);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
@@ -170,26 +170,26 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_001)
     const ani_int value1 = 5;
     const ani_int value2 = 6;
     ani_int res = 0;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value2), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value2);
 
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "II:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "ii:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value2);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 100;
@@ -197,25 +197,25 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_002)
 
     ani_char res = 'a';
     const ani_char value = 'D';
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "C:V", value), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":C", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "c:", value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":c", &res), ANI_OK);
     ASSERT_EQ(res, value);
 
     ani_value args[1U];
     args[0U].c = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "C:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":C", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "c:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":c", &res), ANI_OK);
     ASSERT_EQ(res, value);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ani_int arg = 100;
@@ -224,26 +224,26 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_003)
     ani_int res = 0;
     const ani_int value1 = 5;
     const ani_int value2 = 8;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidSunMethod", "II:V", value1, value2), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidSunMethod", "ii:", value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value2);
 
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidSunMethod", "II:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidSunMethod", "ii:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value2);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 10;
@@ -252,26 +252,26 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_004)
     ani_int res = 0;
     const ani_int value1 = 5;
     const ani_int value2 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value2), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value1 + value2);
 
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "II:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "ii:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value1 + value2);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 5;
@@ -281,48 +281,48 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_005)
     const ani_int value = 5;
     ani_value argsA[1U];
     argsA[0U].i = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "protectedMethod", "I:V", value), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "protectedMethod", "i:", value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value);
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "protectedMethod", "I:V", argsA), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "protectedMethod", "i:", argsA), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value);
 
     ani_double res1 = 0.0;
     const ani_double value1 = 5.0;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "privateMethod", "D:V", value1), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":D", &res1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "privateMethod", "d:", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":d", &res1), ANI_OK);
     ASSERT_EQ(res1, value1);
     ani_value argsB[1U];
     argsB[0U].d = value1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "privateMethod", "D:V", argsB), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":D", &res1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "privateMethod", "d:", argsB), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":d", &res1), ANI_OK);
     ASSERT_EQ(res1, value1);
 
     const ani_int value2 = 5;
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, arg), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "callProtected", "II:V", value, value2), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "callProtected", "ii:", value, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value + value2);
     ani_value argsC[2U];
     argsC[0U].i = value;
     argsC[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "callProtected", "II:V", argsC), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "callProtected", "ii:", argsC), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value + value2);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -330,25 +330,25 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_006)
 
     ani_int res = 0;
     const ani_int value = 10;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "nestedMethod", "I:V", value), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "nestedMethod", "i:", value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value);
 
     ani_value args[1U];
     args[0U].i = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "nestedMethod", "I:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "nestedMethod", "i:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -357,25 +357,25 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_007)
     ani_int res = 0;
     const ani_int value1 = 5;
     const ani_int value2 = 15;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "recursiveMethod", "I:V", value1), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "recursiveMethod", "i:", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value2);
 
     ani_value args[1U];
     args[0U].i = value1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "recursiveMethod", "I:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "recursiveMethod", "i:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value2 + value2);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -387,35 +387,35 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_008)
     const ani_int value1 = 1;
     const ani_char value2 = 'A';
     const ani_double value3 = 1.0;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "calculateSum", "ICD:V", value1, value2, value3), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "calculateSum", "icd:", value1, value2, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res1), ANI_OK);
     ASSERT_EQ(res1, value1);
-    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":C", &res2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":c", &res2), ANI_OK);
     ASSERT_EQ(res2, value2);
-    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":D", &res3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":d", &res3), ANI_OK);
     ASSERT_EQ(res1, value3);
 
     ani_value args[3U];
     args[0U].i = value1;
     args[1U].c = value2;
     args[2U].c = value3;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "calculateSum", "ICD:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "calculateSum", "icd:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res1), ANI_OK);
     ASSERT_EQ(res1, value1);
-    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":C", &res2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Char(obj, "getCharValue", ":c", &res2), ANI_OK);
     ASSERT_EQ(res2, value2);
-    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":D", &res3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Double(obj, "getDoubleValue", ":d", &res3), ANI_OK);
     ASSERT_EQ(res1, value3);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ani_int arg = 15;
@@ -424,42 +424,42 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_009)
     ani_int res = 0;
     const ani_int value1 = 5;
     const ani_int value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value2), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value2);
 
     const ani_int value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value3), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value3), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value3);
 
     const ani_int value4 = 3;
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "II:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "voidMethod", "ii:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value4);
 
     const ani_int value5 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value5), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value5), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value5);
 
     const ani_int value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "II:V", value1, value6), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "voidMethod", "ii:", value1, value6), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, value1 + value6);
 }
 
 TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_void_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_void_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 10;
@@ -467,14 +467,14 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_010)
 
     ani_int res = 0;
     const ani_int value = 10;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "jf", "I:V", value), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(obj, "jf", "i:", value), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value);
 
     ani_value args[1U];
     args[0U].i = value;
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "jf", "I:V", args), ANI_OK);
-    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":I", &res), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(obj, "jf", "i:", args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Int(obj, "getIntValue", ":i", &res), ANI_OK);
     ASSERT_EQ(res, arg + value);
 }
 
@@ -487,16 +487,16 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_011)
     args[0U].l = VAL1;
     args[1U].l = VAL2;
 
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(nullptr, object, "voidMethod", "JJ:V", VAL1, VAL2),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(nullptr, object, "voidMethod", "ll:", VAL1, VAL2),
               ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void_A(nullptr, object, "voidMethod", "JJ:V", args),
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void_A(nullptr, object, "voidMethod", "ll:", args),
               ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(nullptr, "voidMethod", "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(nullptr, "voidMethod", "JJ:V", args), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(nullptr, "voidMethod", "ll:", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(nullptr, "voidMethod", "ll:", args), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, nullptr, "JJ:V", VAL1, VAL2), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, nullptr, "JJ:V", args), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void(object, nullptr, "ll:", VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, nullptr, "ll:", args), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "voidMethod", nullptr, VAL1, VAL2), ANI_OK);
     ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, "voidMethod", nullptr, args), ANI_OK);
@@ -514,8 +514,8 @@ TEST_F(CallObjectMethodByNameVoidTest, object_call_method_by_name_void_012)
     const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
 
     for (const auto &methodName : invalidMethodNames) {
-        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "JJ:V", VAL1, VAL2), ANI_NOT_FOUND);
-        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "JJ:V", args), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void(object, methodName.data(), "ll:", VAL1, VAL2), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Void_A(object, methodName.data(), "ll:", args), ANI_NOT_FOUND);
     }
 }
 

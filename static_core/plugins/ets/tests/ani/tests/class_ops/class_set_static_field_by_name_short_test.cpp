@@ -38,7 +38,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_capi)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Short(env_, cls, "short_value", setTarget), ANI_OK);
     ani_short resultValue = 1U;
@@ -50,7 +50,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_value", setTarget), ANI_OK);
     ani_short resultValue = 1U;
@@ -62,7 +62,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "string_value", setTarget), ANI_INVALID_TYPE);
 }
@@ -71,7 +71,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(nullptr, "short_value", setTarget), ANI_INVALID_ARGS);
 }
@@ -80,7 +80,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, nullptr, setTarget), ANI_INVALID_ARGS);
 }
@@ -88,7 +88,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, set_static_field_by_name_long_invalid
 TEST_F(ClassSetStaticFieldByNameShortTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
     ani_short single = 1U;
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_value", static_cast<ani_short>(0)), ANI_OK);
     ASSERT_EQ(env_->Class_GetStaticFieldByName_Short(cls, "short_value", &single), ANI_OK);
@@ -116,7 +116,7 @@ TEST_F(ClassSetStaticFieldByNameShortTest, combination_test1)
     const ani_short setTarget = 2U;
     const ani_short setTarget2 = 3U;
     ani_short single = 1U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
     const int32_t loopCount = 3;
     for (int32_t i = 0; i < loopCount; i++) {
         ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "short_value", setTarget2), ANI_OK);
@@ -130,19 +130,19 @@ TEST_F(ClassSetStaticFieldByNameShortTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameShortTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_short_test/ShortStaticA;", "short_value");
+    CheckFieldValue("class_set_static_field_by_name_short_test.ShortStaticA", "short_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameShortTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_short_test/ShortStaticFinal;", "short_value");
+    CheckFieldValue("class_set_static_field_by_name_short_test.ShortStaticFinal", "short_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameShortTest, invalid_argument1)
 {
     ani_class cls {};
     const ani_short setTarget = 2U;
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_short_test/ShortStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_short_test.ShortStatic", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Short(cls, "\n", setTarget), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Short(nullptr, cls, "short_value", setTarget), ANI_INVALID_ARGS);

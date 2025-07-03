@@ -33,7 +33,7 @@ public:
 TEST_F(ArrayNewRefTest, NewRefErrorTests)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_array_ref array = nullptr;
@@ -52,7 +52,7 @@ TEST_F(ArrayNewRefTest, NewRefErrorTests)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     // Test zero length
@@ -114,7 +114,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest2)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_array_ref array1 = nullptr;
@@ -143,7 +143,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest2)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref undefinedRef = nullptr;
@@ -158,7 +158,7 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest3)
 TEST_F(ArrayNewRefTest, NewObjectArrayTest4)
 {
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_string str = nullptr;

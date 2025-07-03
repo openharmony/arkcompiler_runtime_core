@@ -89,7 +89,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -118,7 +118,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

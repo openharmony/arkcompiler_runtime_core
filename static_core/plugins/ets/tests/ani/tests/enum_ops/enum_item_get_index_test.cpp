@@ -27,7 +27,7 @@ TEST_F(EnumItemGetIndexTest, get_enum_item_index)
     std::string itemName;
 
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
     ani_enum_item red {};
     ASSERT_EQ(env_->Enum_GetEnumItemByName(aniEnum, "RED", &red), ANI_OK);
@@ -50,7 +50,7 @@ TEST_F(EnumItemGetIndexTest, get_enum_item_index)
 TEST_F(EnumItemGetIndexTest, invalid_arg_enum)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -65,7 +65,7 @@ TEST_F(EnumItemGetIndexTest, invalid_arg_enum)
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_1)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red2 {};
@@ -88,7 +88,7 @@ TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_1)
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_2)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -113,7 +113,7 @@ TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_2)
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_3)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};
@@ -129,7 +129,7 @@ TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_3)
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_one_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/OneItem;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.OneItem", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item oneItem {};
@@ -139,7 +139,7 @@ TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_one_item)
 TEST_F(EnumItemGetIndexTest, enum_get_index_test_one_item)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/OneItem;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.OneItem", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item one {};
@@ -153,7 +153,7 @@ TEST_F(EnumItemGetIndexTest, enum_get_index_test_one_item)
 TEST_F(EnumItemGetIndexTest, enum_get_item_by_index_combine_scenes_001)
 {
     ani_enum aniEnum {};
-    ASSERT_EQ(env_->FindEnum("Lenum_item_get_index_test/Color;", &aniEnum), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("enum_item_get_index_test.Color", &aniEnum), ANI_OK);
     ASSERT_NE(aniEnum, nullptr);
 
     ani_enum_item red {};

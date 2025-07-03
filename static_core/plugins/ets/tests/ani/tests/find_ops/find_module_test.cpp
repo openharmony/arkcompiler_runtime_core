@@ -23,11 +23,11 @@ class FindModuleTest : public AniTest {};
 TEST_F(FindModuleTest, find_module_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@abcModule/find_module_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@abcModule.find_module_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "sum", "II:I", &fn), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "sum", "ii:i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);
 
     ani_value args[2U];
@@ -46,8 +46,8 @@ TEST_F(FindModuleTest, invalid_argument_env)
     ASSERT_EQ(env_->FindModule(nullptr, &module), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->FindModule("", &module), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindModule("\t", &module), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->FindModule("L@abcModule/find_module_test;", nullptr), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->c_api->FindModule(nullptr, "L@abcModule/find_module_test;", &module), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FindModule("@abcModule.find_module_test", nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FindModule(nullptr, "@abcModule.find_module_test", &module), ANI_INVALID_ARGS);
 }
 
 TEST_F(FindModuleTest, check_initialization)

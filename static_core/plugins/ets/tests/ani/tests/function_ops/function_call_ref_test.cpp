@@ -27,15 +27,15 @@ public:
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
         ani_module module {};
-        ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
         ASSERT_NE(module, nullptr);
 
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Namespace_FindFunction(ns, "concat", "II:Lstd/core/String;", &fn), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindFunction(ns, "concat", "ii:C{std.core.String}", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *nsResult = ns;
@@ -164,14 +164,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_v_invalid_result)
 TEST_F(FunctionCallRefTest, function_call_ref_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "II:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -191,17 +191,17 @@ TEST_F(FunctionCallRefTest, function_call_ref_001)
 TEST_F(FunctionCallRefTest, function_call_ref_002)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA/B;", &nB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nB, "refFunctionB", "II:Lstd/core/String;", &fB), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nB, "refFunctionB", "ii:C{std.core.String}", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_ref value {};
@@ -221,14 +221,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_002)
 TEST_F(FunctionCallRefTest, function_call_ref_003)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "III:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "iii:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -249,11 +249,11 @@ TEST_F(FunctionCallRefTest, function_call_ref_003)
 TEST_F(FunctionCallRefTest, function_call_ref_004)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "II:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "ii:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -273,13 +273,13 @@ TEST_F(FunctionCallRefTest, function_call_ref_004)
 TEST_F(FunctionCallRefTest, function_call_ref_005)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_ref value {};
     std::string result {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "III:Lstd/core/String;", &fB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "iii:C{std.core.String}", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_value argsB[3U];
@@ -297,14 +297,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_005)
 TEST_F(FunctionCallRefTest, function_call_ref_006)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "II:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ii:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -324,14 +324,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_006)
 TEST_F(FunctionCallRefTest, function_call_ref_007)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "I:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -351,14 +351,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_007)
 TEST_F(FunctionCallRefTest, function_call_ref_008)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "IIDI:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "iidi:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};
@@ -388,14 +388,14 @@ TEST_F(FunctionCallRefTest, function_call_ref_008)
 TEST_F(FunctionCallRefTest, function_call_ref_009)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_ref_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_ref_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "II:Lstd/core/String;", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "refFunctionA", "ii:C{std.core.String}", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_ref value {};

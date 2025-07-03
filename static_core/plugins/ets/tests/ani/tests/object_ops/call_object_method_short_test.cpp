@@ -32,7 +32,7 @@ TEST_F(CallObjectMethodShortTest, object_call_method_short_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_value args[2U];
     ani_short arg1 = VAL;
@@ -49,7 +49,7 @@ TEST_F(CallObjectMethodShortTest, object_call_method_short_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ani_short arg1 = VAL;
@@ -62,7 +62,7 @@ TEST_F(CallObjectMethodShortTest, object_call_method_short)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ani_short arg1 = 4U;
@@ -75,7 +75,7 @@ TEST_F(CallObjectMethodShortTest, call_method_short_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ani_short arg1 = VAL2;
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodShortTest, call_method_short_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ani_short arg1 = VAL2;
@@ -99,7 +99,7 @@ TEST_F(CallObjectMethodShortTest, call_method_short_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short arg1 = VAL2;
     ani_short arg2 = VAL3;
@@ -110,7 +110,7 @@ TEST_F(CallObjectMethodShortTest, call_method_short_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ani_short arg1 = VAL2;
@@ -122,7 +122,7 @@ TEST_F(CallObjectMethodShortTest, call_method_short_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short sum = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Short_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
@@ -132,7 +132,7 @@ TEST_F(CallObjectMethodShortTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethodVoidParam", ":S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethodVoidParam", ":s", &object, &method);
 
     ani_short result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Short(object, method, &result), ANI_OK);
@@ -147,7 +147,7 @@ TEST_F(CallObjectMethodShortTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethodMultipleParam", "IZFSS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethodMultipleParam", "izfss:s", &object, &method);
 
     ani_value args[5U] = {};
     ani_int arg1 = VAL;
@@ -173,7 +173,7 @@ TEST_F(CallObjectMethodShortTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/B;", "shortMethodVoidParam", ":S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.B", "shortMethodVoidParam", ":s", &object, &method);
 
     ani_short result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Short(object, method, &result), ANI_OK);
@@ -187,7 +187,7 @@ TEST_F(CallObjectMethodShortTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodShortTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_short_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_short_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -195,10 +195,10 @@ TEST_F(CallObjectMethodShortTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_short_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_short_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -221,7 +221,7 @@ TEST_F(CallObjectMethodShortTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/E;", "func", nullptr, &object, &method);
+    GetMethodAndObject("call_object_method_short_test.E", "func", nullptr, &object, &method);
 
     ani_short result = 0U;
     ani_value args[2U] = {};
@@ -240,7 +240,7 @@ TEST_F(CallObjectMethodShortTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "shortMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "shortMethod", "ss:s", &object, &method);
 
     ani_short result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -261,7 +261,7 @@ TEST_F(CallObjectMethodShortTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "nestedMethod", "SS:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "nestedMethod", "ss:s", &object, &method);
 
     ani_short result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -281,7 +281,7 @@ TEST_F(CallObjectMethodShortTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_short_test/A;", "recursionMethod", "S:S", &object, &method);
+    GetMethodAndObject("call_object_method_short_test.A", "recursionMethod", "s:s", &object, &method);
 
     ani_short result = INIT_VALUE;
     ani_value args[1U] = {};

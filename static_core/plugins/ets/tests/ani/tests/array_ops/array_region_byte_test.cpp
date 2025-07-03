@@ -103,7 +103,7 @@ TEST_F(ArraySetGetRegionByteTest, SetRegionByteTest)
 TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_byte_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_byte_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -134,7 +134,7 @@ TEST_F(ArraySetGetRegionByteTest, CheckChangeFromManagedRegionByteTest)
 TEST_F(ArraySetGetRegionByteTest, CheckChangeFromApiRegionByteTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_byte_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_byte_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;

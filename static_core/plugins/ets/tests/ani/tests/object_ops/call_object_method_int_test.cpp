@@ -32,7 +32,7 @@ TEST_F(CallObjectMethodIntTest, object_call_method_int_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_value args[2U];
     ani_int arg1 = VAL;
@@ -49,7 +49,7 @@ TEST_F(CallObjectMethodIntTest, object_call_method_int_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ani_int arg1 = VAL;
@@ -62,7 +62,7 @@ TEST_F(CallObjectMethodIntTest, object_call_method_int)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ani_int arg1 = VAL;
@@ -75,7 +75,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ani_int arg1 = VAL2;
@@ -87,7 +87,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ani_int arg1 = VAL2;
@@ -99,7 +99,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int arg1 = VAL2;
     ani_int arg2 = VAL3;
@@ -110,7 +110,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ani_int arg1 = VAL2;
@@ -122,7 +122,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int sum = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Int_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
@@ -132,7 +132,7 @@ TEST_F(CallObjectMethodIntTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethodVoidParam", ":I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethodVoidParam", ":i", &object, &method);
 
     ani_int result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Int(object, method, &result), ANI_OK);
@@ -147,7 +147,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethodVoidParam", ":I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethodVoidParam", ":i", &object, &method);
 
     ani_value args[2U];
     ani_int arg1 = 2U;
@@ -163,7 +163,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethodVoidParam", ":I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethodVoidParam", ":i", &object, &method);
 
     ani_value args[2U];
     ani_int arg1 = 2U;
@@ -179,7 +179,7 @@ TEST_F(CallObjectMethodIntTest, call_method_int_a_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethodVoidParam", ":I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethodVoidParam", ":i", &object, &method);
 
     ani_value args[2U];
     ani_int arg1 = 2U;
@@ -194,7 +194,7 @@ TEST_F(CallObjectMethodIntTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethodMultipleParam", "IZFSD:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethodMultipleParam", "izfsd:i", &object, &method);
 
     ani_value args[5U] = {};
     ani_int arg1 = VAL;
@@ -220,7 +220,7 @@ TEST_F(CallObjectMethodIntTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/B;", "intMethodVoidParam", ":I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.B", "intMethodVoidParam", ":i", &object, &method);
 
     ani_int result = INIT_VALUE;
     ASSERT_EQ(env_->Object_CallMethod_Int(object, method, &result), ANI_OK);
@@ -234,7 +234,7 @@ TEST_F(CallObjectMethodIntTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodIntTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_int_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_int_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -242,10 +242,10 @@ TEST_F(CallObjectMethodIntTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_int_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_int_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -268,7 +268,7 @@ TEST_F(CallObjectMethodIntTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/E;", "func", nullptr, &object, &method);
+    GetMethodAndObject("call_object_method_int_test.E", "func", nullptr, &object, &method);
 
     ani_int result = 0U;
     ani_value args[2U] = {};
@@ -287,7 +287,7 @@ TEST_F(CallObjectMethodIntTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "intMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "intMethod", "ii:i", &object, &method);
 
     ani_int result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -308,7 +308,7 @@ TEST_F(CallObjectMethodIntTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "nestedMethod", "II:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "nestedMethod", "ii:i", &object, &method);
 
     ani_int result = INIT_VALUE;
     ani_value args[2U] = {};
@@ -328,7 +328,7 @@ TEST_F(CallObjectMethodIntTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_int_test/A;", "recursionMethod", "I:I", &object, &method);
+    GetMethodAndObject("call_object_method_int_test.A", "recursionMethod", "i:i", &object, &method);
 
     ani_int result = INIT_VALUE;
     ani_value args[1U] = {};

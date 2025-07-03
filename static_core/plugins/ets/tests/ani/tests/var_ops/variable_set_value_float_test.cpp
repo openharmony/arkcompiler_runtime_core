@@ -24,7 +24,7 @@ public:
     void SetUp() override
     {
         AniTest::SetUp();
-        ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_float_test/anyns;", &ns_), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("variable_set_value_float_test.anyns", &ns_), ANI_OK);
         ASSERT_NE(ns_, nullptr);
     }
 
@@ -89,11 +89,11 @@ TEST_F(VariableSetValueFloatTest, other_type_value)
 TEST_F(VariableSetValueFloatTest, composite_case_1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns_, "LA;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(ns_, "A", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":F", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "add", ":f", &method), ANI_OK);
 
     ani_float sum = 0.0F;
     ASSERT_EQ(env_->Class_CallStaticMethod_Float(cls, method, &sum), ANI_OK);
@@ -132,7 +132,7 @@ TEST_F(VariableSetValueFloatTest, composite_case_2)
 TEST_F(VariableSetValueFloatTest, composite_case_3)
 {
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "Lsecond;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns_, "second", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_variable variable1 {};
@@ -159,7 +159,7 @@ TEST_F(VariableSetValueFloatTest, composite_case_3)
 TEST_F(VariableSetValueFloatTest, composite_case_4)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lvariable_set_value_float_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("variable_set_value_float_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable1 {};

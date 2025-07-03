@@ -43,7 +43,7 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_value args[2];  // NOLINT(modernize-avoid-c-arrays)
     ani_int arg1 = VAL1;
@@ -67,7 +67,7 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res = ANI_FALSE;
     ani_int arg1 = VAL1;
@@ -88,7 +88,7 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res = ANI_FALSE;
     ani_int arg1 = VAL1;
@@ -103,7 +103,7 @@ TEST_F(CallObjectMethodBooleanTest, object_call_method_boolean_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res = ANI_FALSE;
     ani_int arg1 = VAL1;
@@ -124,7 +124,7 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res = ANI_FALSE;
     ani_int arg1 = VAL1;
@@ -143,7 +143,7 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_int arg1 = VAL1;
     ani_int arg2 = VAL2;
@@ -162,7 +162,7 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res;
     ani_int arg1 = VAL1;
@@ -181,7 +181,7 @@ TEST_F(CallObjectMethodBooleanTest, call_method_boolean_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean res;
     // Attempt to call the method with a nullptr argument array.
@@ -192,7 +192,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethodVoidParam", ":Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethodVoidParam", ":z", &object, &method);
 
     ani_boolean result = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result), ANI_OK);
@@ -207,7 +207,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethodMultipleParam", "BFFB:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethodMultipleParam", "bffb:z", &object, &method);
 
     ani_value args[4U] = {};
     ani_byte arg1 = VAL3;
@@ -231,7 +231,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Parent_Class_Void_Param_Method_1)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/B;", "booleanMethodVoidParam", ":Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.B", "booleanMethodVoidParam", ":z", &object, &method);
 
     ani_boolean result = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Boolean(object, method, &result), ANI_OK);
@@ -245,18 +245,18 @@ TEST_F(CallObjectMethodBooleanTest, call_Parent_Class_Void_Param_Method_1)
 TEST_F(CallObjectMethodBooleanTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_boolean_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_boolean_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(clsC, "func", "II:Z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsC, "func", "ii:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_boolean_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_boolean_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -279,7 +279,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/E;", "func", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.E", "func", "ii:z", &object, &method);
 
     ani_boolean result = ANI_FALSE;
     ani_value args[2U] = {};
@@ -298,7 +298,7 @@ TEST_F(CallObjectMethodBooleanTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "booleanMethod", "II:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "booleanMethod", "ii:z", &object, &method);
 
     ani_boolean result = ANI_FALSE;
     ani_value args[2U] = {};
@@ -319,7 +319,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "nestedMethod", nullptr, &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "nestedMethod", nullptr, &object, &method);
 
     ani_boolean result = ANI_TRUE;
     ani_value args[2U] = {};
@@ -339,7 +339,7 @@ TEST_F(CallObjectMethodBooleanTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_boolean_test/A;", "recursionMethod", "I:Z", &object, &method);
+    GetMethodAndObject("call_object_method_boolean_test.A", "recursionMethod", "i:z", &object, &method);
 
     ani_boolean result = ANI_FALSE;
     ani_value args[1U] = {};
