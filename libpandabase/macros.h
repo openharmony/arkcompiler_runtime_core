@@ -20,7 +20,7 @@
 #include <iostream>
 #include "os/stacktrace.h"
 #include "utils/debug.h"
-#include "visibility.h"
+#include "panda_visibility.h"
 
 // Inline (disabled for DEBUG)
 #ifndef NDEBUG

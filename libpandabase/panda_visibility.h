@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_VISIBILITY_H
-#define LIBPANDABASE_VISIBILITY_H
+#ifndef LIBPANDABASE_PANDA_VISIBILITY_H
+#define LIBPANDABASE_PANDA_VISIBILITY_H
 
 #ifndef PANDA_TARGET_WINDOWS
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -23,4 +23,4 @@
 #define PANDA_PUBLIC_API __declspec(dllexport)
 #endif
 
-#endif // LIBPANDABASE_VISIBILITY_H
+#endif // LIBPANDABASE_PANDA_VISIBILITY_H
