@@ -945,7 +945,7 @@ void InspectorServer::OnCallProfilerDisable()
     server_.OnCall("Profiler.disable", [](auto &, auto &) { return std::unique_ptr<JsonSerializable>(); });
 }
 
-void InspectorServer::OnCallProfilerSetSamplingInterval(std::function<void(int32_t)> &&handler)
+void InspectorServer::OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler)
 {
     // clang-format off
     server_.OnCall("Profiler.setSamplingInterval",

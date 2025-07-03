@@ -102,8 +102,9 @@ public:
 
     ~FileStreamWriter() override
     {
-        writeStreamPtr_->flush();
-        writeStreamPtr_->close();
+        if (writeStreamPtr_ && writeStreamPtr_->is_open()) {
+            writeStreamPtr_->flush();
+        }
     };
 
     PANDA_PUBLIC_API void WriteModule(const FileInfo &moduleInfo) override;
