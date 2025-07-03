@@ -30,7 +30,7 @@ void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]
     std::function<void(uintptr_t)> visitorWrap = [&visitor](uintptr_t address) {
         visitor(reinterpret_cast<panda::RefField<> &>(address));
     };
-    napi_mark_from_object(env_, ref, visitorWrap);
+    napi_mark_from_object_for_cmc(env_, ref, visitorWrap);
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 }
 #endif
