@@ -1,9 +1,6 @@
 #25109
 03.types/20.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 
-#25167
-03.types/20.union_types/02.access_to_common_union_members/cm_meth2_10.ets
-
 #24975
 03.types/20.union_types/02.access_to_common_union_members/cm_meth2_4.ets
 03.types/20.union_types/02.access_to_common_union_members/cm_meth3_8.ets
@@ -32,6 +29,9 @@
 
 #25600
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_4.ets
+
+#27290
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
 #26038
 10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets

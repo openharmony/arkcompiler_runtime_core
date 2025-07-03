@@ -129,6 +129,9 @@ spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.ets
 #16535
 spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.ets
 
+#24958
+spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets
+
 #23719 lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
 
@@ -183,13 +186,11 @@ spec/10.Interfaces/Interface_Methods_Declarations/method_overload1.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload2.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload3.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload4.ets
-spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.ets
 spec/10.Interfaces/method_overload1.ets
 spec/10.Interfaces/method_overload2.ets
 spec/10.Interfaces/method_overload3.ets
 spec/10.Interfaces/method_overload4.ets
-spec/10.Interfaces/method_overload6.ets
 spec/10.Interfaces/method_overload7.ets
 
 #19954 enum issue
@@ -206,7 +207,6 @@ spec/11.Enumerations/enum_const_expr_02_01.ets
 spec/11.Enumerations/enum_const_expr_02_02.ets
 spec/11.Enumerations/enum_const_expr_02_03.ets
 regression/14654_0.ets
-
 
 ### cannot create runtime (compound tests not supported) (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
@@ -318,6 +318,9 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
+
+#25851
+std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 #25264
 std/core/ConsoleArrayTest.ets
@@ -448,6 +451,7 @@ std/core/std_core_typeduarrays_methods__Uint16Array.ets
 std/core/std_core_typeduarrays_methods__Uint32Array.ets
 std/core/std_core_typeduarrays_methods__Uint8Array.ets
 std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
+std/core/tolocalestr/NumberLocaleStringTest.ets
 
 # 5.
 # TypeError: Unresolved reference compareWrapperObjectValue
@@ -512,7 +516,6 @@ std/core/std_core_typeduarrays_methods__Uint16Array.ets
 std/core/std_core_typeduarrays_methods__Uint32Array.ets
 std/core/std_core_typeduarrays_methods__Uint8Array.ets
 std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
-std/core/tolocalestr/NumberLocaleStringTest.ets
 escompat/JsonReplacerTest.ets
 escompat/JsonStringifyRegExpExecArrayTest.ets
 std/core/ConsoleDirTest.ets

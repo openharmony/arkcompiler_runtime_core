@@ -22,6 +22,9 @@ ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
 ets-common-tests/intrinsics/uint32array_sort.ets
 
+# 26975
+ets-common-tests/intrinsics/string_compare_to.ets
+
 # 25111 fail in aot after primitive types removal
 ets-common-tests/intrinsics/typed_arrays_reverse.ets
 
