@@ -393,17 +393,17 @@ export class List<T> implements Iterable<T> {
      * Gets the element at the specified index.
      *
      * @param index - The index of the element to retrieve.
-     *
-     * @returns The element at the specified index. If the index is out of range, returns undefined.
+     * @returns { T } The element in the buffer matching the given index. 
+     * @throws { BusinessError } 10200001 - The value of index is out of range.
      */
-    public $_get(index: number): T | undefined {
+    public $_get(index: number): T {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
         }
 
         this.checkIndex(index, this.length - 1);
 
-        return this.buffer.get(index);
+        return this.buffer.get(index)!;
     }
 
     /**

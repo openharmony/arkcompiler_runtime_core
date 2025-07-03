@@ -1673,13 +1673,17 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         }
 
         /**
-         * Returns the byte at the specified index.
-         * @param {number} index – byte index to read
-         * @returns {number} the byte value at `index`
-         */
-        $_get(index: number): number | undefined {
+        * Returns the item at that index.
+        *
+        * @param { number } index - The zero-based index of the desired code unit.
+        *     Throws error if index < 0 or index >= buffer.length.
+        * @returns { number } The element in the buffer matching the given index. 
+        * @throws { BusinessError } 10200001 - The value of index is out of range.
+        */
+        $_get(index: number): number {
             if (index < 0 || index >= this.length) {
-                return undefined;
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
             return this.getDataView().getUint8(index);
         }
