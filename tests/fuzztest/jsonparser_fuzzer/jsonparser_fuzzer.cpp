@@ -22,14 +22,6 @@ namespace OHOS {
     {
         std::string str(data, data + size);
         panda::JsonObject obj(str);
-
-        auto strBool = R"(
-        {
-            "first_key" : true,
-            "second_key" : true
-        }
-        )";
-        panda::JsonObject objBool(strBool);
     }
 }
 

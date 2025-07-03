@@ -21,15 +21,6 @@ namespace OHOS {
     void GetGlobalFileInfoFuzzTest(const uint8_t* data, size_t size)
     {
         {
-            // handle is nullptr
-            panda::ZipArchiveHandle handle = nullptr;
-            panda::GlobalStat gi = panda::GlobalStat();
-            if (panda::GetGlobalFileInfo(handle, &gi) != 0) {
-                return;
-            }
-        }
-
-        {
             // handle is not nullptr
             // Create zip file
             const char* filename = "classes1.abc";

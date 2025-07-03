@@ -14,6 +14,7 @@
  */
 
 #include "errorconstructandcopy_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 #include "libpandabase/os/error.h"
 
 namespace OHOS {
@@ -22,8 +23,9 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int)) {
             return;
         }
+        FuzzedDataProvider fdp(data, size);
         // init error with int
-        int err = *(reinterpret_cast<const int*>(data));
+        int err = fdp.ConsumeIntegral<int>();
         panda::os::Error error_(err);
         panda::os::Error error_copy(error_);
     }

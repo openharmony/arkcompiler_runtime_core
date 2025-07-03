@@ -14,13 +14,16 @@
  */
 
 #include "begintracepoint_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "trace/trace.h"
 
 namespace OHOS {
     void BeginTracePointFuzzTest(const uint8_t* data, size_t size)
     {
-        panda::trace::BeginTracePoint(std::string(data, data + size).c_str());
+        FuzzedDataProvider fdp(data, size);
+        std::string traceName = fdp.ConsumeRandomLengthString();
+        panda::trace::BeginTracePoint(traceName.c_str());
         panda::trace::EndTracePoint();
     }
 }
