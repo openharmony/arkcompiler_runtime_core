@@ -599,10 +599,14 @@ Standard Annotations
 .. meta:
     frontend_status: Done
 
-*Standard annotation* is an annotation that is defined in :ref:`Standard Library`,
-or implicitly defined in the compiler (*built-in annotation*).
+*Standard annotation* is an annotation that is defined in
+:ref:`Standard Library`, or implicitly defined in the compiler
+(*built-in annotation*).
 *Standard annotation* is usually known to the compiler. It modifies the
 semantics of the declaration it is applied to.
+
+If an annotation is aimed to annotate declaration of other annotation,
+it is called *meta-annotation*.
 
 .. index::
    standard annotation
@@ -611,6 +615,7 @@ semantics of the declaration it is applied to.
    built-in annotation
    semantics
    declaration
+   meta-annotation
 
 |
 
@@ -622,8 +627,8 @@ Retention Annotation
 .. meta:
     frontend_status: Done
 
-*@Retention* is a standard annotation that is used to annotate a declaration
-of another annotation.
+``@Retention`` is a standard *meta-annotation* that is used to annotate
+a declaration of another annotation.
 A :index:`compile-time error` occurs if it is used in other places.
 
 The annotation has a single field ``policy`` of type ``string``. It is typically
@@ -692,6 +697,91 @@ As ``@Retention`` has a single field, it can be used with a short notation
    bytecode file
    string literal
    notation
+
+|
+
+.. _Target Annotation:
+
+Target Annotation
+=================
+
+.. meta:
+    frontend_status: None
+
+
+``@Target`` is a standard *meta-annotation* that is used to annotate
+a declaration of another annotation.
+A :index:`compile-time error` occurs if it is used in other places.
+
+``@Target`` specifies the set of contexts in the source code
+in which the declared annotation can be used
+via the set of values of ``AnnotationTargets`` enumeration defined
+in :ref:`Standard Library`.
+
+The annotation has a single field ``targets`` of type ``AnnotationTargets[]``.
+It is typically used as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    // short form:
+    @Target([AnnotationTargets.FUNCTION, AnnotationTargets.CLASS_METHOD])
+    @interface SpecialCall {/*some fields*/}
+
+    // long form:
+    @Target({targets: [AnnotationTargets.PARAMETER]})
+    @interface SpecialParameter {/*some fields*/}
+    
+If the annotation is present in the declaration of annotation ``X``,
+the compiler checks that ``X`` is used only in the specified contexts.
+Otherwise, a :index:`compile-time error` occurs.
+
+If the annotation is not present in the declaration of annotation ``X``, then
+there is no restriction on ``X`` usage.
+
+The ``AnnotationTargets`` enumeration contains constants
+for the following targets:
+
+-  targets for :ref:`Top-Level Declarations`:
+
+    - CLASS
+    - ENUMERATION
+    - FUNCTION
+    - FUNCTION_WITH_RECEIVER
+    - INTERFACE
+    - NAMESPACE
+    - TYPE_ALIAS
+    - VARIABLE
+    
+-  targets for :ref:`Class Members`:
+
+    - CLASS_FIELD
+    - CLASS_METHOD
+    - CLASS_GETTER
+    - CLASS_SETTER
+
+-  targets for :ref:`Interface Members`:
+
+    - INTERFACE_PROPERTY
+    - INTERFACE_METHOD
+    - INTERFACE_GETTER
+    - INTERFACE_SETTER
+    
+-  other targets:
+    
+    - LAMBDA - for :ref:`Lambda Expressions` and
+      :ref:`Lambda Expressions with Receiver`
+    - PARAMETER -  for function, method and lambda parameter
+    - STRUCT - see :ref:`Keyword struct and ArkUI`
+    
+A :index:`compile-time error` occurs if an enumeration constant is used more
+then once in an ``@Target`` annotation:
+
+.. code-block:: typescript
+   :linenos:
+
+    @Target([AnnotationTargets.CLASS, AnnotationTargets.INTERFACE, AnnotationTargets.CLASS])
+    @interface Anno {}
 
 |
 

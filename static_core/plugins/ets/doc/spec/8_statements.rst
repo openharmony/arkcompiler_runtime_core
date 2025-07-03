@@ -167,6 +167,13 @@ The syntax of *local declaration* is presented below:
 The visibility of a local declaration name is determined by the surrounding
 function or method, and by the block scope rules (see :ref:`Scopes`).
 
+For some statements, scope rules details explained
+in corresponding sections in order to avoid ambiguous interpretation:
+
+- :ref:`if Statements`
+- :ref:`For Statements`
+- :ref:`For-Of Statements`
+
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
@@ -190,7 +197,6 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. meta:
     frontend_status: Done
-    todo: ambiguous wording in the spec: "Any 'else' corresponds to the first 'if' of an if statement" - what first means?
 
 An ``if`` statement allows executing alternative statements (if provided) under
 certain conditions.
@@ -224,7 +230,8 @@ Type of expression must be ``boolean``, or a type mentioned in
 If an expression is successfully evaluated as ``true``, then *thenStatement* is
 executed. Otherwise, *elseStatement* is executed (if provided).
 
-Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
+Any ``else`` corresponds to the nearest preceding ``if`` of an ``if``
+statement:
 
 .. code-block:: typescript
    :linenos:
@@ -243,6 +250,30 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
       if (Cond2) statement1
     }
     else statement2 // Executes if: !Cond1
+
+Without braces, ``if`` statement does not form a distinct scope. When
+braces are used ``if``-part and ``else``-part form distinct block scopes
+(see *block scope* in :ref:`Scopes`). Next example illustrates that:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(Cond1: boolean) {
+      if (Cond1) let x: number = 1
+      x = 2 // OK
+
+      if (Cond1) {
+        let x: number = 10;   // OK, if-block scope
+        let y: number = x;
+      }
+      else {
+        let x: number = 20   // OK, no conflict, else-block scope
+        y = x;           // CTE, no y in scope
+      }
+
+      console.log(x)  // OK, prints 2
+      console.log(y)  // CTE, y unknown
+    }
 
 .. index::
    if statement
@@ -398,6 +429,21 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 
 |
 
+The variable declared in *forInit* part has the loop scope - can be used
+in the *forContinue* and *forUpdate* expressions and also in the single
+body statement or (when braces used) in body block:
+
+.. code-block:: typescript
+   :linenos:
+
+    // forInit declaration and no body block
+    let k: number = 0
+    for (let i: number = 1; i < 10; i++)
+      k += i
+    console.log(k)
+    // i =  k  // CTE when uncommented
+    let i: number = k  // OK
+
 .. _For-Of Statements:
 
 ``for-of`` Statements
@@ -466,6 +512,7 @@ element must be assignable (see :ref:`Assignability`) to the type of the
 variable. Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
+   compile-time error
    modifier
    modifier let
    let
@@ -513,10 +560,12 @@ feature (see :ref:`For-of Explicit Type Annotation`).
     todo: break with label causes compile time assertion
 
 A ``break`` statement transfers control out of the enclosing *loopStatement*
-or *switchStatement*.
+or *switchStatement*. When used out of *loopStatement*
+or *switchStatement*, causes a compile-time error
 
 .. index::
    break statement
+   compile-time error
    control transfer
    switch statement
    loop statement
@@ -538,6 +587,27 @@ A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
 ``breakStatement`` is placed outside *loopStatement* or *switchStatement*, then
 a :index:`compile-time error` occurs.
+
+Here is an example with ``break`` with and without label:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Single iteration
+    while (true) {
+      console.log("iteration")  // get printed exactly once
+      break;
+    }
+
+    let a: number = 0
+    outer:
+      do {
+        for (a = 0; a < 10; a++) {
+            if (a == 1) break outer
+            console.log("inner")    // get printed only once
+        }
+        console.log(a) // Never reached
+      } while (true)   // condition never used
 
 .. index::
    break statement
@@ -578,12 +648,42 @@ The syntax of *continue statement* is presented below:
         'continue' identifier?
         ;
 
+A ``continue`` statement without the label transfers control
+to the next iteration of the enclosing loop statement. If there is no
+enclosing loop statement (within the body of the surrounding function
+or method), then a :index:`compile-time error` occurs.
+
 A ``continue`` statement with the label *identifier* transfers control
 to the next iteration of the enclosing loop statement
 with the same label *identifier*.
 If there is no enclosing loop statement with the same label *identifier*
 (within the body of the surrounding function or method),
 then a :index:`compile-time error` occurs.
+
+Here is an example with ``continue`` with and without label:
+
+.. code-block:: typescript
+   :linenos:
+
+    // continue     // would cause CTE if uncommented
+
+    // continue without label
+    // will print 0, 1, 2, 4 (3 skipped)
+    for (let a: number = 0; a < 5; a++){
+      if (a == 3) continue
+      console.log("a = " + a)
+    }
+
+    let a: number
+    outer:
+      do {
+        for (a = 0; a < 10; a++) {
+            if (a > 1) continue outer
+            console.log("inner")    // get printed only twice
+        }
+        console.log("Outer") // Never reached
+      } while (false)
+
 
 .. index::
    continue statement
@@ -619,7 +719,7 @@ The syntax of *return statement* is presented below:
         ;
 
 A ``return`` statement with *expression* can only occur inside a function or a
-method body with non-``void`` return type.
+method or lambda body with non-``void`` return type.
 
 .. index::
    return statement
@@ -635,7 +735,7 @@ following:
 
 - Initializer block;
 - Constructor body;
-- Function or method body with the return type ``void`` (see
+- Function or method or lambda body with the return type ``void`` (see
   :ref:`Type void`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
@@ -698,7 +798,6 @@ initializer block, or top-level statement are not executed.
     frontend_status: Done
     todo: non literal constant expression () in case ==> causes an assertion error
     todo: when there is only a default clause in switchBlock then the default's statements/block are not executed
-    todo: spec issue: optional identifier before the switch - it should be clarified it can be a label for break stmt
 
 A ``switch`` statement transfers control to a statement or a block by using the
 result of successful evaluation of the value of a ``switch`` expression.
@@ -732,6 +831,10 @@ The syntax of *switch statement* is presented below:
         ;
 
 A ``switch`` expression can be of any type.
+
+An optional identifier, when present, allows the ``break`` operator
+to transfer control out of nested switch or loop statements
+(see :ref:`Break statements`).
 
 .. index::
    expression type
@@ -789,8 +892,9 @@ the value of the ``switch`` expression in terms of the operator '``==``'. The
 execution is transferred to the set of statements of the *caseClause* where the
 match occurred. If this set of statements executes a ``break`` statement, then
 the entire ``switch`` statement terminates. If no ``break`` statement is
-executed, then the execution continues through any remaining *caseClause*(s) and
-*defaultClause* until first ``break`` statement occurs.
+executed, then the execution continues through statements of any remaining
+*caseClause*(s) and *defaultClause* until first ``break`` statement occurs
+or switch statement ends.
 
 If no *match* occurs but *defaultClause* is present,
 then execution is transferred to statements in *defaultClause*.

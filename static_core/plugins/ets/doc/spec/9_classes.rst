@@ -58,15 +58,12 @@ access modifiers (see :ref:`Access Modifiers`):
 
 -  ``Public``,
 -  ``Protected``,
--  ``Internal``, or
 -  ``Private``.
-
-A newly declared method can shadow, overload, implement, or override a method
-declared in a superclass or superinterface.
 
 Every class defines two class-level scopes (see :ref:`Scopes`): one for
 instance members, and the other for static members. It means that two members
 of a class can have the same name if one is static while the other is not.
+
 
 .. index::
    class declaration
@@ -76,8 +73,6 @@ of a class can have the same name if one is static while the other is not.
    accessor
    method
    field
-   shadowing
-   overloading
    implementing
    overriding
    superclass
@@ -619,7 +614,7 @@ as shown below:
    :linenos:
 
     class StyleClassOne implements Style {
-      $$_color: string = "" // the exact name of the field is implementation specific
+      private $$_color: string = "" // the exact name of the field is implementation specific
       get color(): string  { return this.$$_color }
       set color(s: string) { this.$$_color = s }
     }
@@ -754,7 +749,7 @@ the interface:
    :linenos:
 
     class C implements I {
-      $$_num: number = 42 // the exact name of the field is implementation specific
+      private $$_num: number = 42 // the exact name of the field is implementation specific
       get num(): number | undefined { return this.$$_num }
       set num(n: number | undefined) { this.$$_num = n }
     }
@@ -894,10 +889,6 @@ Class members declared ``protected`` or ``public`` are inherited by all
 subclasses of the class and accessible (see :ref:`Accessible`) for all
 subclasses.
 
-Class members declared ``internal`` are accessible within the package the
-current class resides in. They are inherited by all subclasses of the current
-class.
-
 Constructors and static block are not members, and are not inherited.
 
 Members can be as follows:
@@ -909,7 +900,6 @@ Members can be as follows:
    public
    subclass
    access
-   internal
    constructor
    initializer block
    inheritance
@@ -956,8 +946,7 @@ Access modifiers define how a class member or a constructor can be accessed.
 Accessibility in |LANG| can be of the following kinds:
 
 -  ``Private``,
--  ``Internal``,
--  ``Protected``, or
+-  ``Protected``,
 -  ``Public``.
 
 The desired accessibility of class members and constructors can be explicitly
@@ -969,7 +958,6 @@ The syntax of *class members or constructors modifiers* is presented below:
 
     accessModifier:
         'private'
-        | 'internal'
         | 'protected'
         | 'public'
         ;
@@ -977,8 +965,6 @@ The syntax of *class members or constructors modifiers* is presented below:
 If no explicit modifier is provided, then a class member or a constructor
 is implicitly considered ``public`` by default.
 
-The modifier ``internal`` is an experimental feature
-(see :ref:`Internal Access Modifier Experimental`).
 
 .. index::
    access modifier
@@ -1139,7 +1125,7 @@ A field with an identifier marked with '``!``' is called
 
 A :index:`compile-time error` occurs if:
 
--  One and the same field modifier is used more than once in a field declaration.
+-  Some field modifier is used more than once in a field declaration.
 -  Name of a field declared in the body of a class declaration is also
    used for a method of this class with the same static or
    non-static status.
@@ -1163,7 +1149,8 @@ Any static field can be accessed only with the qualification of a superclass
 name (see :ref:`Field Access Expression`).
 
 A class can inherit more than one field or property with the same name from
-its superinterfaces, or from both its superclass and superinterfaces. However,
+its superinterfaces, or from both its superclass (see :ref:`Inheritance`)
+and superinterfaces (see :ref:`Interface Inheritance`. However,
 an attempt to refer to such a field or property by its simple name within the
 class body causes a :index:`compile-time error`.
 
@@ -1556,6 +1543,16 @@ A :index:`compile-time error` occurs if:
 -  The body of a class declaration declares a method but the name of that
    method is already used for a field in the same declaration.
 
+A non-static method declared in a class can 
+- implement a method inherited from superinterface(s) (see :ref:`Implementing Interface Methods`),
+- override a method inherited from a superclass (see :ref:`Overriding in Classes`),
+- be a new method method declaration.
+
+A static method declared in a class can 
+- shadow a static method inherited from a superclass (see :ref:`Static Methods`),
+- be a new static method method declaration.
+
+
 .. index::
    method declaration
    executable code
@@ -1590,6 +1587,28 @@ A :index:`compile-time error` occurs if:
 Static methods are always called without reference to a particular object. As
 a result, a :index:`compile-time error` occurs if the keywords ``this`` or
 ``super`` are used inside a static method.
+
+Static methods can be inherited from the superclass or shadowed by name
+regardless of the their signature:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        static foo() { console.log ("static foo() from Base") }
+        static bar() { console.log ("static foo() from Base") }
+    }
+
+    class Derived extends Base {
+        static foo(p: string) { console.log ("static foo() from Derived") }
+    }
+
+    Base.foo() // Output: static foo() from Base
+    Base.bar() // Output: static foo() from Base
+    Derived.bar()           // Output: static foo() from Base, bar() is inherited
+    Derived.foo("a string") // Output: static foo() from Derived, foo() is shadowed
+    Derived.foo()           // compile-time error as foo() in Derived has shadowed Base.foo()
+
 
 .. index::
    static method
@@ -2498,9 +2517,6 @@ Class ``C`` inherits all accessible members from its direct superclass and
 direct superinterfaces (see :ref:`Accessible`), and optionally overrides or
 hides some of the inherited members.
 
-An accessible member is a public, protected, or internal member in the
-same package as ``C``.
-
 If ``C`` is not abstract, then it must implement all inherited abstract methods.
 The method of each inherited abstract method must be defined with
 *override-compatible* signatures (see :ref:`Override-Compatible Signatures`).
@@ -2586,7 +2602,6 @@ hides the inherited field:
    semantic check
    public member
    protected member
-   internal member
    abstract method
    override-compatible signature
    constructor

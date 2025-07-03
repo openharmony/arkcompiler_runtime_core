@@ -50,6 +50,7 @@ source code in |LANG|.
    user-defined type
    type definition
    source code
+   value
 
 |LANG| types are summarized in the table below:
 
@@ -129,6 +130,8 @@ Using primary names of *predefined types* is recommended in all cases.
 .. index::
    predefined type
    primary name
+   alias
+   compatibility
 
 |
 
@@ -282,7 +285,12 @@ combination of array, function, or union types. Without parentheses, the symbol
 by the example below:
 
 .. index::
+   annotation
+   prefix readonly
+   readonly type
    array type
+   tuple type
+   identifier
    function type
    union type
    type structure
@@ -329,6 +337,12 @@ become a mandatory part of the annotation to prevent ambiguity.
     let var_name1: @my_annotation() (A|B) // OK
     let var_name2: @my_annotation (A|B)  // Compile-time error
 
+.. index::
+   nullable array
+   string
+   null
+   parenthesis
+
 |
 
 .. _Named Types:
@@ -360,6 +374,17 @@ substituted for the type parameters of a named type.
 
 .. index::
    named type
+   class
+   interface
+   enumeration
+   alias
+   type parameter
+   prefedined type
+   function
+   array
+   union type
+   built-in array
+   anonymous type
    class declaration
    interface declaration
    enumeration declaration
@@ -370,7 +395,6 @@ substituted for the type parameters of a named type.
    non-generic type
    type argument
    type parameter
-   named type
 
 |
 
@@ -453,6 +477,12 @@ potentially recursive.
    type reference
    type alias
    non-aliased type
+   type
+   recursive replacement
+   replacement
+   compatibility
+   Object
+   operator validity test
 
 |
 
@@ -482,7 +512,8 @@ values.
    enumeration
    user-defined type
    enumeration type
-   value type
+   value
+   state
 
 |
 
@@ -494,8 +525,9 @@ Numeric Types
 .. meta:
     frontend_status: Done
 
-*Numeric types* are integer (see :ref:`Integer Types and Operations`) and
-floating-point (see :ref:`Floating-Point Types and Operations`) types.
+*Numeric types* are integer and floating-point types (see
+:ref:`Integer Types and Operations` and
+:ref:`Floating-Point Types and Operations`).
 
 Larger type values include all values of smaller types:
 
@@ -514,8 +546,10 @@ context (see :ref:`Assignment-like Contexts`). The methods of class ``BigInt``
    integer type
    floating-point type
    assignability
+   assignment context
    variable
    numeric type
+   value
    double
    float
    long
@@ -611,7 +645,6 @@ below.
    postfix
    prefix
    unary operator
-   unary operator
    additive operator
    multiplicative operator
    increment operator
@@ -628,28 +661,33 @@ below.
    numeric type
    string concatenation operator
    operand
+   string
 
-If one operand is not of type ``long``, then the numeric conversion (see
-:ref:`Widening Numeric Conversions`) must be used to widen it first to type
-``long``.
+If either operand of a binary integer operation except :ref:`Shift Expressions`
+is of type ``long`` and the other operand is of a lesser type, then numeric
+conversion (see :ref:Widening Numeric Conversions) must be used first to widen
+the second operand to type ``long``. In this case:
 
-If neither operand is of type ``long``, then:
+-  Operation implementation uses 64-bit precision; and
+-  Result of the numerical operator is of type ``long``.
 
--  The operation implementation uses 32-bit precision.
--  The result of the numerical operator is of type ``int``.
 
-If one operand (or neither operand) is of type ``int``, then the numeric
-conversion must be used to widen it first to type ``int``.
+If otherwise neither operand is of type ``long`` and any operand if of a type
+other than``int``, then numeric conversion must be used to widen the latter
+to type ``int``. In this case:
+
+-  Operation implementation uses 32-bit precision; and
+-  Result of the numerical operator is of type ``int``.
+
 
 Conversions between integer types and type ``boolean`` are not allowed.
 
 The integer operators cannot indicate an overflow or an underflow.
 
-An integer operator can throw errors (see :ref:`Error Handling`) as follows:
-
--  An integer division operator '``/``' (see :ref:`Division`), and an
-   integer remainder operator '``%``' (see :ref:`Remainder`) throw
-   ``ArithmeticError`` if their right-hand-side operand is zero.
+An integer operator can throw ``ArithmeticError`` if the right-hand-side operand
+of an integer division operator '``/``' (see :ref:`Division`) and an integer
+remainder operator '``%``' (see :ref:`Remainder`) is zero. The situation is
+discussed in :ref:`Error Handling`.
 
 .. index::
    constructor
@@ -674,9 +712,18 @@ An integer operator can throw errors (see :ref:`Error Handling`) as follows:
    increment operator
    decrement operator
    additive expression
+   error
+   integer operator
+   
 
 Predefined constructors, methods, and constants for *integer types*
 are parts of the |LANG| :ref:`Standard Library`.
+
+.. index::
+   predefined constructor
+   predefined method
+   predefined constant
+   integer type
 
 |
 
@@ -701,6 +748,8 @@ Floating-Point Types and Operations
 .. index::
    IEEE 754
    floating-point number
+   floating-point type
+
 
 |LANG| provides a number of operators to act on floating-point type values as
 discussed below.
@@ -744,6 +793,7 @@ discussed below.
    floating-point type
    floating-point number
    operator
+   value
    numerical relational operator
    numerical equality operator
    comparison operator
@@ -755,12 +805,14 @@ discussed below.
    unary plus operator
    unary minus operator
    multiplicative operator
+   multiplicative expression
    additive operator
    prefix
    postfix
    increment operator
    decrement operator
    signed shift operator
+   shift expression
    unsigned shift operator
    cast operator
    bitwise complement operator
@@ -771,6 +823,8 @@ discussed below.
    numeric type
    string
    decimal form
+   loss of information
+   concatenation
 
 An operation is called a *floating-point operation* if at least one of the
 operands in a binary operator is of a floating-point type (even if the
@@ -781,15 +835,15 @@ then the operation implementation uses the 64-bit floating-point arithmetic.
 The result of the numerical operator is a value of type ``double``.
 
 If the other operand is not of type ``double``, then the numeric conversion (see
-:ref:`Widening Numeric Conversions`) must be used to widen it first to type
-``double``.
+:ref:`Widening Numeric Conversions`) must be used to widen the operand first to
+type ``double``.
 
 If neither operand is of type ``double``, then the operation implementation
 is to use the 32-bit floating-point arithmetic. The result of the numerical
 operator is a value of type ``float``.
 
 If the other operand is not of type ``float``, then the numeric conversion
-must be used to widen it first to type ``float``.
+must be used to widen the operator first to type ``float``.
 
 Any floating-point type value can be cast to or from any numeric type (see
 :ref:`Numeric Types`).
@@ -798,10 +852,12 @@ Any floating-point type value can be cast to or from any numeric type (see
    constructor
    method
    constant
+   integer
    standard library
    operation
    floating-point operation
    predefined numeric types conversion
+   string concatenation
    numeric type
    operand
    implementation
@@ -842,9 +898,11 @@ significant bit zero out of any two equally near representable values.
    numeric promotion
    remainder operator
    gradual underflow
+   underflow
    flush to zero
    round to nearest
    rounding mode
+   denormalizaton
    denormalized number
    nearest value
    IEEE 754
@@ -865,6 +923,9 @@ produces ``NaN``.
 
 All numeric operations with a ``NaN`` operand result in ``NaN``.
 
+Predefined constructors, methods, and constants for *floating-point types*
+are parts of the |LANG| :ref:`Standard Library`.
+
 .. index::
    round toward zero
    conversion
@@ -873,6 +934,7 @@ All numeric operations with a ``NaN`` operand result in ``NaN``.
    truncation
    truncated number
    rounding toward zero
+   mantissa bit
    denormalized value
    NaN
    numeric operation
@@ -887,10 +949,11 @@ All numeric operations with a ``NaN`` operand result in ``NaN``.
    floating-point operation
    floating-point operator
    floating-point value
+   floating-point type
    throw
-
-Predefined constructors, methods, and constants for *floating-point types*
-are parts of the |LANG| :ref:`Standard Library`.
+   predefined constructor
+   predefined method
+   predefined constant
 
 |
 
@@ -927,11 +990,14 @@ The boolean operators are as follows:
    conditional-and operator
    conditional-or operator
    conditional operator
+   conditional expression
    string concatenation operator
    floating-point expression
    comparison
    conversion
    nonzero value
+   concatenation
+   string
 
 |
 
@@ -974,7 +1040,7 @@ Reference Types
    literal type
    never type
    null type
-   type undefined
+   undefined type
    void type
    type parameter
 
@@ -988,10 +1054,9 @@ Type ``Any``
 .. meta:
     frontend_status: Partly
 
-Type ``Any`` is a predefined type which is the supertype of all types except
-:ref:`Type void` (see :ref:`Subtyping`). Type ``Any`` is a predefined
-*nullish-type* (see :ref:`Nullish Types`), i.e., a supertype of
-:ref:`Type undefined` and :ref:`Type null` in particular.
+Type ``Any`` is a predefined type which is the supertype of all types. Type
+``Any`` is a predefined *nullish-type* (see :ref:`Nullish Types`), i.e., a
+supertype of :ref:`Type void` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
@@ -1028,7 +1093,11 @@ string representation of the object.
    method
    interface
    array
+   type parameter
+   union type
    inheritance
+   string
+   oblect
 
 The term *object* is used in the Specification to refer to an instance of any
 type.
@@ -1114,16 +1183,19 @@ Type ``void``
 .. meta:
     frontend_status: Done
 
-Type ``void`` has no instances. It is used as a return type to highlight that a
-function, a method, or a lambda returns no value:
+Type ``void`` is used as a return type to highlight that a function, a method,
+or a lambda may contain no return statement or a return statement(s) (see
+:ref:`Return Statements`) with no expression:
 
 .. code-block:: typescript
    :linenos:
 
-    function foo (): void {}
+    function foo (): void {} // no return at all
 
     class C {
-        bar(): void {}
+        bar(): void {
+            return // with no expression
+        }
     }
 
     type FunctionWithNoParametersType = () => void
@@ -1133,7 +1205,11 @@ function, a method, or a lambda returns no value:
 A :index:`compile-time error` occurs if:
 
 -  Type ``void`` is used as type annotation;
--  Expression of type ``void`` is used as a value.
+-  Expression of type ``void`` is used as a value
+
+Type ``void`` has no instances itself. At the same time it is a supertype of type
+``undefined`` (see :ref:`Type undefined`) and that affects assignability (see
+:ref:`Assignability`).
 
 .. code-block-meta:
    expect-cte:
@@ -1141,25 +1217,35 @@ A :index:`compile-time error` occurs if:
 .. code-block:: typescript
    :linenos:
 
-    let x: void // compile-time error - void used as type annotation
+    let x: void = undefined // compile-time error - void used as type annotation
 
     function foo (): void {}
-    let y = foo()  // compile-time error - void used as a value
+    console.log (foo())     // compile-time error - void used as a value
 
-    type ErroneousType = void | number
-         // compile-time error - void used as type annotation
+    function bar1 (): void {
+       return void         // compile-time error - void used as a value
+    }
+
+    function bar2 (): void {
+       return undefined    // OK as undefined is a subtype of void
+    }
+
+    type aType = void | number // compile-time error - void used as type annotation
 
 .. index::
-   type void
+   void type
+   undefined type
+   lambda
    instance
+   supertype
    value
    return type
    function
    method
    type annotation
 
-Type ``void`` can be used as type argument that instantiates a generic
-type with type ``undefined`` (see :ref:`Type undefined`) as follows:
+Type ``void`` can be used as a type argument that instantiates a generic type,
+function or method as follows:
 
 .. code-block-meta:
    expect-cte:
@@ -1172,39 +1258,37 @@ type with type ``undefined`` (see :ref:`Type undefined`) as follows:
       m(): T { return this.f }
       constructor (f: T) { this.f = f }
    }
-   let a1 = new A<void>(undefined)      // ok, type parameter is irrelevant
-   let a2 = new A<undefined>(undefined) // ok, the same
+   let a1 = new A<void>(undefined)      // ok, as undefined is a subtype of void
+   let a2 = new A<undefined>(undefined) // ok
    let a3 = new A<void>(void)           // compile-time error: void is used as value
 
    console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
    function foo<T>(p: T): T { return p }
-   console.log (foo<void>(undefined)) // ok, output is "undefined"
-   foo<void>(void)                    // compile-time error: void is used as value
-
-If type argument of a generic function type is ``void``, then a return type
-equal to the generic parameter is simply removed or replaced for ``: void``.
-If used as a type argument, a type parameter is replaced for ``undefined``.
-
-.. code-block:: typescript
-   :linenos:
+   foo<void>(undefined) // ok, it returns 'undefined' value
+   foo<void>(void)      // compile-time error: void is used as value
 
    type F1<T> = () => T
    const f1: F1<void> = (): void => {}
    const f2: F1<void> = () => {}
-
-   type F2<T> = () => T[]
-   type F3<T> = () => Array<T>
-   const f3: F2<void> = (): Array<void> => { return [undefined] }
-   const f4: F3<void> = (): Array<undefined> => { return [undefined] }
+   const f3: F1<void> = (): undefined => { return undefined }
+   
+   // Array literals can be assigned to the array of void type in any form
+   type A1<T> = T[]
+   type A2<T> = Array<T>
+   const a1: A1<void> = [undefined]
+   const a2: A2<void> = [undefined, undefined]
+   
+   let x: void[] // compile-time error - void used as type annotation
 
 
 .. index::
-   type void
+   void type
    type argument
+   type parameter
    instantiation
    generic type
-   type undefined
+   undefined type
 
 |
 
@@ -1218,6 +1302,8 @@ Type ``undefined``
 
 The only value of type ``undefined`` is the literal ``undefined`` (see
 :ref:`Undefined Literal`).
+
+Type ``undefined`` is a subtype of type ``void`` (see :ref:`Type void`).
 
 Using type ``undefined`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
@@ -1237,11 +1323,14 @@ type as follows:
    foo<undefined>(undefined) // ok
 
 .. index::
-   type undefined
+   undefined type
    keyword undefined
    undefined literal
    literal
    type argument
+   type annotation
+   instantiation
+   generic type
    annotation
    nullish type
 
@@ -1262,7 +1351,7 @@ Using type ``null`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
 
 .. index::
-   type null
+   null type
    null literal
    keyword null
    type annotation
@@ -1293,6 +1382,22 @@ Type ``string`` has dual semantics, i.e.:
    ``string`` operations (see :ref:`String Concatenation`,
    :ref:`Equality Expressions`, and :ref:`String Relational Operators`).
 
+.. index::
+   type string
+   value
+   Unicode code unit
+   string literal
+   literal
+   character
+   sequence
+   string
+   object
+   dual semantics
+   reference type
+   expression
+   equality
+   relational operator
+
 A number of operators can act on ``string`` values as follows:
 
 -  Accessing the ``length`` property returns string length as ``int``
@@ -1320,22 +1425,18 @@ Using ``string`` in all cases is recommended, although the name ``String``
 also refers to type ``string``.
 
 .. index::
-   type string
-   Unicode code unit
+   string value
+   access
    string type
    string literal
    string object
-   relational operator
-   equality operator
    string concatenation
-   semantics
+   integer
+   runtime
+   indexing
+   character
    reference type
-   predefined type
-   extended semantics
-   literal
-   constant expression
    concatenation operator
-   alias
    value type
 
 |
@@ -1377,12 +1478,19 @@ to static methods in order to improve |TS| compatibility.
    let b2: bigint = 123n
 
 .. index::
-   type bigint
+   bigint type
+   built-in type
+   arbitrary large integer
    integer
-   type long
+   long type
    bigint literal
    value type
    type annotation
+   compatibility
+   method
+   static method
+   numeric type
+   value
 
 |
 
@@ -1415,11 +1523,19 @@ Their names are the same as the names of their values, i.e., literals proper.
         console.log (p1, p2, p3)
     }
 
+There are no operations for literal types ``null`` and ``undefined``.
+
 .. index::
    literal type
    truncation
+   operation
+   null type
+   undefined type
+   type name
+   value name
+   literal
+   string
 
-There are no operations for literal types ``null`` and ``undefined``.
 
 |
 
@@ -1444,9 +1560,11 @@ supertype:
 
 .. index::
    literal type
+   string
    variable
    supertype
    subtyping
+   operation type
 
 |
 
@@ -1485,6 +1603,8 @@ requirement.
 .. index::
    array length
    array type
+   array value
+   array instance
    resizable array type
    fixed-size array
 
@@ -1515,6 +1635,8 @@ Resizable Array Types
 
 .. index::
    resizable array type
+   built-in type
+   access
    array length
    non-negative integer number
    constant-time operation
@@ -1526,6 +1648,7 @@ Resizable Array Types
    contiguous memory location
    assignability
    array declaration
+   memory location
    access
    array
 
@@ -1548,6 +1671,8 @@ types (see :ref:`Type Identity`).
 
 .. index::
    type identity
+   element type
+   syntax
    resizable array type
    type identity
 
@@ -1585,6 +1710,14 @@ The above situations cause errors as follows:
    array length
    array element
    access
+   operator
+   syntax
+   indexable type
+   resizable array
+   compatibility
+   floating-point type
+   value
+   runtime
    property length
    standard library
 
@@ -1623,7 +1756,10 @@ An array as an object is assignable to a variable of type ``Object``:
 
 .. index::
    alias
+   array operation
    array element
+   access
+   type alias
    two-dimensional array
    assignability
    array type
@@ -1674,6 +1810,10 @@ Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`
    prefix readonly
    readonly array type
    array length
+   assignment
+   function call
+   method call
+   syntax
    array
    initial value
    multidimensional array
@@ -1732,6 +1872,8 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
 
 .. index::
    tuple type
+   syntax
+   reference type
    assignability
    operator
    object
@@ -1744,6 +1886,7 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
    constant expression
    square bracket
    compatibility
+   access
 
 |
 
@@ -1769,8 +1912,11 @@ call. Otherwise, a :index:`compile-time error` occurs as follows:
     x[0] = 42 // compile-time error as tuple itself is readonly
 
 .. index::
-   prefix readonly
+   prefix
+   readonly
    tuple
+   assignment
+   tuple type
    initial value
    function call
    method call
@@ -1793,15 +1939,12 @@ A function type consists of the following:
 -  Optional return type.
 
 .. index::
-   array element
-   type alias
-   array type
-   type Object
    function
    function type
+   function signature
    signature
    return type
-   parameter
+   parameter list
 
 The syntax of *function type* is as follows:
 
@@ -1844,6 +1987,7 @@ A type alias can set a name for a *function type* (see
    rest parameter
    type alias
    function type
+   syntax
 
 .. code-block:: typescript
    :linenos:
@@ -1895,12 +2039,13 @@ More details on function types assignability are provided in
    function type
    parameter name
    parameter type
-   type undefined
+   undefined type
    assignability
    context
    conversion
    mandatory parameter
    optional parameter
+   subtyping
 
 |
 
@@ -1944,6 +2089,19 @@ in the following way:
 
 -  Otherwise, the string is empty.
 
+.. index::
+   function type
+   predefined type
+   direct superinterface
+   value
+   method
+   argument
+   runtime error
+   assignment
+   function object
+   lambda
+   string
+
 .. code-block:: typescript
    :linenos:
 
@@ -1972,6 +2130,11 @@ in the following way:
 The definitions of the ``unsafeCall`` method, ``name`` property, and all other
 methods and properties of type ``Function`` are included in the |LANG|
 :ref:`Standard Library`.
+
+.. index::
+   property
+   method
+   Function type
 
 |
 
@@ -2005,11 +2168,10 @@ union type declaration leads to a circular reference.
 .. index::
    union type
    reference type
-   union type
    type declaration
    circular reference
    union
-   literal type
+   declaration
    circular reference
 
 Typical usage examples of *union* types are represented below:
@@ -2036,7 +2198,7 @@ Typical usage examples of *union* types are represented below:
       // ...
    }
    type Animal = Cat | Dog | Frog | number
-   // Cat, Dog, and Frog are some types (class or interface ones)
+   // Cat, Dog, and Frog are some types (class type or interface type)
 
    let animal: Animal = new Cat()
    animal = new Frog()
@@ -2046,6 +2208,13 @@ Typical usage examples of *union* types are represented below:
     enum StringEnum {One = "One", Two = "Two"}
 
     type Union1 = string | StringEnum // OK, will be reduced during normalization
+
+.. index::
+   union type
+   class type
+   interface type
+   value
+   normalization
 
 Values of particular types can be received from a *union* by using different
 mechanisms as follows:
@@ -2067,6 +2236,12 @@ mechanisms as follows:
     }
 
     animal.sleep () // Any animal can sleep
+
+.. index::
+   type
+   value
+   union
+   conversion
 
 Predefined types are represented by the following example:
 
@@ -2095,8 +2270,9 @@ Literal types are represented by the following example:
     }
 
 .. index::
-   union type
    literal type
+   predefined type
+   conversion
 
 **Note**. A :index:`compile-time error` occurs if an expression of a *union*
 type is compared to a literal value or a constant that does not belong to the
@@ -2122,6 +2298,7 @@ values of the *union* type:
 .. index::
    union type
    literal value
+   value
 
 |
 
@@ -2151,7 +2328,8 @@ after another:
    type safety
    value type
    non-union type
-   union type normalization
+   normalized union type
+   normalization
    literal type
 
 #. All nested union types are linearized.
@@ -2171,14 +2349,17 @@ after another:
 .. index::
    union type
    nested union type
+   linearization
    non-nullish type
-   type never
+   never type
+   union type
+   type alias
    numeric type
    numeric literal type
-   type never
+   readonly
+   Any type
    alias
    non-alias
-   linearization
    literal type
    Object type
    subtyping
@@ -2212,11 +2393,15 @@ handling type inference for array literals (see
 :ref:`Array Type Inference from Types of Elements`).
 
 .. index::
+   normalization
    union type
-   union type normalization
+   normalized union type
    array literal
    type inference
    array literal
+   linearization
+   string
+   readonly
 
 |
 
@@ -2243,6 +2428,14 @@ conditions are fulfilled:
 
 Otherwise, a :index:`compile-time error` occurs as follows:
 
+.. index::
+   interface type
+   method
+   class type
+   accessor
+   signature
+   field
+
 .. code-block:: typescript
    :linenos:
 
@@ -2268,12 +2461,9 @@ Otherwise, a :index:`compile-time error` occurs as follows:
     u.goo() // compile-time error as signatures differ
 
 .. index::
-   union type
-   interface type
-   class type
-   method
-   accessor
+   field
    signature
+   method
 
 A :index:`compile-time error` occurs if in some ``T``:sub:`i`
 the name ``m`` refers to the *overload alias*:
@@ -2314,6 +2504,11 @@ the name ``m`` refers to the *method with overload signatures*:
     function test(x: C | D) {
         x.foo(1) // compile-time error, as 'foo' in C has overload signatures
     }
+
+.. index::
+   overload alias
+   method
+   overload signature
 
 |
 
@@ -2494,10 +2689,13 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
    nullish-safe option
    nullish value
    nullish type
+   safe operation
    safe method call
    safe field access
    safe indexing expression
+   safe function call
    conversion
+   compatibility
 
 |
 
@@ -2535,6 +2733,7 @@ Default values of value types are as follows:
    reference type
    enumeration type
    initialization
+   supertype
 
 +--------------+--------------------+
 |   Data Type  |   Default Value    |
@@ -2588,6 +2787,7 @@ be assigned.
    null
    undefined type
    data type
+   assignment
 
 -------------
 

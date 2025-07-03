@@ -1016,37 +1016,40 @@ Array Type Inference from Types of Elements
 .. meta:
     frontend_status: Done
 
-When type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]``
-cannot be inferred from the context, then the following algorithm is
-used to infer it from initialization expressions:
+Where no context is set and thus the type of an array literal cannot be inferred
+from the context (see :ref:`Type of Expression`), the type of array literal
+``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]`` is inferred from the
+initialization expression instead by using the following algorithm:
+
 
 .. #. If there is no expression (*N == 0*), then type is ``Object[]``.
 
-#. If there are no elements in the array literal (*N == 0*), then type of
+#. If array literal (*N == 0*) includes no element, then the type of
    the array literal cannot be inferred, and a :index:`compile-time error`
    occurs.
 
-#. If type of at least one of element expression cannot be determined, then
-   type of the array literal cannot be inferred, and a
+#. If at least one element of an expression type cannot be determined, then
+   the type of the array literal cannot be inferred, and a
    :index:`compile-time error` occurs.
 
-#. If each initialization expression is of numeric type (see
-   :ref:`Numeric Types`), then the type of the array literal is ``number[]``.
+#. If each initialization expression is of a numeric type (see
+   :ref:`Numeric Types`), then the array literal type is ``number[]``.
 
-#. If all initialization expressions are of the same type ``T``, then the
-   type of the array literal is ``T[]``.
+#. If all initialization expressions are of the same type ``T``,
+   then the array literal type is ``T[]``.
 
-#. Otherwise, the type of array literal is constructed as the union type
+#. Otherwise, the array literal type is constructed as the union type
    ``T``:sub:1 ``| ... | T``:sub:N,
-   where ``T``:sub:i is the type of *expr*:sub:i and then:
+   where ``T``:sub:i is the type of *expr*:sub:i, and then:
 
-    - If ``T``:sub:i is a literal type, then it is  replaced for its supertype;
+    - If ``T``:sub:i is a literal type, then it is replaced for its supertype;
 
-    - If ``T``:sub:i is a union type that contains literal types,
-      then each literal type is replaced for its supertype.
+    - If ``T``:sub:i is a union type comprised of literal types, then each
+      constituent literal type is replaced for its supertype.
 
-    - :ref:`Union Types Normalization` is applied
-      to the resultant union type after these replacements.
+    - :ref:`Union Types Normalization` is applied to the resultant union type
+      after the above replacements.
+
 
 .. index::
    type inference
@@ -3325,11 +3328,6 @@ is defined as follows:
 +---------------------------------+-------------------------+-----------------------------+
 |       Type of Expression        |     Resulting String    |   Code Example              |
 +=================================+=========================+=============================+
-| ``number``, ``double``          | "number"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  let n: number = ...        |
-|                                 |                         |  typeof n                   |
-+---------------------------------+-------------------------+-----------------------------+
 | ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let s: string = ...        |
@@ -3369,20 +3367,27 @@ is defined as follows:
 | interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``enum``                        | "number" or "string",   | .. code-block:: typescript  |
-|                                 | depending of constant   |                             |
-|                                 | type                    |  enum C {R, G, B}           |
+| enumeration type                | name of enumeration     | .. code-block:: typescript  |
+|                                 | base type               |                             |
+|                                 |                         |  enum C {R, G, B}           |
 |                                 |                         |  let c: C = ...             |
-|                                 |                         |  typeof c                   |
+|                                 |                         |  typeof c // "int"          |
 +---------------------------------+-------------------------+-----------------------------+
-| Numeric types:                  | "byte", "short", "int", | .. code-block:: typescript  |
+| ``number``, ``double``          | "number"                | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let n: number = ...        |
+|                                 |                         |  typeof n                   |
++---------------------------------+-------------------------+-----------------------------+
+| Other numeric types:            | "byte", "short", "int", | .. code-block:: typescript  |
 |                                 | "long" or "float",      |                             |
-|                                 | depending on type of    |  let x: byte = ...          |
-| ``byte``, ``short``, ``int``,   | expression              |  typeof x                   |
-| ``long``, ``float``             |                         |  ...                        |
+| ``byte``, ``short``, ``int``,   | depending on type of    |  let x: byte = ...          |
+| ``long``, ``float``             | expression              |  typeof x // "byte"         |
 +---------------------------------+-------------------------+-----------------------------+
-
-|
+| ``char``                        | "char"                  | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let x: char = ...          |
+|                                 |                         |  typeof x                   |
++---------------------------------+-------------------------+-----------------------------+
 
 2. **Expression type determined at runtime**
 
@@ -5095,9 +5100,12 @@ A comparison that uses the operators '``==``' and '``===``' is evaluated to
 - Function references that refer to the same functional object (see details in
   :ref:`Function Type Equality Operators`).
 
-In all other cases operands are compared as references.
+In all other cases, if a comparison of values of types ``A`` and ``B``  is
+always known to evaluate to ``false`` at compile time, then a
+:index:`compile-time error` occurs. Otherwise, the result of the comparison
+is evaluated at runtime, i.e., during program execution.
 
-This semantics is represented in the example below:
+This semantics is represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -5116,20 +5124,13 @@ This semantics is represented in the example below:
    new Number(5) === new Number(5) // true, values are equal
    new Number(5) == new Number(6) // false, values are not equal
 
-A :index:`compile-time error` occurs if a comparison of values of types ``A``
-and ``B``  is known at compile time to always evaluate to ``false``, i.e., if
-no value of types ``A`` and ``B`` ever compares to ``true``. This semantics is
-represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   1 == "a" // compile-time error
+   1 == "a" // compile-time error, as type int and type string do not overlap
 
    class X {}
    class Y {}
 
-   new X() == new Y() // compile-time error
+   new X() == new Y() // compile-time error, as type X and type Y do not overlap
+
 
 An evaluation of equality expressions always uses the actual types of operands
 as in the example below:
@@ -5146,6 +5147,17 @@ as in the example below:
 
     equ("aa", "aa") // true, string contexts are compared
     equ(1, "aa") // false, not compatible types
+
+    interface I1 {}
+    interface I2 {}
+
+    function equ1 (i1: I1, i2: I2) {
+       return i1 == i2 // to be resolved during program execution
+    }
+    class A implements I1, I2 {}
+    const a = new A
+    equ1 (a, a) // true, the same values
+
 
 An equality with values of two union types is represented in the example below:
 
@@ -5266,8 +5278,8 @@ Function Type Equality Operators
     frontend_status: Done
 
 If both operands refer to the same function object, then the comparison
-returns ``true``. 
-When comparing method references, not only the same method must be used, 
+returns ``true``.
+When comparing method references, not only the same method must be used,
 but also its bounded instances must be equal.
 
 .. code-block:: typescript
@@ -5791,7 +5803,7 @@ following ways:
    :ref:`Record Indexing Expression`), possibly enclosed in parentheses, then:
 
    #. Object reference subexpression of *lhsExpression* is evaluated.
-      If this evaluation completes abruptly, then so does the assignment 
+      If this evaluation completes abruptly, then so does the assignment
       expression. In that case, *rhsExpression* and the index subexpression are
       not evaluated, and no assignment occurs.
    #. If the evaluation completes normally, the index subexpression of
@@ -6269,8 +6281,9 @@ Lambda Expressions
     frontend_status: Done
 
 *Lambda expression* fully defines an instance of a function type (see
-:ref:`Function Types`) by providing optional ``async`` mark, type parameters
-(see :ref:`Type Parameters`), mandatory lambda signature, and its body. The
+:ref:`Function Types`) by providing optional annotation usage
+(see :ref:`Using Annotations`), optional ``async`` mark
+(see :ref:`Async Lambdas`), mandatory lambda signature, and its body. The
 definition of *lambda expression* is generally similar to that of a function
 declaration (see :ref:`Function Declarations`), except that a lambda expression
 has no function name specified, and can have types of parameters omitted.
@@ -6280,8 +6293,7 @@ The syntax of *lambda expression* is presented below:
 .. code-block:: abnf
 
     lambdaExpression:
-        annotationUsage?
-        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? 'async'? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -6333,7 +6345,6 @@ The examples of usage are presented below:
 
     (x: number): number => { return Math.sin(x) } // block as lambda body
     (x: number) => Math.sin(x)                    // expression as lambda body
-    <T> (x: T, y: T) => { let local = x }         // generic lambda
     e => e                                        // shortest form of lambda
 
 A *lambda expression* evaluation creates an instance of a function type (see
@@ -6372,7 +6383,7 @@ type annotations of formal parameters can be omitted.
     foo ((e1: Object, e2, e3) => e1)
     foo ((e1: Object, ...e2) => e1)
 
-    foo (<Object>(e1: Object, e2: Object) => e1)
+    foo ((e1: Object, e2: Object) => e1)
 
     function bar<T> (a: (...p: T[]) => T) {}
     // Type can be omitted for the rest parameter
@@ -6390,7 +6401,7 @@ A :index:`compile-time error` occurs if:
 
 - Lambda expression declares two formal parameters with the same name.
 - Formal parameter contains no type provided, and type cannot be derived
-  by type inference.
+  by :ref:`Type Inference`.
 
 
 .. index::

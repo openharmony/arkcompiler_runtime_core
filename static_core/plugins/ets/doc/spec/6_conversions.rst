@@ -30,22 +30,22 @@ Type of Expression
 .. meta:
     frontend_status: Done
 
-Every expression written in the |LANG| programming language has a type that
+Every expression written in the |LANG| programming language has a type that 
 is evaluated at compile time.
 
 In most contexts, an expression must be *compatible* with a type expected in
 that context. This type is called the *target type*.
 
-If no target type is expected in the context, then the expression
-is called a *standalone expression*:
+If no target type is available in the context, then the expression is called a
+*standalone expression*:
 
 .. code-block:: typescript
    :linenos:
 
-    let a = expr // no target type is expected
+    let a = expr // no target type is available 
 
     function foo() {
-        expr // no target type is expected
+        expr // no target type is available 
     }
 
 Otherwise, the expression is *non-standalone*:
@@ -570,74 +570,6 @@ is converted to the declared type. This conversion never causes a runtime error.
    conversion
    constant
    runtime error
-
-
-|
-
-.. _Constant to Enumeration Conversions:
-
-Constant to Enumeration Conversions
-===================================
-
-.. meta:
-    frontend_status: None
-
-A constant expression of some integer type is converted to *enumeration* type if:
-
--  Enumeration constants are of type ``int``;
--  Value of the constant expression is equal to the value of one of the
-   enumeration type constants.
-
-This conversion never causes a runtime error.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum IntegerEnum {a, b, c}
-    let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b
-    e = 3 // compile-time error, there is no constant with this value
-
-    const one = 2
-    e = one // ok, e is set to IntegerEnum.c
-
-The conversion of a string type expression is performed similarly as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    enum StringEnum {A = "a", B = "b", C = "c"}
-    let e: StringEnum = "b" // OK, , e is set to StringEnum.B
-    e = "d" // compile-time error, there is no constant with this value
-    e = StringEnum.B // OK
-
-.. index::
-   constant expression
-   integer type
-   conversion
-   enumeration type
-   enumeration constant
-   type int
-   string type
-   expression
-
-A similar conversion is applicable for constants of an explicitly declared
-*enumeration* type. This conversion never causes a runtime error.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
-    let dbl_enum: DoubleEnum = DoubleEnum.a
-    dbl_enum = 1.0 // OK
-    dbl_enum = 5.0 // compile-time error, there is no constant with this value
-
-.. index::
-   constant expression
-   conversion
-   enumeration type
-   enumeration constant
-   expression
-
 
 
 |
