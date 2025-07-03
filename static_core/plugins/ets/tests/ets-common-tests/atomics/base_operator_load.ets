@@ -15,19 +15,25 @@
 
 const BYTE_LENGTH = 128
 
-let ab = new ArrayBuffer(BYTE_LENGTH)
-let int8array = new Int8Array(ab)
-let ab2 = new ArrayBuffer(BYTE_LENGTH)
-let int16array = new Int16Array(ab2)
-let ab3 = new ArrayBuffer(BYTE_LENGTH)
-let int32array = new Int32Array(ab3)
-let ab4 = new ArrayBuffer(BYTE_LENGTH)
-let uint32array = new Uint32Array(ab4)
+let abint8 = new ArrayBuffer(BYTE_LENGTH)
+let int8array = new Int8Array(abint8)
+let abint16 = new ArrayBuffer(BYTE_LENGTH)
+let int16array = new Int16Array(abint16)
+let abint32 = new ArrayBuffer(BYTE_LENGTH)
+let int32array = new Int32Array(abint32)
+let abuint8 = new ArrayBuffer(BYTE_LENGTH)
+let uint8array = new Uint16Array(abuint8)
+let abuint16 = new ArrayBuffer(BYTE_LENGTH)
+let uint16array = new Uint16Array(abuint16)
+let abuint32 = new ArrayBuffer(BYTE_LENGTH)
+let uint32array = new Uint32Array(abuint32)
 
 let typeArrayList = [
     int8array,
     int16array,
     int32array,
+    uint8array,
+    uint16array,
     uint32array
 ]
 
@@ -50,7 +56,7 @@ function testLoad() {
 }
 
 function main() {
-    // const suite = new ArkTestsuite('Function Atomics baseOperator tests')
-    // suite.addTest('Function testLoad', testLoad)
-    // return suite.run()
+    const suite = new arktest.ArkTestsuite('Function Atomics baseOperator tests')
+    suite.addTest('Function testLoad', testLoad)
+    return suite.run()
 }
