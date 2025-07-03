@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
+
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,28 +14,28 @@
  * limitations under the License.
  */
 
-interface InterfaceA {
-    fieldA: string,
-    readonly fieldB: number,
-    bar(){}
+namespace N1 {
+    function M1() {}
+
+    const F1: string = "Hello";
+
+    class C1 {}
+
+    interface I1 {}
+
+    enum E1 {
+        ONE
+    }
+
+    namespace N2 {
+        class C2 {
+            M2(){}
+        }
+
+        const F2: number = 1;
+    }
 }
 
-interface InterfaceB extends InterfaceA {
-    foo()
-}
+const F0:string = "World";
 
-interface InterfaceC {
-    fieldC: string
-}
-
-class ClassA implements InterfaceA {
-    fieldA = "Hello";
-    fieldB = 1.0;
-}
-
-class ClassB implements InterfaceB, InterfaceC {
-    fieldA = "Hello";
-    fieldB = 1.0;
-    fieldC = "World";
-    foo(){}
-}
+class C0 {}

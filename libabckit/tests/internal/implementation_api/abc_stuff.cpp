@@ -47,6 +47,9 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {
@@ -87,6 +90,9 @@ TEST_F(LibAbcKitAbcStuff, WriteAbcStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {

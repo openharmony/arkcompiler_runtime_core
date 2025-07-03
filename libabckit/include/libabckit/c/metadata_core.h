@@ -598,6 +598,14 @@ struct CAPI_EXPORT AbckitInspectApi {
      * ======================================== */
 
     /**
+     * @brief Returns owning module for namespace `n`.
+     * @return Pointer to the `AbckitCoreModule`.
+     * @param [ in ] n - Namespace to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
+     */
+    AbckitCoreModule *(*namespaceGetModule)(AbckitCoreNamespace *n);
+
+    /**
      * @brief Returns name of the namespace `n`.
      * @return Pointer to the `AbckitString` containig the name of the namespace.
      * @param [ in ] n - Namespace to be inspected.
@@ -642,6 +650,47 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     bool (*namespaceEnumerateClasses)(AbckitCoreNamespace *n, void *data,
                                       bool (*cb)(AbckitCoreClass *klass, void *data));
+
+    /**
+     * @brief Enumerates interfaces of the namespace `n`, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] n - Namespace to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*namespaceEnumerateInterfaces)(AbckitCoreNamespace *n, void *data,
+                                         bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates enums of the namespace `n`, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] n - Namespace to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*namespaceEnumerateEnums)(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
+
+    /**
+     * @brief Enumerates classes of the namespace `n`, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] n - Namespace to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*namespaceEnumerateFields)(AbckitCoreNamespace *n, void *data,
+                                     bool (*cb)(AbckitCoreNamespaceField *field, void *data));
 
     /**
      * @brief Enumerates top level functions of the namespace `n`, invoking callback `cb` for each top level function.
@@ -840,6 +889,20 @@ struct CAPI_EXPORT AbckitInspectApi {
                                       bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
     /**
+     * @brief Enumerates subclasses of class `klass`, invoking callback `cb` for each interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*classEnumerateSubClasses)(AbckitCoreClass *klass, void *data,
+                                     bool (*cb)(AbckitCoreClass *subClass, void *data));
+
+    /**
      * @brief Enumerates interfaces that class `klass` implements, invoking callback `cb` for each interface.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] klass - Class to be inspected.
@@ -897,6 +960,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     AbckitString *(*interfaceGetName)(AbckitCoreInterface *iface);
 
     /**
+     * @brief Returns parent namespace for interface `iface`.
+     * @return Pointer to the `AbckitCoreNamespace`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    AbckitCoreNamespace *(*interfaceGetParentNamespace)(AbckitCoreInterface *iface);
+
+    /**
      * @brief Enumerates super interfaces of interface `iface`, invoking callback `cb` for each super interface.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] iface - Interface to be inspected.
@@ -909,6 +980,34 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     bool (*interfaceEnumerateSuperInterfaces)(AbckitCoreInterface *iface, void *data,
                                               bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates sub interfaces of interface `iface`, invoking callback `cb` for each super interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateSubInterfaces)(AbckitCoreInterface *iface, void *data,
+                                            bool (*cb)(AbckitCoreInterface *iface, void *data));
+
+    /**
+     * @brief Enumerates classes that implement interface `iface`, invoking callback `cb` for each super interface.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    bool (*interfaceEnumerateClasses)(AbckitCoreInterface *iface, void *data,
+                                      bool (*cb)(AbckitCoreClass *klass, void *data));
 
     /**
      * @brief Enumerates methods of interface `iface`, invoking callback `cb` for each method.
@@ -955,6 +1054,22 @@ struct CAPI_EXPORT AbckitInspectApi {
     /* ========================================
      * Enum
      * ======================================== */
+
+    /**
+     * @brief Returns binary file that the given enum `enm` is a part of.
+     * @return Pointer to the `AbckitFile`.
+     * @param [ in ] enm - Enum to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     */
+    AbckitFile *(*enumGetFile)(AbckitCoreEnum *enm);
+
+    /**
+     * @brief Returns owning module for enum `enm`.
+     * @return Pointer to the `AbckitCoreModule`.
+     * @param [ in ] enm - Enum to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     */
+    AbckitCoreModule *(*enumGetModule)(AbckitCoreEnum *enm);
 
     /**
      * @brief Returns name for enum `enm`.
@@ -1056,6 +1171,26 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     bool (*moduleFieldEnumerateAnnotations)(AbckitCoreModuleField *field, void *data,
                                             bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+    /* ========================================
+     * Namespace Field
+     * ======================================== */
+
+    /**
+     * @brief Returns namespace for namespace field `field`.
+     * @return Pointer to the `AbckitCoreNamespace`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreNamespace *(*namespaceFieldGetNamespace)(AbckitCoreNamespaceField *field);
+
+    /**
+     * @brief Returns name for namespace field `field`.
+     * @return Pointer to the `AbckitString`.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitString *(*namespaceFieldGetName)(AbckitCoreNamespaceField *field);
 
     /* ========================================
      * Class Field
@@ -1166,6 +1301,14 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      */
     AbckitType *(*interfaceFieldGetType)(AbckitCoreInterfaceField *field);
+
+    /**
+     * @brief Returns whether interface field `field` is readonly.
+     * @return `true` if field `field` is readonly.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*interfaceFieldIsReadonly)(AbckitCoreInterfaceField *field);
 
     /**
      * @brief Enumerates annotations of interface field `field`, invoking callback `cb` for each annotation.

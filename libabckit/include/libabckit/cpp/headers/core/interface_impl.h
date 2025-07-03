@@ -16,9 +16,14 @@
 #ifndef CPP_ABCKIT_CORE_INTERFACE_IMPL_H
 #define CPP_ABCKIT_CORE_INTERFACE_IMPL_H
 
-#include "./interface.h"
+#include "interface.h"
 
 namespace abckit::core {
+
+inline const File *Interface::GetFile() const
+{
+    return GetResource();
+}
 
 inline std::string Interface::GetName() const
 {
@@ -30,11 +35,30 @@ inline std::string Interface::GetName() const
     return str;
 }
 
+inline core::Module Interface::GetModule() const
+{
+    AbckitCoreModule *mod = GetApiConfig()->cIapi_->interfaceGetModule(GetView());
+    CheckError(GetApiConfig());
+    return Module(mod, GetApiConfig(), GetResource());
+}
+
+inline Namespace Interface::GetParentNamespace() const
+{
+    AbckitCoreNamespace *ns = GetApiConfig()->cIapi_->interfaceGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(ns, GetApiConfig(), GetResource());
+}
+
 inline std::vector<core::Function> Interface::GetAllMethods() const
 {
     std::vector<core::Function> methods;
+    Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
 
-    GetAllMethodsInner(methods);
+    GetApiConfig()->cIapi_->interfaceEnumerateMethods(GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
+        payload.data->push_back(core::Function(method, payload.config, payload.resource));
+        return true;
+    });
 
     CheckError(GetApiConfig());
 
@@ -44,38 +68,68 @@ inline std::vector<core::Function> Interface::GetAllMethods() const
 inline std::vector<core::InterfaceField> Interface::GetFields() const
 {
     std::vector<core::InterfaceField> fields;
+    Payload<std::vector<core::InterfaceField> *> payload {&fields, GetApiConfig(), GetResource()};
 
-    GetFieldsInner(fields);
+    GetApiConfig()->cIapi_->interfaceEnumerateFields(
+        GetView(), &payload, [](AbckitCoreInterfaceField *field, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::InterfaceField> *> *>(data);
+            payload.data->push_back(core::InterfaceField(field, payload.config, payload.resource));
+            return true;
+        });
 
     CheckError(GetApiConfig());
 
     return fields;
 }
 
-inline bool Interface::GetAllMethodsInner(std::vector<core::Function> &methods) const
+inline std::vector<core::Interface> Interface::GetSuperInterfaces() const
 {
-    Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
+    std::vector<core::Interface> interfaces;
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
 
-    auto isNormalExit = GetApiConfig()->cIapi_->interfaceEnumerateMethods(
-        GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
-            payload.data->push_back(core::Function(method, payload.config, payload.resource));
+    GetApiConfig()->cIapi_->interfaceEnumerateSuperInterfaces(
+        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+            payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
             return true;
         });
-    return isNormalExit;
+
+    CheckError(GetApiConfig());
+
+    return interfaces;
 }
 
-inline bool Interface::GetFieldsInner(std::vector<core::InterfaceField> &fields) const
+inline std::vector<core::Interface> Interface::GetSubInterfaces() const
 {
-    Payload<std::vector<core::InterfaceField> *> payload {&fields, GetApiConfig(), GetResource()};
+    std::vector<core::Interface> interfaces;
+    Payload<std::vector<core::Interface> *> payload {&interfaces, GetApiConfig(), GetResource()};
 
-    auto isNormalExit = GetApiConfig()->cIapi_->interfaceEnumerateFields(
-        GetView(), &payload, [](AbckitCoreInterfaceField *field, void *data) {
-            const auto &payload = *static_cast<Payload<std::vector<core::InterfaceField> *> *>(data);
-            payload.data->push_back(core::InterfaceField(field, payload.config));
+    GetApiConfig()->cIapi_->interfaceEnumerateSubInterfaces(
+        GetView(), &payload, [](AbckitCoreInterface *iface, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Interface> *> *>(data);
+            payload.data->push_back(core::Interface(iface, payload.config, payload.resource));
             return true;
         });
-    return isNormalExit;
+
+    CheckError(GetApiConfig());
+
+    return interfaces;
+}
+
+inline std::vector<core::Class> Interface::GetClasses() const
+{
+    std::vector<core::Class> classes;
+    Payload<std::vector<core::Class> *> payload {&classes, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->interfaceEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *klass, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Class> *> *>(data);
+        payload.data->push_back(core::Class(klass, payload.config, payload.resource));
+        return true;
+    });
+
+    CheckError(GetApiConfig());
+
+    return classes;
 }
 }  // namespace abckit::core
 

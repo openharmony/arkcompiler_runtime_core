@@ -48,6 +48,11 @@ bool ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
 bool ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                        bool (*cb)(AbckitCoreNamespace *klass, void *data));
 bool ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
+bool ArkTSNamespaceEnumerateInterfaces(AbckitCoreNamespace *n, void *data,
+                                       bool (*cb)(AbckitCoreInterface *iface, void *data));
+bool ArkTSNamespaceEnumerateEnums(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
+bool ArkTSNamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
+                                   bool (*cb)(AbckitCoreNamespaceField *field, void *data));
 bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                               bool (*cb)(AbckitCoreFunction *func, void *data));
 
@@ -59,6 +64,10 @@ bool ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(A
 bool ArkTSClassEnumerateFields(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClassField *field, void *data));
 bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+bool ArkTSClassEnumerateSubClasses(AbckitCoreClass *klass, void *data,
+                                   bool (*cb)(AbckitCoreClass *subClass, void *data));
+bool ArkTSClassEnumerateInterfaces(AbckitCoreClass *klass, void *data,
+                                   bool (*cb)(AbckitCoreInterface *iface, void *data));
 
 // ========================================
 // Interface
@@ -68,6 +77,12 @@ bool ArkTSInterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
                                     bool (*cb)(AbckitCoreFunction *method, void *data));
 bool ArkTSInterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
                                    bool (*cb)(AbckitCoreInterfaceField *field, void *data));
+bool ArkTSInterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
+                                            bool (*cb)(AbckitCoreInterface *superInterface, void *data));
+bool ArkTSInterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data,
+                                          bool (*cb)(AbckitCoreInterface *subInterface, void *data));
+bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
+                                    bool (*cb)(AbckitCoreClass *klass, void *data));
 
 // ========================================
 // Enum

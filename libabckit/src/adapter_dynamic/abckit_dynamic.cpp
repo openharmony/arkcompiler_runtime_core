@@ -650,7 +650,7 @@ void AssignNamespacesToParent(std::vector<std::unique_ptr<AbckitCoreNamespace>> 
                 ASSERT(nameToNamespace.count(parentName) == 1);
                 auto *parentNamespace = nameToNamespace[parentName];
                 n->parentNamespace = nameToNamespace[parentName];
-                parentNamespace->namespaces.emplace_back(std::move(n)).get();
+                parentNamespace->nt.emplace(nName, std::move(n));
                 break;
             }
             default:
@@ -710,7 +710,7 @@ void AssignClassesToParent(std::vector<std::unique_ptr<AbckitCoreClass>> &klasse
                 ASSERT(nameToNamespace.count(parentName) != 0);
                 auto *n = nameToNamespace[parentName];
                 klass->parentNamespace = n;
-                n->classes.emplace_back(std::move(klass));
+                n->ct.emplace(name, std::move(klass));
                 break;
             }
             case ParentKind::FUNCTION: {
@@ -1014,10 +1014,10 @@ void DumpHierarchy(AbckitFile *file)
             ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
             auto &nName = GetDynFunction(n->GetArkTSImpl()->f.get())->name;
             LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << nName << std::endl;
-            for (auto &n : n->namespaces) {
+            for (auto &[_, n] : n->nt) {
                 dumpNamespace(n.get(), indent + "  ");
             }
-            for (auto &c : n->classes) {
+            for (auto &[_, c] : n->ct) {
                 dumpClass(c.get(), indent + "  ");
             }
             for (auto &f : n->functions) {

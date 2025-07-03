@@ -696,28 +696,35 @@ bool ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
 }
 
 // ========================================
-// Module
+// Namespace
 // ========================================
 
 bool ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                        bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
-    for (auto &subn : n->namespaces) {
-        if (!cb(subn.get(), data)) {
-            return false;
-        }
-    }
-    return true;
+    return NamespaceEnumerateNamespacesHelper(n, data, cb);
 }
 
 bool ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
-    for (auto &c : n->classes) {
-        if (!cb(c.get(), data)) {
-            return false;
-        }
-    }
-    return true;
+    return NamespaceEnumerateClassesHelper(n, data, cb);
+}
+
+bool ArkTSNamespaceEnumerateInterfaces(AbckitCoreNamespace *n, void *data,
+                                       bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    return NamespaceEnumerateInterfacesHelper(n, data, cb);
+}
+
+bool ArkTSNamespaceEnumerateEnums(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    return NamespaceEnumerateEnumsHelper(n, data, cb);
+}
+
+bool ArkTSNamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
+                                   bool (*cb)(AbckitCoreNamespaceField *field, void *data))
+{
+    return NamespaceEnumerateFieldsHelper(n, data, cb);
 }
 
 bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
@@ -759,6 +766,18 @@ bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
     return true;
 }
 
+bool ArkTSClassEnumerateSubClasses(AbckitCoreClass *klass, void *data,
+                                   bool (*cb)(AbckitCoreClass *subClass, void *data))
+{
+    return ClassEnumerateSubClassesHelper(klass, data, cb);
+}
+
+bool ArkTSClassEnumerateInterfaces(AbckitCoreClass *klass, void *data,
+                                   bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    return ClassEnumerateInterfacesHelper(klass, data, cb);
+}
+
 // ========================================
 // Interface
 // ========================================
@@ -773,6 +792,24 @@ bool ArkTSInterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
                                    bool (*cb)(AbckitCoreInterfaceField *field, void *data))
 {
     return InterfaceEnumerateFieldsHelper(iface, data, cb);
+}
+
+bool ArkTSInterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
+                                            bool (*cb)(AbckitCoreInterface *superInterface, void *data))
+{
+    return InterfaceEnumerateSuperInterfacesHelper(iface, data, cb);
+}
+
+bool ArkTSInterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data,
+                                          bool (*cb)(AbckitCoreInterface *subInterface, void *data))
+{
+    return InterfaceEnumerateSubInterfacesHelper(iface, data, cb);
+}
+
+bool ArkTSInterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
+                                    bool (*cb)(AbckitCoreClass *klass, void *data))
+{
+    return InterfaceEnumerateClassesHelper(iface, data, cb);
 }
 
 // ========================================

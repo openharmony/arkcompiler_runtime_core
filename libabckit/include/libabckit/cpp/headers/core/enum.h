@@ -26,7 +26,9 @@ namespace abckit::core {
 class Enum : public ViewInResource<AbckitCoreEnum *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
-    friend Module;
+    friend class core::Module;
+    /// @brief to access private constructor
+    friend class core::Namespace;
     /// @brief to access private constructor
     friend class Function;
     /// @brief to access private constructor
@@ -34,7 +36,7 @@ class Enum : public ViewInResource<AbckitCoreEnum *, const File *> {
     /// @brief abckit::DefaultHash<Enum>
     friend abckit::DefaultHash<Enum>;
     /// @brief to access private constructor
-    friend File;
+    friend class abckit::File;
 
 protected:
     /// @brief Core API View type
@@ -108,10 +110,6 @@ public:
     std::vector<core::EnumField> GetFields() const;
 
 private:
-    bool GetAllMethodsInner(std::vector<core::Function> &methods) const;
-
-    bool GetFieldsInner(std::vector<core::EnumField> &fields) const;
-
     Enum(AbckitCoreEnum *enm, const ApiConfig *conf, const File *file) : ViewInResource(enm), conf_(conf)
     {
         SetResource(file);

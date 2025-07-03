@@ -161,6 +161,13 @@ bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
+AbckitCoreModule *NamespaceGetModule(AbckitCoreNamespace *n)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
+    return DEFAULT_CORE_MODULE;
+}
+
 AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
 {
     g_calledFuncs.push(__func__);
@@ -188,6 +195,29 @@ bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(Ab
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return cb(DEFAULT_CORE_CLASS, data);
+}
+
+bool NamespaceEnumerateInterfaces(AbckitCoreNamespace *n, void *data,
+                                  bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
+    return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool NamespaceEnumerateEnums(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
+    return cb(DEFAULT_CORE_ENUM, data);
+}
+
+bool NamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
+                              bool (*cb)(AbckitCoreNamespaceField *field, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
+    return cb(DEFAULT_CORE_NAMESPACE_FIELD, data);
 }
 
 bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
@@ -336,6 +366,13 @@ bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data, bool (*cb)(Ab
     return cb(DEFAULT_CORE_ANNOTATION, data);
 }
 
+bool ClassEnumerateSubClasses(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClass *subClass, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
+    return cb(DEFAULT_CORE_CLASS, data);
+}
+
 bool ClassEnumerateInterfaces(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreInterface *iface, void *data))
 {
     g_calledFuncs.push(__func__);
@@ -375,12 +412,34 @@ AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
     return DEFAULT_STRING;
 }
 
+AbckitCoreNamespace *InterfaceGetParentNamespace(AbckitCoreInterface *iface)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return DEFAULT_CORE_NAMESPACE;
+}
+
 bool InterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
                                        bool (*cb)(AbckitCoreInterface *iface, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
     return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool InterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data,
+                                     bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_INTERFACE, data);
+}
+
+bool InterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(iface == DEFAULT_CORE_INTERFACE);
+    return cb(DEFAULT_CORE_CLASS, data);
 }
 
 bool InterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
@@ -410,6 +469,20 @@ bool InterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
 // ========================================
 // Enum
 // ========================================
+
+AbckitFile *EnumGetFile(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_FILE;
+}
+
+AbckitCoreModule *EnumGetModule(AbckitCoreEnum *enm)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(enm == DEFAULT_CORE_ENUM);
+    return DEFAULT_CORE_MODULE;
+}
 
 AbckitString *EnumGetName(AbckitCoreEnum *enm)
 {
@@ -484,6 +557,24 @@ bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
     return cb(DEFAULT_CORE_ANNOTATION, data);
+}
+
+// ========================================
+// Namespace Field
+// ========================================
+
+AbckitCoreNamespace *NamespaceFieldGetNamespace(AbckitCoreNamespaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_NAMESPACE_FIELD);
+    return DEFAULT_CORE_NAMESPACE;
+}
+
+AbckitString *NamespaceFieldGetName(AbckitCoreNamespaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_NAMESPACE_FIELD);
+    return DEFAULT_STRING;
 }
 
 // ========================================
@@ -577,6 +668,13 @@ AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
     return DEFAULT_TYPE;
+}
+
+bool InterfaceFieldIsReadonly(AbckitCoreInterfaceField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
+    return DEFAULT_BOOL;
 }
 
 bool InterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
@@ -1143,11 +1241,14 @@ static AbckitInspectApi g_inspectApiImpl = {
     // ========================================
     // Namespace
     // ========================================
-
+    NamespaceGetModule,
     NamespaceGetName,
     NamespaceGetParentNamespace,
     NamespaceEnumerateNamespaces,
     NamespaceEnumerateClasses,
+    NamespaceEnumerateInterfaces,
+    NamespaceEnumerateEnums,
+    NamespaceEnumerateFields,
     NamespaceEnumerateTopLevelFunctions,
 
     // ========================================
@@ -1182,6 +1283,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassGetSuperClass,
     ClassEnumerateMethods,
     ClassEnumerateAnnotations,
+    ClassEnumerateSubClasses,
     ClassEnumerateInterfaces,
     ClassEnumerateFields,
 
@@ -1192,7 +1294,10 @@ static AbckitInspectApi g_inspectApiImpl = {
     InterfaceGetFile,
     InterfaceGetModule,
     InterfaceGetName,
+    InterfaceGetParentNamespace,
     InterfaceEnumerateSuperInterfaces,
+    InterfaceEnumerateSubInterfaces,
+    InterfaceEnumerateClasses,
     InterfaceEnumerateMethods,
     InterfaceEnumerateAnnotations,
     InterfaceEnumerateFields,
@@ -1201,6 +1306,8 @@ static AbckitInspectApi g_inspectApiImpl = {
     // Enum
     // ========================================
 
+    EnumGetFile,
+    EnumGetModule,
     EnumGetName,
     EnumEnumerateMethods,
     EnumEnumerateFields,
@@ -1216,6 +1323,13 @@ static AbckitInspectApi g_inspectApiImpl = {
     ModuleFieldIsPublic,
     ModuleFieldIsPrivate,
     ModuleFieldEnumerateAnnotations,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    NamespaceFieldGetNamespace,
+    NamespaceFieldGetName,
 
     // ========================================
     // Class Field
@@ -1238,6 +1352,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     InterfaceFieldGetInterface,
     InterfaceFieldGetName,
     InterfaceFieldGetType,
+    InterfaceFieldIsReadonly,
     InterfaceFieldEnumerateAnnotations,
 
     // ========================================

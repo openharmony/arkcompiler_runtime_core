@@ -19,7 +19,6 @@
 #include "../base_classes.h"
 
 #include <functional>
-#include <string_view>
 
 namespace abckit::core {
 
@@ -34,6 +33,12 @@ class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     friend class core::Module;
     /// @brief to access private constructor
     friend class core::Class;
+    /// @brief to access private constructor
+    friend class core::Interface;
+    /// @brief to access private constructor
+    friend class core::Enum;
+    /// @brief to access private constructor
+    friend class core::NamespaceField;
     /// @brief to access private constructor
     friend class core::Function;
     /// @brief abckit::DefaultHash<Namespace>
@@ -76,6 +81,13 @@ public:
     ~Namespace() override = default;
 
     /**
+     * @brief Returns module for this `Namespace`.
+     * @return Owning `core::Module`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
+     */
+    core::Module GetModule() const;
+
+    /**
      * @brief Return namespace's name.
      * @return `std::string`
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -90,6 +102,13 @@ public:
     }
 
     /**
+     * @brief Tells if Namespace is defined in the same binary or externally in another binary.
+     * @return Returns `true` if Namespace is defined in another binary and `false` if defined locally.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    bool IsExternal() const;
+
+    /**
      * @brief Returns parent namespace.
      * @return `core::Namespace` or NULL if namespace has no parent namespace.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -99,6 +118,48 @@ public:
         AbckitCoreNamespace *parent = GetApiConfig()->cIapi_->namespaceGetParentNamespace(GetView());
         return Namespace(parent, GetApiConfig(), GetResource());
     }
+
+    /**
+     * @brief Return vector with namespace's classes.
+     * @return std::vector<core::Class>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Class> GetClasses() const;
+
+    /**
+     * @brief Return vector with namespace's interfaces.
+     * @return std::vector<core::Interface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Interface> GetInterfaces() const;
+
+    /**
+     * @brief Return vector with namespace's enums.
+     * @return std::vector<core::Enum>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Enum> GetEnums() const;
+
+    /**
+     * @brief Return vector with namespace's functions.
+     * @return std::vector<core::Function>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Function> GetTopLevelFunctions() const;
+
+    /**
+     * @brief Return vector with namespace's fields.
+     * @return std::vector<core::NamespaceField>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::NamespaceField> GetFields() const;
+
+    /**
+     * @brief Return vector with namespace's namespaces.
+     * @return std::vector<core::Namespace>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Namespace> GetNamespaces() const;
 
     /**
      * @brief Enumerates namespaces defined inside of the Namespace, invoking callback `cb` for each inner

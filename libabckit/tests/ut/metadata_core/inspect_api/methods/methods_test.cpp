@@ -140,6 +140,9 @@ TEST_F(LibAbcKitInspectApiMethodsTest, FunctionGetFile)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) -> bool {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxClassFinder = {nullptr, "M0C0"};
         g_implI->moduleEnumerateClasses(m, &ctxClassFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -548,6 +551,9 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodIsNative)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/native_method.abc", &file);
 
     g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         helpers::ClassByNameContext ctxFinder = {nullptr, "Y"};
         g_implI->moduleEnumerateClasses(m, &ctxFinder, helpers::ClassByNameFinder);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

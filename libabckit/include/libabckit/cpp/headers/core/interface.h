@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_CORE_INTERFACE_H
 
 #include "../base_classes.h"
+#include <vector>
 
 namespace abckit::core {
 
@@ -26,7 +27,11 @@ namespace abckit::core {
 class Interface : public ViewInResource<AbckitCoreInterface *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
-    friend Module;
+    friend class core::Module;
+    /// @brief to access private constructor
+    friend class core::Namespace;
+    /// @brief to access private constructor
+    friend class core::Class;
     /// @brief to access private constructor
     friend class Function;
     /// @brief to access private constructor
@@ -34,7 +39,7 @@ class Interface : public ViewInResource<AbckitCoreInterface *, const File *> {
     /// @brief abckit::DefaultHash<Interface>
     friend abckit::DefaultHash<Interface>;
     /// @brief to access private constructor
-    friend File;
+    friend class abckit::File;
 
 protected:
     /// @brief Core API View type
@@ -94,6 +99,13 @@ public:
     core::Module GetModule() const;
 
     /**
+     * @brief Returns parent namespace for interface.
+     * @return `core::Namespace`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const;
+
+    /**
      * @brief Get vector with all Methods
      * @return std::vector<core::Function>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -107,11 +119,28 @@ public:
      */
     std::vector<core::InterfaceField> GetFields() const;
 
+    /**
+     * @brief Return vector with interface's super interfaces.
+     * @return std::vector<core::Interface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Interface> GetSuperInterfaces() const;
+
+    /**
+     * @brief Return vector with interface's sub interfaces.
+     * @return std::vector<core::Interface>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Interface> GetSubInterfaces() const;
+
+    /**
+     * @brief Return vector with classes that implement this interface.
+     * @return std::vector<core::Class>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::Class> GetClasses() const;
+
 private:
-    bool GetAllMethodsInner(std::vector<core::Function> &methods) const;
-
-    bool GetFieldsInner(std::vector<core::InterfaceField> &fields) const;
-
     Interface(AbckitCoreInterface *iface, const ApiConfig *conf, const File *file) : ViewInResource(iface), conf_(conf)
     {
         SetResource(file);

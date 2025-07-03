@@ -47,6 +47,9 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {
@@ -88,6 +91,9 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {
@@ -129,6 +135,9 @@ TEST_F(LibAbcKitGraphStuff, DestroyGraphStatic)
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
 
     g_implI->fileEnumerateModules(file, &userData, [](AbckitCoreModule *m, void *data) {
+        if (g_implI->moduleIsExternal(m)) {
+            return false;
+        }
         auto *userData = reinterpret_cast<std::vector<struct ClassData> *>(data);
 
         for (const auto &classData : *userData) {

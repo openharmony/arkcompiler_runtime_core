@@ -30,17 +30,21 @@ namespace abckit::core {
 class Class : public ViewInResource<AbckitCoreClass *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
-    friend Module;
+    friend class core::Module;
     /// @brief to access private constructor
-    friend Namespace;
+    friend class core::Namespace;
     /// @brief to access private constructor
-    friend class Function;
+    friend class core::Interface;
+    /// @brief to access private constructor
+    friend class core::Function;
+    /// @brief to access private constructor
+    friend class core::ClassField;
     /// @brief to access private constructor
     friend class abckit::Type;
     /// @brief abckit::DefaultHash<Class>
-    friend abckit::DefaultHash<Class>;
+    friend class abckit::DefaultHash<Class>;
     /// @brief to access private constructor
-    friend File;
+    friend class abckit::File;
 
 protected:
     /// @brief Core API View type
@@ -107,6 +111,13 @@ public:
     std::vector<core::Function> GetAllMethods() const;
 
     /**
+     * @brief Return vector with class's fields.
+     * @return std::vector<core::ClassField>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<core::ClassField> GetFields() const;
+
+    /**
      * @brief Get vector with all Annotations
      * @return std::vector<core::Annotation>
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
@@ -147,12 +158,32 @@ public:
      */
     Namespace GetParentNamespace() const;
 
+    /**
+     * @brief Returns super class for class.
+     * @return `core::Class`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Class GetSuperClass() const;
+
+    /**
+     * @brief Returns subclasses for class.
+     * @return `std::vector<core::Core>`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<Class> GetSubClasses() const;
+
+    /**
+     * @brief Returns implemented interfaces for class.
+     * @return `std::vector<core::Core>`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::vector<Interface> GetInterfaces() const;
+
 private:
-    inline bool GetAllMethodsInner(std::vector<core::Function> &methods) const;
-
-    inline bool GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const;
-
-    Class(AbckitCoreClass *klass, const ApiConfig *conf, const File *file);
+    Class(AbckitCoreClass *klass, const ApiConfig *conf, const File *file) : ViewInResource(klass), conf_(conf)
+    {
+        SetResource(file);
+    };
 
     const ApiConfig *conf_;
 

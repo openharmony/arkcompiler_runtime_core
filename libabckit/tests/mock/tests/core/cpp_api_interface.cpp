@@ -66,4 +66,46 @@ TEST_F(LibAbcKitCppMockCoreTestInterface, Interface_GetFields)
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
     ASSERT_TRUE(CheckMockedStackEmpty());
 }
+
+// Test: test-kind=mock, api=Interface::GetSuperInterfaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestInterface, Interface_GetSuperInterfaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreInterface(f).GetSuperInterfaces();
+        ASSERT_TRUE(CheckMockedApi("InterfaceEnumerateSuperInterfaces"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Interface::GetSubInterfaces, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestInterface, Interface_GetSubInterfaces)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreInterface(f).GetSubInterfaces();
+        ASSERT_TRUE(CheckMockedApi("InterfaceEnumerateSubInterfaces"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=Interface::GetClasses, abc-kind=ArkTS2, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockCoreTestInterface, Interface_GetClasses)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File f(DEFAULT_PATH);
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::mock::helpers::GetMockCoreInterface(f).GetClasses();
+        ASSERT_TRUE(CheckMockedApi("InterfaceEnumerateClasses"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
 }  // namespace libabckit::cpp_test

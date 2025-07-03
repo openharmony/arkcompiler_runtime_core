@@ -24,8 +24,6 @@
 #include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
-
-#include "metadata_arkts_inspect_impl.h"
 #include "libabckit/src/metadata_arkts_inspect_impl.h"
 #include "libabckit/src/metadata_js_inspect_impl.h"
 #include "libabckit/src/metadata_unknown_inspect_impl.h"
@@ -332,6 +330,14 @@ extern "C" bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *d
 // Namespace
 // ========================================
 
+extern "C" AbckitCoreModule *NamespaceGetModule(AbckitCoreNamespace *n)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(n, nullptr);
+    return n->owningModule;
+}
+
 extern "C" AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -399,6 +405,59 @@ extern "C" bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
             return false;
         default:
             LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" bool NamespaceEnumerateInterfaces(AbckitCoreNamespace *n, void *data,
+                                             bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(n->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSNamespaceEnumerateInterfaces(n, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
+extern "C" bool NamespaceEnumerateEnums(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(n->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSNamespaceEnumerateEnums(n, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
+extern "C" bool NamespaceEnumerateFields(AbckitCoreNamespace *n, void *data,
+                                         bool (*cb)(AbckitCoreNamespaceField *field, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(n->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSNamespaceEnumerateFields(n, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
@@ -642,14 +701,40 @@ extern "C" bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
     }
 }
 
+extern "C" bool ClassEnumerateSubClasses(AbckitCoreClass *klass, void *data,
+                                         bool (*cb)(AbckitCoreClass *subClass, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(klass->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSClassEnumerateSubClasses(klass, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
 extern "C" bool ClassEnumerateInterfaces(AbckitCoreClass *klass, void *data,
                                          bool (*cb)(AbckitCoreInterface *iface, void *data))
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)data;
-    (void)cb;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(klass->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSClassEnumerateInterfaces(klass, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
 }
 
 extern "C" bool ClassEnumerateFields(AbckitCoreClass *klass, void *data,
@@ -663,7 +748,8 @@ extern "C" bool ClassEnumerateFields(AbckitCoreClass *klass, void *data,
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSClassEnumerateFields(klass, data, cb);
         default:
-            LIBABCKIT_UNREACHABLE;
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
@@ -673,16 +759,18 @@ extern "C" bool ClassEnumerateFields(AbckitCoreClass *klass, void *data,
 
 extern "C" AbckitFile *InterfaceGetFile(AbckitCoreInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr)
+    return iface->owningModule->file;
 }
 
 extern "C" AbckitCoreModule *InterfaceGetModule(AbckitCoreInterface *iface)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr)
+    return iface->owningModule;
 }
 
 extern "C" AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
@@ -698,14 +786,63 @@ extern "C" AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
     return InterfaceGetNameStatic(iface);
 }
 
+extern "C" AbckitCoreNamespace *InterfaceGetParentNamespace(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, nullptr);
+    return iface->parentNamespace;
+}
+
 extern "C" bool InterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
                                                   bool (*cb)(AbckitCoreInterface *iface, void *data))
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)data;
-    (void)cb;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(iface->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSInterfaceEnumerateSuperInterfaces(iface, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
+extern "C" bool InterfaceEnumerateSubInterfaces(AbckitCoreInterface *iface, void *data,
+                                                bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(iface->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSInterfaceEnumerateSubInterfaces(iface, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
+}
+
+extern "C" bool InterfaceEnumerateClasses(AbckitCoreInterface *iface, void *data,
+                                          bool (*cb)(AbckitCoreClass *klass, void *data))
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(iface, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    switch (ModuleGetTarget(iface->owningModule)) {
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ArkTSInterfaceEnumerateClasses(iface, data, cb);
+        default:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
+    }
 }
 
 extern "C" bool InterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
@@ -719,7 +856,8 @@ extern "C" bool InterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSInterfaceEnumerateMethods(iface, data, cb);
         default:
-            LIBABCKIT_UNREACHABLE;
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
@@ -744,13 +882,30 @@ extern "C" bool InterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSInterfaceEnumerateFields(iface, data, cb);
         default:
-            LIBABCKIT_UNREACHABLE;
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
 // ========================================
 // Enum
 // ========================================
+
+extern "C" AbckitFile *EnumGetFile(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr)
+    return enm->owningModule->file;
+}
+
+extern "C" AbckitCoreModule *EnumGetModule(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(enm, nullptr)
+    return enm->owningModule;
+}
 
 extern "C" AbckitString *EnumGetName(AbckitCoreEnum *enm)
 {
@@ -775,7 +930,8 @@ extern "C" bool EnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSEnumEnumerateMethods(enm, data, cb);
         default:
-            LIBABCKIT_UNREACHABLE;
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
@@ -789,7 +945,8 @@ extern "C" bool EnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSEnumEnumerateFields(enm, data, cb);
         default:
-            LIBABCKIT_UNREACHABLE;
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return false;
     }
 }
 
@@ -799,9 +956,10 @@ extern "C" bool EnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(
 
 extern "C" AbckitCoreModule *ModuleFieldGetModule(AbckitCoreModuleField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->owner;
 }
 
 extern "C" AbckitString *ModuleFieldGetName(AbckitCoreModuleField *field)
@@ -851,14 +1009,35 @@ extern "C" bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, vo
 }
 
 // ========================================
+// Namespace Field
+// ========================================
+
+extern "C" AbckitCoreNamespace *NamespaceFieldGetNamespace(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->owner;
+}
+
+extern "C" AbckitString *NamespaceFieldGetName(AbckitCoreNamespaceField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->name;
+}
+
+// ========================================
 // Class Field
 // ========================================
 
 extern "C" AbckitCoreClass *ClassFieldGetClass(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->owner;
 }
 
 extern "C" AbckitString *ClassFieldGetName(AbckitCoreClassField *field)
@@ -885,30 +1064,50 @@ extern "C" AbckitValue *ClassFieldGetValue(AbckitCoreClassField *field)
 
 extern "C" bool ClassFieldIsPublic(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return ClassFieldIsPublicStatic(field);
 }
 
 extern "C" bool ClassFieldIsProtected(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return ClassFieldIsProtectedStatic(field);
 }
 
 extern "C" bool ClassFieldIsPrivate(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return ClassFieldIsPrivateStatic(field);
 }
 
 extern "C" bool ClassFieldIsStatic(AbckitCoreClassField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return ClassFieldIsStaticStatic(field);
 }
 
 extern "C" bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
@@ -927,9 +1126,10 @@ extern "C" bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void
 
 extern "C" AbckitCoreInterface *InterfaceFieldGetInterface(AbckitCoreInterfaceField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->owner;
 }
 
 extern "C" AbckitString *InterfaceFieldGetName(AbckitCoreInterfaceField *field)
@@ -945,6 +1145,18 @@ extern "C" AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
     LIBABCKIT_UNIMPLEMENTED;
     (void)field;
     return nullptr;
+}
+
+extern "C" bool InterfaceFieldIsReadonly(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return InterfaceFieldIsReadonlyStatic(field);
 }
 
 extern "C" bool InterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
@@ -963,9 +1175,10 @@ extern "C" bool InterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *fie
 
 extern "C" AbckitCoreEnum *EnumFieldGetEnum(AbckitCoreEnumField *field)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    return field->owner;
 }
 
 extern "C" AbckitString *EnumFieldGetName(AbckitCoreEnumField *field)
@@ -1913,10 +2126,14 @@ AbckitInspectApi g_inspectApiImpl = {
     // Namespace
     // ========================================
 
+    NamespaceGetModule,
     NamespaceGetName,
     NamespaceGetParentNamespace,
     NamespaceEnumerateNamespaces,
     NamespaceEnumerateClasses,
+    NamespaceEnumerateInterfaces,
+    NamespaceEnumerateEnums,
+    NamespaceEnumerateFields,
     NamespaceEnumerateTopLevelFunctions,
 
     // ========================================
@@ -1951,6 +2168,7 @@ AbckitInspectApi g_inspectApiImpl = {
     ClassGetSuperClass,
     ClassEnumerateMethods,
     ClassEnumerateAnnotations,
+    ClassEnumerateSubClasses,
     ClassEnumerateInterfaces,
     ClassEnumerateFields,
 
@@ -1961,7 +2179,10 @@ AbckitInspectApi g_inspectApiImpl = {
     InterfaceGetFile,
     InterfaceGetModule,
     InterfaceGetName,
+    InterfaceGetParentNamespace,
     InterfaceEnumerateSuperInterfaces,
+    InterfaceEnumerateSubInterfaces,
+    InterfaceEnumerateClasses,
     InterfaceEnumerateMethods,
     InterfaceEnumerateAnnotations,
     InterfaceEnumerateFields,
@@ -1970,6 +2191,8 @@ AbckitInspectApi g_inspectApiImpl = {
     // Enum
     // ========================================
 
+    EnumGetFile,
+    EnumGetModule,
     EnumGetName,
     EnumEnumerateMethods,
     EnumEnumerateFields,
@@ -1985,6 +2208,13 @@ AbckitInspectApi g_inspectApiImpl = {
     ModuleFieldIsPublic,
     ModuleFieldIsPrivate,
     ModuleFieldEnumerateAnnotations,
+
+    // ========================================
+    // Namespace Field
+    // ========================================
+
+    NamespaceFieldGetNamespace,
+    NamespaceFieldGetName,
 
     // ========================================
     // Class Field
@@ -2007,6 +2237,7 @@ AbckitInspectApi g_inspectApiImpl = {
     InterfaceFieldGetInterface,
     InterfaceFieldGetName,
     InterfaceFieldGetType,
+    InterfaceFieldIsReadonly,
     InterfaceFieldEnumerateAnnotations,
 
     // ========================================
