@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,38 +236,38 @@ void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptrView, size
 
         auto ptrCnt = ptrView.Size();
         auto end = static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT);
-
+        auto diff = static_cast<ssize_t>(ptrCnt - end);
         ptrView[ptrCnt - gotDataSize] = 0;
         constexpr size_t IMM_2 = 2;
         for (auto [method, idx] : gotPlt_) {
             ASSERT(idx <= 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::PLT_SLOT;
-            ptrView[ptrCnt - end + idx - IMM_2] = method.second;
+            ptrView[diff + idx] = AotFile::AotSlotType::PLT_SLOT;
+            ptrView[diff + idx - IMM_2] = method.second;
         }
         for (auto [method, idx] : gotVirtIndexes_) {
             ASSERT(idx <= 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::VTABLE_INDEX;
-            ptrView[ptrCnt - end + idx - 1] = method.second;
+            ptrView[diff + idx] = AotFile::AotSlotType::VTABLE_INDEX;
+            ptrView[diff + idx - 1] = method.second;
         }
         for (auto [klass, idx] : gotClass_) {
             ASSERT(idx <= 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::CLASS_SLOT;
-            ptrView[ptrCnt - end + idx - IMM_2] = klass.second;
+            ptrView[diff + idx] = AotFile::AotSlotType::CLASS_SLOT;
+            ptrView[diff + idx - IMM_2] = klass.second;
         }
         for (auto [string_id, idx] : gotString_) {
             ASSERT(idx <= 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::STRING_SLOT;
-            ptrView[ptrCnt - end + idx - 1] = string_id.second;
+            ptrView[diff + idx] = AotFile::AotSlotType::STRING_SLOT;
+            ptrView[diff + idx - 1] = string_id.second;
         }
         for (auto [cache, idx] : gotIntfInlineCache_) {
             (void)cache;
             ASSERT(idx < 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::INLINECACHE_SLOT;
+            ptrView[diff + idx] = AotFile::AotSlotType::INLINECACHE_SLOT;
         }
         for (auto [cache, idx] : gotCommon_) {
             (void)cache;
             ASSERT(idx < 0);
-            ptrView[ptrCnt - end + idx] = AotFile::AotSlotType::COMMON_SLOT;
+            ptrView[diff + idx] = AotFile::AotSlotType::COMMON_SLOT;
         }
     }
 }
