@@ -6157,7 +6157,7 @@ intrinsics:
   - name: StdCoreAbcFileLoadFromMemory
     space: ets
     class_name: std.core.AbcFile
-    method_name: loadFromMemoryImpl
+    method_name: loadFromMemory
     static: true
     signature:
       ret: std.core.AbcFile
