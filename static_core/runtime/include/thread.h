@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_THREAD_H_
 #define PANDA_RUNTIME_THREAD_H_
 
+#include <cstdint>
 #include <memory>
 #include <chrono>
 #include <limits>
@@ -316,8 +317,14 @@ public:
         return MEMBER_OFFSET(Thread, vm_);
     }
 
+    uint64_t *GetThreadRandomState()
+    {
+        return &threadRandomState_;
+    }
+
 private:
     void InitCardTableData(mem::GCBarrierSet *barrier);
+    void InitThreadRandomState();
 
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -346,6 +353,7 @@ protected:
 #ifndef NDEBUG
     uintptr_t runtimeCallEnabled_ {1};
 #endif
+    uint64_t threadRandomState_ {0};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
