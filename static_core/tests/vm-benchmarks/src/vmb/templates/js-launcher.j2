@@ -98,7 +98,7 @@ class VmbLauncher {
         if (elapsed <= 0) {
             elapsed = 1; // 0 is invalid result
         }
-        VmbLauncher.log("Benchmark result: {{bench_name}} " + 1.0*elapsed/VmbLauncher.FI);
+        VmbLauncher.log("Benchmark result: {{bench_name}} " + 1.0*elapsed*MS2NS/VmbLauncher.FI);
     {% else %}
         // Normal mode
         VmbLauncher.log('Starting {{bench_name}} @ {{fixture}}...');

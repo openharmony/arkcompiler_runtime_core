@@ -25,11 +25,28 @@ from itertools import combinations, product
 from dataclasses import dataclass, field
 from collections import namedtuple
 from vmb.lang import LangBase
-from vmb.helpers import StringEnum, split_params
+from vmb.helpers import StringEnum, split_params, die
 from vmb.cli import Args, add_measurement_opts
 
 log = logging.getLogger('vmb')
 NameVal = namedtuple("NameVal", "name value")
+
+
+class TestFilter:
+    def __init__(self, patterns: Iterable[str]):
+        to_strip = '\'\"'
+        self.patterns = []
+        for x in patterns:
+            try:
+                self.patterns.append(re.compile(f'^{x.strip(to_strip)}$'))
+            except re.error as e:
+                die(True, f'RegExp error in [{x}]: {e}')
+
+    def match(self, name: str):
+        # empty filter match all
+        if not self.patterns:
+            return True
+        return any(r.search(name) is not None for r in self.patterns)
 
 
 class LineParser:
@@ -351,7 +368,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                            ) -> Iterable[TemplateVars]:
         """Produce all combinations of Benches and Params."""
         tags_filter = args.tags if args else []
-        tests_filter = args.tests if args else []
+        tests_filter = TestFilter(args.tests if args else [])
         skip_tags = args.skip_tags if args else set()
         # list of lists of tuples (param_name, param_value)
         # sorting by param name to keep fixture indexing
@@ -390,8 +407,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                 if tp.fix_id > 0:
                     tp.bench_name = f'{tp.bench_name}_{tp.fix_id}'
                 # if requested specific tests skip all other
-                if tests_filter and \
-                        not any((x == tp.bench_name) for x in tests_filter):
+                if not tests_filter.match(tp.bench_name):
                     fix_id += 1
                     continue
                 tp.state_setup = f'bench.{parsed.setup}();' \
