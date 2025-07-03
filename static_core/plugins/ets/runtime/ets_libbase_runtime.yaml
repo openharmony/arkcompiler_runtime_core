@@ -7704,6 +7704,26 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
+  - name: ConcurrencyHelpersSpinlockCreate
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: spinlockCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsQueueSpinlockCreate
+
+  - name: ConcurrencyHelpersSpinlockGuard
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: spinlockGuard
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
+
 ###############################
 # std.core.RuntimeDebug #
 ###############################
