@@ -21,7 +21,7 @@
 #include "helpers.h"
 
 #include "utils/span.h"
-#include "visibility.h"
+#include "panda_visibility.h"
 
 namespace panda::panda_file {
 using StringData = File::StringData;

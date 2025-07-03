@@ -19,7 +19,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
-#include "../visibility.h"
+#include "../panda_visibility.h"
 
 namespace panda {
 

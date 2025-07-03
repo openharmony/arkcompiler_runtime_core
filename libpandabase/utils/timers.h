@@ -22,7 +22,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include "visibility.h"
+#include "panda_visibility.h"
 
 namespace panda {
 // Event list

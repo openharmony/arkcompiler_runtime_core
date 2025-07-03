@@ -16,7 +16,7 @@
 #ifndef LIBPANDABASE_UTILS_DEBUG_H
 #define LIBPANDABASE_UTILS_DEBUG_H
 
-#include "../visibility.h"
+#include "../panda_visibility.h"
 
 namespace panda::debug {
 
