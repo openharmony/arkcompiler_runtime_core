@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
+#include "plugins/ets/runtime/types/ets_atomic_int.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -278,6 +279,36 @@ extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
         return UINT8_MAX;
     }
     return std::lrint(val);
+}
+
+extern "C" void EtsAtomicIntSetValue(EtsObject *atomicInt, EtsInt value)
+{
+    EtsAtomicInt::FromEtsObject(atomicInt)->SetValue(value);
+}
+
+extern "C" EtsInt EtsAtomicIntGetValue(EtsObject *atomicInt)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->GetValue();
+}
+
+extern "C" EtsInt EtsAtomicIntGetAndSet(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->GetAndSet(value);
+}
+
+extern "C" EtsInt EtsAtomicIntCompareAndSet(EtsObject *atomicInt, EtsInt expected, EtsInt newValue)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->CompareAndSet(expected, newValue);
+}
+
+extern "C" EtsInt EtsAtomicIntFetchAndAdd(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->FetchAndAdd(value);
+}
+
+extern "C" EtsInt EtsAtomicIntFetchAndSub(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->FetchAndSub(value);
 }
 
 }  // namespace ark::ets::intrinsics
