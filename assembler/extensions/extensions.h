@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,14 +31,13 @@ constexpr Language DEFAULT_LANGUAGE = panda::panda_file::DEFUALT_SOURCE_LANG;
 
 class MetadataExtension {
 public:
-    static PANDA_PUBLIC_API std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
+    static std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
+    static std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(
-        panda::panda_file::SourceLang lang);
+    static std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(panda::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
+    static std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
 };
 
 }  // namespace panda::pandasm::extensions

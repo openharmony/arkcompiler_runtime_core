@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,11 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
-
-#include "../../../libpandabase/os/stacktrace.h"
+#include "libpandabase/macros.h"
 
 namespace ark {
+
+class StackPrinterImpl;
 
 /*
  * Return stack trace as a vector of PCs
@@ -50,5 +51,4 @@ inline std::ostream &PrintStack(std::ostream &out)
 }
 
 }  // namespace ark
-
 #endif  // PANDA_STACKTRACE_H

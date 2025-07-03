@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,7 +147,8 @@ public:
 protected:
     virtual std::optional<Error> Validate(const std::string_view &attribute) const = 0;
 
-    virtual std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const = 0;
+    virtual std::optional<Error> Validate(const std::string_view &attribute,
+                                          const std::string_view &value) const = 0;
 
     virtual std::optional<Error> StoreValue(const std::string_view &attribute, const std::string_view &value)
     {
@@ -207,7 +208,7 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
-    void EnumerateAnnotations(const std::function<void(AnnotationData &)> &callback)
+    void EnumerateAnnotations(const std::function<void(AnnotationData&)> &callback)
     {
         for (auto &annotation : annotations_) {
             callback(annotation);
@@ -216,10 +217,10 @@ public:
 
     void DeleteAnnotationElementByName(std::string_view annotation_name, std::string_view annotation_elem_name)
     {
-        auto annotation_iter =
-            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
-            });
+        auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
+            [&](pandasm::AnnotationData &annotation) -> bool {
+            return annotation.GetName() == annotation_name;
+        });
         if (annotation_iter != annotations_.end()) {
             annotation_iter->DeleteAnnotationElementByName(annotation_elem_name);
         }
@@ -227,10 +228,10 @@ public:
 
     void DeleteAnnotationByName(const std::string_view &annotation_name)
     {
-        auto annotation_iter =
-            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
-            });
+        auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
+            [&](pandasm::AnnotationData &annotation) -> bool {
+            return annotation.GetName() == annotation_name;
+        });
         if (annotation_iter != annotations_.end()) {
             (void)annotations_.erase(annotation_iter);
         }
@@ -238,10 +239,10 @@ public:
 
     void AddAnnotationElementByName(const std::string_view &annotation_name, AnnotationElement &&element)
     {
-        auto annotation_iter =
-            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
-            });
+        auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
+            [&](pandasm::AnnotationData &annotation) -> bool {
+            return annotation.GetName() == annotation_name;
+        });
         if (annotation_iter != annotations_.end()) {
             annotation_iter->AddElement(std::move(element));
         }
@@ -528,7 +529,7 @@ public:
         access_flags_ = access_flags_ | access_flags;
     }
 
-    PANDA_PUBLIC_API bool IsForeign() const;
+    bool IsForeign() const;
 
 private:
     uint32_t access_flags_ {0};

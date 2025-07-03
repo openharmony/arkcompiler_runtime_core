@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,12 +41,3 @@ namespace ark::debug {
 }
 
 }  // namespace ark::debug
-
-namespace panda::debug {
-
-[[noreturn]] void AssertionFail(const char *expr, const char *file, unsigned line, const char *function)
-{
-    ark::debug::AssertionFail(expr, file, line, function);
-}
-
-}  // namespace panda::debug

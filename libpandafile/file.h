@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,7 @@ public:
     enum OpenMode { READ_ONLY, READ_WRITE, WRITE_ONLY };
 
     StringData GetStringData(EntityId id) const;
-    PANDA_PUBLIC_API EntityId GetLiteralArraysId() const;
+    EntityId GetLiteralArraysId() const;
 
     EntityId GetClassId(const uint8_t *mutf8_name) const;
 
@@ -234,8 +234,8 @@ public:
         ASSERT(index_header != nullptr);
         auto class_idx_size = index_header->class_idx_size * EntityId::GetSize();
         ThrowIfWithCheck(index_header->class_idx_off > header->file_size || class_idx_size > header->file_size ||
-                             index_header->class_idx_off > header->file_size - class_idx_size,
-                         File::INVALID_INDEX_HEADER, File::GET_CLASS_INDEX);
+            index_header->class_idx_off > header->file_size - class_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_CLASS_INDEX);
         auto sp = file.SubSpan(index_header->class_idx_off, index_header->class_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->class_idx_size);
     }
@@ -255,8 +255,8 @@ public:
         // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
         auto method_idx_size = index_header->method_idx_size * EntityId::GetSize();
         ThrowIfWithCheck(index_header->method_idx_off > header->file_size || method_idx_size > header->file_size ||
-                             index_header->method_idx_off > header->file_size - method_idx_size,
-                         File::INVALID_INDEX_HEADER, File::GET_METHOD_INDEX);
+            index_header->method_idx_off > header->file_size - method_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_METHOD_INDEX);
         auto sp = file.SubSpan(index_header->method_idx_off, index_header->method_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->method_idx_size);
     }
@@ -275,8 +275,8 @@ public:
         ASSERT(index_header != nullptr);
         auto field_idx_size = index_header->field_idx_size * EntityId::GetSize();
         ThrowIfWithCheck(index_header->field_idx_off > header->file_size || field_idx_size > header->file_size ||
-                             index_header->field_idx_off > header->file_size - field_idx_size,
-                         File::INVALID_INDEX_HEADER, File::GET_FIELD_INDEX);
+            index_header->field_idx_off > header->file_size - field_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_FIELD_INDEX);
         auto sp = file.SubSpan(index_header->field_idx_off, index_header->field_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->field_idx_size);
     }
@@ -295,8 +295,8 @@ public:
         ASSERT(index_header != nullptr);
         auto proto_idx_size = index_header->proto_idx_size * EntityId::GetSize();
         ThrowIfWithCheck(index_header->proto_idx_off > header->file_size || proto_idx_size > header->file_size ||
-                             index_header->proto_idx_off > header->file_size - proto_idx_size,
-                         File::INVALID_INDEX_HEADER, File::GET_PROTO_INDEX);
+            index_header->proto_idx_off > header->file_size - proto_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_PROTO_INDEX);
         auto sp = file.SubSpan(index_header->proto_idx_off, index_header->proto_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->proto_idx_size);
     }
@@ -417,7 +417,7 @@ public:
 
     static uint32_t CalcFilenameHash(const std::string &filename);
 
-    PANDA_PUBLIC_API static std::unique_ptr<const File> Open(std::string_view filename, OpenMode open_mode = READ_ONLY);
+    static std::unique_ptr<const File> Open(std::string_view filename, OpenMode open_mode = READ_ONLY);
 
     static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr);
 
@@ -433,8 +433,7 @@ public:
 
     bool ValidateChecksum(uint32_t *cal_checksum_out = nullptr) const;
 
-    PANDA_PUBLIC_API void ThrowIfWithCheck(bool cond, const std::string_view &msg,
-                                           const std::string_view &tag = "") const;
+    void ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag = "") const;
 
     static constexpr const char *INVALID_FILE_OFFSET = "Invalid file offset";
     static constexpr const char *NULL_INDEX_HEADER = "index_header is null";
@@ -450,8 +449,8 @@ public:
     static constexpr const char *CODE_DATA_ACCESSOR = "CodeDataAccessor";
     static constexpr const char *FIELD_DATA_ACCESSOR = "FieldDataAccessor";
     static constexpr const char *GET_SPAN_FROM_ID = "GetSpanFromId";
-
-    PANDA_PUBLIC_API ~File();
+    
+    ~File();
 
     NO_COPY_SEMANTIC(File);
     NO_MOVE_SEMANTIC(File);

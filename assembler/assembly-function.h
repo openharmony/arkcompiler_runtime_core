@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,10 @@ struct Function {
     struct Parameter {
         Type type;
 
-        Parameter(Type t, panda::panda_file::SourceLang lang) : type(std::move(t)) {}
+        Parameter(Type t, panda::panda_file::SourceLang lang)
+            : type(std::move(t))
+        {
+        }
     };
 
     std::string name = "";
@@ -218,7 +221,7 @@ struct Function {
         return std::any_of(ins.cbegin(), ins.cend(), [](const Ins &insn) { return insn.HasDebugInfo(); });
     }
 
-    PANDA_PUBLIC_API void DebugDump() const;
+    void DebugDump() const;
 
     std::set<std::string> CollectStringsFromFunctionInsns() const;
 };

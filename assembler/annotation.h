@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,16 +61,16 @@ public:
         return elements_;
     }
 
-    void EnumerateAnnotationElements(const std::function<void(AnnotationElement &)> &callback);
+    void EnumerateAnnotationElements(const std::function<void(AnnotationElement&)> &callback);
 
     void AddElement(AnnotationElement &&element)
     {
         elements_.push_back(std::forward<AnnotationElement>(element));
     }
 
-    PANDA_PUBLIC_API void DeleteAnnotationElementByName(const std::string_view &annotation_elem_name);
+    void DeleteAnnotationElementByName(const std::string_view &annotation_elem_name);
 
-    PANDA_PUBLIC_API void SetOrAddElementByIndex(size_t ele_idx, AnnotationElement &&element);
+    void SetOrAddElementByIndex(size_t ele_idx, AnnotationElement &&element);
 
 private:
     std::string record_name_;
@@ -392,13 +392,13 @@ public:
         return type_ == Type::ARRAY;
     }
 
-    PANDA_PUBLIC_API ScalarValue *GetAsScalar();
+    ScalarValue *GetAsScalar();
 
-    PANDA_PUBLIC_API const ScalarValue *GetAsScalar() const;
+    const ScalarValue *GetAsScalar() const;
 
-    PANDA_PUBLIC_API ArrayValue *GetAsArray();
+    ArrayValue *GetAsArray();
 
-    PANDA_PUBLIC_API const ArrayValue *GetAsArray() const;
+    const ArrayValue *GetAsArray() const;
 
     virtual ~Value() = default;
 
@@ -550,12 +550,10 @@ private:
 class AnnotationElement {
 public:
     AnnotationElement(const std::string_view &name, std::unique_ptr<Value> value)
-        : name_(name), value_(std::move(value))
-    {
-    }
+        : name_(name), value_(std::move(value)) {}
 
-    PANDA_PUBLIC_API AnnotationElement(const AnnotationElement &ann_elem);
-    PANDA_PUBLIC_API AnnotationElement &operator=(const AnnotationElement &ann_elem);
+    AnnotationElement(const AnnotationElement &ann_elem);
+    AnnotationElement &operator=(const AnnotationElement &ann_elem);
     DEFAULT_MOVE_SEMANTIC(AnnotationElement);
     ~AnnotationElement() = default;
 

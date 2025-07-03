@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,29 +49,27 @@ public:
         std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarray_items;
     };
 
-    PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, const Program &program,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool emit_debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
+    static bool Emit(panda_file::ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps = nullptr,
+                     bool emit_debug_info = true, panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
 
-    PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, const Program &program,
-                                      std::map<std::string, size_t> *stat = nullptr,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr, uint8_t api = 0,
-                                      std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+    static bool Emit(panda_file::Writer *writer, const Program &program, std::map<std::string, size_t> *stat = nullptr,
+                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
+                     panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr,
+                     uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
-    PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
-                                      std::map<std::string, size_t> *stat = nullptr,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr, uint8_t api = 0,
-                                      std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+    static bool Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat = nullptr,
+                     PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
+                     panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr,
+                     uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
     // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                              uint8_t api = 0, std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
-    PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(
-        const Program &program, PandaFileToPandaAsmMaps *maps = nullptr, uint8_t api = 0,
-        std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
+    static std::unique_ptr<const panda_file::File> Emit(const Program &program,
+                                                        PandaFileToPandaAsmMaps *maps = nullptr,
+                                                        uint8_t api = 0,
+                                                        std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
 
     static std::string GetLastError()
     {
@@ -158,15 +156,15 @@ private:
         last_error = message;
     }
 
-    static bool MakeItemsForSingleProgram(
-        panda_file::ItemContainer *items, const Program &program, bool emit_debug_info, AsmEntityCollections &entities,
+    static bool MakeItemsForSingleProgram(panda_file::ItemContainer *items, const Program &program,
+        bool emit_debug_info, AsmEntityCollections &entities,
         std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> primitive_types);
 
     static std::string GetMethodSignatureFromProgram(const std::string &name, const Program &program);
 
-    static panda_file::LiteralItem *CreateLiteralItem(panda_file::ItemContainer *container, const Value *value,
-                                                      std::vector<panda_file::LiteralItem> *out,
-                                                      const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::LiteralItem *CreateLiteralItem(
+        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
+        const AsmEmitter::AsmEntityCollections &entities);
 
     template <class PrimType>
     static panda_file::ScalarValueItem *CreateScalarPrimValueItem(panda_file::ItemContainer *container,
@@ -213,18 +211,17 @@ private:
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
-    static panda_file::ScalarValueItem *CreateScalarValueItem(panda_file::ItemContainer *container, const Value *value,
-                                                              std::vector<panda_file::ScalarValueItem> *out,
-                                                              const Program &program,
-                                                              const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::ScalarValueItem *CreateScalarValueItem(
+        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
+        const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
-    static panda_file::ValueItem *CreateValueItem(panda_file::ItemContainer *container, const Value *value,
-                                                  const Program &program,
-                                                  const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::ValueItem *CreateValueItem(
+        panda_file::ItemContainer *container, const Value *value, const Program &program,
+        const AsmEmitter::AsmEntityCollections &entities);
 
-    static panda_file::AnnotationItem *CreateAnnotationItem(panda_file::ItemContainer *container,
-                                                            const AnnotationData &annotation, const Program &program,
-                                                            const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::AnnotationItem *CreateAnnotationItem(
+        panda_file::ItemContainer *container, const AnnotationData &annotation, const Program &program,
+        const AsmEmitter::AsmEntityCollections &entities);
 
     static panda_file::MethodHandleItem *CreateMethodHandleItem(
         panda_file::ItemContainer *container, const MethodHandle &mh,
@@ -236,11 +233,11 @@ private:
                                const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
     // TODO(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
-    PANDA_PUBLIC_API static std::string last_error;
+    static std::string last_error;
 };
 
-PANDA_PUBLIC_API std::string GetOwnerName(std::string name);
-PANDA_PUBLIC_API std::string GetItemName(std::string name);
+std::string GetOwnerName(std::string name);
+std::string GetItemName(std::string name);
 
 }  // namespace panda::pandasm
 

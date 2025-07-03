@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ class CodeDataAccessor {
 public:
     class TryBlock {
     public:
-        PANDA_PUBLIC_API explicit TryBlock(Span<const uint8_t> data);
+        explicit TryBlock(Span<const uint8_t> data);
 
         ~TryBlock() = default;
 
@@ -73,7 +73,7 @@ public:
 
     class CatchBlock {
     public:
-        PANDA_PUBLIC_API explicit CatchBlock(Span<const uint8_t> data);
+        explicit CatchBlock(Span<const uint8_t> data);
 
         ~CatchBlock() = default;
 
@@ -108,7 +108,7 @@ public:
         size_t size_;
     };
 
-    PANDA_PUBLIC_API CodeDataAccessor(const File &panda_file, File::EntityId code_id);
+    CodeDataAccessor(const File &panda_file, File::EntityId code_id);
 
     ~CodeDataAccessor() = default;
 

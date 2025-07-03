@@ -289,17 +289,3 @@ std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream 
 }
 
 }  // namespace ark
-
-namespace panda {
-
-std::vector<uintptr_t> GetStacktrace()
-{
-    return ark::GetStacktrace();
-}
-
-std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream &out)
-{
-    return ark::PrintStack(stacktrace, out);
-}
-
-}  // namespace panda

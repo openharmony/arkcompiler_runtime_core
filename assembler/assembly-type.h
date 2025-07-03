@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,22 +154,22 @@ public:
         return type_id_ == panda_file::Type::TypeId::VOID;
     }
 
-    PANDA_PUBLIC_API static panda_file::Type::TypeId GetId(const std::string_view &name, bool ignore_primitive = false);
+    static panda_file::Type::TypeId GetId(const std::string_view &name, bool ignore_primitive = false);
 
     bool operator==(const Type &type) const
     {
         return name_ == type.name_;
     }
 
-    static PANDA_PUBLIC_API Type FromDescriptor(std::string_view descriptor);
+    static Type FromDescriptor(std::string_view descriptor);
 
-    static PANDA_PUBLIC_API Type FromName(std::string_view name, bool ignore_primitive = false);
+    static Type FromName(std::string_view name, bool ignore_primitive = false);
 
-    static PANDA_PUBLIC_API bool IsPandaPrimitiveType(const std::string &name);
+    static bool IsPandaPrimitiveType(const std::string &name);
     static bool IsStringType(const std::string &name, panda::panda_file::SourceLang lang);
 
 private:
-    static PANDA_PUBLIC_API std::string GetName(std::string_view component_name, size_t rank);
+    static std::string GetName(std::string_view component_name, size_t rank);
 
     std::string component_name_;
     size_t rank_ {0};

@@ -368,9 +368,8 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CAST(Opc) CastTo##Opc()
 
-// CC-OFFNXT(G.PRE.02-CPP) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECK_OPC(Opc, Getter)                                                                               \
+#define CHECK(Opc, Getter)                                                                                   \
     do {                                                                                                     \
         /* CC-OFFNXT(G.PRE.02) false positive */                                                             \
         if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
@@ -379,42 +378,42 @@ public:
         }                                                                                                    \
     } while (0)
 
-        CHECK_OPC(Constant, GetRawValue);
+        CHECK(Constant, GetRawValue);
 
-        CHECK_OPC(Cast, GetOperandsType);
-        CHECK_OPC(Cmp, GetOperandsType);
+        CHECK(Cast, GetOperandsType);
+        CHECK(Cmp, GetOperandsType);
 
-        CHECK_OPC(Compare, GetCc);
-        CHECK_OPC(Compare, GetOperandsType);
+        CHECK(Compare, GetCc);
+        CHECK(Compare, GetOperandsType);
 
-        CHECK_OPC(If, GetCc);
-        CHECK_OPC(If, GetOperandsType);
+        CHECK(If, GetCc);
+        CHECK(If, GetOperandsType);
 
-        CHECK_OPC(IfImm, GetCc);
-        CHECK_OPC(IfImm, GetImm);
-        CHECK_OPC(IfImm, GetOperandsType);
+        CHECK(IfImm, GetCc);
+        CHECK(IfImm, GetImm);
+        CHECK(IfImm, GetOperandsType);
 
-        CHECK_OPC(LoadArrayI, GetImm);
-        CHECK_OPC(LoadArrayPairI, GetImm);
-        CHECK_OPC(LoadPairPart, GetImm);
-        CHECK_OPC(StoreArrayI, GetImm);
-        CHECK_OPC(StoreArrayPairI, GetImm);
-        CHECK_OPC(BoundsCheckI, GetImm);
-        CHECK_OPC(ReturnI, GetImm);
-        CHECK_OPC(AddI, GetImm);
-        CHECK_OPC(SubI, GetImm);
-        CHECK_OPC(ShlI, GetImm);
-        CHECK_OPC(ShrI, GetImm);
-        CHECK_OPC(AShrI, GetImm);
-        CHECK_OPC(AndI, GetImm);
-        CHECK_OPC(OrI, GetImm);
-        CHECK_OPC(XorI, GetImm);
+        CHECK(LoadArrayI, GetImm);
+        CHECK(LoadArrayPairI, GetImm);
+        CHECK(LoadPairPart, GetImm);
+        CHECK(StoreArrayI, GetImm);
+        CHECK(StoreArrayPairI, GetImm);
+        CHECK(BoundsCheckI, GetImm);
+        CHECK(ReturnI, GetImm);
+        CHECK(AddI, GetImm);
+        CHECK(SubI, GetImm);
+        CHECK(ShlI, GetImm);
+        CHECK(ShrI, GetImm);
+        CHECK(AShrI, GetImm);
+        CHECK(AndI, GetImm);
+        CHECK(OrI, GetImm);
+        CHECK(XorI, GetImm);
 
-        CHECK_OPC(LoadStatic, GetVolatile);
-        CHECK_OPC(StoreStatic, GetVolatile);
-        CHECK_OPC(LoadObject, GetVolatile);
-        CHECK_OPC(StoreObject, GetVolatile);
-#undef CHECK_OPC
+        CHECK(LoadStatic, GetVolatile);
+        CHECK(StoreStatic, GetVolatile);
+        CHECK(LoadObject, GetVolatile);
+        CHECK(StoreObject, GetVolatile);
+#undef CHECK
 #undef CAST
 
         if (inst1->GetOpcode() == Opcode::Cmp && IsFloatType(inst1->GetInput(0).GetInst()->GetType())) {
