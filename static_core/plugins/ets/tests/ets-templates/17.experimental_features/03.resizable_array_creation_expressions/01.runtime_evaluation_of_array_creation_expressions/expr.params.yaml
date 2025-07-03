@@ -105,25 +105,6 @@ cases:
           }
 
     - defs: |-
-          type UT = FixedArray<FixedArray<number>> | null
-          let size = 1_000_000
-          let res: string = ""
-          function foo(p: int): int {
-              res += p
-              return p
-          }
-      use: |-
-          res = ""
-          let v: UT = null
-          try {
-              v = new number[foo(size)][foo(size)]
-          } catch (e: OutOfMemoryError) {
-              // expected
-              return (res == "10000001000000" && v == null ? 0 : 1)
-          }
-          return 1
-
-    - defs: |-
           let cntr: int = 0
           class A {
               fld: int

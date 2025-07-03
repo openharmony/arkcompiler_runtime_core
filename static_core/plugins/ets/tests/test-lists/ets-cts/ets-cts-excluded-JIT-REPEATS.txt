@@ -55,12 +55,3 @@
 16.concurrency/03.asynchronous_api/03.async_methods/async_method26.ets
 16.concurrency/03.asynchronous_api/03.async_methods/async_method27.ets
 16.concurrency/03.asynchronous_api/03.async_methods/async_method28.ets
-
-#24226 RUNTIME_TIMEOUT - it required more than 600sec
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_0.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_1.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_2.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_3.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_4.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_5.ets
-20.implementation_details/07.outofmemoryerror_for_primitive_type_operations/test_6.ets
