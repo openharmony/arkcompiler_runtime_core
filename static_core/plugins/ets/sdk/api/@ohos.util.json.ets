@@ -54,13 +54,13 @@
      *
      * @returns String - JSON representation of Object
      */
-    export function stringify(value: NullishType, replacer?: Transformer | ((number | string)[]) | null, space?: string | number): string {
+    export function stringify(value: NullishType, replacer?: Transformer | ((double | string)[]) | null, space?: string | int): string {
         if ((replacer === null) || (replacer === undefined)) {
             return JSON.stringify(value, undefined, space)
-        } else if (replacer instanceof Transformer) {
-            return JSON.stringify(value, replacer, space)
+        } else if (replacer! instanceof Transformer) {
+            return JSON.stringify(value, replacer! as Transformer, space)
         }
-        return JSON.stringify(value, replacer as (number | string)[], space)
+        return JSON.stringify(value, replacer! as (double | string)[], space)
     }
 
     /**
@@ -70,7 +70,7 @@
      *
      * @param type: Type of parsed object
      *
-     * @param replacer A function that transforms the results
+     * @param reviver A function that transforms the results
      *
      * @param space A string or number that's used to insert white space
      * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.

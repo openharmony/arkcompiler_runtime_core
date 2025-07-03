@@ -77,8 +77,8 @@ function jsonStringifyArrayClass() {
 }
 
 function jsonStringifyArraySpace() {
-    let arr = Array.of<int>(1, 2, 3, 4);
-    let space: string | number = 1;
+    let arr = Array.of<double>(1, 2, 3, 4);
+    let space: string | int = 1;
     let expect = '[\n 1,\n 2,\n 3,\n 4\n]';
     let ret = JSON.stringify(arr, undefined, space);
     arktest.assertEQ(ret, expect);
@@ -89,8 +89,8 @@ function jsonStringifyArraySpace() {
 }
 
 function jsonStringifyArrayReplacer1() {
-    let arr = Array.of<int>(1, 2, 3, 4);
-    let replacer: FixedArray<string | number> = [2, 4];
+    let arr = Array.of<double>(1, 2, 3, 4);
+    let replacer: FixedArray<string | double> = [2, 4];
     let expect = '[1,2,3,4]';
     let ret = JSON.stringify(arr, replacer);
     arktest.assertEQ(ret, expect);
