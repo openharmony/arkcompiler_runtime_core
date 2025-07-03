@@ -12,13 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-    err,
-    ErrorFunc,
-    CustomErrorFunc,
-    errRangeError
-} from 'test_error_ts';
+
 let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/error/ts_to_ets/test_error');
+let err = module.getProperty('err');
+let etsErrorFunc = module.getProperty('ErrorFunc');
+let etsCustomErrorFunc = module.getProperty('CustomErrorFunc');
 let errRangeErrorModule = module.getProperty('errRangeError');
 
 const ErrMsg: string = 'This is a Error';
@@ -28,17 +26,17 @@ const CustomErrorCode: number = 1001;
 
 function testError(): boolean {
     let res: boolean;
-    res = (err.message == ErrMsg);
+    res = (err.getProperty('message').toString() === ErrMsg);
     return res;
 }
 
 function testThrowError(): boolean {
     let res: boolean;
     try {
-        ErrorFunc(ErrorMessage);
+        etsErrorFunc.invoke(ErrorMessage);
         res = false;
     } catch (error: Error) {
-        res = (error instanceof Error) && (error.message == ErrorMessage);
+        res = (error instanceof Error) && (error.message === ErrorMessage);
     }
     return res;
 }
@@ -46,15 +44,15 @@ function testThrowError(): boolean {
 function testCustomThrowError(): boolean {
     let res: boolean;
     try {
-        CustomErrorFunc(CustomErrorMessage, CustomErrorCode);
+        etsCustomErrorFunc.invoke(CustomErrorMessage, CustomErrorCode);
         res = false;
     } catch (e: Error) {
         console.log(e instanceof Error);
         let errObj: ESValue = (e as ESError).getValue()
         let msg: ESValue = errObj.getProperty('message')
         let code: ESValue = errObj.getProperty('code')
-        res = (e instanceof Error) && (msg.toString() == CustomErrorMessage) &&
-              (code.toNumber() == CustomErrorCode);
+        res = (e instanceof Error) && (msg.toString() === CustomErrorMessage) &&
+              (code.toNumber() === CustomErrorCode);
     }
     return res;
 }

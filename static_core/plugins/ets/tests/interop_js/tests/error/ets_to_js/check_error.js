@@ -15,9 +15,9 @@
 
 const stsVm = globalThis.gtest.etsVm;
 
-const bar0 = stsVm.getFunction('Lerror/test/ETSGLOBAL;', 'bar0');
-const bar1 = stsVm.getFunction('Lerror/test/ETSGLOBAL;', 'bar1');
-const bar2 = stsVm.getFunction('Lerror/test/ETSGLOBAL;', 'bar2');
+const bar0 = stsVm.getFunction('Lerror/ETSGLOBAL;', 'bar0');
+const bar1 = stsVm.getFunction('Lerror/ETSGLOBAL;', 'bar1');
+const bar2 = stsVm.getFunction('Lerror/ETSGLOBAL;', 'bar2');
 
 function catchErrorFromOrgJs() {
     try {

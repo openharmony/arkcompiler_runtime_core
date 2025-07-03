@@ -37,16 +37,16 @@ class ListNode {
 
 class ProxyEscapeCtor {
     constructor(cb: JSValue) {
-        cb(this);
+        ESValue.wrap(cb).invoke(this);
     }
 };
 
 class ProxyClassCalls {
     constructor(cb: JSValue) {
-        cb();
+        ESValue.wrap(cb).invoke();
     }
     static call(cb: JSValue) {
-        cb();
+        ESValue.wrap(cb).invoke();
     }
 };
 
@@ -124,7 +124,7 @@ class ReferencesAccess {
     public setfUClass1(v?: UClass1): void { this.fUClass1 = v; }
     public setfUClass2(v?: UClass2): void { this.fUClass2 = v; }
     public setfString(v?: String): void { this.fString = v; }
-    public setfJSValue(v?: JSValue): void { this.fJSValue = v; }
+    public setfJSValue(v?: Any): void { this.fJSValue = v; }
     public setfPromise(v?: Promise<Object>): void { this.fPromise = v; }
     public setfAString(v?: FixedArray<String>): void { this.fAString = v; }
     public setfAUClass1(v?: FixedArray<UClass1>): void { this.fAUClass1 = v; }
@@ -132,7 +132,7 @@ class ReferencesAccess {
     public fUClass1?: UClass1 = new UClass1();
     public fUClass2?: UClass2 = new UClass2();
     public fString?: String = new String();
-    public fJSValue?: JSValue = '0' as JSValue;
+    public fJSValue?: Any = '0' as Any;
     public fPromise?: Promise<Object> = new Promise<Object>(foo);
     public fAString?: FixedArray<String> = [];
     public fAUClass1?: FixedArray<UClass1> = [];
@@ -142,19 +142,19 @@ class ReferencesAccessStatic {
     public static getfUClass1(): UClass1 { return ReferencesAccessStatic.fUClass1; }
     public static getfUClass2(): UClass2 { return ReferencesAccessStatic.fUClass2; }
     public static getfString(): String { return ReferencesAccessStatic.fString; }
-    public static getfJSValue(): JSValue { return ReferencesAccessStatic.fJSValue; }
+    public static getfJSValue(): Any { return ReferencesAccessStatic.fJSValue; }
     public static getfPromise(): Promise<Object> { return ReferencesAccessStatic.fPromise; }
 
     public static setfUClass1(v: UClass1): void { ReferencesAccessStatic.fUClass1 = v; }
     public static setfUClass2(v: UClass2): void { ReferencesAccessStatic.fUClass2 = v; }
     public static setfString(v: String): void { ReferencesAccessStatic.fString = v; }
-    public static setfJSValue(v: JSValue): void { ReferencesAccessStatic.fJSValue = v; }
+    public static setfJSValue(v: Any): void { ReferencesAccessStatic.fJSValue = v; }
     public static setfPromise(v: Promise<Object>): void { ReferencesAccessStatic.fPromise = v; }
 
     public static fUClass1: UClass1 = new UClass1();
     public static fUClass2: UClass2 = new UClass2();
     public static fString: String = new String();
-    public static fJSValue: JSValue = '0' as JSValue;;
+    public static fJSValue: Any = '0' as Any;
     public static fPromise: Promise<Object> = new Promise<Object>(foo);
 };
 

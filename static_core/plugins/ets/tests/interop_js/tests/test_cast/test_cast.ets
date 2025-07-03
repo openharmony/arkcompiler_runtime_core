@@ -13,24 +13,23 @@
  * limitations under the License.
  */
 
-import {
-  funcArgType
-} from "js_code"
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_cast/pure')
+let funcArgType = module.getProperty('funcArgType');
 
 function TestFuncCallArg_Pos(): boolean {
   let arg12: "literal" = "literal";
-  if (funcArgType(arg12) as "literal" == "literal") {
-    return true
+  if (funcArgType.invoke(arg12).toString() == "literal") {
+    return true;
   } else {
-    return false
+    return false;
   }
 }
 
 function TestFuncCallArg_Neg(): boolean {
   let arg12: "literal" = "literal";
-  if (funcArgType(arg12) as "literal" == "literal2") {
-    return true
+  if (funcArgType.invoke(arg12).toString() == "literal2") {
+    return true;
   } else {
-    return false
+    return false;
   }
 }

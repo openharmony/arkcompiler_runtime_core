@@ -50,7 +50,7 @@ function areArraysEqual3(arr1: Array<number>){
     let o2 =  module.getProperty('o');
     let res: boolean = ESValue.areEqual(jsArray1, jsArray2) && ESValue.areStrictlyEqual(jsArray1, jsArray2) 
                        && ESValue.areEqual(o1, o2) && ESValue.areStrictlyEqual(o1, o2)
-                       && ESValue.areEqual(jsArray1, new ESValue(arr1)) && !(jsArray1 === new ESValue(arr1));
+                       && ESValue.areEqual(jsArray1, ESValue.wrap(arr1)) && !(jsArray1 === ESValue.wrap(arr1));
     return res;
 }
 

@@ -13,30 +13,29 @@
 * limitations under the License.
 */
 
-import {
-    throwNum,
-    throwStr,
-    throwObj,
-    throwErrorSubClass,
-    throwError1,
-    throwError2,
-    throwError3,
-    throwEtsError
-} from 'error_js';
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/error/js_to_ets/error')
+let throwNum = module.getProperty('throwNum');
+let throwStr = module.getProperty('throwStr');
+let throwObj = module.getProperty('throwObj');
+let throwErrorSubClass = module.getProperty('throwErrorSubClass');
+let throwError1 = module.getProperty('throwError1');
+let throwError2 = module.getProperty('throwError2');
+let throwError3 = module.getProperty('throwError3');
+let throwEtsError = module.getProperty('throwEtsError');
 
 function throwError(): Error {
     throw new Error('Error From ETS');
 }
 
 function checkEtsError(): boolean {
-    try { throwEtsError(throwError); } catch (e: Error) {
+    try { throwEtsError.invoke(throwError); } catch (e: Error) {
         return e.message === 'Error From ETS';
     }
     return false;
 }
 
 function checkNumError(): boolean {
-    try { throwNum(); } catch (e: Error) {
+    try { throwNum.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         return errObj.toNumber() === 0;
     }
@@ -44,7 +43,7 @@ function checkNumError(): boolean {
 }
 
 function checkStrError(): boolean {
-    try { throwStr(); } catch (e: Error) {
+    try { throwStr.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         return errObj.toString() === 'hello';
     }
@@ -52,7 +51,7 @@ function checkStrError(): boolean {
 }
 
 function checkObjError(): boolean {
-    try { throwObj(); } catch (e: Error) {
+    try { throwObj.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         let a: ESValue = errObj.getProperty('a');
         let b: ESValue = errObj.getProperty('b');
@@ -62,7 +61,7 @@ function checkObjError(): boolean {
 }
 
 function checkSubClassError(): boolean {
-    try { throwErrorSubClass(); } catch (e: Error) {
+    try { throwErrorSubClass.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         let extraField: ESValue = errObj.getProperty('extraField');
         let foo: ESValue = errObj.getProperty('foo');
@@ -72,7 +71,7 @@ function checkSubClassError(): boolean {
 }
 
 function checkErrorData(): boolean {
-    try { throwError1(); } catch (e: Error) {
+    try { throwError1.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         let msg: ESValue = errObj.getProperty('message');
         let data: ESValue = msg.getProperty('data');
@@ -82,14 +81,14 @@ function checkErrorData(): boolean {
 }
 
 function checkErrorMsg(): boolean {
-    try { throwError2(); } catch (e: Error) {
+    try { throwError2.invoke(); } catch (e: Error) {
         return e.message === 'null pointer error';
     }
     return false;
 }
 
 function checkErrorCause(): boolean {
-    try { throwError3(); } catch (e: Error) {
+    try { throwError3.invoke(); } catch (e: Error) {
         let errObj: ESValue = (e as ESError).getValue();
         let curMsg: ESValue = errObj.getProperty('message');
         let cause: ESValue = errObj.getProperty('cause');
@@ -100,7 +99,6 @@ function checkErrorCause(): boolean {
 }
 
 // Check Error
-
 function checkError(): boolean {
     let cause: ErrorOptions = new ErrorOptions('Test cause');
     let err = new Error('original error', cause);
@@ -112,6 +110,6 @@ function checkError(): boolean {
     err.cause = 'new error cause';
 
     return orgName === 'Error' && orgMsg === 'original error' &&
-           orgCause === 'Test cause' && err.cause === 'new error cause' &&
-           err.name === 'new error name' && err.message === 'new error message';
+        orgCause === 'Test cause' && err.cause === 'new error cause' &&
+        err.name === 'new error name' && err.message === 'new error message';
 }

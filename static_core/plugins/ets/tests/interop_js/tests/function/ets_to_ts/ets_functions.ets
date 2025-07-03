@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-let callbackEtsFunctionJs: JSValue = 0;
+let callbackEtsFunctionJs: Any = 0;
 
 function testCallBackEtsFunctionLambda(): number {
-    return callbackEtsFunctionJs((x: number) => x + 1);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke((x: number) => x + 1).toNumber();
 }
 
 function testCallBackEtsFunctionLambdaCapture(): number {
     let bias = 1;
-    return callbackEtsFunctionJs((x: number) => x + bias);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke((x: number) => x + bias).toNumber();
 }
 
 function plusOne(x: number): number {
@@ -29,7 +29,7 @@ function plusOne(x: number): number {
 }
 
 function testCallBackEtsFunctionOuter(): number {
-    return callbackEtsFunctionJs(plusOne);
+    return ESValue.wrap(callbackEtsFunctionJs).invoke(plusOne).toNumber();
 }
 
 function sumFunc(...items: number[]) : number {
