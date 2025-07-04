@@ -18,11 +18,7 @@
 
 #include "base/common.h"
 
-<<<<<<< HEAD
 namespace common {
-=======
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 /*
 * @struct HeapParam
 * @brief Data structure for Arkcommon heap configuration parameters,\n
@@ -179,10 +175,6 @@ struct RuntimeParam {
     struct HeapParam heapParam;
     struct GCParam gcParam;
 };
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // panda
->>>>>>> OpenHarmony_feature_20250328
 
 #endif  // COMMON_INTERFACES_BASE_RUNTIME_PARAM_H

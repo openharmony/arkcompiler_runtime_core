@@ -16,7 +16,6 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 
-<<<<<<< HEAD
 #include <vector>
 #include <variant>
 #include <cstdint>
@@ -34,52 +33,19 @@ namespace common {
 
 struct BaseUndefined {};
 struct BaseNull {};
-=======
-#include <cstdint>
-#include <memory>
-#include <variant>
-#include <vector>
-
-#include "objects/base_object.h"
-
-namespace panda::ecmascript {
-class JSTaggedValue;
-}  // namespace panda::ecmascript
-
-using JSTaggedValue = panda::ecmascript::JSTaggedValue;
-namespace panda {
-
-struct BaseUndefined {};
-struct BaseNull {};
-
-// Only use inside interop bridge as local variable
-// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init,-warnings-as-errors)
->>>>>>> OpenHarmony_feature_20250328
 struct BaseBigInt {
     uint32_t length;
     bool sign;
     std::vector<uint32_t> data;
 };
-<<<<<<< HEAD
 
 // The common consensus type between static and dynamic
 using BaseType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
                                double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject*,
                                BaseString*>;
-=======
-// NOLINTEND(cppcoreguidelines-pro-type-member-init,-warnings-as-errors)
-
-// The common consensus type between static and dynamic
-using PandaType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
-                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject *>;
->>>>>>> OpenHarmony_feature_20250328
 
 // base type for static vm
 using BoxedValue = BaseObject *;
 
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_H

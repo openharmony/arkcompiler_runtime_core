@@ -24,33 +24,21 @@
 #include "objects/ref_field.h"
 #include "objects/base_state_word.h"
 
-<<<<<<< HEAD
 namespace common {
 class BaseObject;
 
-=======
-namespace panda {
-class BaseObject;
-
-// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
->>>>>>> OpenHarmony_feature_20250328
 class BaseObjectOperatorInterfaces {
 public:
     // Get Object size.
     virtual size_t GetSize(const BaseObject *object) const = 0;
     // Check is valid object.
     virtual bool IsValidObject(const BaseObject *object) const = 0;
-<<<<<<< HEAD
-    // Iterate object field.
-    virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
-=======
     // Iterate object field, and skit the weak referent, ONLY used in interop.
     virtual void ForEachRefFieldSkipReferent(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field.
     virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate XRef.
     virtual void IterateXRef(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
->>>>>>> OpenHarmony_feature_20250328
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.
@@ -65,9 +53,5 @@ private:
     BaseObjectOperatorInterfaces *staticObjOp_;
     friend BaseObject;
 };
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H

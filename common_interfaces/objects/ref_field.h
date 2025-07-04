@@ -20,13 +20,7 @@
 #include <functional>
 #include "objects/base_state_word.h"
 
-<<<<<<< HEAD
 namespace common {
-=======
-// NOLINTBEGIN(readability-identifier-naming, readability-else-after-return,-warnings-as-errors,
-// cppcoreguidelines-pro-type-union-access)
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 class BaseObject;
 
 template <bool isAtomic = false>
@@ -34,12 +28,6 @@ class RefField {
 public:
     static constexpr uint64_t TAG_WEAK = 0x01ULL;
     static constexpr MAddress REF_UNDEFINED = 0x02ULL;
-<<<<<<< HEAD
-    // size in bytes
-    static constexpr size_t GetSize()
-    {
-        return sizeof(fieldVal);
-=======
 
     struct BitFieldLayout {
         MAddress address : 48;
@@ -52,7 +40,6 @@ public:
     static constexpr size_t GetSize()
     {
         return sizeof(RefFieldValue);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     BaseObject *GetTargetObject(std::memory_order order = std::memory_order_relaxed) const
@@ -96,10 +83,6 @@ public:
 
         if (isAtomic) {
             __atomic_store_n(&fieldVal, static_cast<RefFieldValue>(newVal), order);
-<<<<<<< HEAD
-        } else {
-=======
->>>>>>> OpenHarmony_feature_20250328
             fieldVal = static_cast<RefFieldValue>(newVal);
         }
     }
@@ -138,39 +121,22 @@ public:
 
     MAddress GetAddress() const
     {
-<<<<<<< HEAD
-        return address;
-=======
         return layout.address;
->>>>>>> OpenHarmony_feature_20250328
     }
 
     bool IsWeak() const
     {
-<<<<<<< HEAD
-        return (address & TAG_WEAK);
-    }
-
-    // bool IsTagged() const { return isTagged == 1; }
-=======
         return (layout.address & TAG_WEAK);
     }
 
->>>>>>> OpenHarmony_feature_20250328
     bool IsTagged() const
     {
         return false;
     }
-<<<<<<< HEAD
-    uint16_t GetTagID() const
-    {
-        return tagID;
-=======
 
     uint16_t GetTagID() const
     {
         return layout.tagID;
->>>>>>> OpenHarmony_feature_20250328
     }
 
     ~RefField() = default;
@@ -178,18 +144,6 @@ public:
     RefField(const RefField &ref) : fieldVal(ref.fieldVal) {}
     explicit RefField(const BaseObject *obj) : fieldVal(0)
     {
-<<<<<<< HEAD
-        address = reinterpret_cast<MAddress>(obj);
-    }
-    RefField(const BaseObject* obj, bool forWeak) : fieldVal(0)
-    {
-        MAddress tag = forWeak ? TAG_WEAK : 0;
-        address = reinterpret_cast<MAddress>(obj) | tag;
-    }
-    RefField(const BaseObject *obj, uint16_t tagged, uint16_t tagid)
-        : address(reinterpret_cast<MAddress>(obj)), isTagged(tagged), tagID(tagid), padding(0)
-    {
-=======
         layout.address = reinterpret_cast<MAddress>(obj);
     }
     RefField(const BaseObject *obj, bool forWeak) : fieldVal(0)
@@ -203,7 +157,6 @@ public:
         layout.isTagged = tagged;
         layout.tagID = tagid;
         layout.padding = 0;
->>>>>>> OpenHarmony_feature_20250328
     }
 
     RefField(RefField &&ref) : fieldVal(ref.fieldVal) {}
@@ -215,24 +168,11 @@ private:
     using RefFieldValue = MAddress;
 
     union {
-<<<<<<< HEAD
-        struct {
-            MAddress address : 48;
-            MAddress isTagged : 1;
-            MAddress tagID : 1;
-            MAddress padding : 14;
-        };
-        RefFieldValue fieldVal;
-    };
-};
-}  // namespace common
-=======
         BitFieldLayout layout;
         RefFieldValue fieldVal;
     };
 };
-}  // namespace panda
+}  // namespace common
 // NOLINTEND(readability-identifier-naming, readability-else-after-return,-warnings-as-errors,
 // cppcoreguidelines-pro-type-union-access)
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H

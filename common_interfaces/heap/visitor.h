@@ -21,11 +21,7 @@
 #include <functional>
 #include "objects/ref_field.h"
 
-<<<<<<< HEAD
 namespace common {
-=======
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 class BaseObject;
 // For ArkTS1.2，It is just example.
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
@@ -34,9 +30,5 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
 // For ArkTS1.1
 // using WeakRootVisitor = std::function<BaseObject *(BaseObject *p)>;
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H
