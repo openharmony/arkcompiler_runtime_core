@@ -45,6 +45,9 @@ class F {
     $_set(index: number, s: String) {}
 
     foo(a: int, b: int): int {return a + b }
+
+    native foo(data: string[]): string[];
+    native foo(data: string[], fn : (it: string) => void): void;
 }
 
 class G {
@@ -75,6 +78,9 @@ function foo(x: double) {}
 function foo(x: double, y: A, z: B): E { return E.R }
 function foo(p: Partial<A>, a: Array<B>) {}
 
+native function foo(data: string[]): string[];
+native function foo(data: string[], fn : (it: string) => void): void;
+
 namespace rls {
     interface A {}
     class B {}
@@ -91,4 +97,9 @@ namespace rls {
     function foo(x: double) {}
     function foo(x: double, y: A, z: B): E { return E.R }
     function foo(p: Partial<A>, a: Array<B>) {}
+    function foo(u: number | string | FixedArray<char>): (E | B) | Partial<A> { return E.R }
+    function foo1<T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V { return null }
+
+    native function foo(data: string[]): string[];
+    native function foo(data: string[], fn : (it: string) => void): void;
 };

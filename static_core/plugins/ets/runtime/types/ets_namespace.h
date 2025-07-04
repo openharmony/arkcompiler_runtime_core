@@ -40,9 +40,9 @@ public:
         return EtsVariable::FromField(field);
     }
 
-    EtsMethod *GetFunction(const char *name, const char *signature)
+    EtsMethod *GetFunction(const char *name, const char *signature, bool isANIFormat = false)
     {
-        return GetStaticMethod(name, signature);
+        return GetStaticMethod(name, signature, isANIFormat);
     }
 };
 

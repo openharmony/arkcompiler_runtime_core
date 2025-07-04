@@ -15,6 +15,7 @@
 
 #include "ani_gtest.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
+#include "plugins/ets/runtime/types/ets_array.h"
 
 namespace ark::ets::ani::testing {
 
@@ -667,6 +668,58 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName_OldFormat)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Int(object, "foo", "II:I", &result, 1, 2U), ANI_OK);
     ASSERT_EQ(result, 1 + 2U);
+}
+
+static EtsArray *ClassBindNativeFunctionsFoo1(EtsArray *data)
+{
+    return data;
+}
+
+static void ClassBindNativeFunctionsFoo2([[maybe_unused]] EtsArray *data, [[maybe_unused]] EtsObject *fn) {}
+
+TEST_F(MangleSignatureTest, Class_BindNativeMethods)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
+        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+    };
+
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, functions.data(), functions.size()), ANI_OK);
+}
+
+TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
+        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+    };
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("msig.rls", &ns), ANI_OK);
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
+}
+
+TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
+{
+    auto *foo1 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo1);
+    auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
+
+    std::array functions = {
+        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
+        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+    };
+
+    ani_module m {};
+    ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->Module_BindNativeFunctions(m, functions.data(), functions.size()), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing
