@@ -257,6 +257,8 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     concatIntrinsic->AppendInput(saveStateClone);
     concatIntrinsic->AddInputType(saveStateClone->GetType());
 
+    concatIntrinsic->SetPc(saveState->GetPc());
+
     return concatIntrinsic;
 }
 
