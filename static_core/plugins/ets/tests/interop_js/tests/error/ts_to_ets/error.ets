@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
     err,
     ErrorFunc,
-    CustomErrorFunc
+    CustomErrorFunc,
+    errRangeError
 } from 'test_error_ts';
+let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/error/ts_to_ets/test_error');
+let errRangeErrorModule = module.getProperty('errRangeError');
 
 const ErrMsg: string = 'This is a Error';
 const ErrorMessage: string = 'Panda: throw new error in ets!';
@@ -53,6 +55,17 @@ function testCustomThrowError(): boolean {
         let code: ESValue = errObj.getProperty('code')
         res = (e instanceof Error) && (msg.toString() == CustomErrorMessage) &&
               (code.toNumber() == CustomErrorCode);
+    }
+    return res;
+}
+
+function testRangeError(): boolean {
+    let res: boolean;
+    try {
+        let error = new RangeError();
+        res = errRangeErrorModule.instanceOf(Type.of(error));
+    } catch (e: Error) {
+        res = false;
     }
     return res;
 }

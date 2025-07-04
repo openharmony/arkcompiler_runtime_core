@@ -242,6 +242,19 @@ JSCONVERT_UNWRAP(JSValue)
     return JSValue::Create(EtsCoroutine::GetCurrent(), ctx, jsVal);
 }
 
+JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
+JSCONVERT_WRAP(EtsObject)
+{
+    InteropFatal("Wrap of EtsObject should be done with relevant converter");
+    UNREACHABLE();
+}
+
+JSCONVERT_UNWRAP(EtsObject)
+{
+    auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
+    return objectConverter->Unwrap(ctx, jsVal);
+}
+
 // ESError convertors are supposed to box JSValue objects, do not treat them in any other way
 JSCONVERT_DEFINE_TYPE(ESError, EtsObject *);
 JSCONVERT_WRAP(ESError)
