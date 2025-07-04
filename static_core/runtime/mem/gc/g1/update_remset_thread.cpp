@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ void UpdateRemsetThread<LanguageConfig>::CreateWorkerImpl()
     auto internalAllocator = this->GetGC()->GetInternalAllocator();
     ASSERT(updateThread_ == nullptr);
     updateThread_ = internalAllocator->template New<std::thread>(&UpdateRemsetThread::ThreadLoop, this);
+    ASSERT(updateThread_ != nullptr);
     int res = os::thread::SetThreadName(updateThread_->native_handle(), "UpdateRemset");
 
     LOG_IF(res != 0, ERROR, RUNTIME) << "Failed to set a name for the UpdateRemset thread";

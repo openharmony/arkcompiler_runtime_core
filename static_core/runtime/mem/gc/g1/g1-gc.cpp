@@ -82,6 +82,7 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
     updatedRefsQueue_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
     updatedRefsQueueTemp_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
     auto *firstRefVector = allocator->New<RefVector>();
+    ASSERT(firstRefVector != nullptr);
     firstRefVector->reserve(MAX_REFS);
     uniqueRefsFromRemsets_.push_back(firstRefVector);
     GetG1ObjectAllocator()->ReserveRegionIfNeeded();
@@ -137,6 +138,7 @@ void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool useGcWorkers,
         PandaVector<ObjectHeader *> *movedObjects;
         if (useGcWorkers) {
             movedObjects = internalAllocator->template New<PandaVector<ObjectHeader *>>();
+            ASSERT(movedObjects != nullptr);
             movedObjectsVector->push_back(movedObjects);
             size_t moveSize = region->GetAllocatedBytes();
             movedObjects->reserve(moveSize / GetMinimalObjectSize());
@@ -2304,6 +2306,7 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
     PandaVector<ObjectHeader *> *preBuff = nullptr;
     if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
         preBuff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
+        ASSERT(preBuff != nullptr);
         thread->GetPreBuff()->clear();
     } else {  // keep_buffers == mem::BuffersKeepingFlag::DELETE
         preBuff = thread->MovePreBuff();
