@@ -462,9 +462,6 @@ private:
     static IntrinsicId GetIntrinsicId(std::string_view className, std::string_view methodName,
                                       panda_file::MethodDataAccessor mda);
 
-    static bool IsEqual(panda_file::MethodDataAccessor mda, std::initializer_list<panda_file::Type::TypeId> shorties,
-                        std::initializer_list<std::string_view> refTypes);
-
     const panda_file::File &pandaFile_;
 };
 }  // namespace ark
