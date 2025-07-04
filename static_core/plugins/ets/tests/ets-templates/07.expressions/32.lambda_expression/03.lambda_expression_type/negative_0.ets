@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Negative cases for return type inference
+tags:
+- compile-only
+- negative
 ---*/
 
-{{c.impl}}
-
 function main() {
-    {{c.call|indent}}
+    let f1 = (a:int, b: int) => a + b
+    let x: String = f1(1, 2)
 }
-{% endfor %}

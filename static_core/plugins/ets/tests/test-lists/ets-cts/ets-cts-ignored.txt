@@ -887,6 +887,16 @@
 07.expressions/06.spread_expression/spex_lmbd_46.ets
 07.expressions/06.spread_expression/spex_lmbd_48.ets
 
+#27465
+07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
+
+#24472
+07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
+
 # #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
 17.experimental_features/02.fixed_array_types/far3_1.ets

@@ -13,14 +13,24 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
+type Pair = [String, int]
 
 function main() {
-    {{c.call|indent}}
+    let F2 = (a: String, b: int) => [a, b] as Pair
+
+    let R = F2('Whale', 5)
+
+    arktest.assertTrue(F2 instanceof Function2)
+    arktest.assertTrue(R instanceof Tuple)
+    arktest.assertTrue(R instanceof Pair)
+    arktest.assertEQ('Whale', R[0])
+    arktest.assertEQ(5, R[1])
+
+
 }
-{% endfor %}

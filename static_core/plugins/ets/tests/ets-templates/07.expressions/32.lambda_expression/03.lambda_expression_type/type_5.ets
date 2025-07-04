@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
 
 function main() {
-    {{c.call|indent}}
+
+    type TU = String | number
+
+    let FO = (flag: boolean) => () => flag ? 'Hello World' : 12.0
+
+    let F1 = FO(true)
+    let x: TU = F1()
+
+
 }
-{% endfor %}

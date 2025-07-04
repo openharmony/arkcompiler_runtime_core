@@ -13,14 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
-desc: Body, {{c.desc}}
+desc: Lambda signature negative
+tags:
+- compile-only
+- negative
 ---*/
 
-{{c.impl}}
+interface IFoo {
+}
+
+class A implements IFoo {
+}
+
+class B extends A {}
+
+class C {}
 
 function main() {
-    {{c.call|indent}}
+    let test = <T extends IFoo> (x: T): T => { return x }
+
+    test<IFoo>(new C)  // TypeError: Type 'C' is not compatible with type 'IFoo'
 }
-{% endfor %}

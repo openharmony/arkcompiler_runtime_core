@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
+enum Color { Red, Green, Blue }
 
 function main() {
-    {{c.call|indent}}
+    let fl = (ord: Color) => ord
+    let x = fl(Color.Green)
+
+    arktest.assertTrue(x instanceof Color)
+    arktest.assertEQ(Color.Green, x)
 }
-{% endfor %}

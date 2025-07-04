@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Body, {{c.desc}}
+desc: Return type can be inferred from the lambda body
+tags:
+
 ---*/
 
-{{c.impl}}
+interface IPerson {
+    name: String
+    age: int
+}
 
 function main() {
-    {{c.call|indent}}
+    let fl = () => { return {name: 'Bob', age: 25} as IPerson }
+    let x = fl()
+
+    arktest.assertTrue(x instanceof IPerson)
+    arktest.assertEQ('Bob', x.name)
 }
-{% endfor %}
