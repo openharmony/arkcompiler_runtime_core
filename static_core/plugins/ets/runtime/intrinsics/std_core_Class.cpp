@@ -66,6 +66,7 @@ void StdCoreClassInitialize(EtsClass *cls)
 
     if (UNLIKELY(!cls->IsInitialized())) {
         auto coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro != nullptr);
         EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
         linker->InitializeClass(coro, cls);
     }

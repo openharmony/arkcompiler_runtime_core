@@ -97,6 +97,7 @@ void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *t
 void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *etsVM = coro->GetPandaVM();
     if (etsVM->GetCoroutineManager()->IsExclusiveWorkersLimitReached()) {
         ThrowCoroutinesLimitExceedError("The limit of Exclusive Workers has been reached");
@@ -141,6 +142,7 @@ void ExclusiveLaunch(EtsObject *task, uint8_t needInterop)
 int64_t TaskPosterCreate()
 {
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto poster = coro->GetPandaVM()->CreateCallbackPoster();
     ASSERT(poster != nullptr);
     return reinterpret_cast<int64_t>(poster.release());
@@ -159,6 +161,7 @@ void TaskPosterPost(int64_t poster, EtsObject *task)
     ASSERT(taskPoster != nullptr);
 
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
     auto *taskRef = refStorage->Add(task->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     taskPoster->Post(RunExclusiveTask, taskRef, refStorage);
