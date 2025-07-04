@@ -961,15 +961,21 @@ Monitor *Monitor::GetMonitorFromObject(ObjectHeader *obj)
     return nullptr;
 }
 
-inline void Monitor::TraceMonitorLock(ObjectHeader *obj, bool isWait)
+inline void Monitor::TraceMonitorLock([[maybe_unused]] ObjectHeader *obj, bool isWait)
 {
     if (UNLIKELY(ark::trace::IsEnabled())) {
         // Use stack memory to avoid "Too many allocations" error.
         constexpr int BUF_SIZE = 32;
         std::array<char, BUF_SIZE> buf = {};
+// For Security reasons, optionally hide address based on build target
+#if !defined(PANDA_TARGET_OHOS) || !defined(NDEBUG)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         int ret = snprintf_s(buf.data(), BUF_SIZE, BUF_SIZE - 1,
                              (isWait ? "Waiting on 0x%" PRIxPTR : "Locking 0x%" PRIxPTR), ToUintPtr(obj));
+#else
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        int ret = snprintf_s(buf.data(), BUF_SIZE, BUF_SIZE - 1, (isWait ? "Waiting on object" : "Locking object"));
+#endif
         if (ret < 0) {
             UNREACHABLE();
         }
