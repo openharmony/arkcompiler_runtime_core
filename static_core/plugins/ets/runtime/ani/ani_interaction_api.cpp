@@ -3913,11 +3913,10 @@ NO_UB_SANITIZE static ani_status ThrowError(ani_env *env, ani_error err)
     CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(err);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
-    ScopedManagedCodeFix s(pandaEnv);
+    ScopedManagedCodeFix s(env);
     EtsThrowable *exception = s.ToInternalType(err);
     ANI_CHECK_RETURN_IF_EQ(exception, nullptr, ANI_ERROR);
-    PandaEnv::ToPandaEtsEnv(pandaEnv)->SetException(exception);
+    PandaEnv::FromAniEnv(env)->SetException(exception);
     return ANI_OK;
 }
 

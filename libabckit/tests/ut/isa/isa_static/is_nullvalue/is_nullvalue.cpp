@@ -59,7 +59,7 @@ class LibAbcKitIsUndefinedStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static.abc",
-                                            "is_nullvalue_static/ETSGLOBAL", "main");
+                                            "is_nullvalue_static", "main");
     EXPECT_TRUE(helpers::Match(output, "true\n"));
 
     helpers::TransformMethod(
@@ -86,7 +86,7 @@ TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_nullvalue/is_nullvalue_static_modified.abc",
-                                       "is_nullvalue_static/ETSGLOBAL", "main");
+                                       "is_nullvalue_static", "main");
     EXPECT_TRUE(helpers::Match(output, "false\n"));
 }
 

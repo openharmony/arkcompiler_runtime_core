@@ -96,7 +96,6 @@ public:
     void *GetDoubleToStringCache() const override;
     bool IsStringCachesUsed() const override;
     bool IsNativeMethodOptimizationEnabled() const override;
-    uint64_t GetDeprecatedNativeApiMask() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;
     bool IsClassBoxedBoolean(ClassPtr klass) const override;

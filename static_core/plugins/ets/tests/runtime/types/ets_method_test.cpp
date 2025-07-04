@@ -20,7 +20,7 @@
 #include "ets_coroutine.h"
 
 #include "types/ets_method.h"
-#include "napi/ets_scoped_objects_fix.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -59,7 +59,7 @@ public:
         coroutine_ = EtsCoroutine::GetCurrent();
         PandaEtsNapiEnv *env = coroutine_->GetEtsNapiEnv();
 
-        s_ = new napi::ScopedManagedCodeFix(env);
+        s_ = new ani::ScopedManagedCodeFix(env);
     }
 
     void TearDown() override
@@ -70,10 +70,10 @@ public:
 private:
     RuntimeOptions options_;
     EtsCoroutine *coroutine_ = nullptr;
-    napi::ScopedManagedCodeFix *s_ = nullptr;
+    ani::ScopedManagedCodeFix *s_ = nullptr;
 
 protected:
-    napi::ScopedManagedCodeFix *GetScopedManagedCodeFix()
+    ani::ScopedManagedCodeFix *GetScopedManagedCodeFix()
     {
         return s_;
     }
@@ -112,11 +112,12 @@ TEST_F(EtsMethodTest, Invoke)
     EtsMethod *sumMethod = klass->GetStaticMethod("sum", nullptr);
     ASSERT(sumMethod);
 
-    EtsValue res = fooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
+    EtsValue res;
+    ASSERT_EQ(fooMethod->Invoke(*GetScopedManagedCodeFix(), nullptr, &res), ANI_OK);
     ASSERT_EQ(res.GetAs<int32_t>(), 111_I);
-    res = gooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
+    ASSERT_EQ(gooMethod->Invoke(*GetScopedManagedCodeFix(), nullptr, &res), ANI_OK);
     ASSERT_EQ(res.GetAs<int32_t>(), 222_I);
-    res = sumMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
+    ASSERT_EQ(sumMethod->Invoke(*GetScopedManagedCodeFix(), nullptr, &res), ANI_OK);
     ASSERT_EQ(res.GetAs<int32_t>(), 333_I);
 }
 

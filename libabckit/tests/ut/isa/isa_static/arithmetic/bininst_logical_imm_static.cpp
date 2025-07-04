@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 {
     auto output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arithmetic/bininst_logical_imm_static.abc",
-                                  "bininst_logical_imm_static/ETSGLOBAL", "main");
+                                  "bininst_logical_imm_static", "main");
     EXPECT_TRUE(helpers::Match(output, "9\n"));
 
     helpers::TransformMethod(
@@ -54,7 +54,7 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arithmetic/bininst_logical_imm_static_modified.abc",
-                                  "bininst_logical_imm_static/ETSGLOBAL", "main");
+                                  "bininst_logical_imm_static", "main");
     EXPECT_TRUE(helpers::Match(output, expectedOutput));
 }
 

@@ -36,10 +36,7 @@ foreach(plugin, ark_enabled_plugins) {
 with_sdk = false
 
 group("ark_packages") {
-  deps = [
-    "runtime/libani_helpers:ani_helpers",
-    "runtime/napi/etsnative:etsnative",
-  ]
+  deps = [ "runtime/libani_helpers:ani_helpers" ]
 
   if (ark_static_standalone_build) {
     deps += [ "$ark_es2panda_root/aot:ets2panda" ]
@@ -146,7 +143,6 @@ if (!(ark_standalone_build ||
       "$ark_root/plugins/ets",
       "$ark_root/plugins/ets/runtime",
       "$ark_root/plugins/ets/runtime/ani",
-      "$ark_root/plugins/ets/runtime/napi",
       "$ark_root/plugins/ets/sdk",
       "$ark_root/plugins/ets/sdk/native",
     ]

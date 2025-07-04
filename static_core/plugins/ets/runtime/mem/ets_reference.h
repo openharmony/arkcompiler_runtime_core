@@ -19,7 +19,6 @@
 #include "libpandabase/macros.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
@@ -69,29 +68,6 @@ private:
         return reinterpret_cast<const mem::Reference *>(this);
     }
 };
-
-[[maybe_unused]] static inline EtsReference *EtsObjectToEtsRef(ets_object obj)
-{
-    return reinterpret_cast<EtsReference *>(obj);
-}
-
-[[maybe_unused]] static inline ets_object EtsRefToEtsObject(EtsReference *ref)
-{
-    return reinterpret_cast<ets_object>(ref);
-}
-
-[[maybe_unused]] static inline EtsReference *EtsNapiWeakToEtsRef(ets_object obj)
-{
-    auto ref = reinterpret_cast<EtsReference *>(obj);
-    ASSERT(ref->IsWeak());
-    return ref;
-}
-
-[[maybe_unused]] static inline ets_object EtsRefToEtsNapiWeak(EtsReference *ref)
-{
-    ASSERT(ref->IsWeak());
-    return reinterpret_cast<ets_object>(ref);
-}
 
 class EtsReferenceStorage final : private mem::ReferenceStorage {
 public:

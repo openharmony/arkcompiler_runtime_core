@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,8 +48,8 @@ class LibAbcKitMethodStaticTest : public ::testing::Test {};
 // Test: test-kind=api, api=GraphApiImpl::iSetFunction, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitMethodStaticTest, LibAbcKitTestSetCallMethod)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",
-                                            "method_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", "method_static", "main");
     EXPECT_TRUE(helpers::Match(output, "foo\n"));
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",
@@ -60,8 +60,8 @@ TEST_F(LibAbcKitMethodStaticTest, LibAbcKitTestSetCallMethod)
                                  TransformSetSetCallMethod(graph, bar);
                              });
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc",
-                                       "method_static/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "method_static",
+                                       "main");
     EXPECT_TRUE(helpers::Match(output, "bar\n"));
 }
 

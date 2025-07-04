@@ -93,10 +93,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
     ${ETS_EXT_SOURCES}/mem/ets_gc_stat.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
-    ${ETS_EXT_SOURCES}/napi/ets_napi_helpers.cpp
-    ${ETS_EXT_SOURCES}/napi/ets_napi_invoke_interface.cpp
-    ${ETS_EXT_SOURCES}/napi/ets_napi_native_interface.cpp
-    ${ETS_EXT_SOURCES}/napi/ets_mangle.cpp
+    ${ETS_EXT_SOURCES}/ani/ani_helpers.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
@@ -153,20 +150,20 @@ get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPIL
 
 if (PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list (APPEND ETS_RUNTIME_SOURCES
-        ${ETS_EXT_SOURCES}/napi/arch/arm32/ets_async_entry_point_arm32.S
-        ${ETS_EXT_SOURCES}/napi/arch/arm32/ets_napi_entry_point_arm32.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32.S
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32.S)
 elseif(PANDA_TARGET_ARM32_ABI_HARD)
     list (APPEND ETS_RUNTIME_SOURCES
-        ${ETS_EXT_SOURCES}/napi/arch/arm32/ets_async_entry_point_arm32hf.S
-        ${ETS_EXT_SOURCES}/napi/arch/arm32/ets_napi_entry_point_arm32hf.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32hf.S
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32hf.S)
 elseif(PANDA_TARGET_ARM64)
     list (APPEND ETS_RUNTIME_SOURCES
-        ${ETS_EXT_SOURCES}/napi/arch/arm64/ets_async_entry_point_aarch64.S
-        ${ETS_EXT_SOURCES}/napi/arch/arm64/ets_napi_entry_point_aarch64.S)
+        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_async_entry_point_aarch64.S
+        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_napi_entry_point_aarch64.S)
 elseif (PANDA_TARGET_AMD64)
     list (APPEND ETS_RUNTIME_SOURCES
-        ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_async_entry_point_amd64.S
-        ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_napi_entry_point_amd64.S)
+        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_async_entry_point_amd64.S
+        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_napi_entry_point_amd64.S)
 endif()
 
 if (PANDA_TARGET_OHOS)
@@ -201,7 +198,6 @@ if (PANDA_ETS_INTEROP_JS)
     add_subdirectory(interop_js)
 endif()
 
-add_subdirectory(napi)
 add_subdirectory(libani_helpers)
 
 set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)

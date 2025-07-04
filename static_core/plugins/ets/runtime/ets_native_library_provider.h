@@ -18,8 +18,8 @@
 
 #include <string>
 #include "libpandabase/os/mutex.h"
+#include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "runtime/include/mem/panda_containers.h"
 
 namespace ark::ets {
@@ -31,7 +31,7 @@ public:
     NO_COPY_SEMANTIC(NativeLibraryProvider);
     NO_MOVE_SEMANTIC(NativeLibraryProvider);
 
-    std::optional<std::string> LoadLibrary(EtsEnv *env, const PandaString &name, bool shouldVerifyPermission);
+    std::optional<std::string> LoadLibrary(ani_env *env, const PandaString &name, bool shouldVerifyPermission);
     void *ResolveSymbol(const PandaString &name) const;
 
     PandaVector<PandaString> GetLibraryPath() const;
@@ -40,9 +40,9 @@ public:
 
 private:
     mutable os::memory::RWLock lock_;
-    std::optional<std::string> CallAniCtor(EtsEnv *env, const EtsNativeLibrary *lib);
-    std::optional<std::string> GetCallerClassName(EtsEnv *env);
-    bool CheckLibraryPermission(EtsEnv *env);
+    std::optional<std::string> CallAniCtor(ani_env *env, const EtsNativeLibrary *lib);
+    std::optional<std::string> GetCallerClassName(ani_env *env);
+    bool CheckLibraryPermission(ani_env *env);
     PandaSet<EtsNativeLibrary> libraries_ GUARDED_BY(lock_);
     PandaVector<PandaString> libraryPath_ GUARDED_BY(lock_);
 };

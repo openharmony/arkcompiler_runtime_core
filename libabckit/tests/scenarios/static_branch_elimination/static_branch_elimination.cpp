@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ class AbckitScenarioTest : public ::testing::Test {};
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc";
-    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "static_branch_elimination/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "static_branch_elimination", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "MyFunc start...\n"
                                "MyFunc start...\n"
@@ -120,7 +120,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
     g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "static_branch_elimination/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "static_branch_elimination", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "MyFunc start...\n"
                                "MyFunc start...\n"

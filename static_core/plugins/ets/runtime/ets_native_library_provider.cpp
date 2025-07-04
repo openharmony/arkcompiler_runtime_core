@@ -21,7 +21,6 @@
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_namespace_manager_impl.h"
 
@@ -72,7 +71,7 @@ Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char 
 }
 }  // namespace
 
-std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name,
+std::optional<std::string> NativeLibraryProvider::LoadLibrary(ani_env *env, const PandaString &name,
                                                               bool shouldVerifyPermission)
 {
     if (shouldVerifyPermission && !CheckLibraryPermission(env)) {
@@ -106,20 +105,13 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
     return CallAniCtor(env, lib);
 }
 
-std::optional<std::string> NativeLibraryProvider::CallAniCtor(EtsEnv *env, const EtsNativeLibrary *lib)
+std::optional<std::string> NativeLibraryProvider::CallAniCtor(ani_env *env, const EtsNativeLibrary *lib)
 {
-    if (auto onLoadSymbol = lib->FindSymbol("EtsNapiOnLoad")) {
-        using EtsNapiOnLoadHandle = ets_int (*)(EtsEnv *);
-        auto onLoadHandle = reinterpret_cast<EtsNapiOnLoadHandle>(onLoadSymbol.Value());
-        ets_int etsNapiVersion = onLoadHandle(env);
-        if (!napi::CheckVersionEtsNapi(etsNapiVersion)) {
-            return "Unsupported Ets napi version " + std::to_string(etsNapiVersion);
-        }
-    } else if (auto res = lib->FindSymbol("ANI_Constructor")) {
+    if (auto res = lib->FindSymbol("ANI_Constructor")) {
         using AniCtor = ani_status (*)(ani_vm *, uint32_t *);
         auto ctor = reinterpret_cast<AniCtor>(res.Value());
         uint32_t version;
-        ani_vm *vm = PandaEnv::FromEtsEnv(env)->GetEtsVM();
+        ani_vm *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
         ani_status status = ctor(vm, &version);
         if (status != ANI_OK) {
             return "ANI_Constructor returns an error: " + std::to_string(status);
@@ -128,15 +120,16 @@ std::optional<std::string> NativeLibraryProvider::CallAniCtor(EtsEnv *env, const
             return "Unsupported ANI version: " + std::to_string(version);
         }
     } else {
-        // NODE: Return error "Native library doesn't have ANI_Constructor" when ets_napi will be dropped. #22232
-        LOG(WARNING, ANI) << lib->GetName() << " doesn't contain ANI_Constructor";
+        std::string message = std::string(lib->GetName()) + " doesn't contain ANI_Constructor";
+        LOG(ERROR, ANI) << message;
+        return message;
     }
     return {};
 }
 
-std::optional<std::string> NativeLibraryProvider::GetCallerClassName(EtsEnv *env)
+std::optional<std::string> NativeLibraryProvider::GetCallerClassName(ani_env *env)
 {
-    auto coroutine = PandaEnv::FromEtsEnv(env)->GetEtsCoroutine();
+    auto coroutine = PandaEnv::FromAniEnv(env)->GetEtsCoroutine();
     if (coroutine == nullptr) {
         LOG(ERROR, RUNTIME) << "Coroutine is null, failed to get class name.";
         return std::nullopt;
@@ -160,7 +153,7 @@ std::optional<std::string> NativeLibraryProvider::GetCallerClassName(EtsEnv *env
     return cls->GetName();
 }
 
-bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] EtsEnv *env)
+bool NativeLibraryProvider::CheckLibraryPermission([[maybe_unused]] ani_env *env)
 {
 #if defined(PANDA_TARGET_OHOS)
     auto classNameOpt = GetCallerClassName(env);

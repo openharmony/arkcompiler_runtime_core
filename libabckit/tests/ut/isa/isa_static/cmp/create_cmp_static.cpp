@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI1)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<false>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
@@ -115,7 +115,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI2)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<false>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "-1\n"));
 }
 
@@ -133,7 +133,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpI3)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<true>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 
@@ -153,7 +153,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD1)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<false>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
@@ -173,7 +173,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD2)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<false>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "-1\n"));
 }
 
@@ -191,7 +191,7 @@ TEST_F(LibAbcKitCreateCmpStaticTest, LibAbcKitTestCmpD3)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema<true>()); });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cmp/create_cmp_static_modified_set.abc",
-                                            "create_cmp_static/ETSGLOBAL", "main");
+                                            "create_cmp_static", "main");
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 

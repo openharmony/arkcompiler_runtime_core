@@ -19,7 +19,6 @@ lib/libarklinker.so
 lib/libarkruntime.so
 lib/libarktarget_options.so
 lib/libani_helpers.so
-lib/libetsnative.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
 lib/libe2p_test_plugin.so

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,7 @@ class LibAbcKitIsInstanceStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitIsInstanceStaticTest, LibAbcKitTestIsInstance)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_instance/is_instance_static.abc",
-                                            "is_instance_static/ETSGLOBAL", "main");
+                                            "is_instance_static", "main");
     EXPECT_TRUE(helpers::Match(output, "false\n"));
 
     helpers::TransformMethod(
@@ -91,7 +91,7 @@ TEST_F(LibAbcKitIsInstanceStaticTest, LibAbcKitTestIsInstance)
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_instance/is_instance_static_modified.abc",
-                                       "is_instance_static/ETSGLOBAL", "main");
+                                       "is_instance_static", "main");
     EXPECT_TRUE(helpers::Match(output, "true\n"));
 }
 

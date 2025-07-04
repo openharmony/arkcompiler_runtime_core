@@ -17,7 +17,6 @@
 #include "include/mem/panda_containers.h"
 #include "libpandabase/utils/utf.h"
 #include "macros.h"
-#include "napi/ets_napi.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -317,7 +316,7 @@ EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature,
 {
     EtsMethodSignature methodSignature(signature, isANIFormat);
     if (!methodSignature.IsValid()) {
-        LOG(ERROR, ETS_NAPI) << "Wrong method signature: " << signature;
+        LOG(ERROR, RUNTIME) << "Wrong method signature: " << signature;
         return nullptr;
     }
 

@@ -22,7 +22,6 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/string.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -40,7 +39,7 @@ public:
 
     static EtsString *CreateFromAscii(const char *str, uint32_t length);
 
-    static EtsString *CreateFromUtf16(const ets_char *utf16, ets_int length);
+    static EtsString *CreateFromUtf16(const uint16_t *utf16, EtsInt length);
 
     using CharCodeArray = EtsObjectArray;
 
@@ -50,7 +49,7 @@ public:
 
     static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray);
 
-    static EtsString *CreateNewStringFromBytes(EtsArray *bytearray, ets_int high, ets_int offset, ets_int length);
+    static EtsString *CreateNewStringFromBytes(EtsArray *bytearray, EtsInt high, EtsInt offset, EtsInt length);
 
     static EtsString *CreateNewStringFromString(EtsString *etsString);
 
@@ -97,7 +96,7 @@ public:
         return GetCoreType()->At(index);
     }
 
-    static EtsString *DoReplace(EtsString *src, ets_char oldC, ets_char newC);
+    static EtsString *DoReplace(EtsString *src, EtsChar oldC, EtsChar newC);
 
     static EtsString *FastSubString(EtsString *src, uint32_t start, uint32_t length)
     {
@@ -134,7 +133,7 @@ public:
         return !IsUtf16();
     }
 
-    ets_int GetLength()
+    EtsInt GetLength()
     {
         return GetCoreType()->GetLength();
     }

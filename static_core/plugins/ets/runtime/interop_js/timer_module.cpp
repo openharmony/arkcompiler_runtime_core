@@ -98,7 +98,7 @@ bool TimerModule::Init(ani_env *env)
     return env->Module_BindNativeFunctions(module, methods.data(), methods.size()) == ANI_OK;
 }
 
-ets_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int delayMs, ani_boolean repeat)
+ani_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int delayMs, ani_boolean repeat)
 {
     ASSERT(ark::ets::interop::js::InteropCtx::Current() != nullptr);
 

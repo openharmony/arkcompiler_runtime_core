@@ -15,7 +15,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"
@@ -107,33 +106,6 @@ inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
             return panda_file::Type(panda_file::Type::TypeId::REFERENCE);
         default:
             return panda_file::Type(panda_file::Type::TypeId::INVALID);
-    }
-}
-
-// CC-OFFNXT(G.FUD.06) switch-case, ODR
-inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
-{
-    switch (type) {
-        case EtsType::VOID:
-            return "void";
-        case EtsType::BOOLEAN:
-            return "ets_boolean";
-        case EtsType::BYTE:
-            return "ets_byte";
-        case EtsType::CHAR:
-            return "ets_char";
-        case EtsType::SHORT:
-            return "ets_short";
-        case EtsType::INT:
-            return "ets_int";
-        case EtsType::LONG:
-            return "ets_long";
-        case EtsType::FLOAT:
-            return "ets_float";
-        case EtsType::DOUBLE:
-            return "ets_double";
-        default:
-            UNREACHABLE();
     }
 }
 

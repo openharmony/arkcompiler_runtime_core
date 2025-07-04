@@ -23,7 +23,6 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/thread.h"
-#include "plugins/ets/runtime/ets_modifiers.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
@@ -39,9 +38,6 @@ namespace ark::ets {
 namespace ani {
 class ScopedManagedCodeFix;
 }  // namespace ani
-namespace napi {
-class ScopedManagedCodeFix;
-}  // namespace napi
 
 class PandaEtsEnv;
 
@@ -51,13 +47,7 @@ public:
 
     PANDA_PUBLIC_API static bool IsMethod(const PandaString &td);
 
-    PANDA_PUBLIC_API EtsValue Invoke(napi::ScopedManagedCodeFix *s, Value *args);
     PANDA_PUBLIC_API ani_status Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result);
-
-    void InvokeVoid(napi::ScopedManagedCodeFix *s, Value *args)
-    {
-        Invoke(s, args);
-    }
 
     uint32_t GetParametersNum() const
     {
@@ -206,11 +196,6 @@ public:
         return GetPandaMethod()->IsIntrinsic();
     }
 
-    bool IsDeprecatedNativeAPI() const
-    {
-        return (GetAccessFlags() & ACC_DEPRECATED_NATIVE_API) != 0;
-    }
-
     bool IsConstructor() const
     {
         return GetPandaMethod()->IsConstructor();
@@ -252,34 +237,6 @@ public:
         Method *m = GetPandaMethod();
 
         m->SetNativePointer(const_cast<void *>(ptr));
-    }
-
-    bool RegisterNativeDeprecated(void *impl)
-    {
-        ASSERT(!IsIntrinsic());
-        ASSERT(IsNative());
-        if (IsBoundNativeFunction()) {
-            return false;
-        }
-
-        Method *m = GetPandaMethod();
-        m->SetAccessFlags(m->GetAccessFlags() | ACC_DEPRECATED_NATIVE_API);
-        m->SetNativePointer(impl);
-        return true;
-    }
-
-    bool UnregisterNativeDeprecated()
-    {
-        ASSERT(!IsIntrinsic());
-        ASSERT(IsNative());
-        if (!IsBoundNativeFunction()) {
-            return false;
-        }
-
-        Method *m = GetPandaMethod();
-        m->SetNativePointer(nullptr);
-        m->SetAccessFlags(m->GetAccessFlags() & ~ACC_DEPRECATED_NATIVE_API);
-        return true;
     }
 
     uint32_t GetAccessFlags() const

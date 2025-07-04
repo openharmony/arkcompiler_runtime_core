@@ -12,7 +12,6 @@ lib/libarkdisassembler.so
 lib/libarkfile.so
 lib/libarkplatform.so
 lib/libarkruntime.so
-lib/libetsnative.so
 lib/libarktarget_options.so
 lib/libani_helpers.so
 lib/libarkziparchive.so

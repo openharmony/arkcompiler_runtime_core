@@ -80,8 +80,8 @@ private:
     {
         ani_vm *etsVM;
         ani_size vmCount;
-        [[maybe_unused]] ets_int res = ANI_GetCreatedVMs(&etsVM, 1, &vmCount);
-        ASSERT(res == ETS_OK);
+        [[maybe_unused]] auto res = ANI_GetCreatedVMs(&etsVM, 1, &vmCount);
+        ASSERT(res == ANI_OK);
         ASSERT(vmCount == 1);
         return etsVM;
     }
@@ -103,11 +103,11 @@ private:
             event.Fire();
 
             ani_class cls;
-            [[maybe_unused]] ani_status status = etsEnv->FindClass("Lattach_test/TestClass;", &cls);
-            ASSERT(status == ETS_OK);
+            [[maybe_unused]] ani_status status = etsEnv->FindClass("attach_test.TestClass", &cls);
+            ASSERT(status == ANI_OK);
             ani_static_method method;
             status = etsEnv->Class_FindStaticMethod(cls, name, nullptr, &method);
-            ASSERT(status == ETS_OK);
+            ASSERT(status == ANI_OK);
             ani_int val;
             etsEnv->c_api->Class_CallStaticMethod_Int(etsEnv, cls, method, &val);
             ASSERT(val == 0);

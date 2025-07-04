@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,8 +113,8 @@ void TransformIrForIgetClass(AbckitFile *file, AbckitCoreFunction *method, Abcki
 void TemplateTestFunction(const std::string &inputResult, const std::string &outputResult, const std::string &funcName,
                           void (*irTransformer)(AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph))
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/classes/classes_api.abc",
-                                            "classes_api/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/classes/classes_api.abc", "classes_api", "main");
     EXPECT_TRUE(helpers::Match(output, inputResult));
 
     helpers::TransformMethod(
@@ -129,7 +129,7 @@ void TemplateTestFunction(const std::string &inputResult, const std::string &out
         });
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/classes/classes_api_modified.abc",
-                                       "classes_api/ETSGLOBAL", "main");
+                                       "classes_api", "main");
     EXPECT_TRUE(helpers::Match(output, outputResult));
 }
 }  // namespace

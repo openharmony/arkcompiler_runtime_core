@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,8 @@ class LibAbcKitThrowStaticTest : public ::testing::Test {};
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateThrow, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitThrowStaticTest, LibAbcKitTestThrow)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/throw/throw_static.abc",
-                                            "throw_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/throw/throw_static.abc", "throw_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/throw/throw_static.abc",
@@ -62,7 +62,7 @@ TEST_F(LibAbcKitThrowStaticTest, LibAbcKitTestThrow)
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/throw/throw_static_modified.abc",
-                                       "throw_static/ETSGLOBAL", "main");
+                                       "throw_static", "main");
     EXPECT_TRUE(helpers::Match(output, "THROW\n"));
 }
 
