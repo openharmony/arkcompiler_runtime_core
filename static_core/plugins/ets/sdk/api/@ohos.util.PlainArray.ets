@@ -14,15 +14,12 @@
  */
 
 import LightWeightMap from '@ohos.util.LightWeightMap';
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type PlainArrayForEachCb<T> = (value: T, key: number, PlainArray: PlainArray<T>) => void;
->>>>>>> OpenHarmony_feature_20250328
 
 /**
  * The PlainArray class is a collection of key-value pairs.

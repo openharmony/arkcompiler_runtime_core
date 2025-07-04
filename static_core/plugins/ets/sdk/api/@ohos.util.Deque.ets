@@ -15,16 +15,11 @@
 
 import { BusinessError } from "@ohos.base";
 
-<<<<<<< HEAD
-const OutOfBoundsErrorCodeId: number = 10200001;
-
-=======
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type DequeforEachCb<T> = (value: T, index: number, deque: Deque<T>) => void;
 
->>>>>>> OpenHarmony_feature_20250328
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
     err.code = code;
@@ -33,11 +28,7 @@ function createBusinessError(code: number, message: string) {
     return err;
 }
 
-<<<<<<< HEAD
-export default class Deque<T> implements Iterable<T> {
-=======
 export default class Deque<T> implements Iterable<T>, JsonReplacer {
->>>>>>> OpenHarmony_feature_20250328
     private readonly DEFAULT_CAPACITY = 8;
     internal capacity: int = this.DEFAULT_CAPACITY;
     internal buffer: Array<T>;
@@ -241,14 +232,6 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param index - The index of the element to retrieve.
      *
      * @returns The element at the specified index.
-<<<<<<< HEAD
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
-     */
-    public $_get(index: number): T {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
-        }
-=======
      * @throws { BusinessError } 401 - The type of "index" must be small integer.
      * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
      *  Received value is: ${index}
@@ -259,7 +242,6 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
         }
         this.checkIndex(index);
->>>>>>> OpenHarmony_feature_20250328
 
         return this.buffer[this.getRealIndex(index)];
     }
@@ -270,20 +252,11 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * @param index - The index of the element to set.
      *
      * @param val - The value to set at the specified index.
-<<<<<<< HEAD
-     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
-     */
-    public $_set(index: number, val: T): void {
-        if (index >= this.length || index < 0) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
-        }
-=======
      * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= ${length - 1}.
      *  Received value is: ${index}
      */
     public $_set(index: number, val: T): void {
         this.checkIndex(index);
->>>>>>> OpenHarmony_feature_20250328
 
         this.buffer[this.getRealIndex(index)] = val;
     }
@@ -291,8 +264,6 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     private getRealIndex(index: number): number {
         return (this.front + index) % this.capacity;
     }
-<<<<<<< HEAD
-=======
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
@@ -305,7 +276,6 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
             throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this.length - 1}. Received value is: ${index}`));
         }
     }
->>>>>>> OpenHarmony_feature_20250328
 }
 
 class DequeValuesIterator_T<T> implements IterableIterator<T> {

@@ -13,21 +13,10 @@
 
 group("fuzztest") {
   testonly = true
-<<<<<<< HEAD
-  if (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) {
-    deps = []
-  } else {
-    deps = [
-      "anitextdecoder_fuzzer:fuzztest",
-      "anitextencoder_fuzzer:fuzztest",
-    ]
-  }
-=======
 
   deps = [
     "anistringdecoder_fuzzer:fuzztest",
     "anitextdecoder_fuzzer:fuzztest",
     "anitextencoder_fuzzer:fuzztest",
   ]
->>>>>>> OpenHarmony_feature_20250328
 }

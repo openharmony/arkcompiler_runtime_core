@@ -14,11 +14,8 @@
  */
 
 import HashMap from '@ohos.util.HashMap';
-<<<<<<< HEAD
-=======
 
 export type HashSetCbFn<T> = (value: T, key: T, set: HashSet<T>) => void;
->>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyHashSet<T> extends Iterable<T> {
     /**

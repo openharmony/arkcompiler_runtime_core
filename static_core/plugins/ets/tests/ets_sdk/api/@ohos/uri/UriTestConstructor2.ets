@@ -205,17 +205,6 @@ function testUriConstruction021() {
 
 function testUriConstruction022() {
   let gaogao = new uri.URI('http://16.9.5.4:99/path/path?query#fagment');
-<<<<<<< HEAD
-  assertEQ(gaogao.scheme, "http");
-  assertEQ(gaogao.authority, "16.9.5.4:99");
-  assertEQ(gaogao.ssp, "//16.9.5.4:99/path/path?query");
-  assertEQ(gaogao.userInfo, null);
-  assertEQ(gaogao.host, "16.9.5.4");
-  assertEQ(gaogao.port, "99");
-  assertEQ(gaogao.path, "/path/path");
-  assertEQ(gaogao.query, "query");
-  assertEQ(gaogao.fragment, "fagment");
-=======
   arktest.assertEQ(gaogao.scheme, "http");
   arktest.assertEQ(gaogao.authority, "16.9.5.4:99");
   arktest.assertEQ(gaogao.ssp, "//16.9.5.4:99/path/path?query");
@@ -225,22 +214,10 @@ function testUriConstruction022() {
   arktest.assertEQ(gaogao.path, "/path/path");
   arktest.assertEQ(gaogao.query, "query");
   arktest.assertEQ(gaogao.fragment, "fagment");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriConstruction023() {
   let gaogao = new uri.URI('http://49.99.54.12:50/path/path23?query#fagment');
-<<<<<<< HEAD
-  assertEQ(gaogao.scheme, "http");
-  assertEQ(gaogao.authority, "49.99.54.12:50");
-  assertEQ(gaogao.ssp, "//49.99.54.12:50/path/path23?query");
-  assertEQ(gaogao.userInfo, null);
-  assertEQ(gaogao.host, "49.99.54.12");
-  assertEQ(gaogao.port, "50");
-  assertEQ(gaogao.path, "/path/path23");
-  assertEQ(gaogao.query, "query");
-  assertEQ(gaogao.fragment, "fagment");
-=======
   arktest.assertEQ(gaogao.scheme, "http");
   arktest.assertEQ(gaogao.authority, "49.99.54.12:50");
   arktest.assertEQ(gaogao.ssp, "//49.99.54.12:50/path/path23?query");
@@ -250,22 +227,10 @@ function testUriConstruction023() {
   arktest.assertEQ(gaogao.path, "/path/path23");
   arktest.assertEQ(gaogao.query, "query");
   arktest.assertEQ(gaogao.fragment, "fagment");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriConstruction024() {
   let gaogao = new uri.URI('http://user@49.10pe8.54.12:80/path/path23?query#qwer');
-<<<<<<< HEAD
-  assertEQ(gaogao.scheme, "http");
-  assertEQ(gaogao.authority, "user@49.10pe8.54.12:80");
-  assertEQ(gaogao.ssp, "//user@49.10pe8.54.12:80/path/path23?query");
-  assertEQ(gaogao.userInfo, null);
-  assertEQ(gaogao.host, null);
-  assertEQ(gaogao.port, "-1");
-  assertEQ(gaogao.path, "/path/path23");
-  assertEQ(gaogao.query, "query");
-  assertEQ(gaogao.fragment, "qwer");
-=======
   arktest.assertEQ(gaogao.scheme, "http");
   arktest.assertEQ(gaogao.authority, "user@49.10pe8.54.12:80");
   arktest.assertEQ(gaogao.ssp, "//user@49.10pe8.54.12:80/path/path23?query");
@@ -275,7 +240,6 @@ function testUriConstruction024() {
   arktest.assertEQ(gaogao.path, "/path/path23");
   arktest.assertEQ(gaogao.query, "query");
   arktest.assertEQ(gaogao.fragment, "qwer");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriConstruction025() {
@@ -319,17 +283,6 @@ function testUriConstruction027() {
 
 function testUriConstruction028() {
   let gaogao = new uri.URI('ht2tp://user@www.1hw.1com:77/path/path23?query#qwer');
-<<<<<<< HEAD
-  assertEQ(gaogao.scheme, "ht2tp");
-  assertEQ(gaogao.authority, "user@www.1hw.1com:77");
-  assertEQ(gaogao.ssp, "//user@www.1hw.1com:77/path/path23?query");
-  assertEQ(gaogao.userInfo, null);
-  assertEQ(gaogao.host, null);
-  assertEQ(gaogao.port, "-1");
-  assertEQ(gaogao.path, "/path/path23");
-  assertEQ(gaogao.query, "query");
-  assertEQ(gaogao.fragment, "qwer");
-=======
   arktest.assertEQ(gaogao.scheme, "ht2tp");
   arktest.assertEQ(gaogao.authority, "user@www.1hw.1com:77");
   arktest.assertEQ(gaogao.ssp, "//user@www.1hw.1com:77/path/path23?query");
@@ -339,7 +292,6 @@ function testUriConstruction028() {
   arktest.assertEQ(gaogao.path, "/path/path23");
   arktest.assertEQ(gaogao.query, "query");
   arktest.assertEQ(gaogao.fragment, "qwer");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriConstruction029() {
@@ -377,17 +329,6 @@ function testConstructorThrow(uriText: string, errText: string) {
 
 function testUriConstruction031() {
   let gaogao = new uri.URI('http://[::192:0:5]/path/path23?query#qwer');
-<<<<<<< HEAD
-  assertEQ(gaogao.scheme, "http");
-  assertEQ(gaogao.authority, "[::192:0:5]");
-  assertEQ(gaogao.ssp, "//[::192:0:5]/path/path23?query");
-  assertEQ(gaogao.userInfo, null);
-  assertEQ(gaogao.host, "[::192:0:5]");
-  assertEQ(gaogao.port, "-1");
-  assertEQ(gaogao.path, "/path/path23");
-  assertEQ(gaogao.query, "query");
-  assertEQ(gaogao.fragment, "qwer");
-=======
   arktest.assertEQ(gaogao.scheme, "http");
   arktest.assertEQ(gaogao.authority, "[::192:0:5]");
   arktest.assertEQ(gaogao.ssp, "//[::192:0:5]/path/path23?query");
@@ -397,7 +338,6 @@ function testUriConstruction031() {
   arktest.assertEQ(gaogao.path, "/path/path23");
   arktest.assertEQ(gaogao.query, "query");
   arktest.assertEQ(gaogao.fragment, "qwer");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): int {

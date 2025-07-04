@@ -139,33 +139,6 @@ function testUriAddEncodedSegment001() {
 function testUriAddEncodedSegment002() {
   let route1 = new uri.URI('http://www.test.com?param%2B1=value1&param+2=value%202#fra+gemnt');
   let newRoute1 = route1.addSegment("my+files").addEncodedSegment("my+image.jpg");
-<<<<<<< HEAD
-  assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");
-  assertEQ(newRoute1.encodedUserInfo, null);
-  assertEQ(newRoute1.encodedPath, "/my%2Bfiles/my+image.jpg");
-  assertEQ(newRoute1.encodedQuery, 'param%2B1=value1&param+2=value%202');
-  assertEQ(newRoute1.encodedFragment, "fra+gemnt");
-  assertEQ(newRoute1.encodedAuthority, "www.test.com");
-  assertEQ(newRoute1.encodedSSP, "//www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202");
-  let route2 = new uri.URI('http://www.test.com/');
-  let newRoute2 = route2.addSegment("my files").addEncodedSegment("my%20image.jpg");
-  assertEQ(newRoute2.toString(), "http://www.test.com/my%20files/my%20image.jpg");
-  assertEQ(newRoute2.encodedUserInfo, null);
-  assertEQ(newRoute2.encodedPath, "/my%20files/my%20image.jpg");
-  assertEQ(newRoute2.encodedQuery, null);
-  assertEQ(newRoute2.encodedFragment, null);
-  assertEQ(newRoute2.encodedAuthority, "www.test.com");
-  assertEQ(newRoute2.encodedSSP, "//www.test.com/my%20files/my%20image.jpg");
-  let route3 = new uri.URI('http://username:my%20name@www.test.com/');
-  let newRoute3 = route3.addSegment("my%2Bfiles").addEncodedSegment("my%2Bimage.jpg");
-  assertEQ(newRoute3.toString(), "http://username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
-  assertEQ(newRoute3.encodedUserInfo, "username:my%20name");
-  assertEQ(newRoute3.encodedPath, "/my%252Bfiles/my%2Bimage.jpg");
-  assertEQ(newRoute3.encodedQuery, null);
-  assertEQ(newRoute3.encodedFragment, null);
-  assertEQ(newRoute3.encodedAuthority, "username:my%20name@www.test.com");
-  assertEQ(newRoute3.encodedSSP, "//username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
-=======
   arktest.assertEQ(newRoute1.toString(), "http://www.test.com/my%2Bfiles/my+image.jpg?param%2B1=value1&param+2=value%202#fra+gemnt");
   arktest.assertEQ(newRoute1.encodedUserInfo, null);
   arktest.assertEQ(newRoute1.encodedPath, "/my%2Bfiles/my+image.jpg");
@@ -191,7 +164,6 @@ function testUriAddEncodedSegment002() {
   arktest.assertEQ(newRoute3.encodedFragment, null);
   arktest.assertEQ(newRoute3.encodedAuthority, "username:my%20name@www.test.com");
   arktest.assertEQ(newRoute3.encodedSSP, "//username:my%20name@www.test.com/my%252Bfiles/my%2Bimage.jpg");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriAddEncodedSegment003() {

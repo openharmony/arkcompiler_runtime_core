@@ -15,12 +15,6 @@
 
 import HashMap from "@ohos.util.HashMap";
 import { BusinessError } from "@ohos.base";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("HashMap Set Get SetAll API tests")

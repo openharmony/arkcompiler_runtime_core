@@ -14,12 +14,9 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: number = 10200001;
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("PlainArray API tests");

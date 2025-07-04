@@ -14,12 +14,9 @@
  */
 
 import {util} from "@ohos.util";
-<<<<<<< HEAD
-=======
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Base64Helper Test");
->>>>>>> OpenHarmony_feature_20250328
 
     testEncodeDecodeBasic();
     testEncodeDecodeBasicSync();

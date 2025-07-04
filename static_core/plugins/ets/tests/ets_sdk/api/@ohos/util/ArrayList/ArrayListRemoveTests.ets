@@ -111,11 +111,7 @@ function testRemoveByRangeStartIndexOutOfRange() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: -1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByRangeEndIndexOutOfRange() {
@@ -126,11 +122,7 @@ function testRemoveByRangeEndIndexOutOfRange() {
             "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByRangeEndIndexSmallerThanStartIndex() {
@@ -141,11 +133,7 @@ function testRemoveByRangeEndIndexSmallerThanStartIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 3") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByRangeEmptyContainer() {
@@ -154,11 +142,7 @@ function testRemoveByRangeEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByRange(0, TestData.testNumber1)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByRange(0, TestData.testNumber1)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByRangeStartIndexEqualsEndIndex() {
@@ -169,22 +153,14 @@ function testRemoveByRangeStartIndexEqualsEndIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: 3") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByRangeFullRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.removeByRange(0, TestData.testNumber5);
-<<<<<<< HEAD
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after removeByRange operation");
-=======
     arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after removeByRange operation");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

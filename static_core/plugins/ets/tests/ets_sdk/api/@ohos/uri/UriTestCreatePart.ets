@@ -97,17 +97,6 @@ function testAddQueryJson001() {
 function testSpecialCharacters001() {
   let uriStr = "hta{}_b- c|~d!a$b&c=d+e,;'()*vvtp://www.bi an'|{}()$~,;*!_-+:80/index?par(,;/) '_$:?+a{}|m=10-!*&pa ra~m1=20!-~#par(,;/) '_$:?+a{}|m=10-!*&para~m1=20!-~";
   let newUri = new uri.URI(uriStr);
-<<<<<<< HEAD
-  assertEQ(newUri.scheme, "hta{}_b- c|~d!a$b&c=d+e,;'()*vvtp");
-  assertEQ(newUri.getSegment()[0], "index");
-  assertEQ(newUri.query, "par(,;/) '_$:?+a{}|m=10-!*&pa ra~m1=20!-~");
-  assertEQ(newUri.ssp, "//www.bi an'|{}()$~,;*!_-+:80/index?par(,;/) '_$:?+a{}|m=10-!*&pa ra~m1=20!-~");
-  assertEQ(newUri.authority, "www.bi an'|{}()$~,;*!_-+:80");
-  assertEQ(newUri.fragment, "par(,;/) '_$:?+a{}|m=10-!*&para~m1=20!-~");
-  assertEQ(newUri.host, "www.bi an'|{}()$~,;*!_-+");
-  assertEQ(newUri.userInfo, null);
-  assertEQ(newUri.port, "80");
-=======
   arktest.assertEQ(newUri.scheme, "hta{}_b- c|~d!a$b&c=d+e,;'()*vvtp");
   arktest.assertEQ(newUri.getSegment()[0], "index");
   arktest.assertEQ(newUri.query, "par(,;/) '_$:?+a{}|m=10-!*&pa ra~m1=20!-~");
@@ -117,23 +106,15 @@ function testSpecialCharacters001() {
   arktest.assertEQ(newUri.host, "www.bi an'|{}()$~,;*!_-+");
   arktest.assertEQ(newUri.userInfo, null);
   arktest.assertEQ(newUri.port, "80");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testspecialPort001() {
   let uriStr = "http://publickinfo:-1";
   let newUri = new uri.URI(uriStr);
-<<<<<<< HEAD
-  assertEQ(newUri.toString(), "http://publickinfo:-1");
-  assertEQ(newUri.port, "-1");
-  assertEQ(newUri.host, null);
-  assertEQ(newUri.authority, "publickinfo:-1");
-=======
   arktest.assertEQ(newUri.toString(), "http://publickinfo:-1");
   arktest.assertEQ(newUri.port, "-1");
   arktest.assertEQ(newUri.host, null);
   arktest.assertEQ(newUri.authority, "publickinfo:-1");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testspecialPort002() {
@@ -148,17 +129,10 @@ function testspecialPort002() {
 function testspecialPort003() {
   let uriStr = "http://publickinfo:600000000332";
   let newUri = new uri.URI(uriStr);
-<<<<<<< HEAD
-  assertEQ(newUri.toString(), "http://publickinfo:600000000332");
-  assertEQ(newUri.port, "-1");
-  assertEQ(newUri.host, null);
-  assertEQ(newUri.authority, "publickinfo:600000000332");
-=======
   arktest.assertEQ(newUri.toString(), "http://publickinfo:600000000332");
   arktest.assertEQ(newUri.port, "-1");
   arktest.assertEQ(newUri.host, null);
   arktest.assertEQ(newUri.authority, "publickinfo:600000000332");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testspecialPort004() {

@@ -41,48 +41,15 @@ function main(): int {
     suite.addTest("Test get Blob constructor Int16Array", testBlobToArrayInt16Array)
     suite.addTest("Test get Blob constructor Uint16Array", testBlobToArrayUint16Array)
     suite.addTest("Test get Blob constructor Uint8Array with options", testBlobToArrayUint8ArrayOptions)
-<<<<<<< HEAD
-=======
     suite.addTest("Test get Blob constructor for string[]", testBlobToBuiltInStringArray)
     suite.addTest("Test get Blob constructor from empty", testBlobFromEmpty)
     suite.addTest("Test get Blob constructor from arrays with negative values", testBlobNegative)
->>>>>>> OpenHarmony_feature_20250328
 
     return suite.run()
 }
 
 function testEmptyStringSlice() {
     let src: FixedArray<string> = []
-<<<<<<< HEAD
-    let blob = new buffer.Blob(src)
-    assertEQ(blob.type, "")
-    assertEQ(blob.size, 0)
-}
-
-function testChineseStringSlice() {
-    let sources: FixedArray<string> = ["你好", "世界", "测试"];
-    let blob = new buffer.Blob(sources);
-    let size = blob.size;
-    assertEQ(blob.type, "")
-    assertEQ(size, 18)
-    let text = await blob.text()
-    assertEQ(text, "你好世界测试")
-}
-
-function testEnglishStringSlice() {
-    let sources: FixedArray<string> = ["测试", "$#", "c"];
-    let blob = new buffer.Blob(sources)
-    let size = blob.size;
-    assertEQ(blob.type, "")
-    assertEQ(size, 9)
-    let text = await blob.text()
-    assertEQ(text, "测试$#c")
-}
-
-function testBlobFromStringArray() {
-    let src: FixedArray<string> = ["1", "2", "3", "4", "5"]
-=======
->>>>>>> OpenHarmony_feature_20250328
     let blob = new buffer.Blob(src)
     arktest.assertEQ(blob.type, "")
     arktest.assertEQ(blob.size, 0)
@@ -135,11 +102,7 @@ function testBlobFromTypedArray() {
     arktest.assertEQ(blob.size, 5)
     arktest.assertEQ(blob.type, "")
     let text = await blob.text()
-<<<<<<< HEAD
-    assertEQ(text, "abcab")
-=======
     arktest.assertEQ(text, "abcab")
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testBlobFromDataView() {
@@ -157,13 +120,8 @@ function testBlobFromDataView() {
 function testBlobFromBlob() {
     let src = new buffer.Blob(["1", "2", "3", "4", "5"])
     let blob = new buffer.Blob([src] as FixedArray<buffer.Blob>)
-<<<<<<< HEAD
-    assertEQ(blob.type, "")
-    assertEQ(blob.size, 5)
-=======
     arktest.assertEQ(blob.type, "")
     arktest.assertEQ(blob.size, 5)
->>>>>>> OpenHarmony_feature_20250328
     let text = await blob.text()
     arktest.assertEQ(text, "12345")
 }
@@ -203,17 +161,10 @@ function testTypedArraySlice() {
                             new Int8Array([97, 98, 100]),
                             new Int8Array([110, 120, 130, 140])]
     let blob = new buffer.Blob(src).slice(0, 1)
-<<<<<<< HEAD
-    assertEQ(blob.type, "")
-    assertEQ(blob.size, 3)
-    let text = await blob.text()
-    assertEQ(text, "abc")
-=======
     arktest.assertEQ(blob.type, "")
     arktest.assertEQ(blob.size, 3)
     let text = await blob.text()
     arktest.assertEQ(text, "abc")
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testDataViewSlice() {

@@ -16,11 +16,7 @@
 import {TreeSet} from "@ohos.util.TreeSet";
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("TreeSet ForEach Values API tests")
-=======
     const suite = new arktest.ArkTestsuite("TreeSet ForEach Values API tests")
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("TreeSet forEach the treeSet with no reference",
         testForEachNoReference)
@@ -47,11 +43,7 @@ function testForEachNoReference() {
     treeSet.forEach(() => {
         count++;
     });
-<<<<<<< HEAD
-    assertEQ(count, 2, "The treeSet forEach should iterate over all elements");
-=======
     arktest.assertEQ(count, 2, "The treeSet forEach should iterate over all elements");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testForEachValueReference() {
@@ -62,11 +54,7 @@ function testForEachValueReference() {
     let flag = false;
     treeSet.forEach((value: string) => {
         flag = treeSet.has(value)
-<<<<<<< HEAD
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values");
-=======
         arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values");
->>>>>>> OpenHarmony_feature_20250328
     });
 }
 
@@ -78,11 +66,7 @@ function testForEachValueKeyReference() {
     let flag = false;
     treeSet.forEach((value: string, key: string) => {
         flag = treeSet.has(value)
-<<<<<<< HEAD
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values and keys");
-=======
         arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values and keys");
->>>>>>> OpenHarmony_feature_20250328
     });
 }
 
@@ -94,11 +78,7 @@ function testForEachThreeReferences() {
     let flag = false;
     treeSet.forEach((value: string, key: string, treeSet: TreeSet<string>) => {
         flag = treeSet.has(value)
-<<<<<<< HEAD
-        assertEQ(flag, true, "The treeSet forEach should iterate over all values, keys, and the set itself");
-=======
         arktest.assertEQ(flag, true, "The treeSet forEach should iterate over all values, keys, and the set itself");
->>>>>>> OpenHarmony_feature_20250328
     });
 }
 
@@ -108,24 +88,14 @@ function testValuesReturnIteratorByValue() {
     treeSet.add("aa");
     treeSet.add("bb");
     let it = treeSet.values();
-<<<<<<< HEAD
-    assertEQ(it.next().value, "aa", "The treeSet values iterator should return the first value");
-    assertEQ(it.next().value, "bb", "The treeSet values iterator should return the second value");
-    assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined for no more values");
-=======
     arktest.assertEQ(it.next().value, "aa", "The treeSet values iterator should return the first value");
     arktest.assertEQ(it.next().value, "bb", "The treeSet values iterator should return the second value");
     arktest.assertTrue(it.next().done, "The treeSet values iterator.done should true for no more values");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testValuesReturnIteratorByValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.values();
-<<<<<<< HEAD
-    assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined when treeSet is empty");
-=======
     arktest.assertTrue(it.next().done, "The treeSet values iterator.done should true when treeSet is empty");
->>>>>>> OpenHarmony_feature_20250328
 }

@@ -31,15 +31,9 @@ function testUriEncodedUserInfo003() {
 
 function testUriEncodedUserInfo004() {
     let route = new uri.URI('http://www.test.com');
-<<<<<<< HEAD
-    assertEQ(route.encodedUserInfo, null);
-    let mailRoute = new uri.URI('mailto:body');
-    assertEQ(mailRoute.encodedUserInfo, null);
-=======
     arktest.assertEQ(route.encodedUserInfo, null);
     let mailRoute = new uri.URI('mailto:body');
     arktest.assertEQ(mailRoute.encodedUserInfo, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriEncodedPath001() {
@@ -54,15 +48,9 @@ function testUriEncodedPath002() {
 
 function testUriEncodedPath003() {
     let route = new uri.URI('http://www.test.com');
-<<<<<<< HEAD
-    assertEQ(route.encodedPath, null);
-    let mailRoute = new uri.URI('mailto:body');
-    assertEQ(mailRoute.encodedUserInfo, null);
-=======
     arktest.assertEQ(route.encodedPath, null);
     let mailRoute = new uri.URI('mailto:body');
     arktest.assertEQ(mailRoute.encodedUserInfo, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriEncodedPath004() {
@@ -78,11 +66,7 @@ function testUriEncodedFragment001() {
 
 function testUriEncodedFragment002() {
     let route = new uri.URI('mailto:body#');
-<<<<<<< HEAD
-    assertEQ(route.encodedFragment, null);
-=======
     arktest.assertEQ(route.encodedFragment, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriEncodedFragment003() {
@@ -92,11 +76,7 @@ function testUriEncodedFragment003() {
 
 function testUriEncodedFragment004() {
     let route = new uri.URI('mailto:body');
-<<<<<<< HEAD
-    assertEQ(route.encodedFragment, null);
-=======
     arktest.assertEQ(route.encodedFragment, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriEncodedAuthority001() {
@@ -111,11 +91,7 @@ function testUriEncodedAuthority002() {
 
 function testUriEncodedAuthority003() {
     let route = new uri.URI('mailto:body#top');
-<<<<<<< HEAD
-    assertEQ(route.encodedAuthority, null);
-=======
     arktest.assertEQ(route.encodedAuthority, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriEncodedAuthority004() {

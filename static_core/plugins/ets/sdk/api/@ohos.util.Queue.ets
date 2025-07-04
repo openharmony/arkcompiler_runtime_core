@@ -14,11 +14,8 @@
  */
 
 import Deque from "@ohos.util.Deque";
-<<<<<<< HEAD
-=======
 
 export type QueueForEachCb<T> = (value: T, index: number, queue: Queue<T>) => void;
->>>>>>> OpenHarmony_feature_20250328
 
 export class Queue<T> implements Iterable<T> {
     private buffer: Deque<T>;

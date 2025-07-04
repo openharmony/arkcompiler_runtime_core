@@ -14,12 +14,9 @@
  */
 
 import TreeMap from '@ohos.util.TreeMap';
-<<<<<<< HEAD
-=======
 
 export type TreeSetForEachCb<T> = (value: T, key: T, set: TreeSet<T>) => void;
 export type TreeSetComparator<T> = (firstValue: T, secondValue: T) => number;
->>>>>>> OpenHarmony_feature_20250328
 
 export interface ReadonlyTreeSet<T> extends Iterable<T> {
     /**
@@ -68,11 +65,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param comparator: the comparator of the TreeSet
      */
-<<<<<<< HEAD
-    constructor(comparator?: (firstValue: T, secondValue: T) => number) {
-=======
     constructor(comparator?: TreeSetComparator<T>) {
->>>>>>> OpenHarmony_feature_20250328
         this.treeMap = new TreeMap<T, T>(comparator);
     }
 

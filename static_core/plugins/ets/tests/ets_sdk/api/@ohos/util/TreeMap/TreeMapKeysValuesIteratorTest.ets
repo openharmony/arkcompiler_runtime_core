@@ -14,12 +14,6 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap Keys Values Iterator API tests")

@@ -14,12 +14,6 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet GetValueAt API tests")
@@ -105,9 +99,5 @@ function testGetValueAtLongString() {
     lightWeightSet.add(str2);
     lightWeightSet.add(str3);
     let result = lightWeightSet.getValueAt(1);
-<<<<<<< HEAD
-    assertEQ(result, "sparrow", "The lightWeightSet should return the value at the specified index");
-=======
     arktest.assertEQ(result, "sparrow", "The lightWeightSet should return the value at the specified index");
->>>>>>> OpenHarmony_feature_20250328
 }

@@ -45,20 +45,12 @@ function testUriUriEncodedQuery001() {
 
 function testUriUriEncodedQuery002() {
   let route = new uri.URI('https://www.test.com/search?');
-<<<<<<< HEAD
-  assertEQ(route.encodedQuery, null);
-=======
   arktest.assertEQ(route.encodedQuery, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriUriEncodedQuery003() {
   let route = new uri.URI('https://www.test.com/');
-<<<<<<< HEAD
-  assertEQ(route.encodedQuery, null);
-=======
   arktest.assertEQ(route.encodedQuery, null);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriUriEncodedQuery004() {

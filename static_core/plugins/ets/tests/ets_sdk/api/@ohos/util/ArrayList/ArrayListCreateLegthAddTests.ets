@@ -40,29 +40,17 @@ class TestData {
     static readonly testString2: string = "";
     static readonly testString4: string = "%";
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
-<<<<<<< HEAD
-    static readonly arrayResult9 = `{"DEFAULT_CAPACITY":10,"capacity":10,"buffer":["string","","%"]}`;
-=======
     static readonly arrayResult9 = `{"0":"string","1":"","2":"%"}`;
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testCreateSingleTypeInstance() {
     let arrayList: ArrayList<number>;
-<<<<<<< HEAD
-    expectNoThrow(() => {arrayList = new ArrayList<number>()});
-=======
     arktest.expectNoThrow(() => {arrayList = new ArrayList<number>()});
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testCreateMultiTypeInstance() {
     let arrayList: ArrayList<number | string>;
-<<<<<<< HEAD
-    expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
-=======
     arktest.expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListLength() {
@@ -87,11 +75,7 @@ function testArrayListLengthMixedTypes() {
         "ArrayList length should be 3 after adding three elements of mixed types");
     arrayList.remove(TestData.testNumber3);
     arrayList.remove(TestData.testString1);
-<<<<<<< HEAD
-    assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
-=======
     arktest.assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListLengthSetterLarge() {

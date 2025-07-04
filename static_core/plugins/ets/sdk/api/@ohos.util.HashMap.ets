@@ -16,11 +16,8 @@
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
-<<<<<<< HEAD
-=======
 
 export type HashMapCbFn<K, V> = (value: V, key: K, map: HashMap<K, V>) => void;
->>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     /**

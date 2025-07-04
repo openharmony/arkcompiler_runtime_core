@@ -15,11 +15,7 @@
 import {xml} from "@ohos.xml"
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("XmlPullParser API tests, part2");
-=======
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part2");
->>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as undefined.", testXmlPullParserParseOptions0009)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as function.", testXmlPullParserParseOptions0008)
     suite.addTest("Testing XML PullParser with tagValueCallbackFunction as function.", testXmlPullParserParseOptions0006)
@@ -35,11 +31,7 @@ function main(): int {
 function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
-<<<<<<< HEAD
-    assertNE(parser, null)
-=======
     arktest.assertNE(parser, null)
->>>>>>> OpenHarmony_feature_20250328
     parser.parseXml({} as xml.ParseOptions)
 }
 
@@ -107,11 +99,7 @@ function testWithTagValueCb() {
         "{  :  }"
 )
     let result = res.join("; ") + "; "
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(result))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(result))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithTagValueCbWithIgnoreNS() {
@@ -159,11 +147,7 @@ function testWithTagValueCbWithIgnoreNS() {
         "{ note : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> <title>Happy</title><title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?><a><b/></a> <h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
         "{  :  }")
     let result = res.join("; ") + "; "
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(result))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(result))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -215,11 +199,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 <h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
         "{  :  }")
     let result = res.join("; ") + "; "
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(result))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(result))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithAttributeValueCb() {
@@ -249,11 +229,7 @@ function testWithAttributeValueCb() {
     parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(expected))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(expected))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -283,11 +259,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
     parser.parseXml(options)
 
     const expected = "{ xmlns:h : http://www.w3.org/TR/html4/ }; { importance : high }; { logged : true }; "
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(expected));
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(expected));
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function parseInfo2Str(info: xml.ParseInfo): string {
@@ -345,11 +317,7 @@ function testXmlPullParserParseOptions0001() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -371,11 +339,7 @@ function testXmlPullParserParseOptions0002() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -397,11 +361,7 @@ function testXmlPullParserParseOptions0003() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -423,11 +383,7 @@ function testXmlPullParserParseOptions0004() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -449,11 +405,7 @@ function testXmlPullParserParseOptions0005() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -475,11 +427,7 @@ function testXmlPullParserParseOptions0006() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -503,11 +451,7 @@ function testXmlPullParserParseOptions0008() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -530,11 +474,7 @@ function testXmlPullParserParseOptions0009() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 

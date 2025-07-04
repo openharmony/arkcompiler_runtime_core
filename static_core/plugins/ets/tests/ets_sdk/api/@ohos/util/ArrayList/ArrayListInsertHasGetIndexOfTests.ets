@@ -16,10 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
-<<<<<<< HEAD
-=======
 const TypeErrorCodeId: number = 401;
->>>>>>> OpenHarmony_feature_20250328
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
@@ -102,13 +99,8 @@ function testInsertWithNegativeIndex() {
             "The value of \"index\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.insert(TestData.testNumber3, -TestData.testNumber1)}, exceptionCheck);
-    expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);
-=======
     arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, -TestData.testNumber1)}, exceptionCheck);
     arktest.expectThrow(() => {arrayList.insert(TestData.testNumber3, TestData.testNumber8)}, exceptionCheck1);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testInsertWithDoubleIndex() {

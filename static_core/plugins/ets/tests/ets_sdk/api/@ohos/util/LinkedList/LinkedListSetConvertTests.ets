@@ -14,12 +14,9 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
-<<<<<<< HEAD
-=======
 import {BusinessError} from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: number = 10200001;
->>>>>>> OpenHarmony_feature_20250328
 
 function main() {
     const suite = new arktest.ArkTestsuite("LinkedList API tests");

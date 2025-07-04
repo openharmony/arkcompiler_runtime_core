@@ -14,12 +14,6 @@
  */
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightMap Entries API tests")
@@ -69,9 +63,5 @@ function testEntriesReturnIteratorByLongStrKey() {
         str += iterator.next().value!.toString();
     }
     let strAll = "sparrow123squirrel357";
-<<<<<<< HEAD
-    assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
-=======
     arktest.assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
->>>>>>> OpenHarmony_feature_20250328
 }

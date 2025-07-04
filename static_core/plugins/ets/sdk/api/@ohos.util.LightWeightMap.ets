@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
@@ -22,7 +20,6 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
 
->>>>>>> OpenHarmony_feature_20250328
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
@@ -520,11 +517,7 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
             return 1;
         }
 
-<<<<<<< HEAD
-        const keyHash: int = key!.$_hashCode();
-=======
         const keyHash: int = (key! as object).$_hashCode(); // #26217
->>>>>>> OpenHarmony_feature_20250328
         const positiveMask: int = 1 << LightWeightMap.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)

@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-import {uri} from "@ohos.uri";
-=======
 import { uri } from "@ohos.uri";
 import { BusinessError } from "@ohos.base";
->>>>>>> OpenHarmony_feature_20250328
 
 function ConstructorTest001() {
   let muri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");

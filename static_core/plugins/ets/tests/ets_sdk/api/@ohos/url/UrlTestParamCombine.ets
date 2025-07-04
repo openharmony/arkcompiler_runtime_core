@@ -148,11 +148,7 @@ function testUrlTest116() {
 function testUrlTest117() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
 	murl.hash = 'saaf^as\tk\njf'
-<<<<<<< HEAD
-	assertEQ(murl.hash, "#saaf%5Eas%09k%0Ajf");
-=======
  arktest.assertEQ(murl.hash, "#saaf%5Eas%09k%0Ajf");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------117 done')
 }
 
@@ -168,11 +164,7 @@ function testUrlTest119() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
  arktest.assertEQ(murl.pathname, "/directory/file");
 	murl.pathname = 'sasf/s?dc#j/mm^h';
-<<<<<<< HEAD
-	assertEQ(murl.pathname, "/sasf/s?dc#j/mm%5Eh");
-=======
  arktest.assertEQ(murl.pathname, "/sasf/s?dc#j/mm%5Eh");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------119 done')
 }
 
@@ -180,11 +172,7 @@ function testUrlTest120() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
  arktest.assertEQ(murl.port, "8080");
 	murl.port = '98\t5\r6';
-<<<<<<< HEAD
-	assertEQ(murl.port, "8080");
-=======
  arktest.assertEQ(murl.port, "8080");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------120 done')
 }
 
@@ -192,13 +180,8 @@ function testUrlTest121() {
 	let murl = url.URL.parseURL("http://username:password@host:443/directory/file?query=pppppp#123456");
  arktest.assertEQ(murl.origin, "http://host:443");
 	murl.protocol = 'ht\tt\nps:';
-<<<<<<< HEAD
-	assertEQ(murl.origin, "http://host:443");
-	assertEQ(murl.port, "443");
-=======
  arktest.assertEQ(murl.origin, "http://host:443");
  arktest.assertEQ(murl.port, "443");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------121 done')
 }
 
@@ -206,11 +189,7 @@ function testUrlTest122() {
 	let murl = url.URL.parseURL("http://username:password@host:443/directory/file?query=pppppp#123456");
  arktest.assertEQ(murl.search, "?query=pppppp");
 	murl.search = 'ad/sd=ss`\'c\rc\tc\nc'
-<<<<<<< HEAD
-	assertEQ(murl.search, "?ad/sd=ss`'c%0Dc%09c%0Ac");
-=======
  arktest.assertEQ(murl.search, "?ad/sd=ss`'c%0Dc%09c%0Ac");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------122 done')
 }
 
@@ -218,11 +197,7 @@ function testUrlTest123() {
 	let murl = url.URL.parseURL("http://aas@asdgfv.hh:443/index.html?sad=ss中国s");
  arktest.assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?sad=ss%E4%B8%AD%E5%9B%BDs");
 	murl.search = 'ad/sd=s中国s`\'cc\tc\rc';
-<<<<<<< HEAD
-	assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?ad/sd=s%E4%B8%AD%E5%9B%BDs`'cc%09c%0Dc");
-=======
  arktest.assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?ad/sd=s%E4%B8%AD%E5%9B%BDs`'cc%09c%0Dc");
->>>>>>> OpenHarmony_feature_20250328
 	console.log('-------------------------123 done')
 }
 

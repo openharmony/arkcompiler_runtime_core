@@ -242,11 +242,7 @@ function testSubArrayListStartIndexOutOfRange() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.subArrayList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.subArrayList(-TestData.testNumber1, TestData.testNumber5)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testSubArrayListEndIndexOutOfRange() {
@@ -257,11 +253,7 @@ function testSubArrayListEndIndexOutOfRange() {
             "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testSubArrayListEndIndexSmallerThanStartIndex() {
@@ -272,11 +264,7 @@ function testSubArrayListEndIndexSmallerThanStartIndex() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber5, TestData.testNumber1)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testSubArrayListWithChange() {
@@ -298,11 +286,7 @@ function testSubArrayListEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testSubArrayListFullRange() {
@@ -312,9 +296,6 @@ function testSubArrayListFullRange() {
     for (let i: number = 0; i < subArrayList.length; i++) {
         arktest.assertEQ(subArrayList[i], arrayList[i], `Element at index ${i} should match`);
     }
-<<<<<<< HEAD
-    assertEQ(subArrayList.length, TestData.testNumber5, "SubArrayList length should be 5");
-=======
     arktest.assertEQ(subArrayList.length, TestData.testNumber5, "SubArrayList length should be 5");
 }
 
@@ -331,7 +312,6 @@ function testArrayListJsonStringify() {
     arrayList.removeByIndex(TestData.testNumber0);
     let jsonResult = JSON.stringify(arrayList);
     arktest.assertEQ(jsonResult, TestData.result8, `jsonResult should be ${TestData.result8}`);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

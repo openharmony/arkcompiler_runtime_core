@@ -14,16 +14,10 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
-<<<<<<< HEAD
-
-function main(): int {
-    const suite = new ArkTestsuite("TreeSet Remove Clear API tests")
-=======
 import {TreeSetComparator} from "@ohos.util.TreeSet";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet Remove Clear API tests")
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("TreeSet remove value", testRemoveExistingValue)
     suite.addTest("TreeSet remove not set value", testRemoveNonExistingValue)
@@ -43,15 +37,9 @@ function testRemoveExistingValue() {
     treeSet.add("aa");
     let result1 = treeSet.remove("aa");
     let result2 = treeSet.has("aa");
-<<<<<<< HEAD
-    assertEQ(result1, true, "The treeSet should remove the value");
-    assertEQ(result2, false, "The treeSet should not has the value");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-=======
     arktest.assertEQ(result1, true, "The treeSet should remove the value");
     arktest.assertEQ(result2, false, "The treeSet should not has the value");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveNonExistingValue() {
@@ -59,13 +47,8 @@ function testRemoveNonExistingValue() {
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.remove("bb");
-<<<<<<< HEAD
-    assertEQ(result, false, "The treeSet should return false for the value that is not set");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
-=======
     arktest.assertEQ(result, false, "The treeSet should return false for the value that is not set");
     arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function removeItem(treeSet: TreeSet<number>){
@@ -75,16 +58,10 @@ function removeItem(treeSet: TreeSet<number>){
 }
 
 function testAddValueBetweenRemoveValue() {
-<<<<<<< HEAD
-    let treeSet = new TreeSet<number>((first: number, second: number) =>{
-        return second - first;
-    });
-=======
     let treeSetCb: TreeSetComparator<number> = (first: number, second: number) =>{
         return second - first;
     };
     let treeSet = new TreeSet<number>(treeSetCb);
->>>>>>> OpenHarmony_feature_20250328
     const insertArr = [643, 811, 807, 378, 226, 195, 599, 641, 494, 964, 156, 419, 977, 20, 788, 596]
     for(let i = 0;i < insertArr.length;i++) {
         treeSet.add(insertArr[i]);
@@ -107,11 +84,7 @@ function testAddValueBetweenRemoveValue() {
     let index = 0;
     treeSet.forEach((element) => {
         console.log(element);
-<<<<<<< HEAD
-        assertEQ(element, resArr[index], "The result should be match");
-=======
         arktest.assertEQ(element, resArr[index], "The result should be match");
->>>>>>> OpenHarmony_feature_20250328
         index++;
     });
 }
@@ -120,26 +93,16 @@ function testRemoveValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("aa");
-<<<<<<< HEAD
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-=======
     arktest.assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveEmptyStringValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("");
-<<<<<<< HEAD
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-=======
     arktest.assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testClearData() {
@@ -149,26 +112,16 @@ function testClearData() {
     treeSet.clear();
     let result1 = treeSet.has("aa");
     let result2 = treeSet.isEmpty();
-<<<<<<< HEAD
-    assertEQ(result1, false, "The treeSet should not has the value");
-    assertEQ(result2, true, "The treeSet should be empty");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-=======
     arktest.assertEQ(result1, false, "The treeSet should not has the value");
     arktest.assertEQ(result2, true, "The treeSet should be empty");
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testClearEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.clear();
-<<<<<<< HEAD
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-=======
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testAddDataAfterClearTreeSet() {
@@ -177,15 +130,6 @@ function testAddDataAfterClearTreeSet() {
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.clear();
-<<<<<<< HEAD
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-    treeSet.add("cc");
-    treeSet.add("dd");
-    treeSet.add("ee");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
-    assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
-    assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
-=======
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0");
     treeSet.add("cc");
     treeSet.add("dd");
@@ -193,5 +137,4 @@ function testAddDataAfterClearTreeSet() {
     arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3");
     arktest.assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
     arktest.assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
->>>>>>> OpenHarmony_feature_20250328
 }

@@ -14,10 +14,7 @@
  */
 
 import { BusinessError } from "@ohos.base";
-<<<<<<< HEAD
-=======
 import { jsonx } from "std/core"
->>>>>>> OpenHarmony_feature_20250328
 
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
@@ -38,13 +35,6 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     return value.buffer;
 }
 
-<<<<<<< HEAD
-function fillInPaddingBase64(str: string): string {
-    let base64Divisible: int = 4;
-    let remainder: int = str.length % base64Divisible as int;
-    const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
-    return str.padRight(c'=', str.length as int + paddingCount);
-=======
 function normalizeBase64Url(str: string): string {
     return str
         .replace(new RegExp('-', 'g'), '+')
@@ -125,7 +115,6 @@ function sanitizeLatin1(str: string): string {
         sb.append(String.fromCharCode(low));
     }
     return sb.toString();
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -228,9 +217,6 @@ export default namespace buffer {
     export function from(string: String, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
         let resolvedString = string;
-<<<<<<< HEAD
-        if (encoding == 'base64' || encoding == 'base64url') {
-=======
         if (resolvedEncoding == 'ascii') {
             resolvedString = sanitizeAscii(resolvedString);
         } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
@@ -244,7 +230,6 @@ export default namespace buffer {
                 return new Buffer(new ArrayBuffer(0));
             }
         } else if (encoding == 'base64' || encoding == 'base64url') {
->>>>>>> OpenHarmony_feature_20250328
             resolvedString = fillInPaddingBase64(string);
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
@@ -484,11 +469,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      */
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         const resolvedSource = getArrayBufferFrom(source);
-<<<<<<< HEAD
-        const sourceBytesLength = resolvedSource.byteLength as int;
-=======
         const sourceBytesLength = resolvedSource.byteLength.toInt();
->>>>>>> OpenHarmony_feature_20250328
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
@@ -607,31 +588,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
-<<<<<<< HEAD
-            let resolvedEnd: int = this.length as int;
-            if (start && !isNaN(start!) && start! > 0) {
-                resolvedStart = start as int;
-            }
-            if (end && !isNaN(end!)) {
-                resolvedEnd = end as int;
-=======
             let resolvedEnd: int = (this.length).toInt();
             if (start && !isNaN(start!) && start! > 0) {
                 resolvedStart = start.toInt();
             }
             if (end && !isNaN(end!)) {
                 resolvedEnd = end.toInt();
->>>>>>> OpenHarmony_feature_20250328
             }
             let bufLength = this.length;
             if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
                  return '';
             }
-<<<<<<< HEAD
-            resolvedEnd = resolvedEnd > bufLength ? bufLength as int : resolvedEnd
-=======
             resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd
->>>>>>> OpenHarmony_feature_20250328
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -892,12 +860,6 @@ Received value is: ${resolvedEnd}`)
 
             switch (klass) {
                 case "string":
-<<<<<<< HEAD
-                    let buff = ArrayBuffer.from(value as string,
-                                                resolvedEncoding as string);
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, buff.at((i % buff.byteLength) as int) as byte);
-=======
                     let strValue = value as string;
                     if (resolvedEncoding == 'ascii') {
                         strValue = sanitizeAscii(strValue);
@@ -934,7 +896,6 @@ Received value is: ${resolvedEnd}`)
 
                     for (let j: int = 0; pos < resolvedEndInt; j++, pos++) {
                         this.buffer.set(pos, buff[j].toByte());
->>>>>>> OpenHarmony_feature_20250328
                     }
                     return this;
                 case "number":
@@ -1735,8 +1696,6 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             }
             this.getDataView().setUint8(index, value);
         }
-<<<<<<< HEAD
-=======
 
         /**
          * Converts this Buffer instance into a JsonElement.
@@ -1755,7 +1714,6 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             objectElem.setElement("data", jsonx.JsonElement.createArray(arr));
             return objectElem;
         }
->>>>>>> OpenHarmony_feature_20250328
     }
 
     enum TypeParameters {

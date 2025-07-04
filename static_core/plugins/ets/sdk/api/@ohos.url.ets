@@ -14,20 +14,6 @@
  */
 
 import { BusinessError } from "@ohos.base";
-<<<<<<< HEAD
-
-const TypeErrorCodeId: number = 401;
-const SyntaxErrorCodeId: number = 10200002;
-
-function createBusinessError(code: number, message:string){
-    let err = new BusinessError();
-    err.code = code;
-    err.name='BusinessError';
-    err.message = message;
-    return err;
-}
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 const TypeErrorCodeId: number = 401;
 const SyntaxErrorCodeId: number = 10200002;
@@ -210,13 +196,6 @@ export namespace url {
         return ch.length == 1 && ((ch[0] >= c'a' && ch[0] <= c'z') || (ch[0] >= c'A' && ch[0] <= c'Z'));
     }
 
-<<<<<<< HEAD
-    function isAlpha(ch: string): boolean {
-        return ch.length == 1 && ((ch[0] >= c'a' && ch[0] <= c'z') || (ch[0] >= c'A' && ch[0] <= c'Z'));
-    }
-
-=======
->>>>>>> OpenHarmony_feature_20250328
     function isNum(ch: string): boolean {
         return ch.length == 1 && (ch[0] >= c'0' && ch[0] <= c'9');
     }
@@ -471,11 +450,7 @@ export namespace url {
     * @class InnerURL
     */
     class InnerURL {
-<<<<<<< HEAD
-        flags: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false];
-=======
         flags: boolean[] = new boolean[12];
->>>>>>> OpenHarmony_feature_20250328
         cScheme: string = "";
         cFragment: string = "";
         cQuery: string = "";
@@ -1057,11 +1032,7 @@ export namespace url {
                 if (inputLen > 0) {
                     this.cIsSpecialPath = input[0] != c'/' ? true : false;
                 }
-<<<<<<< HEAD
-                if (this.flags[11] && inputLen == 2) {
-=======
                 if (this.flags[INDEX_DOUBLE_SLASH] && inputLen == 2) {
->>>>>>> OpenHarmony_feature_20250328
                     return;
                 }
                 this.analysizeNoDefaultProtocol(input);
@@ -1077,11 +1048,7 @@ export namespace url {
             if (tempInput.indexOf(':') != -1) {
                 let pos = tempInput.indexOf(':');
                 pos++;
-<<<<<<< HEAD
-                this.flags[11] = (input[pos] == c'/' && input[pos + 1] == c'/');
-=======
                 this.flags[INDEX_DOUBLE_SLASH] = (input[pos] == c'/' && input[pos + 1] == c'/');
->>>>>>> OpenHarmony_feature_20250328
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1633,11 +1600,7 @@ export namespace url {
                     nativeUrl = URL.parseBaseUrl(fixIllegalString(inputUrl), inputBase as URL);
                 }
             }
-<<<<<<< HEAD
-            if (nativeUrl.urlInner.flags[0]) {
-=======
             if (nativeUrl.urlInner.flags[INDEX_INVALID]) {
->>>>>>> OpenHarmony_feature_20250328
                 throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
             }
             setEncodedData(nativeUrl, nativeUrl.urlInner);
@@ -1912,11 +1875,7 @@ export namespace url {
             if (!this.urlInner.flags[INDEX_INVALID]) {
                 setEncodedData(this, this.urlInner);
             } else {
-<<<<<<< HEAD
-                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
-=======
                 throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid Url string.');
->>>>>>> OpenHarmony_feature_20250328
             }
         }
 
@@ -2164,27 +2123,21 @@ export namespace url {
         toString(): string {
             return this.urlClass.toString();
         }
-<<<<<<< HEAD
-=======
 
         /**
         * Returns an iterator allowing to go through all keys contained in this object.
         *
         * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
         */
->>>>>>> OpenHarmony_feature_20250328
         keys(): IterableIterator<string> {
             return this.urlClass.iterByKeys().$_iterator();
         }
 
-<<<<<<< HEAD
-=======
         /**
         * Returns an iterator allowing to go through all keys contained in this object.
         *
         * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
         */
->>>>>>> OpenHarmony_feature_20250328
         values(): IterableIterator<string> {
             return this.urlClass.iterByValues().$_iterator();
         }
@@ -2212,9 +2165,6 @@ export namespace url {
             return this.urlClass.get(getname);
         }
 
-<<<<<<< HEAD
-        entries(): IterableIterator<[string,string]> {
-=======
         /**
         * Returns an ES6 iterator. Each item of the iterator is a JavaScript Array.
         * The first item of Array is name, and the second item of Array is value.
@@ -2222,7 +2172,6 @@ export namespace url {
         * @returns { IterableIterator<[string,string]> } Returns an iterator over all values.
         */
         entries(): IterableIterator<[string, string]> {
->>>>>>> OpenHarmony_feature_20250328
             return this.urlClass.entries().$_iterator();
         }
 
@@ -2261,8 +2210,6 @@ export namespace url {
             }
         }
 
-<<<<<<< HEAD
-=======
         /**
         * Returns an iterator allowing to go through all key/value
         * pairs contained in this object.
@@ -2271,7 +2218,6 @@ export namespace url {
         * Each item of the iterator is a JavaScript Array.
         * The first item of Array is name, and the second item of Array is value.
         */
->>>>>>> OpenHarmony_feature_20250328
         $_iterator(): IterableIterator<[string, string]> {
             return this.urlClass.entries().$_iterator();
         }
@@ -2330,17 +2276,10 @@ export namespace url {
             }
         }
 
-<<<<<<< HEAD
-        entries(): Array<[string,string]> {
-            let result = new Array<[string, string]>();
-            for (let i = 0; i < this.searchParams.length; i += 2) {
-                let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]]; 
-=======
         entries(): Array<[string, string]> {
             let result = new Array<[string, string]>();
             for (let i = 0; i < this.searchParams.length; i += 2) {
                 let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]];
->>>>>>> OpenHarmony_feature_20250328
                 result.push(arr);
             }
             return result;
@@ -2459,11 +2398,7 @@ export namespace url {
         } else if (input instanceof Record) {
             return parseParamFromRecord(input as Record<string, string>)
         } else {
-<<<<<<< HEAD
-            throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid input type.');
-=======
             throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid input type.');
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 
@@ -2472,11 +2407,7 @@ export namespace url {
         if (input.length == 0) {
             return result;
         } else if (input[0][0] == undefined || input[0][1] == undefined) {
-<<<<<<< HEAD
-            throw createBusinessError(SyntaxErrorCodeId,'Parameter error. The type of input must be string[][].');
-=======
             throw createBusinessError(SyntaxErrorCodeId, 'Parameter error. The type of input must be string[][].');
->>>>>>> OpenHarmony_feature_20250328
         }
 
         for (let it of input) {

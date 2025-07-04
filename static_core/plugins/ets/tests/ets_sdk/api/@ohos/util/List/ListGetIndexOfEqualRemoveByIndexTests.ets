@@ -14,12 +14,9 @@
  */
 
 import {List} from '@ohos.util.List';
-<<<<<<< HEAD
-=======
 import {BusinessError} from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: number = 10200001;
->>>>>>> OpenHarmony_feature_20250328
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");

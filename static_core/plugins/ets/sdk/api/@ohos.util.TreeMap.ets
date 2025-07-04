@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
  export type TreeMapForEachCb<K, V> = (value: V, key: K, map: TreeMap<K, V>) => void;
  export type TreeMapComparator<K> = (firstValue: K, secondValue: K) => number;
 
->>>>>>> OpenHarmony_feature_20250328
 export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
     /**
      * Return the number of elements in the TreeMap
@@ -273,13 +270,8 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
             if (Number.isInteger(firstValueN) && Number.isInteger(secondValueN) &&
                 firstValueN <= Int.MAX_VALUE / 128 && firstValueN >= Int.MIN_VALUE / 128 &&
                 secondValueN <= Int.MAX_VALUE / 128 && secondValueN >= Int.MIN_VALUE / 128) {
-<<<<<<< HEAD
-                const firstValueI = firstValueN as int;
-                const secondValueI = secondValueN as int;
-=======
                 const firstValueI = firstValueN.toInt();
                 const secondValueI = secondValueN.toInt();
->>>>>>> OpenHarmony_feature_20250328
                 return secondValueI - firstValueI;
             }
         } else if (firstValue instanceof String && secondValue instanceof String) {
@@ -295,11 +287,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      *
      * @param comparator: the comparator of the TreeMap
      */
-<<<<<<< HEAD
-    constructor(comparator?: (firstValue: K, secondValue: K) => number) {
-=======
     constructor(comparator?: TreeMapComparator<K>) {
->>>>>>> OpenHarmony_feature_20250328
         if (comparator === undefined) {
             const defaultComparator: (firstValue: K, secondValue: K) => number =
                 (firstValue: K, secondValue: K): number => {

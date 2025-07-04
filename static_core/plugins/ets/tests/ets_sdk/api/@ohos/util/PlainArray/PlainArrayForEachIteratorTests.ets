@@ -148,11 +148,6 @@ function testIteratorWithNonEmpty() {
         arktest.assertEQ(temp.value![0], plainArray.getKeyAt(elem2++), "The key should be same");
         temp = iter.next();
     }
-<<<<<<< HEAD
-    assertEQ(elem1, plainArray.length, "Iterator should iterate all elements correctly");
-    assertEQ(elem2, plainArray.length, "Iterator should iterate all elements correctly");
-=======
     arktest.assertEQ(elem1, plainArray.length, "Iterator should iterate all elements correctly");
     arktest.assertEQ(elem2, plainArray.length, "Iterator should iterate all elements correctly");
->>>>>>> OpenHarmony_feature_20250328
 }

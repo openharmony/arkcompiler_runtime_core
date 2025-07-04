@@ -558,11 +558,7 @@ function main(): int {
 	suite.addTest("testUrlToString009", testUrlToString009);
     suite.addTest("testUrlToString010", testUrlToString010);
     suite.addTest("testUrlToString011", testUrlToString011);
-<<<<<<< HEAD
-	suite.addTest("testUrlToString012", testUrlToString012);
-=======
     suite.addTest("testUrlToString012", testUrlToString012);
->>>>>>> OpenHarmony_feature_20250328
 
 	//passed
 	return suite.run();

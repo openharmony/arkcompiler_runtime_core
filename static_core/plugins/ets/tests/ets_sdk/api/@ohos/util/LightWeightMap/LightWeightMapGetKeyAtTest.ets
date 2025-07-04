@@ -14,10 +14,7 @@
  */
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
->>>>>>> OpenHarmony_feature_20250328
 
 const OutOfBoundsErrorCodeId: number = 10200001;
 

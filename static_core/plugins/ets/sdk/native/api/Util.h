@@ -24,12 +24,9 @@ namespace ark::ets::sdk::util {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                          ani_boolean entropyCache);
 
-<<<<<<< HEAD
-=======
 ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                                ani_boolean entropyCache);
 
->>>>>>> OpenHarmony_feature_20250328
 ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
                               const char *ctorSignature = nullptr);
 

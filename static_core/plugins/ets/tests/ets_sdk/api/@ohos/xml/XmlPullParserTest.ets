@@ -37,11 +37,7 @@ function main(): int {
 function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
-<<<<<<< HEAD
-    assertNE(parser, null)
-=======
     arktest.assertNE(parser, null)
->>>>>>> OpenHarmony_feature_20250328
     parser.parseXml({} as xml.ParseOptions)
 }
 
@@ -91,11 +87,7 @@ function testWithTagValueCb() {
 { todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { table :  }; { tr :  }; { td :  }; {  : Apples }; \
 { td :  }; { td :  }; {  : Bananas }; { td :  }; { tr :  }; { table :  }; { note :  }; '
 
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(res))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(res))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithTagValueCbWithIgnoreNS() {
@@ -128,11 +120,7 @@ function testWithTagValueCbWithIgnoreNS() {
 {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; { todo :  }; \
 {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; { h:td :  }; \
 { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(res))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(res))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -167,11 +155,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 { todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; \
 { h:td :  }; { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
 
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(res))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(res))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function eventName(type: xml.EventType): string {
@@ -253,11 +237,7 @@ function testWithTokenValueCb() {
 { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; \
 { prefix : }; { text : } }; '
 
-<<<<<<< HEAD
-    assertEQ(processStr(g_testStr), processStr(expected))
-=======
     arktest.assertEQ(processStr(g_testStr), processStr(expected))
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml013
@@ -292,13 +272,8 @@ function testReplaceXmlSpecChars() {
     let expectedTextStr = 'Hello>World\'Wo"rk'
     let expectedAttrStr = "{ importance : hi&gh }; { logged : <true }; "
 
-<<<<<<< HEAD
-    assertEQ(attStr, expectedAttrStr)
-    assertEQ(textStr, expectedTextStr)
-=======
     arktest.assertEQ(attStr, expectedAttrStr)
     arktest.assertEQ(textStr, expectedTextStr)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParse012
@@ -327,11 +302,7 @@ function testCDATA() {
 
     let expectedTextStr = 'Hello\nWorld Work\n This is a \n CDATA section '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml010
@@ -362,17 +333,10 @@ function testIsEmptyElementTag() {
 
     let expectedTextStr = '{ note : false }; { title : true }; { todo : false }; { todo : true }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-
-    const expectedOld = 'key:2 value:false key:2 value:true key:2 value:false key:2 value:true '
-    assertEQ(expectedOld, oldStr)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
 
     const expectedOld = 'key:2 value:false key:2 value:true key:2 value:false key:2 value:true '
     arktest.assertEQ(expectedOld, oldStr)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml009
@@ -403,17 +367,10 @@ function testGetText() {
 
     let expectedTextStr = '{  : Happy }; {  : Work }; {  : Play }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-
-    let expectedOld = "key:4 value:Happy key:4 value:Work key:4 value:Play "
-    assertEQ(oldStr, expectedOld)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
 
     let expectedOld = "key:4 value:Happy key:4 value:Work key:4 value:Play "
     arktest.assertEQ(oldStr, expectedOld)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml008
@@ -444,19 +401,11 @@ function testGetPrefix() {
 
     let expectedTextStr = '{ note :  }; { table : h }; { tr : h }; { td : h }; { td : h }; { tr : h }; { table : h }; { note :  }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-
-    let oldExpected = "key:2 value: key:2 value:h key:2 value:h key:2 value:h " +
-    "key:3 value:h key:3 value:h key:3 value:h key:3 value: "
-    assertEQ(oldExpected, oldStr)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpected = "key:2 value: key:2 value:h key:2 value:h key:2 value:h " +
     "key:3 value:h key:3 value:h key:3 value:h key:3 value: "
     arktest.assertEQ(oldExpected, oldStr)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml007
@@ -487,19 +436,11 @@ function testGetNamespace() {
 
     let expectedTextStr = '{ note :  }; { table : html4 }; { tr : html4 }; { td : html4 }; { td : html4 }; { tr : html4 }; { table : html4 }; { note :  }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-
-    let oldExpected = "key:2 value: key:2 value:html4 key:2 value:html4 key:2 value:html4 " +
-    "key:3 value:html4 key:3 value:html4 key:3 value:html4 key:3 value: "
-    assertEQ(oldStr, oldExpected)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpected = "key:2 value: key:2 value:html4 key:2 value:html4 key:2 value:html4 " +
     "key:3 value:html4 key:3 value:html4 key:3 value:html4 key:3 value: "
     arktest.assertEQ(oldStr, oldExpected)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // testParseXml002
@@ -533,19 +474,11 @@ function testTagValue() {
 {  :      }; { company :  }; {  : John & Hans }; { company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; \
 {  :      }; { lens :  }; {  : Play }; { lens :  }; {  :      }; {  : go there }; { note :  }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-
-    let oldExpectedStr = 'note    function \n matchwo(a,6)    Hello, World!    companyJohn & Hanscompany\
-    titleHappytitle    lensPlaylens    go therenote'
-    assertEQ(oldTextStr, oldExpectedStr)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
 
     let oldExpectedStr = 'note    function \n matchwo(a,6)    Hello, World!    companyJohn & Hanscompany\
     titleHappytitle    lensPlaylens    go therenote'
     arktest.assertEQ(oldTextStr, oldExpectedStr)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 let testXml =
@@ -587,19 +520,11 @@ let testXml =
                 supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
             }
             parser.parseXml(options);
-<<<<<<< HEAD
-            assertTrue(str.includes("key:2 value:true"))
-        } catch (err) {
-            const TAG = 'testXmlIsWhitespace0001';
-            console.error(`${TAG} failed, error: ${err}`);
-            assertTrue(false)
-=======
             arktest.assertTrue(str.includes("key:2 value:true"))
         } catch (err) {
             const TAG = 'testXmlIsWhitespace0001';
             console.error(`${TAG} failed, error: ${err}`);
             arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 

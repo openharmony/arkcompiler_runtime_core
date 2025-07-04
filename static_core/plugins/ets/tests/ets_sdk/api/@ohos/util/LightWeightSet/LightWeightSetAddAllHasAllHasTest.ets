@@ -14,12 +14,6 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet AddAll HasAll Has API tests")
@@ -54,11 +48,7 @@ function testAddAllData() {
 function testAddAllEmptyData() {
     let set: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = set.addAll(set);
-<<<<<<< HEAD
-    assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
-=======
     arktest.assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testAddAllWithNonEmptySet() {
@@ -68,9 +58,6 @@ function testAddAllWithNonEmptySet() {
     setA.add("aa");
     setB.add("bb");
     let result = setB.addAll(setA);
-<<<<<<< HEAD
-    assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
-=======
     arktest.assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
 }
 
@@ -91,7 +78,6 @@ function testAddAllWithMultipleSets() {
     setC.add("s");
 
     arktest.assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testAddAllWithMultipleSets() {

@@ -14,12 +14,6 @@
  */
 
 import {HashSet} from "@ohos.util.HashSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("HashSet Clear Foreach API tests")

@@ -61,10 +61,6 @@ public:
     {
         return tranTool_.get();
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> OpenHarmony_feature_20250328
     bool IsUnicode() const
     {
         uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::UNICODE_FLG);

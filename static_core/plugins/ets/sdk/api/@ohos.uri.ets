@@ -14,20 +14,6 @@
  */
 
 import { BusinessError } from "@ohos.base";
-<<<<<<< HEAD
-
-const SyntaxErrorCodeId: number = 10200002;
-const TypeErrorCodeId: number = 401;
-
-function createBusinessError(code: number, message:string){
-    let err = new BusinessError();
-    err.code = code;
-    err.name='BusinessError';
-    err.message = message;
-    return err;
-}
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 /**
 * The uri module provides utilities for URI resolution and parsing.
@@ -42,14 +28,6 @@ export namespace uri {
   */
   export class URI {
     uriEntry: UriEntry;
-<<<<<<< HEAD
-    constructor(input: string) {
-      this.uriEntry = new UriEntry(input);
-      let errStr: string = this.uriEntry.getErrStr();
-      if (errStr != "") {
-        throw createBusinessError(SyntaxErrorCodeId,`Syntax Error. Invalid Uri string: The ${errStr}`)
-      }
-=======
 
     /**
     * URI constructor, which is used to instantiate a URI object.
@@ -60,7 +38,6 @@ export namespace uri {
     */
     constructor(uri: string) {
       this.uriEntry = new UriEntry(uri);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -170,31 +147,6 @@ export namespace uri {
       return new URI(uriStr);
     }
 
-<<<<<<< HEAD
-      getQueryValue(key: string): string | null {
-          let query = this.uriEntry.getQuery();
-          if (query === '') {
-              return null;
-          }
-          const queryStrs = query.split('&');
-          for (const item of queryStrs) {
-              const eqPos = item.indexOf('=');
-              let currentKey = item;
-              let currentValue = '';
-              if (eqPos !== -1) {
-                  currentKey = item.substring(0, eqPos);
-                  currentValue = item.substring(eqPos + 1);
-              }
-
-              const decodedKey = this.decodeSafelyInner(currentKey);
-              if (decodedKey === key) {
-                  const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
-                  return decodedValue || '';
-              }
-          }
-          return null;
-      }
-=======
     /**
     * Searches the query string for the first value with the given key.
     *
@@ -204,7 +156,6 @@ export namespace uri {
     getQueryValue(key: string): string | null {
       return this.uriEntry.getQueryValue(key);
     }
->>>>>>> OpenHarmony_feature_20250328
 
 
 
@@ -215,28 +166,7 @@ export namespace uri {
     * @returns { Array<string> } Return a set of decoded names.
     */
     getQueryNames(): Array<string> {
-<<<<<<< HEAD
-      let query = this.uriEntry.getQuery();
-      if (query == "") {
-        return new Array<string>();
-      }
-      let names = new Set<string>();
-      let start: number = 0;
-      while (start < query.length) {
-        let next: number = query.indexOf('&', start);
-        let end: number = (next == -1) ? query.length : next;
-        let separator: number = query.indexOf('=', start);
-        if (separator > end || separator == -1) {
-          separator = end;
-        }
-        let name = query.substring(start, separator);
-        names.add(this.decodeSafelyInner(name));
-        start = end + 1;
-      }
-      return Array.from<string>(names);
-=======
       return this.uriEntry.getQueryNames();
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -246,30 +176,7 @@ export namespace uri {
     * @returns { Array<string> } Return a set of decoded values.
     */
     getQueryValues(key: string): Array<string> {
-<<<<<<< HEAD
-      let query = this.uriEntry.getQuery();
-      if (query == "") {
-        return new Array<string>();
-      }
-      let values = new Array<string>();
-      let queryStrs: string[] = query.split('&');
-      let isKeyEmpty = key == "";
-      for (let item of queryStrs) {
-        if (isKeyEmpty && item == "") {
-          values.push(item);
-        }
-        let strArr: string[] = item.split('=');
-        let isKeyEqualStr0 = this.decodeSafelyInner(strArr[0]) == key;
-        if (strArr.length == 1 && isKeyEqualStr0) {
-          values.push("");
-        } else if (isKeyEqualStr0) {
-          values.push(this.decodeSafelyInner(item.substring(strArr[0].length + 1)));
-        }
-      }
-      return values;
-=======
       return this.uriEntry.getQueryValues(key);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -280,11 +187,7 @@ export namespace uri {
     * @returns { boolean } Query with key value returns true, otherwise returns false.
     */
     getBooleanQueryValue(key: string, defaultValue: boolean): boolean {
-<<<<<<< HEAD
-      let flag = this.getQueryValue(key);
-=======
       let flag = this.uriEntry.getQueryValue(key);
->>>>>>> OpenHarmony_feature_20250328
       if (flag == null) {
         return defaultValue;
       }
@@ -334,14 +237,11 @@ export namespace uri {
       return new URI(uriStr);
     }
 
-<<<<<<< HEAD
-=======
     /**
     * Gets the protocol part of the URI.
     *
     * @returns { string | null }
     */
->>>>>>> OpenHarmony_feature_20250328
     get scheme(): string | null {
       if (this.uriEntry.getScheme() == '') {
         return null;
@@ -349,14 +249,6 @@ export namespace uri {
       return this.uriEntry.getScheme();
     }
 
-<<<<<<< HEAD
-    get authority(): string | null {
-      let thisAuthority: string = this.uriEntry.getAuthority();
-      if (thisAuthority == '') {
-        return null;
-      }
-      return this.dealDecode(thisAuthority, true);
-=======
     /**
     * Gets the authority part of the URI.
     *
@@ -365,7 +257,6 @@ export namespace uri {
     get authority(): string | null {
       let s: string = this.uriEntry.getAuthority();
       return s == "" ? null : this.dealDecodeInput(s);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -389,20 +280,6 @@ export namespace uri {
       return decodeURIComponent(split1) + '[' + split2 + ']' + decodeURIComponent(split3);
     }
 
-<<<<<<< HEAD
-    get userInfo(): string | null {
-      if (this.uriEntry.getUserinfo() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getUserinfo());
-    }
-
-    get host(): string | null {
-      if (this.uriEntry.getHost() == '') {
-        return null;
-      }
-      return this.uriEntry.getHost();
-=======
     /**
     * Gets Obtains the user information part of the URI.
     *
@@ -421,7 +298,6 @@ export namespace uri {
     get host(): string | null {
       let s: string = this.uriEntry.getHost();
       return s == '' ? null : s;
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -433,63 +309,6 @@ export namespace uri {
       return Number.toString(this.uriEntry.getPort());
     }
 
-<<<<<<< HEAD
-    get path(): string | null {
-      if (this.uriEntry.getPath() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getPath());
-    }
-
-    get query(): string | null {
-      if (this.uriEntry.getQuery() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getQuery());
-    }
-
-    get fragment(): string | null {
-      if (this.uriEntry.getFragment() == '') {
-        return null;
-      }
-      return this.decodeSafelyInner(this.uriEntry.getFragment());
-    }
-
-    get encodedUserInfo(): string | null {
-      if (this.uriEntry.getUserinfo() == '') {
-        return null;
-      }
-      return this.uriEntry.getUserinfo();
-    }
-
-    get encodedPath(): string | null {
-      if (this.uriEntry.getPath() == '') {
-        return null;
-      }
-      return this.uriEntry.getPath();
-    }
-
-    get encodedQuery(): string | null {
-      if (this.uriEntry.getQuery() == '') {
-        return null;
-      }
-      return this.uriEntry.getQuery();
-    }
-
-    get encodedFragment(): string | null {
-      if (this.uriEntry.getFragment() == '') {
-        return null;
-      }
-      return this.uriEntry.getFragment();
-    }
-
-    get encodedAuthority(): string | null {
-      let thisAuthority: string = this.uriEntry.getAuthority();
-      if (thisAuthority == '') {
-        return null;
-      }
-      return this.dealDecode(thisAuthority);
-=======
     /**
     * Gets the path portion of the URI.
     *
@@ -568,7 +387,6 @@ export namespace uri {
     get encodedAuthority(): string | null {
       let s: string = this.uriEntry.getAuthority();
       return s == '' ? null : s;
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -1369,213 +1187,6 @@ export namespace uri {
     clearQuery() {
       return this.buildUriString("clearquery", "");
     }
-<<<<<<< HEAD
-
-    setScheme(scheme: string): void {
-      let code = scheme.charCodeAt(0);
-      if (code >= 0 && code < MAX_BIT_SIZE &&
-        !UriRule.ruleAlpha[code]) {
-        this.errStr = "Scheme the first character must be a letter.";
-        return;
-      }
-      let temp: string = "";
-      const pos: number = scheme.indexOf(':');
-      if (pos !== -1) {
-        temp = scheme.substring(0, pos);
-      } else {
-        temp = scheme;
-      }
-
-      if (!this.checkCharacter(temp, UriRule.ruleScheme, false)) {
-        this.errStr = "Scheme does not conform to the rule.";
-        return;
-      }
-      this.uriData.scheme = temp;
-      this.inputUri = this.updateToString();
-    }
-
-    setAuthority(authorityStr: string): void {
-      // Reset values
-      this.uriData.port = -1;
-      this.uriData.host = "";
-      this.uriData.userInfo = "";
-      this.uriData.authority = authorityStr;
-      this.data = authorityStr;
-
-      // Find UserInfo
-      const atPos = this.data.indexOf('@');
-      if (atPos !== -1) {
-        const userStr = this.data.substring(0, atPos);
-        this.data = this.data.substring(atPos + 1);
-
-        if (!this.checkCharacter(userStr, UriRule.ruleUserInfo, true)) {
-          this.errStr = "userInfo does not conform to the rule";
-          return;
-        }
-        this.uriData.userInfo = userStr;
-      }
-
-      let isLawfulPort = true;
-      // Find port
-      const colonPos = this.data.lastIndexOf(':');
-      if (colonPos !== -1) {
-        const bracketPos = this.data.lastIndexOf(']');
-        if (bracketPos === -1 || colonPos > bracketPos) {
-          isLawfulPort = this.analysisPort(colonPos);
-        }
-        if (this.errStr) {
-          return;
-        }
-      }
-      this.analysisHost(isLawfulPort);
-      this.updateSsp();
-      this.inputUri = this.updateToString();
-    }
-
-    setSsp(sspStr: string): void {
-      // Reset all relevant fields
-      this.uriData.authority = "";
-      this.uriData.port = -1;
-      this.uriData.host = "";
-      this.uriData.userInfo = "";
-      this.uriData.query = "";
-      this.uriData.path = "";
-      this.uriData.SchemeSpecificPart = "";
-      this.data = sspStr;
-
-      // Handle query part
-      const queryPos = this.data.indexOf('?');
-      if (queryPos !== -1) {
-        this.analysisQuery(queryPos);
-      }
-
-      // Handle path and host parts
-      const doubleSlashPos = this.data.indexOf('//');
-      if (doubleSlashPos !== -1 && doubleSlashPos === 0) {
-        this.assignSchemeSpecificPart();
-        this.data = this.data.substring(2); // Skip the '//'
-        this.analysisHostAndPath();
-      } else if (this.data[0] === c'/') {
-        this.uriData.path = this.data;
-        this.assignSchemeSpecificPart();
-        this.data = "";
-      } else {
-        this.assignSchemeSpecificPart();
-        this.uriData.path = "";
-        this.uriData.query = "";
-        this.data = "";
-      }
-      this.inputUri = this.updateToString();
-    }
-
-    setUserInfo(userInfo: string): void {
-      if (!this.uriData.host || !this.checkCharacter(userInfo, UriRule.ruleUserInfo, true)) {
-        this.errStr = "userInfo does not conform to the rule";
-        return;
-      }
-      this.uriData.userInfo = userInfo;
-      this.updateAuthority();
-      this.updateSsp();
-      this.inputUri = this.updateToString();
-    }
-
-    setPath(pathStr: string): void {
-      if (!this.checkCharacter(pathStr, UriRule.rulePath, true)) {
-        this.errStr = "pathStr does not conform to the rule";
-        return;
-      }
-      this.uriData.path = pathStr;
-      this.updateSsp();
-      this.inputUri = this.updateToString();
-    }
-
-    setQuery(queryStr: string): void {
-      if (!this.checkCharacter(queryStr, UriRule.ruleUrlc, true)) {
-        this.errStr = "QueryStr does not conform to the rule";
-        return;
-      }
-      this.uriData.query = queryStr;
-      this.updateSsp();
-      this.inputUri = this.updateToString();
-    }
-
-    setFragment(fragmentStr: string): void {
-      if (!this.checkCharacter(fragmentStr, UriRule.ruleUrlc, true)) {
-        this.errStr = "Fragment does not conform to the rule";
-        return;
-      }
-      this.uriData.fragment = fragmentStr;
-      this.inputUri = this.updateToString();
-    }
-
-    private updateAuthority(): void {
-      let temp = this.uriData.userInfo;
-      if (this.uriData.userInfo) {
-        temp += "@";
-      }
-      temp += this.uriData.host;
-      if (this.uriData.port !== -1) {
-        temp += `:${this.uriData.port}`;
-      }
-      this.uriData.authority = temp;
-    }
-
-    private updateSsp(): void {
-      let temp = "";
-      if (this.uriData.authority) {
-        temp += `//${this.uriData.authority}`;
-      }
-      if (this.uriData.path) {
-        temp += this.uriData.path.startsWith('/')
-          ? this.uriData.path
-          : `/${this.uriData.path}`;
-      }
-      if (this.uriData.query) {
-        temp += `?${this.uriData.query}`;
-      }
-      this.uriData.SchemeSpecificPart = temp;
-    }
-
-    private updateToString(): string {
-      let uriStr = "";
-      let addQuery = false;
-      if (this.uriData.scheme) {
-        uriStr += this.uriData.scheme + ":";
-      }
-      if (!this.uriData.path) {
-        uriStr += this.uriData.SchemeSpecificPart;
-        addQuery = true;
-      } else {
-        if (this.uriData.host) {
-          uriStr += "//";
-          if (this.uriData.userInfo) {
-            uriStr += this.uriData.userInfo + "@";
-          }
-          uriStr += this.uriData.host;
-          if (this.uriData.port !== -1) {
-            uriStr += ":" + this.uriData.port;
-          }
-        } else if (this.uriData.authority) {
-          uriStr += "//" + this.uriData.authority;
-        }
-        if (this.uriData.path) {
-          uriStr += this.uriData.path.startsWith('/')
-            ? this.uriData.path
-            : "/" + this.uriData.path;
-        }
-      }
-      if (this.uriData.query && !addQuery) {
-        uriStr += "?" + this.uriData.query;
-      }
-
-      if (this.uriData.fragment) {
-        uriStr += "#" + this.uriData.fragment;
-      }
-      return uriStr;
-    }
-  }
-=======
->>>>>>> OpenHarmony_feature_20250328
 
     setScheme(scheme: string): void {
       if (!this.checkCharacter(scheme.substring(0, 1), this.REG_ALPHA, true)) {

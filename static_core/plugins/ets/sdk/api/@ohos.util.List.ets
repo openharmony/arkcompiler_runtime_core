@@ -14,8 +14,6 @@
  */
 
 import { LinkedList, ListNode } from './@ohos.util.LinkedList';
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
@@ -23,7 +21,6 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 
 export type ListForEachCb<T> = (value: T, index: number, list: List<T>) => void;
 export type ListReplaceCb<T> = (value: T, index: number, list: List<T>) => T;
->>>>>>> OpenHarmony_feature_20250328
 
 export class List<T> implements Iterable<T> {
     private buffer: LinkedList<T>;
@@ -375,8 +372,6 @@ export class List<T> implements Iterable<T> {
         return undefined;
     }
 
-<<<<<<< HEAD
-=======
     private checkIndexType(index: number): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer. Received value is: ${index}`));
@@ -394,7 +389,6 @@ export class List<T> implements Iterable<T> {
         }
     }
 
->>>>>>> OpenHarmony_feature_20250328
     /**
      * Gets the element at the specified index.
      *
@@ -403,15 +397,12 @@ export class List<T> implements Iterable<T> {
      * @returns The element at the specified index. If the index is out of range, returns undefined.
      */
     public $_get(index: number): T | undefined {
-<<<<<<< HEAD
-=======
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
         }
 
         this.checkIndex(index, this.length - 1);
 
->>>>>>> OpenHarmony_feature_20250328
         return this.buffer.get(index);
     }
 
@@ -423,8 +414,6 @@ export class List<T> implements Iterable<T> {
      * @param val - The value to set at the specified index.
      */
     public $_set(index: number, val: T): void {
-<<<<<<< HEAD
-=======
         if (index > Int.MAX_VALUE || index < 0) {
             return;
         }
@@ -433,7 +422,6 @@ export class List<T> implements Iterable<T> {
 
         this.checkIndex(index, this.length - 1);
 
->>>>>>> OpenHarmony_feature_20250328
         this.buffer.set(index, val);
     }
 }

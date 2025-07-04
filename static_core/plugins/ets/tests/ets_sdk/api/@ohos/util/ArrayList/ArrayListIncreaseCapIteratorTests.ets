@@ -55,12 +55,7 @@ class TestData {
     static readonly testObject2 = [0, 1, 2, undefined];
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
-<<<<<<< HEAD
-    static readonly arrayResult8 = `{"DEFAULT_CAPACITY":10,"capacity":10,"buffer":["string",1,` +
-        `{"age":10,"name":"zhang"},null,null,true,[0,1,2,null]]}`;
-=======
     static readonly arrayResult8 = `{"0":"string","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true,"6":[0,1,2,null]}`;
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testIncreaseCapacityToBiggerValue() {
@@ -76,17 +71,10 @@ function testIncreaseCapacityToBiggerValue() {
     }
     let cap2: number = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
-<<<<<<< HEAD
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(cap1, TestData.testNumber12, "ArrayList capacity should be 12 after increaseCapacityTo");
-    assertEQ(cap2, TestData.testNumber12, "ArrayList capacity should remain 12 after adding elements");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber18,
-=======
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(cap1, TestData.testNumber12, "ArrayList capacity should be 12 after increaseCapacityTo");
     arktest.assertEQ(cap2, TestData.testNumber12, "ArrayList capacity should remain 12 after adding elements");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber18,
->>>>>>> OpenHarmony_feature_20250328
         "ArrayList capacity should be 18 after adding more elements");
 
     arrayList.increaseCapacityTo(TestData.testNumber1w);
@@ -101,13 +89,8 @@ function testIncreaseCapacityToSmallerValue() {
     }
     let cap: number = arrayList.getCapacity();
     arrayList.increaseCapacityTo(TestData.testNumber2);
-<<<<<<< HEAD
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10,
-=======
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10,
->>>>>>> OpenHarmony_feature_20250328
         "ArrayList capacity should remain unchanged when increasing to a smaller value");
 }
 
@@ -118,13 +101,8 @@ function testTrimToCurrentLength() {
     }
     let cap: number = arrayList.getCapacity();
     arrayList.trimToCurrentLength();
-<<<<<<< HEAD
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), arrayList.length, "ArrayList capacity should be trimmed to current length");
-=======
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), arrayList.length, "ArrayList capacity should be trimmed to current length");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testIteratorEmptyContainer() {
@@ -175,11 +153,7 @@ function testAPIComposition() {
 
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     arrayList.clone();
-<<<<<<< HEAD
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
-=======
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
->>>>>>> OpenHarmony_feature_20250328
     arrayList.increaseCapacityTo(TestData.testNumber12);
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber12, "ArrayList capacity should be updated correctly");
     arrayList.trimToCurrentLength();

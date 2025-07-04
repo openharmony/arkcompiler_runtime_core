@@ -14,12 +14,6 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet RemoveAt API tests")

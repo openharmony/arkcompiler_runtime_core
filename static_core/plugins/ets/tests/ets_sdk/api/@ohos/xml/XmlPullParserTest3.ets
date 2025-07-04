@@ -16,11 +16,7 @@ import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("XmlPullParser API tests, part3");
-=======
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part3");
->>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Testing XML isEmptyElementTag with illegal XML structure.", testXmlIsEmptyElementTag0003)
     suite.addTest("Testing XML isEmptyElementTag with valid non-empty element.", testXmlIsEmptyElementTag0002)
     suite.addTest("Testing XML isEmptyElementTag with valid empty element.", testXmlIsEmptyElementTag0001)
@@ -89,19 +85,11 @@ function testXmlParseInfoGetNamespace0001() {
             supportDoctype: true, ignoreNameSpace: false, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:http://www.w3.org"));
-    } catch (err) {
-        const TAG = 'testXmlParseInfoGetNamespace0001';
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:http://www.w3.org"));
     } catch (err) {
         const TAG = 'testXmlParseInfoGetNamespace0001';
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -122,19 +110,11 @@ function testXmlParseInfoGetNamespace0002() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:"));
-    } catch (err) {
-        const TAG = 'testXmlParseInfoGetNamespace0002';
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:"));
     } catch (err) {
         const TAG = 'testXmlParseInfoGetNamespace0002';
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -156,17 +136,10 @@ function testXmlParseInfoGetPrefix0001() {
             supportDoctype: true, ignoreNameSpace: false, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:h"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:h"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -184,17 +157,10 @@ function testXmlParseInfoGetText0001() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:4 value:Happy"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:4 value:Happy"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -212,17 +178,10 @@ function testXmlParseInfoGetText0002() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:4 value:Ha$ppy"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:4 value:Ha$ppy"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -244,17 +203,10 @@ function testXmlIsEmptyElementTag0001() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:true"))
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:true"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -271,19 +223,11 @@ function testXmlIsEmptyElementTag0002() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:4 value:false"))
-    } catch (err) {
-        const TAG = 'testXmlIsEmptyElementTag0002';
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:4 value:false"))
     } catch (err) {
         const TAG = 'testXmlIsEmptyElementTag0002';
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -306,19 +250,11 @@ function testXmlIsEmptyElementTag0003() {
                 supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
             }
             parser.parseXml(options);
-<<<<<<< HEAD
-            assertTrue(false)
-    } catch (err) {
-            assertTrue(err instanceof BusinessError)
-            console.error(`${TAG} failed, error: ${err}`);
-            assertEQ((err as BusinessError).code, 401)
-=======
             arktest.assertTrue(false)
     } catch (err) {
             arktest.assertTrue(err instanceof BusinessError)
             console.error(`${TAG} failed, error: ${err}`);
             arktest.assertEQ((err as BusinessError).code, 401)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -340,19 +276,11 @@ function testXmlIsWhitespace0001() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:true"));
-    } catch (err) {
-        const TAG = 'testXmlIsWhitespace0001';
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:true"));
     } catch (err) {
         const TAG = 'testXmlIsWhitespace0001';
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -371,19 +299,11 @@ function testXmlGetAttributeCount0001() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:1"));
-    } catch (err) {
-        const TAG = 'testXmlGetAttributeCount0001';
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:1"));
     } catch (err) {
         const TAG = 'testXmlGetAttributeCount0001';
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -403,17 +323,10 @@ function testXmlGetAttributeCount0002() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:2"))
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:2"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -431,17 +344,10 @@ function testXmlGetAttributeCount0003() {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
-=======
         arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertEQ((err as BusinessError).code, 401);
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }

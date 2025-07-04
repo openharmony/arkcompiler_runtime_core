@@ -191,43 +191,23 @@ function test_encoding_utf8()
 {
     let enc = new util.TextEncoder();
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'utf-8');
-=======
     arktest.assertEQ(str, 'utf-8');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function test_encoding_gb18030()
 {
     let enc = new util.TextEncoder('gb18030');
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'gb18030');
-    enc = new util.TextEncoder('GB18030');
-    str = enc.encoding;
-    assertEQ(str, 'GB18030');
-=======
     arktest.assertEQ(str, 'gb18030');
     enc = new util.TextEncoder('GB18030');
     str = enc.encoding;
     arktest.assertEQ(str, 'GB18030');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function test_encoding_gbk()
 {
     let enc = new util.TextEncoder('gbk');
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'gbk');
-    enc = new util.TextEncoder('GBK');
-    str = enc.encoding;
-    assertEQ(str, 'GBK');
-    enc = new util.TextEncoder('GbK');
-    str = enc.encoding;
-    assertEQ(str, 'GbK');
-=======
     arktest.assertEQ(str, 'gbk');
     enc = new util.TextEncoder('GBK');
     str = enc.encoding;
@@ -235,22 +215,12 @@ function test_encoding_gbk()
     enc = new util.TextEncoder('GbK');
     str = enc.encoding;
     arktest.assertEQ(str, 'GbK');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function test_encoding_gb2312()
 {
     let enc = new util.TextEncoder('gb2312');
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'gb2312');
-    enc = new util.TextEncoder('GB2312');
-    str = enc.encoding;
-    assertEQ(str, 'GB2312');
-    enc = new util.TextEncoder('gB2312');
-    str = enc.encoding;
-    assertEQ(str, 'gB2312');
-=======
     arktest.assertEQ(str, 'gb2312');
     enc = new util.TextEncoder('GB2312');
     str = enc.encoding;
@@ -258,39 +228,24 @@ function test_encoding_gb2312()
     enc = new util.TextEncoder('gB2312');
     str = enc.encoding;
     arktest.assertEQ(str, 'gB2312');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function test_encoding_utf16le()
 {
     let enc = new util.TextEncoder('utf-16le');
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'utf-16le');
-    enc = new util.TextEncoder('Utf-16le');
-    str = enc.encoding;
-    assertEQ(str, 'Utf-16le');
-=======
     arktest.assertEQ(str, 'utf-16le');
     enc = new util.TextEncoder('Utf-16le');
     str = enc.encoding;
     arktest.assertEQ(str, 'Utf-16le');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function test_encoding_iso88593()
 {
     let enc = new util.TextEncoder('ISO-8859-3');
     let str = enc.encoding;
-<<<<<<< HEAD
-    assertEQ(str, 'ISO-8859-3');
-    enc = new util.TextEncoder('IBM866');
-    str = enc.encoding;
-    assertEQ(str, 'IBM866');
-=======
     arktest.assertEQ(str, 'ISO-8859-3');
     enc = new util.TextEncoder('IBM866');
     str = enc.encoding;
     arktest.assertEQ(str, 'IBM866');
->>>>>>> OpenHarmony_feature_20250328
 }

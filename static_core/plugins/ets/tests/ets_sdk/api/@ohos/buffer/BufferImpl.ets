@@ -14,10 +14,7 @@
  */
 
 import buffer from "@ohos.buffer"
-<<<<<<< HEAD
-=======
 import { jsonx } from "std/core"
->>>>>>> OpenHarmony_feature_20250328
 
 
 function main(): int {
@@ -45,15 +42,12 @@ function main(): int {
     suite.addTest("Test buffer.from with string", testFromString)
     suite.addTest("Test buffer.from with string and base64 encoding", testFromStringWithBase64Encoding)
     suite.addTest("Test buffer.from with string with invalid length", testFromStringWithInvalidLength)
-<<<<<<< HEAD
-=======
     suite.addTest("Test buffer.from with invalid base64 chars", testFromStringWithInvalidBase64Chars)
     suite.addTest("Test buffer.from with invalid base64url chars", testFromStringWithInvalidBase64UrlChars)
     suite.addTest("Test buffer.from with invalid hex chars", testFromStringWithInvalidHexChars)
     suite.addTest("Test buffer.from with invalid ascii chars", testFromStringWithInvalidAsciiChars)
     suite.addTest("Test buffer.from with invalid utf8 chars", testFromStringWithInvalidUtf8Chars)
     suite.addTest("Test buffer.from with invalid latin1 chars", testFromStringWithInvalidLatin1Chars)
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Test alloc", testAlloc)
     suite.addTest("Test allocUninitialized", testAllocUninitialized)
@@ -106,12 +100,9 @@ function main(): int {
     suite.addTest("Test string write wrong offset", testBufferWriteStringWrongOffset)
     suite.addTest("Test string write out range offset", testBufferWriteStringOutRangeOffset)
     suite.addTest("Test string write out range length", testBufferWriteStringOutRangeLength)
-<<<<<<< HEAD
-=======
     suite.addTest("Test buffer from string in base64", testBufferFrom40002)
     suite.addTest("Test buffer from string in utf8", testBufferFrom30006)
     suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Test buffer toJSON", testBufferToJSON)
     return suite.run()
@@ -148,39 +139,6 @@ function testByteLengthSpecialChars() {
 
 function testByteLengthTypedArrays() {
     const int8Array = new Int8Array([1, 2, 3, 4])
-<<<<<<< HEAD
-    assertEQ(buffer.byteLength(int8Array), 4, "int8Array byteLength is not 4")
-
-    const uint8Array = new Uint8Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(uint8Array), 4, "uint8Array byteLength is not 4")
-
-    const uint8ClampedArray = new Uint8ClampedArray([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(uint8ClampedArray), 4, "uint8ClampedArray byteLength is not 4")
-
-    const int16Array = new Int16Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(int16Array), 8, "int16Array byteLength is not 8")
-
-    const uint16Array = new Uint16Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(uint16Array), 8, "uint16Array byteLength is not 8")
-
-    const int32Array = new Int32Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(int32Array), 16, "int32Array byteLength is not 16")
-
-    const uint32Array = new Uint32Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(uint32Array), 16, "uint32Array byteLength is not 16")
-
-    const float32Array = new Float32Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(float32Array), 16, "float32Array byteLength is not 16")
-
-    const float64Array = new Float64Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(float64Array), 32, "float64Array byteLength is not 32")
-
-    const bigInt64Array = new BigInt64Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(bigInt64Array), 32, "bigInt64Array byteLength is not 32")
-
-    const bigUint64Array = new BigUint64Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(bigUint64Array), 32, "bigUint64Array byteLength is not 32")
-=======
     arktest.assertEQ(buffer.byteLength(int8Array), 4, "int8Array byteLength is not 4")
 
     const uint8Array = new Uint8Array([1, 2, 3, 4])
@@ -212,7 +170,6 @@ function testByteLengthTypedArrays() {
 
     const bigUint64Array = new BigUint64Array([1, 2, 3, 4])
     arktest.assertEQ(buffer.byteLength(bigUint64Array), 32, "bigUint64Array byteLength is not 32")
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testByteLengthBufferAndViews() {
@@ -430,21 +387,12 @@ function testEdgeCases() {
 function testAllSupportedEncodings() {
     const testStr = 'Test123'
     const testBuffer = buffer.from(testStr)
-<<<<<<< HEAD
-    assertEQ(testBuffer.toString('ascii'), 'Test123')
-    assertEQ(testBuffer.toString('utf8'), 'Test123')
-    assertEQ(testBuffer.toString('utf-8'), 'Test123')
-    assertEQ(testBuffer.toString('base64'), 'VGVzdDEyMw==')
-    assertEQ(testBuffer.toString('base64url'), 'VGVzdDEyMw')
-    assertEQ(testBuffer.toString('hex'), '54657374313233')
-=======
     arktest.assertEQ(testBuffer.toString('ascii'), 'Test123')
     arktest.assertEQ(testBuffer.toString('utf8'), 'Test123')
     arktest.assertEQ(testBuffer.toString('utf-8'), 'Test123')
     arktest.assertEQ(testBuffer.toString('base64'), 'VGVzdDEyMw==')
     arktest.assertEQ(testBuffer.toString('base64url'), 'VGVzdDEyMw')
     arktest.assertEQ(testBuffer.toString('hex'), '54657374313233')
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testAlloc() {
@@ -508,103 +456,62 @@ function testTranscode() {
     const checkInvariant = (b: buffer.Buffer, s: buffer.BufferEncoding, t: buffer.BufferEncoding) => {
         let x = buffer.transcode(b, s, t);
         let b2 = buffer.transcode(x, t, s);
-<<<<<<< HEAD
-        assertEQ(b.length, b2.length, `Invariant violated: length of ${s} -> ${t} != length of ${t} -> ${s}`);
-        assertEQ(b.toString(s), b2.toString(s), `Invariant violated: ${s} -> ${t} != ${t} -> ${s}`);
-=======
         arktest.assertEQ(b.length, b2.length, `Invariant violated: length of ${s} -> ${t} != length of ${t} -> ${s}`);
         arktest.assertEQ(b.toString(s), b2.toString(s), `Invariant violated: ${s} -> ${t} != ${t} -> ${s}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     // 1. ascii → hex
     let b1 = buffer.from("Hello, World!", "ascii");
     let b1_hex = buffer.transcode(b1, "ascii", "hex");
-<<<<<<< HEAD
-    assertEQ(b1_hex.toString("hex"), "48656c6c6f2c20576f726c6421", "Case (1) failed: ascii -> hex");
-=======
     arktest.assertEQ(b1_hex.toString("hex"), "48656c6c6f2c20576f726c6421", "Case (1) failed: ascii -> hex");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b1, "ascii", "hex");
 
     // 2. hex → base64
     let b2 = buffer.from("48656c6c6f2c20576f726c6421", "hex");
     let b2_b64 = buffer.transcode(b2, "hex", "base64");
-<<<<<<< HEAD
-    assertEQ(b2_b64.toString("base64"), "SGVsbG8sIFdvcmxkIQ==", "Case (2) failed: hex -> base64");
-=======
     arktest.assertEQ(b2_b64.toString("base64"), "SGVsbG8sIFdvcmxkIQ==", "Case (2) failed: hex -> base64");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b2, "hex", "base64");
 
     // 3. base64 → utf8
     let b3 = buffer.from("SGVsbG8sIFdvcmxkIQ==", "base64");
     let b3_utf8 = buffer.transcode(b3, "base64", "utf8");
-<<<<<<< HEAD
-    assertEQ(b3_utf8.toString("utf8"), "Hello, World!", "Case (3) failed: base64 -> utf8");
-=======
     arktest.assertEQ(b3_utf8.toString("utf8"), "Hello, World!", "Case (3) failed: base64 -> utf8");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b3, "base64", "utf8");
 
     // 4. utf8 → hex
     let b4 = buffer.from("Привет", "utf8");
     let b4_hex = buffer.transcode(b4, "utf8", "hex");
-<<<<<<< HEAD
-    assertEQ(b4_hex.toString("hex"), "d09fd180d0b8d0b2d0b5d182", "Case (4) failed: utf8 -> hex");
-=======
     arktest.assertEQ(b4_hex.toString("hex"), "d09fd180d0b8d0b2d0b5d182", "Case (4) failed: utf8 -> hex");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b4, "utf8", "hex");
 
     // 5. latin1 → utf8
     let b5 = buffer.from("abc", "latin1");
     let b5_utf8 = buffer.transcode(b5, "latin1", "utf8");
-<<<<<<< HEAD
-    assertEQ(b5_utf8.toString("utf8"), "abc", "Case (5) failed: latin1 -> utf8");
-=======
     arktest.assertEQ(b5_utf8.toString("utf8"), "abc", "Case (5) failed: latin1 -> utf8");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b5, "latin1", "utf8");
 
     // 6. ascii → base64url
     let b6 = buffer.from("Hello-World_", "ascii");
     let b6_b64url = buffer.transcode(b6, "ascii", "base64url");
-<<<<<<< HEAD
-    assertEQ(b6_b64url.toString("base64url"), "SGVsbG8tV29ybGRf", "Case (6) failed: ascii -> base64url");
-=======
     arktest.assertEQ(b6_b64url.toString("base64url"), "SGVsbG8tV29ybGRf", "Case (6) failed: ascii -> base64url");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b6, "ascii", "base64url");
 
     // 7. base64url → base64
     let b7 = buffer.from("SGVsbG8tV29ybGRf", "base64url");
     let b7_b64 = buffer.transcode(b7, "base64url", "base64");
-<<<<<<< HEAD
-    assertEQ(b7_b64.toString("base64"), "SGVsbG8tV29ybGRf", "Case (7) failed: base64url -> base64");
-=======
     arktest.assertEQ(b7_b64.toString("base64"), "SGVsbG8tV29ybGRf", "Case (7) failed: base64url -> base64");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b7, "base64url", "base64");
 
     // 8. hex → ascii
     let b8 = buffer.from("48656c6c6f", "hex");
     let b8_ascii = buffer.transcode(b8, "hex", "ascii");
-<<<<<<< HEAD
-    assertEQ(b8_ascii.toString("ascii"), "Hello", "Case (8) failed: hex -> ascii");
-=======
     arktest.assertEQ(b8_ascii.toString("ascii"), "Hello", "Case (8) failed: hex -> ascii");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b8, "hex", "ascii");
 
     // 9. base64 → hex
     let b9 = buffer.from("4pyTIMOgIGV4YW1wbGU=", "base64");
     let b9_hex = buffer.transcode(b9, "base64", "hex");
-<<<<<<< HEAD
-    assertEQ(b9_hex.toString("hex"), "e29c9320c3a0206578616d706c65", "Case (9) failed: base64 -> hex");
-=======
     arktest.assertEQ(b9_hex.toString("hex"), "e29c9320c3a0206578616d706c65", "Case (9) failed: base64 -> hex");
->>>>>>> OpenHarmony_feature_20250328
     checkInvariant(b9, "base64", "hex");
 }
 
@@ -1027,36 +934,22 @@ function testStringWrite() {
 function testBufferWriteStringBase64() {
     let buf = buffer.alloc(10)
     let res = buf.write("abcdefg", 3, 1, 'base64')
-<<<<<<< HEAD
-    assertEQ(res, 1)
-    assertEQ(buf.toString('base64'), "AAAAaQAAAAAAAA==")
-=======
     arktest.assertEQ(res, 1)
     arktest.assertEQ(buf.toString('base64'), "AAAAaQAAAAAAAA==")
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testBufferWriteStringSingleParam() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
     let res = buf.write(str)
-<<<<<<< HEAD
-    assertEQ(res, str.length)
-    assertEQ(buf.toString('utf8', 0, str.length), str)
-=======
     arktest.assertEQ(res, str.length)
     arktest.assertEQ(buf.toString('utf8', 0, str.length), str)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testBufferWriteStringInfinity() {
     const str = "abcdefg"
     let buf = buffer.alloc(10)
-<<<<<<< HEAD
-    expectError(() => {
-=======
     arktest.expectError(() => {
->>>>>>> OpenHarmony_feature_20250328
         buf.write(str, 0, Infinity);
     }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: Infinity");
 }
@@ -1064,34 +957,20 @@ function testBufferWriteStringInfinity() {
 function testBufferWriteStringWrongOffset() {
     const str = "abc"
     let buf = buffer.alloc(10)
-<<<<<<< HEAD
-    expectError(() => {
-=======
     arktest.expectError(() => {
->>>>>>> OpenHarmony_feature_20250328
 		buf.write(str, -12)
     }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -12");
 }
 
 function testBufferWriteStringOutRangeOffset() {
     let buf = buffer.alloc(10);
-<<<<<<< HEAD
-    expectError(() => {
-=======
     arktest.expectError(() => {
->>>>>>> OpenHarmony_feature_20250328
         buf.write("abc", -Infinity, -Infinity, 'utf8');
     }, "The value of \"offset\" is out of range. It must be >= 0 and <= 10. Received value is: -Infinity");
 }
 
 function testBufferWriteStringOutRangeLength() {
     let buf = buffer.alloc(10);
-<<<<<<< HEAD
-    expectError(() => {
-        buf.write("abcdefg", 3, -1);
-    }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
-}
-=======
     arktest.expectError(() => {
         buf.write("abcdefg", 3, -1);
     }, "The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: -1");
@@ -1233,4 +1112,3 @@ function testFillUtf16leWithUnicode() {
     const hex = buf.toString('hex');
     arktest.assertEQ(hex, '46003100185246004700');
 }
->>>>>>> OpenHarmony_feature_20250328

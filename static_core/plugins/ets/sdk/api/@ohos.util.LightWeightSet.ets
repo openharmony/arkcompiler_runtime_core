@@ -14,14 +14,11 @@
  */
 
 import LightWeightMap from '@ohos.util.LightWeightMap';
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
->>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**
@@ -95,19 +92,11 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @returns true if the value was added, false otherwise
      */
-<<<<<<< HEAD
-    add(value: T): boolean {
-        if (this.buckets.hasKey(value)) {
-            return false;
-        }
-        this.buckets.set(value, value);
-=======
     add(obj: T): boolean {
         if (this.buckets.hasKey(obj)) {
             return false;
         }
         this.buckets.set(obj, obj);
->>>>>>> OpenHarmony_feature_20250328
         return true;
     }
 

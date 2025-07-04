@@ -14,12 +14,6 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetLowerValue GetHigherValue API tests")

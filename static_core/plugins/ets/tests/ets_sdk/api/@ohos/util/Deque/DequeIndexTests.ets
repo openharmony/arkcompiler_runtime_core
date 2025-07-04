@@ -19,11 +19,7 @@ import { BusinessError } from "@ohos.base";
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("Deque API tests");
-=======
     const suite = new arktest.ArkTestsuite("Deque API tests");
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Deque index getter", testIndexGetter);
     suite.addTest("Deque index setter", testIndexSetter);
@@ -39,11 +35,7 @@ function testIndexGetter() {
     let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
     for (let i: int = 0; i < deque.length; i++) {
-<<<<<<< HEAD
-        assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
-=======
         arktest.assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -55,17 +47,10 @@ function testIndexSetter() {
     }
     let forEachCount = 0;
     deque.forEach((value: number) => {
-<<<<<<< HEAD
-        assertEQ(value, 3, `Element should match`);
-        forEachCount++;
-    });
-    assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
-=======
         arktest.assertEQ(value, 3, `Element should match`);
         forEachCount++;
     });
     arktest.assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testIndexOutOfRange() {
@@ -73,19 +58,11 @@ function testIndexOutOfRange() {
     initializeDeque(deque, testNumbers);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
-<<<<<<< HEAD
-            `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: 36`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
-    }
-    expectThrow(() => {deque[testNumbers.length + 6]}, exceptionCheck);
-    expectThrow(() => {deque[testNumbers.length + 6] = 0}, exceptionCheck);
-=======
             `The value of \"index\" is out of range. It must be >= 0 && <= 29. Received value is: -30`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
     arktest.expectThrow(() => {deque[-testNumbers.length]}, exceptionCheck);
     arktest.expectThrow(() => {deque[-testNumbers.length] = 0}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

@@ -20,11 +20,7 @@ const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("ArrayList API tests");
-=======
     const suite = new arktest.ArkTestsuite("ArrayList API tests");
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing ArrayList add", testArrayList0001);
     suite.addTest("Testing ArrayList basic operations", testArrayList0002);
@@ -60,11 +56,7 @@ function testArrayList0001() {
     arr.add(2);
 
     for (let i = 0; i < arr.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arr[i], i + 1, `The element at index ${i} should be ${i + 1}`);
-=======
         arktest.assertEQ(arr[i], i + 1, `The element at index ${i} should be ${i + 1}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -77,19 +69,6 @@ function testArrayList0002() {
         testArray.push(i);
     }
     for (let i = 0; i < testArray.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]}`);
-    }
-
-    assertTrue(arr1.has(2), "The ArrayList should contain the value 2");
-    assertEQ(arr1.getCapacity(), 10, "The capacity of the ArrayList should be 10");
-    assertEQ(arr1.getLastIndexOf(1), 1, "The last index of value 1 should be 1");
-    assertEQ(arr1.getIndexOf(5), 5, "The index of value 5 should be 5");
-
-    let array = arr1.convertToArray();
-    for (let i = 0; i < testArray.length; i++) {
-        assertEQ(array[i], testArray[i], `The element at index ${i} should be ${testArray[i]} in the converted array`);
-=======
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]}`);
     }
 
@@ -101,48 +80,15 @@ function testArrayList0002() {
     let array = arr1.convertToArray();
     for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(array[i], testArray[i], `The element at index ${i} should be ${testArray[i]} in the converted array`);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     let newArrayList = arr1.clone();
     for (let i = 0; i < testArray.length; i++) {
-<<<<<<< HEAD
-        assertEQ(newArrayList[i], testArray[i],
-=======
         arktest.assertEQ(newArrayList[i], testArray[i],
->>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${testArray[i]} in the cloned ArrayList`);
     }
 
     arr1.insert(999, 3);
-<<<<<<< HEAD
-    testArray.splice(3, 0, 999);
-    for (let i = 0; i < testArray.length; i++) {
-        assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after insertion`);
-    }
-
-    arr1.removeByIndex(9);
-    testArray.splice(9, 1);
-    for (let i = 0; i < testArray.length; i++) {
-        assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by index`);
-    }
-
-    const removeRes = arr1.remove(7);
-    testArray.splice(8, 1);
-    for (let i = 0; i < testArray.length; i++) {
-        assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by value`);
-    }
-    assertTrue(removeRes, "The remove operation should return true");
-
-    arr1.removeByRange(1, 3);
-    testArray.splice(1, 2);
-    for (let i = 0; i < testArray.length; i++) {
-        assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after removal by range`);
-    }
-
-    arr1.forEach((value, index) => {
-        assertEQ(value, testArray[index], `The element at index ${index} should be ${testArray[index]} during forEach`);
-=======
     testArray.splice(3 as int, 0 as int, 999);
     for (let i = 0; i < testArray.length; i++) {
         arktest.assertEQ(arr1[i], testArray[i], `The element at index ${i} should be ${testArray[i]} after insertion`);
@@ -169,46 +115,29 @@ function testArrayList0002() {
 
     arr1.forEach((value, index) => {
         arktest.assertEQ(value, testArray[index], `The element at index ${index} should be ${testArray[index]} during forEach`);
->>>>>>> OpenHarmony_feature_20250328
     });
 
     let subArrayList = arr1.subArrayList(1, 3);
     const newTestArray = testArray.slice(1, 3);
     for (let i = 0; i < subArrayList.length; i++) {
-<<<<<<< HEAD
-        assertEQ(newTestArray[i], subArrayList[i],
-=======
         arktest.assertEQ(newTestArray[i], subArrayList[i],
->>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${newTestArray[i]} in the subArrayList`);
     }
 
     let j = 0;
     for (const data of arr1) {
-<<<<<<< HEAD
-        assertEQ(data, testArray[j], `The element at index ${j} should be ${testArray[j]} during iteration`);
-      j++;
-    }
-
-    assertTrue(testedIterator(arr1, testArray), "The iterator should correctly iterate over all elements");
-=======
         arktest.assertEQ(data, testArray[j], `The element at index ${j} should be ${testArray[j]} during iteration`);
       j++;
     }
 
     arktest.assertTrue(testedIterator(arr1, testArray), "The iterator should correctly iterate over all elements");
->>>>>>> OpenHarmony_feature_20250328
 
     arr1.replaceAllElements((item, index) => {
         return item * 2;
     });
 
     for (let i = 0; i < testArray.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arr1[i], testArray[i] * 2,
-=======
         arktest.assertEQ(arr1[i], testArray[i] * 2,
->>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${testArray[i] * 2} after replaceAllElements`);
     }
 }
@@ -222,21 +151,12 @@ function testArrayList0003() {
     arr2.add(0);
     arr2.sort((a,b) => a - b);
     for (let i = 0; i < 5; i++) {
-<<<<<<< HEAD
-        assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after sorting in ascending order`);
-    }
-
-    arr2.clear();
-    assertEQ(arr2.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
-    assertTrue(arr2.isEmpty(), "The ArrayList should be empty after clearing all elements");
-=======
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after sorting in ascending order`);
     }
 
     arr2.clear();
     arktest.assertEQ(arr2.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
     arktest.assertTrue(arr2.isEmpty(), "The ArrayList should be empty after clearing all elements");
->>>>>>> OpenHarmony_feature_20250328
     arr2.add(4);
     arr2.add(3);
     arr2.add(1);
@@ -244,18 +164,6 @@ function testArrayList0003() {
     arr2.add(0);
     arr2.sort((a,b) => a - b);
     for (let i = 0; i < 5; i++) {
-<<<<<<< HEAD
-        assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after re-sorting in ascending order`);
-    }
-
-    arr2.insert(50, 0);
-    assertEQ(arr2[0], 50, "The first element should be 50 after inserting 50 at index 0");
-    arr2.increaseCapacityTo(20);
-    assertEQ(arr2.getCapacity(), 20, "The capacity of the ArrayList should be 20 after increasing capacity");
-
-    arr2.trimToCurrentLength();
-    assertEQ(arr2.getCapacity(), 6, "The capacity of the ArrayList should match its current length (6) after trimming");
-=======
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after re-sorting in ascending order`);
     }
 
@@ -266,36 +174,22 @@ function testArrayList0003() {
 
     arr2.trimToCurrentLength();
     arktest.assertEQ(arr2.getCapacity(), 6, "The capacity of the ArrayList should match its current length (6) after trimming");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayList0004() {
     let testList = new ArrayList<number>();
-<<<<<<< HEAD
-    expectThrow(() => {testList.removeByIndex(0)}, exceptionCheckEmptyContainer);
-    expectThrow(() => {testList.removeByRange(0, 1)}, exceptionCheckEmptyContainer);
-    expectThrow(() => {testList.subArrayList(0, 1)}, exceptionCheckEmptyContainer);
-    testList.add(7);
-    testList.add(9);
-    assertEQ(testList[1], 9, "The element at index 1 should be 9 after adding 7 and 9");
-=======
     arktest.expectThrow(() => {testList.removeByIndex(0)}, exceptionCheckEmptyContainer);
     arktest.expectThrow(() => {testList.removeByRange(0, 1)}, exceptionCheckEmptyContainer);
     arktest.expectThrow(() => {testList.subArrayList(0, 1)}, exceptionCheckEmptyContainer);
     testList.add(7);
     testList.add(9);
     arktest.assertEQ(testList[1], 9, "The element at index 1 should be 9 after adding 7 and 9");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayList0005() {
     let myArrayList = new ArrayList<number>();
     myArrayList.add(1);
-<<<<<<< HEAD
-    expectThrow(() => {myArrayList[2147483648]}, exceptionCheckType);
-=======
     arktest.expectThrow(() => {myArrayList[2147483648]}, exceptionCheckType);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayList0006() {
@@ -308,11 +202,7 @@ function testArrayList0006() {
     for (key in test1) {
         keyName += key;
     }
-<<<<<<< HEAD
-    assertEQ(keyName, "0123456789", "The concatenated keys should match the sequence '0123456789'");
-=======
     arktest.assertEQ(keyName, "0123456789", "The concatenated keys should match the sequence '0123456789'");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayList0007() {
@@ -321,15 +211,9 @@ function testArrayList0007() {
     myAl.add(2);
     myAl.add(3);
     myAl.insert(30, Math.floor(1.3));
-<<<<<<< HEAD
-    assertEQ(myAl[1], 30, "The element at index 1 should be 30 after insertion");
-    myAl.removeByIndex(Math.floor(1.3));
-    assertEQ(myAl[1], 2, "The element at index 1 should be 2 after removal");
-=======
     arktest.assertEQ(myAl[1], 30, "The element at index 1 should be 30 after insertion");
     myAl.removeByIndex(Math.floor(1.3));
     arktest.assertEQ(myAl[1], 2, "The element at index 1 should be 2 after removal");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function exceptionCheckEmptyContainer(e: Error | Exception): boolean | string {
@@ -338,11 +222,6 @@ function exceptionCheckEmptyContainer(e: Error | Exception): boolean | string {
 }
 
 function exceptionCheckType(e: Error | Exception): boolean | string {
-<<<<<<< HEAD
-    return (e instanceof BusinessError) && ((e as BusinessError).message ==
-        `The type of \"index\" must be small integer.`) && ((e as BusinessError).code == TypeErrorCodeId);
-=======
     return (e instanceof BusinessError) && ((e as BusinessError).message.startsWith(`The type of \"index\" must be small integer.`)) &&
         ((e as BusinessError).code == TypeErrorCodeId);
->>>>>>> OpenHarmony_feature_20250328
 }

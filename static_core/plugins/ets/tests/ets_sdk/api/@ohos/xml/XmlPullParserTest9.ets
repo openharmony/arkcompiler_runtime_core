@@ -16,11 +16,7 @@ import {xml} from "@ohos.xml"
 import { BusinessError } from "@ohos.base";
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("XmlPullParser API tests, part9")
-=======
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part9")
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing the XML PullParser's constructor with element names starting with a number.", testXmlPullParserConstructor0006)
     suite.addTest("Testing the XML PullParser's constructor with comments.", testXmlPullParserConstructor0005)
@@ -66,17 +62,10 @@ function testXmlPullParserConstructor0001() {
         }
     }
     parser.parseXml(options);
-<<<<<<< HEAD
-    assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
-=======
     arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertEQ((err as BusinessError).code, 401);
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -97,11 +86,7 @@ function testXmlPullParserConstructor0002() {
         parser.parseXml(options)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertEQ((err as BusinessError).code, 401);
-=======
         arktest.assertEQ((err as BusinessError).code, 401);
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -126,11 +111,7 @@ function testXmlPullParserConstructor0003() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -149,17 +130,10 @@ function testXmlPullParserConstructor0004() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
-=======
         arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertEQ((err as BusinessError).code, 401);
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -183,11 +157,7 @@ function testXmlPullParserConstructor0005() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -208,17 +178,10 @@ function testXmlPullParserConstructor0006() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertEQ((err as BusinessError).code, 401);
-=======
         arktest.assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertEQ((err as BusinessError).code, 401);
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -234,11 +197,7 @@ function testXmlPullParserConstructor0010() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
     }
@@ -263,11 +222,7 @@ function testXmlPullParserConstructor0011() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -296,11 +251,7 @@ function testXmlPullParserConstructor0012() {
         parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
-<<<<<<< HEAD
-        assertTrue(false)
-=======
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 

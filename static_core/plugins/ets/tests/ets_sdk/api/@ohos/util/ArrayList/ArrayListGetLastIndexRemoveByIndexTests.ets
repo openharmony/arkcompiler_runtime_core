@@ -16,10 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
-<<<<<<< HEAD
-=======
 const TypeErrorCodeId: number = 401;
->>>>>>> OpenHarmony_feature_20250328
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
@@ -132,13 +129,8 @@ function testRemoveByIndexOutOfRange() {
             `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -12`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByIndex(TestData.testNumber12)}, exceptionCheck);
-    expectThrow(() => {arrayList.removeByIndex(-TestData.testNumber12)}, exceptionCheck1);
-=======
     arktest.expectThrow(() => {arrayList.removeByIndex(TestData.testNumber12)}, exceptionCheck);
     arktest.expectThrow(() => {arrayList.removeByIndex(-TestData.testNumber12)}, exceptionCheck1);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByIndexWithDoubleIndex() {
@@ -169,11 +161,7 @@ function testRemoveByIndexEmptyContainer() {
         return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-<<<<<<< HEAD
-    expectThrow(() => {arrayList.removeByIndex(0)}, exceptionCheck);
-=======
     arktest.expectThrow(() => {arrayList.removeByIndex(0)}, exceptionCheck);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testRemoveByIndexSameIndex() {

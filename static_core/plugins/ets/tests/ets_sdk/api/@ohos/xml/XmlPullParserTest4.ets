@@ -17,11 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("XmlPullParser API tests, part4");
-=======
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part4");
->>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Testing XML ParseInfo getDepth with ENTITY_REFERENCE event.", testXmlParseInfoGetDepth0010)
     suite.addTest("Testing XML ParseInfo getDepth with WHITESPACE event.", testXmlParseInfoGetDepth0011)
     suite.addTest("Testing XML ParseInfo getDepth with INSTRUCTION event.", testXmlParseInfoGetDepth0009)
@@ -86,17 +82,10 @@ function testXmlParseInfoGetDepth0001() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:0 value:0"))
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:0 value:0"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -116,17 +105,10 @@ function testXmlParseInfoGetDepth0002() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:1 value:0"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:1 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -146,17 +128,10 @@ function testXmlParseInfoGetDepth0003() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:2 value:2"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:2 value:2"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -176,17 +151,10 @@ function testXmlParseInfoGetDepth0004() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:3 value:1"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:3 value:1"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -206,17 +174,10 @@ function testXmlParseInfoGetDepth0005() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:4 value:5"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:4 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -236,17 +197,10 @@ function testXmlParseInfoGetDepth0006() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:5 value:5"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:5 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -266,17 +220,10 @@ function testXmlParseInfoGetDepth0007() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:6 value:0"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:6 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -296,17 +243,10 @@ function testXmlParseInfoGetDepth0008() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:7 value:0"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:7 value:0"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -326,17 +266,10 @@ function testXmlParseInfoGetDepth0009() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:8 value:4"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:8 value:4"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -356,17 +289,10 @@ function testXmlParseInfoGetDepth0011() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:10 value:5"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:10 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -386,17 +312,10 @@ function testXmlParseInfoGetDepth0010() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
-<<<<<<< HEAD
-        assertTrue(str.includes("key:9 value:5"));
-    } catch (err) {
-        console.error(`${TAG} failed, error: ${err}`);
-        assertTrue(false)
-=======
         arktest.assertTrue(str.includes("key:9 value:5"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -431,21 +350,13 @@ function testGetDepth() {
     let expectedTextStr = '{  : 0 }; { note : 1 }; {  : 1 }; { title : 2 }; {  : 2 }; { title : 1 }; {  : 1 }; \
 { todo : 2 }; {  : 2 }; { todo : 1 }; {  : 1 }; { todo : 2 }; {  : 2 }; { todo : 1 }; { note : 1 }; {  : 0 }; '
 
-<<<<<<< HEAD
-    assertEQ(textStr, expectedTextStr)
-=======
     arktest.assertEQ(textStr, expectedTextStr)
->>>>>>> OpenHarmony_feature_20250328
 
     // key0 - xml, key2 - start, key3 - close, key 4 - text, key10 - whitespace
     let oldExpected = new Array<string>("key:0 value:0 key:2 value:1 key:10 value:1 key:2 value:2 key:4 value:2",
     "key:3 value:1 key:10 value:1 key:2 value:2 key:4 value:2 key:3 value:1 key:10 value:1",
     "key:2 value:2 key:4 value:2 key:3 value:1 key:3 value:1 key:1 value:0 ").join(" ")
 
-<<<<<<< HEAD
-    assertEQ(oldStr, oldExpected)
-=======
     arktest.assertEQ(oldStr, oldExpected)
->>>>>>> OpenHarmony_feature_20250328
 }
 

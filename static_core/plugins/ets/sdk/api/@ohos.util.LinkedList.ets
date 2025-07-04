@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
 import {BusinessError} from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
@@ -23,7 +21,6 @@ const EmptyContainerErrorCodeId: number = 10200010;
 
 export type LinkedListForEachCb<T> = (value: T, index: number, linkedList: LinkedList<T>) => void;
 
->>>>>>> OpenHarmony_feature_20250328
 /**
  * Represents a node in the linked list.
  */

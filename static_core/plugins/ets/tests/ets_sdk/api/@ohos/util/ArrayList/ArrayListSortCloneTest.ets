@@ -16,11 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite("ArrayList API tests");
-=======
     const suite = new arktest.ArkTestsuite("ArrayList API tests");
->>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing ArrayList sort by Ascending Order", testArrayListSort0001);
     suite.addTest("Testing ArrayList sort by Descending Order", testArrayListSort0002);
@@ -48,11 +44,7 @@ function testArrayListSort0001() {
 
     const expectedValues = [0, 1, 3, 5, 8, 22, 24, 51];
     for (let i = 0; i < expectedValues.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
-=======
         arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -70,11 +62,7 @@ function testArrayListSort0002() {
 
     const expectedValues = [51, 24, 22, 8, 5, 3, 1, 0];
     for (let i = 0; i < expectedValues.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
-=======
         arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -93,11 +81,7 @@ function testArrayListSort0003() {
 
     const expectedValues = [0, 1, 22, 24, 3, 5, 51, 8, "zhang san"];
     for (let i = 0; i < expectedValues.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
-=======
         arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -116,11 +100,7 @@ function testArrayListSort0004() {
 
     const expectedValues = [0, 1, 22, 24, 3, 5, 51, 8, "A"];
     for (let i = 0; i < expectedValues.length; i++) {
-<<<<<<< HEAD
-        assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
-=======
         arktest.assertEQ(arrayList[i], expectedValues[i], `The element at index ${i} should be ${expectedValues[i]}`);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -138,11 +118,7 @@ function testArrayListSubArrayList0001() {
 
     const expectedValues = [22, 3, 24, 5];
     for (let i = 0; i < expectedValues.length; i++) {
-<<<<<<< HEAD
-        assertEQ(subArrayList[i], expectedValues[i],
-=======
         arktest.assertEQ(subArrayList[i], expectedValues[i],
->>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} in the subArrayList should be ${expectedValues[i]}`);
     }
 }
@@ -154,11 +130,7 @@ function testArrayListClear0001() {
     arrayList.add(22);
     arrayList.subArrayList(1, 2);
     arrayList.clear();
-<<<<<<< HEAD
-    assertEQ(arrayList.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
-=======
     arktest.assertEQ(arrayList.length, 0, "The length of the ArrayList should be 0 after clearing all elements");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListClone0001() {
@@ -168,11 +140,7 @@ function testArrayListClone0001() {
     arrayList.add(22);
     arrayList.subArrayList(1, 2);
     let result = arrayList.clone();
-<<<<<<< HEAD
-    assertEQ(arrayList.length, result.length, "The length of the cloned ArrayList should match the original ArrayList");
-=======
     arktest.assertEQ(arrayList.length, result.length, "The length of the cloned ArrayList should match the original ArrayList");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListClone0002() {
@@ -183,9 +151,5 @@ function testArrayListClone0002() {
     arrayList.subArrayList(1, 2);
     arrayList.clear();
     let result = arrayList.clone();
-<<<<<<< HEAD
-    assertEQ(result.length, 0, "The length of the cloned ArrayList should be 0 after clearing the original ArrayList");
-=======
     arktest.assertEQ(result.length, 0, "The length of the cloned ArrayList should be 0 after clearing the original ArrayList");
->>>>>>> OpenHarmony_feature_20250328
 }

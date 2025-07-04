@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
  export type StackForEachCb<T> = (value: T, index: number, stack: Stack<T>) => void;
 
->>>>>>> OpenHarmony_feature_20250328
 export class Stack<T> implements Iterable<T> {
     private buffer: Array<T>;
 

@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
 import { BusinessError } from "@ohos.base";
 
->>>>>>> OpenHarmony_feature_20250328
 export type Rounding = number
 export type Modulo = number
 export type DecimalValue = Decimal | number | string;

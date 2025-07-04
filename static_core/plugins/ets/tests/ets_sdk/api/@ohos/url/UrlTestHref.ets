@@ -311,17 +311,10 @@ function testUrlUsername005() {
 function testUrlHostName001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.hostname;
-<<<<<<< HEAD
-	assertEQ(result, 'host');
-    params.hostname = 'www.test.com';
-    assertEQ(params.hostname, 'www.test.com');
-    assertEQ(params.host, 'www.test.com:8080');
-=======
  arktest.assertEQ(result, 'host');
     params.hostname = 'www.test.com';
     arktest.assertEQ(params.hostname, 'www.test.com');
     arktest.assertEQ(params.host, 'www.test.com:8080');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -335,17 +328,10 @@ function testUrlHostName001() {
 function testUrlHostName002() {
 	let params = url.URL.parseURL('http://usme@host1:8080/directory/file?query#fragment');
 	let result = params.hostname;
-<<<<<<< HEAD
-	assertEQ(result, 'host1');
-    params.hostname = 'www.test.com';
-    assertEQ(params.host, 'www.test.com:8080');
-    assertEQ(params.href, 'http://usme@www.test.com:8080/directory/file?query#fragment');
-=======
  arktest.assertEQ(result, 'host1');
     params.hostname = 'www.test.com';
     arktest.assertEQ(params.host, 'www.test.com:8080');
     arktest.assertEQ(params.href, 'http://usme@www.test.com:8080/directory/file?query#fragment');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -359,19 +345,11 @@ function testUrlHostName002() {
 function testUrlHost001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.host;
-<<<<<<< HEAD
-	assertEQ(result, 'host:8080');
-    params.host = 'www.test:99';
-    assertEQ(params.host, 'www.test:99');
-    assertEQ(params.hostname, 'www.test');
-    assertEQ(params.port, '99');
-=======
  arktest.assertEQ(result, 'host:8080');
     params.host = 'www.test:99';
     arktest.assertEQ(params.host, 'www.test:99');
     arktest.assertEQ(params.hostname, 'www.test');
     arktest.assertEQ(params.port, '99');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -385,15 +363,9 @@ function testUrlHost001() {
 function testUrlPort001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.port;
-<<<<<<< HEAD
-	assertEQ(result, '8080');
-    params.port = '77';
-    assertEQ(params.host, 'host:77');
-=======
  arktest.assertEQ(result, '8080');
     params.port = '77';
     arktest.assertEQ(params.host, 'host:77');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -407,19 +379,11 @@ function testUrlPort001() {
 function testUrlGetHost001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.host;
-<<<<<<< HEAD
-	assertEQ(result, 'host:8080');
-    params.port = '77';
-    params.hostname = 'www.test.com';
-    assertEQ(params.host, 'www.test.com:77');
-    assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
-=======
  arktest.assertEQ(result, 'host:8080');
     params.port = '77';
     params.hostname = 'www.test.com';
     arktest.assertEQ(params.host, 'www.test.com:77');
     arktest.assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): int {

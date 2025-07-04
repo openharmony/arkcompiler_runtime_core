@@ -14,12 +14,6 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
-<<<<<<< HEAD
-
-const success = 0;
-const fail = 1;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("LightWeightSet Constructor IsEmpty Add API tests")
@@ -100,19 +94,10 @@ function testAddExistData() {
     lightWeightSet.add("aa");
 
     let result = lightWeightSet.has("aa");
-<<<<<<< HEAD
-    assertEQ(result, true, "The lightWeightSet should contain the added value");
-
-    result = lightWeightSet.add("aa");
-    assertEQ(result, false, "The lightWeightSet should not add exist value");
-
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
-=======
     arktest.assertEQ(result, true, "The lightWeightSet should contain the added value");
 
     result = lightWeightSet.add("aa");
     arktest.assertEQ(result, false, "The lightWeightSet should not add exist value");
 
     arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
->>>>>>> OpenHarmony_feature_20250328
 }

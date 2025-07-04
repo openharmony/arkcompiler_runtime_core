@@ -12,12 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<< HEAD
-import {uri} from "@ohos.uri";
-=======
 import { uri } from "@ohos.uri";
 import { BusinessError } from "@ohos.base";
->>>>>>> OpenHarmony_feature_20250328
 
 function ConstructorTest033() {
   let uriText = "/username/path/path?query#fagment";

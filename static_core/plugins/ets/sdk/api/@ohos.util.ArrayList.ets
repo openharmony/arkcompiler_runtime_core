@@ -21,14 +21,10 @@ const IncorrectBufferSizeId: number = 10200009;
 const CapacityErrorCodeId: number = 10200062;
 const INT_MAX_VALUE_OFFSET: number = 4294967296;
 
-<<<<<<< HEAD
-export class ArrayList<T> implements Iterable<T> {
-=======
 export type ArrayListForEachCb<T> =  (value: T, index: number, arrlist: ArrayList<T>) => void;
 export type ArrayListReplaceCb<T> =  (value: T, index: number, arrlist: ArrayList<T>) => T;
 
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
->>>>>>> OpenHarmony_feature_20250328
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
@@ -91,10 +87,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param index - the index.
      */
     public insert(element: T, index: number): void {
-<<<<<<< HEAD
-        this.checkIndexType(index);
-=======
->>>>>>> OpenHarmony_feature_20250328
         this.checkIndex(index, this.length);
 
         if (this.length + 1 <= this.capacity) {
@@ -165,10 +157,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @returns the deleted element.
      */
     public removeByIndex(index: number): T {
-<<<<<<< HEAD
-        this.checkIndexType(index);
-=======
->>>>>>> OpenHarmony_feature_20250328
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -330,12 +318,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @returns The element at the specified index.
      */
     public $_get(index: number): T {
-<<<<<<< HEAD
-        if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
-        }
-=======
->>>>>>> OpenHarmony_feature_20250328
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -351,12 +333,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public $_set(index: number, val: T): void {
         this.checkEmptyContainer();
-<<<<<<< HEAD
-        if (index < 0 || index > Int.MAX_VALUE) {
-            return;
-        }
-=======
->>>>>>> OpenHarmony_feature_20250328
         this.checkIndex(index, this.length - 1);
 
         this.buffer[index] = val;
@@ -417,18 +393,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         }
     }
 
-<<<<<<< HEAD
-    private checkIndexType(index: number): void {
-        if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
-        }
-    }
-
-    private checkIndex(index: number, length: number): void {
-        if (index > length || index < 0) {
-            this.createBusinessError('index', length, index);
-        }
-=======
     private checkIndex(index: number, length: number): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
@@ -439,7 +403,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         if (!isInteger(index)) {
             throw new BusinessError(TypeErrorCodeId, new Error(`Index must be an integer. Received value is: ${index}`));
         }
->>>>>>> OpenHarmony_feature_20250328
     }
 
     private checkRange(fromIndex: number, toIndex: number): void {

@@ -49,17 +49,10 @@ function testArrayListClear() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let length: number = arrayList.length;
     arrayList.clear();
-<<<<<<< HEAD
-    assertEQ(length, TestData.testNumber6, "ArrayList length should be 6 before clear");
-    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
-    assertTrue(arrayList.isEmpty(), "ArrayList should be empty after clear");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be 10 after clear");
-=======
     arktest.assertEQ(length, TestData.testNumber6, "ArrayList length should be 6 before clear");
     arktest.assertEQ(arrayList.length, 0, "ArrayList length should be 0 after clear");
     arktest.assertTrue(arrayList.isEmpty(), "ArrayList should be empty after clear");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be 10 after clear");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListClearEmpty() {
@@ -129,22 +122,13 @@ function testArrayListGetCapacity() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cap: number = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
-<<<<<<< HEAD
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber15, "ArrayList capacity should be updated correctly");
-=======
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber15, "ArrayList capacity should be updated correctly");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListGetCapacityEmpty() {
     let arrayList = new ArrayList<number>();
-<<<<<<< HEAD
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "Initial ArrayList capacity should be 10");
-=======
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "Initial ArrayList capacity should be 10");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListGetCapacityAfterClear() {
@@ -157,13 +141,8 @@ function testArrayListGetCapacityAfterClear() {
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     let cap: number = arrayList.getCapacity();
     arrayList.clear();
-<<<<<<< HEAD
-    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
-=======
     arktest.assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     arktest.assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

@@ -16,14 +16,11 @@ import buffer from '@ohos.buffer';
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
-<<<<<<< HEAD
-=======
 const BufferOverFlowErrorCodeId: number = 10200062;
 const IllegalPositionErrorCodeId: number = 10200063;
 const EmptyErrorCodeId: number = 10200064;
 const NoElementMatchErrorCodeId: number = 10200065;
 const EncodingErrorCodeId: number = 10200066;
->>>>>>> OpenHarmony_feature_20250328
 
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
@@ -137,8 +134,6 @@ export namespace xml {
         isServiceTagNode?: boolean
     }
 
-<<<<<<< HEAD
-=======
     export const MaxXmlLength = 100000;
     const OffsetDepth = 1;
     const SpacesIndentation = 2;
@@ -524,7 +519,6 @@ export namespace xml {
         }
     }
 
->>>>>>> OpenHarmony_feature_20250328
     export class XmlParseHelper {
 
         public supportDoctype: boolean = false
@@ -540,26 +534,6 @@ export namespace xml {
             this.strXml_ = str
         }
 
-<<<<<<< HEAD
-        private static readonly const XML = "<?xml"
-        private static readonly const SEMICOLON = ':'
-        private static readonly const HTTP = 'http'
-        private static readonly const HTTPS = 'https'
-        private static readonly const UNDESCORE = '_'
-        private static readonly const XMLNS = 'xmlns'
-        private static readonly const XMLNS_PREFIX = 'xmlns:'
-        private static readonly const lineEndRegExp = new RegExp("\n", "m")
-        private static readonly const selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
-        private static readonly const startTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>", "m")
-        private static readonly const closeTagRegExp = new RegExp("</([\\w:]+)([^<^>])*?>", "m")
-        private static readonly const textTagRegExp = new RegExp(">[&|\\w:|\\s][^<>]+<", "m")
-        private static readonly const attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")
-        private static readonly const stripRegExp = new RegExp("^['\"]|['\"]$","g")
-        private static readonly const entityRegExp = new RegExp("<!ENTITY (?<name>\\w+) ('|\")(?<value>.*?)('|\")>", "gm")
-        private static readonly const nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
-
-        private static readonly const serviceTagRegExpMap = new Map<EventType, RegExp>([
-=======
         private static readonly XML = "<?xml"
         private static readonly SEMICOLON = ':'
         private static readonly HTTP = 'http'
@@ -578,7 +552,6 @@ export namespace xml {
         private static readonly nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
 
         private static readonly serviceTagRegExpMap = new Map<EventType, RegExp>([
->>>>>>> OpenHarmony_feature_20250328
             [EventType.INSTRUCTION, new RegExp("<\\?[^>]+?>","g")],
             [EventType.COMMENT, new RegExp("<!--[\\s\\S]*?-->","g")],
             [EventType.ENTITY_REFERENCE, new RegExp("<!ENTITY[\\s\\S]*?>","g")],
@@ -586,11 +559,7 @@ export namespace xml {
             [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?\]\]>","gm")]
         ])
 
-<<<<<<< HEAD
-        private static readonly const xmlEscapeChars = new Map<string, string>([
-=======
         private static readonly xmlEscapeChars = new Map<string, string>([
->>>>>>> OpenHarmony_feature_20250328
             ["&quot;", "\""],
             ["&amp;", "&"],
             ["&lt;", "<"],
@@ -973,8 +942,6 @@ export namespace xml {
                 return res
             }
             return true
-<<<<<<< HEAD
-=======
         }
     }
 
@@ -1347,7 +1314,6 @@ export namespace xml {
             }
 
             return stringBuilder;
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 }
