@@ -153,6 +153,7 @@ public:
         [[maybe_unused]] HandleScope<ObjectHeader *> hscope(coro);
 
         VMHandle<coretypes::Array> etsArr(coro, obj->GetCoreType());
+        ASSERT(etsArr.GetPtr() != nullptr);
         auto len = etsArr->GetLength();
 
         NapiEscapableScope jsHandleScope(env);

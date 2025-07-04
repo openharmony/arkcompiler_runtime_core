@@ -134,6 +134,7 @@ public:
 
     void SetInteropObject(EtsCoroutine *coro, EtsObject *o)
     {
+        ASSERT(o != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_), o->GetCoreType());
     }
 
@@ -150,9 +151,11 @@ public:
 
     static void CreateLink(EtsObject *source, EtsPromise *target)
     {
+        ASSERT(target != nullptr);
         EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
         auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
         if (jobQueue != nullptr) {
+            ASSERT(target != nullptr);
             jobQueue->CreateLink(source, target->AsObject());
         }
     }
@@ -165,6 +168,7 @@ public:
 
     void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
     {
+        ASSERT(mutex != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
     }
 
@@ -176,6 +180,7 @@ public:
 
     void SetEvent(EtsCoroutine *coro, EtsEvent *event)
     {
+        ASSERT(event != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
     }
 
@@ -191,6 +196,7 @@ public:
     void Reject(EtsCoroutine *coro, EtsObject *error)
     {
         ASSERT(IsPending() || IsLinked());
+        ASSERT(error != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
         OnPromiseCompletion(coro);

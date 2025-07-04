@@ -158,6 +158,7 @@ public:
         uint16_t character = CodeToChar(charCode);
         bool compress = Runtime::GetOptions().IsRuntimeCompressedStringsEnabled() && IsASCIICharacter(character);
         EtsString *s = AllocateNonInitializedString(SINGLE_CHAR_LENGTH, compress);
+        ASSERT(s != nullptr);
         auto putCharacterIntoString = [character](auto *dstData) {
             Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, SINGLE_CHAR_LENGTH);
             to[0] = character;
@@ -230,7 +231,11 @@ public:
 
     static EtsString *Concat(EtsString *etsString1, EtsString *etsString2)
     {
+        ASSERT(etsString1 != nullptr);
+        ASSERT(etsString2 != nullptr);
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+        ASSERT(etsString1 != nullptr);
+        ASSERT(etsString2 != nullptr);
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         coretypes::String *string3 = coretypes::String::Concat(etsString1->GetCoreType(), etsString2->GetCoreType(),
                                                                ctx, Runtime::GetCurrent()->GetPandaVM());
@@ -369,6 +374,7 @@ public:
 
     static EtsString *FastSubString(EtsString *src, uint32_t start, uint32_t length)
     {
+        ASSERT(src != nullptr);
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         coretypes::String *string1 = src->GetCoreType();
         coretypes::String *string2 =

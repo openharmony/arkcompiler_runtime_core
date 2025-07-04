@@ -160,6 +160,7 @@ struct EtsFieldAccessorREFERENCE {
                 return false;
             }
         }
+        ASSERT(etsObject.GetPtr() != nullptr);
         etsObject->SetFieldObject(etsFieldWrapper->GetObjOffset(), etsValue);
         return true;
     }
@@ -181,6 +182,7 @@ struct EtsFieldAccessorPRIMITIVE {
     {
         std::optional<PrimitiveType> etsValue = Convertor::Unwrap(ctx, env, jsValue);
         if (LIKELY(etsValue.has_value())) {
+            ASSERT(etsObject.GetPtr() != nullptr);
             etsObject->SetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset(), etsValue.value());
         }
         return etsValue.has_value();

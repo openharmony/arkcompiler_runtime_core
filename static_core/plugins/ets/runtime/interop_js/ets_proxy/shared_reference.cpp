@@ -23,6 +23,7 @@ namespace ark::ets::interop::js::ets_proxy {
 
 void SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_ref jsRef, uint32_t refIdx)
 {
+    ASSERT(etsObject != nullptr);
     if (!etsObject->HasInteropIndex()) {
         etsObject->SetInteropIndex(refIdx);
     }

@@ -65,7 +65,9 @@ void EtsMutex::Lock()
     if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
         return;
     }
-    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *coroManager = coro->GetCoroutineManager();
     auto awaitee = EtsWaitersList::Node(coroManager);
     SuspendCoroutine(&awaitee);
 }
@@ -104,7 +106,9 @@ void EtsEvent::Wait()
     if (IsFireState(state)) {
         return;
     }
-    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *coroManager = coro->GetCoroutineManager();
     auto awaitee = EtsWaitersList::Node(coroManager);
     SuspendCoroutine(&awaitee);
 }
@@ -137,7 +141,9 @@ void EtsCondVar::Wait(EtsHandle<EtsMutex> &mutex)
     ASSERT(mutex->IsHeld());
     waiters_++;
     mutex->Unlock();
-    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *coroManager = coro->GetCoroutineManager();
     auto awaitee = EtsWaitersList::Node(coroManager);
     SuspendCoroutine(&awaitee);
     mutex->Lock();

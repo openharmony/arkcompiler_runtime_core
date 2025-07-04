@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ ArenaAllocatorT<USE_OOM_HANDLER>::~ArenaAllocatorT()
 template <bool USE_OOM_HANDLER>
 inline void *ArenaAllocatorT<USE_OOM_HANDLER>::AllocateAndAddNewPool(size_t size, Alignment alignment)
 {
+    ASSERT(arenas_ != nullptr);
     void *mem = arenas_->Alloc(size, alignment);
     if (mem == nullptr) {
         bool addNewPool = false;

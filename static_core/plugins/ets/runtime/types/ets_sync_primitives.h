@@ -76,6 +76,7 @@ public:
     ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList::Node *awaitee)
     {
         auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro != nullptr);
         auto *coroManager = coro->GetCoroutineManager();
         auto &event = awaitee->GetEvent();
         // Need to lock event before PushBack

@@ -52,6 +52,7 @@ void SetFieldValue(EtsObject *obj, EtsLong i, T val)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
+    ASSERT(objHandle.GetPtr() != nullptr);
 
     auto typeClass = objHandle->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
@@ -123,6 +124,7 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
+    ASSERT(nameHandle.GetPtr() != nullptr);
 
     auto typeClass = objHandle->GetClass();
     auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, nameHandle->GetMutf8());

@@ -134,6 +134,7 @@ static ArgVector<Value> GetArgValues(ScopedManagedCodeFix *s, EtsMethod *method,
                                      ets_object object)
 {
     ArgVector<Value> parsedArgs;
+    ASSERT(method != nullptr);
     parsedArgs.reserve(method->GetNumArgs());
     if (object != nullptr) {
         parsedArgs.emplace_back(s->ToInternalType(object)->GetCoreType());
@@ -214,6 +215,7 @@ static EtsMethod *ResolveVirtualMethod(ScopedManagedCodeFix *s, ets_object objec
     }
 
     EtsObject *obj = s->ToInternalType(object);
+    ASSERT(obj != nullptr);
     return obj->GetClass()->ResolveVirtualMethod(method);
 }
 
@@ -323,6 +325,7 @@ static EtsClass *GetInternalClass(EtsEnv *env, ets_class cls, ScopedManagedCodeF
 {
     EtsClass *klass = s->ToInternalType(cls);
 
+    ASSERT(klass != nullptr);
     if (klass->IsInitialized()) {
         return klass;
     }

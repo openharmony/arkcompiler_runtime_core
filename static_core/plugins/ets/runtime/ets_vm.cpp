@@ -286,6 +286,7 @@ bool PandaEtsVM::Initialize()
         ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
         auto *coro = EtsCoroutine::GetCurrent();
 
+        ASSERT(coro != nullptr);
         coro->GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
             ToUintPtr(classLinker_->GetEtsClassLinkerExtension()->GetPlatformTypes()));
         ASSERT(PlatformTypes(coro) != nullptr);
@@ -490,6 +491,7 @@ static EtsObjectArray *CreateArgumentsArray(const std::vector<std::string> &args
 
     for (size_t i = 0; i < args.size(); i++) {
         EtsString *str = EtsString::CreateFromMUtf8(args[i].data(), args[i].length());
+        ASSERT(arrayHandle.GetPtr() != nullptr);
         arrayHandle.GetPtr()->Set(i, str->AsObject());
     }
 
@@ -541,6 +543,7 @@ Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoin
     if (entrypoint->GetNumArgs() == 1) {
         EtsObjectArray *etsObjectArray = CreateArgumentsArray(args, this);
         EtsHandle<EtsObjectArray> argsHandle(coroutine, etsObjectArray);
+        ASSERT(argsHandle.GetPtr() != nullptr);
         Value argVal(argsHandle.GetPtr()->AsObject()->GetCoreType());
         auto v = entrypoint->Invoke(coroutine, &argVal);
 
@@ -605,6 +608,7 @@ void PandaEtsVM::ResolveNativeMethod(Method *method)
 
 static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exception, PandaStringStream &ss)
 {
+    ASSERT(exception.GetPtr() != nullptr);
     auto cls = exception->GetClass();
 
     PandaVector<uint8_t> strBuf;
@@ -855,6 +859,7 @@ void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<
     auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
     os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    ASSERT(weakRefList != nullptr);
     weakRefList->Push(coro, weakRef);
 }
 
@@ -863,6 +868,7 @@ void PandaEtsVM::CleanFinalizableReferenceList()
     auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
     os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    ASSERT(weakRefList != nullptr);
     weakRefList->UnlinkClearedReferences(EtsCoroutine::GetCurrent());
 }
 
@@ -871,6 +877,7 @@ void PandaEtsVM::BeforeShutdown()
     ScopedManagedCodeThread managedScope(EtsCoroutine::GetCurrent());
     auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
+    ASSERT(weakRefList != nullptr);
     weakRefList->TraverseAndFinalize();
 }
 
@@ -893,6 +900,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
 
     auto *klass = PlatformTypes(this)->coreAbcRuntimeLinker;
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
+    ASSERT(linkerHandle.GetPtr() != nullptr);
 
     EtsHandle<EtsEscompatArray> pathsHandle(coro, EtsEscompatArray::Create(abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {

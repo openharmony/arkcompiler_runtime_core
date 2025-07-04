@@ -121,6 +121,7 @@ std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsA
 void ThrowNoInteropContextException()
 {
     auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
     auto ctx = thread->GetVM()->GetLanguageContext();
     auto descriptor = utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_INTEROP_CONTEXT_ERROR.data());
     PandaString msg = "Interop call may be done only from _main_ or exclusive worker";

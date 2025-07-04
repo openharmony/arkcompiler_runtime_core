@@ -70,6 +70,7 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str(), true, ctx);
+    ASSERT(type != nullptr);
     EtsMethod *method = type->GetInstanceMethod(ark::ets::INVOKE_METHOD_NAME, nullptr);
     method = method == nullptr ? type->GetStaticMethod(ark::ets::INVOKE_METHOD_NAME, nullptr) : method;
     if (method != nullptr) {
