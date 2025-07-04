@@ -688,7 +688,7 @@ void Inspector::ReplyNativeCalling(PtThread thread)
     Continue(thread);
 }
 
-void Inspector::ProfilerSetSamplingInterval(int32_t interval)
+void Inspector::ProfilerSetSamplingInterval(uint32_t interval)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
     if (UNLIKELY(CheckVmDead())) {
