@@ -187,7 +187,7 @@ function ecmaDateFromTime(time: long): byte {
  * @returns Week day.
  */
 function ecmaWeekDay(time: long): byte {
-    let day = ecmaDayFromTime (time);
+    let day = ecmaDayFromTime(time);
     let weekDay = ((day + 4) % 7).toByte();
 
     return weekDay >= 0 ? weekDay : (weekDay + 7).toByte();
@@ -359,7 +359,7 @@ function ecmaMakeDay(year: double, month: double, day: double): long {
  * @returns Elapsed number of milliseconds since Unix Epoch.
  *
  */
-function ecmaMakeDate(day:long, time: long): long {
+function ecmaMakeDate(day: long, time: long): long {
     return day * msPerDay + time;
 }
 
@@ -451,13 +451,12 @@ export class Date {
      * @param dateStr Date in string format
      * @returns If the string is in ISO date format, return true; otherwise, return false.
      */
-    private static isIsoDate(dateStr:String): boolean {
+    private static isIsoDate(dateStr: String): boolean {
         return Date.isoDateRegExp.test(dateStr);
     }
 
     /** Stored value of Date, milliseconds */
     private ms: long;
-    private isValid: boolean = true;
     private get TZOffset(): long {
         return Date.getLocalTimezoneOffset(this.ms as long);
     }
@@ -465,7 +464,7 @@ export class Date {
     /**
      * The `parseDateFromString()` static method parses a string representation of a date,
      * and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC
-     * or returns `INVALID_DATE` if the string is unrecognized or, in some cases,
+     * or throws `RangeError` if the string is unrecognized or, in some cases,
      * contains illegal date values (e.g. 2015-02-31).
      *
      * Only the @link{https://tc39.es/ecma262/#sec-date-time-string-format|ISO 8601 format}
@@ -477,65 +476,68 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
+     * 
+     * @throws {RangeError} if the argument doesn't represent a valid date.
      */
-    private static parseDateFromString(dateStr: String): number {
+    private static parseDateFromString(dateStr: String): long {
         if (!Date.isIsoDate(dateStr)) {
-            let parser = new LegacyDateParser(dateStr);
-            let parseDate = parser.parseDate()
-            if (parseDate === INVALID_DATE) {
-                return NaN;
+            const parser = new LegacyDateParser(dateStr)
+            const parsedDate = parser.parseDate()
+            if (parsedDate === INVALID_DATE) {
+                throw new RangeError("Invalid time value")
             }
-            return parseDate.toDouble();
+            return parsedDate
         }
-        let parseResult = new ISODateParseResult()
+
+        let parseResult: ISODateParseResult
         try {
             parseResult = new ISODateParser(dateStr).parse()
         } catch (parseError) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
 
         const date = new Date(0)
-        date.setUTCFullYear(parseResult.year);
+        date.setUTCFullYear(parseResult.year)
 
         if (parseResult.month > 0) {
             if (parseResult.month > monthCountPerYear) {
-                return INVALID_DATE
+                throw new RangeError("Invalid time value")
             }
             date.setUTCMonth(parseResult.month - 1)
         }
 
         if (parseResult.day > maxDaysInMonth) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
         date.setUTCDay(parseResult.day)
 
         if (parseResult.hour > hoursPerDay) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
         date.setUTCHours(parseResult.hour)
 
         if (parseResult.minute > minutesPerHour) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
         date.setUTCMinutes(parseResult.minute)
 
         if (parseResult.second > secondsPerMinute) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
         date.setUTCSeconds(parseResult.second)
 
         if (parseResult.ms > msPerSecond) {
-            return INVALID_DATE
+            throw new RangeError("Invalid time value")
         }
         date.setUTCMilliseconds(parseResult.ms)
 
         const tzOffset = parseResult.tzOffset
         if (tzOffset !== undefined) {
             return date.valueOf() + tzOffset
-        } else {
-            return date.valueOf() + Date.getLocalTimezoneOffset((date.valueOf()).toLong()) * msPerMinute
         }
+        return date.valueOf() + Date.getLocalTimezoneOffset(date.getTime()) * msPerMinute
     }
+
     /**
      * Default constructor.
      *
@@ -544,7 +546,7 @@ export class Date {
      * @description Initializes Date instance with current time.
      */
     constructor() {
-        this.ms = Date.now().toLong();
+        this.ms = Date.now();
     }
 
     /**
@@ -554,28 +556,16 @@ export class Date {
      *
      * @see ECMA-262, 21.4.2.1
      *
-     * @description Initializes `Date` instance with `number` or `string` or another `Date` instance.
+     * @description Initializes `Date` instance with `long` or `string` or another `Date` instance.
      * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
      */
-
-    constructor(value: number | string | Date) {
-
+    constructor(value: long | string | Date) {
         if (value instanceof Date) {
-            this.ms = (trunc((value as Date).valueOf() as number)).toLong()
-        }
-        else if (typeof value == "string") {
-            let result = Date.parseDateFromString(value as string);
-            if (Double.isNaN(result)) {
-                this.isValid = false;
-            }
-            this.ms = result.toLong();
-        }
-        else {
-            if (isNaN(value as number)) {
-                this.ms = (maxDateOffset + 1) as long;
-            } else {
-                this.ms = (trunc(value as number)).toLong();
-            }
+            this.ms = value.ms
+        } else if (value instanceof string) {
+            this.ms = Date.parseDateFromString(value);
+        } else {
+            this.ms = value
         }
     }
 
@@ -601,19 +591,10 @@ export class Date {
      * @description Initialize `Date` instance with year, month, day, hours, minutes, seconds and milliseconds given.
      * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
      */
-    constructor(year: number, monthIndex: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number) {
+    constructor(year: int, monthIndex: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int) {
         this.ms = ecmaMakeDate(
-            ecmaMakeDay(
-                ecmaMakeFullYear(year),
-                monthIndex,
-                day != undefined ? day as number: 1
-            ),
-            ecmaMakeTime(
-                hours != undefined ? hours as number : 0,
-                minutes != undefined ? minutes as number : 0,
-                seconds != undefined ? seconds as number : 0,
-                ms != undefined ? ms as number : 0
-            )
+            ecmaMakeDay(ecmaMakeFullYear(year), monthIndex, day ?? 1),
+            ecmaMakeTime(hours ?? 0, minutes ?? 0, seconds ?? 0, ms ?? 0)
         );
         this.ms += this.TZOffset * msPerMinute
     }
@@ -634,7 +615,7 @@ export class Date {
      * by the standard `Date` object (equivalent to ±8,640,000,000,000,000 milliseconds).
      */
     private isDateValid(ms: long): boolean {
-        return this.isValid && ms >= -maxDateOffset && ms <= maxDateOffset;
+        return ms >= -maxDateOffset && ms <= maxDateOffset;
     }
 
     /**
@@ -655,11 +636,8 @@ export class Date {
      *
      * @returns The number of milliseconds between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public valueOf(): number {
-        if (!this.isDateValid()) {
-            return NaN;
-        }
-        return this.ms.toDouble();
+    public valueOf(): long {
+        return this.ms;
     }
 
     /**
@@ -671,7 +649,7 @@ export class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static native now(): number;
+    public static native now(): long;
 
     /**
      * Gets local time offset.
@@ -723,10 +701,10 @@ export class Date {
 
     private appendDefaultTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
         const appendTimeOptions = !options.dayPeriod
-                && !options.hour
-                && !options.minute
-                && !options.second
-                && !options.fractionalSecondDigits
+            && !options.hour
+            && !options.minute
+            && !options.second
+            && !options.fractionalSecondDigits
 
         let effectiveOptions = options
         if (appendTimeOptions) {
@@ -827,15 +805,12 @@ export class Date {
      *
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public getDate(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getDate(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear());
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return (day - firstDay + 1).toDouble();
+        return day - firstDay + 1;
     }
 
     /**
@@ -843,29 +818,11 @@ export class Date {
      *
      * @param value new day.
      */
-    public setDate(value: byte): void {
+    public setDate(value: int): long {
         let day = this.getDate();
-        this.ms -= (day * msPerDay).toLong();
+        this.ms -= day * msPerDay;
         this.ms += value * msPerDay;
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on local time.
-     *
-     * @param value new day.
-     */
-    public setDate(value: number): number {
-        this.setDate(value.toByte());
-        return this.ms.toDouble();
-    }
-
-    /**
-     * Alias to @link{setDate} and left for compatibility with ECMA-262.
-     *
-     * @param value new day.
-     */
-    public setDay(value: byte): void {
-        this.setDate(value);
+        return this.ms;
     }
 
     /**
@@ -873,15 +830,12 @@ export class Date {
      *
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public getUTCDate(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getUTCDate(): int {
         let localTime = this.ms;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
+        let inLeapYear = ecmaInLeapYear(this.getFullYear());
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return (day - firstDay + 1).toDouble();
+        return day - firstDay + 1;
     }
 
     /**
@@ -889,10 +843,11 @@ export class Date {
      *
      * @param value new day.
      */
-    public setUTCDate(value: byte): void {
-        let day = (this.getUTCDate()).toByte();
+    public setUTCDate(value: int): long {
+        let day = this.getUTCDate();
         this.ms -= day * msPerDay;
         this.ms += value * msPerDay;
+        return this.ms;
     }
 
     /**
@@ -900,28 +855,9 @@ export class Date {
      *
      * @param value new day.
      */
-    public setUTCDate(value: number): number {
-        this.setUTCDate(value.toByte());
-        return this.ms.toDouble();
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on UTC time.
-     *
-     * @param value new day.
-     */
-    public setUTCDay(value: byte): void {
+    public setUTCDay(value: int): long {
         this.setUTCDate(value);
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on UTC time.
-     *
-     * @param value new day.
-     */
-    public setUTCDay(value: number): number {
-        this.setUTCDate(value);
-        return this.ms.toDouble();
+        return this.ms;
     }
 
     /**
@@ -933,11 +869,8 @@ export class Date {
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public getDay(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return (ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond)).toDouble();
+    public getDay(): int {
+        return ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond);
     }
 
     /**
@@ -946,11 +879,8 @@ export class Date {
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public getUTCDay(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return (ecmaWeekDay(this.ms)).toDouble();
+    public getUTCDay(): int {
+        return ecmaWeekDay(this.ms);
     }
 
     /**
@@ -963,7 +893,7 @@ export class Date {
      * @returns year
      */
     public getYear(): int {
-        return this.getFullYear().toInt();
+        return this.getFullYear();
     }
 
     /**
@@ -977,11 +907,8 @@ export class Date {
      *
      * @returns year
      */
-    public getUTCFullYear(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return (ecmaYearFromTime(this.ms)).toDouble();
+    public getUTCFullYear(): int {
+        return ecmaYearFromTime(this.ms);
     }
 
     /**
@@ -1001,12 +928,9 @@ export class Date {
      * const year = today.getYearFull();
      * ```
      */
-    public getFullYear(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getFullYear(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return (ecmaYearFromTime(localTime)).toDouble();
+        return ecmaYearFromTime(localTime);
     }
 
     /**
@@ -1014,15 +938,12 @@ export class Date {
      *
      * @param value new year
      */
-    public setUTCFullYear(value: number, month?: number, date?: number): number {
-        this.setUTCFullYear(value.toInt());
-        if (month !== undefined) {
-            this.setUTCMonth(month.toInt());
-        }
-        if (date !== undefined) {
-            this.setUTCDate(date.toByte());
-        }
-        return this.ms.toDouble();
+    public setUTCFullYear(value: int): long {
+        let currentYear = ecmaYearFromTime(this.ms);
+        let currentMonth = ecmaMonthFromTime(this.ms);
+        this.ms -= ecmaMakeDay(currentYear, currentMonth, 1) * msPerDay
+        this.ms += ecmaMakeDay(value, currentMonth, 1) * msPerDay
+        return this.ms;
     }
 
     /**
@@ -1030,20 +951,22 @@ export class Date {
      *
      * @param value new year
      */
-    public setUTCFullYear(value: int): void {
-        let year = ecmaYearFromTime(this.ms);
-        let month = ecmaMonthFromTime(this.ms)
-        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
-        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
+    public setUTCFullYear(value: int, month: int): long {
+        this.setUTCFullYear(value);
+        this.setUTCMonth(month);
+        return this.ms;
     }
 
     /**
-     * This function is an alias to @link{setFullYear} and left for compatibility with ECMA-262.
+     * Sets the full year for a specified date according to universal time.
      *
      * @param value new year
      */
-    public setYear(value: number): void {
-        this.setYear(value.toInt())
+    public setUTCFullYear(value: int, month: int, date: int): long {
+        this.setUTCFullYear(value);
+        this.setUTCMonth(month);
+        this.setUTCDate(date);
+        return this.ms;
     }
 
     /**
@@ -1060,15 +983,13 @@ export class Date {
      *
      * @param value new year
      */
-    public setFullYear(value: number, month?: Number, date?: Number): number {
-        this.setFullYear(value.toInt());
-        if (month !== undefined) {
-            this.setMonth(month.toInt());
-        }
-        if (date !== undefined) {
-            this.setDate(date.toByte());
-        }
-        return this.ms.toDouble();
+    public setFullYear(value: int): long {
+        let localTime = this.ms - this.TZOffset * 60 * msPerSecond
+        let localYear = ecmaYearFromTime(localTime)
+        let localMonth = ecmaMonthFromTime(localTime)
+        this.ms -= ecmaMakeDay(localYear, localMonth, 1) * msPerDay
+        this.ms += ecmaMakeDay(value, localMonth, 1) * msPerDay
+        return this.ms;
     }
 
     /**
@@ -1076,12 +997,22 @@ export class Date {
      *
      * @param value new year
      */
-    public setFullYear(value: int): void {
-        let local_time = this.ms - this.TZOffset * 60 * msPerSecond
-        let year = ecmaYearFromTime(local_time)
-        let month = ecmaMonthFromTime(local_time)
-        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
-        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
+    public setFullYear(value: int, month: int): long {
+        this.setFullYear(value);
+        this.setMonth(month);
+        return this.ms;
+    }
+
+    /**
+     * Sets the full year for a specified date according to local time.
+     *
+     * @param value new year
+     */
+    public setFullYear(value: int, month: int, date: int): long {
+        this.setFullYear(value);
+        this.setMonth(month);
+        this.setDate(date);
+        return this.ms;
     }
 
     /**
@@ -1097,12 +1028,9 @@ export class Date {
      * const hours = today.getHour();
      * ```
      */
-    public getHours(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getHours(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaHourFromTime(localTime).toDouble();
+        return ecmaHourFromTime(localTime);
     }
 
     /**
@@ -1110,11 +1038,8 @@ export class Date {
      *
      * @returns An integer number, between 0 and 23, representing the hour for the given date according to UTC time.
      */
-    public getUTCHours(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return ecmaHourFromTime(this.ms).toDouble();
+    public getUTCHours(): int {
+        return ecmaHourFromTime(this.ms);
     }
 
     /**
@@ -1122,13 +1047,14 @@ export class Date {
      *
      * @param value new hours
      */
-    public setHours(value: byte): void {
+    public setHours(value: int): long {
         if (value < 0 || value > 23) {
             throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..23");
         }
         let hours = ecmaHourFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
+        return this.ms;
     }
 
     /**
@@ -1136,18 +1062,35 @@ export class Date {
      *
      * @param value new hours
      */
-    public setHours(value: number, min?: number, sec?: number, ms?: number): number {
-        this.setHours(value.toByte());
-        if (min !== undefined) {
-            this.setMinutes(min.toByte());
-        }
-        if (sec !== undefined) {
-            this.setSeconds(sec.toByte());
-        }
-        if (ms !== undefined) {
-            this.setMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setHours(value: int, min: int): long {
+        this.setHours(value);
+        this.setMinutes(min);
+        return this.ms;
+    }
+
+    /**
+     * Sets the hours for a specified date according to local time.
+     *
+     * @param value new hours
+     */
+    public setHours(value: int, min: int, sec: int): long {
+        this.setHours(value);
+        this.setMinutes(min);
+        this.setSeconds(sec);
+        return this.ms;
+    }
+
+    /**
+     * Sets the hours for a specified date according to local time.
+     *
+     * @param value new hours
+     */
+    public setHours(value: int, min: int, sec: int, ms: int): long {
+        this.setHours(value);
+        this.setMinutes(min);
+        this.setSeconds(sec);
+        this.setMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1155,13 +1098,14 @@ export class Date {
      *
      * @param value new hours
      */
-    public setUTCHours(value: byte): void {
+    public setUTCHours(value: int): long {
         if (value < 0 || value > 23) {
             throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..23");
         }
         let hours = ecmaHourFromTime(this.ms);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
+        return this.ms;
     }
 
     /**
@@ -1169,18 +1113,35 @@ export class Date {
      *
      * @param value new hours
      */
-    public setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
-        this.setUTCHours(value.toByte());
-        if (min !== undefined) {
-            this.setUTCMinutes(min.toByte());
-        }
-        if (sec !== undefined) {
-            this.setUTCSeconds(sec.toByte());
-        }
-        if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setUTCHours(value: int, min: int): long {
+        this.setUTCHours(value);
+        this.setUTCMinutes(min);
+        return this.ms;
+    }
+
+    /**
+     * Sets the hour for a specified date according to universal time.
+     *
+     * @param value new hours
+     */
+    public setUTCHours(value: int, min: int, sec: int): long {
+        this.setUTCHours(value);
+        this.setUTCMinutes(min);
+        this.setUTCSeconds(sec);
+        return this.ms;
+    }
+
+    /**
+     * Sets the hour for a specified date according to universal time.
+     *
+     * @param value new hours
+     */
+    public setUTCHours(value: int, min: int, sec: int, ms: int): long {
+        this.setUTCHours(value);
+        this.setUTCMinutes(min);
+        this.setUTCSeconds(sec);
+        this.setUTCMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1196,12 +1157,9 @@ export class Date {
      * const milliseconds = today.getMilliseconds();
      * ```
      */
-    public getMilliseconds(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getMilliseconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return (ecmaMsFromTime(localTime)).toDouble();
+        return ecmaMsFromTime(localTime);
     }
 
     /**
@@ -1216,7 +1174,7 @@ export class Date {
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
     public static UTC(d: Date): long {
-        return d.valueOf().toLong();
+        return d.ms;
     }
 
     /**
@@ -1228,8 +1186,8 @@ export class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: number): number {
-        return (ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))).toDouble()
+    public static UTC(year: int): long {
+        return ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0));
     }
 
     /**
@@ -1253,21 +1211,20 @@ export class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-
-    public static UTC(year: number, month: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): number {
-        return (ecmaMakeDate(
+    public static UTC(year: int, month: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int): long {
+        return ecmaMakeDate(
             ecmaMakeDay(
                 ecmaMakeFullYear(year),
                 month,
-                day != undefined ? day as number: 1.0
+                day != undefined ? day : 1.0
             ),
             ecmaMakeTime(
-                hours != undefined ? hours as number : 0,
-                minutes != undefined ? minutes as number : 0,
-                seconds != undefined ? seconds as number : 0,
-                ms != undefined ? ms as number : 0
+                hours != undefined ? hours : 0,
+                minutes != undefined ? minutes : 0,
+                seconds != undefined ? seconds : 0,
+                ms != undefined ? ms : 0
             )
-        )).toDouble();
+        );
     }
 
     /**
@@ -1275,12 +1232,9 @@ export class Date {
      *
      * @returns the milliseconds portion of the time object's value according to universal time.
      */
-    public getUTCMilliseconds(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getUTCMilliseconds(): int {
         let localTime = this.ms;
-        return (ecmaMsFromTime(localTime)).toDouble();
+        return ecmaMsFromTime(localTime);
     }
 
     /**
@@ -1288,20 +1242,11 @@ export class Date {
      *
      * @param value new ms
      */
-    public setMilliseconds(value: short): void {
+    public setMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= ms;
         this.ms += value;
-    }
-
-    /**
-     * Sets the milliseconds for a specified date according to local time.
-     *
-     * @param value new ms
-     */
-    public setMilliseconds(value: number): number {
-        this.setMilliseconds(value.toShort());
-        return this.ms.toDouble();
+        return this.ms;
     }
 
     /**
@@ -1309,20 +1254,11 @@ export class Date {
      *
      * @param value new ms
      */
-    public setUTCMilliseconds(value: short): void {
+    public setUTCMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms);
         this.ms -= ms;
         this.ms += value;
-    }
-
-    /**
-     * Sets the milliseconds for a specified date according to universal time.
-     *
-     * @param value new ms
-     */
-    public setUTCMilliseconds(value: number): number {
-        this.setUTCMilliseconds(value.toShort());
-        return this.ms.toDouble();
+        return this.ms;
     }
 
     /**
@@ -1338,12 +1274,9 @@ export class Date {
      * const seconds = today.getSeconds();
      * ```
      */
-    public getSeconds(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getSeconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return (ecmaSecFromTime(localTime)).toDouble();
+        return ecmaSecFromTime(localTime);
     }
 
     /**
@@ -1351,11 +1284,8 @@ export class Date {
      *
      * @returns the seconds in the specified date according to universal time.
      */
-    public getUTCSeconds(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return (ecmaSecFromTime(this.ms)).toDouble();
+    public getUTCSeconds(): int {
+        return ecmaSecFromTime(this.ms);
     }
 
     /**
@@ -1363,23 +1293,22 @@ export class Date {
      *
      * @param value new seconds
      */
-    public setSeconds(value: number, ms?: number): number {
-        this.setSeconds(value.toByte());
-        if (ms !== undefined) {
-            this.setMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
-    }
-
-    /**
-     * Sets the seconds for a specified date according to local time.
-     *
-     * @param value new seconds
-     */
-    public setSeconds(value: byte): void {
+    public setSeconds(value: int): long {
         let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
+        return this.ms;
+    }
+
+    /**
+     * Sets the seconds for a specified date according to local time.
+     *
+     * @param value new seconds
+     */
+    public setSeconds(value: int, ms: int): long {
+        this.setSeconds(value);
+        this.setMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1387,13 +1316,14 @@ export class Date {
      *
      * @param value new seconds
      */
-    public setUTCSeconds(value: byte): void {
+    public setUTCSeconds(value: int): long {
         if (value < 0 || value >= 60) {
             throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
         }
         let sec = ecmaSecFromTime(this.ms);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
+        return this.ms;
     }
 
     /**
@@ -1401,12 +1331,10 @@ export class Date {
      *
      * @param value new seconds
      */
-    public setUTCSeconds(value: number, ms?: number): number {
-        this.setUTCSeconds(value.toByte());
-        if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setUTCSeconds(value: int, ms: int): long {
+        this.setUTCSeconds(value);
+        this.setUTCMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1422,12 +1350,9 @@ export class Date {
      * const minutes = today.getMinutes();
      * ```
      */
-    public getMinutes(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getMinutes(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaMinFromTime(localTime).toDouble();
+        return ecmaMinFromTime(localTime);
     }
 
     /**
@@ -1435,13 +1360,14 @@ export class Date {
      *
      * @param value new minutes
      */
-    public setUTCMinutes(value: byte): void {
+    public setUTCMinutes(value: int): long {
         if (value < 0 || value >= 60) {
             throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
         }
         let min = ecmaMinFromTime(this.ms);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
+        return this.ms;
     }
 
     /**
@@ -1449,15 +1375,22 @@ export class Date {
      *
      * @param value new minutes
      */
-    public setUTCMinutes(value: number, sec?: Number, ms?: Number): number {
-        this.setUTCMinutes(value.toByte());
-        if (sec !== undefined) {
-            this.setUTCSeconds(sec.toByte());
-        }
-        if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setUTCMinutes(value: int, sec: int): long {
+        this.setUTCMinutes(value);
+        this.setUTCSeconds(sec);
+        return this.ms;
+    }
+
+    /**
+     * Sets the minutes for a specified date according to universal time.
+     *
+     * @param value new minutes
+     */
+    public setUTCMinutes(value: int, sec: int, ms: int): long {
+        this.setUTCMinutes(value);
+        this.setUTCSeconds(sec);
+        this.setUTCMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1465,11 +1398,8 @@ export class Date {
      *
      * @returns the minutes in the specified date according to universal time.
      */
-    public getUTCMinutes(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return ecmaMinFromTime(this.ms).toDouble();
+    public getUTCMinutes(): int {
+        return ecmaMinFromTime(this.ms);
     }
 
     /**
@@ -1477,13 +1407,14 @@ export class Date {
      *
      * @param value new minutes
      */
-    public setMinutes(value: byte): void {
+    public setMinutes(value: int): long {
         if (value < 0 || value >= 60) {
             throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
         }
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
+        return this.ms;
     }
 
     /**
@@ -1491,15 +1422,22 @@ export class Date {
      *
      * @param value new minutes
      */
-    public setMinutes(value: number, sec?: number, ms?: number): number {
-        this.setMinutes(value.toByte());
-        if (sec !== undefined) {
-            this.setSeconds(sec.toByte());
-        }
-        if (ms !== undefined) {
-            this.setMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setMinutes(value: int, sec: int): long {
+        this.setMinutes(value);
+        this.setSeconds(sec);
+        return this.ms;
+    }
+
+    /**
+     * Sets the minutes for a specified date according to local time.
+     *
+     * @param value new minutes
+     */
+    public setMinutes(value: int, sec: int, ms: int): long {
+        this.setMinutes(value);
+        this.setSeconds(sec);
+        this.setMilliseconds(ms);
+        return this.ms;
     }
 
     /**
@@ -1517,12 +1455,9 @@ export class Date {
      * const month = today.getMonth();
      * ```
      */
-    public getMonth(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
+    public getMonth(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
-        return ecmaMonthFromTime(localTime).toDouble();
+        return ecmaMonthFromTime(localTime);
     }
 
     /**
@@ -1531,11 +1466,8 @@ export class Date {
      * @returns  An integer number, between 0 and 11, representing the month in the given date according to UTC time.
      * 0 corresponds to January, 1 to February, and so on.
      */
-    public getUTCMonth(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return ecmaMonthFromTime(this.ms).toDouble();
+    public getUTCMonth(): int {
+        return ecmaMonthFromTime(this.ms);
     }
 
     /**
@@ -1543,25 +1475,24 @@ export class Date {
      *
      * @param month new month
      */
-    public setMonth(month: number, date?: number): number {
-        this.setMonth(month.toInt());
-        if (date !== undefined) {
-            this.setDate(date.toByte());
-        }
-        return this.ms.toDouble();
-    }
-
-    /**
-     * Sets the month for a specified date according to the currently set year.
-     *
-     * @param month new month
-     */
-    public setMonth(month: int): void {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
+    public setMonth(month: int): long {
+        let inLeapYear = ecmaInLeapYear(this.getFullYear());
         let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms - this.TZOffset * 60 * msPerSecond));
         let daysNew: int = getFirstDayInMonth(inLeapYear, month);
         this.ms -= daysNow * msPerDay;
         this.ms += daysNew * msPerDay;
+        return this.ms;
+    }
+
+    /**
+     * Sets the month for a specified date according to the currently set year.
+     *
+     * @param month new month
+     */
+    public setMonth(month: int, date: int): long {
+        this.setMonth(month);
+        this.setDate(date);
+        return this.ms;
     }
 
     /**
@@ -1569,25 +1500,24 @@ export class Date {
      *
      * @param month new month
      */
-    public setUTCMonth(month: number, date?: number): number {
-        this.setUTCMonth(month.toInt());
-        if (date !== undefined) {
-            this.setUTCDate(date.toByte());
-        }
-        return this.ms.toDouble();
-    }
-
-    /**
-     * Sets the month for a specified date according to universal time.
-     *
-     * @param month new month
-     */
-    public setUTCMonth(month: int): void {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
+    public setUTCMonth(month: int): long {
+        let inLeapYear = ecmaInLeapYear(this.getFullYear());
         let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms));
         let daysNew: int = getFirstDayInMonth(inLeapYear, month);
         this.ms -= daysNow * msPerDay;
         this.ms += daysNew * msPerDay;
+        return this.ms;
+    }
+
+    /**
+     * Sets the month for a specified date according to universal time.
+     *
+     * @param month new month
+     */
+    public setUTCMonth(month: int, date: int): long {
+        this.setUTCMonth(month);
+        this.setUTCDate(date);
+        return this.ms;
     }
 
     /**
@@ -1598,11 +1528,8 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public getTime(): number {
-        if (this.isValid === false) {
-            return NaN;
-        }
-        return this.valueOf();
+    public getTime(): long {
+        return this.ms;
     }
 
     /**
@@ -1615,34 +1542,15 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public setTime(value: long): void {
-        this.isValid = true;
+    public setTime(value: long): long {
         this.ms = value;
-    }
-
-    /**
-     * Sets the number of milliseconds since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param value new ms
-     *
-     * @see ECMA-262, 21.4.4.10
-     *
-     * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
-     */
-    public setTime(value: number): number {
-        if (Double.isNaN(value)) {
-            this.isValid = false;
-            return value;
-        }
-        this.setTime(value.toLong());
-        return this.ms.toDouble();
+        return this.ms;
     }
 
     /**
      * Parses a string representation of a date,
      * and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC
-     * or returns `INVALID_DATE` if the string is unrecognized or, in some cases,
+     * or throws `RangeError` if the string is unrecognized or, in some cases,
      * contains illegal date values (e.g. 2015-02-31).
      *
      * Only the @link{https://tc39.es/ecma262/#sec-date-time-string-format|ISO 8601 format}
@@ -1656,10 +1564,11 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
-     * If the argument doesn't represent a valid date, `INVALID_DATE` value is returned.
+     * 
+     * @throws {RangeError} if the argument doesn't represent a valid date.
      */
-    public static parse(dateStr: string): number {
-        return Date.parseDateFromString(dateStr) as number;
+    public static parse(dateStr: string): long {
+        return Date.parseDateFromString(dateStr);
     }
 
     /**
@@ -1669,11 +1578,8 @@ export class Date {
      * @returns the difference, in minutes, between a date as
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      */
-    public getTimezoneOffset(): number {
-        if (!this.isValid) {
-            return NaN;
-        }
-        return this.TZOffset.toDouble();
+    public getTimezoneOffset(): long {
+        return this.TZOffset;
     }
 
     /**
@@ -1682,8 +1588,10 @@ export class Date {
      *
      * @param value new timezone offset
      */
-    public setTimezoneOffset(value: number): number {
-        return this.setTimezoneOffset(value.toInt()) as number
+    public setTimezoneOffset(value: int): long {
+        const diff = value - this.getTimezoneOffset();
+        this.ms += diff * msPerMinute;
+        return this.getTimezoneOffset();
     }
 
     /**
@@ -1704,9 +1612,6 @@ export class Date {
      * ```
      */
     public toISOString(): string {
-        if (!this.isDateValid()) {
-            throw new RangeError('Invalid time value');
-        }
         let sb = new StringBuilder();
         let y = this.getUTCFullYear();
         if (y < 0) {
@@ -1721,41 +1626,41 @@ export class Date {
         if (abs(y) < 10) {
             sb.append("0");
         }
-        sb.append((abs(y)).toLong());
+        sb.append(abs(y).toLong());
         sb.append("-");
         let month = this.getUTCMonth() + 1;
-        if(month < 10){
+        if (month < 10) {
             sb.append("0");
         }
         sb.append(month);
         sb.append("-");
         let day = this.getUTCDate();
-        if(day < 10){
+        if (day < 10) {
             sb.append("0");
         }
         sb.append(day);
         sb.append("T");
         let h = this.getUTCHours();
-        if(h < 10) {
+        if (h < 10) {
             sb.append("0");
         }
         sb.append(h);
         sb.append(":");
         let m = this.getUTCMinutes();
-        if(m < 10) {
+        if (m < 10) {
             sb.append("0");
         }
         sb.append(m);
         sb.append(":");
         let s = this.getUTCSeconds();
-        if(s < 10) {
+        if (s < 10) {
             sb.append("0");
         }
         sb.append(s);
         sb.append(".");
         let ms = this.getUTCMilliseconds();
         if (ms < 10) {
-           sb.append("00")
+            sb.append("00")
         }
         else if (ms < 100) {
             sb.append("0")
@@ -1852,9 +1757,9 @@ export class Date {
         }
 
         let sb = new StringBuilder();
-        sb.append(dayNames[this.getDay().toInt()]);
+        sb.append(dayNames[this.getDay()]);
         sb.append(" ");
-        sb.append(monthNames[this.getMonth().toInt()]);
+        sb.append(monthNames[this.getMonth()]);
         sb.append(" ");
         let d = this.getDate();
         if (d < 10) {
@@ -1875,7 +1780,7 @@ export class Date {
         if (abs(y) < 10) {
             sb.append("0");
         }
-        sb.append((abs(y)).toLong());
+        sb.append(abs(y).toLong());
         return sb.toString();
     }
 
@@ -1887,7 +1792,7 @@ export class Date {
         sb.append("GMT");
         let offset = -this.TZOffset;
         let hours = offset / 60;
-        if(hours < 0) {
+        if (hours < 0) {
             sb.append("-");
         } else {
             sb.append("+")
@@ -1919,13 +1824,13 @@ export class Date {
      */
     public override toString(): string {
         let res: String = "Invalid Date";
-        if (this.isValid === false) {
+        if (!this.isDateValid()) {
             return res;
         }
         try {
             res = this.toDateString() + " " + this.toTimeString();
         }
-        catch (e) {}
+        catch (e) { }
         return res;
     }
 
@@ -1943,7 +1848,7 @@ export class Date {
      * ```
      */
     public toUTCString(): string {
-        if (this.isValid === false || !this.isDateValid()) {
+        if (!this.isDateValid()) {
             throw new Error("Invalid Date");
         }
         let s: String = this.toUTCDateString() + " " + this.toUTCTimeString();
@@ -1952,7 +1857,7 @@ export class Date {
 
     private toUTCDateString(): string {
         let sb = new StringBuilder();
-        sb.append(dayNames[this.getUTCDay().toInt()]);
+        sb.append(dayNames[this.getUTCDay()]);
         sb.append(", ");
         let d = this.getUTCDate();
         if (d < 10) {
@@ -1960,13 +1865,13 @@ export class Date {
         }
         sb.append(d);
         sb.append(" ");
-        sb.append(monthNames[this.getUTCMonth().toInt()]);
+        sb.append(monthNames[this.getUTCMonth()]);
         sb.append(" ");
         let y = this.getUTCFullYear();
         if (y < 0) {
             sb.append("-");
         }
-        y = abs(y);
+        y = abs(y).toInt();
         if (y < 1000) {
             sb.append("0");
         }
@@ -1976,7 +1881,7 @@ export class Date {
         if (y < 10) {
             sb.append("0");
         }
-        sb.append(y.toLong());
+        sb.append(y);
         return sb.toString();
     }
 
@@ -2033,7 +1938,7 @@ const DATE_COMPONENTS_SEPARATOR: string = "-"
 const TIME_COMPONENTS_SEPARATOR: string = ":"
 const FRACTIONAL_SECONDS_SEPARATOR: string = "."
 
-final class ISODateParseError extends Error {}
+final class ISODateParseError extends Error { }
 
 // https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-date-time-string-format
 class ISODateParser {
@@ -2161,8 +2066,8 @@ class ISODateParser {
         }
 
         const millisText = (millisTextLength > MS_COMPONENT_LENGTH)
-                ? this.dateStr.substring(startPos, startPos + MS_COMPONENT_LENGTH)
-                : this.dateStr.substring(startPos, currentPos).padEnd(MS_COMPONENT_LENGTH, "0")
+            ? this.dateStr.substring(startPos, startPos + MS_COMPONENT_LENGTH)
+            : this.dateStr.substring(startPos, currentPos).padEnd(MS_COMPONENT_LENGTH, "0")
 
         const millisValue = Double.parseInt(millisText).toInt()
 
@@ -2225,8 +2130,8 @@ class DateStringReader {
     }
 
     public readNumber(): ReadDataResult {
-        let length:int = 0;
-        let num:int = 0;
+        let length: int = 0;
+        let num: int = 0;
         while (Char.isDecDigit(this.value.charAt(0))) {
             num = parseInt(this.value).toInt() + (num * 10);
             length++;
@@ -2242,7 +2147,7 @@ class DateStringReader {
     }
 
     public readAlphabet(size: int): ReadDataResult {
-        let sb =  new StringBuilder();
+        let sb = new StringBuilder();
         let length = 0;
         while (Char.isLetter(this.value.charAt(0))) {
             if (length < size) {
@@ -2402,82 +2307,82 @@ class DateLexer {
     private date: DateUnit;
 
     constructor(str: DateStringReader) {
-      this.str = str;
-      this.date = this.read();
+        this.str = str;
+        this.date = this.read();
     }
 
     getDate(): DateUnit {
-      return this.date;
+        return this.date;
     }
 
     nextDate(): DateUnit {
-      const current = this.date;
-      this.date = this.read();
-      return current;
+        const current = this.date;
+        this.date = this.read();
+        return current;
     }
 
     ignoreSymbol(ch: string): boolean {
-      if (!this.date.isSymbolChar(ch)) {
-        return false;
-      }
-      this.date = this.read();
-      return true;
+        if (!this.date.isSymbolChar(ch)) {
+            return false;
+        }
+        this.date = this.read();
+        return true;
     }
 
     private read(): DateUnit {
-      if (Char.isDecDigit(this.str.getValue().charAt(0))) {
-        const res = this.str.readNumber();
-        return DateUnit.numericValue(res.value, res.length);
-      }
-      if (this.str.getValue() == '\x7F') {
-        return DateUnit.stringEnd();
-      }
-      if (this.str.getValue() == ':') {
-        this.str.nextChar();
-        return DateUnit.symbolValue(':');
-      }
-      if (this.str.getValue() == '+') {
-        this.str.nextChar();
-        return DateUnit.symbolValue('+');
-      }
-      if (this.str.getValue() == '-') {
-        this.str.nextChar();
-        return DateUnit.symbolValue('-');
-      }
-      if (this.str.getValue() == '.') {
-        this.str.nextChar();
-        return DateUnit.symbolValue('.');
-      }
-      if (Char.isLetter(this.str.getValue().charAt(0))) {
-        const alphabet = this.str.readAlphabet(3);
-        const minLen: int = Math.min(alphabet.length, 3).toInt();
-        const str = alphabet.strValue.substring(0, minLen);
-        let res = 0;
-        let type = DateValueType.DATE_INVALID_WORD;
-        if (str === 't') {
-            type = DateValueType.DATE_TIME_FALG;
+        if (Char.isDecDigit(this.str.getValue().charAt(0))) {
+            const res = this.str.readNumber();
+            return DateUnit.numericValue(res.value, res.length);
         }
-        if (str === 'z') {
-            type =  DateValueType.DATE_TIME_ZONE;
+        if (this.str.getValue() == '\x7F') {
+            return DateUnit.stringEnd();
         }
-        if (str === 'utc' || str === 'gmt') {
-            res = 1;
-            type = DateValueType.DATE_TIME_ZONE;
+        if (this.str.getValue() == ':') {
+            this.str.nextChar();
+            return DateUnit.symbolValue(':');
         }
-        const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-        const index = monthNames.indexOf(str.toLowerCase());
-        if (index !== -1) {
-            res = index + 1;
-            type = DateValueType.DATE_MONTH;
+        if (this.str.getValue() == '+') {
+            this.str.nextChar();
+            return DateUnit.symbolValue('+');
         }
-        return DateUnit.word(type, res, alphabet.length);
-      }
-      if (Char.isWhiteSpace(this.str.getValue().charAt(0))) {
+        if (this.str.getValue() == '-') {
+            this.str.nextChar();
+            return DateUnit.symbolValue('-');
+        }
+        if (this.str.getValue() == '.') {
+            this.str.nextChar();
+            return DateUnit.symbolValue('.');
+        }
+        if (Char.isLetter(this.str.getValue().charAt(0))) {
+            const alphabet = this.str.readAlphabet(3);
+            const minLen: int = Math.min(alphabet.length, 3).toInt();
+            const str = alphabet.strValue.substring(0, minLen);
+            let res = 0;
+            let type = DateValueType.DATE_INVALID_WORD;
+            if (str === 't') {
+                type = DateValueType.DATE_TIME_FALG;
+            }
+            if (str === 'z') {
+                type = DateValueType.DATE_TIME_ZONE;
+            }
+            if (str === 'utc' || str === 'gmt') {
+                res = 1;
+                type = DateValueType.DATE_TIME_ZONE;
+            }
+            const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            const index = monthNames.indexOf(str.toLowerCase());
+            if (index !== -1) {
+                res = index + 1;
+                type = DateValueType.DATE_MONTH;
+            }
+            return DateUnit.word(type, res, alphabet.length);
+        }
+        if (Char.isWhiteSpace(this.str.getValue().charAt(0))) {
+            this.str.nextChar();
+            return DateUnit.space();
+        }
         this.str.nextChar();
-        return DateUnit.space();
-      }
-      this.str.nextChar();
-      return DateUnit.unknown();
+        return DateUnit.unknown();
     }
 }
 
@@ -2516,146 +2421,146 @@ class DayValue {
 }
 
 class TimeValue {
-  hour_: int = 0
-  minute_: int = 0
-  second_: int = 0
-  ms_: int = 0;
-  index: int = 0;
+    hour_: int = 0
+    minute_: int = 0
+    second_: int = 0
+    ms_: int = 0;
+    index: int = 0;
 
-  setData(data: int): boolean {
-    if (this.index < 4) {
-        switch (this.index) {
-            case 0:
-                this.hour_ = data;
-                break;
-            case 1:
-                this.minute_ = data;
-                break;
-            case 2:
-                this.second_ = data;
-                break;
-            case 3:
-                this.ms_ = data;
-                break;
-            default:
-                return false;
+    setData(data: int): boolean {
+        if (this.index < 4) {
+            switch (this.index) {
+                case 0:
+                    this.hour_ = data;
+                    break;
+                case 1:
+                    this.minute_ = data;
+                    break;
+                case 2:
+                    this.second_ = data;
+                    break;
+                case 3:
+                    this.ms_ = data;
+                    break;
+                default:
+                    return false;
             }
-        this.index++;
-        return true;
+            this.index++;
+            return true;
+        }
+        return false;
     }
-    return false;
-  }
 
-  static minuteIsValid(n: int): boolean {
-    return n >= 0 && n <= 59;
-  }
-
-  static secondIsValid(n: int): boolean {
-    return n >= 0 && n <= 59;
-  }
-
-  static hourIsValid(n: int): boolean {
-    return n >= 0 && n <= 24;
-  }
-
-  static milliSecondIsValid(n: int): boolean {
-    return n >= 0 && n <= 999;
-  }
-
-  static normMilliSecond(sec: DateUnit): int {
-    const len = sec.getLength();
-    const value = sec.getValue();
-    if (len === 3) {
-      return value;
+    static minuteIsValid(n: int): boolean {
+        return n >= 0 && n <= 59;
     }
-    if (len === 2) {
-      return value * 10;
-    }
-    if (len === 1) {
-      return value * 100;
-    }
-    let divisor = 1;
-    let remainingLen = len;
-    while (remainingLen > 3) {
-      divisor *= 10;
-      remainingLen--;
-    }
-    return Math.floor(value / divisor).toInt();
-  }
 
-  getIndex(): int {
-    return this.index;
-  }
+    static secondIsValid(n: int): boolean {
+        return n >= 0 && n <= 59;
+    }
 
-  isValid(n: int): boolean {
-    return (this.index === 1 && TimeValue.minuteIsValid(n)) || (this.index === 2 && TimeValue.secondIsValid(n));
-  }
+    static hourIsValid(n: int): boolean {
+        return n >= 0 && n <= 24;
+    }
 
-  isValidSecond(n: int): boolean {
-    return this.index === 2 && TimeValue.secondIsValid(n);
-  }
+    static milliSecondIsValid(n: int): boolean {
+        return n >= 0 && n <= 999;
+    }
+
+    static normMilliSecond(sec: DateUnit): int {
+        const len = sec.getLength();
+        const value = sec.getValue();
+        if (len === 3) {
+            return value;
+        }
+        if (len === 2) {
+            return value * 10;
+        }
+        if (len === 1) {
+            return value * 100;
+        }
+        let divisor = 1;
+        let remainingLen = len;
+        while (remainingLen > 3) {
+            divisor *= 10;
+            remainingLen--;
+        }
+        return Math.floor(value / divisor).toInt();
+    }
+
+    getIndex(): int {
+        return this.index;
+    }
+
+    isValid(n: int): boolean {
+        return (this.index === 1 && TimeValue.minuteIsValid(n)) || (this.index === 2 && TimeValue.secondIsValid(n));
+    }
+
+    isValidSecond(n: int): boolean {
+        return this.index === 2 && TimeValue.secondIsValid(n);
+    }
 }
 class TimeZone {
-  sign: int = Int.MAX_VALUE;
-  hour: int = Int.MAX_VALUE;
-  minute: int = Int.MAX_VALUE;
+    sign: int = Int.MAX_VALUE;
+    hour: int = Int.MAX_VALUE;
+    minute: int = Int.MAX_VALUE;
 
-  setSign(sign: int): void {
-    this.sign = sign;
-  }
-
-  setHour(hour: int): void {
-    this.hour = hour;
-  }
-
-  setMin(minute: int): void {
-    this.minute = minute;
-  }
-
-  setUTC(): void {
-    this.sign = 1;
-    this.hour = 0;
-    this.minute = 0;
-  }
-
-  isUTC(): boolean {
-    return this.hour === 0 && this.minute === 0;
-  }
-
-  IsLocal(): boolean {
-    return this.hour === Int.MAX_VALUE;
-  }
-
-  hasSign(): boolean {
-    return this.sign !== Int.MAX_VALUE;
-  }
-
-  hasHour(): boolean {
-    return this.hour !== Int.MAX_VALUE;
-  }
-
-  hasMinute(): boolean {
-    return this.minute !== Int.MAX_VALUE;
-  }
-
-  isValid(): boolean {
-    if (!this.hasSign() && !this.hasHour() && !this.hasMinute()) {
-      return true;
+    setSign(sign: int): void {
+        this.sign = sign;
     }
-    if (this.hasSign()) {
-      if (!this.hasHour()) {
-        return false;
-      }
-      
-      if (this.hour < 0 || this.hour > 23) {
-        return false;
-      }
-      if (this.hasMinute() && (this.minute < 0 || this.minute > 59)) {
-        return false;
-      }
+
+    setHour(hour: int): void {
+        this.hour = hour;
     }
-    return true;
-  }
+
+    setMin(minute: int): void {
+        this.minute = minute;
+    }
+
+    setUTC(): void {
+        this.sign = 1;
+        this.hour = 0;
+        this.minute = 0;
+    }
+
+    isUTC(): boolean {
+        return this.hour === 0 && this.minute === 0;
+    }
+
+    IsLocal(): boolean {
+        return this.hour === Int.MAX_VALUE;
+    }
+
+    hasSign(): boolean {
+        return this.sign !== Int.MAX_VALUE;
+    }
+
+    hasHour(): boolean {
+        return this.hour !== Int.MAX_VALUE;
+    }
+
+    hasMinute(): boolean {
+        return this.minute !== Int.MAX_VALUE;
+    }
+
+    isValid(): boolean {
+        if (!this.hasSign() && !this.hasHour() && !this.hasMinute()) {
+            return true;
+        }
+        if (this.hasSign()) {
+            if (!this.hasHour()) {
+                return false;
+            }
+
+            if (this.hour < 0 || this.hour > 23) {
+                return false;
+            }
+            if (this.hasMinute() && (this.minute < 0 || this.minute > 59)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }
 
@@ -2671,7 +2576,7 @@ enum TimeField {
     DATE_LENGTH = 9,
 }
 
-class LegacyDateResult { 
+class LegacyDateResult {
     private dayValue: DayValue;
     private timeValue: TimeValue;
     private timeZone: TimeZone;
@@ -2712,7 +2617,7 @@ class LegacyDateResult {
         this.ms_ = value;
     }
 
-    constructor(dayValue: DayValue, timeValue: TimeValue, timeZone:TimeZone) {
+    constructor(dayValue: DayValue, timeValue: TimeValue, timeZone: TimeZone) {
         this.dayValue = dayValue;
         this.timeValue = timeValue;
         this.timeZone = timeZone;
@@ -2737,7 +2642,7 @@ class LegacyDateResult {
         if (this.hour_ === 24) {
             let rs = this.minute_ === 0 && this.second_ === 0 && this.ms_ === 0
             if (!rs) {
-                throw new RangeError("Invalid TimeValue");   
+                throw new RangeError("Invalid TimeValue");
             }
         }
     }
@@ -2746,9 +2651,9 @@ class LegacyDateResult {
         if (this.dayValue.index === 0) {
             throw new RangeError("Invalid DateValue");
         }
-        let year:int = 1;
-        let month:int = 1;
-        let day:int = 1;
+        let year: int = 1;
+        let month: int = 1;
+        let day: int = 1;
         for (let i = this.dayValue.index; i < 3; i++) {
             this.dayValue.data[i] = 1;
         }
@@ -2792,7 +2697,7 @@ class LegacyDateResult {
             throw new RangeError("Invalid DateValue");
         }
         this.year_ = year;
-        this.month_ = month - 1; 
+        this.month_ = month - 1;
         this.day_ = day;
     }
 }
@@ -2815,7 +2720,7 @@ class LegacyDateParser {
             return null;
         }
         let legacyDateResult = new LegacyDateResult(dayValue, timeValue, timeZone)
-        try { 
+        try {
             legacyDateResult.setTimeZone();
             legacyDateResult.setTimeValue();
             legacyDateResult.setDayValue();
@@ -2825,7 +2730,7 @@ class LegacyDateParser {
         return legacyDateResult;
     }
 
-    private parseLegacyDates(dateLexer: DateLexer, dayValue: DayValue, timeValue: TimeValue, timeZone: TimeZone) : boolean {
+    private parseLegacyDates(dateLexer: DateLexer, dayValue: DayValue, timeValue: TimeValue, timeZone: TimeZone): boolean {
         let date = dateLexer.nextDate();
         let hasNumber = (dayValue.getIndex() > 0);
         while (!date.isStringEnd()) {
@@ -2894,13 +2799,13 @@ class LegacyDateParser {
 
     private parseLegacyDateIsSign(date: DateUnit, dateLexer: DateLexer, timeZone: TimeZone): boolean {
         if (date.isSymbolChar('-')) {
-          timeZone.setSign(-1);
+            timeZone.setSign(-1);
         } else {
-          timeZone.setSign(1);
+            timeZone.setSign(1);
         }
         const timeNumUnit = dateLexer.getDate();
         if (!timeNumUnit.isNumberType()) {
-          return false;
+            return false;
         }
         const timeNum = timeNumUnit.getValue();
         const numLength = timeNumUnit.getLength();
@@ -2931,7 +2836,7 @@ class LegacyDateParser {
         return true;
     }
 
-    private getLocalOffsetFromOS(timeMs: long, isLocal: boolean): double  {
+    private getLocalOffsetFromOS(timeMs: long, isLocal: boolean): double {
         if (!isLocal) {
             return 0;
         }
@@ -2949,7 +2854,7 @@ class LegacyDateParser {
             if (isNaN(timeValue)) {
                 return timeValue;
             }
-            let localMs:Double = 0;
+            let localMs: Double = 0;
             if (time.tz_ == Int.MAX_VALUE) {
                 localMs = this.getLocalOffsetFromOS(timeValue, true) * msPerMinute;
             } else {

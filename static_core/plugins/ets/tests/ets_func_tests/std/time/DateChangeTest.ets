@@ -65,7 +65,7 @@ function testDateChangeYear():int {
 
 }
 
-function daysInMonth(year: number, month: number): number {
+function daysInMonth(year: int, month: int): number {
     let tmp = new Date(year, month + 1, 0);
     return tmp.getDate();
 }
@@ -141,8 +141,8 @@ function testDateChangeMinutes(): int {
 
 function testDateChangeSeconds(): int {
     let date: Date = new Date();
-    let seconds: byte = date.getSeconds().toByte();
-    let newSeconds: byte = 30;
+    let seconds: int = date.getSeconds();
+    let newSeconds: int = 30;
     if(newSeconds == seconds) newSeconds = 21;
     date.setSeconds(newSeconds);
 
@@ -151,7 +151,7 @@ function testDateChangeSeconds(): int {
 }
 
 function testSetUTCFullYear(): int {
-    let date: Date =  new Date(Date.UTC(96, 1, 2, 3, 4, 5));
+    let date: Date = new Date(Date.UTC(96, 1, 2, 3, 4, 5));
     arktest.assertEQ(date.getUTCFullYear(), 1996);
     arktest.assertEQ(date.valueOf(), 823230245000);
     arktest.assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");

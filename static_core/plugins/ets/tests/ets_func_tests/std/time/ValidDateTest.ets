@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const dates: long[] = [ -271821, -271820, 1, 1900, 1971, 275759, 275760, 275761];
+const dates: int[] = [ -271821, -271820, 1, 1900, 1971, 275759, 275760, 275761];
 const check: boolean[] = [false, true, true, true, true, true, true, false];
 
 function main(): int {
