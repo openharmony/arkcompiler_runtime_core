@@ -185,6 +185,7 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
     }
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
     auto *exc = promiseHandle->GetValue(currentCoro);
+    ASSERT(exc != nullptr);
     currentCoro->SetException(exc->GetCoreType());
     return nullptr;
 }
