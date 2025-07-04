@@ -12,16 +12,6 @@
 # limitations under the License.
 
 set(DISABLES_TESTS
-<<<<<<< HEAD
-    standalone_function
-)
-
-SUBDIRLIST(EXECUTED_TESTS
-    ${CMAKE_CURRENT_LIST_DIR}
-    DISABLES_TESTS
-)
-
-=======
     callable_signature
     cast_dynamic_to_object
     checked
@@ -77,7 +67,6 @@ SUBDIRLIST(EXECUTED_TESTS
     DISABLES_TESTS
 )
 
->>>>>>> OpenHarmony_feature_20250328
 foreach(TEST_DIR ${EXECUTED_TESTS})
     add_subdirectory(${TEST_DIR})
 endforeach()

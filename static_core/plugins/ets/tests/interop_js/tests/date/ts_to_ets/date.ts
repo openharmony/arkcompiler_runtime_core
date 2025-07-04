@@ -17,21 +17,6 @@ const etsVm = globalThis.gtest.etsVm;
 const dateString = '2025-03-01T01:02:03.000Z';
 const timeStamp = 1609459200000;
 
-<<<<<<< HEAD
-let FunDateInstanceof = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDateInstanceof');
-let FunDatetypeof = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDatetypeof');
-let FunDategetFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetFullYear');
-let FunDategetMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMonth');
-let FunDategetDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetDate');
-let FunDategetDay = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetDay');
-let FunDategetHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetHours');
-let FunDategetMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMinutes');
-let FunDategetSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetSeconds');
-let FunDategetMilliseconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetMilliseconds');
-let FunDatetoISOString = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDatetoISOString');
-let FunDategetTime = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunDategetTime');
-let FunObject = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'FunObject');
-=======
 let funDateInstanceOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateInstanceOf');
 let funDateTypeOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateTypeOf');
 let funDateGetFullYear = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetFullYear');
@@ -57,7 +42,6 @@ let funDateGetTimeZoneOffSet = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDa
 let funDateToJSON = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateToJSON');
 let funDateToDateString = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateToDateString');
 let funDateValueOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateValueOf');
->>>>>>> OpenHarmony_feature_20250328
 
 let testSetDateOfSetTime = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetTime');
 let testSetDateOfSetDate = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetDate');

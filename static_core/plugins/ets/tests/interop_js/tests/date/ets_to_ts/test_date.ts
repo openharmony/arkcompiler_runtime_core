@@ -14,14 +14,6 @@
  */
 
 const etsVm = globalThis.gtest.etsVm;
-<<<<<<< HEAD
-const datestr = '2025-03-01T01:02:03.000Z';
-const timestamp = 1609459200000;
-let firstdate = etsVm.getClass('Ldate/ETSGLOBAL;').firstdate;
-let datestring = etsVm.getClass('Ldate/ETSGLOBAL;').datestring;
-let datetimestamp = etsVm.getClass('Ldate/ETSGLOBAL;').datetimestamp;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 const DATASTR = etsVm.getClass('Ldate/test/ETSGLOBAL;').DATASTR;
 const TIMESTAMP = etsVm.getClass('Ldate/test/ETSGLOBAL;').TIMESTAMP;

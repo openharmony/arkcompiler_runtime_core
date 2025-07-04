@@ -51,10 +51,6 @@ function runTest(test, pandaOptions) {
 		'xgc-trigger-type': 'never',
 		'panda-files': testAbcPath,
 		'boot-panda-files': `${stdlibPath}:${testAbcPath}`,
-<<<<<<< HEAD
-		'coroutine-enable-external-scheduling': 'true',
-=======
->>>>>>> OpenHarmony_feature_20250328
 	};
 	const transformedPandaOptions = parseArgs(pandaOptions.toString());
 	const etsOpts = { ...options, ...transformedPandaOptions };

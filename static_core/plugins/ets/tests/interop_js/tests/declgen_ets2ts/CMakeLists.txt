@@ -207,20 +207,14 @@ function(create_declgen_ets2ts_test TARGET)
     list(APPEND ALL_DYNAMIC_SOURCES ${GLUE_FILES})
 
     # Execute compiled interop project
-<<<<<<< HEAD
-=======
     # PACKAGE_NAME is not necessary for declgen_ets2ts_test,
     # but it is necessary for panda_ets_interop_js_test;
->>>>>>> OpenHarmony_feature_20250328
     panda_ets_interop_js_test(${TARGET}
         ABC_FILE ${LIB_LINKED_ABC}
         JS_LAUNCHER ${ARG_TS_MAIN}
         JS_SOURCES ${ALL_DYNAMIC_SOURCES}
         DYNAMIC_ABC_OUTPUT_DIR ${JS_TO_ABC_OUTPUT_DIR}
-<<<<<<< HEAD
-=======
         PACKAGE_NAME "main"
->>>>>>> OpenHarmony_feature_20250328
     )
     add_dependencies(${TARGET} ${TARGET}_tsc ${TARGET}_link)
     add_dependencies(declgen_ets2ts_test ${TARGET})
@@ -287,11 +281,7 @@ add_subdirectory(export_default)
 
 # interop not supported
 # eg: E/ets_interop_js: InteropCtx::Fatal: ets_proxy requested for Lescompat/WeakMap; must add or forbid
-<<<<<<< HEAD
-# add_subdirectory(esobject)
-=======
 # add_subdirectory(esvalue)
->>>>>>> OpenHarmony_feature_20250328
 # add_subdirectory(standard_lib)
 # add_subdirectory(properties)
 

@@ -66,25 +66,6 @@ function main() {
 	let gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	let asmAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH');
 
-<<<<<<< HEAD
-	const etsVmRes = globalThis.gtest.etsVm.createRuntime({
-		'log-level': 'info',
-		'log-components': 'ets_interop_js',
-		'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
-		'panda-files': gtestAbcPath,
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
-        'coroutine-enable-external-scheduling': 'true',
-	});
-
-	if (!etsVmRes) {
-		print('Failed to create ETS runtime');
-		return 1;
-	}
-
-	globalThis.require = require;
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 	let argv = helper.getArgv();
 	const arkJsNapiCliLastArgIdx = 5;

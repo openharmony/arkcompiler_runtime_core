@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-function callbackEtsFunctionJs(callback_handler: (x: number) => number): number {
-    return callback_handler(0x55aa);
-}
-
-=======
 function callbackEtsFunctionJs(callbackHandler: (x: number) => number): number {
     return callbackHandler(0x55aa);
 }
@@ -47,27 +41,11 @@ function testErrorCall(sumFunc: ()=> void, erroString: string): void {
     }
 }
 
->>>>>>> OpenHarmony_feature_20250328
 function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
     // emulate import
     let ets_global = etsVm.getClass('Lets_functions/ETSGLOBAL;');
-<<<<<<< HEAD
-    ets_global.callback_ets_function_js = callbackEtsFunctionJs;
-
-    let testCallBackEtsFunctionLambda = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionLambda');
-    let call_back_res = testCallBackEtsFunctionLambda();
-    ASSERT_TRUE(call_back_res === 0x55ab);
-
-    let testCallBackEtsFunctionLambdaCapture = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionLambdaCapture');
-    call_back_res = testCallBackEtsFunctionLambdaCapture();
-    ASSERT_TRUE(call_back_res === 0x55ab);
-
-    let testCallBackEtsFunctionOuter = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionOuter');
-    call_back_res = testCallBackEtsFunctionOuter();
-    ASSERT_TRUE(call_back_res === 0x55ab);
-=======
     ets_global.callbackEtsFunctionJs = callbackEtsFunctionJs;
 
     let testCallBackEtsFunctionLambda = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionLambda');
@@ -104,7 +82,6 @@ function main(): void {
     testErrorCall(()=> {
         callbackEtsFunctionSum(ets_global.sum);
     }, 'TypeError: is not callable');
->>>>>>> OpenHarmony_feature_20250328
 }
 
 main();

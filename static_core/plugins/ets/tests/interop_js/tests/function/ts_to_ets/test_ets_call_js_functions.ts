@@ -17,8 +17,6 @@ function plusOne(x: number): number {
     return x + 1;
 }
 
-<<<<<<< HEAD
-=======
 function sum(...items: number[]): number {
     let sum = 0;
     for (let i = 0; i < items.length; i++) {
@@ -35,26 +33,12 @@ let sumFunc = (...items: number[]): number => {
     return sum;
 };
 
->>>>>>> OpenHarmony_feature_20250328
 function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
     let callbackJsFunctionEts = etsVm.getFunction('Lets_function/ETSGLOBAL;', 'callbackJsFunctionEts');
 
     // test lambda function
-<<<<<<< HEAD
-    let call_back_res = callback_js_function_ets((val: number) => val + 1);
-    ASSERT_TRUE(call_back_res === 0x55ab);
-
-    // test lambda function with capture
-    let bias = 1;
-    call_back_res = callback_js_function_ets((val: number) => val + bias);
-    ASSERT_TRUE(call_back_res === 0x55ab);
-
-    // test normal function
-    call_back_res = callback_js_function_ets(plusOne);
-    ASSERT_TRUE(call_back_res === 0x55ab);
-=======
     let callBackResult = callbackJsFunctionEts((val: number) => val + 1);
     ASSERT_TRUE(callBackResult === 0x55ab);
 
@@ -78,7 +62,6 @@ function main(): void {
     let callbackFunctionEtsTestSum = etsVm.getFunction('Lets_function/ETSGLOBAL;', 'callbackFunctionEtsTestSum');
     ASSERT_TRUE(callbackFunctionEtsTestSum(sum));
     ASSERT_TRUE(callbackFunctionEtsTestSum(sumFunc));
->>>>>>> OpenHarmony_feature_20250328
 }
 
 main();

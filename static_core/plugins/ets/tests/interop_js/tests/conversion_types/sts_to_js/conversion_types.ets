@@ -51,11 +51,7 @@ class DeferentIntTypes {
     num: int = 1;
     numb: number = 1;
     bigInt: BigInt = 1n;
-<<<<<<< HEAD
-    fl: float = 1.1;
-=======
     fl: float = 1.1f;
->>>>>>> OpenHarmony_feature_20250328
     intString: string = '1';
     l: long = 1;
     doub: double = 1;
@@ -64,11 +60,7 @@ class DeferentIntTypes {
 }
 
 class DeferentStringTypes {
-<<<<<<< HEAD
-    ch: char = 'a';
-=======
     ch: char = c'a';
->>>>>>> OpenHarmony_feature_20250328
     str: string = "hello";
     lit: "one" | "two" = "one";
 }

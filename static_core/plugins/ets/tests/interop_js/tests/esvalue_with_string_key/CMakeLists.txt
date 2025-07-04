@@ -14,15 +14,9 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/interop_js/tests/esobject_with_string_key/CMakeLists.txt
-panda_ets_interop_js_gtest(ets_interop_js__esobject_with_string_key_js_to_sts
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.ets
-=======
 panda_ets_interop_js_gtest(ets_interop_js__esvalue_with_string_key_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.ets
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/interop_js/tests/esvalue_with_string_key/CMakeLists.txt
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.js
 )

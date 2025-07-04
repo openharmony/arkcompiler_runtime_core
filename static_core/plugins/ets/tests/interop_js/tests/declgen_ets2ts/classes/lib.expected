@@ -55,11 +55,7 @@ export declare class C1 {
     constructor();
 }
 export declare class C2 {
-<<<<<<< HEAD
-    public foo2(...nums: number[]): void;
-=======
     public foo2(...nums: Array<number>): void;
->>>>>>> OpenHarmony_feature_20250328
     constructor();
 }
 export declare class C3 {
@@ -79,11 +75,7 @@ export declare class C6 {
     constructor();
 }
 export declare class C7 {
-<<<<<<< HEAD
-    public static foo7(...nums: number[]): void;
-=======
     public static foo7(...nums: Array<number>): void;
->>>>>>> OpenHarmony_feature_20250328
     constructor();
 }
 export declare class C8 {

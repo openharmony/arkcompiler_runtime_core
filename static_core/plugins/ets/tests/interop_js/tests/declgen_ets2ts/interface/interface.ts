@@ -28,15 +28,8 @@ export function main(): void {
 }
 
 function testInterface(): void {
-<<<<<<< HEAD
-	const input = ["hello"];
-	const classC = new C();
-	classC.bar(input);
-	assertEq(input[0], "hello");
-=======
 	const input = ['hello'];
 	const classC = new C();
 	classC.bar(input);
 	assertEq(input[0], 'hello');
->>>>>>> OpenHarmony_feature_20250328
 }

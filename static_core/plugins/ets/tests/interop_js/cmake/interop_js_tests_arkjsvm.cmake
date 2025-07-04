@@ -91,25 +91,15 @@ endfunction(compile_dynamic_file)
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #     PACKAGE_NAME
-<<<<<<< HEAD
-#       unit1_test 
-=======
 #       unit1_test
->>>>>>> OpenHarmony_feature_20250328
 #   )
 function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-<<<<<<< HEAD
-        "COMPILATION_JS_WITH_CJS_ON"
-        "ETS_CONFIG;PACKAGE_NAME"
-        "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
-=======
         "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
         "ETS_CONFIG;PACKAGE_NAME"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;ASM_SOURCE;LIBRARIES"
->>>>>>> OpenHarmony_feature_20250328
         ${ARGN}
     )
 
@@ -153,18 +143,6 @@ function(panda_ets_interop_js_gtest TARGET)
         )
     endif()
 
-<<<<<<< HEAD
-    # if not set PACKAGE_NAME, using first ets file as its name;
-    set(ETS_SOURCES_NUM)
-    list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
-    if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
-        list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
-        get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
-    elseif(NOT DEFINED ARG_PACKAGE_NAME)
-        message("Please provide PACKAGE_NAME for ${TARGET}")
-    endif()
-    # Add launcher <${TARGET}_gtests> target
-=======
     if(DEFINED ARG_ASM_SOURCE)
         get_filename_component(ASM_DIR_PATH ${ARG_ASM_SOURCE} DIRECTORY)
         get_filename_component(ASM_FILE_NAME ${ARG_ASM_SOURCE} NAME)
@@ -191,7 +169,6 @@ function(panda_ets_interop_js_gtest TARGET)
         endif()
     endif()
 
->>>>>>> OpenHarmony_feature_20250328
     panda_ets_add_gtest(
         NAME ${TARGET}
         NO_EXECUTABLE
@@ -207,10 +184,7 @@ function(panda_ets_interop_js_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
             "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
-<<<<<<< HEAD
-=======
             "ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE=${TARGET_GTEST_PACKAGE}"
->>>>>>> OpenHarmony_feature_20250328
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
@@ -227,11 +201,6 @@ function(panda_ets_interop_js_gtest TARGET)
         add_dependencies(${TARGET}_gtests ${TARGET}_dynamic_modules)
     endif()
 
-<<<<<<< HEAD
-    add_dependencies(ets_interop_js_gtests ${TARGET}_gtests)
-endfunction(panda_ets_interop_js_gtest)
-
-=======
     if(DEFINED ARG_ASM_SOURCE)
         add_dependencies(${TARGET}_gtests ${TARGET}_asm_abc)
     endif()
@@ -239,16 +208,11 @@ endfunction(panda_ets_interop_js_gtest)
     add_dependencies(ets_interop_js_gtests ${TARGET}_gtests)
 endfunction(panda_ets_interop_js_gtest)
 
->>>>>>> OpenHarmony_feature_20250328
 function(panda_ets_interop_js_test TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-<<<<<<< HEAD
-        "COMPILATION_JS_WITH_CJS_ON"
-=======
         "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
->>>>>>> OpenHarmony_feature_20250328
         "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;PACKAGE_NAME"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
@@ -285,11 +249,7 @@ function(panda_ets_interop_js_test TARGET)
         list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
         get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
     elseif(NOT DEFINED ARG_PACKAGE_NAME)
-<<<<<<< HEAD
-        message("Please provide PACKAGE_NAME  for ${TARGET}")
-=======
         message(FATAL_ERROR "Please provide PACKAGE_NAME  for ${TARGET}")
->>>>>>> OpenHarmony_feature_20250328
     endif()
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
     set(COMPILE_OPTIONS SOURCES ${ARG_JS_LAUNCHER} OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
@@ -318,11 +278,7 @@ function(panda_ets_interop_js_test TARGET)
 
     set(CUSTOM_PRERUN_ENVIRONMENT
         "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
-<<<<<<< HEAD
-        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
-=======
         "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
->>>>>>> OpenHarmony_feature_20250328
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
         "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
     )
@@ -350,8 +306,4 @@ function(panda_ets_interop_js_test TARGET)
         add_dependencies(${TARGET} ${TARGET}_js_modules)
     endif()
     add_dependencies(ets_interop_js_tests ${TARGET})
-<<<<<<< HEAD
 endfunction(panda_ets_interop_js_test)
-=======
-endfunction(panda_ets_interop_js_test)
->>>>>>> OpenHarmony_feature_20250328

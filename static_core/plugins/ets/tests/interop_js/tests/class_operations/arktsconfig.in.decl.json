@@ -9,11 +9,7 @@
 			"module": {
 				"language": "js",
 				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/module",
-<<<<<<< HEAD
-				"declPath": "${CMAKE_CURRENT_SOURCE_DIR}/module.ets"
-=======
 				"path": "${CMAKE_CURRENT_SOURCE_DIR}/module.ets"
->>>>>>> OpenHarmony_feature_20250328
 			}
 		}
 	}
