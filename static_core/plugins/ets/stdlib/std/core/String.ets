@@ -436,13 +436,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
-     * Computes the hashcode for this String.
-     *
-     * @returns hashcode value of this String
-     */
-    public native override $_hashCode(): int;
-
-    /**
      * Finds the first occurrence of a character in this String.
      *
      * @param ch to find

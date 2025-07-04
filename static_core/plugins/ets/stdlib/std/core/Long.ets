@@ -332,15 +332,6 @@ export final class Long extends Integral implements Comparable<Long> {
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
     * Checks for equality this instance with provided object, treated as a Long
     *
     * @param other object to be checked against

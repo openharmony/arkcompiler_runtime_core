@@ -954,20 +954,6 @@ intrinsics:
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
 
-  - name: StdCoreStringHashCode
-    space: ets
-    class_name: std.core.String
-    method_name: $_hashCode
-    static: false
-    signature:
-      ret: i32
-      args: [ ]
-    impl: ark::ets::intrinsics::StdCoreStringHashCode
-    codegen_func: CreateStringHashCode
-    codegen_arch: [arm64, amd64]
-    llvm_codegen_func: EmitStringHashCode
-    safe_intrinsic: true
-
   - name: StdCoreStringIsCompressed
     space: ets
     class_name: std.core.String
@@ -5898,6 +5884,16 @@ intrinsics:
       ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeGetHashCode
+
+  - name: StdRuntimeGetHashCodeByValue
+    space: ets
+    class_name: std.core.Runtime
+    method_name: getHashCodeByValue
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeGetHashCodeByValue
 
   - name: StdCoreRuntimeFailedTypeCastException
     space: ets

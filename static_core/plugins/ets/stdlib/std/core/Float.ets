@@ -346,15 +346,6 @@ export final class Float extends Floating implements Comparable<Float> {
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
      * compare(float, float) checks if two floats are differs no more than by Float.DELTA
      *
      * @param lhs left-hand side float for comparison

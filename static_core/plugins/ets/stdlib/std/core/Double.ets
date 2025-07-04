@@ -444,16 +444,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     * @tag arkts
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
      * compare(double, double) checks if two doubles are differs no more than by Double.DELTA
      *
      * @param lhs left-hand side double for comparison

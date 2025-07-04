@@ -304,15 +304,6 @@ export final class Int extends Integral implements Comparable<Int> {
         return (new Long(this.value)).toString(radix);
     }
 
-    /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.value;
-    }
-
     equals(other: NullishType): boolean {
         if (this === other) {
             return true

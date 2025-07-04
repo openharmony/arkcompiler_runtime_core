@@ -348,7 +348,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
             return 1;
         }
 
-        const keyHash: int = (key! as object).$_hashCode(); // #26217
+        const keyHash: int = Runtime.getHashCodeByValue(key! as object).toInt(); // #26217
         const positiveMask: int = 1 << LightWeightSet.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)

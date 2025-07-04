@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 
 namespace ark::ets::intrinsics {
@@ -41,6 +42,11 @@ EtsInt StdCoreRuntimeGetHashCode(EtsObject *source)
 {
     ASSERT(source != nullptr);
     return bit_cast<EtsInt>(source->GetHashCode());
+}
+
+EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
+{
+    return static_cast<EtsLong>(EtsEscompatMap::GetHashCode(source));
 }
 
 static char const *ReferenceTypeString(EtsObject *obj)

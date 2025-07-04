@@ -305,15 +305,6 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
-     * Returns a hash code (shorteger representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        return this.toInt();
-    }
-
-    /**
     * Checks for equality this instance with provided object, treated as a Short
     *
     * @param other object to be checked against
