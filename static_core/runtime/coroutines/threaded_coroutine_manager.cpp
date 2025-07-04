@@ -244,6 +244,7 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await started";
 
     auto *waiter = Coroutine::GetCurrent();
+    ASSERT(waiter != nullptr);
     auto *waiterCtx = waiter->GetContext<ThreadedCoroutineContext>();
 
     coroSwitchLock_.Lock();
@@ -375,6 +376,7 @@ void ThreadedCoroutineManager::ScheduleImpl()
 {
     ASSERT_NATIVE_CODE();
     auto *currentCo = Coroutine::GetCurrent();
+    ASSERT(currentCo != nullptr);
     auto *currentCtx = currentCo->GetContext<ThreadedCoroutineContext>();
 
     coroSwitchLock_.Lock();
@@ -437,6 +439,7 @@ bool ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
 void ThreadedCoroutineManager::MainCoroutineCompleted()
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted() started";
+    ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *ctx = Coroutine::GetCurrent()->GetContext<ThreadedCoroutineContext>();
     //  firstly yield
     {

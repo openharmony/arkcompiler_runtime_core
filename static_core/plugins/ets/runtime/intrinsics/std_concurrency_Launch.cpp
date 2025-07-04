@@ -89,11 +89,13 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
 }
 
 template <typename CoroResult>
+// CC-OFFNXT(huge_method) solid logic
 ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (func == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
@@ -104,17 +106,14 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postTo
                           "Cannot launch coroutines in the current context!");
         return nullptr;
     }
-
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    VMHandle<EtsArray> array(coro, arr->GetCoreType());
-    VMHandle<EtsObject> function(coro, func->GetCoreType());
-
     if (arr == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
         return nullptr;
     }
-
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    VMHandle<EtsArray> array(coro, arr->GetCoreType());
+    VMHandle<EtsObject> function(coro, func->GetCoreType());
     EtsMethod *method = ResolveInvokeMethod(coro, function);
     if (method == nullptr) {
         return nullptr;
@@ -168,6 +167,7 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto *coro = EtsCoroutine::GetCurrent();
     EtsHandleScope scope(coro);
     VMHandle<EtsObject> hCallback(coro, callback->GetCoreType());
+    ASSERT(hCallback.GetPtr() != nullptr);
     PandaVector<Value> args = {Value(hCallback->GetCoreType())};
     auto *method = ResolveInvokeMethod(coro, hCallback);
     auto *coroMan = coro->GetCoroutineManager();
