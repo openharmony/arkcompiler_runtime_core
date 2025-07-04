@@ -56,7 +56,7 @@ class LibAbcKitLoadNullValueStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitLoadNullValueStaticTest, LibAbcKitTestLoadNullValue)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.abc",
-                                            "load_nullvalue_static/ETSGLOBAL", "main");
+                                            "load_nullvalue_static", "main");
     EXPECT_TRUE(helpers::Match(output, "load_nullvalue_static.A \\{\\}\n"));
 
     helpers::TransformMethod(
@@ -82,7 +82,7 @@ TEST_F(LibAbcKitLoadNullValueStaticTest, LibAbcKitTestLoadNullValue)
 
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static_modified.abc",
-                                  "load_nullvalue_static/ETSGLOBAL", "main");
+                                  "load_nullvalue_static", "main");
     EXPECT_TRUE(helpers::Match(output, "null\n"));
 }
 

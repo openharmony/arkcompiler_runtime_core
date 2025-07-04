@@ -376,11 +376,6 @@ public:
         return nullptr;
     }
 
-    virtual uint64_t GetDeprecatedNativeApiMask() const
-    {
-        return 0U;
-    }
-
     virtual uint32_t GetRuntimeClassOffset([[maybe_unused]] Arch arch) const
     {
         return 0U;

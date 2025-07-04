@@ -18,7 +18,6 @@
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
 
 namespace ark::ets {
 
@@ -26,7 +25,7 @@ class EtsCoroutine;
 class PandaEtsVM;
 using EtsThrowable = EtsObject;
 
-class PandaEtsNapiEnv : public ani_env, public EtsEnv {  // NOLINT(fuchsia-multiple-inheritance)
+class PandaEtsNapiEnv : public ani_env {
 public:
     static Expected<PandaEtsNapiEnv *, const char *> Create(EtsCoroutine *coroutine,
                                                             mem::InternalAllocatorPtr allocator);
@@ -45,16 +44,6 @@ public:
     EtsReferenceStorage *GetEtsReferenceStorage() const
     {
         return referenceStorage_.get();
-    }
-
-    static PandaEtsNapiEnv *ToPandaEtsEnv(EtsEnv *env)
-    {
-        return static_cast<PandaEtsNapiEnv *>(env);
-    }
-
-    static PandaEtsNapiEnv *FromEtsEnv(EtsEnv *env)
-    {
-        return static_cast<PandaEtsNapiEnv *>(env);
     }
 
     static PandaEtsNapiEnv *FromAniEnv(ani_env *env)

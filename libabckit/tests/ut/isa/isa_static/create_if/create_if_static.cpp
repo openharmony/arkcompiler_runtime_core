@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -207,7 +207,7 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestCreateIf)
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) { TransformIrIcreateIf(graph); },
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema1()); });
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified.abc",
-                                            "create_if_static/ETSGLOBAL", "main");
+                                            "create_if_static", "main");
     EXPECT_TRUE(helpers::Match(output, "3.14\n"));
 }
 
@@ -221,9 +221,8 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestCreateIfNeg)
             TransformIrIcreateIfNeg(graph);
         },
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema1()); });
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_neg.abc",
-                                  "create_if_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_neg.abc", "create_if_static", "main");
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 
@@ -268,9 +267,8 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestSetCondidionCodePos)
             TransformIrIsetConditionCode(graph);
         },
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema2()); });
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_set.abc",
-                                  "create_if_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_set.abc", "create_if_static", "main");
     EXPECT_TRUE(helpers::Match(output, "3.14\n"));
 }
 
@@ -296,9 +294,8 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestGetCondidionCodePos)
             TransformIrIgetConditionCode(graph);
         },
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema2()); });
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_get.abc",
-                                  "create_if_static/ETSGLOBAL", "main");
+    auto output = helpers::ExecuteStaticAbc(
+        ABCKIT_ABC_DIR "ut/isa/isa_static/create_if/create_if_static_modified_get.abc", "create_if_static", "main");
     EXPECT_TRUE(helpers::Match(output, "3.14\n"));
 }
 

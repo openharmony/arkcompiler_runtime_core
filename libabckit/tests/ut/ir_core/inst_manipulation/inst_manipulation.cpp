@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1118,7 +1118,7 @@ TEST_F(LibAbcKitIrInstTest, IgetFunction_4)
 TEST_F(LibAbcKitIrInstTest, Iremove_1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
-                                            "inst_manipulation_static/ETSGLOBAL", "main");
+                                            "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 0\n"));
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
@@ -1129,7 +1129,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_1)
                              });
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
-                                  "inst_manipulation_static/ETSGLOBAL", "main");
+                                  "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test2\n1 2 3 4 5 0\n"));
 }
 
@@ -1157,7 +1157,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_2)
 TEST_F(LibAbcKitIrInstTest, Iremove_3)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
-                                            "inst_manipulation_static/ETSGLOBAL", "main");
+                                            "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 0\n"));
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
@@ -1170,7 +1170,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_3)
                              });
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
-                                  "inst_manipulation_static/ETSGLOBAL", "main");
+                                  "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test2\n1 2 3 4 5 0\n"));
 }
 
@@ -1222,7 +1222,7 @@ TEST_F(LibAbcKitIrInstTest, IcreateCallrange)
 TEST_F(LibAbcKitIrInstTest, IappendInput_1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
-                                            "inst_manipulation_static/ETSGLOBAL", "main");
+                                            "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 0\n"));
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
@@ -1237,7 +1237,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_1)
                              });
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
-                                  "inst_manipulation_static/ETSGLOBAL", "main");
+                                  "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\ntest0  6\n1 2 3 4 5 0\n"));
 }
 
@@ -1245,7 +1245,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_1)
 TEST_F(LibAbcKitIrInstTest, IappendInput_2)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
-                                            "inst_manipulation_static/ETSGLOBAL", "main");
+                                            "inst_manipulation_static", "main");
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *call = helpers::FindLastInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_VIRTUAL);
         auto *found = helpers::FindMethodByName(file, "test2:inst_manipulation_static.Test;i32;i32;");
@@ -1262,7 +1262,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_2)
                              "main", cb);
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
-                                  "inst_manipulation_static/ETSGLOBAL", "main");
+                                  "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\ntest2\n1 2 3 4 5 0\n"));
 }
 
@@ -1364,7 +1364,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_8)
 TEST_F(LibAbcKitIrInstTest, IappendInput_9)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
-                                            "inst_manipulation_static/ETSGLOBAL", "main");
+                                            "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 0\n"));
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         [[maybe_unused]] auto *start = g_implG->gGetStartBasicBlock(graph);
@@ -1383,7 +1383,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_9)
                              "main", cb);
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
-                                  "inst_manipulation_static/ETSGLOBAL", "main");
+                                  "inst_manipulation_static", "main");
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 8\n"));
 }
 

@@ -44,8 +44,8 @@ enum class TryCatchScenario {
 // Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
-                                            "catchphi_static/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc", "catchphi_static", "main");
     EXPECT_TRUE(helpers::Match(output, "CATCH\n"));
 
     helpers::TransformMethod(
@@ -62,15 +62,15 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
         [&]([[maybe_unused]] AbckitGraph *graph) {});
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified.abc",
-                                       "catchphi_static/ETSGLOBAL", "main");
+                                       "catchphi_static", "main");
     EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\nCATCH\n"));
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
-                                            "catchphi_static/ETSGLOBAL", "main0");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc", "catchphi_static", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n13\n"));
 
     helpers::TransformMethod(
@@ -105,15 +105,15 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
         [&]([[maybe_unused]] AbckitGraph *ctxG) {});
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified_noacc.abc",
-                                       "catchphi_static/ETSGLOBAL", "main0");
+                                       "catchphi_static", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n42\n"));
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticInvalid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
-                                            "catchphi_static/ETSGLOBAL", "main0");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc", "catchphi_static", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n13\n"));
 
     helpers::TransformMethod(

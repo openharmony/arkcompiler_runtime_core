@@ -124,7 +124,7 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestCheckCast)
         });
 
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/cast/checkcast_static_modified.abc",
-                                            "checkcast_static/ETSGLOBAL", "main");
+                                            "checkcast_static", "main");
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 

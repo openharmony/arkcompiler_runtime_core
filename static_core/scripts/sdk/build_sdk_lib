@@ -97,7 +97,7 @@ function linux_arm64_tools() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
+    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin verifier ani_helpers aspt_converter dependency_analyzer"
     build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
     copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
     copy_abc_files "$linux_arm64_build_dir"
@@ -133,7 +133,7 @@ function linux_tools() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_build_targets="ark ark_aot ets_interop_js_napi ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter dependency_analyzer"
+    local linux_build_targets="ark ark_aot ets_interop_js_napi ark_disasm ark_link es2panda etssdk e2p_test_plugin verifier ani_helpers aspt_converter dependency_analyzer"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
     mv "$PANDA_SDK_PATH/linux_host_tools/lib/module/ets_interop_js_napi.so" "$PANDA_SDK_PATH/linux_host_tools/lib/libets_interop_js_napi.so"
@@ -177,7 +177,7 @@ function ohos_arm64() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative ani_helpers aspt_converter dependency_analyzer"
+    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin ani_helpers aspt_converter dependency_analyzer"
     build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm64.txt
 
@@ -202,7 +202,7 @@ function ohos_arm32() {
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local ohos_build_targets="ark arkruntime arkassembler ets_interop_js_napi etsnative ani_helpers aspt_converter dependency_analyzer"
+    local ohos_build_targets="ark arkruntime arkassembler ets_interop_js_napi ani_helpers aspt_converter dependency_analyzer"
     build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm32.txt
     copy_abc_files "$ohos_build_dir"

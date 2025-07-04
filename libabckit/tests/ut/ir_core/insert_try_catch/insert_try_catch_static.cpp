@@ -44,7 +44,7 @@ enum class TryCatchScenario {
 TEST_F(LibAbcKitStaticTryCatchTest, TryCatchIrbuilder)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/insert_try_catch/insert_try_catch_static.abc",
-                                            "insert_try_catch_static/ETSGLOBAL", "main");
+                                            "insert_try_catch_static", "main");
     EXPECT_TRUE(helpers::Match(output, "TRY1\nTRY2\nCATCH\nTRY1\nTRY3\n"));
 
     helpers::TransformMethod(
@@ -56,7 +56,7 @@ TEST_F(LibAbcKitStaticTryCatchTest, TryCatchIrbuilder)
 
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/insert_try_catch/insert_try_catch_static_modified.abc",
-                                  "insert_try_catch_static/ETSGLOBAL", "main");
+                                  "insert_try_catch_static", "main");
     EXPECT_TRUE(helpers::Match(output, "TRY1\nTRY2\nCATCH\nTRY1\nTRY3\n"));
 }
 

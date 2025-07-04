@@ -26,28 +26,28 @@ class EtsObject;
 template <typename T>
 constexpr EtsType GetEtsType()
 {
-    if constexpr (std::is_same<T, ets_boolean>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsBoolean>::value) {  // NOLINT
         return EtsType::BOOLEAN;
     }
-    if constexpr (std::is_same<T, ets_byte>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsByte>::value) {  // NOLINT
         return EtsType::BYTE;
     }
-    if constexpr (std::is_same<T, ets_char>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsChar>::value) {  // NOLINT
         return EtsType::CHAR;
     }
-    if constexpr (std::is_same<T, ets_short>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsShort>::value) {  // NOLINT
         return EtsType::SHORT;
     }
-    if constexpr (std::is_same<T, ets_int>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsInt>::value) {  // NOLINT
         return EtsType::INT;
     }
-    if constexpr (std::is_same<T, ets_long>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsLong>::value) {  // NOLINT
         return EtsType::LONG;
     }
-    if constexpr (std::is_same<T, ets_float>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsFloat>::value) {  // NOLINT
         return EtsType::FLOAT;
     }
-    if constexpr (std::is_same<T, ets_double>::value) {  // NOLINT
+    if constexpr (std::is_same<T, EtsDouble>::value) {  // NOLINT
         return EtsType::DOUBLE;
     }
     if constexpr (std::is_same<T, EtsObject>::value) {  // NOLINT
@@ -66,7 +66,7 @@ public:
     template <typename T>
     explicit EtsValue(T value)
     {
-        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, ets_object> || std::is_same_v<T, ani_ref> ||
+        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, EtsObject *> || std::is_same_v<T, ani_ref> ||
                       std::is_same_v<T, std::nullptr_t>);
         static_assert(sizeof(T) <= sizeof(holder_));
 
@@ -76,7 +76,7 @@ public:
     template <typename T>
     T GetAs()
     {
-        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, ets_object> || std::is_same_v<T, ani_ref>);
+        static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, EtsObject *> || std::is_same_v<T, ani_ref>);
         static_assert(sizeof(T) <= sizeof(holder_));
 
         T tmp;

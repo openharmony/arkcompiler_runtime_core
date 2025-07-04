@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <cstdint>
-#include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/tests/native/native_test_helper.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
@@ -41,23 +40,23 @@ public:
      * @brief Checks that changes in natively-acquired array are visible by managed `at` method
      * @param arrayBuffer non-detached instance of ArrayBuffer
      */
-    void ArrayBufferAtTest(ets_arraybuffer arrayBuffer)
+    void ArrayBufferAtTest(ani_arraybuffer arrayBuffer)
     {
         int8_t *data = nullptr;
         size_t length = 0;
-        auto status = env_->ArrayBufferGetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
-        ASSERT_EQ(status, ETS_OKAY);
+        auto status = env_->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
+        ASSERT_EQ(status, ANI_OK);
         ASSERT_EQ(length, TWENTY_FOUR);
 
         data[ELEVEN] = FOURTY_TWO;
         data[TWELVE] = FOURTY_THREE;
 
-        ets_int value = 0;
+        ani_int value = 0;
         CallEtsFunction(&value, "ManagedTest", "getByte", arrayBuffer, ELEVEN);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+        CheckUnhandledError(env_);
         ASSERT_EQ(value, FOURTY_TWO);
         CallEtsFunction(&value, "ManagedTest", "getByte", arrayBuffer, TWELVE);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+        CheckUnhandledError(env_);
         ASSERT_EQ(value, FOURTY_THREE);
     }
 
@@ -65,20 +64,20 @@ public:
      * @brief Checks that changes through managed `set` method are visible in natively-acquired array
      * @param arrayBuffer non-detached instance of ArrayBuffer
      */
-    void ArrayBufferSetTest(ets_arraybuffer arrayBuffer)
+    void ArrayBufferSetTest(ani_arraybuffer arrayBuffer)
     {
         int8_t *data = nullptr;
         size_t length = 0;
-        auto status = env_->ArrayBufferGetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
-        ASSERT_EQ(status, ETS_OKAY);
+        auto status = env_->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void **>(&data), &length);
+        ASSERT_EQ(status, ANI_OK);
         ASSERT_EQ(length, TWENTY_FOUR);
 
-        ets_int value = 0;
+        ani_int value = 0;
         CallEtsFunction(&value, "ManagedTest", "setByte", arrayBuffer, ELEVEN, FOURTY_TWO);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+        CheckUnhandledError(env_);
         ASSERT_EQ(data[ELEVEN], FOURTY_TWO);
         CallEtsFunction(&value, "ManagedTest", "setByte", arrayBuffer, TWELVE, FOURTY_THREE);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+        CheckUnhandledError(env_);
         ASSERT_EQ(data[TWELVE], FOURTY_THREE);
     }
 
@@ -86,76 +85,76 @@ public:
      * @brief Checks that `at` with invalid indexes results in managed error being thrown
      * @param arrayBuffer non-detached instance of ArrayBuffer, must be with length less or equal to 24
      */
-    void ArrayBufferAtInvalidIndexTest(ets_arraybuffer arrayBuffer)
+    void ArrayBufferAtInvalidIndexTest(ani_arraybuffer arrayBuffer)
     {
-        ets_int value = 0;
+        ani_int value = 0;
         CallEtsFunction(&value, "ManagedTest", "getByte", arrayBuffer, -1);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
 
         CallEtsFunction(&value, "ManagedTest", "getByte", arrayBuffer, TWENTY_FOUR);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
 
         CallEtsFunction(&value, "ManagedTest", "getByte", arrayBuffer, TWENTY_FIVE);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
     }
 
     /**
      * @brief Checks that `set` with invalid indexes results in managed error being thrown
      * @param arrayBuffer non-detached instance of ArrayBuffer, must be with length less or equal to 24
      */
-    void ArrayBufferSetInvalidIndexTest(ets_arraybuffer arrayBuffer)
+    void ArrayBufferSetInvalidIndexTest(ani_arraybuffer arrayBuffer)
     {
-        ets_int value = 0;
+        ani_int value = 0;
         CallEtsFunction(&value, "ManagedTest", "setByte", arrayBuffer, -1, 1);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
 
         CallEtsFunction(&value, "ManagedTest", "setByte", arrayBuffer, TWENTY_FOUR, 1);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
 
         CallEtsFunction(&value, "ManagedTest", "setByte", arrayBuffer, TWENTY_FIVE, 1);
-        ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-        env_->ErrorClear();
+        CheckUnhandledError(env_, ANI_TRUE);
+        env_->ResetError();
     }
 };
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferCreate)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     void *data = nullptr;
-    auto status = env_->ArrayBufferCreate(0, &data, &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(0, &data, &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
-    ets_int length = 0;
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", arrayBuffer);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, 0);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferCreateWithLength)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     void *data = nullptr;
-    auto status = env_->ArrayBufferCreate(TWENTY_FOUR, &data, &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(TWENTY_FOUR, &data, &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
-    ets_int length = 0;
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", arrayBuffer);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, TWENTY_FOUR);
 }
 
 /// @brief Creates ArrayBuffer via ets_napi and tests its `at` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferGet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     int8_t *data = nullptr;
-    auto status = env_->ArrayBufferCreate(TWENTY_FOUR, reinterpret_cast<void **>(&data), &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(TWENTY_FOUR, reinterpret_cast<void **>(&data), &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
     ArrayBufferAtTest(arrayBuffer);
 }
@@ -163,65 +162,66 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferGet)
 /// @brief Creates ArrayBuffer via ets_napi and tests its `set` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     int8_t *data = nullptr;
-    auto status = env_->ArrayBufferCreate(TWENTY_FOUR, reinterpret_cast<void **>(&data), &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(TWENTY_FOUR, reinterpret_cast<void **>(&data), &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
     ArrayBufferSetTest(arrayBuffer);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSlice)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     void *data = nullptr;
-    auto status = env_->ArrayBufferCreate(HUNDRED_TWENTY_FOUR, &data, &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(HUNDRED_TWENTY_FOUR, &data, &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
-    ets_arraybuffer sliced {};
+    ani_arraybuffer sliced {};
     CallEtsFunction(&sliced, "ManagedTest", "createSlicedArrayBuffer", arrayBuffer, TWENTY_FOUR, HUNDRED);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
-    ets_int length = 0;
+    CheckUnhandledError(env_);
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", sliced);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, HUNDRED - TWENTY_FOUR);
 }
 
 template <size_t LENGTH>
-static void CreateExternalArrayBuffer(EtsEnv *env, ets_arraybuffer *arrayBuffer)
+static void CreateExternalArrayBuffer(ani_env *env, ani_arraybuffer *arrayBuffer)
 {
     auto *data = new int8_t[LENGTH];
-    auto status = env->ArrayBufferCreateExternal(data, LENGTH, TestFinalizer, nullptr, arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
-    ASSERT_EQ(env->ErrorCheck(), ETS_FALSE);
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    auto status = DoCreateExternalArrayBuffer(env, data, LENGTH, TestFinalizer, nullptr, arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
+    CheckUnhandledError(env);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalCreate)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<0>(env_, &arrayBuffer);
 
-    ets_int length = 0;
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", arrayBuffer);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, 0);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalCreateWithLength)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<TWENTY_FOUR>(env_, &arrayBuffer);
 
-    ets_int length = 0;
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", arrayBuffer);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, TWENTY_FOUR);
 }
 
 /// @brief Creates ArrayBuffer with external memory via ets_napi and tests its `at` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalGet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<TWENTY_FOUR>(env_, &arrayBuffer);
 
     ArrayBufferAtTest(arrayBuffer);
@@ -230,7 +230,7 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalGet)
 /// @brief Creates ArrayBuffer with external memory via ets_napi and tests its `set` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<TWENTY_FOUR>(env_, &arrayBuffer);
 
     ArrayBufferSetTest(arrayBuffer);
@@ -238,42 +238,42 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSet)
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSlice)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<HUNDRED_TWENTY_FOUR>(env_, &arrayBuffer);
 
-    ets_arraybuffer sliced {};
+    ani_arraybuffer sliced {};
     CallEtsFunction(&sliced, "ManagedTest", "createSlicedArrayBuffer", arrayBuffer, TWENTY_FOUR, HUNDRED);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
-    ets_int length = 0;
+    CheckUnhandledError(env_);
+    ani_int length = 0;
     CallEtsFunction(&length, "ManagedTest", "getLength", sliced);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
     ASSERT_EQ(length, HUNDRED - TWENTY_FOUR);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedCreate)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", 0);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     void *data = nullptr;
     size_t length = 0;
-    auto status = env_->ArrayBufferGetInfo(arrayBuffer, &data, &length);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->ArrayBuffer_GetInfo(arrayBuffer, &data, &length);
+    ASSERT_EQ(status, ANI_OK);
     // data is accepted to be an arbitrary pointer even on zero length
     ASSERT_EQ(length, 0);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedCreateWithLength)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", TWENTY_FOUR);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     void *data = nullptr;
     size_t length = 0;
-    auto status = env_->ArrayBufferGetInfo(arrayBuffer, &data, &length);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->ArrayBuffer_GetInfo(arrayBuffer, &data, &length);
+    ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(data, nullptr);
     ASSERT_EQ(length, TWENTY_FOUR);
 }
@@ -281,9 +281,9 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedCreateWithLength)
 /// @brief Creates ArrayBuffer in managed code and tests its `at` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedGet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", TWENTY_FOUR);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     ArrayBufferAtTest(arrayBuffer);
 }
@@ -291,65 +291,65 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedGet)
 /// @brief Creates ArrayBuffer in managed code and tests its `set` method
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedSet)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", TWENTY_FOUR);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     ArrayBufferSetTest(arrayBuffer);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetachEmpty)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", 0);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     bool result = false;
-    auto status = env_->ArrayBufferIsDetached(arrayBuffer, &result);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(status, false);
 
-    auto status1 = env_->ArrayBufferDetach(arrayBuffer);
-    ASSERT_EQ(status1, ETS_DETACHABLE_ARRAYBUFFER_EXPECTED);
+    auto status1 = ArrayBufferDetach(env_, arrayBuffer);
+    ASSERT_EQ(status1, ANI_INVALID_ARGS);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetach)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", TWENTY_FOUR);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_FALSE);
+    CheckUnhandledError(env_);
 
     bool result = false;
-    auto status = env_->ArrayBufferIsDetached(arrayBuffer, &result);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ASSERT_EQ(status, ANI_OK);
     ASSERT_EQ(status, false);
 
-    auto status1 = env_->ArrayBufferDetach(arrayBuffer);
-    ASSERT_EQ(status1, ETS_DETACHABLE_ARRAYBUFFER_EXPECTED);
+    auto status1 = ArrayBufferDetach(env_, arrayBuffer);
+    ASSERT_EQ(status1, ANI_INVALID_ARGS);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedInvalid)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
 
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", -TWENTY_FOUR);
-    ASSERT_EQ(env_->ErrorCheck(), ETS_TRUE);
-    env_->ErrorClear();
+    CheckUnhandledError(env_, ANI_TRUE);
+    env_->ResetError();
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferGetInvalidArgs)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     void *data = nullptr;
-    auto status = env_->ArrayBufferCreate(TWENTY_FOUR, &data, &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(TWENTY_FOUR, &data, &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
     ArrayBufferAtInvalidIndexTest(arrayBuffer);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalGetInvalidArgs)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<TWENTY_FOUR>(env_, &arrayBuffer);
 
     ArrayBufferAtInvalidIndexTest(arrayBuffer);
@@ -357,17 +357,17 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalGetInvalidArgs)
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferSetInvalidArgs)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     void *data = nullptr;
-    auto status = env_->ArrayBufferCreate(TWENTY_FOUR, &data, &arrayBuffer);
-    ASSERT_EQ(status, ETS_OKAY);
+    auto status = env_->CreateArrayBuffer(TWENTY_FOUR, &data, &arrayBuffer);
+    ASSERT_EQ(status, ANI_OK);
 
     ArrayBufferSetInvalidIndexTest(arrayBuffer);
 }
 
 TEST_F(ArrayBufferNativeManagedTest, ArrayBufferExternalSetInvalidArgs)
 {
-    ets_arraybuffer arrayBuffer = nullptr;
+    ani_arraybuffer arrayBuffer = nullptr;
     CreateExternalArrayBuffer<TWENTY_FOUR>(env_, &arrayBuffer);
 
     ArrayBufferSetInvalidIndexTest(arrayBuffer);

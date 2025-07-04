@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 namespace ark::ets::test {
 
@@ -38,33 +38,34 @@ protected:
 
     void SetUp() override
     {
-        std::vector<EtsVMOption> optionsVector;
+        const char *stdlib = std::getenv("PANDA_STD_LIB");
+        ASSERT_NE(stdlib, nullptr);
 
-        optionsVector = {{EtsOptionType::ETS_GC_TYPE, "epsilon"},
-                         {EtsOptionType::ETS_NO_JIT, nullptr},
-                         {EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")}};
+        // Create boot-panda-files options
+        std::string bootFileString = "--ext:boot-panda-files=" + std::string(stdlib);
 
-        if (testBinFileName_ != nullptr) {
-            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, testBinFileName_});
-        }
+        // clang-format off
+        std::vector<ani_option> optionsVector{
+            {bootFileString.data(), nullptr},
+            {"--ext:gc-type=epsilon", nullptr},
+            {"--ext:compiler-enable-jit=false", nullptr},
+        };
+        // clang-format on
+        ani_options optionsPtr = {optionsVector.size(), optionsVector.data()};
 
-        EtsVMInitArgs vmArgs;
-        vmArgs.version = ETS_NAPI_VERSION_1_0;
-        vmArgs.options = optionsVector.data();
-        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
-
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_), ANI_OK) << "Cannot create ETS VM";
+        ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env_), ANI_OK) << "Cannot get ani env";
     }
 
     void TearDown() override
     {
-        ASSERT_TRUE(vm_->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
+        ASSERT_EQ(vm_->DestroyVM(), ANI_OK) << "Cannot destroy ETS VM";
     }
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     const char *testBinFileName_ {nullptr};
-    EtsEnv *env_ {nullptr};
-    EtsVM *vm_ {nullptr};
+    ani_env *env_ {nullptr};
+    ani_vm *vm_ {nullptr};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 

@@ -95,7 +95,7 @@ static PandaVector<uint8_t> ConvertEtsStringToBytes(EtsString *strObj, EtsString
 }
 
 /// @brief Calculates byte length of string when encoded
-extern "C" ets_int EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj)
+extern "C" EtsInt EtsStringBytesLength(EtsString *strObj, EtsString *encodingObj)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -158,8 +158,8 @@ extern "C" EtsLong EtsEscompatArrayBufferGetAddress(ObjectHeader *byteArray)
 }
 
 /// @brief Creates new ArrayBuffer from slice of existing buffer
-extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArrayBuffer *obj, ets_int offset,
-                                                                 ets_int length)
+extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArrayBuffer *obj, EtsInt offset,
+                                                                 EtsInt length)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -200,8 +200,8 @@ extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromBufferSlice(EtsEscompatArra
  * This function validates the input buffer and indices, extracts the requested bytes,
  * determines the encoding, and then converts the byte sequence into the desired string.
  */
-extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, EtsString *encodingObj, ets_int start,
-                                             ets_int end)
+extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, EtsString *encodingObj, EtsInt start,
+                                             EtsInt end)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);

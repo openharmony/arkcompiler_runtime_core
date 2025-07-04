@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ class LibAbcKitArrayStaticTest : public ::testing::Test {};
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWide)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array_wide.abc",
-                                            "store_array_wide/ETSGLOBAL", "main");
+                                            "store_array_wide", "main");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array_wide.abc",
@@ -99,15 +99,15 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWide)
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array_wide_modified.abc",
-                                       "store_array_wide/ETSGLOBAL", "main");
+                                       "store_array_wide", "main");
     EXPECT_TRUE(helpers::Match(output, "4\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArrayWide, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWideNeg)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
-                                            "store_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc", "store_array", "main");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
@@ -132,8 +132,8 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayWideNeg)
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArray)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
-                                            "store_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc", "store_array", "main");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
@@ -154,15 +154,15 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArray)
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array_modified.abc",
-                                       "store_array/ETSGLOBAL", "main");
+                                       "store_array", "main");
     EXPECT_TRUE(helpers::Match(output, "4\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayNeg)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
-                                            "store_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc", "store_array", "main");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/store_array.abc",
@@ -187,8 +187,8 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestStoreArrayNeg)
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArray)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc",
-                                            "load_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc", "load_array", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc",
@@ -216,16 +216,16 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArray)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array_modified.abc",
-                                       "load_array/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array_modified.abc", "load_array",
+                                       "main");
     EXPECT_TRUE(helpers::Match(output, "2\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArrayNeg)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc",
-                                            "load_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc", "load_array", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_array.abc",
@@ -249,8 +249,8 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadArrayNeg)
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArray)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc",
-                                            "len_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc", "len_array", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc",
@@ -272,16 +272,16 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArray)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array_modified.abc",
-                                       "len_array/ETSGLOBAL", "main");
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array_modified.abc", "len_array",
+                                       "main");
     EXPECT_TRUE(helpers::Match(output, "4\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArrayNeg)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc",
-                                            "len_array/ETSGLOBAL", "main");
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc", "len_array", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/len_array.abc",
@@ -300,7 +300,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLenArrayNeg)
 TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadConstArray)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array.abc",
-                                            "load_const_array/ETSGLOBAL", "main");
+                                            "load_const_array", "main");
     EXPECT_TRUE(helpers::Match(output, "1\n"));
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array.abc",
@@ -330,7 +330,7 @@ TEST_F(LibAbcKitArrayStaticTest, LibAbcKitTestLoadConstArray)
         },
         []([[maybe_unused]] AbckitGraph *graph) {});
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/arrays/load_const_array_modified.abc",
-                                       "load_const_array/ETSGLOBAL", "main");
+                                       "load_const_array", "main");
     EXPECT_TRUE(helpers::Match(output, "4\n"));
 }
 

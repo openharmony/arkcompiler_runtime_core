@@ -69,7 +69,7 @@ class AbckitScenarioTest : public ::testing::Test {};
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticParameterCheck)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/parameter_check/parameter_check_static.abc",
-                                            "parameter_check_static/ETSGLOBAL", "main");
+                                            "parameter_check_static", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "buisiness logic...\n"
                                "1\n"
@@ -87,7 +87,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticParameterCheck)
         []([[maybe_unused]] AbckitGraph *graph) {});
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/parameter_check/parameter_check_static_modified.abc",
-                                       "parameter_check_static/ETSGLOBAL", "main");
+                                       "parameter_check_static", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "buisiness logic...\n"
                                "1\n"
