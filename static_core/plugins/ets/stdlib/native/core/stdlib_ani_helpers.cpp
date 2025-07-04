@@ -14,7 +14,7 @@
  */
 
 #include "stdlib_ani_helpers.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ets::stdlib {
 

@@ -18,11 +18,11 @@
 
 #include "aot_file.h"
 #include "libarkfile/file.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/method.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 
 namespace ark::compiler {
 class RuntimeInterface;

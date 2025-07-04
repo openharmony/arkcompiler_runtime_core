@@ -15,7 +15,7 @@
 
 #ifndef PANDA_PLUGINS_ETS_TOOLS_FORMAT_LOGGER_H
 #define PANDA_PLUGINS_ETS_TOOLS_FORMAT_LOGGER_H
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include <securec.h>
 
 namespace ark {

@@ -16,9 +16,9 @@
 #ifndef LIBPANDAFILE_FILE_H_
 #define LIBPANDAFILE_FILE_H_
 
-#include "os/mem.h"
-#include "utils/span.h"
-#include "utils/utf.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
 #include <cstdint>
 
 #include <array>

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ set_c_compiler(clang-14)
 set_cxx_compiler(clang++-14)
 
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT=1)
-add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libarkfile/,/libpandabase/")
+add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libarkfile/,/libarkbase/")
 add_definitions(-DFUZZING_FUZZILLI_BUILTIN=1)
 
 set(PANDA_BUILD_FUZZ_TARGETS false)

@@ -21,7 +21,7 @@ At the current moment it has following segments and sections layout:
 
 - `.hash`, `.dynstr`, `.dynsym`, `.dynamic` - Standard ELF sections.
 - `.text` - Contains compiled native code. Code of each compiled method is placed sequentially into this section with
-special alignment, mostly it is 16 bytes (see `CODE_ALIGNMENT` in `libpandabase/utils/arch.h` file).
+special alignment, mostly it is 16 bytes (see `CODE_ALIGNMENT` in `libarkbase/utils/arch.h` file).
 - `.aot_got` - Contains table of the runtime's entrypoint handlers. Must be placed right before `.text` section.
 - `.aot` - Contains all information that describes AOT structure. All used structures can be found at
 `compiler/aot/aot_headers.h`.

@@ -18,8 +18,8 @@
 
 #include <cstdint>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/object_pointer.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/object_pointer.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/coroutines/coroutine.h"

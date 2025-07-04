@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "objects/string/base_string-inl.h"
 #include "objects/string/line_string-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "objects/base_class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/exceptions.h"

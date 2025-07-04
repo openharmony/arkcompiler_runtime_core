@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 #ifndef GC_SCOPED_PHASE_H
 #define GC_SCOPED_PHASE_H
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/mem_stats_additional_info.h"

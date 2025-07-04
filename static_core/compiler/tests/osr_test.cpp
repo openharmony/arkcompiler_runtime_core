@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
 #include "code_info/code_info_builder.h"
 #include "codegen.h"
 #include "panda_runner.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include <fstream>
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::test {
 class OsrTest : public testing::Test {

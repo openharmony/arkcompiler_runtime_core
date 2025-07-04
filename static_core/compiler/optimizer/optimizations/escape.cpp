@@ -18,8 +18,8 @@
 #include <iostream>
 #include <utility>
 #include <variant>
-#include "macros.h"
-#include "mem/arena_allocator.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/escape.h"

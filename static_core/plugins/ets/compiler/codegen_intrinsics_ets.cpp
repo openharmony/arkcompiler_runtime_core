@@ -17,7 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"
-#include "utils/regmask.h"
+#include "libarkbase/utils/regmask.h"
 
 namespace ark::compiler {
 

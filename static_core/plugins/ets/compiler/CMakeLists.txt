@@ -42,7 +42,7 @@ if (PANDA_ETS_INTEROP_JS)
       DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
       TEMPLATE ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/interop_intrinsic_kinds.h.erb
       API ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb
-      REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+      REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
       EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
       OUTPUTFILE ${INTEROP_INTRINSIC_KINDS_H}
   )

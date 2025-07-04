@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 #define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"
 #include "runtime/class_linker_context.h"

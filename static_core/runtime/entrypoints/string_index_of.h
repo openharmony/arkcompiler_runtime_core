@@ -17,7 +17,7 @@
 
 #include <cstdint>
 #include <type_traits>
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/handle_scope-inl.h"

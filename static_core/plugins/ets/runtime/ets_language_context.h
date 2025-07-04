@@ -18,8 +18,8 @@
 
 #include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/class_initializer.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"

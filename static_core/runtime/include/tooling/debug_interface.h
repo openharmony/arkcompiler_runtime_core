@@ -22,8 +22,8 @@
 #include <string_view>
 #include <vector>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/expected.h"
 #include "libarkfile/file.h"
 #include "runtime/include/console_call_type.h"
 #include "runtime/include/coretypes/tagged_value.h"

@@ -14,7 +14,7 @@
  */
 
 #include <cstdint>
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "compiler_logger.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"

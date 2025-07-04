@@ -14,8 +14,8 @@
  */
 
 #include "include/coretypes/string.h"
-#include "libpandabase/utils/utils.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -27,7 +27,7 @@
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
-#include "utils/math_helpers.h"
+#include "libarkbase/utils/math_helpers.h"
 #include <cstdint>
 #include <cmath>
 

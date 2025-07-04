@@ -18,9 +18,9 @@
 #include <gtest/gtest.h>
 
 #include "assembly-parser.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
 #include "libarkfile/bytecode_emitter.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"
@@ -46,8 +46,8 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/tests/test_utils.h"
-#include "libpandabase/test_utilities.h"
-#include "utils/utils.h"
+#include "libarkbase/test_utilities.h"
+#include "libarkbase/utils/utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 

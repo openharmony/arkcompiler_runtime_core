@@ -15,10 +15,10 @@
 #ifndef LIBPANDAFILE_FILE_WRITER_H_
 #define LIBPANDAFILE_FILE_WRITER_H_
 
-#include "os/file.h"
-#include "utils/span.h"
-#include "utils/type_helpers.h"
-#include "utils/leb128.h"
+#include "libarkbase/os/file.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/type_helpers.h"
+#include "libarkbase/utils/leb128.h"
 #include "securec.h"
 
 #include <cstdint>

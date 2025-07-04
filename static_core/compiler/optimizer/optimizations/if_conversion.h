@@ -17,7 +17,7 @@
 #define COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H
 
 #include "optimizer/ir/graph.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class BasicBlock;

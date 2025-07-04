@@ -18,8 +18,8 @@
 
 #include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/macros.h"
-#include "os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"

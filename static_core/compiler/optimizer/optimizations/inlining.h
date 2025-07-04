@@ -21,7 +21,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "compiler_options.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage,-warnings-as-errors)
 #define LOG_INLINING(level) COMPILER_LOG(level, INLINING) << GetLogIndent()

@@ -18,7 +18,7 @@ Encoder (implementation of math and mem Low-level emitters)
 
 #include <iomanip>
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 #include "compiler/optimizer/code_generator/fast_divisor.h"
 #include "operands.h"

@@ -18,7 +18,7 @@
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class PANDA_PUBLIC_API BranchElimination : public Optimization {

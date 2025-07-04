@@ -16,9 +16,9 @@
 #include "libarkfile/bytecode_emitter.h"
 #include "libarkfile/bytecode_instruction-inl.h"
 
-#include <macros.h>
-#include <utils/bit_utils.h>
-#include <utils/span.h>
+#include <libarkbase/macros.h>
+#include <libarkbase/utils/bit_utils.h>
+#include <libarkbase/utils/span.h>
 
 namespace ark {
 

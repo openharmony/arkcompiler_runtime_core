@@ -15,10 +15,10 @@
 
 #include <gtest/gtest.h>
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/class_linker_extension.h"

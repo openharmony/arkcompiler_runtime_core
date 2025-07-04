@@ -18,8 +18,8 @@
 
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 
-#include "libpandabase/taskmanager/task.h"
-#include "libpandabase/taskmanager/utils/wait_list.h"
+#include "libarkbase/taskmanager/task.h"
+#include "libarkbase/taskmanager/utils/wait_list.h"
 
 namespace ark::mem {
 

@@ -21,7 +21,7 @@
 #include <queue>
 
 #include "runtime/include/external_callback_poster.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark {

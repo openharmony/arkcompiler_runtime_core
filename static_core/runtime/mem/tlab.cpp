@@ -15,7 +15,7 @@
 
 #include "runtime/mem/tlab.h"
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/mem/object_helpers.h"
 
 namespace ark::mem {

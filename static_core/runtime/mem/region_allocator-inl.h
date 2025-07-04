@@ -15,8 +15,8 @@
 #ifndef PANDA_RUNTIME_MEM_REGION_ALLOCATOR_INL_H
 #define PANDA_RUNTIME_MEM_REGION_ALLOCATOR_INL_H
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/gc_task.h"
@@ -26,7 +26,7 @@
 #include "runtime/mem/freelist_allocator-inl.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/arch/memory_helpers.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::mem {
 

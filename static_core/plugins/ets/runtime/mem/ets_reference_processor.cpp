@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/object_helpers.h"

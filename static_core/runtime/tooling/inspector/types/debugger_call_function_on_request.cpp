@@ -14,7 +14,7 @@
  */
 
 #include "types/debugger_call_function_on_request.h"
-#include "utils/json_parser.h"
+#include "libarkbase/utils/json_parser.h"
 
 #include "types/numeric_id.h"
 

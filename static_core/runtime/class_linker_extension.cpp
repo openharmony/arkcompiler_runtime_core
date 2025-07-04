@@ -15,7 +15,7 @@
 
 #include "runtime/include/class_linker_extension.h"
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/class.h"

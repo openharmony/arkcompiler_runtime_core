@@ -21,10 +21,10 @@
 #include <vector>
 
 #include "debugger/breakpoint.h"
-#include "macros.h"
-#include "os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include "error.h"
 #include "evaluation/base64.h"

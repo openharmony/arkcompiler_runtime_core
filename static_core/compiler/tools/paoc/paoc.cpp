@@ -21,13 +21,13 @@
 #include "compiler_options.h"
 #include "compiler_events_gen.h"
 #include "compiler_logger.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "include/runtime.h"
 #include "mem/gc/gc_types.h"
 #include "optimizer_run.h"
 #include "optimizer/ir_builder/ir_builder.h"
-#include "os/filesystem.h"
-#include "generated/logger_options.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
 #include "paoc.h"
 #ifdef PANDA_LLVM_AOT

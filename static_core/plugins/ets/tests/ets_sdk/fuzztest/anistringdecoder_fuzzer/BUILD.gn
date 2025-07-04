@@ -28,7 +28,7 @@ ohos_fuzztest("AniStringDecoderFuzzTest") {
     "$ark_root/plugins/ets/stdlib/native",
     "$ark_root/plugins/ets/runtime/ani",
     "$ark_root/plugins/ets/sdk/native",
-    "$ark_root/libpandabase",
+    "$ark_root/libarkbase",
   ]
 
   configs = [ "$ark_root:ark_config" ]

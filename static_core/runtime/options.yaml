@@ -181,7 +181,7 @@ options:
     - events
     - scheduler
     - coroutines
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   delimiter: ":"
   deprecated: true
 
@@ -446,7 +446,7 @@ options:
   - warning
   - error
   - fatal
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-stream
@@ -457,13 +457,13 @@ options:
   - file
   - fast-file
   - dummy
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-file
   type: std::string
   default: ""
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: gc-enable-tracing

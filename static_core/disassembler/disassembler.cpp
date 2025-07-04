@@ -19,7 +19,7 @@
 #include "libarkfile/type_helper.h"
 #include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include <cstdint>
 #include <iomanip>

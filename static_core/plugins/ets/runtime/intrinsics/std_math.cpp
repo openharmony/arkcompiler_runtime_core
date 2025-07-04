@@ -20,8 +20,8 @@
 #include <random>
 #include <cmath>
 
-#include "libpandabase/utils/bit_utils.h"
-#include "macros.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 

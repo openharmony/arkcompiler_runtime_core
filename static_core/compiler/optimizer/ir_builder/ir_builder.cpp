@@ -16,7 +16,7 @@
 #include "libarkfile/file_items.h"
 #include "ir_builder.h"
 #include "compiler_logger.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "pbc_iterator.h"

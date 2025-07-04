@@ -15,7 +15,7 @@
 
 #include "ark_guard/ark_guard.h"
 
-#include "static_core/libpandabase/utils/logger.h"
+#include "static_core/libarkbase/utils/logger.h"
 
 #include "abckit_wrapper/file_view.h"
 

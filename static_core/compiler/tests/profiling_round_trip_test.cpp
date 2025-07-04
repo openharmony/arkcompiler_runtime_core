@@ -20,7 +20,7 @@
 #include "jit/profiling_data.h"
 #include "gmock/gmock.h"
 #include "panda_runner.h"
-#include "utils/string_helpers.h"
+#include "libarkbase/utils/string_helpers.h"
 #include "runtime/jit/profiling_saver.h"
 #include "runtime/jit/profiling_loader.h"
 

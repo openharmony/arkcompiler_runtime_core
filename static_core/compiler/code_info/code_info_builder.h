@@ -17,8 +17,8 @@
 #define PANDA_CODE_INFO_BUILDER_H
 
 #include "code_info.h"
-#include "utils/arena_containers.h"
-#include "utils/bit_vector.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/bit_vector.h"
 
 namespace ark::compiler {
 

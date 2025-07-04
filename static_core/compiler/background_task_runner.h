@@ -18,10 +18,10 @@
 
 #include <memory>
 
-#include "libpandabase/task_runner.h"
-#include "libpandabase/taskmanager/task.h"
-#include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/mem/arena_allocator.h"
+#include "libarkbase/task_runner.h"
+#include "libarkbase/taskmanager/task.h"
+#include "libarkbase/taskmanager/task_queue.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "compiler/optimizer/pipeline.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "runtime/include/compiler_interface.h"

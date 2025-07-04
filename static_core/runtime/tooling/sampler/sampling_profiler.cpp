@@ -17,8 +17,8 @@
 #include <atomic>
 
 #include "coroutines/coroutine_stats.h"
-#include "libpandabase/macros.h"
-#include "os/thread.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/thread.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/thread_manager.h"

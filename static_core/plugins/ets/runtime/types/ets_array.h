@@ -15,8 +15,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/space.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/space.h"
 #include "runtime/include/coretypes/array.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"

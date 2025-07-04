@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +17,16 @@
 
 #include <vector>
 
-#include "libpandabase/concepts.h"
-#include "libpandabase/mem/mmap_mem_pool-inl.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/concepts.h"
+#include "libarkbase/mem/mmap_mem_pool-inl.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/mem/freelist_allocator.h"
 #include "runtime/mem/humongous_obj_allocator.h"
 #include "runtime/mem/runslots_allocator.h"
 
 #ifdef TRACK_INTERNAL_ALLOCATIONS
-#include "libpandabase/mem/alloc_tracker.h"
+#include "libarkbase/mem/alloc_tracker.h"
 #endif  // TRACK_INTERNAL_ALLOCATIONS
 
 namespace ark::mem {

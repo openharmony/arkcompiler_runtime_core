@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_STDLIB_ANI_HELPERS_H
 
 #include <ani.h>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 // This functions must be moved from stdlib. #23681
 namespace ark::ets::stdlib {

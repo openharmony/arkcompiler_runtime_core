@@ -21,7 +21,7 @@
 #include "runtime/include/coretypes/dyn_objects.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::coretypes {
 

@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "generated/logger_options.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ani/ani.h"
 

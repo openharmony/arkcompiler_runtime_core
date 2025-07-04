@@ -15,7 +15,7 @@
 
 #include <atomic>
 #include <thread>
-#include "libpandabase/os/time.h"
+#include "libarkbase/os/time.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/include/runtime.h"

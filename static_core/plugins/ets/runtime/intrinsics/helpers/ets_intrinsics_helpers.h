@@ -20,8 +20,8 @@
 #include <cmath>
 #include <cstdint>
 #include <type_traits>
-#include "libpandabase/utils/bit_helpers.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/bit_helpers.h"
+#include "libarkbase/utils/utils.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"

@@ -355,10 +355,8 @@ panda_target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_ROOT}/../common_interfaces
@@ -619,12 +617,10 @@ panda_target_include_directories(csa_tests_arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_ROOT}/../common_interfaces
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
 )
@@ -671,10 +667,8 @@ if(PANDA_WITH_TESTS)
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/../common_interfaces
     )

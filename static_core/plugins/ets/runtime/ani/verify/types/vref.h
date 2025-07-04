@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
 
 namespace ark::ets::ani::verify {

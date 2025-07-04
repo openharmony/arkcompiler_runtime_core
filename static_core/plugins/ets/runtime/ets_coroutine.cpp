@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/include/value.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "mem/refstorage/reference.h"
 #include "runtime/include/object_header.h"
 #include "plugins/ets/runtime/types/ets_promise.h"

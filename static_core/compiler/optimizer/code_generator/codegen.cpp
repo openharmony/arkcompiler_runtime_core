@@ -29,10 +29,10 @@ Codegen Hi-Level implementation
 #include "compiler/optimizer/ir/locations.h"
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/code_generator/method_properties.h"
-#include "events/events.h"
-#include "libpandabase/utils/tsan_interface.h"
-#include "libpandabase/utils/utils.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/events/events.h"
+#include "libarkbase/utils/tsan_interface.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 #include <iomanip>
 

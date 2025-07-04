@@ -17,7 +17,7 @@
 
 #include "include/object_header.h"
 #include "libarkfile/file_items.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/runtime.h"

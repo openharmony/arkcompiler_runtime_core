@@ -14,10 +14,10 @@
  */
 
 #include "runtime/mem/heap_space.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/mem/mmap_mem_pool-inl.h"
-#include "libpandabase/mem/mem_pool.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/mem/mmap_mem_pool-inl.h"
+#include "libarkbase/mem/mem_pool.h"
 
 namespace ark::mem {
 

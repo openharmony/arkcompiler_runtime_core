@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_INL_H
 
 #include "runtime/global_handle_storage.h"
-#include "libpandabase/trace/trace.h"
+#include "libarkbase/trace/trace.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
 

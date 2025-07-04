@@ -19,8 +19,8 @@
 #include <atomic>
 #include <cstdint>
 #include <limits>
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark::ets {
 

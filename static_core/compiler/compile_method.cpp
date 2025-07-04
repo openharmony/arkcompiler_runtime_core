@@ -15,8 +15,8 @@
 
 #include "optimizer_run.h"
 #include "compile_method.h"
-#include "mem/pool_manager.h"
-#include "mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/mem/code_allocator.h"
 #include "include/class.h"
 #include "include/method.h"
 #include "optimizer/ir/ir_constructor.h"
@@ -24,13 +24,13 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/pass.h"
 #include "optimizer/ir_builder/ir_builder.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "code_info/code_info.h"
-#include "events/events.h"
-#include "trace/trace.h"
+#include "libarkbase/events/events.h"
+#include "libarkbase/trace/trace.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::compiler {
 

@@ -17,7 +17,7 @@
 #include <cstddef>
 #include "compiler_logger.h"
 #include "compiler_options.h"
-#include "events_gen.h"
+#include "libarkbase/generated/events_gen.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir_builder/ir_builder.h"
@@ -32,7 +32,7 @@
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "runtime/include/class.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 
 namespace ark::compiler {
 using MethodPtr = RuntimeInterface::MethodPtr;

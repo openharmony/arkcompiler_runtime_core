@@ -39,8 +39,8 @@ Codegen interface for compiler
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/optimizations/regalloc/spill_fills_resolver.h"
 #include "optimizer/pass_manager.h"
-#include "utils/arena_containers.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/cframe_layout.h"
 
 namespace ark::compiler {
 // Maximum size in bytes

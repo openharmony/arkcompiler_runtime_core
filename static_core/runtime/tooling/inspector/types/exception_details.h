@@ -20,7 +20,7 @@
 #include <optional>
 #include <string>
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "types/numeric_id.h"
 #include "types/remote_object.h"
 

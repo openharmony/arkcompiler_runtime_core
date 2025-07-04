@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,8 @@
 #include "include/method.h"
 #include "include/tooling/debug_interface.h"
 #include "include/tooling/pt_thread.h"
-#include "macros.h"
-#include "utils/list.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/list.h"
 
 // NOLINTBEGIN
 

@@ -29,7 +29,7 @@ Dir.glob("#{ARGV[1]}/*values_gen.h").each do |values_h|
 end
 $header += "\n"
 $header += "#include <cstddef>\n"
-$header += "#include \"libpandabase/utils/arch.h\"\n"
+$header += "#include \"libarkbase/utils/arch.h\"\n"
 $header += "#include \"runtime/entrypoints/entrypoints.h\"\n\n"
 
 def generate(input_file, output_file)

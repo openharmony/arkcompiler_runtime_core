@@ -31,7 +31,7 @@
 #include "ide_helpers.h"
 #include "lexer.h"
 #include "meta.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 
 namespace ark::pandasm {
 

@@ -17,7 +17,7 @@
 #define PANDA_INST_BUILDER_INL_H
 
 #include "inst_builder.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "optimizer/code_generator/encode.h"
 #include "runtime/include/coretypes/string.h"
 

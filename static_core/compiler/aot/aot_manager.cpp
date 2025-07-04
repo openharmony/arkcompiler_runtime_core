@@ -14,8 +14,8 @@
  */
 
 #include "aot_manager.h"
-#include "os/filesystem.h"
-#include "events/events.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/events/events.h"
 
 namespace ark::compiler {
 class RuntimeInterface;

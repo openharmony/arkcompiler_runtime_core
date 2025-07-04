@@ -28,7 +28,7 @@
 #include "types/ets_object.h"
 #include "ets_vm.h"
 #include "ets_class_linker_extension.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::ets::test {
 

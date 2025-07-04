@@ -15,7 +15,7 @@
 
 #include "runtime/mem/gc/g1/update_remset_thread.h"
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/language_config.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/g1/update_remset_worker.h"

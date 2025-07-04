@@ -18,7 +18,7 @@
 
 #include "tooling/inspector/json_serialization/serializable.h"
 
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 
 #include "types/location.h"
 

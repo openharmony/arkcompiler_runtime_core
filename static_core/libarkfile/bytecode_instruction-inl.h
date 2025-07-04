@@ -17,7 +17,7 @@
 #define LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
 
 #include "libarkfile/bytecode_instruction.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 

@@ -15,7 +15,7 @@
 
 #include "libarkfile/external/file_ext.h"
 #include "libarkfile/external/panda_file_external.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include <dlfcn.h>
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/code_data_accessor-inl.h"

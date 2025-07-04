@@ -15,7 +15,7 @@
 #include "compilation.h"
 #include "compiler_options.h"
 #include "irtoc_options.h"
-#include "generated/logger_options.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
 namespace ark::irtoc {
 

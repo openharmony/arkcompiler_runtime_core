@@ -18,7 +18,7 @@
 #include "libarkfile/line_number_program.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/debug_data_accessor-inl.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::panda_file {
 DebugInfoExtractor::DebugInfoExtractor(const File *pf)

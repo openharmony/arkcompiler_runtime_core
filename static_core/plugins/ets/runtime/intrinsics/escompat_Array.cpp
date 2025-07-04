@@ -20,15 +20,15 @@
 #include "runtime/include/coretypes/string.h"
 #include "intrinsics.h"
 #include "interpreter/runtime_interface.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::ets::intrinsics {
 

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ENV_ANI_VERIFIER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ENV_ANI_VERIFIER_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "runtime/include/mem/panda_containers.h"

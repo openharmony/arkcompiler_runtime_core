@@ -16,8 +16,8 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 
 #include "plugins/ets/runtime/ets_vm.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/param_annotations_data_accessor.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"

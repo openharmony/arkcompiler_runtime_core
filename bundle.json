@@ -172,17 +172,17 @@
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libarktsbase",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandabase"
+                        "header_base": "//arkcompiler/runtime_core/static_core/libarkbase"
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase_package",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libarktsbase_package",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandabase"
+                        "header_base": "//arkcompiler/runtime_core/static_core"
                     }
                 },
                 {
@@ -285,7 +285,7 @@
                     "name": "//arkcompiler/runtime_core/static_core/bytecode_optimizer:bytecode_optimizer_headers"
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libpandabase_headers"
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libpandabase_headers"
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/libarkfile:libpandafile_headers"

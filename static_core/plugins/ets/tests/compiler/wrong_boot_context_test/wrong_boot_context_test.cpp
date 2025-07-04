@@ -16,8 +16,8 @@
 #include <cstdlib>
 #include "compiler_gtest.h"
 #include "gtest/gtest.h"
-#include "os/file.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/os/file.h"
+#include "libarkbase/test_utilities.h"
 
 namespace ark::ets::compiler::testing {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 #ifndef PANDA_RUNTIME_ARCH_HELPERS_H_
 #define PANDA_RUNTIME_ARCH_HELPERS_H_
 
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/include/value.h"
 #include "runtime/include/mem/panda_containers.h"
 

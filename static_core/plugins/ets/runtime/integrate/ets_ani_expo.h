@@ -29,10 +29,15 @@
 #include <vector>
 #include <ani.h>
 
-#include "libpandabase/macros.h"
+#ifndef PANDA_TARGET_WINDOWS
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PANDA_ETS_ANI_EXPO_PUBLIC_API __attribute__((visibility("default")))
+#else
+#define PANDA_ETS_ANI_EXPO_PUBLIC_API __declspec(dllexport)
+#endif
 
 namespace ark::ets {
-class PANDA_PUBLIC_API ETSAni {
+class PANDA_ETS_ANI_EXPO_PUBLIC_API ETSAni {
 public:
     static constexpr std::string_view AOT_FILE_OPTION_PREFIX = "--ext:--aot-file=";
     static constexpr std::string_view INTEROP_OPTION_PREFIX = "--ext:interop";

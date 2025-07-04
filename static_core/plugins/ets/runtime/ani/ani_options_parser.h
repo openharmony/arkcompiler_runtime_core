@@ -17,9 +17,9 @@
 
 #include "ani.h"
 
-#include "generated/logger_options.h"
-#include "libpandabase/utils/pandargs.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/utils/span.h"
 #include "plugins/ets/runtime/ani/ani_options.h"
 #include "runtime/include/runtime_options.h"
 

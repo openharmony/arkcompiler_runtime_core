@@ -163,7 +163,7 @@ if (!(ark_standalone_build ||
       icuuc_dep,
     ]
     deps = [
-      "$ark_root/libpandabase:libarktsbase_static",
+      "$ark_root/libarkbase:libarktsbase_static",
       "$ark_root/plugins/ets/runtime/ani:ani",
     ]
     subsystem_name = "arkcompiler"

@@ -22,8 +22,8 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "utils/bit_helpers.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/bit_helpers.h"
+#include "libarkbase/utils/utils.h"
 
 #if !PANDA_TARGET_WINDOWS
 #include "securec.h"

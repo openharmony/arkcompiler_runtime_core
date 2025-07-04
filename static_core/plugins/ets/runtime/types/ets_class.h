@@ -21,7 +21,7 @@
 #include "include/mem/panda_string.h"
 #include "include/object_header.h"
 #include "include/runtime.h"
-#include "libpandabase/mem/object_pointer.h"
+#include "libarkbase/mem/object_pointer.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/thread.h"
@@ -30,7 +30,7 @@
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_method_signature.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::ets {
 

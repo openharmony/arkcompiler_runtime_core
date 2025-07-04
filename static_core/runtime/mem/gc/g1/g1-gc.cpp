@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/mem/space.h"
+#include "libarkbase/mem/space.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_string.h"

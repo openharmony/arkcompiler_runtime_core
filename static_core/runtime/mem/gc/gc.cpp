@@ -15,11 +15,11 @@
 
 #include <memory>
 
-#include "libpandabase/os/cpu_affinity.h"
-#include "libpandabase/os/mem.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/time.h"
-#include "libpandabase/taskmanager/task_manager.h"
+#include "libarkbase/os/cpu_affinity.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/taskmanager/task_manager.h"
 #include "runtime/assert_gc_scope.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/dyn_objects.h"
@@ -46,7 +46,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/thread_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
-#include "utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::mem {
 using TaggedValue = coretypes::TaggedValue;

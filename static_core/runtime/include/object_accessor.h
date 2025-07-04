@@ -17,7 +17,7 @@
 
 #include <cstddef>
 
-#include "libpandabase/utils/atomic.h"
+#include "libarkbase/utils/atomic.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 

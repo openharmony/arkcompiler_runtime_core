@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <array>
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/tests/test_utils.h"

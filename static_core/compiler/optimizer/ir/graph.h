@@ -23,7 +23,7 @@
 #include "marker.h"
 #include "optimizer/code_generator/method_properties.h"
 #include "optimizer/pass_manager.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 #include <optional>
 

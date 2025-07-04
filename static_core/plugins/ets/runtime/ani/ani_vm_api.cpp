@@ -18,14 +18,14 @@
 #include "ani_options.h"
 #include "compiler/compiler_logger.h"
 #include "compiler/compiler_options.h"
-#include "generated/logger_options.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
-#include "utils/logger.h"
-#include "utils/pandargs.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/pandargs.h"
 
 // CC-OFFNXT(huge_method[C++]) solid logic
 extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result)

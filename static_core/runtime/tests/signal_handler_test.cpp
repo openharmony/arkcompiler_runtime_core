@@ -23,9 +23,9 @@
 #include "libarkfile/value.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utils.h"
-#include "os/thread.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/os/thread.h"
 #include "runtime/include/managed_thread.h"
 #include <sys/syscall.h>
 #include "assembly-parser.h"

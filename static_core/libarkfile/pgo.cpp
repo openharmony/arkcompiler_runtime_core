@@ -14,7 +14,7 @@
  */
 
 #include "libarkfile/pgo.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::panda_file::pgo {
 

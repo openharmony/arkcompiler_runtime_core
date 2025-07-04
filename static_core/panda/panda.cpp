@@ -19,20 +19,20 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/method-inl.h"
 #include "runtime/include/class.h"
-#include "utils/pandargs.h"
+#include "libarkbase/utils/pandargs.h"
 #include "compiler/compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "compiler_events_gen.h"
 #include "mem/mem_stats.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/os/native_stack.h"
-#include "generated/logger_options.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
-#include "ark_version.h"
+#include "libarkbase/generated/ark_version.h"
 
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include <limits>
 #include <iostream>

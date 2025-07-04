@@ -18,7 +18,7 @@
 
 #include "libarkfile/file.h"
 
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::panda_file {
 

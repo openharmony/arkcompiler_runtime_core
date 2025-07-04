@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_MANAGER_H
 #define PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_MANAGER_H
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/priority_queue.h"

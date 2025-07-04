@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include <array>
 
 #include "compiler/code_info/code_info.h"
-#include "libpandabase/utils/cframe_layout.h"
+#include "libarkbase/utils/cframe_layout.h"
 #include "runtime/interpreter/frame.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 namespace ark {
 
 namespace compiler {

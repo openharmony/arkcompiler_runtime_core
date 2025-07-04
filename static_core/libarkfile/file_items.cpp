@@ -14,10 +14,10 @@
  */
 
 #include "libarkfile/file_items.h"
-#include "macros.h"
-#include "utils/bit_utils.h"
-#include "utils/leb128.h"
-#include "utils/utf.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/leb128.h"
+#include "libarkbase/utils/utf.h"
 
 #include <iomanip>
 

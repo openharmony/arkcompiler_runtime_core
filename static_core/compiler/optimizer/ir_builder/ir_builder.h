@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/pass.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "pbc_iterator.h"
 #include "inst_builder.h"
 

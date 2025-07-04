@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 #include <string_view>
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/interop_js/timer_module.h"

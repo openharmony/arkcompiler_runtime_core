@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "optimizer/optimizations/const_folding.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/code_generator/codegen.h"

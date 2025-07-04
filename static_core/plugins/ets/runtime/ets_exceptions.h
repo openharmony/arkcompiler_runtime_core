@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_
 
 #include <string_view>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "runtime/include/mem/panda_string.h"
 

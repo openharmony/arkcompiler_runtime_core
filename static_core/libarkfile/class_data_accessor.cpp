@@ -16,8 +16,8 @@
 #include "libarkfile/class_data_accessor.h"
 #include "libarkfile/helpers.h"
 
-#include "utils/leb128.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/leb128.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::panda_file {
 

@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_APP_STATE_MANAGER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_APP_STATE_MANAGER_H
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/app_state.h"
 
 namespace ark::ets {

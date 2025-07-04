@@ -17,7 +17,7 @@
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlLanguageTag.h"
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "unicode/locid.h"
 #include "unicode/localebuilder.h"
 #include "unicode/localematcher.h"

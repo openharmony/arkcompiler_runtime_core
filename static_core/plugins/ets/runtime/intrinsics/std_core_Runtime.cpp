@@ -15,7 +15,7 @@
 
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"

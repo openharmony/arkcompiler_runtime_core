@@ -22,9 +22,9 @@
 #include <vector>
 
 #include "compiler/aot/aot_manager.h"
-#include "libpandabase/mem/arena_allocator.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"

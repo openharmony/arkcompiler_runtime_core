@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/region_space.h"
-#include "libpandabase/utils/type_converter.h"
+#include "libarkbase/utils/type_converter.h"
 #include "runtime/mem/object-references-iterator-inl.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 

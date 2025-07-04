@@ -19,7 +19,7 @@
 #include "alias_visitor.h"
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/pass.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class BasicBlock;

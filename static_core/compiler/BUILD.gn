@@ -231,7 +231,7 @@ if (abckit_enable) {
 libarkcompiler_configs = [
   ":arkcompiler_public_config",
   "$ark_root:ark_config",
-  "$ark_root/libpandabase:arkbase_public_config",
+  "$ark_root/libarkbase:arkbase_public_config",
   "$ark_root/libarkfile:arkfile_public_config",
   "$ark_root/runtime:arkruntime_public_config",
 ]
@@ -314,7 +314,7 @@ template("libarktscompiler_shared") {
     deps = [
       ":arktscompiler_header_deps",
       ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkbase:libarktsbase",
       "$ark_root/libarkfile:libarktsfile",
     ]
 
@@ -371,7 +371,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
   deps = [
     ":arktscompiler_header_deps",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-    "$ark_root/libpandabase:libarktsbase_frontend_static",
+    "$ark_root/libarkbase:libarktsbase_frontend_static",
     "$ark_root/libarkfile:libarktsfile_frontend_static",
   ]
 
@@ -447,7 +447,7 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
   api = [
     "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
   ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root/libarkbase/utils.rb" ]
   extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   if (abckit_enable) {
     extra_dependencies += [

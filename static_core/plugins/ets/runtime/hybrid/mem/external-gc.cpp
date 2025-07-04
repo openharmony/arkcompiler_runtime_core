@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/mark_word.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"

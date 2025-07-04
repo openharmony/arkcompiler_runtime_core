@@ -16,9 +16,9 @@
 #ifndef PANDA_CODE_INFO_TABLES_H
 #define PANDA_CODE_INFO_TABLES_H
 
-#include "utils/bit_field.h"
-#include "utils/bit_table.h"
-#include "utils/arch.h"
+#include "libarkbase/utils/bit_field.h"
+#include "libarkbase/utils/bit_table.h"
+#include "libarkbase/utils/arch.h"
 #include "vreg_info.h"
 
 namespace ark::compiler {

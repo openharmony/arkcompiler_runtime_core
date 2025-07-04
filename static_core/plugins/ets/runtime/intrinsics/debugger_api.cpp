@@ -16,7 +16,7 @@
 #include "include/tooling/debug_interface.h"
 #include "include/tooling/vreg_value.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/tooling/helpers.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"

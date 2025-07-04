@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -92,8 +92,7 @@ if ((PANDA_TARGET_X86 OR PANDA_TARGET_AMD64) AND PANDA_WITH_TESTS)
             ${PANDA_SANITIZERS_LIST}
     )
     if(TARGET pandaverification_rapidcheck_gtest_tests)
-        panda_target_include_directories(pandaverification_rapidcheck_gtest_tests PUBLIC ${PANDA_ROOT}
-            ${PANDA_ROOT}/libpandabase)
+        panda_target_include_directories(pandaverification_rapidcheck_gtest_tests PUBLIC ${PANDA_ROOT})
         panda_target_include_directories(pandaverification_rapidcheck_gtest_tests
             SYSTEM PRIVATE "${PANDA_THIRD_PARTY_SOURCES_DIR}/rapidcheck/extras/gtest/include")
         add_verification_includes(TARGET pandaverification_rapidcheck_gtest_tests)

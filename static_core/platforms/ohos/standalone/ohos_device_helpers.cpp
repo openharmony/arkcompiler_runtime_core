@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "platforms/ohos/ohos_device_helpers.h"
 
-#include "libpandabase/os/library_loader.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/library_loader.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ohos_device {
 std::string GetHardwareModelString()

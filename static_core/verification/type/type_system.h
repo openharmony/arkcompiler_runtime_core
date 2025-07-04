@@ -16,7 +16,7 @@
 #ifndef PANDA_TYPE_SYSTEM_HPP
 #define PANDA_TYPE_SYSTEM_HPP
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/method.h"

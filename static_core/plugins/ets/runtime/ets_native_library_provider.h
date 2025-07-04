@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
 
 #include <string>
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 #include "runtime/include/mem/panda_containers.h"

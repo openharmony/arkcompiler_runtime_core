@@ -16,7 +16,7 @@
 #include "libarkfile/field_data_accessor.h"
 #include "libarkfile/helpers.h"
 
-#include "utils/leb128.h"
+#include "libarkbase/utils/leb128.h"
 
 namespace ark::panda_file {
 

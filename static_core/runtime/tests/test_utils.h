@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_MEM_TEST_UTILS_H
 #define PANDA_RUNTIME_MEM_TEST_UTILS_H
 
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/test_utilities.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/line_string.h"

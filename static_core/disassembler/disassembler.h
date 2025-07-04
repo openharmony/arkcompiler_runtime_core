@@ -16,9 +16,8 @@
 #ifndef DISASM_LIB_H_INCLUDED
 #define DISASM_LIB_H_INCLUDED
 
-#include "macros.h"
-#include "utils/type_helpers.h"
-#include "utils/span.h"
+#include "libarkbase/utils/type_helpers.h"
+#include "libarkbase/utils/span.h"
 
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/code_data_accessor-inl.h"
@@ -32,7 +31,7 @@
 #include "libarkfile/proto_data_accessor-inl.h"
 #include "libarkfile/file-inl.h"
 #include "libarkfile/file.h"
-#include "os/file.h"
+#include "libarkbase/os/file.h"
 
 #include "runtime/profiling/profiling-disasm-inl.h"
 
@@ -40,7 +39,7 @@
 #include "assembly-ins.h"
 
 #include "libarkfile/bytecode_instruction-inl.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 #include <map>
 #include <memory>

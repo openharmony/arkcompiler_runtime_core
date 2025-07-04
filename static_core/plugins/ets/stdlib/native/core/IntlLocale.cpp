@@ -19,7 +19,7 @@
 #include <unicode/locid.h>
 #include <unicode/numsys.h>
 #include <unicode/localpointer.h>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 #include <cassert>
 #include <cstring>

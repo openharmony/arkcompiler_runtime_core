@@ -19,10 +19,10 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/mem/panda_containers.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "intrinsics.h"
 #include "utility"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #ifdef PANDA_TARGET_OHOS
 #include <hilog/log.h>

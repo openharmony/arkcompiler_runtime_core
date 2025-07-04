@@ -19,7 +19,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class BalanceExpressions : public Optimization {

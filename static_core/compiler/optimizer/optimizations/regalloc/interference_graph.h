@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,12 @@
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include <iostream>
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "optimizer/code_generator/operands.h"
 #include <unordered_set>
-#include "utils/arena_containers.h"
-#include "utils/small_vector.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/small_vector.h"
 
 namespace ark::compiler {
 class LifeIntervals;

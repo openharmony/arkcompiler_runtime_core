@@ -16,11 +16,11 @@
 #if defined(ARK_HYBRID)
 #include "heap/heap_visitor.h"
 #endif
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "interop_js/napi_impl/napi_impl.h"
 #include "interop_js/napi_impl/detail/enumerate_napi.h"
 #include "interop_js/interop_common.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "interop_js/logger.h"
 
 #include <iostream>

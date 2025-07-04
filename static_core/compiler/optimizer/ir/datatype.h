@@ -16,9 +16,9 @@
 #ifndef COMPILER_OPTIMIZER_IR_DATATYPE_H
 #define COMPILER_OPTIMIZER_IR_DATATYPE_H
 
-#include "macros.h"
-#include "utils/arch.h"
-#include "mem/mem.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/mem/mem.h"
 
 // NOLINTNEXTLINE(modernize-concat-nested-namespaces)
 namespace ark::compiler {

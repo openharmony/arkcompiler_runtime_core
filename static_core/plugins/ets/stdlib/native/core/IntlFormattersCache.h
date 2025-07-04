@@ -17,8 +17,8 @@
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLFORMATTERSCACHE_H
 
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 #include "IntlNumberFormatters.h"
 #include "unicode/coll.h"
 

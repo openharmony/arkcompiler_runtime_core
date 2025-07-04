@@ -23,11 +23,11 @@
 #include "ets_vm.h"
 #include "include/runtime.h"
 #include "include/runtime_options.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/test_utilities.h"
 #include "jit/libprofile/aot_profiling_data.h"
 #include "jit/profiling_loader.h"
 #include "jit/profiling_saver.h"
-#include "os/filesystem.h"
+#include "libarkbase/os/filesystem.h"
 
 namespace ark::test {
 class ProfileSaverTest : public testing::Test {

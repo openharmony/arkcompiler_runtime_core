@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #include <random>
 #include <gtest/gtest.h>
 
-#include "macros.h"
-#include "mem/code_allocator.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
 #include "target/amd64/target.h"
-#include "mem/base_mem_stats.h"
+#include "libarkbase/mem/base_mem_stats.h"
 
 namespace ark::compiler {
 class Callconv64Test : public ::testing::Test {

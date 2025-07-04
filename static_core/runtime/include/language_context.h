@@ -15,10 +15,10 @@
 #ifndef PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 #define PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/class_data_accessor-inl.h"
 #include "libarkfile/file_items.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "compiler/code_info/vreg_info.h"
 #include "runtime/class_initializer.h"
 #include "runtime/include/class-inl.h"

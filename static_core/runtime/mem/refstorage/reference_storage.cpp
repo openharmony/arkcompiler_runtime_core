@@ -15,14 +15,14 @@
 
 #include "runtime/mem/refstorage/reference_storage.h"
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/dfx.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/dfx.h"
 #include "runtime/include/thread.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/include/stack_walker-inl.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
 namespace ark::mem {
 

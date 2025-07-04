@@ -20,9 +20,9 @@
 #include <cstdint>
 
 #include "compiler/optimizer/code_generator/type_info.h"
-#include "libpandabase/macros.h"
-#include "utils/bit_utils.h"
-#include "utils/math_helpers.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/math_helpers.h"
 
 namespace ark::compiler {
 /*

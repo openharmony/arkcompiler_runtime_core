@@ -15,8 +15,8 @@
 
 #include <sstream>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/system_environment.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/system_environment.h"
 #include "plugins/ets/runtime/ani/ani.h"
 
 namespace {

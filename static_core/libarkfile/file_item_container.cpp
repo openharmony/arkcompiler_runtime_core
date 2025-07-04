@@ -16,7 +16,7 @@
 #include "libarkfile/file_item_container.h"
 #include <cstdint>
 #include <type_traits>
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include <libarkfile/include/file_format_version.h>
 #include "libarkfile/pgo.h"
 

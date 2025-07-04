@@ -19,7 +19,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/panda_vm.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark {
 

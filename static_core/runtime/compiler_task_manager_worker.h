@@ -18,9 +18,9 @@
 #include "runtime/compiler_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/mem/panda_containers.h"
-#include "libpandabase/taskmanager/task.h"
-#include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/taskmanager/task_manager.h"
+#include "libarkbase/taskmanager/task.h"
+#include "libarkbase/taskmanager/task_queue.h"
+#include "libarkbase/taskmanager/task_manager.h"
 
 namespace ark {
 

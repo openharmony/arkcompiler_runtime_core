@@ -27,7 +27,7 @@
 
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 
-#include "mem/arena_allocator.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "libarkfile/modifiers.h"
 #include "src/logger.h"
 #include "static_core/assembler/assembly-program.h"

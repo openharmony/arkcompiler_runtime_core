@@ -19,8 +19,8 @@
 #include "include/mem/panda_string.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
-#include "macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/entrypoints/string_index_of.h"
@@ -35,7 +35,7 @@
 #include "unicode/coll.h"
 #include "unicode/unistr.h"
 #include "unicode/normalizer2.h"
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
 using icu::Normalizer2;
 

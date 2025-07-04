@@ -23,7 +23,7 @@
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/modifiers.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/class_linker-inl.h"

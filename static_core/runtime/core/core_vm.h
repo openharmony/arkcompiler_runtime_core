@@ -16,8 +16,8 @@
 #ifndef PANDA_RUNTIME_VM_CORE_CORE_VM_H_
 #define PANDA_RUNTIME_VM_CORE_CORE_VM_H_
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/expected.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"

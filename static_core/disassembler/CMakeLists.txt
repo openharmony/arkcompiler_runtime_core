@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,9 +49,7 @@ panda_add_library(arkdisassembler_obj OBJECT
 panda_target_include_directories(arkdisassembler_obj
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    PUBLIC ${CMAKE_SOURCE_DIR}/libpandabase
     PUBLIC ${CMAKE_SOURCE_DIR}/runtime
-    PUBLIC ${CMAKE_BINARY_DIR}/libpandabase
     ${CMAKE_BINARY_DIR}
 )
 

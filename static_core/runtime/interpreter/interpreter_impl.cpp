@@ -15,7 +15,7 @@
 
 #include "runtime/interpreter/interpreter_impl.h"
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/interpreter/runtime_interface.h"
 #ifdef PANDA_WITH_IRTOC

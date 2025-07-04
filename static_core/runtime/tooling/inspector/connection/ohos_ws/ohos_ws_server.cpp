@@ -17,8 +17,8 @@
 
 #include <string_view>
 
-#include "os/thread.h"
-#include "utils/logger.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::tooling::inspector {
 [[maybe_unused]] static constexpr std::string_view G_ARK_TS_INSPECTOR_NAME = "ArkEtsDebugger";

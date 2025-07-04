@@ -19,7 +19,7 @@
 
 #include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"

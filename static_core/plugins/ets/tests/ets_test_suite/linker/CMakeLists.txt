@@ -114,10 +114,7 @@ function(test_runtime_linker_extensions test)
     panda_target_include_directories(${native_lib} PRIVATE
         ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         ${PANDA_ROOT}
-        ${PANDA_ROOT}/libpandabase
-        ${CMAKE_BINARY_DIR}/libpandabase
-        ${PANDA_BINARY_ROOT}
-        ${PANDA_BINARY_ROOT}/libpandabase/generated)
+        ${PANDA_BINARY_ROOT})
     panda_target_link_libraries(${native_lib}
         arkbase
         arkfile

@@ -19,7 +19,7 @@
 #include <optional>
 #include <string_view>
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/console_call_type.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/locks.h"

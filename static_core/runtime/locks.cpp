@@ -14,8 +14,8 @@
  */
 
 #include "runtime/include/locks.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "include/thread.h"
 
 #include <memory>

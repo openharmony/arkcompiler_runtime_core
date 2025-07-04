@@ -16,7 +16,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_JSON_SERIALIZATION_SERIALIZABLE_H
 #define PANDA_TOOLING_INSPECTOR_JSON_SERIALIZATION_SERIALIZABLE_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 class JsonObjectBuilder;

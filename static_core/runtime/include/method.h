@@ -21,8 +21,8 @@
 #include <string_view>
 
 #include "intrinsics_enum.h"
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/logger.h"
 #include "libarkfile/code_data_accessor-inl.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_items.h"

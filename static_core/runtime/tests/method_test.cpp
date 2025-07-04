@@ -20,7 +20,7 @@
 #include "assembly-parser.h"
 #include "mangling.h"
 #include "libarkfile/value.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/method-inl.h"

@@ -17,7 +17,7 @@
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_item_container.h"
 #include "libarkfile/file_reader.h"
-#include "utils/string_helpers.h"
+#include "libarkbase/utils/string_helpers.h"
 #include "zip_archive.h"
 #include "libarkfile/file.h"
 #include "libarkfile/external/panda_file_support.cpp"

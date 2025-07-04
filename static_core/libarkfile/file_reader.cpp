@@ -34,7 +34,7 @@
 #include "libarkfile/field_data_accessor-inl.h"
 #include "libarkfile/method_data_accessor-inl.h"
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "libarkfile/proto_data_accessor.h"
 
 namespace ark::panda_file {

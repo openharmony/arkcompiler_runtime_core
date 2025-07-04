@@ -19,8 +19,8 @@
 #include <vector>
 #include <thread>
 
-#include "libpandabase/os/filesystem.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 

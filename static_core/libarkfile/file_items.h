@@ -18,7 +18,7 @@
 
 #include "libarkfile/file.h"
 #include "libarkfile/file_writer.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "libarkfile/modifiers.h"
 #include <libarkfile/include/type.h>
 #include <libarkfile/include/file_format_version.h>
