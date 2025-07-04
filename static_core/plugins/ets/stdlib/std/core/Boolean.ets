@@ -250,18 +250,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
-     * Returns a hash code (integer representation) for this instance
-     *
-     * @returns representation of this instance
-     */
-    public override $_hashCode(): int {
-        if (this.value) {
-            return 1;
-        }
-        return 0;
-    }
-
-    /**
      * Converts this object to a string
      *
      * @returns 'True' if this instance is true, 'False' otherwise
@@ -284,7 +272,9 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns result of the comparison
      */
     public override compareTo(other: Boolean): int {
-        return this.$_hashCode() - other.$_hashCode();
+        let thisInt = this.value ? 1 : 0
+        let otherInt = other.value ? 1 : 0
+        return thisInt - otherInt;
     }
 
     /**

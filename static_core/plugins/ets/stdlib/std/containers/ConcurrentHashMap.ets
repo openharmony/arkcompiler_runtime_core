@@ -151,7 +151,7 @@ export namespace containers {
                 return 1;
             }
 
-            const keyHash: int = (k! as object).$_hashCode(); // #26217
+            const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt(); // #26217
             const t = keyHash >> 31;
 
             return ((keyHash ^ t) - t) & (this.buckets.actualLength - 1);

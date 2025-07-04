@@ -137,22 +137,7 @@ static inline uint32_t GetHashFloats(EtsObject *obj)
     return static_cast<uint32_t>(static_cast<int32_t>(val));
 }
 
-static inline uint32_t CallCustomHashCodeMethod(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key,
-                                                Method *instanceMethod)
-{
-    ASSERT(coro->HasPendingException() == false);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatMap> mapHandle(coro, map);
-    EtsHandle<EtsObject> keyHandle(coro, key);
-    std::array args {Value(keyHandle->GetCoreType())};
-    auto result = instanceMethod->Invoke(coro, args.data());
-    map = mapHandle.GetPtr();
-    key = keyHandle.GetPtr();
-    coro = EtsCoroutine::GetCurrent();
-    return result.GetAs<uint32_t>();
-}
-
-static uint32_t GetHashCode(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
+uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
 {
     auto *klass = key->GetClass();
     if (klass->IsNullValue()) {
@@ -188,20 +173,7 @@ static uint32_t GetHashCode(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject
         return EtsString::FromEtsObject(key)->GetCoreType()->GetHashcode();
     }
 
-    auto *baseClass = klass->GetBase();
-    if (klass->IsEtsEnum() || baseClass == nullptr) {
-        return key->GetHashCode();
-    }
-
-    auto *baseMethod = klass->GetBase()->GetRuntimeClass()->GetVirtualClassMethod(g_hashCodeMethod);
-    auto *instanceMethod = klass->GetRuntimeClass()->GetVirtualClassMethod(g_hashCodeMethod);
-    if (baseMethod == instanceMethod && baseClass->GetBase() == nullptr) {
-        return key->GetHashCode();
-    }
-
-    // We need to call the `$_hashCode` method from ETS for compatibility because some classes can override this method
-    // with their own implementation.
-    return CallCustomHashCodeMethod(coro, map, key, instanceMethod);
+    return key->GetHashCode();
 }
 
 static inline uint32_t GetBucketIdx(EtsCoroutine *&coro, EtsEscompatMap *&map, EtsObject *&key)
@@ -211,7 +183,7 @@ static inline uint32_t GetBucketIdx(EtsCoroutine *&coro, EtsEscompatMap *&map, E
     }
 
     // Using int for keyHash to maintain ETS compatibility.
-    int32_t keyHash = GetHashCode(coro, map, key);
+    int32_t keyHash = EtsEscompatMap::GetHashCode(key);
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     uint32_t tmp = keyHash >> HASH_SIGN_SHIFT;
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
