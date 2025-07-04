@@ -83,6 +83,31 @@ config("arkcompiler_public_config") {
   }
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("compiler_headers") {
+    include_dirs = [
+      "$ark_root_gen_dir",
+      "$ark_root/compiler",
+      "$ark_root/compiler/code_info",
+      "$ark_root/compiler/optimizer/ir",
+      "$target_gen_dir/generated",
+      get_label_info("$ark_root/cross_values:cross_values_getters_generate",
+                     "target_gen_dir"),
+      get_label_info("$ark_root/runtime:plugins_defines_h", "target_gen_dir") +
+          "/asm_defines/generated",
+      get_label_info(
+          "$ark_root_gen_dir/cross_values:cross_values_getters_generate",
+          "target_gen_dir"),
+    ]
+    deps = [
+      "../cross_values:cross_values_getters_generate(${default_toolchain})",
+      "../runtime:plugins_defines_h",
+    ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 libarkcompiler_sources = [
   "compiler_logger.cpp",
   "compiler_options.cpp",
