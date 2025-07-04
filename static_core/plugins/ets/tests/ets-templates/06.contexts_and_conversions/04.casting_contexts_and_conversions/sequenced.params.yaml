@@ -50,14 +50,12 @@ cases:
 
     - { stype: float, sval: '0f', dtype: Byte }
     - { stype: float, sval: '0f', dtype: Short }
-    - { stype: float, sval: '0f', dtype: Char }
     - { stype: float, sval: '0f', dtype: Int }
     - { stype: float, sval: '0f', dtype: Long }
     - { stype: float, sval: '0f', dtype: Double }
 
     - { stype: double, sval: '0.0', dtype: Byte }
     - { stype: double, sval: '0.0', dtype: Short }
-    - { stype: double, sval: '0.0', dtype: Char }
     - { stype: double, sval: '0.0', dtype: Int }
     - { stype: double, sval: '0.0', dtype: Long }
     - { stype: double, sval: '0.0', dtype: Float }
@@ -129,26 +127,26 @@ cases:
 
     - { stype: Float, sval: 'new Float()', dtype: Byte }
     - { stype: Float, sval: 'new Float()', dtype: Short }
-    - { stype: Float, sval: 'new Float()', dtype: Char }
+
     - { stype: Float, sval: 'new Float()', dtype: Int }
     - { stype: Float, sval: 'new Float()', dtype: Long }
     - { stype: Float, sval: 'new Float()', dtype: Double }
     - { stype: Float, sval: 'new Float()', dtype: Byte }
     - { stype: Float, sval: 'new Float()', dtype: Short }
-    - { stype: Float, sval: 'new Float()', dtype: Char }
+
     - { stype: Float, sval: 'new Float()', dtype: Int }
     - { stype: Float, sval: 'new Float()', dtype: Long }
     - { stype: Float, sval: 'new Float()', dtype: Double }
 
     - { stype: Double, sval: 'new Double()', dtype: Byte }
     - { stype: Double, sval: 'new Double()', dtype: Short }
-    - { stype: Double, sval: 'new Double()', dtype: Char }
+
     - { stype: Double, sval: 'new Double()', dtype: Int }
     - { stype: Double, sval: 'new Double()', dtype: Long }
     - { stype: Double, sval: 'new Double()', dtype: Float }
     - { stype: Double, sval: 'new Double()', dtype: Byte }
     - { stype: Double, sval: 'new Double()', dtype: Short }
-    - { stype: Double, sval: 'new Double()', dtype: Char }
+
     - { stype: Double, sval: 'new Double()', dtype: Int }
     - { stype: Double, sval: 'new Double()', dtype: Long }
     - { stype: Double, sval: 'new Double()', dtype: Float }

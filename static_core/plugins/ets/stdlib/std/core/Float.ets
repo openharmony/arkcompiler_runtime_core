@@ -246,15 +246,6 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     }
 
     /**
-     * Returns value of this instance
-     *
-     * @returns value as char
-     */
-    public toChar(): char {
-        return this.value.toChar();
-    }
-
-    /**
      * Returns the primitive as byte value
      *
      * @param value value to cast
@@ -309,15 +300,6 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns casted value
      */
     public static native toDouble(value: float): double;
-
-    /**
-     * Returns the primitive as char value
-     *
-     * @param value value to cast
-     *
-     * @returns casted value
-     */
-    public static native toChar(value: float): char;
 
     /**
      * Compares this instance to other Float object
