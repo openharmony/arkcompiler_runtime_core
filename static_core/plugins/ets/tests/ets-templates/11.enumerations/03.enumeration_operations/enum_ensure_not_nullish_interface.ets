@@ -30,7 +30,7 @@ interface I {
 function foo(a?: I) {
     let e: E
     e = a?.e!
-    assertEQ( e, E.B)
+    arktest.assertEQ( e, E.B)
 }
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 import re
 from pathlib import Path
-from typing import List, Set
 
 from runner.logger import Log
 from runner.reports.summary import Summary
@@ -43,7 +42,7 @@ class XmlView:
         return data
 
     @staticmethod
-    def __get_failed_test_case(test_result: Test) -> List[str]:
+    def __get_failed_test_case(test_result: Test) -> list[str]:
         if not isinstance(test_result, TestStandardFlow) or not test_result.report or test_result.fail_kind is None:
             return ['<failure>There are no data about the failure</failure>']
 
@@ -67,7 +66,7 @@ class XmlView:
 
         return result
 
-    def create_xml_report(self, results: List[Test], execution_time: float) -> None:
+    def create_xml_report(self, results: list[Test], execution_time: float) -> None:
         total = self.__summary.passed + self.__summary.failed + self.__summary.ignored
 
         test_cases = []
@@ -105,7 +104,7 @@ class XmlView:
         _LOGGER.all(f"Save {xml_report_path}")
         write_2_file(xml_report_path, "\n".join(xml_report))
 
-    def create_ignore_list(self, tests: Set[Test]) -> None:
+    def create_ignore_list(self, tests: set[Test]) -> None:
         result = [f"{self.__summary.name}.{test.test_id}" for test in tests if test.ignored]
         ignore_list_path = self.__report_root / self.__ignore_list_xml
         _LOGGER.all(f"Save {ignore_list_path}")

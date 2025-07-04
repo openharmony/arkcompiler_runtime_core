@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "runtime/include/class_root.h"
 
 namespace ark::mem {
-constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "gen-gc", "g1-gc"};
+constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "g1-gc"};
 
 [[maybe_unused]] inline ObjectHeader *AllocateNullifiedPayloadString(size_t length)
 {

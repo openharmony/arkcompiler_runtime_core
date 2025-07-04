@@ -17,7 +17,7 @@
 desc: To verify the initialization behavior of default parameter values.
 ---*/
 
-let defaultVal = 5;
+let defaultVal = 5 as number;
 
 function withDefault(param: number = defaultVal + 1): number {
   return param;
@@ -25,8 +25,8 @@ function withDefault(param: number = defaultVal + 1): number {
 
 function main(): void {
   let x: number = withDefault();
-  assertEQ(x, 6);
+  arktest.assertEQ(x, 6);
 
   let y: number = withDefault(10);
-  assertEQ(y, 10);
+  arktest.assertEQ(y, 10);
 }

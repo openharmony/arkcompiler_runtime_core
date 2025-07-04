@@ -45,5 +45,5 @@ function test(y: int): int {
 
 function main(): void
 {
-    assertEQ(test(3), 14)
+    arktest.assertEQ(test(3), 14)
 }

@@ -21,8 +21,8 @@ general:
     verbose-filter: NEW
     coverage:
         use-llvm-cov: true
-        llvm-cov-profdata-out-path: /tmp/hermes/coverage/profdata_files
-        llvm-cov-html-out-path: /tmp/hermes/coverage/html_report
+        profdata-files-dir: /tmp/hermes/coverage/profdata_files
+        coverage-html-report-dir: /tmp/hermes/coverage/html_report
 es2panda:
     timeout: 30
     opt-level: 2

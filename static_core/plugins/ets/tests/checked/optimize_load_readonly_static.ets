@@ -20,10 +20,10 @@ class Base {
     static {
         Base.x = 2
         __noinline__doSomething()
-        assertEQ(getBaseX(), 2)
+        arktest.assertEQ(getBaseX(), 2)
         Base.x = 3
         __noinline__doSomething()
-        assertEQ(getBaseX(), 3)
+        arktest.assertEQ(getBaseX(), 3)
         Base.x = 4
         Base.y = 10
     }
@@ -35,11 +35,11 @@ class NotReadonly {
     static {
         NotReadonly.x = 2
         __noinline__changeX()
-        assertEQ(getNotReadonlyX(), 3)
+        arktest.assertEQ(getNotReadonlyX(), 3)
         __noinline__changeX()
-        assertEQ(getNotReadonlyX(), 4)
+        arktest.assertEQ(getNotReadonlyX(), 4)
         __noinline__doSomething()
-        assertEQ(getNotReadonlyX(), 4)
+        arktest.assertEQ(getNotReadonlyX(), 4)
     }
 }
 
@@ -100,7 +100,7 @@ function getNotReadonlyX(): int {
 
 function checkGetBaseX(): int {
     for (let i = 0; i < 5; i++) {
-        assertEQ(getBaseX(), 4)
+        arktest.assertEQ(getBaseX(), 4)
     }
     return 0
 }
@@ -147,7 +147,7 @@ function checkGetBaseX(): int {
 
 function checkGetNotReadonlyX(): int {
     for (let i = 0; i < 5; i++) {
-        assertEQ(getNotReadonlyX(), 4 + i)
+        arktest.assertEQ(getNotReadonlyX(), 4 + i)
         __noinline__changeX()
     }
     return 0
@@ -188,10 +188,10 @@ function checkGetNotReadonlyX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
 
 function checkBaseX(): int {
-    assertEQ(Base.x, 4)
+    arktest.assertEQ(Base.x, 4)
     __noinline__doSomething()
-    assertEQ(Base.y, 10)
-    assertEQ(Base.x, 4)
+    arktest.assertEQ(Base.y, 10)
+    arktest.assertEQ(Base.x, 4)
     return 0
 }
 
@@ -218,8 +218,8 @@ function checkBaseX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 
 function checkNotReadonlyX(): int {
-    assertEQ(NotReadonly.x, 4)
+    arktest.assertEQ(NotReadonly.x, 4)
     __noinline__changeX()
-    assertEQ(NotReadonly.x, 5)
+    arktest.assertEQ(NotReadonly.x, 5)
     return 0
 }

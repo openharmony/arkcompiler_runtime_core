@@ -22,10 +22,10 @@ type TNumberStringPair = [number, string];
 
 function receiver(tuple: TNumberStringPair): void {
     let tmp = tuple;
-    assertTrue( tmp instanceof TNumberStringPair)
+    arktest.assertTrue( tmp instanceof TNumberStringPair)
 
-    assertEQ( tuple[0], 123.0)
-    assertEQ( tuple[1], "123.0")
+    arktest.assertEQ( tuple[0], 123.0)
+    arktest.assertEQ( tuple[1], "123.0")
 }
 function main(): void {
 

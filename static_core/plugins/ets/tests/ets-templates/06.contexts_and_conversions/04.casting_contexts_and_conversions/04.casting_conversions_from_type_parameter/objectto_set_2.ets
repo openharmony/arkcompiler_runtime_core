@@ -20,5 +20,5 @@ desc: Convert to obj-otherset type.
 function main(): void {
   let myWeakSet = new WeakSet<object>();
   const obj1: object = myWeakSet;
-  assertTrue(obj1 == myWeakSet);
+  arktest.assertTrue(obj1 == myWeakSet);
 }

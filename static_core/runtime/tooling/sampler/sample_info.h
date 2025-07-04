@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ struct SampleInfo {
     struct ManagedStackFrameId {
         uintptr_t fileId {0};
         uintptr_t pandaFilePtr {0};
+        uint32_t bcOffset {0};
     };
 
     struct StackInfo {
@@ -47,7 +48,7 @@ struct SampleInfo {
         uint32_t threadId {0};
         ThreadStatus threadStatus {ThreadStatus::UNDECLARED};
     };
-
+    uint64_t timeStamp {0};
     ThreadInfo threadInfo {};
     StackInfo stackInfo {};
 };
@@ -67,6 +68,7 @@ bool operator==(const FileInfo &lhs, const FileInfo &rhs);
 bool operator!=(const FileInfo &lhs, const FileInfo &rhs);
 bool operator==(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs);
 bool operator!=(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs);
+bool operator<(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs);
 bool operator==(const SampleInfo::StackInfo &lhs, const SampleInfo::StackInfo &rhs);
 bool operator!=(const SampleInfo::StackInfo &lhs, const SampleInfo::StackInfo &rhs);
 bool operator==(const SampleInfo::ThreadInfo &lhs, const SampleInfo::ThreadInfo &rhs);
@@ -100,6 +102,10 @@ inline bool operator==(const SampleInfo::ManagedStackFrameId &lhs, const SampleI
 inline bool operator!=(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs)
 {
     return !(lhs == rhs);
+}
+inline bool operator<(const SampleInfo::ManagedStackFrameId &lhs, const SampleInfo::ManagedStackFrameId &rhs)
+{
+    return std::tie(lhs.fileId, lhs.pandaFilePtr) < std::tie(rhs.fileId, rhs.pandaFilePtr);
 }
 
 inline bool operator==(const FileInfo &lhs, const FileInfo &rhs)

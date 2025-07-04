@@ -26,6 +26,6 @@ type TString = string;
 
 function main() : int {
     let s: TString | null = null
-    assertEQ( s, null)
+    arktest.assertEQ( s, null)
     return 0;
 }

@@ -41,6 +41,15 @@ public:
     {
     }
 
+#if defined(ARK_HYBRID)
+    void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const panda::RefFieldVisitor &visitor) override
+    {
+        std::stringstream err;
+        err << "Unexpected call of MarkFromObject";
+        values_->errors.push_back(err.str());
+    }
+#endif
+
     void MarkFromObject([[maybe_unused]] napi_ref obj) override
     {
         std::stringstream err;

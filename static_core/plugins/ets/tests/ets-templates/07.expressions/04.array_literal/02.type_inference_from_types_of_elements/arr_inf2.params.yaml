@@ -15,37 +15,37 @@
 cases:
     - use: |-
           let a = [new Object, new Boolean]
-          assertTrue( a instanceof Object[] )
+          arktest.assertTrue( a instanceof Object[] )
 
     - use: |-
           let b = ["a", "b" + "c"]
-          assertTrue( b instanceof string[] )
+          arktest.assertTrue( b instanceof string[] )
 
     - use: |-
           let c = [1, 2, 3]
-          assertTrue( c instanceof number[] )
+          arktest.assertTrue( c instanceof number[] )
 
     - use: |-
           let d = ["a", 1, 3.14]
-          assertTrue( d instanceof (string|number)[] )
+          arktest.assertTrue( d instanceof (string|number)[] )
 
     - use: |-
           let d = ["a" + "", 1, 3.14]
-          assertTrue( d instanceof (String|Number)[] )
+          arktest.assertTrue( d instanceof (String|Number)[] )
 
     - decl: |-
           class A {}
       use: |-
           let e = [(): void => {}, new A]
-          assertTrue( e instanceof ((() => void) | A)[] )
+          arktest.assertTrue( e instanceof ((() => void) | A)[] )
 
     - use: |-
           let x = [new Long(), new Number(), new Short()]
-          assertTrue( x instanceof number[] )
+          arktest.assertTrue( x instanceof Numeric[] )
 
     - use: |-
           let x = [new Long(), new Number(), null, new Short(), undefined]
-          assertTrue( x instanceof (number|null|undefined)[] )
+          arktest.assertTrue( x instanceof (number|null|undefined)[] )
 
     - decl: |-
           let cnt: number
@@ -60,42 +60,42 @@ cases:
               return cnt--
           }
       use: |-
-          assertTrue( [bar, null, baz, foo] instanceof (F|null)[] )
+          arktest.assertTrue( [bar, null, baz, foo] instanceof (F|null)[] )
 
     - use: |-
-          assertTrue( [false, 1, 14, 33.98] instanceof (Number|Boolean)[] )
+          arktest.assertTrue( [false, 1, 14, 33.98] instanceof (Number|Boolean)[] )
 
     - use: |-
-          assertTrue( [0 as long, "0", 0 as short, 0x1 as int] instanceof (number|string)[] )
+          arktest.assertTrue( [0 as long, "0", 0 as short, 0x1 as int] instanceof (number|string)[] )
 
     - use: |-
-          assertTrue( [new Object(), null, new Error(), null] instanceof (Object|null)[] )
+          arktest.assertTrue( [new Object(), null, new Error(), null] instanceof (Object|null)[] )
 
     - use: |-
-          assertTrue( [new Boolean(true), "aaa", new Long()] instanceof (Boolean|string|long)[] )
+          arktest.assertTrue( [new Boolean(true), "aaa", new Long()] instanceof (Boolean|string|long)[] )
 
     - use: |-
-          assertTrue( ["aa", "bb", null, "cc", null] instanceof (string|null)[] )
+          arktest.assertTrue( ["aa", "bb", null, "cc", null] instanceof (string|null)[] )
 
     - use: |-
-          assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|int)[] )
+          arktest.assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|int)[] )
 
     - use: |-
-          assertTrue( [null, null, null, ] instanceof (null)[] )
+          arktest.assertTrue( [null, null, null, ] instanceof (null)[] )
 
     - use: |-
-          assertTrue( [undefined, undefined] instanceof (undefined)[] )
+          arktest.assertTrue( [undefined, undefined] instanceof (undefined)[] )
 
     - use: |-
-          assertTrue( [null, undefined] instanceof (null|undefined)[] )
+          arktest.assertTrue( [null, undefined] instanceof (null|undefined)[] )
 
     - use: |-
-          assertTrue( [(p: string): number => { return p.length }] instanceof ((p: string) => number)[] )
+          arktest.assertTrue( [(p: string): number => { return p.length }] instanceof ((p: string) => number)[] )
 
     - decl: |-
           let a = [true, "a", 42.0]
       use: |-
-          assertTrue( a instanceof (Boolean|string|Number)[] )
+          arktest.assertTrue( a instanceof (Boolean|string|Number)[] )
 
     - decl: |-
           class A {}
@@ -103,7 +103,7 @@ cases:
           class C {}
           let a = [{} as A, {} as B, {} as C, {} as A, {} as B, {} as C]
       use: |-
-          assertTrue( a instanceof (A|B|C)[] )
+          arktest.assertTrue( a instanceof (A|B|C)[] )
 
     - decl: |-
           class A {}
@@ -111,18 +111,18 @@ cases:
           class C extends B {}
           let a = [{} as A, {} as B, {} as C, {} as A, {} as B, {} as C]
       use: |-
-          assertTrue( a instanceof A[] )
+          arktest.assertTrue( a instanceof A[] )
 
     - decl: |-
           let a = ["a", "b", "c", "s", ]
       use: |-
-          assertTrue( a instanceof string[] )
+          arktest.assertTrue( a instanceof string[] )
 
     - decl: |-
           let s: string = "s"
           let a = ["a", "b", "c", s, ]
       use: |-
-          assertTrue( a instanceof string[] )
+          arktest.assertTrue( a instanceof string[] )
 
     - decl: |-
           interface I {}
@@ -133,13 +133,13 @@ cases:
           let b: J = new B
       use: |-
           let x = [a, b, "a", "b", a, b, "a", "b"]
-          assertTrue( x instanceof (I|J|string)[] )
+          arktest.assertTrue( x instanceof (I|J|string)[] )
 
     - decl: |-
           let a = c'1'
       use: |-
           let x = [a, c'2', '1', '2',]
-          assertTrue( x instanceof (string|Char)[])
+          arktest.assertTrue( x instanceof (string|Char)[])
 
     - decl: |-
           let b: bigint|double = 0n
@@ -147,4 +147,4 @@ cases:
           let d: [number, Error] = [1.0, new Error]
       use: |-
           let x = [b, c, d, "1"]
-          assertTrue(x instanceof (string|[number, Error]|Double|BigInt)[])
+          arktest.assertTrue(x instanceof (string|[number, Error]|Double|BigInt)[])

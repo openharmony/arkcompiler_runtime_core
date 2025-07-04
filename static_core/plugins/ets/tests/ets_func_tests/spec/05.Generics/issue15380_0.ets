@@ -20,7 +20,7 @@ tags: [negative, compile-only]
 ---*/
 
 interface PromiseLike<T> {
-    then<U, V>()(onFulfilled: (value: T) => U throws, onRejected: (error: Object|null) => V throws): PromiseLike<U|V>;
+    then<U, V>()(onFulfilled: (value: T) => U throws, onRejected: (error: Object|null) => V): PromiseLike<U|V>;
 }
 
 function main(): void {

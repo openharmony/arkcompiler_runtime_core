@@ -2740,9 +2740,10 @@ NO_UB_SANITIZE static ets_status DeferredResolve(EtsEnv *env, ets_deferred defer
     CHECK_ARG(env, resolution);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+
     EtsPromise *promise = s.ToInternalType(deferred);
     EtsObject *value = s.ToInternalType(resolution);
-    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+    EtsCoroutine *coro = s.Coroutine();
 
     promise->Resolve(coro, value);
     DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));
@@ -2757,9 +2758,10 @@ NO_UB_SANITIZE static ets_status DeferredReject(EtsEnv *env, ets_deferred deferr
     CHECK_ARG(env, rejection);
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+
     EtsPromise *promise = s.ToInternalType(deferred);
     EtsObject *error = s.ToInternalType(rejection);
-    EtsCoroutine *coro = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
+    EtsCoroutine *coro = s.Coroutine();
 
     promise->Reject(coro, error);
     DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));

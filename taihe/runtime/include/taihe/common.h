@@ -12,26 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_COMMON_H
-#define TAIHE_COMMON_H
+#ifndef RUNTIME_INCLUDE_TAIHE_COMMON_H_
+#define RUNTIME_INCLUDE_TAIHE_COMMON_H_
+// NOLINTBEGIN
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-// This file is used as a standard library and needs to be easy to use.
-// The length limit of functional macros and internal function name does not apply.
-// NOLINTBEGIN
 #define TH_NONNULL __attribute__((nonnull))
 
-#define TH_ASSERT(condition, message)                                                        \
-    do {                                                                                     \
-        if (!(condition)) {                                                                  \
-            fprintf(stderr, "Assertion failed: (%s), function %s, file %s, line %d.\n"       \
-                    "Message: %s\n", #condition, __FUNCTION__, __FILE__, __LINE__, message); \
-            abort();                                                                         \
-        }                                                                                    \
+#define TH_ASSERT(condition, message)                                          \
+    do {                                                                       \
+        if (!(condition)) {                                                    \
+            fprintf(stderr,                                                    \
+                    "Assertion failed: (%s), function %s, file %s, line %d.\n" \
+                    "Message: %s\n",                                           \
+                    #condition, __FUNCTION__, __FILE__, __LINE__, message);    \
+            abort();                                                           \
+        }                                                                      \
     } while (0)
 
 #ifdef __cplusplus
@@ -46,7 +46,7 @@
 #define TH_INLINE static inline
 #endif
 
-// REFERENCE COUNTING
+// REFERENCE COUNTING //
 
 typedef uint32_t TRefCount;
 
@@ -68,5 +68,4 @@ TH_INLINE int tref_dec(TRefCount *c)
     return __atomic_sub_fetch(c, 1, __ATOMIC_SEQ_CST) == 0;
 }
 // NOLINTEND
-
-#endif // TAIHE_COMMON_H
+#endif  // RUNTIME_INCLUDE_TAIHE_COMMON_H_

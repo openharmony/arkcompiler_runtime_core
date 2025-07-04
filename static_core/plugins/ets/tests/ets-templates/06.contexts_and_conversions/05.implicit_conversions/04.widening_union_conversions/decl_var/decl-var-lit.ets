@@ -27,10 +27,10 @@ function main() {
     let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}}
 
     let d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    assertTrue( d{{loop.index}} == {{t.expr|safe}} )
+    arktest.assertTrue( d{{loop.index}} == {{t.expr|safe}} )
 
     const c{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    assertTrue( c{{loop.index}} == {{t.expr|safe}} )
+    arktest.assertTrue( c{{loop.index}} == {{t.expr|safe}} )
 {% endfor %}
 }
 {%- endfor %}

@@ -19,6 +19,7 @@
 #include "objects/base_type.h"
 #include "thread/thread_holder.h"
 
+<<<<<<< HEAD
 namespace common {
 // Type Converter implemented for dynamic vm.
 class DynamicTypeConverterInterface {
@@ -40,4 +41,17 @@ public:
     virtual BaseType UnWrapBoxed(BoxedValue value) = 0;
 };
 }  // namespace common
+=======
+namespace panda {
+// Type Converter implemented for dynamic vm.
+class DynamicTypeConverterInterface {
+public:
+    // convert PandaType to JSTaggedValue
+    virtual JSTaggedValue WrapTagged(ThreadHolder *thread, PandaType value) = 0;
+
+    // convert JSTaggedValue to PandaType
+    virtual PandaType UnwrapTagged(JSTaggedValue value) = 0;
+};
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H

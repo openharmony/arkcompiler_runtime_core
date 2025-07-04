@@ -17,7 +17,7 @@ Implementation Details
 
 .. meta:
     frontend_status: Partly
-    todo: Implement Type.for in stdlib
+    todo: Implement Type.from in stdlib
 
 Important implementation details are discussed in this section.
 
@@ -36,7 +36,7 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
     as a separate module written in |LANG|;
 
 -   If the folder contains the file ``index.ts``, then this file is imported
-    as a separated module written in |TS|;
+    as a separate module written in |TS|;
 
 -   Otherwise, the compiler imports the package constituted by files
     ``name/*.ets``.
@@ -44,9 +44,13 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 .. index::
    implementation
    import path
+   path
+   folder
+   file
    compiler
    lookup sequence
    module
+   separate module
    package
 
 |
@@ -54,17 +58,17 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 .. _Compilation Units in Host System:
 
 Compilation Units in Host System
-**********************************
+********************************
 
 .. meta:
     frontend_status: Done
 
-Modules and packages are created and stored in a manner determined by the
-host system. The exact manner modules and packages are stored in a file
-system is determined by a particular implementation of the compiler and other
-tools.
+Modules, packages, and libraries are created and stored in a manner that is
+determined by the host system. The exact manner modules and packages are stored
+in a file system is determined by a particular implementation of the compiler
+and other tools.
 
-As an example, a simple implementation is characterised by the following:
+A simple implementation is summarized as follows:
 
 -  Module (package module) is stored in a single file.
 
@@ -76,57 +80,91 @@ As an example, a simple implementation is characterised by the following:
 -  Folder that stores a single package must not contain separate module
    files or package modules from other packages.
 
+-  Library description files are named "lib.ets". Source files are stored in
+   folders with a predefined structure.
+
 .. index::
    compilation unit
    host system
+   storage
+   storage management
    module
    package
+   separate module
    file system
    implementation
    package module
    file
    folder
    source file
-   separate module
+
+|
+
+.. _Getting Type Via Reflection:
+
+Getting Type Via Reflection
+***************************
+
+.. meta:
+    frontend_status: None
+
+The |LANG| standard library (see :ref:`Standard Library`) provides a
+pseudogeneric static method ``Type.from<T>()`` to be processed by the compiler
+in a specific way during compilation. A call to this method allows getting a
+value of type ``Type`` that represents type ``T`` at runtime. 
+
+.. code-block:: typescript
+   :linenos:
+
+    let type_of_int: Type = Type.from<int>()
+    let type_of_string: Type = Type.from<String>()
+    let type_of_array_of_int: Type = Type.from<int[]>()
+    let type_of_number: Type = Type.from<number>()
+    let type_of_Object: Type = Type.from<Object>()
+
+    class UserClass {}
+    let type_of_user_class: Type = Type.from<UserClass>()
+
+    interface SomeInterface {}
+    let type_of_interface: Type = Type.from<SomeInterface>()
+
+.. index::
+   pseudogeneric static method
+   static method
+   compiler
+   method call
+   call
+   method
+   variable
+   runtime
+
+Restrictions apply to type ``T`` (see :ref:`Standard Library` for details).
 
 
 |
 
-.. _How to get type via reflection:
+.. _Ensuring Module Initialization:
 
-How to Get Type Via Reflection
+Ensuring Module Initialization
 ******************************
 
 .. meta:
     frontend_status: None
 
-The |LANG| standard library (see :ref:`Standard Library`) provides a pseudo
-generic static method ``Type.for<T>()`` to be processed by the compiler in a
-specific way during compilation. A call to this method allows getting a
-variable of type ``Type`` that represents type ``T`` at runtime. Type ``T`` can
-be any valid type.
+The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
+function ``initModule()`` with one parameter of ``string`` type. A call to this
+function ensures that the module referred by the argument is available and its 
+initialization (see :ref:`Static Initialization`) is performed. An argument
+should be a string literal otherwise a :index:`compile-time error` occurs. The
+current module has no access to the exported declarations of the module
+referred by the argument. If such module is not available or any other runtime
+issue occurs then a proper exception is thrown. All these details are part of
+the standard library documentation.
 
 .. code-block:: typescript
    :linenos:
 
-    let type_of_int: Type = Type.for<int>()
-    let type_of_string: Type = Type.for<String>()
-    let type_of_array_of_int: Type = Type.for<int[]>()
-    let type_of_number: Type = Type.for<number>()
-    let type_of_Object: Type = Type.for<Object>()
-
-    class UserClass {}
-    let type_of_user_class: Type = Type.for<UserClass>()
-
-    interface SomeInterface {}
-    let type_of_interface: Type = Type.for<SomeInterface>()
-
-.. index::
-   pseudo generic static method
-   static method
-   compiler
-   variable
-   runtime
+    initModule ("@ohos/library/src/main/ets/pages/Index")
 
 |
 
@@ -135,17 +173,18 @@ be any valid type.
 Generic and Function Types Peculiarities
 ****************************************
 
-Current compiler and runtime implementations use type erasure, and thus affect
-the manner of behavior of generics and function types. It is expected to change
-in the future. A particular example can be found under the last bullet of
-the compile-time errors list in :ref:`InstanceOf Expression`.
+The current compiler and runtime implementations use type erasure.
+Type erasure affects the behavior of generics and function types. It is
+expected to change in the future. A particular example is provided in the last
+bullet point in the list of compile-time errors in :ref:`InstanceOf Expression`.
 
 .. index::
    generic
    function type
    compiler
    runtime implementation
-   conversion
+   type erasure
+   instanceof expression
 
 |
 
@@ -157,19 +196,20 @@ Keyword ``struct`` and ArkUI
 .. meta:
     frontend_status: Done
 
-The current compiler reserves the keyword ``struct``
-because it is used in legacy ArkUI code.
-This keyword can be used as a replacement for the keyword ``class``
-in :ref:`Class declarations`.
-Class declarations marked with the keyword ``struct``
-are processed by the ArkUI plugin
-and replaced with class declarations that use specific ArkUI types.
+The current compiler reserves the keyword ``struct`` because it is used in
+legacy ArkUI code. This keyword can be used as a replacement for the keyword
+``class`` in :ref:`Class declarations`. Class declarations marked with the
+keyword ``struct`` are processed by the ArkUI plugin and replaced with class
+declarations that use specific ArkUI types.
 
 .. index::
    compiler
-   struct
-   ArkUI
-   compiler plugin
+   keyword struct
+   keyword class
+   class declaration
+   ArkUI plugin
+   ArkUI type
+   ArkUI code
 
 |
 
@@ -178,39 +218,63 @@ and replaced with class declarations that use specific ArkUI types.
 ``OutOfMemoryError`` for Primitive Type Operations
 **************************************************
 
-Execution of some primitive type operations (like
-increment, decrement and assignment)
-can throw ``OutOfMemoryError`` (see :ref:`Error Handling`)
-if allocation of new object is required
-but the available memory is not sufficient to perform it.
+The execution of some primitive type operations (e.g., increment, decrement, and
+assignment) can throw ``OutOfMemoryError`` (see :ref:`Error Handling`) if
+allocation of a new object is required but the available memory is not
+sufficient to perform it.
 
-.. _Uniqueness of Functional Objects:
+.. index::
+   primitive type
+   primitive type operation
+   operation
+   increment
+   decrement
+   assignment
+   error
+   allocation
+   object
+   available memory
 
-Uniqueness of Functional Objects
-********************************
+|
+
+.. _Make a Bridge Method for Overriding Method:
+
+Make a Bridge Method for Overriding Method
+******************************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: None
 
-|TS| and |LANG| handle function objects differently, and the equality test can
-perform differently. The difference can be eliminated in the future versions of
-|LANG|.
+There are cases where the compiler makes an additional
+*bridge* method for overriding method in a subclass of a generic class.
+As the overriding is based on *erased types* (see :ref:`Type Erasure`)
+a *bridge* method is required to provide type safe method call.
+
+The following example illustrates such case:
 
 .. code-block:: typescript
    :linenos:
+   
+    class B<T extends Object> {
+        foo(p: T) {}
+    }
+    class D extends B<string> {
+        foo(p: string> {} // original overriding method
+    }
 
-    function foo() {}
-    foo == foo  // true in Typescript while may be false in ArkTS
-    const f1 = foo
-    const f2 = foo
-    f1 == f2 // true in Typescript while may be false in ArkTS
+For this example, the compiler generates a *bridge* method with 
+the name ``foo`` and signature ``(p: Object)``.
+
+A *bridge* method:
+
+-  Behaves, in most cases, as ordinary method, but is not accessible from 
+   the source code and does not participate in overloading;
+   
+-  In its body, it applies narrowing to argument types to match parameter types in the
+   original method and invokes the original method.
 
 
-.. index::
-   function object
-   equality test
-
-|
+**TBD** Provide more formal description.
 
 .. raw:: pdf
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,17 +22,17 @@ cases:
   - defs: |-
       let v: long = 1;
       let w: int = 12;
-    exp: v = w / 2 + (v as short) - (42 as byte)
+    exp: v = w / 2 + (v.toShort()) - (42 as byte)
     res: 5
 
   - exp: '[1 as short, 2, 3]'
     res: 104
 
   - exp: '[new Object(), "abc"]'
-    res: 132
+    res: 32
 
   - exp: '[new Int(1), 2, 3]'
-    res: 124
+    res: 104
 
   - defs: |-
       let d: Double[];
@@ -43,3 +43,4 @@ cases:
       let k = new Long[3];
     exp: '14 + (k[2] = 2 as long) + k[2] * (k[1] = 1 as long)'
     res: 5
+

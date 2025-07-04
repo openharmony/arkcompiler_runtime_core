@@ -27,6 +27,7 @@
 
 namespace panda::ecmascript {
 class JSThread;
+<<<<<<< HEAD
 }
 
 namespace ark {
@@ -34,6 +35,28 @@ class Coroutine;
 }
 
 namespace common {
+=======
+}  // namespace panda::ecmascript
+
+namespace ark {
+class Coroutine;
+}  // namespace ark
+
+namespace panda {
+// This is a temporary impl to adapt interop to cmc, because some interop call napi
+// without transfering to NATIVE
+using InterOpCoroutineToNativeHookFunc = bool (*)(ThreadHolder *current);
+using InterOpCoroutineToRunningHookFunc = bool (*)(ThreadHolder *current);
+
+PUBLIC_API bool InterOpCoroutineToNative(ThreadHolder *current);
+PUBLIC_API bool InterOpCoroutineToRunning(ThreadHolder *current);
+
+PUBLIC_API void RegisterInterOpCoroutineToNativeHook(InterOpCoroutineToNativeHookFunc func);
+PUBLIC_API void RegisterInterOpCoroutineToRunningHook(InterOpCoroutineToRunningHookFunc func);
+}  // namespace panda
+
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 class BaseThread;
 class ThreadHolderManager;
 
@@ -47,12 +70,23 @@ class ThreadHolderManager;
  * ThreadHolder is a package of execution BaseThreads which must run in the same OS Thread and so could
  * share ThreadState.
  */
+<<<<<<< HEAD
 class ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
     using MutatorBase = common::MutatorBase;
 
+=======
+class PUBLIC_API ThreadHolder {
+public:
+    using JSThread = panda::ecmascript::JSThread;
+    using Coroutine = ark::Coroutine;
+    using MutatorBase = panda::MutatorBase;
+
+    // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+    // NOLINTNEXTLINE(google-explicit-constructor)
+>>>>>>> OpenHarmony_feature_20250328
     ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
     {
         SetCurrent(this);
@@ -113,6 +147,7 @@ public:
     void UnregisterCoroutine(Coroutine *coroutine);
     void VisitAllThreads(CommonRootVisitor visitor);
 
+<<<<<<< HEAD
     // Get the thread-local alloction buffer, which is used for fast path of allocating heap objects.
     // It should be used after binding mutator, and will be invalid after unbinding.
     void* GetAllocBuffer() const
@@ -122,6 +157,9 @@ public:
     }
 
     JSThread* GetJSThread() const
+=======
+    JSThread *GetJSThread() const
+>>>>>>> OpenHarmony_feature_20250328
     {
         return jsThread_;
     }
@@ -137,20 +175,31 @@ public:
     }
 
     // Return if thread has already binded mutator.
+<<<<<<< HEAD
     class TryBindMutatorScope {
     public:
         TryBindMutatorScope(ThreadHolder *holder);
+=======
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
+    class TryBindMutatorScope {
+    public:
+        // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+        TryBindMutatorScope(ThreadHolder *holder);  // NOLINT(google-explicit-constructor)
+>>>>>>> OpenHarmony_feature_20250328
         ~TryBindMutatorScope();
 
     private:
         ThreadHolder *holder_ {nullptr};
     };
 
+<<<<<<< HEAD
     static constexpr size_t GetMutatorBaseOffset()
     {
         return offsetof(ThreadHolder, mutatorBase_);
     }
 
+=======
+>>>>>>> OpenHarmony_feature_20250328
 private:
     ~ThreadHolder()
     {
@@ -162,9 +211,12 @@ private:
 
     MutatorBase *mutatorBase_ {nullptr};
 
+<<<<<<< HEAD
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void* allocBuffer_ {nullptr};
 
+=======
+>>>>>>> OpenHarmony_feature_20250328
     // Access jsThreads/coroutines(iterate/insert/remove) must happen in RunningState from the currentThreadHolder, or
     // in SuspendAll from others, because daemon thread may iterate if in NativeState.
     // And if we use locks to make that thread safe, it would cause a AB-BA dead lock.
@@ -173,9 +225,16 @@ private:
 
     NO_COPY_SEMANTIC_CC(ThreadHolder);
     NO_MOVE_SEMANTIC_CC(ThreadHolder);
+<<<<<<< HEAD
 
     friend JSThread;
     friend ThreadHolderManager;
 };
 }  // namespace common
+=======
+    friend JSThread;
+    friend ThreadHolderManager;
+};
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_H

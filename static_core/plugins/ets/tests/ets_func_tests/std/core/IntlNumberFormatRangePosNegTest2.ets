@@ -17,7 +17,7 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    assertEQ( languageCodes.length, countryCodes.length,  "Error! Size of languageCodes should be the same as countryCodes")
+    arktest.assertEQ( languageCodes.length, countryCodes.length,  "Error! Size of languageCodes should be the same as countryCodes")
 
     let failures: int = 0;
     failures += check(FormatRangePosBigIntNegNumberUnion(), "Intl NumberFormat.formatRange +BigInt -number. Called union-types args");

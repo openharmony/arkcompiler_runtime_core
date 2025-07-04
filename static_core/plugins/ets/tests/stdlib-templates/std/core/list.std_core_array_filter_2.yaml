@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "boolean[]",
-    method_signature: { arr: "boolean[]", fn : "(value:boolean)=>boolean" },
+    result_type: "FixedArray<boolean>",
+    method_signature: { arr: "FixedArray<boolean>", fn : "(value:boolean)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "boolean_array", fn: "func_boolean"},
     method_test_index_data:
@@ -55,8 +55,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "byte[]",
-    method_signature: { arr: "byte[]", fn : "(value:byte)=>boolean" },
+    result_type: "FixedArray<byte>",
+    method_signature: { arr: "FixedArray<byte>", fn : "(value:byte)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "byte_array", fn: "func_byte"},
     method_test_index_data:
@@ -94,8 +94,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "short[]",
-    method_signature: { arr: "short[]", fn : "(value:short)=>boolean" },
+    result_type: "FixedArray<short>",
+    method_signature: { arr: "FixedArray<short>", fn : "(value:short)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "short_array", fn: "func_short"},
     method_test_index_data:
@@ -133,8 +133,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "int[]",
-    method_signature: { arr: "int[]", fn : "(value:int)=>boolean" },
+    result_type: "FixedArray<int>",
+    method_signature: { arr: "FixedArray<int>", fn : "(value:int)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "int_array", fn: "func_int"},
     method_test_index_data:
@@ -172,8 +172,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "long[]",
-    method_signature: { arr: "long[]", fn : "(value:long)=>boolean" },
+    result_type: "FixedArray<long>",
+    method_signature: { arr: "FixedArray<long>", fn : "(value:long)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "long_array", fn: "func_long"},
     method_test_index_data:
@@ -212,8 +212,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "float[]",
-    method_signature: { arr: "float[]", fn : "(value:float)=>boolean" },
+    result_type: "FixedArray<float>",
+    method_signature: { arr: "FixedArray<float>", fn : "(value:float)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "float_array", fn: "func_float"},
     method_test_index_data:
@@ -251,8 +251,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "double[]",
-    method_signature: { arr: "double[]", fn : "(value:double)=>boolean" },
+    result_type: "FixedArray<double>",
+    method_signature: { arr: "FixedArray<double>", fn : "(value:double)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "double_array", fn: "func_double"},
     method_test_index_data:
@@ -290,8 +290,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "char[]",
-    method_signature: { arr: "char[]", fn : "(value:char)=>boolean" },
+    result_type: "FixedArray<char>",
+    method_signature: { arr: "FixedArray<char>", fn : "(value:char)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "char_array", fn: "func_char"},
     method_test_index_data:

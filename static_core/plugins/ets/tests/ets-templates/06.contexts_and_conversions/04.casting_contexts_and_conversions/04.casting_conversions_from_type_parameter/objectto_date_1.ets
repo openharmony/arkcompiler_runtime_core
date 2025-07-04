@@ -20,5 +20,5 @@ desc: Convert to obj-date type.
 function main(): void {
   let now: Date = new Date();
   const obj1: object = now;
-  assertTrue(obj1 == now);
+  arktest.assertTrue(obj1 == now);
 }

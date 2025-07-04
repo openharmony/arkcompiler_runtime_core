@@ -40,10 +40,10 @@ type NullishHelperType = null | string | number
 function cleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(full_gc_id);
+        let fullGcId = GC.startGC(GC.Cause.FULL);
+        GC.waitForFinishGC(fullGcId);
     } catch (e) {
-        assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected exception during GC");
     }
 }
 
@@ -62,14 +62,16 @@ function type_imported__returnBoolean(){
     return typeof getterFn() == "object" && (getterFn() as boolean) == true && (getterFn() as boolean) != false;
 }
 
+// NOTE: this test uses JS integer value which is longer than 32 bits
 function type_imported__returnInteger(){
     const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getInt as TFunctionReturnsNumber;
-    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == (getterFn() as int) * 0.5;
+    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == Double.toInt((getterFn() as int) * 0.5);
 }
 
+// NOTE: this test uses JS integer value which is longer than 32 bit
 function type_imported__returnNegativeInteger(){
     const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getNegativeInt;
-    return typeof getterFn() == "object" && (getterFn() as int) < 0 && (getterFn() as int) * -1 > 0;
+    return typeof getterFn() == "object" && (getterFn() as long) < 0 && (getterFn() as long) * -1 > 0;
 }
 
 
@@ -139,4 +141,3 @@ function type_imported__returnFunction(){
             && (returnNumericValue() as float)> 3
             && (returnNumericValue() as float) < 4;
 }
-

@@ -104,6 +104,7 @@ if (NOT PANDA_TARGET_ARM64)
             tests/debug_info_extractor_test.cpp
             tests/panda_cache_test.cpp
             tests/file_format_version_test.cpp
+            tests/file_writer_test.cpp
         LIBRARIES
             arkbase
             arkfile

@@ -28,8 +28,8 @@ interface I {
 }
 
 class C implements I {
-  private _i:number = 0;
-  private _j:string = "";
+  _i:number = 0;
+  _j:string = "";
   set i(i: number) { z += 1; this._i = i; }
   get i() { z += 10; return this._i; }
   set j(j: string) { z += 5; this._j = j; }
@@ -60,10 +60,10 @@ function fooC(i: Partial<C>) {
 
 function main() {
   z = 0;
-  assertTrue( fooC( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
-  assertTrue( fooI( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
+  arktest.assertTrue( fooC( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( z == 0 );
+  arktest.assertTrue( fooI( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( z == 0 );
 }
 
 {% endfor %}

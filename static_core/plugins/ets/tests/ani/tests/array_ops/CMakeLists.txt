@@ -11,8 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ani_test_array_getlen
+ani_add_gtest(ani_test_array_get_length
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_length_test.cpp
+)
+
+ani_add_gtest(ani_test_array_get_set
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_set_test.cpp
+)
+
+ani_add_gtest(ani_test_array_push_pop
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_push_pop_test.cpp
+)
+
+ani_add_gtest(ani_test_array_managed
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_managed_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_managed_test.ets
 )
 
 ani_add_gtest(ani_test_array_region_boolean
@@ -54,6 +67,10 @@ ani_add_gtest(ani_test_array_new_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_new_ref_test.cpp
 )
 
+ani_add_gtest(ani_test_array_fixedarray_new_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_new_ref_test.cpp
+)
+
 ani_add_gtest(ani_test_array_get_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.ets
@@ -67,9 +84,4 @@ ani_add_gtest(ani_test_array_set_ref
 ani_add_gtest(ani_test_array_region_char
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.ets
-)
-
-ani_add_gtest(ani_test_array_compatibility
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_compatibility_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_compatibility_test.ets
 )

@@ -14,107 +14,115 @@
  */
 
 function checkBoolean(val: boolean) {
-    assertTrue(val == true)
+    arktest.assertTrue(val == true)
 }
 
 function checkBooleanBoxed(val: Boolean) {
-    assertTrue(val == true)
+    arktest.assertTrue(val == true)
 }
 
 function checkByte(val: byte) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkByteOverflow(val: byte, oriVal: int) {
-    assertTrue(val == oriVal as byte)
+    arktest.assertTrue(val == Int.toByte(oriVal))
 }
 
 function checkByteBoxed(val: Byte) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkShort(val: short) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkShortBoxed(val: Short) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkShortOverflow(val: short, oriVal: int) {
-    assertTrue(val == oriVal as short)
+    arktest.assertTrue(val == Int.toShort(oriVal))
 }
 
 function checkInt(val: int) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkIntBoxed(val: Int) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkIntOverflow(val: int, oriVal: long) {
-    assertTrue(val == oriVal as int)
+    arktest.assertTrue(val == Long.toInt(oriVal))
 }
 
 function checkLong(val: long) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkLongBoxed(val: Long) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkFloat(val: float) {
+<<<<<<< HEAD
      assertTrue(val == 2.1f)
 }
 
 function checkFloatBoxed(val: Float) {
     assertTrue(val == 2.1f)
+=======
+     arktest.assertTrue(val == 2.1f)
+}
+
+function checkFloatBoxed(val: Float) {
+    arktest.assertTrue(val == 2.1f)
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function checkFloatOverflow(val: float, oriVal: number) {
-    assertTrue(val == oriVal as float)
+    arktest.assertTrue(val == Double.toFloat(oriVal))
 }
 
 function checkDouble(val: double) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkDoubleBoxed(val: Double) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkNumber(val: number) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkNumberBoxed(val: Number) {
-    assertTrue(val == 1)
+    arktest.assertTrue(val == 1)
 }
 
 function checkChar(val: char) {
-    assertTrue(val == c'1')
+    arktest.assertTrue(val == c'1')
 }
 
 function checkCharBoxed(val: Char) {
-    assertTrue(val.unboxed() == c'1')
+    arktest.assertTrue(val.unboxed() == c'1')
 }
 
 function checkString(val: string) {
-    assertTrue(val == '1')
+    arktest.assertTrue(val == '1')
 }
 
 function checkStringBoxed(val: String) {
-    assertTrue(val == '1')
+    arktest.assertTrue(val == '1')
 }
 
 function checkBigint(val: bigint) {
-    assertTrue(val == 1n)
+    arktest.assertTrue(val == 1n)
 }
 
 function checkBigintBoxed(val: BigInt) {
-    assertTrue(val == 1n)
+    arktest.assertTrue(val == 1n)
 }
 
 function checkNull(val: null) {

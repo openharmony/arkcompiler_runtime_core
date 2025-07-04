@@ -156,7 +156,11 @@ public:
     bool WriteChecksum(size_t offset) override
     {
         auto sub = sp_.SubSpan(offset);
+<<<<<<< HEAD
         return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) != 0);
+=======
+        return (memcpy_s(sub.data(), sizeof(checksum_), &checksum_, sizeof(checksum_)) == 0);
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     bool WriteByte(uint8_t byte) override

@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/ani/ani.h"
 #include "libpandabase/os/file.h"
 
-static ani_array_byte LoadFile(ani_env *env, [[maybe_unused]] ani_class cls, ani_string path)
+static ani_fixedarray_byte LoadFile(ani_env *env, [[maybe_unused]] ani_class cls, ani_string path)
 {
     ani_size pathLength = 0;
     [[maybe_unused]] auto status = env->String_GetUTF8Size(path, &pathLength);
@@ -38,7 +38,7 @@ static ani_array_byte LoadFile(ani_env *env, [[maybe_unused]] ani_class cls, ani
         ani_ref undefined;
         [[maybe_unused]] auto s = env->GetUndefined(&undefined);
         ASSERT(s == ANI_OK);
-        return static_cast<ani_array_byte>(undefined);
+        return static_cast<ani_fixedarray_byte>(undefined);
     };
 
     auto file = ark::os::file::Open(pathToFile, ark::os::file::Mode::READONLY);
@@ -57,10 +57,10 @@ static ani_array_byte LoadFile(ani_env *env, [[maybe_unused]] ani_class cls, ani
         return undefinedFactory("Failed to read file");
     }
 
-    ani_array_byte rawFile;
-    status = env->Array_New_Byte(buffer.size(), &rawFile);
+    ani_fixedarray_byte rawFile;
+    status = env->FixedArray_New_Byte(buffer.size(), &rawFile);
     ASSERT(status == ANI_OK);
-    status = env->Array_SetRegion_Byte(rawFile, 0, buffer.size(), buffer.data());
+    status = env->FixedArray_SetRegion_Byte(rawFile, 0, buffer.size(), buffer.data());
     ASSERT(status == ANI_OK);
     return rawFile;
 }

@@ -70,7 +70,7 @@ class ObjProxyHandler extends DefaultProxyHandler<ObjWithProps> {
         return super.set(target, name, value)
     }
 
-    invoke(target: ObjWithProps, method: Method, args: NullishType[]): NullishType {
+    invoke(target: ObjWithProps, method: Method, args: FixedArray<NullishType>): NullishType {
         const methodName = method.getName()
         if (methodName == "isNameSet") {
             return false
@@ -83,33 +83,33 @@ class ObjProxyHandler extends DefaultProxyHandler<ObjWithProps> {
 }
 
 function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandler): void {
-    assertFalse(objProxyHandler.getTrapped)
-    assertFalse(objProxyHandler.setTrapped)
+    arktest.assertFalse(objProxyHandler.getTrapped)
+    arktest.assertFalse(objProxyHandler.setTrapped)
 
     const objProxy = Proxy.create(obj, objProxyHandler)
 
     objProxy.name = "foo"
-    assertTrue(objProxyHandler.setTrapped)
+    arktest.assertTrue(objProxyHandler.setTrapped)
 
     const objName = objProxy.name
-    assertTrue(objProxyHandler.getTrapped)
+    arktest.assertTrue(objProxyHandler.getTrapped)
 
-    assertEQ(objName,  "foo1")
+    arktest.assertEQ(objName,  "foo1")
 
-    assertTrue(obj.isNameSet())
-    assertFalse(objProxy.isNameSet())
+    arktest.assertTrue(obj.isNameSet())
+    arktest.assertFalse(objProxy.isNameSet())
 
     objProxy.add("bar")
-    assertEQ(objProxy.name, "foo,bar1")
+    arktest.assertEQ(objProxy.name, "foo,bar1")
 
     objProxy.add("baz", "goo")
-    assertEQ(objProxy.name, "foo,bar,baz,goo1")
+    arktest.assertEQ(objProxy.name, "foo,bar,baz,goo1")
 
     const id = objProxy.getId()
-    assertTrue(objProxyHandler.getIdTrapped)
+    arktest.assertTrue(objProxyHandler.getIdTrapped)
 
-    assertEQ(Proxy.tryGetTarget(objProxy), obj)
-    assertEQ(Proxy.tryGetHandler(objProxy), objProxyHandler)
+    arktest.assertEQ(Proxy.tryGetTarget(objProxy), obj)
+    arktest.assertEQ(Proxy.tryGetHandler(objProxy), objProxyHandler)
 }
 
 function testObjectProxyOps(): void {
@@ -122,11 +122,11 @@ function testStdLibClassesProxying(): void {
     class Handler extends DefaultProxyHandler<Map<string, string>> {}
     const mapProxy = Proxy.create(map, new Handler())
 
-    assertTrue(map === mapProxy)
+    arktest.assertTrue(map === mapProxy)
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Proxy API")
+    const suite = new arktest.ArkTestsuite("Proxy API")
 
     suite.addTest("Object proxy operations", testObjectProxyOps)
     suite.addTest("StdLib classes proxying", testStdLibClassesProxying)

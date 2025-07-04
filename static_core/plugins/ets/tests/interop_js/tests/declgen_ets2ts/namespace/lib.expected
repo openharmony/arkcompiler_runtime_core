@@ -45,15 +45,22 @@ export declare namespace myNamespace {
 }
 export declare namespace BarNameSpace {
     namespace FooNameSpace {
+<<<<<<< HEAD
         type Callback2 = (arg: string) => void;
     }
     type Callback = (arg: string) => void;
+=======
+        export type Callback2 = (arg: string) => void;
+    }
+    export type Callback = (arg: string) => void;
+>>>>>>> OpenHarmony_feature_20250328
 }
 export declare namespace MySpace {
     let count: number;
     let message: string;
     function resetMessage(): void;
     function resetState(): void;
+<<<<<<< HEAD
     interface IShape {
         area(): number;
     }
@@ -64,6 +71,16 @@ export declare namespace MySpace {
         public set height(value: number);
         public constructor(width: number, height: number);
         public area(): number;
+=======
+    export interface IShape {
+    area(): number;
+}
+    class Rectangle implements IShape {
+        width: number;
+        height: number;
+        constructor(width: number, height: number);
+        area(): number;
+>>>>>>> OpenHarmony_feature_20250328
     }
     enum Color {
         RED = 0,
@@ -85,5 +102,9 @@ export declare namespace N {
     class NA {
         constructor();
     }
+<<<<<<< HEAD
     type NB = (arg: string) => void;
+=======
+    export type NB = (arg: string) => void;
+>>>>>>> OpenHarmony_feature_20250328
 }

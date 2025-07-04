@@ -20,10 +20,10 @@ desc: Object conversion to bool type.
 function checkType(type: string, o: object): void {
     switch (type) {
         case "bool":
-            assertEQ(o as boolean,true);
+            arktest.assertEQ(o as boolean,true);
             break;
         default:
-            assertTrue(false);
+            arktest.assertTrue(false);
             break;
     }
 }

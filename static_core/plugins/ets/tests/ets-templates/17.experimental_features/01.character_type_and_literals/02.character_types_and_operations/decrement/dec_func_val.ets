@@ -20,17 +20,17 @@ desc: >-
 ---*/
 
 function decPre(p: char): char {
-    return --p
+    return (--p).toChar()
 }
 
 function decPost(p: char): char {
     p--
-    return p
+    return (p).toChar()
 }
 
 function main() {
     const v1 = {{v.v1}}
 
-    assertEQ( ({{v.exp}}), {{v.res}} )
+    arktest.assertEQ( ({{v.exp}}), {{v.res}} )
 }
 {%- endfor %}

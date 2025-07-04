@@ -27,5 +27,5 @@ function main() {
     const v1 = c'\u0020'
     const v2 = c'\u0021'
 
-    assertEQ( (c' ' + foo(false, v2 + v1, v2 - v1)), 1 )
+    arktest.assertEQ( (c' ' + foo(false, v2 + v1, v2 - v1)), 1 )
 }

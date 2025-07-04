@@ -20,5 +20,5 @@ tags: [compile-only, negative]
 
 function main(): void {
   const obj1: object;
-  assertEQ(obj1 as null,false);
+  arktest.assertEQ(obj1 as null,false);
 }

@@ -30,7 +30,7 @@ export class ErrorOptions {
 export class Error {
     private name_: string
     private message_: string
-    private stackLines: StackTraceElement[] = []
+    private stackLines: FixedArray<StackTraceElement> = []
     private stack_?: String
     private cause_?: Object
     private code_: number

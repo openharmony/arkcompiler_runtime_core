@@ -49,7 +49,8 @@ class Tool(ToolBase):
                 else str(self.dev_dir / 'etsstdlib.an')
             an_files.append(stdlib)
         if OptFlags.INT in self.flags:
-            opts += '--compiler-enable-jit=false '
+            opts += '--compiler-enable-jit=false ' \
+                    '--profiler-enabled=false '
         if OptFlags.INT_CPP in self.flags:
             opts += '--interpreter-type=cpp '
         if OptFlags.INT_IRTOC in self.flags:
@@ -62,7 +63,7 @@ class Tool(ToolBase):
                     '--log-file={gclog} '
         if OptFlags.JIT_STATS in self.flags:
             opts += '--compiler-dump-jit-stats-csv={abc}.dump.csv '
-        if OptFlags.AOT in self.flags:
+        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
             an_files.append('{an}')
         if an_files:
             enable_an = '' if Target.HOST == self.target else '--enable-an:force'
@@ -71,13 +72,13 @@ class Tool(ToolBase):
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
                    f'--load-runtimes=ets {opts} {self.custom} ' \
-                   '{options} {abc} {name}.ETSGLOBAL::main'
+                   '{options} {abc} {name}.VmbLauncher::main'
 
     @property
     def name(self) -> str:
         return 'Ark VM'
 
-    def exec(self, bu: BenchUnit) -> None:
+    def do_exec(self, bu: BenchUnit, profile: bool = False) -> None:
         bu_flags, _ = self.get_bu_opts(bu)
         gclog = ''
         libs = ':'.join([str(f) for f in self.x_libs(bu, '.abc')])
@@ -95,9 +96,21 @@ class Tool(ToolBase):
             options += '--compiler-inlining=false '
         if OptFlags.GC_STATS in bu_flags:
             gclog = str(abc.with_suffix('.gclog.txt'))
+        if profile:
+            options += ('--compiler-profiling-threshold=0 '
+                        '--profilesaver-enabled=true '
+                        f'--profile-output={abc}.profdata ')
         arkts_cmd = self.cmd.format(
             name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
-        res = self.x_run(arkts_cmd)
+        if Target.OHOS == self.target:  # console writes to hilog on OHOS
+            res = self.hdc.run_syslog(
+                cmd=arkts_cmd,
+                finished_marker=f'Benchmark result: {bu.name}',
+                measure_time=True,
+                ping_interval=0,  # grep log immidiately after cmd
+                tag='ArkTSApp')   # grep only bench-related records
+        else:
+            res = self.x_run(arkts_cmd)
         bu.parse_run_output(res)
         if OptFlags.JIT_STATS in bu_flags:
             csv = Path(f'{abc}.dump.csv')
@@ -108,6 +121,9 @@ class Tool(ToolBase):
                 bu.result.jit_stats = JITStat.from_csv(csv)
             else:
                 log.error('JIT stats dump missed: %s', str(csv))
+
+    def exec(self, bu: BenchUnit) -> None:
+        self.do_exec(bu)
 
     def kill(self) -> None:
         self.x_sh.run('pkill ark')

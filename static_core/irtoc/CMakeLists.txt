@@ -128,6 +128,11 @@ function(irtoc_generate)
 
     set(IRTOC_PLUGINS_FILE ${IRTOC_BUILD_DIR}/generated/plugins.txt)
 
+    set(irtoc_cpu_features "")
+    if (NOT "${PANDA_TARGET_CPU_FEATURES}" STREQUAL "")
+        set(irtoc_cpu_features "--cpu-features=${PANDA_TARGET_CPU_FEATURES}")
+    endif()
+
     add_custom_command(OUTPUT ${ARG_OUTPUT_FILES}
         COMMENT             "Run IRtoC generator for ${ARG_TARGET}"
         COMMAND             ruby ${IRTOC_SOURCE_DIR}/lang/irtoc.rb
@@ -138,6 +143,7 @@ function(irtoc_generate)
                                 --isa ${ISA}
                                 ${IRTOC_DEFINITIONS}
                                 --arch ${IRTOC_TARGET}
+                                ${irtoc_cpu_features}
                                 --plugins ${IRTOC_PLUGINS_FILE}
         WORKING_DIRECTORY   ${ARG_WORKING_DIRECTORY}
         DEPENDS             ${IRTOC_LANG_SOURCES} ${ARG_INPUT_FILES} ${ISA} ${ISAPI} ${IRTOC_SOURCE_DIR}/scripts/common.irt ${IRTOC_PLUGINS_FILE}

@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray forEach with no parameter function", testForEachNoParameterFunction);
     suite.addTest("PlainArray forEach with function with value", testForEachWithOneParameter);
@@ -50,7 +50,7 @@ function testForEachNoParameterFunction() {
     plainArray.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
+    arktest.assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
 }
 
 function testForEachWithOneParameter() {
@@ -60,9 +60,9 @@ function testForEachWithOneParameter() {
     }
     let forEachCount: number = 0;
     plainArray.forEach((value: number) => {
-        assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
+        arktest.assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
     });
-    assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
+    arktest.assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
 }
 
 function testForEachWithTwoParameters() {
@@ -72,10 +72,10 @@ function testForEachWithTwoParameters() {
     }
     let forEachCount: number = 0;
     plainArray.forEach((value: number, index: number) => {
-        assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
-        assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
+        arktest.assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
+        arktest.assertEQ(value, plainArray.getValueAt(forEachCount++), "ForEach should iterate and modify elements correctly");
     });
-    assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
+    arktest.assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
 }
 
 function testForEachWithThreeParameters() {
@@ -85,15 +85,15 @@ function testForEachWithThreeParameters() {
     }
     let forEachCount: number = 0;
     plainArray.forEach((value: number, index: number, tempPlainArray: PlainArray<number>) => {
-        assertEQ(plainArray, tempPlainArray, "TempPlainArray should be this");
-        assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
-        assertEQ(value, plainArray.getValueAt(forEachCount), "ForEach should iterate and modify elements correctly");
-        assertEQ(tempPlainArray.getValueAt(forEachCount), plainArray.getValueAt(forEachCount),
+        arktest.assertEQ(plainArray, tempPlainArray, "TempPlainArray should be this");
+        arktest.assertEQ(index, plainArray.getKeyAt(forEachCount), "ForEach should iterate and modify elements correctly");
+        arktest.assertEQ(value, plainArray.getValueAt(forEachCount), "ForEach should iterate and modify elements correctly");
+        arktest.assertEQ(tempPlainArray.getValueAt(forEachCount), plainArray.getValueAt(forEachCount),
             "The value at same index should be same");
-        assertEQ(tempPlainArray.getKeyAt(forEachCount), plainArray.getKeyAt(forEachCount++),
+        arktest.assertEQ(tempPlainArray.getKeyAt(forEachCount), plainArray.getKeyAt(forEachCount++),
             "The key at same index should be same");
     });
-    assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
+    arktest.assertEQ(forEachCount, plainArray.length, "ForEach count should match plainArray length");
 }
 
 function testForEachWithEmpty() {
@@ -102,7 +102,7 @@ function testForEachWithEmpty() {
     plainArray.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.testNumber1, "ForEach should not execute the callback function");
+    arktest.assertEQ(forEachCount, TestData.testNumber1, "ForEach should not execute the callback function");
 }
 
 function testForEachChangeValue() {
@@ -113,7 +113,7 @@ function testForEachChangeValue() {
     plainArray.forEach((value: number) => {
         value = TestData.testNumber6;
     });
-    assertEQ(plainArray.toString(), TestData.testString1, "The elements should not change");
+    arktest.assertEQ(plainArray.toString(), TestData.testString1, "The elements should not change");
 }
 
 function testIteratorWithEmpty() {
@@ -127,7 +127,7 @@ function testIteratorWithEmpty() {
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
-    assertEQ(elem, 0, "Iterator over empty PlainArray should not iterate any elements");
+    arktest.assertEQ(elem, 0, "Iterator over empty PlainArray should not iterate any elements");
 }
 
 function testIteratorWithNonEmpty() {
@@ -137,17 +137,22 @@ function testIteratorWithNonEmpty() {
     }
     let elem1: number = 0;
     for (let item of plainArray) {
-        assertEQ(item[TestData.testInt1], plainArray.getValueAt(elem1), "The value should be same");
-        assertEQ(item[0], plainArray.getKeyAt(elem1++), "The key should be same");
+        arktest.assertEQ(item[TestData.testInt1], plainArray.getValueAt(elem1), "The value should be same");
+        arktest.assertEQ(item[0], plainArray.getKeyAt(elem1++), "The key should be same");
     }
     let iter = plainArray.$_iterator();
     let temp: IteratorResult<[Number, string]> = iter.next();
     let elem2: number = 0;
     while (!temp.done) {
-        assertEQ(temp.value![TestData.testInt1], plainArray.getValueAt(elem2), "The value should be same");
-        assertEQ(temp.value![0], plainArray.getKeyAt(elem2++), "The key should be same");
+        arktest.assertEQ(temp.value![TestData.testInt1], plainArray.getValueAt(elem2), "The value should be same");
+        arktest.assertEQ(temp.value![0], plainArray.getKeyAt(elem2++), "The key should be same");
         temp = iter.next();
     }
+<<<<<<< HEAD
     assertEQ(elem1, plainArray.length, "Iterator should iterate all elements correctly");
     assertEQ(elem2, plainArray.length, "Iterator should iterate all elements correctly");
+=======
+    arktest.assertEQ(elem1, plainArray.length, "Iterator should iterate all elements correctly");
+    arktest.assertEQ(elem2, plainArray.length, "Iterator should iterate all elements correctly");
+>>>>>>> OpenHarmony_feature_20250328
 }

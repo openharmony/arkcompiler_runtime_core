@@ -36,7 +36,7 @@ export namespace Intl {
         maximumFractionDigits: number
         minimumSignificantDigits?: number
         maximumSignificantDigits?: number
-        pluralCategories: LDMLPluralRule[]
+        pluralCategories: FixedArray<LDMLPluralRule>
     }
 
     export interface SupportedLocalesOfOptions {
@@ -56,11 +56,11 @@ export namespace Intl {
     export class PluralRules {
         private options : ResolvedPluralRulesOptions
 
-        public constructor(locales?: string | string[], options?: PluralRulesOptions) {
+        public constructor(locales?: string | FixedArray<string>, options?: PluralRulesOptions) {
             const localeMatcher = options?.localeMatcher ?? "best fit"
             const locale = this.resolveLocale(localeMatcher, locales)
             const type: PluralRuleType = options?.type ?? "cardinal"
-            const categories = PluralRules.getPluralCategories(locale, type) as LDMLPluralRule[]
+            const categories = PluralRules.getPluralCategories(locale, type) as FixedArray<LDMLPluralRule>
             this.options = {
                 locale: locale,
                 localeMatcher: localeMatcher,
@@ -74,9 +74,12 @@ export namespace Intl {
             } as ResolvedPluralRulesOptions
         }
 
-        private resolveLocale(localeMatcher: "lookup" | "best fit", locales?: string | string[]): string {
-            const locale = PluralRules.toArray(locales)[0]
-            return localeMatcher === "lookup" ? intlLookUpLocale(locale) : intlBestFitLocale(locale)
+        private resolveLocale(localeMatcher: "lookup" | "best fit", locales?: string | FixedArray<string>): string {
+            if (locales === undefined) {
+                return Locale.defaultTag()
+            }
+            const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
+            return localeMatcher === "lookup" ? intlLookUpLocale(arr) : intlBestFitLocale(arr)
         }
 
         public resolvedOptions(): ResolvedPluralRulesOptions {
@@ -96,30 +99,22 @@ export namespace Intl {
             return PluralRules.selectDouble(value, options) as LDMLPluralRule
         }
 
-        public static supportedLocalesOf(locales: string | string[], options?: SupportedLocalesOfOptions): string[] {
-            const result = PluralRules.toArray(locales)
-            const localeMatcher = options?.localeMatcher ?? "best fit"
-            for (let i = 0; i < result.length; i++) {
-                result[i] = localeMatcher === "lookup"
-                    ? intlLookUpLocale(result[i])
-                    : intlBestFitLocale(result[i])
-            }
-            return result
+        public static supportedLocalesOf(locales: string | FixedArray<string> | Array<string>, options?: SupportedLocalesOfOptions | PluralRulesOptions): string[] {
+            const arr = PluralRules.toArray(locales)
+            return options?.localeMatcher === "lookup" ? intlLookUpLocales(arr) : intlBestFitLocales(arr)
         }
 
-        private static toArray(locales?: string | string[]): string[] {
-            if (!locales) {
-                return [PluralRules.getDefaultLocaleTag()]
+        private static toArray(locales: string | FixedArray<string> | Array<string>): string[] {
+            if (locales instanceof FixedArray<string>) {
+                return Array.from(locales)
+            } else if (locales instanceof string) {
+                return [locales]
+            } else {
+                return locales
             }
-            if (locales instanceof string) {
-                return [locales as string]
-            }
-            return locales as string[]
         }
 
         private static native selectDouble(value: double, options: Object): string
-
-        private static native getDefaultLocaleTag(): string
 
         private static native getPluralCategories(locale: string, type: string): Object
     }

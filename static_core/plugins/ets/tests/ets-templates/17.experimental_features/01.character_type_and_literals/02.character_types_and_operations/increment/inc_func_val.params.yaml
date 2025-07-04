@@ -24,12 +24,12 @@ vals:
 
     # 2.
     - v1: c'\u0020'
-      exp: "(c' ' + incPre(v1)) as char"
+      exp: "(c' ' + incPre(v1)).toChar()"
       res: c'A'
 
     # 3.
     - v1: c'\u0020'
-      exp: "(c' ' + incPost(v1)) as char"
+      exp: "(c' ' + incPost(v1)).toChar()"
       res: c'A'
 
     # 4.
@@ -44,30 +44,30 @@ vals:
 
     # 6. Widening to int happens
     - v1: c'\uFFFF'
-      exp: "incPre((c'!' + v1 + v1) as char)"
+      exp: "incPre((c'!' + v1 + v1).toChar())"
       res: c'\u0020'
 
     # 7. Widening to int happens
     - v1: c'\uFFFF'
-      exp: "incPost((c'!' + v1 + v1) as char)"
+      exp: "incPost((c'!' + v1 + v1).toChar())"
       res: c'\u0020'
 
     # 8. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "(incPre((v1 + c'1') as char) + incPre(c'\\uACD9')) as char"
+      exp: "(incPre((v1 + c'1').toChar()) + incPre(c'\\uACD9')).toChar()"
       res: c'\uBC1B'
 
     # 9. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "(incPost((v1 + c'1') as char) + incPost(c'\\uACD9')) as char"
+      exp: "(incPost((v1 + c'1').toChar()) + incPost(c'\\uACD9')).toChar()"
       res: c'\uBC1B'
 
     - v1: c'\u007F'
-      exp: "(incPre(c'\\u0000') + incPre(v1)) as char"
+      exp: "(incPre(c'\\u0000') + incPre(v1)).toChar()"
       res: c'\u0081'
 
     - v1: c'\u007F'
-      exp: "(incPost(c'\\u0000') + incPost(v1)) as char"
+      exp: "(incPost(c'\\u0000') + incPost(v1)).toChar()"
       res: c'\u0081'
 
     - v1: c'∫'

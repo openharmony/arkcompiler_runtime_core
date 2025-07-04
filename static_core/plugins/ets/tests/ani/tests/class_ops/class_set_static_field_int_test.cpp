@@ -42,7 +42,7 @@ public:
 TEST_F(ClassSetStaticFieldIntTest, set_int)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -57,7 +57,7 @@ TEST_F(ClassSetStaticFieldIntTest, set_int)
 TEST_F(ClassSetStaticFieldIntTest, set_int_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -72,7 +72,7 @@ TEST_F(ClassSetStaticFieldIntTest, set_int_c_api)
 TEST_F(ClassSetStaticFieldIntTest, set_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -82,7 +82,7 @@ TEST_F(ClassSetStaticFieldIntTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldIntTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -95,14 +95,14 @@ TEST_F(ClassSetStaticFieldIntTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldIntTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Int(cls, nullptr, 1024U), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassSetStaticFieldIntTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field = nullptr;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -113,7 +113,7 @@ TEST_F(ClassSetStaticFieldIntTest, invalid_argument4)
 TEST_F(ClassSetStaticFieldIntTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -133,7 +133,7 @@ TEST_F(ClassSetStaticFieldIntTest, special_values)
 TEST_F(ClassSetStaticFieldIntTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_int_test/TestSetInt;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetInt", &cls), ANI_OK);
     ani_static_field field {};
     const ani_int setTar = 1024;
     const ani_int setTar2 = 10;
@@ -153,13 +153,28 @@ TEST_F(ClassSetStaticFieldIntTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldIntTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_int_test/TestSetIntA;", "int_value");
+    CheckFieldValue("class_set_static_field_int_test.TestSetIntA", "int_value");
 }
 
 TEST_F(ClassSetStaticFieldIntTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_int_test/TestSetIntFinal;", "int_value");
+    CheckFieldValue("class_set_static_field_int_test.TestSetIntFinal", "int_value");
 }
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetIntFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.TestSetIntFinal"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.TestSetIntFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

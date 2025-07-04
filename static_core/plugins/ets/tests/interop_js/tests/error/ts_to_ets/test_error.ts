@@ -14,6 +14,7 @@
  */
 
 export let err: Error = new Error('This is a Error');
+export let errRangeError: RangeError = new RangeError('This is a RangeError');
 
 export function ErrorFunc(message: string): void {
   throw new Error(message);

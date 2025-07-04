@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 package std.interop.js;
 
+<<<<<<< HEAD
 export type StaticOrESObject = ESObject | Object | null | undefined
 export type ESObjectCallbackData = object
 export type ESObjectCallback = (argThis: ESObject, argNewTgt: ESObject, args: ESObject[], data?: ESObjectCallbackData) => ESObject
@@ -508,3 +509,6 @@ final class ESObjectEntriesIterator implements IterableIterator<[ESObject, ESObj
         return this;
     }
 }
+=======
+export type ESObject = ESValue;
+>>>>>>> OpenHarmony_feature_20250328

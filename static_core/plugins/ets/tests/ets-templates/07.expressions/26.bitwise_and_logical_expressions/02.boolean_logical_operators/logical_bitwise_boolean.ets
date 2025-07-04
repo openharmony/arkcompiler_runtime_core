@@ -24,7 +24,7 @@ function main(): void {
   let x: Boolean = {{i.xorigin}};
   let y: Boolean = {{i.yorigin}};
   let dest: Boolean = {{i.dest}};
-  assertTrue((x {{i.op}} y) == dest);
+  arktest.assertTrue((x {{i.op}} y) == dest);
 }
 
 {% endfor %}

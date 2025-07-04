@@ -16,15 +16,25 @@
 #ifndef COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 #define COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 
+<<<<<<< HEAD
 #include "common_interfaces/objects/base_object.h"
 
 namespace common {
+=======
+#include "objects/base_object.h"
+
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 template <typename T>
 class ReadOnlyHandle {
 public:
     inline explicit ReadOnlyHandle(uintptr_t slot) : address_(slot)
     {
+<<<<<<< HEAD
         DCHECK_CC(slot != 0);
+=======
+        ASSERT_COMMON(slot != 0);
+>>>>>>> OpenHarmony_feature_20250328
         T::Cast(*reinterpret_cast<BaseObject **>(slot));
     }
     inline ReadOnlyHandle() : address_(reinterpret_cast<uintptr_t>(nullptr)) {}
@@ -46,7 +56,11 @@ public:
     template <typename S>
     static ReadOnlyHandle<T> Cast(const ReadOnlyHandle<S> &handle)
     {
+<<<<<<< HEAD
         T::Cast(handle.GetTaggedValue().GetTaggedObject());
+=======
+        T::Cast(handle.GetBaseObject());
+>>>>>>> OpenHarmony_feature_20250328
         return ReadOnlyHandle<T>(handle.GetAddress());
     }
 

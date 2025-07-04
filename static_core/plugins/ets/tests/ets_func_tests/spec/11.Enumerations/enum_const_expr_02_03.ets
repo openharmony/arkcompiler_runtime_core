@@ -29,8 +29,8 @@ enum ConstExpr {
 type MainResultType = int
 
 function main(): MainResultType {
-    assertEQ( ConstExpr.READ.getValue(), "Hello")
-    assertEQ( ConstExpr.WRITE.getValue(), "World")
-    assertEQ( ConstExpr.READ_WRITE.getValue(), "HelloWorld")
+    arktest.assertEQ( ConstExpr.READ.getValue(), "Hello")
+    arktest.assertEQ( ConstExpr.WRITE.getValue(), "World")
+    arktest.assertEQ( ConstExpr.READ_WRITE.getValue(), "HelloWorld")
     return 0
 }

@@ -99,7 +99,8 @@ private:
     static panda_file::MethodItem *FindMethod(const Function &func, const std::string &name,
                                               const AsmEmitter::AsmEntityCollections &entities);
     static panda_file::MethodItem *FindAmongAllMethods(const std::string &name,
-                                                       const AsmEmitter::AsmEntityCollections &entities);
+                                                       const AsmEmitter::AsmEntityCollections &entities,
+                                                       const Value *value);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool HandleFields(
         panda_file::ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,

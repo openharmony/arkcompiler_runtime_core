@@ -37,7 +37,6 @@ struct Program {
     std::map<std::string, ark::pandasm::Record> recordTable;
     std::map<std::string, ark::pandasm::Function> functionInstanceTable;
     std::map<std::string, ark::pandasm::Function> functionStaticTable;
-    std::vector<std::pair<std::string, std::string>> exportStrMap;
     std::unordered_map<std::string, std::vector<std::string>>
         functionSynonyms;  // we might keep unordered, since we don't iterate over it
     std::map<std::string, ark::pandasm::LiteralArray> literalarrayTable;

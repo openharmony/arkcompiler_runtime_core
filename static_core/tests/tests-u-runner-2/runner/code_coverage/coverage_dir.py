@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 from functools import cached_property
 from pathlib import Path
+
 from runner.options.options_general import GeneralOptions
 
 
@@ -27,8 +28,8 @@ class CoverageDir:
 
     @property
     def html_report_dir(self) -> Path:
-        if self.__general.coverage.llvm_cov_html_out_path:
-            html_out_path = Path(self.__general.coverage.llvm_cov_html_out_path)
+        if self.__general.coverage.coverage_html_report_dir:
+            html_out_path = Path(self.__general.coverage.coverage_html_report_dir)
         else:
             html_out_path = self.root / "html_report_dir"
         html_out_path.mkdir(parents=True, exist_ok=True)
@@ -58,8 +59,8 @@ class CoverageDir:
 
     @cached_property
     def profdata_dir(self) -> Path:
-        if self.__general.coverage.llvm_profdata_out_path:
-            profdata_out_path = Path(self.__general.coverage.llvm_profdata_out_path)
+        if self.__general.coverage.profdata_files_dir:
+            profdata_out_path = Path(self.__general.coverage.profdata_files_dir)
         else:
             profdata_out_path = self.root / "profdata_dir"
         profdata_out_path.mkdir(parents=True, exist_ok=True)

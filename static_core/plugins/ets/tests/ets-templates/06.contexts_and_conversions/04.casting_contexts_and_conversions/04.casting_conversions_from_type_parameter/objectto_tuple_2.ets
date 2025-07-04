@@ -21,5 +21,5 @@ let tuple: [number, string, boolean] = [1, "hello", true];
 
 function main(): void {
   const obj1: object = tuple;
-  assertTrue(obj1 == tuple);
+  arktest.assertTrue(obj1 == tuple);
 }

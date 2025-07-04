@@ -22,7 +22,11 @@ function testToString() {
             buf1.writeInt8(i + 97, i);
         }
         const res = buf1.toString('base64'); // YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=
+<<<<<<< HEAD
         assertEQ(res, "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=");
+=======
+        arktest.assertEQ(res, "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=");
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -30,7 +34,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 30); // '';
+<<<<<<< HEAD
         assertEQ(str, '')
+=======
+        arktest.assertEQ(str, '')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -38,7 +46,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 5, 3); // ''
+<<<<<<< HEAD
         assertEQ(str, '');
+=======
+        arktest.assertEQ(str, '');
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -46,7 +58,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', -1); // abcdefghijklmnopqrstuvwxyz
+<<<<<<< HEAD
         assertEQ(str, 'abcdefghijklmnopqrstuvwxyz');
+=======
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz');
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -54,7 +70,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', Infinity); // ''
+<<<<<<< HEAD
         assertEQ(str, '');
+=======
+        arktest.assertEQ(str, '');
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -62,7 +82,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', -Infinity); // abcdefghijklmnopqrstuvwxyz
+<<<<<<< HEAD
         assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+=======
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -70,7 +94,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', undefined, Infinity) // abcdefghijklmnopqrstuvwxyz
+<<<<<<< HEAD
         assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+=======
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -78,7 +106,11 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 0, -Infinity); // ''
+<<<<<<< HEAD
         assertEQ(str, '')
+=======
+        arktest.assertEQ(str, '')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -86,26 +118,43 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', undefined, -1); // ''
+<<<<<<< HEAD
         assertEQ(str, '')
+=======
+        arktest.assertEQ(str, '')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, -1); // ''
+<<<<<<< HEAD
         assertEQ(res, '')
+=======
+        arktest.assertEQ(res, '')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, Infinity); // aGVsbG8=
+<<<<<<< HEAD
         assertEQ(res, 'aGVsbG8=')
+=======
+        arktest.assertEQ(res, 'aGVsbG8=')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, -Infinity); // ''
+<<<<<<< HEAD
         assertEQ(res, '')
+=======
+        arktest.assertEQ(res, '')
+>>>>>>> OpenHarmony_feature_20250328
     }
     {
         let array = new Uint8Array([252, 11, 3, 67, 237, 118, 91, 177, 43]);
         let buf = buffer.from(array);
+<<<<<<< HEAD
         let strUrl = buf.toString('base64url');
         let str = buf.toString('base64');
         assertEQ(strUrl, '_AsDQ-12W7Er');
@@ -145,11 +194,56 @@ function testToString() {
         str = buf.toString('base64');
         assertEQ(strUrl, '_GGO');
         assertEQ(str, '/GGO');
+=======
+        let strUrl = buf.toString("base64url");
+        let str = buf.toString("base64");
+        arktest.assertEQ(strUrl, "_AsDQ-12W7Er");
+        arktest.assertEQ(str, "/AsDQ+12W7Er");
+
+        array = new Uint8Array([2, 192, 254, 253, 5, 132, 69]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        arktest.assertEQ(String(strUrl), 'AsD-_QWERQ');
+        arktest.assertEQ(str, "AsD+/QWERQ==");
+
+        array = new Uint8Array([215, 109, 211, 97, 72, 142, 167, 241]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        arktest.assertEQ(strUrl, "123TYUiOp_E");
+        arktest.assertEQ(str, "123TYUiOp/E=");
+
+        array = new Uint8Array([252]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        arktest.assertEQ(strUrl, "_A");
+        arktest.assertEQ(str, "/A==");
+
+        array = new Uint8Array([252, 97]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        arktest.assertEQ(strUrl, "_GE");
+        arktest.assertEQ(str, "/GE=");
+
+        array = new Uint8Array([252, 97, 142]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        arktest.assertEQ(strUrl, "_GGO");
+        arktest.assertEQ(str, "/GGO");
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
 function main(): int {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("Buffer API tests")
+=======
+    const suite = new arktest.ArkTestsuite("Buffer API tests")
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Test buffer toString", testToString)
     return suite.run()
 }

@@ -24,7 +24,7 @@ function main(): void {
   let x: byte = {{i.xorigin}};
   let y: byte = {{i.yorigin}};
   let dest: byte = {{i.dest}};
-  assertTrue((x {{i.op}} y) == dest);
+  arktest.assertTrue((x {{i.op}} y) == dest);
 }
 
 {% endfor %}

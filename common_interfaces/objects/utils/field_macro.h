@@ -16,6 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 #define COMMON_INTERFACES_OBJECTS_UTILS_FIELD_MACRO_H
 
+<<<<<<< HEAD
 #include <type_traits>
 #include <utility>
 
@@ -40,6 +41,31 @@ inline type Get##name() const                                           \
     auto *addr = reinterpret_cast<type *>(ToUintPtr(this) + offset);    \
     /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */               \
     return *addr;                                                       \
+=======
+#include "objects/utils/objects_traits.h"
+#include "base_runtime.h"
+#include <type_traits>
+#include <utility>
+
+// CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PRIMITIVE_FIELD(name, type, offset, endOffset)                                      \
+static constexpr size_t endOffset = (offset) + sizeof(type);                                \
+inline void Set##name(type value)                                                           \
+{                                                                                           \
+    /* CC-OFFNXT(G.PRE.02) code readability */                                              \
+    auto *addr = reinterpret_cast<type *>(reinterpret_cast<uintptr_t>(this) + (offset));    \
+    /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                   \
+    *addr = value;                                                                          \
+}                                                                                           \
+inline type Get##name() const                                                               \
+{                                                                                           \
+    /* CC-OFFNXT(G.PRE.02) code readability */                                              \
+    auto *addr = reinterpret_cast<type *>(reinterpret_cast<uintptr_t>(this) + (offset));    \
+    /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                   \
+    return *addr;                                                                           \
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 // CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
@@ -53,7 +79,11 @@ inline void Set##name(WriteBarrier &&writeBarrier, PointerType value)           
 {                                                                                                 \
     /* CC-OFFNXT(G.PRE.02) code readability */                                                    \
     void *obj = static_cast<void *>(this);                                                        \
+<<<<<<< HEAD
     std::invoke(writeBarrier, obj, offset, value);                                                \
+=======
+    std::invoke(std::forward<WriteBarrier>(writeBarrier), obj, offset, value);                    \
+>>>>>>> OpenHarmony_feature_20250328
 }                                                                                                 \
                                                                                                   \
 template <typename PointerType, typename ReadBarrier,                                             \
@@ -62,7 +92,12 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
 {                                                                                                 \
     /* CC-OFFNXT(G.PRE.02) code readability */                                                    \
     /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                                         \
+<<<<<<< HEAD
     return std::invoke(readBarrier, const_cast<void *>(static_cast<const void *>(this)), offset); \
+=======
+    return std::invoke(std::forward<ReadBarrier>(readBarrier),                                    \
+        const_cast<void *>(static_cast<const void *>(this)), offset);                             \
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 #if !defined(NDEBUG)
@@ -98,7 +133,11 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
     static inline CAST_TYPE *Cast(BaseObject *object)                                       \
     {                                                                                       \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
+<<<<<<< HEAD
         DCHECK_CC(object->CHECK_METHOD());                                                     \
+=======
+        ASSERT_COMMON(object->CHECK_METHOD());                                              \
+>>>>>>> OpenHarmony_feature_20250328
         /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                               \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
         return static_cast<CAST_TYPE *>(object);                                            \
@@ -106,7 +145,11 @@ inline PointerType Get##name(ReadBarrier &&readBarrier) const                   
     static const inline CAST_TYPE *ConstCast(const BaseObject *object)                      \
     {                                                                                       \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
+<<<<<<< HEAD
         DCHECK_CC(object->CHECK_METHOD());                                                     \
+=======
+        ASSERT_COMMON(object->CHECK_METHOD());                                              \
+>>>>>>> OpenHarmony_feature_20250328
         /* CC-OFFNXT(G.PRE.05) C_RULE_ID_KEYWORD_IN_DEFINE */                               \
         /* CC-OFFNXT(G.PRE.02) code readability */                                          \
         return static_cast<const CAST_TYPE *>(object);                                      \

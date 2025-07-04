@@ -31,10 +31,10 @@ public:
     void GetValueMethod(ani_method *checkMethod)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lcall_object_method_void_test/A;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("call_object_method_void_test.A", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
-        ASSERT_EQ(env_->Class_FindMethod(cls, "getCount", ":I", checkMethod), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "getCount", ":i", checkMethod), ANI_OK);
         ASSERT_NE(checkMethod, nullptr);
     }
 };
@@ -43,7 +43,7 @@ TEST_F(CallObjectMethodVoidTest, object_call_method_void_a)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
     ani_method getMethod {};
     GetValueMethod(&getMethod);
 
@@ -62,7 +62,7 @@ TEST_F(CallObjectMethodVoidTest, object_call_method_void_v)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
     ani_method getMethod {};
     GetValueMethod(&getMethod);
 
@@ -78,7 +78,7 @@ TEST_F(CallObjectMethodVoidTest, object_call_method_void)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
     ani_method getMethod {};
     GetValueMethod(&getMethod);
 
@@ -94,7 +94,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_v_invalid_env)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ani_int a = VAL3;
     ani_int b = VAL6;
@@ -105,7 +105,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_v_invalid_method)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ani_int a = VAL3;
     ani_int b = VAL6;
@@ -116,7 +116,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_v_invalid_object)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ani_int a = VAL3;
     ani_int b = VAL6;
@@ -127,7 +127,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_a_invalid_method)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ani_value args[2];
     ani_int arg1 = VAL;
@@ -141,7 +141,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_a_invalid_object)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ani_value args[2];
     ani_int arg1 = VAL;
@@ -155,7 +155,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_a_invalid_args)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
 
     ASSERT_EQ(env_->Object_CallMethod_Void_A(object, voidMethod, nullptr), ANI_INVALID_ARGS);
 }
@@ -164,7 +164,7 @@ TEST_F(CallObjectMethodVoidTest, call_method_void_invalid_env)
 {
     ani_object object {};
     ani_method voidMethod {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &voidMethod);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &voidMethod);
     ani_int arg1 = 2;
     ani_int arg2 = 3;
 
@@ -175,7 +175,7 @@ TEST_F(CallObjectMethodVoidTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethodVoidParam", ":V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethodVoidParam", ":", &object, &method);
     ani_method checkMethod {};
     GetValueMethod(&checkMethod);
 
@@ -194,7 +194,7 @@ TEST_F(CallObjectMethodVoidTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethodMultipleParam", "IZFIF:V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethodMultipleParam", "izfif:", &object, &method);
 
     const ani_int arg1 = VAL;
     const ani_boolean arg2 = ANI_TRUE;
@@ -213,7 +213,7 @@ TEST_F(CallObjectMethodVoidTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/B;", "voidMethodVoidParam", ":V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.B", "voidMethodVoidParam", ":", &object, &method);
 
     ani_int result = 0;
     ani_method checkMethod {};
@@ -231,7 +231,7 @@ TEST_F(CallObjectMethodVoidTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodVoidTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_void_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_void_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -239,10 +239,10 @@ TEST_F(CallObjectMethodVoidTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_void_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_void_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -256,7 +256,7 @@ TEST_F(CallObjectMethodVoidTest, call_Parent_Class_Method)
 
     ani_int result = 0;
     ani_method checkMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "getCount", ":I", &checkMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "getCount", ":i", &checkMethod), ANI_OK);
     ASSERT_NE(checkMethod, nullptr);
 
     ASSERT_EQ(env_->Object_CallMethod_Void(object, method, arg1, arg2), ANI_OK);
@@ -272,7 +272,7 @@ TEST_F(CallObjectMethodVoidTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/E;", "func", nullptr, &object, &method);
+    GetMethodAndObject("call_object_method_void_test.E", "func", nullptr, &object, &method);
 
     ani_int result = 0;
     ani_value args[2U] = {};
@@ -282,10 +282,10 @@ TEST_F(CallObjectMethodVoidTest, call_Sub_Class_Method)
     args[1U].i = arg2;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_void_test/E;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_void_test.E", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ani_method checkMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "getCount", ":I", &checkMethod), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "getCount", ":i", &checkMethod), ANI_OK);
     ASSERT_NE(checkMethod, nullptr);
 
     ASSERT_EQ(env_->Object_CallMethod_Void(object, method, arg1, arg2), ANI_OK);
@@ -301,7 +301,7 @@ TEST_F(CallObjectMethodVoidTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "voidMethod", "II:V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.A", "voidMethod", "ii:", &object, &method);
 
     ani_value args[2U] = {};
     ani_int arg1 = VAL1;
@@ -327,7 +327,7 @@ TEST_F(CallObjectMethodVoidTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "nestedMethod", "II:V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.A", "nestedMethod", "ii:", &object, &method);
 
     ani_value args[2U] = {};
     ani_int arg1 = VAL1;
@@ -351,7 +351,7 @@ TEST_F(CallObjectMethodVoidTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_void_test/A;", "recursionMethod", "I:V", &object, &method);
+    GetMethodAndObject("call_object_method_void_test.A", "recursionMethod", "i:", &object, &method);
 
     ani_value args[1U] = {};
     ani_int arg1 = VAL1;

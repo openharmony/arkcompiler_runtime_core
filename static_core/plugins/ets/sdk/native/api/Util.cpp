@@ -28,10 +28,19 @@
 namespace ark::ets::sdk::util {
 
 constexpr int UUID_LEN = 37;
+constexpr int UUID_STR_LEN_NO_DASH = UUID_LEN - 4;
+constexpr int UUID_BINARY_LEN = 16;
+constexpr int HEX_BYTE_STR_LENGTH = 3;
+constexpr int UUID_VERSION_BYTE_INDEX = 6;
+constexpr int UUID_RESERVED_BYTE_INDEX = 8;
 constexpr uint32_t NULL_FOUR_HIGH_BITS_IN_16 = 0x0FFF;
 constexpr uint32_t RFC4122_UUID_VERSION_MARKER = 0x4000;
 constexpr uint32_t NULL_TWO_HIGH_BITS_IN_16 = 0x3FFF;
 constexpr uint32_t RFC4122_UUID_RESERVED_BITS = 0x8000;
+constexpr uint8_t UUID_LOW_FOUR_BITS_MASK = 0x0F;
+constexpr uint8_t UUID_VERSION4_MARK = 0x40;
+constexpr uint8_t UUID_LOW_SIX_BITS_MASK = 0x3F;
+constexpr uint8_t UUID_RESERVED_MARK = 0x80;
 
 template <typename S>
 S GenRandUint()
@@ -61,6 +70,54 @@ std::string GenUuid4(ani_env *env)
     return res.str();
 }
 
+std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
+{
+    std::array<char, UUID_STR_LEN_NO_DASH> uuidStr = {0};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    int charsWritten = snprintf_s(
+        uuidStr.data(), uuidStr.size(), UUID_STR_LEN_NO_DASH - 1, "%08x%04x%04x%04x%012x", GenRandUint<uint32_t>(),
+        GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
+        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
+    if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
+        stdlib::ThrowNewError(env, "Lstd/core/RuntimeException;", "generateRandomBinaryUUID failed",
+                              "Lescompat/Uint8Array;:V");
+        return {};
+    }
+
+    std::array<uint8_t, UUID_BINARY_LEN> uuidBin = {0};
+    for (size_t i = 0; i < UUID_BINARY_LEN; ++i) {
+        std::array<char, HEX_BYTE_STR_LENGTH> byteStr = {uuidStr[i * 2], uuidStr[i * 2 + 1], 0};
+        uuidBin[i] = static_cast<uint8_t>(strtol(byteStr.data(), nullptr, UUID_BINARY_LEN));
+    }
+    // Set the four most significant bits of the 7th byte to 0100'b, so the UUID version is 4.
+    uuidBin[UUID_VERSION_BYTE_INDEX] = static_cast<uint8_t>(
+        (static_cast<unsigned int>(uuidBin[UUID_VERSION_BYTE_INDEX]) & UUID_LOW_FOUR_BITS_MASK) | UUID_VERSION4_MARK);
+
+    // Set the two most significant bits of the 9th byte to 10'b, so the UUID variant is RFC4122.
+    uuidBin[UUID_RESERVED_BYTE_INDEX] = static_cast<uint8_t>(
+        (static_cast<unsigned int>(uuidBin[UUID_RESERVED_BYTE_INDEX]) & UUID_LOW_SIX_BITS_MASK) | UUID_RESERVED_MARK);
+    return uuidBin;
+}
+
+template <class... Args>
+ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
+{
+    ani_class arrayClass;
+    if (env->FindClass("Lescompat/Uint8Array;", &arrayClass) != ANI_OK) {
+        return nullptr;
+    }
+    ani_method arrayCtor;
+    if (env->Class_FindMethod(arrayClass, "<ctor>", signature, &arrayCtor) != ANI_OK) {
+        return nullptr;
+    }
+    ani_object res;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    if (env->Object_New(arrayClass, arrayCtor, &res, args...) != ANI_OK) {
+        return nullptr;
+    }
+    return res;
+}
+
 extern "C" {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                          ani_boolean entropyCache)
@@ -70,6 +127,39 @@ ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_u
         lastGeneratedUUID = GenUuid4(env);
     }
     return stdlib::CreateUtf8String(env, lastGeneratedUUID.data(), lastGeneratedUUID.size());
+}
+
+ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[maybe_unused]] ani_class klass,
+                                                               ani_boolean entropyCache)
+{
+    static std::array<uint8_t, UUID_BINARY_LEN> lastGeneratedUUID;
+    static bool hasUUID = false;
+    if (entropyCache != ANI_TRUE || !hasUUID) {
+        lastGeneratedUUID = GenUuid4Binary(env);
+        hasUUID = true;
+    }
+
+    ani_object arr = NewUint8Array(env, "I:V", static_cast<ani_int>(UUID_BINARY_LEN));
+    if (arr == nullptr) {
+        return nullptr;
+    }
+
+    ani_ref buffer;
+    if (env->Object_GetFieldByName_Ref(arr, "buffer", &buffer) != ANI_OK) {
+        return nullptr;
+    }
+
+    void *bufData = nullptr;
+    size_t bufLength = 0;
+    if (env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(buffer), &bufData, &bufLength) != ANI_OK) {
+        return nullptr;
+    }
+
+    if (EOK != memcpy_s(bufData, bufLength, lastGeneratedUUID.data(), lastGeneratedUUID.size())) {
+        return nullptr;
+    }
+
+    return arr;
 }
 }  // extern "C"
 

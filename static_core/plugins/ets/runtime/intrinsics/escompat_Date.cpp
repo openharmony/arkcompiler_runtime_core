@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 namespace ark::ets::intrinsics {
 
 constexpr const int32_t MS_IN_MINUTES = 60000;
-constexpr const int32_t MS_IN_SECOND = 1000;
 
 extern "C" double EscompatDateNow()
 {
@@ -57,22 +56,6 @@ extern "C" EtsString *EscompatDateGetTimezoneName(int64_t ms)
     s.toUTF8String(result);
     delete tzlocal;
     return EtsString::CreateFromMUtf8(result.c_str());
-}
-
-extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *locale, int64_t ms, uint8_t isUtc)
-{
-    PandaVector<uint8_t> buf;
-    auto formatS = std::string(format->ConvertToStringView(&buf));
-    auto localeS = std::string(locale->ConvertToStringView(&buf));
-    std::time_t seconds = ms / MS_IN_SECOND;
-    std::stringstream ss;
-    ss.imbue(std::locale(ss.getloc(), new std::time_put_byname<char>(localeS.c_str())));
-    if (static_cast<bool>(isUtc)) {
-        ss << std::put_time(std::gmtime(&seconds), formatS.c_str());
-    } else {
-        ss << std::put_time(std::localtime(&seconds), formatS.c_str());
-    }
-    return EtsString::CreateFromMUtf8(ss.str().c_str());
 }
 
 extern "C" int64_t ChronoGetCpuTime()

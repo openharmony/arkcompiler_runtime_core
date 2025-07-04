@@ -24,7 +24,11 @@ class Temp {
 }
 
 function main() {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("ArrayList API tests");
+=======
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
+>>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing ArrayList removeByIndex", testArrayListRemoveByIndexOf0001);
     suite.addTest("Testing ArrayList removeByIndex -2", testArrayListRemoveByIndexOf0002);
@@ -58,11 +62,19 @@ function testArrayListRemoveByIndexOf0001() {
     let index1 = arrayList.getIndexOf("");
     let result = arrayList.removeByIndex(index1);
     let result1 = arrayList.removeByIndex(index1);
+<<<<<<< HEAD
     assertNE(result, result1, "The results of consecutive removeByIndex calls at the same index should not be equal");
     let index2 = arrayList.getIndexOf("%");
     let result2 = arrayList.removeByIndex(index2);
     let result3 = arrayList.removeByIndex(index2);
     assertNE(result2, result3, "The results of consecutive removeByIndex calls at the same index should not be equal");
+=======
+    arktest.assertNE(result, result1, "The results of consecutive removeByIndex calls at the same index should not be equal");
+    let index2 = arrayList.getIndexOf("%");
+    let result2 = arrayList.removeByIndex(index2);
+    let result3 = arrayList.removeByIndex(index2);
+    arktest.assertNE(result2, result3, "The results of consecutive removeByIndex calls at the same index should not be equal");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemoveByIndexOf0002() {
@@ -88,13 +100,21 @@ function testArrayListRemoveByIndexOf0002() {
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: -2") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+<<<<<<< HEAD
     expectThrow(() => {arrayList.removeByIndex(-2)}, exceptionCheck);
+=======
+    arktest.expectThrow(() => {arrayList.removeByIndex(-2)}, exceptionCheck);
+>>>>>>> OpenHarmony_feature_20250328
     let exceptionCheck1 = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: 11") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+<<<<<<< HEAD
     expectThrow(() => {arrayList.removeByIndex(arrayList.length)}, exceptionCheck1);
+=======
+    arktest.expectThrow(() => {arrayList.removeByIndex(arrayList.length)}, exceptionCheck1);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemoveByIndexOf0003() {
@@ -120,7 +140,11 @@ function testArrayListRemoveByIndexOf0003() {
             "The value of \"index\" is out of range. It must be >= 0 && <= 10. Received value is: 11") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+<<<<<<< HEAD
     expectThrow(() => {arrayList.removeByIndex(arrayList.length)}, exceptionCheck);
+=======
+     arktest.expectThrow(() => {arrayList.removeByIndex(arrayList.length)}, exceptionCheck);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemove0001() {
@@ -156,10 +180,17 @@ function testArrayListRemove0001() {
     arrayList.insert("zhang san", 1);
     arrayList.insert("zhang san", 2);
     let index = arrayList.getIndexOf("zhang san");
+<<<<<<< HEAD
     assertEQ(index, 0, "The index of 'zhang san' should be 0 after insertion");
     arrayList.remove("zhang san");
     let index1 = arrayList.getIndexOf("zhang san");
     assertEQ(index1, 0, "The index of 'zhang san' should still be 0 after removing one instance");
+=======
+    arktest.assertEQ(index, 0, "The index of 'zhang san' should be 0 after insertion");
+    arrayList.remove("zhang san");
+    let index1 = arrayList.getIndexOf("zhang san");
+    arktest.assertEQ(index1, 0, "The index of 'zhang san' should still be 0 after removing one instance");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemove0002() {
@@ -195,10 +226,17 @@ function testArrayListRemove0002() {
     arrayList.insert("zhang san", 1);
     arrayList.insert("zhang san", 2);
     let index = arrayList.getIndexOf("zhang san");
+<<<<<<< HEAD
     assertEQ(index, 0, "The index of 'zhang san' should be 0 after insertion");
     arrayList.removeByIndex(index);
     let index1 = arrayList.getIndexOf("zhang san");
     assertEQ(index1, 0, "The index of 'zhang san' should still be 0 after removing one instance by index");
+=======
+    arktest.assertEQ(index, 0, "The index of 'zhang san' should be 0 after insertion");
+    arrayList.removeByIndex(index);
+    let index1 = arrayList.getIndexOf("zhang san");
+    arktest.assertEQ(index1, 0, "The index of 'zhang san' should still be 0 after removing one instance by index");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemoveByRange0001() {
@@ -224,7 +262,11 @@ function testArrayListRemoveByRange0001() {
             "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 1") &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+<<<<<<< HEAD
     expectThrow(() => {arrayList.removeByRange(1, 1)}, exceptionCheck);
+=======
+    arktest.expectThrow(() => {arrayList.removeByRange(1, 1)}, exceptionCheck);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListRemoveByRange0002() {
@@ -246,5 +288,9 @@ function testArrayListRemoveByRange0002() {
     arrayList.add("%");
     arrayList.add(`"`);
     arrayList.removeByRange(1, arrayList.length);
+<<<<<<< HEAD
     assertEQ(arrayList.length, 1, `The length of the ArrayList should be 1 after removing the specified range`);
+=======
+    arktest.assertEQ(arrayList.length, 1, `The length of the ArrayList should be 1 after removing the specified range`);
+>>>>>>> OpenHarmony_feature_20250328
 }

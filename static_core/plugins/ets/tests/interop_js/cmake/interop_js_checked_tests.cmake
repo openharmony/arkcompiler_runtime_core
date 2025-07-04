@@ -46,7 +46,11 @@ function(panda_ets_interop_js_checked_test)
         ETS_VERIFICATOR_ERRORS ${ETS_VERIFICATOR_ERRORS}
     )
 
+<<<<<<< HEAD
     set(JS_COMPILATION_OPTIONS --module --merge-abc)
+=======
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
+>>>>>>> OpenHarmony_feature_20250328
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
@@ -112,7 +116,11 @@ function(panda_ets_interop_js_checked_test)
     if(NOT DEFINED ARG_PACKAGE_NAME AND DEFINED ARG_FILE)
         get_filename_component(ARG_PACKAGE_NAME ${ARG_FILE} NAME_WE)
     elseif(NOT DEFINED ARG_PACKAGE_NAME)
+<<<<<<< HEAD
         message("Please provide PACKAGE_NAME for ${TARGET}")
+=======
+        message(FATAL_ERROR "Please provide PACKAGE_NAME for ${TARGET}")
+>>>>>>> OpenHarmony_feature_20250328
     endif()
     set(RUN_COMMAND
         "/usr/bin/env"

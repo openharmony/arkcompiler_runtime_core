@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ extern "C" int StartDebugger(uint32_t port, bool breakOnStart)
 
     g_debugSession = ark::Runtime::GetCurrent()->StartDebugSession();
     g_inspector.emplace(g_server, g_debugSession->GetDebugger(), breakOnStart);
+    g_inspector->Run();
     return 0;
 }
 
@@ -72,4 +73,34 @@ extern "C" int StopDebugger()
     g_inspector.reset();
     g_debugSession.reset();
     return 0;
+}
+
+extern "C" bool StartDebuggerForSocketpair(int socketfd, bool breakOnStart)
+{
+    if (g_inspector) {
+        g_server.Stop();
+        g_inspector->Stop();
+    }
+
+    if (!g_server.StartForSocketpair(socketfd)) {
+        return false;
+    }
+
+    if (!g_inspector) {
+        g_debugSession = ark::Runtime::GetCurrent()->StartDebugSession();
+        g_inspector.emplace(g_server, g_debugSession->GetDebugger(), breakOnStart);
+    }
+
+    g_inspector->Run();
+    return true;
+}
+
+extern "C" void WaitForDebugger()
+{
+    if (!g_inspector) {
+        LOG(ERROR, DEBUGGER) << "Debugger has not been started";
+        return;
+    }
+
+    g_inspector->WaitForDebugger();
 }

@@ -68,9 +68,9 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /NullCheck/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
@@ -215,9 +215,9 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /NullCheck/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
@@ -348,7 +348,7 @@ function doSmthWithSB(sb: StringBuilder) : void {
 }
 
 function toString3(str: String): String {
-    let sb = new StringBuilder(str);
+    let sb = new StringBuilder(str);            // not removed, due to potential inlining of doSmth with potential deoptimize instructions
     sb.toString();                              // applied
     doSmth();
     return sb.toString();                       // applied
@@ -417,7 +417,7 @@ function toString9(str: String): String {
 function toString10(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
-    let strings: string[] = ["1"]               // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
+    let strings: FixedArray<string> = ["1"]               // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
     sb.toString();                              // applied
     sb.append(strings[0]);
     return sb.toString();                       // not applied, due to dominating append()-call
@@ -432,17 +432,49 @@ function toString11(str: String): String {
 }
 
 function main(): int {
-    assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
-    assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
-    assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
-    assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
-    assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
-    assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
-    assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
-    assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
-    assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
-    assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
-    assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
-    assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
+    arktest.assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
+    arktest.assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
+    arktest.assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
+    arktest.assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
+    arktest.assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
+    arktest.assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
+    arktest.assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
+    arktest.assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
+    arktest.assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
+    arktest.assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
+    arktest.assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
+    arktest.assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
     return 0;
+}
+
+// Checker below based on plugins/ets/sdk/api/@ohos.url.ets
+// Expected successful compilation
+
+//! CHECKER       AOT IR Builder, Bugfix 25869
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*encodePercentEncoding.*' --compiler-inlining=false --compiler-check-final=false"
+
+const HASH_TABLE: Array<string> = new Array<string>(256);
+const NO_ESCAPE_TABLE = new Int8Array(256);
+
+function encodePercentEncoding(str: string) {
+    let outVal = '';
+
+    const len = str.length;
+    let i = 0;
+    const UNICODE_0x80 = 0x80;
+
+    outer:
+    for (; i < len; i++) {
+        let c = str.charCodeAt(i as number);
+
+        while (c < UNICODE_0x80) {
+            if (NO_ESCAPE_TABLE[c] !== 1) {
+                outVal += HASH_TABLE[c];
+            }
+            if (++i == len)
+                break outer;
+        }
+    }
+    return outVal;
 }

@@ -22,13 +22,40 @@
 using namespace std::literals::string_view_literals;  // Enables 'sv' suffix
 
 constexpr std::array NOALIAS_IRTOC_FUNC = {
-    "CreateObjectByIdEntrypoint"sv,        "CreateObjectByClassInterpreter"sv,   "CreateArrayByIdEntrypoint"sv,
+    "CreateObjectByIdEntrypoint"sv,
+    "CreateObjectByClassInterpreter"sv,
+    "CreateArrayByIdEntrypoint"sv,
     "CreateMultiDimensionalArrayById"sv,
+    "AnyLdbyname"sv,
+    "AnyLdbyidx"sv,
+    "AnyLdbyval"sv,
+    "AnyLdByValEntrypoint"sv,
+    "AnyCall0"sv,
+    "AnyCallRange"sv,
+    "AnyCallShort"sv,
+    "AnyCallThis0"sv,
+    "AnyCallThisRange"sv,
+    "AnyCallThisShort"sv,
+    "AnyCallNew0"sv,
+    "AnyCallNewRange"sv,
+    "AnyCallNewShort"sv,
 #ifdef PANDA_WITH_ETS
+<<<<<<< HEAD
     "LaunchFromInterpreterShort"sv,        "LaunchFromInterpreterLong"sv,        "LaunchFromInterpreterRange"sv,
     "LookupGetterByNameShortEntrypoint"sv, "LookupGetterByNameLongEntrypoint"sv, "LookupGetterByNameObjEntrypoint"sv,
     "LookupSetterByNameShortEntrypoint"sv, "LookupSetterByNameLongEntrypoint"sv, "LookupSetterByNameObjEntrypoint"sv,
     "LookupFieldByNameEntrypoint"sv,       "EtsGetTypeofEntrypoint"sv,           "EtsGetIstrueEntrypoint"sv,
+=======
+    "LookupGetterByNameShortEntrypoint"sv,
+    "LookupGetterByNameLongEntrypoint"sv,
+    "LookupGetterByNameObjEntrypoint"sv,
+    "LookupSetterByNameShortEntrypoint"sv,
+    "LookupSetterByNameLongEntrypoint"sv,
+    "LookupSetterByNameObjEntrypoint"sv,
+    "LookupFieldByNameEntrypoint"sv,
+    "EtsGetTypeofEntrypoint"sv,
+    "EtsGetIstrueEntrypoint"sv,
+>>>>>>> OpenHarmony_feature_20250328
     "LookupMethodByNameEntrypoint"sv,
 #endif
 };

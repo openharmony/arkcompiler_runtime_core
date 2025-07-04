@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,7 @@ public:
 #endif
         }
 
-        ~Message();
+        PANDA_PUBLIC_API ~Message();
 
         std::ostream &GetStream()
         {
@@ -145,13 +145,14 @@ public:
 
     static void Initialize(const base_options::Options &options);
 
-    static void InitializeFileLogging(const std::string &log_file, Level level, const ComponentMask &component_mask,
-                                      bool is_fast_logging = false);
+    PANDA_PUBLIC_API static void InitializeFileLogging(const std::string &log_file, Level level,
+                                                       const ComponentMask &component_mask,
+                                                       bool is_fast_logging = false);
 #ifdef ENABLE_HILOG
     static void InitializeHiLogging(Level level, const ComponentMask &component_mask);
 #endif
 
-    static void InitializeStdLogging(Level level, const ComponentMask &component_mask);
+    PANDA_PUBLIC_API static void InitializeStdLogging(Level level, const ComponentMask &component_mask);
 
     static void InitializeDummyLogging(Level level = Level::DEBUG, const ComponentMask &component_mask = 0);
 
@@ -213,9 +214,10 @@ public:
     }
 
 #ifndef NDEBUG
-    static void LogNestingInc();
+    PANDA_PUBLIC_API static void LogNestingInc();
     static void LogNestingDec();
-    static bool IsMessageSuppressed([[maybe_unused]] Level level, [[maybe_unused]] Component component);
+    PANDA_PUBLIC_API static bool IsMessageSuppressed([[maybe_unused]] Level level,
+                                                     [[maybe_unused]] Component component);
 #endif
 
     static void Log(Level level, Component component, const std::string &str);
@@ -320,7 +322,7 @@ protected:
 
     virtual ~Logger() = default;
 
-    static Logger *logger;
+    PANDA_PUBLIC_API static Logger *logger;
 
     static os::memory::Mutex mutex;
 

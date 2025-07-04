@@ -33,7 +33,7 @@ function testNoOptimizationExpected() {
     for (let index:int = 0; index < array.length; ++index) {
         result = array[index].toString() + result
     }
-    assertEQ(result, "9876543210")
+    arktest.assertEQ(result, "9876543210")
 }
 
 function testNoOptimizationExpectedWithIntermediate() {
@@ -46,7 +46,7 @@ function testNoOptimizationExpectedWithIntermediate() {
         temp = array[index].toString() + temp
         result = temp
     }
-    assertEQ(result, "9876543210..........")
+    arktest.assertEQ(result, "9876543210..........")
 }
 
 function testOptimizationExpected() {
@@ -56,7 +56,7 @@ function testOptimizationExpected() {
     for (let index:int = 0; index < array.length; ++index) {
         result += array[index].toString()
     }
-    assertEQ(result, "0123456789")
+    arktest.assertEQ(result, "0123456789")
 }
 
 function testOptimizationExpectedWithIntermediate() {
@@ -69,5 +69,5 @@ function testOptimizationExpectedWithIntermediate() {
         temp += "."
         result = temp
     }
-    assertEQ(result, "0.1.2.3.4.5.6.7.8.9.")
+    arktest.assertEQ(result, "0.1.2.3.4.5.6.7.8.9.")
 }

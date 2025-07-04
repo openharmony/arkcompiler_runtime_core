@@ -26,12 +26,13 @@ class PoisonedIterable<T> implements Iterable<T> {
 }
 
 let error = new Error();
-Promise.allSettled<Object>(new PoisonedIterable<Object>(error)).then<void, void>((value: PromiseSettledResult<Object>[]): void => {
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+Promise.allSettled<Object>(new PoisonedIterable<Object>(error))
+        .then<void, void>((value: PromiseSettledResult<Object>[]): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (err: Error): void => {
     if (err != error) {
-        console.log("Test failed. The promise should be rejected by the provided error.");
+        console.log('Test failed. The promise should be rejected by the provided error.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

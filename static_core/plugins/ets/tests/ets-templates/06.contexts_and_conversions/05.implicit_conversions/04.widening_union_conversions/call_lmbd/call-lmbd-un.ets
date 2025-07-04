@@ -28,7 +28,7 @@ let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}};
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( ((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}) as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( ((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}) {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

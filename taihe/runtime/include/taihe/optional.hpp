@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_OPTIONAL_HPP
-#define TAIHE_OPTIONAL_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_OPTIONAL_HPP_
+#define RUNTIME_INCLUDE_TAIHE_OPTIONAL_HPP_
+// NOLINTBEGIN
 
 #include <taihe/optional.abi.h>
 #include <taihe/common.hpp>
@@ -25,9 +26,6 @@
 #include <stdexcept>
 #include <utility>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename cpp_owner_t>
 struct optional_view;
@@ -77,6 +75,16 @@ struct optional_view {
         }
     }
 
+    friend bool operator==(optional_view const &lhs, optional_view const &rhs)
+    {
+        return (!lhs && !rhs) || (lhs && rhs && *lhs == *rhs);
+    }
+
+    friend bool operator!=(optional_view const &lhs, optional_view const &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
 protected:
     cpp_owner_t *m_handle;
 };
@@ -94,15 +102,34 @@ struct optional : public optional_view<cpp_owner_t> {
     {
     }
 
+    // TODO: Deprecate this
     template <typename... Args>
     static optional make(Args &&...args)
     {
-        return optional(std::in_place_t {}, std::forward<Args>(args)...);
+        return optional(std::in_place, std::forward<Args>(args)...);
     }
 
-    optional(optional_view<cpp_owner_t> const &other) : optional(new cpp_owner_t(*other)) {}
+    template <typename... Args>
+    cpp_owner_t &emplace(Args &&...args)
+    {
+        if (this->m_handle) {
+            delete this->m_handle;
+        }
+        this->m_handle = new cpp_owner_t(std::forward<Args>(args)...);
+        return *this->m_handle;
+    }
 
-    optional(optional<cpp_owner_t> const &other) : optional(new cpp_owner_t(*other)) {}
+    void reset()
+    {
+        if (this->m_handle) {
+            delete this->m_handle;
+            this->m_handle = nullptr;
+        }
+    }
+
+    optional(optional_view<cpp_owner_t> const &other) : optional(other ? new cpp_owner_t(*other) : nullptr) {}
+
+    optional(optional<cpp_owner_t> const &other) : optional(other ? new cpp_owner_t(*other) : nullptr) {}
 
     optional(optional<cpp_owner_t> &&other) : optional(std::exchange(other.m_handle, nullptr)) {}
 
@@ -121,18 +148,6 @@ struct optional : public optional_view<cpp_owner_t> {
 };
 
 template <typename cpp_owner_t>
-inline std::size_t hash_impl(adl_helper_t, optional_view<cpp_owner_t> val)
-{
-    return val ? hash(*val) + 0x9e3779b9 : 0;
-}
-
-template <typename cpp_owner_t>
-inline bool same_impl(adl_helper_t, optional_view<cpp_owner_t> lhs, optional_view<cpp_owner_t> rhs)
-{
-    return !lhs && !rhs || same(*lhs, *rhs);
-}
-
-template <typename cpp_owner_t>
 struct as_abi<optional_view<cpp_owner_t>> {
     using type = struct TOptional;
 };
@@ -147,6 +162,13 @@ struct as_param<optional<cpp_owner_t>> {
     using type = optional_view<cpp_owner_t>;
 };
 }  // namespace taihe
-// NOLINTEND
 
-#endif // TAIHE_OPTIONAL_HPP
+template <typename cpp_owner_t>
+struct std::hash<taihe::optional<cpp_owner_t>> {
+    std::size_t operator()(taihe::optional_view<cpp_owner_t> val) const
+    {
+        return val ? std::hash<cpp_owner_t>()(*val) + 0x9e3779b9 : 0;
+    }
+};
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_OPTIONAL_HPP_

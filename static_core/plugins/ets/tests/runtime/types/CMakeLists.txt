@@ -45,6 +45,7 @@ panda_ets_add_gtest(
         ets_promise_test.cpp
         ets_job_test.cpp
         ets_class_test.cpp
+        ets_string_from_char_code_test.cpp
         ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
         ets_arrayobj_test.cpp
@@ -57,6 +58,14 @@ panda_ets_add_gtest(
         typed_arrays_test.cpp
         ets_base_enum_test.cpp
         ets_error_test.cpp
+<<<<<<< HEAD
+=======
+        ets_atomic_flag_test.cpp
+        ets_error_options_test.cpp
+        ets_stacktrace_element_test.cpp
+        ets_typed_arrays_test.cpp
+        ets_typed_unsigned_arrays_test.cpp
+>>>>>>> OpenHarmony_feature_20250328
     LIBRARIES
         arkassembler
         arkruntime

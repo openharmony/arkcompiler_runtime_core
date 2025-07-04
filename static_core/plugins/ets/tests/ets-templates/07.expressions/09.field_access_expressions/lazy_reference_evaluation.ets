@@ -27,5 +27,5 @@ class A {
 function main(): void {
   let a: A|null = null;
   a?.b[0] ? i = 1 : i = 2;
-  assertTrue( i == 0 )
+  arktest.assertTrue( i == 0 )
 }

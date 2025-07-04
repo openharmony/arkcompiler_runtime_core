@@ -37,10 +37,10 @@ function main(): int {
     if (res != 0) return 1;
 
     // cast
-    res = t510 / t255 as byte
+    res = (t510 / t255).toByte()
     if (res != 2) return 1;
 
-    res = t510 as byte / t255
+    res = t510.toByte() / t255
     if (res != 0) return 1;
 
     // shifts

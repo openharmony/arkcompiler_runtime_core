@@ -53,7 +53,7 @@ string add_str(string_view a, string_view b)
 
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_add_int(add_int);
 TH_EXPORT_CPP_API_add_str(add_str);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +14,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from threading import main_thread
+from typing import ClassVar
 
-from typing import Optional, Dict, Any
-
+from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
 
 
 class LocalEnv:
-    __instance: Optional['LocalEnv'] = None
+    instance: ClassVar[dict[str, 'LocalEnv']] = {}
 
     def __init__(self) -> None:
-        self.__env: Dict[str, Any] = {}
+        self.__env: dict[str, str] = {}
 
     @staticmethod
-    def get() -> 'LocalEnv':
-        if LocalEnv.__instance is None:
-            LocalEnv.__instance = LocalEnv()
-        return LocalEnv.__instance
+    def get_instance_id() -> str:
+        return str(main_thread().ident)
+
+    @classmethod
+    def get(cls) -> 'LocalEnv':
+        ident: str = cls.get_instance_id()
+        if ident not in cls.instance:
+            cls.instance[ident] = LocalEnv()
+        return cls.instance[ident]
 
     def add(self, key: str, env_value: str) -> None:
         if key not in self.__env:
             self.__env[key] = env_value
             return
         if key in self.__env and self.__env[key] != env_value:
-            raise EnvironmentError(
+            raise InvalidConfiguration(
                 "Attention: environment has been changed during test execution. "
                 f"For key `{key}` the env_value `{self.__env[key]}` changed to `{env_value}`"
             )

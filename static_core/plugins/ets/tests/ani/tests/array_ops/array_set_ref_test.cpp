@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "ani.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetRefTest : public AniGTestArrayOps {};
+class ArraySetRefTest : public ArrayHelperTest {};
 
 // ninja ani_test_array_setref_gtests
 TEST_F(ArraySetRefTest, SetRefErrorTests)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
     ani_ref ref = nullptr;
@@ -34,24 +35,41 @@ TEST_F(ArraySetRefTest, SetRefErrorTests)
     const ani_size invalidIndex = 5;
     ASSERT_EQ(env_->Array_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
-    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNumber"));
+    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getObj"));
+    // Can set any object as a type
+    ASSERT_EQ(env_->Array_Set_Ref(array, 0, num), ANI_OK);
+}
+
+TEST_F(ArraySetRefTest, FixedSetRefErrorTests)
+{
+    ani_array_ref array = nullptr;
+    ani_class cls = nullptr;
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
+    ani_ref ref = nullptr;
+    const ani_size index = 0;
+    const ani_size invalidIndex = 5;
+    ASSERT_EQ(env_->Array_Set_Ref(nullptr, index, ref), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_Set_Ref(array, invalidIndex, ref), ANI_OUT_OF_RANGE);
+    auto num = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getObj"));
     ASSERT_EQ(env_->Array_Set_Ref(array, 0, num), ANI_INVALID_TYPE);
 }
 
 TEST_F(ArraySetRefTest, SetRefOkTests)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getArray"));
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
     const ani_size index1 = 0;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
 
-    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString2"));
     const ani_size index2 = 2;
     ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
 
     ani_boolean result =
-        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "CheckArray", array));
+        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "checkArray", array));
     ASSERT_EQ(result, ANI_TRUE);
 }
 
@@ -59,9 +77,21 @@ TEST_F(ArraySetRefTest, SetRefErrorValueToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+
+    const ani_size errorIndex = -1;
+    ASSERT_EQ(env_->Array_Set_Ref(array, errorIndex, nullptr), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(ArraySetRefTest, FixedSetRefErrorValueToArrayTest)
+{
+    ani_array_ref array = nullptr;
+    ani_class cls = nullptr;
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
     const ani_size errorIndex = -1;
     ASSERT_EQ(env_->Array_Set_Ref(array, errorIndex, nullptr), ANI_OUT_OF_RANGE);
@@ -71,10 +101,10 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
     const ani_size index1 = 1;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
     ani_ref ref1 = nullptr;
@@ -92,7 +122,7 @@ TEST_F(ArraySetRefTest, SetGetUnionToArrayTest)
     ASSERT_STREQ(result.c_str(), "New String 1!");
 
     const ani_size index2 = 2;
-    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString2"));
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
     ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
     for (ani_int i = 0; i < LOOP_COUNT; i++) {
@@ -120,10 +150,10 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
 {
     ani_array_ref array = nullptr;
     ani_class cls = nullptr;
-    ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
-    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_3, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.String", &cls), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Ref(cls, LENGTH_3, nullptr, reinterpret_cast<ani_fixedarray_ref *>(&array)), ANI_OK);
     ani_ref ref1 = nullptr;
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
     const ani_size index1 = 1;
     for (ani_int i = 0; i < LOOP_COUNT; i++) {
         ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
@@ -152,7 +182,7 @@ TEST_F(ArraySetRefTest, SetGetStabilityToArrayTest)
 
 TEST_F(ArraySetRefTest, EscompatGetRegionRefTest)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getEscompatArray"));
     const ani_size index1 = 1;
     const ani_size index2 = 2;
     ani_ref ref1 = nullptr;
@@ -168,26 +198,26 @@ TEST_F(ArraySetRefTest, EscompatGetRegionRefTest)
 
 TEST_F(ArraySetRefTest, EscompatSetRegionRefTest)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getEscompatArray"));
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
     const ani_size index1 = 0;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OK);
 
-    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString2"));
+    auto newValue2 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString2"));
     const ani_size index2 = 2;
     ASSERT_EQ(env_->Array_Set_Ref(array, index2, newValue2), ANI_OK);
 
     ani_boolean result =
-        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "CheckEscompatArray", array));
+        static_cast<ani_boolean>(CallEtsFunction<ani_boolean>("array_set_ref_test", "checkEscompatArray", array));
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(ArraySetRefTest, EscompatInvalidRefTest)
 {
-    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetEscompatArray"));
+    auto array = static_cast<ani_array_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getEscompatArray"));
 
-    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "GetNewString1"));
+    auto newValue1 = static_cast<ani_ref>(CallEtsFunction<ani_ref>("array_set_ref_test", "getNewString1"));
     const ani_size index1 = 5;
     ASSERT_EQ(env_->Array_Set_Ref(array, index1, newValue1), ANI_OUT_OF_RANGE);
     ani_ref res;

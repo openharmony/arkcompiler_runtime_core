@@ -24,7 +24,7 @@ cases:
           }
       use: |-
           // expression returning class
-          assertEQ( cr().met(), "A" )
+          arktest.assertEQ( cr().met(), "A" )
 
     - decl: |-
           interface I {
@@ -38,4 +38,4 @@ cases:
           }
       use: |-
           // expression returning interface
-          assertEQ( cr().met(), "I" )
+          arktest.assertEQ( cr().met(), "I" )

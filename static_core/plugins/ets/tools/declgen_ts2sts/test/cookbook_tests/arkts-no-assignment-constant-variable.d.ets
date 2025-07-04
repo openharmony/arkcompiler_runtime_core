@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,5 +33,5 @@ declare let b18: boolean;
 declare let b19: boolean;
 declare let b20: boolean;
 declare let b21: boolean;
-declare let a: string;
+declare let a: "hello";
 declare let a2: number;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"
+#include "utils/regmask.h"
 
 namespace ark::compiler {
 
@@ -73,9 +74,9 @@ void Codegen::CreateMathTrunc([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRC
     GetEncoder()->EncodeTrunc(dst, src[0]);
 }
 
-void Codegen::CreateMathRoundAway([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateETSMathRound([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    GetEncoder()->EncodeRoundAway(dst, src[0]);
+    GetEncoder()->EncodeRoundToPInfReturnFloat(dst, src[0]);
 }
 
 void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
@@ -206,7 +207,12 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     auto labelFastPathDone = enc->CreateLabel();
     auto labelIncIndex = enc->CreateLabel();
     // Jump to slowPath if buffer is full and needs to be reallocated
-    enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    if (cg->GetRuntime()->NeedsPreReadBarrier()) {
+        cg->CreateReadViaBarrier(inst, args.SbBufferAddr(), reg0, false,
+                                 MakeMask(args.SbBufferAddr().GetBase().GetId(), args.Value().GetId()));
+    } else {
+        enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    }
     enc->EncodeLdr(reg1, false, MemRef(reg0, coretypes::Array::GetLengthOffset()));
     enc->EncodeLdr(reg2, false, args.SbIndexAddr());
     enc->EncodeJump(labelSlowPath, reg2, reg1, Condition::HS);
@@ -229,7 +235,7 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     enc->EncodeAdd(reg2, reg2, Imm(1));
     enc->EncodeStr(reg2, args.SbIndexAddr());
     // Unpack length of string
-    enc->EncodeShr(reg1, reg1, Imm(1));
+    enc->EncodeShr(reg1, reg1, Imm(ark::coretypes::String::STRING_LENGTH_SHIFT));
     // Add length of string to the current length of StringBuilder
     enc->EncodeLdr(reg2, false, args.SbLengthAddr());
     enc->EncodeAdd(reg2, reg2, reg1);
@@ -534,11 +540,249 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
     enc->BindLabel(charNotFoundLabel);
 }
 
+void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto array = src[FIRST_OPERAND];
+    auto getEntryId = [this, inst]() {
+        switch (inst->GetIntrinsicId()) {
+            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
+                return GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
+            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
+                return GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+            default:
+                UNREACHABLE();
+        }
+    };
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(
+            klassReg, false,
+            MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
+        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassReg);
+    } else {
+        auto klassImm =
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassImm);
+    }
+}
+
 void Codegen::CreateStringRepeat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
     auto entrypointId = EntrypointId::STRING_REPEAT;
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
+
+void Codegen::CreateInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::INT8_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::INT16_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::INT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateBigInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateFloat32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto valType = inst->GetInputType(SECOND_OPERAND);
+    ASSERT(valType == DataType::FLOAT32);
+    auto entrypoint = EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::INT32, GetArch()));
+    auto val = ConvertRegister(inst->GetSrcReg(SECOND_OPERAND), valType);
+    GetEncoder()->EncodeMov(tmp, val);
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], tmp, src[THIRD_OPERAND], src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateFloat64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto valType = inst->GetInputType(SECOND_OPERAND);
+    ASSERT(valType == DataType::FLOAT64);
+    auto entrypoint = EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::INT64, GetArch()));
+    auto val = ConvertRegister(inst->GetSrcReg(SECOND_OPERAND), valType);
+    GetEncoder()->EncodeMov(tmp, val);
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], tmp, src[THIRD_OPERAND], src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateUInt8ClampedArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateUInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::U_INT8_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateUInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::U_INT16_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateUInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::U_INT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_TO_REVERSED(Name, MacroType)                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                    \
+    void Codegen::Create##Name##ArrayToReversed(IntrinsicInst *inst, Reg dst, SRCREGS src) \
+    {                                                                                      \
+        ASSERT(GetArch() != Arch::AARCH32);                                                \
+        auto array = src[FIRST_OPERAND];                                                   \
+        auto eid = RuntimeInterface::EntrypointId::MacroType##_ARRAY_TO_REVERSED;          \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                             \
+        CallFastPath(inst, eid, dst, {}, array);                                           \
+    }
+
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Int8, INT8)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Int16, INT16)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Int32, INT32)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Float32, FLOAT32)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Float64, FLOAT64)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_TO_REVERSED(BigUint64, BIG_UINT64)
+
+#undef CODEGEN_TYPED_ARRAY_TO_REVERSED
+
+void Codegen::CreateWriteString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::WRITE_STRING_TO_MEM;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::CREATE_STRING_FROM_MEM;
+    auto buf = src[FIRST_OPERAND];
+    auto len = src[SECOND_OPERAND];
+    if (GetGraph()->IsAotMode()) {
+        auto *enc = GetEncoder();
+        auto offset = GetRuntime()->GetStringClassPointerTlsOffset(GetArch());
+        ScopedTmpReg klass(enc);
+        enc->EncodeLdr(klass, false, MemRef(ThreadReg(), offset));
+        CallFastPath(inst, entrypointId, dst, {}, buf, len, klass);
+    } else {
+        auto klass = GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr);
+        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klass));
+        CallFastPath(inst, entrypointId, dst, {}, buf, len, klassImm);
+    }
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_WITH_INT(Name, Type)                                                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                         \
+    void Codegen::Create##Name##ArrayWith([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)           \
+    {                                                                                                           \
+        auto entrypointId = EntrypointId::Type##_ARRAY_WITH;                                                    \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                  \
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]); \
+    }
+
+CODEGEN_TYPED_ARRAY_WITH_INT(Int8, INT8)
+CODEGEN_TYPED_ARRAY_WITH_INT(Int16, INT16)
+CODEGEN_TYPED_ARRAY_WITH_INT(Int32, INT32)
+CODEGEN_TYPED_ARRAY_WITH_INT(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint8Clamped, UINT8_CLAMPED)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_WITH_INT(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_WITH_INT(BigUint64, BIG_UINT64)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_WITH_FLOAT(Name, Type, InType)                                                \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                   \
+    void Codegen::Create##Name##ArrayWith([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)     \
+    {                                                                                                     \
+        ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::InType, GetArch()));                     \
+        GetEncoder()->EncodeMov(tmp, src[THIRD_OPERAND]);                                                 \
+        auto entrypointId = EntrypointId::Type##_ARRAY_WITH;                                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], tmp.GetReg()); \
+    }
+
+CODEGEN_TYPED_ARRAY_WITH_FLOAT(Float32, FLOAT32, UINT32)
+CODEGEN_TYPED_ARRAY_WITH_FLOAT(Float64, FLOAT64, UINT64)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_SLICE(defName, defType)                                                    \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                \
+    void Codegen::Create##defName##ArraySlice(IntrinsicInst *inst, Reg dst, SRCREGS src)               \
+    {                                                                                                  \
+        auto eid = RuntimeInterface::EntrypointId::defType##_ARRAY_SLICE;                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                         \
+        CallFastPath(inst, eid, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]); \
+    }
+
+CODEGEN_TYPED_ARRAY_SLICE(Int8, INT8)
+CODEGEN_TYPED_ARRAY_SLICE(Int16, INT16)
+CODEGEN_TYPED_ARRAY_SLICE(Int32, INT32)
+CODEGEN_TYPED_ARRAY_SLICE(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_SLICE(Float32, FLOAT32)
+CODEGEN_TYPED_ARRAY_SLICE(Float64, FLOAT64)
+CODEGEN_TYPED_ARRAY_SLICE(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_SLICE(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_SLICE(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_SLICE(BigUint64, BIG_UINT64)
+CODEGEN_TYPED_ARRAY_SLICE(Uint8Clamped, UINT8_CLAMPED)
+
+#undef CODEGEN_TYPED_ARRAY_SLICE
 
 }  // namespace ark::compiler

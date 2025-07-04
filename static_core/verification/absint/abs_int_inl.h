@@ -2520,197 +2520,6 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnDyn();
 
-#ifdef PANDA_WITH_ETS
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckLaunch(Method const *method, Span<int> regs)
-    {
-        if (method == nullptr) {
-            SET_STATUS_FOR_MSG(CannotResolveMethodId, OK);
-            return false;
-        }
-
-        auto *plugin = job_->JobPlugin();
-        auto const *jobMethod = job_->JobMethod();
-        auto result = plugin->CheckMethodAccessViolation(method, jobMethod, GetTypeSystem());
-        if (!result.IsOk()) {
-            const auto &verifOpts = config->opts;
-            if (verifOpts.debug.allow.methodAccessViolation && result.IsError()) {
-                result.status = VerificationStatus::WARNING;
-            }
-            LogInnerMessage(result);
-            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetFullName(), method->GetFullName());
-            status_ = result.status;
-            if (status_ == VerificationStatus::ERROR) {
-                return false;
-            }
-        }
-
-        auto methodNameGetter = [method]() { return method->GetFullName(); };
-        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId()) &&
-            !CheckMethodArgs(methodNameGetter, method, regs)) {
-            return false;
-        }
-
-        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-        ClassLinkerExtension *cle = classLinker->GetExtension(method->GetClass()->GetSourceLang());
-
-        auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/core/Promise;");
-        auto klass = cle->GetClass(mutf8Name);
-        if (klass == nullptr) {
-            LOG(ERROR, RUNTIME) << "Cannot find class '" << mutf8Name << "'";
-            return false;
-        }
-
-        SetAcc(Type(klass));
-        MoveToNextInst<FORMAT>();
-        return true;
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchShort()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-
-        if (method != nullptr && method->IsAbstract()) {
-            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::array<int, 2UL> regs {vs1, vs2};
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunch()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
-        uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
-        uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-
-        if (method != nullptr && method->IsAbstract()) {
-            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchRange()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-
-        if (method != nullptr && method->IsAbstract()) {
-            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::vector<int> regs;
-        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
-            regs.push_back(regIdx);
-        }
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtShort()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-        if (method != nullptr && method->IsStatic()) {
-            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::array<int, 2UL> regs {vs1, vs2};
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirt()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
-        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
-        uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
-        uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-        if (method != nullptr && method->IsStatic()) {
-            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLaunchVirtRange()
-    {
-        LOG_INST();
-        DBGBRK();
-        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
-
-        Method const *method = GetCachedMethod();
-        if (method != nullptr) {
-            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
-        }
-        if (method != nullptr && method->IsStatic()) {
-            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
-            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
-            return false;
-        }
-
-        Sync();
-        std::vector<int> regs;
-        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
-            regs.push_back(regIdx);
-        }
-        return CheckLaunch<FORMAT>(method, Span {regs});
-    }
-#endif  // PANDA_WITH_ETS
-
     template <bool IS_LOAD>
     bool CheckFieldAccessByName(int regIdx, [[maybe_unused]] Type expectedFieldType)
     {
@@ -3036,6 +2845,23 @@ public:
             return false;
         }
         SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsNullcheck()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+
+        if (!CheckType(GetAccType(), refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
 
         MoveToNextInst<FORMAT>();
         return true;
@@ -3600,6 +3426,101 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCall0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallShort()
+    {
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThis0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallThisShort()
+    {
+        // NOTE: handle properly
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNew0()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyCallNewShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleThrow()
     {
         LOG_INST();
@@ -3692,6 +3613,103 @@ public:
             return capitalize ? "Accumulator" : "accumulator";
         }
         return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(regIdx);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
+        SetReg(vOut, refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyname()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbynameV()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyidx()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyLdbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyStbyval()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleAnyIsinstance()
+    {
+        LOG_INST();
+        DBGBRK();
+        Sync();
+        SetAcc(u1_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
     }
 
 private:

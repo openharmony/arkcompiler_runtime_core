@@ -45,13 +45,21 @@ class Point3D extends Point2D {
 
 class C {
     public p1:number = 0;
+<<<<<<< HEAD
     public p2:float = 0.0;
+=======
+    public p2:float = 0.0f;
+>>>>>>> OpenHarmony_feature_20250328
     public p3:long = 0;
     public p4:int = 0;
     public p5:short = 0;
 }
 
+<<<<<<< HEAD
 function arraysAreEqual(a: string[], b: string[]): boolean {
+=======
+function arraysAreEqual(a: FixedArray<string>, b: FixedArray<string>): boolean {
+>>>>>>> OpenHarmony_feature_20250328
     let alen = a.length
     if (alen != b.length) {
         return false
@@ -92,7 +100,11 @@ function reflectSetTypeConvert(): int {
     let b: short = 2;
     let c: int  = 3;
     let d: long = 4;
+<<<<<<< HEAD
     let e: float = 5.0;
+=======
+    let e: float = 5.0f;
+>>>>>>> OpenHarmony_feature_20250328
 
     Reflect.set(sample, 'p1', a);
     result += (sample.p1 == a) ? 0  : 1
@@ -135,8 +147,8 @@ function reflectSetTypeConvert(): int {
 function reflectSetArray(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
-    let brr: string[] = ["p", "q", "t", "w"]
+    let arr: FixedArray<number> = [10, 20, 30]
+    let brr: FixedArray<string> = ["p", "q", "t", "w"]
 
     result += (Reflect.set(arr, 0, 40 as number) == true) ? 0 : 1
     result += (Reflect.set(arr, 1, 50 as number) == true) ? 0 : 1

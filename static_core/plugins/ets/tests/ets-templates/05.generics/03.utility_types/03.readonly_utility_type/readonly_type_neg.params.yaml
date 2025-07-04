@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,12 +12,16 @@
 # limitations under the License.
 
 ---
-properties:
-  - { edit_prop: "i", new_val: "9" }
-  - { edit_prop: "j", new_val: "\"new str\"" }
+types:
+  - A
+  - I
 
-cases:
-  - { argument: "{i: 1.9, j: \"some str\"}", result: 3 }
-  - { argument: "{i: 1.9}", result: 2 }
-  - { argument: "{j: \"some str\"}", result: 1 }
-  - { argument: "{}", result: 0 }
+init:
+  - "{i: 1.9, j: \"some str\"}"
+  - "{i: 1.9}"
+  - "{j: \"some str\"}"
+  - "{}"
+
+checks:
+  - a.i = 3.0
+  - a.j = "new str"

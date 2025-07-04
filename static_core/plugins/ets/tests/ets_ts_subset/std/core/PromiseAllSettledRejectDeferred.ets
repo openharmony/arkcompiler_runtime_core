@@ -16,14 +16,21 @@ class Thenable implements PromiseLike<string> {
     constructor(e: Error) {
         this.error = e;
     }
+<<<<<<< HEAD
     then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<E>((): E|PromiseLike<E> => {
+=======
+    then<U, E>(_?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<E>((): E | PromiseLike<E> => {
+>>>>>>> OpenHarmony_feature_20250328
             return onRejected!(this.error);
         });
     }
     private error: Error;
 };
 
+<<<<<<< HEAD
 let error = new Error("abc");
 let thenable = new Thenable(error);
 Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
@@ -42,4 +49,25 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
     console.log("Test passed.");
 }, (error: Object): void => {
     console.log("Test failed. The promise should not be rejected.");
+=======
+let error = new Error('abc');
+let thenable = new Thenable(error);
+Promise.allSettled([thenable]).then<void, void>((values): void => {
+    if (values.length != 1) {
+        console.log('Test failed. Expected an array of length 1 but got length ' + values.length + '.');
+        return;
+    }
+    if (values[0].status != 'rejected') {
+        console.log('Test failed. Expected the first element has status \'rejected\' but got \'' +
+            values[0].status + '\'.');
+        return;
+    }
+    if ((values[0] as PromiseRejectedResult).reason.message != 'abc') {
+        console.log('Test failed. The promise should be rejected by the provided value.');
+        return;
+    }
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+>>>>>>> OpenHarmony_feature_20250328
 });

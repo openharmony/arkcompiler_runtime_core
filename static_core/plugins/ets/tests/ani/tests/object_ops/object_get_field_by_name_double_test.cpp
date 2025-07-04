@@ -30,30 +30,39 @@ TEST_F(ObjectGetFieldByNameDoubleTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_double age;
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "age", &age), ANI_OK);
     ASSERT_EQ(age, 2.0F);
+}
+
+TEST_F(ObjectGetFieldByNameDoubleTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_double age = 0.0F;
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Double(nullptr, animal, "age", &age), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameDoubleTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_double age;
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "x", &age), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "", &age), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameDoubleTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_double age;
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, "name", &age), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameDoubleTest, invalid_object)
 {
-    ani_double age;
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Double(nullptr, "age", &age), ANI_INVALID_ARGS);
 }
 
@@ -61,7 +70,7 @@ TEST_F(ObjectGetFieldByNameDoubleTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_double age;
+    ani_double age = 0.0F;
     ASSERT_EQ(env_->Object_GetFieldByName_Double(animal, nullptr, &age), ANI_INVALID_ARGS);
 }
 

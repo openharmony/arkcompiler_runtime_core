@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -22,13 +22,13 @@ class PromiseResolveTest : public AniTest {};
 
 TEST_F(PromiseResolveTest, ResolvePromise)
 {
-    ani_object promise;
-    ani_resolver resolver;
+    ani_object promise {};
+    ani_resolver resolver {};
 
     ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
 
     std::string resolved = "resolved";
-    ani_string resolution;
+    ani_string resolution = nullptr;
     ASSERT_EQ(env_->String_NewUTF8(resolved.c_str(), resolved.size(), &resolution), ANI_OK);
 
     ASSERT_EQ(env_->PromiseResolver_Resolve(resolver, resolution), ANI_OK);
@@ -36,4 +36,31 @@ TEST_F(PromiseResolveTest, ResolvePromise)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_resolve_test", "checkResolve", promise, resolution), ANI_TRUE);
 }
 
+TEST_F(PromiseResolveTest, invalid_argument)
+{
+    ani_object promise {};
+    ani_resolver resolver {};
+
+    ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
+
+    std::string resolved = "resolved";
+    ani_string resolution = nullptr;
+    ASSERT_EQ(env_->String_NewUTF8(resolved.c_str(), resolved.size(), &resolution), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->PromiseResolver_Resolve(nullptr, resolver, resolution), ANI_INVALID_ARGS);
+}
+
+TEST_F(PromiseResolveTest, invalid_argument2)
+{
+    ani_object promise {};
+    ani_resolver resolver {};
+
+    ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
+
+    std::string resolved = "resolved";
+    ani_string resolution = nullptr;
+    ASSERT_EQ(env_->String_NewUTF8(resolved.c_str(), resolved.size(), &resolution), ANI_OK);
+
+    ASSERT_EQ(env_->PromiseResolver_Resolve(nullptr, resolution), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing

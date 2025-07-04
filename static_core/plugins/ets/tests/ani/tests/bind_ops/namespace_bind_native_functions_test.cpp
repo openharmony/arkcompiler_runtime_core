@@ -50,7 +50,7 @@ static ani_string Concat(ani_env *env, ani_string s0, ani_string s1)
 }
 
 static const char *MODULE_NAME = "L@defModule/namespace_bind_native_functions_test;";
-static const char *CLASS_NAME = "@defModule/namespace_bind_native_functions_test";
+static const char *MODULE_DESCRIPTOR = "@defModule/namespace_bind_native_functions_test";
 static const char *CONCAT_SIGNATURE = "Lstd/core/String;Lstd/core/String;:Lstd/core/String;";
 static const ani_native_function NATIVE_FUNC_SUM = {"sum", "II:I", reinterpret_cast<void *>(Sum)};
 static const ani_native_function NATIVE_FUNC_SUM_A = {"sum", "III:I", reinterpret_cast<void *>(SumA)};
@@ -72,8 +72,8 @@ TEST_F(NamespaceBindNativeFunctionsTest, bind_native_functions)
     };
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
@@ -93,8 +93,8 @@ TEST_F(NamespaceBindNativeFunctionsTest, already_binded_function)
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_ALREADY_BINDED);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(NamespaceBindNativeFunctionsTest, invalid_ns)
@@ -148,9 +148,9 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_001)
     std::array functions = {NATIVE_FUNC_SUM, NATIVE_FUNC_SUM_A, NATIVE_FUNC_CONCAT};
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSum"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSumA"), ANI_TRUE);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
 }
 
 TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_002)
@@ -182,13 +182,55 @@ TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_003)
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_SUM, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSum"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSum"), ANI_TRUE);
 
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_SUM_A, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkSumA"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkSumA"), ANI_TRUE);
 
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, &NATIVE_FUNC_CONCAT, 1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>(CLASS_NAME, "checkConcat"), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>(MODULE_DESCRIPTOR, "checkConcat"), ANI_TRUE);
+}
+
+TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_004)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace nsA {};
+    ani_namespace nsB {};
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nsA), ANI_OK);
+    ASSERT_NE(nsA, nullptr);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "LA/B;", &nsB), ANI_OK);
+    ASSERT_NE(nsB, nullptr);
+    ASSERT_EQ(env_->Namespace_FindFunction(nsA, "checkSumB", ":Z", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
+
+    std::array functions = {
+        ani_native_function {"sumB", "II:I", reinterpret_cast<void *>(Sum)},
+    };
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(nsB, functions.data(), functions.size()), ANI_OK);
+    ani_boolean value = ANI_FALSE;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, &value), ANI_OK);
+    ASSERT_EQ(value, ANI_TRUE);
+}
+
+TEST_F(NamespaceBindNativeFunctionsTest, namespace_bind_native_functions_005)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_namespace ns {};
+    ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    std::array functions = {
+        ani_native_function {"undefined", "II:I", reinterpret_cast<void *>(Sum)},
+    };
+    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 }  // namespace ark::ets::ani::testing
 

@@ -365,6 +365,12 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro,
         auto methods = klass->GetVTable();
         for (size_t idx = from; idx < methods.size(); ++idx) {
             auto vmethod = methods[idx];
+<<<<<<< HEAD
+=======
+            if (vmethod->IsPrivate()) {
+                continue;
+            }
+>>>>>>> OpenHarmony_feature_20250328
             if (LIKELY(lookupTarget->GetName() != vmethod->GetName())) {
                 continue;
             }

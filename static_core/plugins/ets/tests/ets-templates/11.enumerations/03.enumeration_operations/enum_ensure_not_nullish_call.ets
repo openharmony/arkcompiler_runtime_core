@@ -22,7 +22,7 @@ enum E {
 }
 
 function foo(a: E) {
-  assertEQ( a, E.A )
+  arktest.assertEQ( a, E.A )
 }
 
 function foo2(a?: E) {

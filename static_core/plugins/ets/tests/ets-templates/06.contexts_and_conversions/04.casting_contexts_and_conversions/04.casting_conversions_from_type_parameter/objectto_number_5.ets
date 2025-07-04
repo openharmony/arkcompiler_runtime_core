@@ -20,5 +20,5 @@ desc: Convert to number-hex type.
 function main(): void {
   let hex: number = 0xA; // 10
   const obj1: object = hex;
-  assertTrue(obj1 == hex);
+  arktest.assertTrue(obj1 == hex);
 }

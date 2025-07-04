@@ -24,5 +24,5 @@ function getValue(): number {
 
 function main(): void {
   getValue()++;
-  assertEQ(getValue()++, 11);
+  arktest.assertEQ(getValue()++, 11);
 }

@@ -21,19 +21,19 @@ tags: []
 
 class A<T> {
     returnHello(op?: T): string {
-        const extra: string = op ? op.toString() : ""
+        const extra: string = op ? ("" + op) : ""
         return "hello A " + extra;
     }
 }
 
 class B<T> extends A<T> {
     returnHello(op?: T): string {
-        const extra: string = op ? op.toString() : ""
+        const extra: string = op ? ("" + op) : ""
         return "hello B " + extra;
     }
 }
 
 function main(): void {
     let b: A<string> = new B<string>()
-    assertEQ( b.returnHello("world"), "hello B world")
+    arktest.assertEQ( b.returnHello("world"), "hello B world")
 }

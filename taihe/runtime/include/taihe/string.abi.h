@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_STRING_ABI_H
-#define TAIHE_STRING_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_
 
 #include <taihe/common.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
-// Private ABI: Don't use in your code
+// Private ABI: Don't use in your code //
 
 enum TStringFlags {
     TSTRING_REF = 1,
@@ -37,7 +37,7 @@ struct TStringData {
     char buffer[];
 };
 
-// Public C API
+// Public C API //
 
 // Returns the buffer of the TString.
 TH_INLINE const char *tstr_buf(struct TString tstr)
@@ -106,25 +106,25 @@ TH_EXPORT void tstr_drop(struct TString tstr);
 TH_EXPORT struct TString tstr_dup(struct TString tstr);
 
 // Concatenates two TString objects.
+// # Parameters
+// - `count`: The number of strings to concatenate.
+// - `tstr_list`: An array of TString objects to concatenate.
 // # Returns
-// - A new TString containing the concatenation of `left` and `right`.
+// - A new TString object containing the concatenated result.
 // # Notes
-// - The resulting TString object contains the concatenation of `left` and
-// `right`.
-// - The reference counts of both `left` and `right` are incremented.
-//   Remember to call `tstr_drop` after use to manage memory correctly.
-TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
+// - The returned TString must be freed using `tstr_drop`.
+TH_EXPORT struct TString tstr_concat(size_t count, struct TString const *tstr_list);
 
 // Extracts a substring from a TString object.
 // # Parameters
-// - `s`: The source TString object to extract the substring from.
+// - `tstr`: The source TString object to extract the substring from.
 // - `pos`: The starting position of the substring within the source TString
-// object.
+//   object.
 // - `len`: The length of the substring to extract.
 // # Returns
 // - A TString reference of the extracted substring.
 // # Notes
-// - Calling this function returns an unowned string reference (string_view).
+// - The returned TString is just a view of the original string and does not own
+//   the memory, so it should not be freed.
 TH_EXPORT struct TString tstr_substr(struct TString tstr, size_t pos, size_t len);
-
-#endif // TAIHE_STRING_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_

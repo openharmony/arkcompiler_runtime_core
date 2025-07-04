@@ -18,6 +18,7 @@ package PreallocTest;
 function fillHeap(arr: Object[], numberOfIter: number): void
 {
     let globalIdx = 0;
+<<<<<<< HEAD
     const megabyte = Math.pow(2, 20);
 
     arr[globalIdx++] = new Object[megabyte];
@@ -26,6 +27,17 @@ function fillHeap(arr: Object[], numberOfIter: number): void
     arr[globalIdx++] = new Object[megabyte / 64];
     arr[globalIdx++] = new Object[megabyte / 128];
     arr[globalIdx++] = new Object[megabyte / 256];
+=======
+    const objectSize = GC.getObjectSize(new Object());
+    const count = Math.pow(2, 20) / (objectSize / 8);
+
+    arr[globalIdx++] = new Object[count];
+    arr[globalIdx++] = new Object[count / 2];
+    arr[globalIdx++] = new Object[count / 32];
+    arr[globalIdx++] = new Object[count / 64];
+    arr[globalIdx++] = new Object[count / 128];
+    arr[globalIdx++] = new Object[count / 256];
+>>>>>>> OpenHarmony_feature_20250328
 
     let newIterNmb = numberOfIter - globalIdx;
     for (let idx = 0; idx < newIterNmb; ++idx) {
@@ -89,7 +101,11 @@ function testThrowingPreallocOOMObject(
 {
     let error = testThrowingPreallocOOMObjectSuite();
 
+<<<<<<< HEAD
     GC.startGC(GC.FULL_CAUSE);
+=======
+    GC.startGC(GC.Cause.FULL);
+>>>>>>> OpenHarmony_feature_20250328
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }
@@ -125,7 +141,11 @@ function testThrowingPreallocOOMObjectTwice(
 {
     let error = testThrowingPreallocOOMObjectTwiceSuite();
 
+<<<<<<< HEAD
     GC.startGC(GC.FULL_CAUSE);
+=======
+    GC.startGC(GC.Cause.FULL);
+>>>>>>> OpenHarmony_feature_20250328
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }

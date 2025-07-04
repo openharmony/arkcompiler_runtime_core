@@ -29,7 +29,7 @@ let w{{loop.index}}: {{t.type}};
 function main() {
 {% for t in c['to'] %}
     w{{loop.index}} = foo
-    assertTrue( w{{loop.index}}{{t.call}} )
+    arktest.assertTrue( w{{loop.index}}{{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

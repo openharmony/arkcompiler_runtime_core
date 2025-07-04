@@ -1,0 +1,123 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          // Async functions can be neither abstract nor native.
+          async native function foo(): Promise<Number>;
+
+    - decl: |-
+          // The return type of an async function must be Promise<T>
+          async function foo(p: int): undefined {
+              return undefined
+          }
+
+    - decl: |-
+          // The return type of an async function must be Promise<T>
+          async function foo(p: int): int {
+              return p + p
+          }
+
+    - decl: |-
+          // The return type of an async function must be Promise<T>
+          async function foo(p: boolean): Promise<Int> {
+              return p
+          }
+
+    - decl: |-
+          // The return type of an async function must be Promise<T>
+          async function foo<U>(p: U): Promise<T> {
+              return p
+          }
+
+    - decl: |-
+          // Returning values of types Promise<T> and T from async functions is allowed.
+          async function foo<T>(p: T): Promise<T> {
+              return new Object()
+          }
+
+    - decl: |-
+          // Returning values of types Promise<T> and T from async functions is allowed.
+          async function foo(p: string): Promise<String> {
+              return (async (): Object => new Object())()
+          }
+
+    - decl: |-
+          // Returning values of types Promise<T> and T from async functions is allowed.
+          async function foo(p: string): Promise<String> {
+              return undefined
+          }
+
+    - decl: |-
+          // Returning values of types Promise<T> and T from async functions is allowed.
+          async function foo(p: int): Promise<Number> {
+              if (p == 1) return 1.0
+              return true
+          }
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            if (p == 'A') {
+                throw new Error('E')
+            }
+            return 'X'
+        }
+      use: |-
+        // Catch error in chained catch
+        let r = foo(s)
+            .then((p: string): string => p + p)  // skipped
+            .catch((p: EN): string => p!.message)
+            .then((p: string): string => p + p)
+        
+        arktest.assertTrue((await r) == 'EE')
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            return p + p
+        }
+      use: |-
+        // Throw error in chained then and catch in the following chained catch
+        let r: Promise<string> = foo(s)
+            .then((p: string): string => { throw new Error(p) })
+            .catch((p: EN): string => p!.message + p!.message)
+        
+        arktest.assertTrue((await r) == 'AAAA')
+
+    - decl: |-
+        type EN = Error|null
+        let s = 'A'
+        async function foo(p: string): Promise<string> {
+            if (p == 'A') {
+                throw new Error('E')
+            }
+            return 'X'
+        }
+      use: |-
+        // Throw error in chained catch
+        // await is forbidden for non-async functions
+        let r: Promise<string> = foo(s)
+            .then((p: string): string => p + p)
+            .catch((p: EN): string => { throw p! })
+        
+        try {
+            await r
+        } catch (e: Error) {
+            arktest.assertTrue(e.message == 'E')
+            return
+        }
+        arktest.assertTrue(false)

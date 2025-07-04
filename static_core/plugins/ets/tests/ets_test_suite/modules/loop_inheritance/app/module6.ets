@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 import { LevelTwo } from "@loop_inheritance/level_two";
 import { Ability } from "@spawn/ability";
 

@@ -16,7 +16,7 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList getLastIndexOf an unique element", testGetLastIndexOfUniqueElement);
     suite.addTest("LinkedList getLastIndexOf an inexistent element", testGetLastIndexOfInexistentElement);
@@ -56,14 +56,14 @@ class TestData {
 function testGetLastIndexOfUniqueElement() {
     let linkedList = initializeNumberLinkedList();
     
-    assertEQ(linkedList.getLastIndexOf(TestData.testNumber1), 0, "Last index of 1 should be 0");
-    assertEQ(linkedList.getLastIndexOf(TestData.testNumber3), TestData.testNumber3, "Last index of 3 should be 3");
+    arktest.assertEQ(linkedList.getLastIndexOf(TestData.testNumber1), 0, "Last index of 1 should be 0");
+    arktest.assertEQ(linkedList.getLastIndexOf(TestData.testNumber3), TestData.testNumber3, "Last index of 3 should be 3");
 }
 
 function testGetLastIndexOfInexistentElement() {
     let linkedList = initializeNumberLinkedList();
 
-    assertEQ(linkedList.getLastIndexOf(TestData.testNumber4), -TestData.testNumber1, "Last index of 4 should be -1");
+    arktest.assertEQ(linkedList.getLastIndexOf(TestData.testNumber4), -TestData.testNumber1, "Last index of 4 should be -1");
 }
 
 function testGetLastIndexOfAddRemoveByIndex() {
@@ -71,10 +71,10 @@ function testGetLastIndexOfAddRemoveByIndex() {
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
     let result1 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber2));
     let result2 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber2));
-    assertEQ(result1, result2, "The two result should be equal");
+    arktest.assertEQ(result1, result2, "The two result should be equal");
     let result3 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber3));
     let result4 = linkedList.removeByIndex(linkedList.getLastIndexOf(TestData.testNumber3));
-    assertEQ(result3, result4, "The two result should be equal");
+    arktest.assertEQ(result3, result4, "The two result should be equal");
 }
 
 function testGetLastIndexOfAddRemoveFirstAdd() {
@@ -82,7 +82,7 @@ function testGetLastIndexOfAddRemoveFirstAdd() {
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeFirst();
     linkedList.add(elem!);
-    assertEQ(linkedList.getLastIndexOf(elem!), linkedList.length - TestData.testNumber1,
+    arktest.assertEQ(linkedList.getLastIndexOf(elem!), linkedList.length - TestData.testNumber1,
         "The index should be length - 1");
 }
 
@@ -91,27 +91,27 @@ function testGetLastIndexOfAddRemoveLastAdd() {
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeLast();
     linkedList.add(elem!);
-    assertEQ(linkedList.getLastIndexOf(elem!), linkedList.length - TestData.testNumber1,
+    arktest.assertEQ(linkedList.getLastIndexOf(elem!), linkedList.length - TestData.testNumber1,
         "The index should be length - 1");
 }
 
 function testGetLastIndexOfRepeatedElement() {
     let linkedList = initializeNumberLinkedList();
 
-    assertEQ(linkedList.getLastIndexOf(TestData.testNumber2), TestData.testNumber2, "Last index of 2 should be 2");
+    arktest.assertEQ(linkedList.getLastIndexOf(TestData.testNumber2), TestData.testNumber2, "Last index of 2 should be 2");
 }
 
 function testGetIndexOfUniqueElement() {
     let linkedList = initializeNumberLinkedList();
 
-    assertEQ(linkedList.getIndexOf(TestData.testNumber1), 0, "First index of 1 should be 0");
-    assertEQ(linkedList.getIndexOf(TestData.testNumber3), TestData.testNumber3, "First index of 3 should be 3");
+    arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber1), 0, "First index of 1 should be 0");
+    arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber3), TestData.testNumber3, "First index of 3 should be 3");
 }
 
 function testGetIndexOfInexistentElement() {
     let linkedList = new LinkedList<number>();
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
-    assertEQ(linkedList.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
+    arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber4), -TestData.testNumber1, "First index of 4 should be -1");
 }
 
 function testGetIndexOfAddRemoveByIndex() {
@@ -119,10 +119,10 @@ function testGetIndexOfAddRemoveByIndex() {
     initializeLinkedList(linkedList, TestData.arrayForNumber4);
     let result1 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber2));
     let result2 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber2));
-    assertEQ(result1, result2, "The two result should be equal");
+    arktest.assertEQ(result1, result2, "The two result should be equal");
     let result3 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber3));
     let result4 = linkedList.removeByIndex(linkedList.getIndexOf(TestData.testNumber3));
-    assertEQ(result3, result4, "The two result should be equal");
+    arktest.assertEQ(result3, result4, "The two result should be equal");
 }
 
 function testGetIndexOfAddRemoveFirstAdd() {
@@ -130,13 +130,13 @@ function testGetIndexOfAddRemoveFirstAdd() {
     initializeLinkedList(linkedList, TestData.arrayForNumber2);
     let elem = linkedList.removeFirst();
     linkedList.add(elem!);
-    assertEQ(linkedList.getIndexOf(elem!), linkedList.length - TestData.testNumber1, "The index should be length - 1");
+    arktest.assertEQ(linkedList.getIndexOf(elem!), linkedList.length - TestData.testNumber1, "The index should be length - 1");
 }
 
 function testGetIndexOfRepeatedElement() {
     let linkedList = initializeNumberLinkedList();
-   
-    assertEQ(linkedList.getIndexOf(TestData.testNumber2), TestData.testNumber1, "First index of 2 should be 1");
+
+    arktest.assertEQ(linkedList.getIndexOf(TestData.testNumber2), TestData.testNumber1, "First index of 2 should be 1");
 }
 
 function initializeNumberLinkedList() {

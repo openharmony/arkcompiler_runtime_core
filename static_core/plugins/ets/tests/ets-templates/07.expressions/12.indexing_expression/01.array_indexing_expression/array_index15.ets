@@ -22,7 +22,7 @@ function main(): void {
   let firstColor: string = colors[0];
   let secondColor: string = colors[1];
   let thirdColor: string = colors[2];
-  assertEQ(firstColor, "Red");
-  assertEQ(secondColor, "Green");
-  assertEQ(thirdColor, "Blue");
+  arktest.assertEQ(firstColor, "Red");
+  arktest.assertEQ(secondColor, "Green");
+  arktest.assertEQ(thirdColor, "Blue");
 }

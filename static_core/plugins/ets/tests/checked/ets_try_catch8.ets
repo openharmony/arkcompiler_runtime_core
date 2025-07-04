@@ -47,7 +47,7 @@
 class Exception0 extends Exception {}
 
 class MultipleCatch {
-    multipleCatch(a: int, b: int, c: int) : int throws {
+    multipleCatch(a: int, b: int, c: int) : int {
     let res : int = 0;
 
     for (let i : int = 0; i < 16; i++) {
@@ -76,7 +76,7 @@ class MultipleCatch {
     }
     return res;
   }
-  wrapper(a :int, b :int, c :int , d :int): int throws {
+  wrapper(a :int, b :int, c :int , d :int): int {
     return d + this.multipleCatch(a, b, c);
   }
 }

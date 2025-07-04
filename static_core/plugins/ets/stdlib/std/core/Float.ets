@@ -25,7 +25,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * Constructs a new Float instance with initial value zero
      */
     public constructor() {
-        this.value = 0.0;
+        this.value = 0.0f;
     }
 
     /**
@@ -43,17 +43,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @param value the initial value
      */
     public constructor(value: double) {
-        this.value = value as float;
-    }
-
-
-    /**
-     * Constructs a new Float instance with provided initial value
-     *
-     * @param value the initial value
-     */
-    public constructor(value: Float) {
-        this.value = value.floatValue();
+        this.value = Double.toFloat(value);
     }
 
     /**
@@ -80,12 +70,12 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Minimal value that this type can have as a float
      */
-    public static readonly MIN_VALUE: float = 1.4e-45 as float;
+    public static readonly MIN_VALUE: float = 1.4e-45f;
 
     /**
      * Maximal value that this type can have as a float
      */
-    public static readonly MAX_VALUE: float = 3.4028235e+38 as float;
+    public static readonly MAX_VALUE: float = 3.4028235e+38f;
 
     /**
      * Maximal integer value that can be used as a float without loss of precision
@@ -106,17 +96,17 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Represents the NaN value according to IEEE-754 specification
      */
-    public static readonly NaN: float = 0.0 / 0.0;
+    public static readonly NaN: float = Double.toFloat(0.0 / 0.0);
 
     /**
      * Represents the +Infinity value according to IEEE-754 specification
      */
-    public static readonly POSITIVE_INFINITY: float = 1.0 / 0.0;
+    public static readonly POSITIVE_INFINITY: float = Double.toFloat(1.0 / 0.0);
 
     /**
      * Represents the -Infinity value according to IEEE-754 specification
      */
-    public static readonly NEGATIVE_INFINITY: float = -1.0 / 0.0;
+    public static readonly NEGATIVE_INFINITY: float = Double.toFloat(-1.0 / 0.0);
 
     /**
      * Number of significant precision bits in this floating type
@@ -139,8 +129,19 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as byte
      */
+    public override toByte(): byte {
+        return this.value.toByte();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as byte
+     */
     public override byteValue(): byte {
-        return this.value as byte;
+        return this.toByte();
     }
 
     /**
@@ -148,8 +149,19 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as short
      */
+    public override toShort(): short {
+        return this.value.toShort();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as short
+     */
     public override shortValue(): short {
-        return this.value as short;
+        return this.toShort();
     }
 
     /**
@@ -157,8 +169,19 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as int
      */
+    public override toInt(): int {
+        return this.value.toInt();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as int
+     */
     public override intValue(): int {
-        return this.value as int;
+        return this.toInt();
     }
 
     /**
@@ -166,8 +189,19 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as long
      */
+    public override toLong(): long {
+        return this.value.toLong();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as long
+     */
     public override longValue(): long {
-        return this.value as long;
+        return this.toLong();
     }
 
     /**
@@ -175,8 +209,19 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as float
      */
-    public override floatValue(): float {
+    public override toFloat(): float {
         return this.value;
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as float
+     */
+    public override floatValue(): float {
+        return this.toFloat();
     }
 
     /**
@@ -184,9 +229,95 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns value as double
      */
-    public override doubleValue(): double {
-        return this.value as double;
+    public override toDouble(): double {
+        return this.value.toDouble();
     }
+
+
+    /**
+     * Returns value of this instance
+     *
+     * Supportive interface
+     *
+     * @returns value as double
+     */
+    public override doubleValue(): double {
+        return this.toDouble();
+    }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     */
+    public toChar(): char {
+        return this.value.toChar();
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: float): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: float): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: float): int;
+
+    /**
+     * Returns the primitive as long value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toLong(value: float): long;
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toFloat(value: float): float {
+        return value;
+    }
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: float): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: float): char;
 
     /**
      * Compares this instance to other Float object
@@ -199,7 +330,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns result of the comparison
      */
     public override compareTo(other: Float): int {
-        return (this.value - other.unboxed()) as int;
+        return (this.value - other.unboxed()).toInt();
     }
 
     /**
@@ -238,7 +369,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns representation of this instance
      */
     public override $_hashCode(): int {
-        return this.intValue();
+        return this.toInt();
     }
 
     /**
@@ -324,7 +455,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      */
     public static isInteger(v: float): boolean {
         // In the language % works as C fmod that differs with IEEE-754 % definition
-        return Float.compare(v % (1.0 as float), 0.0 as float);
+        return Float.compare(v % 1.0f, 0.0f);
     }
 
     /**
@@ -364,7 +495,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns Result of the addition
      */
     public add(other: Float): Float {
-        return Float.valueOf((this.value + other.floatValue()) as float)
+        return Float.valueOf((this.value + other.toFloat()) as float)
     }
 
     /**
@@ -375,7 +506,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns Result of the subtraction
      */
     public sub(other: Float): Float {
-        return Float.valueOf((this.value - other.floatValue()) as float)
+        return Float.valueOf((this.value - other.toFloat()) as float)
     }
 
     /**
@@ -386,7 +517,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns Result of the multiplication
      */
     public mul(other: Float): Float {
-        return Float.valueOf((this.value * other.floatValue()) as float)
+        return Float.valueOf((this.value * other.toFloat()) as float)
     }
 
     /**
@@ -397,7 +528,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns Result of the division
      */
     public div(other: Float): Float {
-        return Float.valueOf((this.value / other.floatValue()) as float)
+        return Float.valueOf((this.value / other.toFloat()) as float)
     }
 
     /**
@@ -408,7 +539,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Float): boolean {
-        return this.value < other.floatValue();
+        return this.value < other.toFloat();
     }
 
     /**
@@ -419,7 +550,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Float): boolean {
-        return this.value <= other.floatValue();
+        return this.value <= other.toFloat();
     }
 
     /**
@@ -430,7 +561,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Float): boolean {
-        return this.value > other.floatValue();
+        return this.value > other.toFloat();
     }
 
     /**
@@ -441,7 +572,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Float): boolean {
-        return this.value >= other.floatValue();
+        return this.value >= other.toFloat();
     }
 
     /**
@@ -473,7 +604,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
         if (json instanceof JSONNumber) {
             let val = (json as JSONNumber).value
             if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
-                return Float.valueOf((json as JSONNumber).value as float)
+                return Float.valueOf(((json as JSONNumber).value).toFloat())
             }
         }
         throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))

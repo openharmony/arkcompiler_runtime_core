@@ -36,7 +36,7 @@ class Z{{loop.index}} {
 
 function main() {
 {%- for v in c['vals'] %}
-    assertEQ( new Z{{loop.index}}({{v.expr}}).meth({{v.expr}}), "{{c.res}}" )
+    arktest.assertEQ( new Z{{loop.index}}({{v.expr}}).meth({{v.expr}}), "{{c.res}}" )
 {%- endfor %}
 }
 {%- endfor %}

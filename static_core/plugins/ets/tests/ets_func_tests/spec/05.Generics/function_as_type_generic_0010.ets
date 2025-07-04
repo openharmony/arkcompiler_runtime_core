@@ -34,10 +34,10 @@ function main() {
     a.push(b3)
     let b4 = (p) => p + 4 
     a.push(b4)
-    assertEQ(a[0](1), 2)
-    assertEQ(a[0](1), 3)
-    assertEQ(a[0](1), 4)
-    assertEQ(a[0](1), 5)
+    arktest.assertEQ(a[0](1), 2)
+    arktest.assertEQ(a[0](1), 3)
+    arktest.assertEQ(a[0](1), 4)
+    arktest.assertEQ(a[0](1), 5)
     return 0;
 }
 

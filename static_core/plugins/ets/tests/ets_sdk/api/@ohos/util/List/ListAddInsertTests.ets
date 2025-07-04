@@ -14,9 +14,24 @@
  */
 
 import {List} from '@ohos.util.List';
+<<<<<<< HEAD
+=======
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
+
+class Temp1 {
+    age: number = 0
+    name: string = ""
+    constructor(age: number, name: string) {
+        this.age = age;
+        this.name = name;
+    }
+}
+>>>>>>> OpenHarmony_feature_20250328
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List add elements of multiple types to the container", testAddMultipleTypes);
     suite.addTest("List add special characters to the container", testAddSpecialCharacters);
@@ -26,6 +41,8 @@ function main() {
         testInsertGetIndexOfRemoveByIndexHas);
     suite.addTest("List insert elements at index > length", testInsertIndexGreaterThanLength);
     suite.addTest("List insert elements at index < 0", testInsertIndexLessThanZero);
+    suite.addTest("Testing List Add different dataType data", testListAddVariousDataTypes);
+    suite.addTest("Testing List add special string", testListAddSpecialString);
 
     return suite.run();
 }
@@ -60,20 +77,20 @@ function testAddMultipleTypes() {
     list.add(TestData.testObject1);
     list.add(undefined);
 
-    assertEQ(list.length, TestData.testNumber6, "List length should be 6");
-    assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
-    assertEQ(list.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
-    assertEQ(list.get(TestData.testNumber2), true, "Element at index 2 should match");
-    assertEQ(list.get(TestData.testNumber3), null, "Element at index 3 should match");
-    assertEQ(list.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
-    assertEQ(list.get(TestData.testNumber5), undefined, "Element at index 5 should match");
+    arktest.assertEQ(list.length, TestData.testNumber6, "List length should be 6");
+    arktest.assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
+    arktest.assertEQ(list.get(TestData.testNumber1), TestData.testString1, "Element at index 1 should match");
+    arktest.assertEQ(list.get(TestData.testNumber2), true, "Element at index 2 should match");
+    arktest.assertEQ(list.get(TestData.testNumber3), null, "Element at index 3 should match");
+    arktest.assertEQ(list.get(TestData.testNumber4), TestData.testObject1, "Element at index 4 should match");
+    arktest.assertEQ(list.get(TestData.testNumber5), undefined, "Element at index 5 should match");
 }
 
 function testAddSpecialCharacters() {
     let list = new List<string>();
     list.add(TestData.testString2);
-    assertEQ(list.get(0), TestData.testString2, "Add successful");
-    assertEQ(list.length, TestData.testNumber1, "List length should be 1");
+    arktest.assertEQ(list.get(0), TestData.testString2, "Add successful");
+    arktest.assertEQ(list.length, TestData.testNumber1, "List length should be 1");
 }
 
 function testInsertWithinRange() {
@@ -87,15 +104,15 @@ function testInsertWithinRange() {
     list.insert(TestData.testObject1, TestData.testNumber5);
     list.insert(undefined, TestData.testNumber6);
 
-    assertEQ(list.length, TestData.testNumber8, "List length should be 8");
-    assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
-    assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 6 should match");
-    assertEQ(list.get(TestData.testNumber2), TestData.testString1, "Element at index 1 should match");
-    assertEQ(list.get(TestData.testNumber3), true, "Element at index 2 should match");
-    assertEQ(list.get(TestData.testNumber4), null, "Element at index 3 should match");
-    assertEQ(list.get(TestData.testNumber5), TestData.testObject1, "Element at index 4 should match");
-    assertEQ(list.get(TestData.testNumber6), undefined, "Element at index 5 should match");
-    assertEQ(list.get(TestData.testNumber7), TestData.testNumber2, "Element at index 7 should match");
+    arktest.assertEQ(list.length, TestData.testNumber8, "List length should be 8");
+    arktest.assertEQ(list.get(0), TestData.testNumber1, "Element at index 0 should match");
+    arktest.assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 6 should match");
+    arktest.assertEQ(list.get(TestData.testNumber2), TestData.testString1, "Element at index 1 should match");
+    arktest.assertEQ(list.get(TestData.testNumber3), true, "Element at index 2 should match");
+    arktest.assertEQ(list.get(TestData.testNumber4), null, "Element at index 3 should match");
+    arktest.assertEQ(list.get(TestData.testNumber5), TestData.testObject1, "Element at index 4 should match");
+    arktest.assertEQ(list.get(TestData.testNumber6), undefined, "Element at index 5 should match");
+    arktest.assertEQ(list.get(TestData.testNumber7), TestData.testNumber2, "Element at index 7 should match");
 }
 
 function testInsertAtBoundary() {
@@ -105,52 +122,80 @@ function testInsertAtBoundary() {
     list.insert(0, 0);
 
     for (let i: number = 0; i < TestData.arrayForNumber1.length; i++) {
-        assertEQ(list.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
+        arktest.assertEQ(list.get(i + TestData.testNumber1), TestData.arrayForNumber1[i], "Element should match");
     }
-    assertEQ(list.get(0), 0, "Element should be 0");
-    assertEQ(list.get(list.length - TestData.testNumber1), 0, "Element should be 0");
-    assertEQ(list.length, TestData.arrayForNumber1.length + TestData.testNumber2, "List length should + 2");
+    arktest.assertEQ(list.get(0), 0, "Element should be 0");
+    arktest.assertEQ(list.get(list.length - TestData.testNumber1), 0, "Element should be 0");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length + TestData.testNumber2, "List length should + 2");
 }
 
 function testInsertGetIndexOfRemoveByIndexHas() {
     let list = new List<number | string>();
     list.insert(TestData.testString2, 0);
     let index = list.getIndexOf(TestData.testString2);
-    assertEQ(index, 0, "The index of the first element should be 0");
+    arktest.assertEQ(index, 0, "The index of the first element should be 0");
     list.removeByIndex(index);
-    assertFalse(list.has(TestData.testString2), "The element should be removed");
+    arktest.assertFalse(list.has(TestData.testString2), "The element should be removed");
 }
 
 function testInsertIndexGreaterThanLength() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    try {
-        list.insert(TestData.testNumber1, TestData.testNumber6);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.insert(TestData.testNumber6, 10000)}, exceptionCheck);
 }
 
 function testInsertIndexLessThanZero() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    try {
-        list.insert(-TestData.testNumber1, TestData.testNumber6);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertFalse(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {list.insert(TestData.testNumber6, -TestData.testNumber1)}, exceptionCheck);
 }
 
 function initializeList(list: List<number>, sourceArray: Array<number>) {
     for (let i = 0; i < sourceArray.length; i++) {
         list.add(sourceArray[i]);
     }
+}
+
+// Test cases ported from ArkTS 1.0: LIST_ADD_0100
+function testListAddVariousDataTypes() {
+    let list = new List<number | string | boolean | undefined | null | Object>();
+    list.add("zhang san");
+    list.add(1);
+    let param: Temp1 = new Temp1(10, "zhang");
+    list.add(param);
+    list.add(undefined);
+    list.add(null);
+    list.add(true);
+    list.insert("insert", 0);
+    list.add([0, 1, 2, 4]);
+    list.removeByIndex(0);
+    for (let i = 0; i < 4; i++) {
+        arktest.assertEQ((list.get(6)! as Array<int>)[i], [0, 1, 2, 4][i]);
+    }
+    arktest.assertEQ(list.get(5), true);
+    arktest.assertEQ(list.get(4), null);
+    arktest.assertEQ(list.get(3), undefined);
+    arktest.assertEQ(list.get(2), param);
+    arktest.assertEQ(list.get(1), 1);
+    arktest.assertEQ(list.get(0), "zhang san");
+}
+
+// Test cases ported from ArkTS 1.0: LIST_ADD_0200
+function testListAddSpecialString() {
+    let list = new List<string>();
+    let param = "!\"#$%'()+,-./:;<=>?@[\\]^_`{|}~";
+    list.add(param);
+    arktest.assertEQ(list.get(0), param);
 }

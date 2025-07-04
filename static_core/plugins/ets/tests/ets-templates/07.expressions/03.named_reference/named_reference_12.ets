@@ -23,5 +23,5 @@ function identity<T>(arg: T): T {
 
 function main(): void {
   let result = identity("hello");
-  assertEQ(result, "hello");
+  arktest.assertEQ(result, "hello");
 }

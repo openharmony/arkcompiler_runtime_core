@@ -29,7 +29,6 @@ cases:
         - StackTrace
         - StackTraceElement
         - OutOfMemoryError
-        - Exception
         - AssertionError
         - DivideByZeroError
         - NullPointerError

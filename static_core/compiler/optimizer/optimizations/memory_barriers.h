@@ -75,10 +75,6 @@ private:
     static void VisitCallResolvedStatic(GraphVisitor *v, Inst *inst);
     static void VisitCallVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst);
-    static void VisitCallLaunchStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst);
-    static void VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallDynamic(GraphVisitor *v, Inst *inst);
     static void VisitCallNative(GraphVisitor *v, Inst *inst);
     static void VisitSelect(GraphVisitor *v, Inst *inst);

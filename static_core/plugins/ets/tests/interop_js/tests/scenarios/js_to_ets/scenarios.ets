@@ -30,23 +30,22 @@ import {
     singleRequired,
 } from "decl_js"
 
-
 function testOptionals() {
     // #22991
     // let x = optionalCall(123, 321, 5)
-    // assertTrue(x == 123 + 321 + 5);
+    // arktest.assertTrue(x == 123 + 321 + 5);
     // x = optionalCall(23, 21)
-    // assertTrue(x == 23 + 21 + 1);
+    // arktest.assertTrue(x == 23 + 21 + 1);
     // x = optionalCall(100)
-    // assertTrue(x == 100 + 130 + 1);
+    // arktest.assertTrue(x == 100 + 130 + 1);
     // x = optionalCall()
-    // assertTrue(x == 123 + 130 + 1);
+    // arktest.assertTrue(x == 123 + 130 + 1);
 
     // #22991
     // x = singleRequired(123, 321)
-    // assertTrue(x == 123 + 321 + 123);
+    // arktest.assertTrue(x == 123 + 321 + 123);
     // x = singleRequired(100)
-    // assertTrue(x == 100 + 123 + 123);
+    // arktest.assertTrue(x == 100 + 123 + 123);
 
     return true;
 }
@@ -175,11 +174,11 @@ function TestFunctionReturnTypePrimitive(): boolean {
 
 function TestRestParams() {
     // NOTE: casts due to bug in frontend
-    assertEQ( js.jsSumRestParams(1, 2, 3) as Int, (1 + 2 + 3) );
-    assertEQ( js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int, (1) * (2 + 3 + 4));
-    assertEQ( js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int, (1 + 2) * (3 + 4 + 5));
-    assertEQ( js.jsConcatStringsRestParams() as String, "");
-    assertEQ( js.jsConcatStringsRestParams("a", "b", "c") as String, "abc");
+    arktest.assertEQ( js.jsSumRestParams(1, 2, 3) as Int, (1 + 2 + 3) );
+    arktest.assertEQ( js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int, (1) * (2 + 3 + 4));
+    arktest.assertEQ( js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int, (1 + 2) * (3 + 4 + 5));
+    arktest.assertEQ( js.jsConcatStringsRestParams() as String, "");
+    arktest.assertEQ( js.jsConcatStringsRestParams("a", "b", "c") as String, "abc");
     return true;
 }
 
@@ -309,7 +308,7 @@ function testClassInPlaceFieldDeclarations(): boolean {
 function testFunctionReturnsCompositeTypeInt(): boolean {
     let isOk = true;
     for (let i = 0; i < 4; i++){
-        const expectedValue = functionReturnsCompositeType(i) as (string | number | double | string[]);
+        const expectedValue = functionReturnsCompositeType(i) as (string | number | double | FixedArray<string>);
         switch (i) {
             case 0:
                 isOk = isOk && expectedValue as string == '1';

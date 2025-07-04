@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionBooleanTest : public AniGTestArrayOps {};
+class ArraySetGetRegionBooleanTest : public ArrayHelperTest {};
 
 TEST_F(ArraySetGetRegionBooleanTest, SetBooleanArrayRegionErrorTests)
 {
@@ -39,13 +39,35 @@ TEST_F(ArraySetGetRegionBooleanTest, GetBooleanArrayRegionErrorTests)
     ani_boolean nativeBuffer[LENGTH_10] = {ANI_TRUE};
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    // Should change to ANI_OK when std lib array will work according to spec
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_ERROR);
+}
+
+TEST_F(ArraySetGetRegionBooleanTest, SetBooleanFixedArrayRegionErrorTests)
+{
+    ani_array_boolean array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
+    ani_boolean nativeBuffer[LENGTH_10] = {ANI_FALSE};
+    const ani_size offset1 = -1;
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
+}
+
+TEST_F(ArraySetGetRegionBooleanTest, GetBooleanFixedArrayRegionErrorTests)
+{
+    ani_array_boolean array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
+    ani_boolean nativeBuffer[LENGTH_10] = {ANI_TRUE};
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_OK);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getArray"));
     ani_boolean nativeBuffer[LENGTH_5] = {ANI_FALSE};
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
@@ -58,16 +80,16 @@ TEST_F(ArraySetGetRegionBooleanTest, GetRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, SetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getArray"));
     const ani_boolean nativeBuffer1[LENGTH_5] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "checkArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -84,7 +106,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
     ASSERT_EQ(nativeBuffer[3U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[4U], ANI_TRUE);
 
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "ChangeStaticArray", nullptr), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "changeStaticArray", nullptr), ANI_OK);
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
     ASSERT_EQ(nativeBuffer[0U], ANI_TRUE);
     ASSERT_EQ(nativeBuffer[1U], ANI_TRUE);
@@ -96,7 +118,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromManagedRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Larray_region_boolean_test/ArrayClass;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("array_region_boolean_test.ArrayClass", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_ref ref = nullptr;
@@ -108,14 +130,14 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_2, LENGTH_3, nativeBuffer), ANI_OK);
 
     ani_boolean result = ANI_FALSE;
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "CheckStaticArray", nullptr, &result), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "checkStaticArray", nullptr, &result), ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, SetGetUnionToArrayTest)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->Array_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
 
     std::array<ani_boolean, LENGTH_5> nativeBuffer = {ANI_TRUE, ANI_FALSE, ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -149,7 +171,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionBooleanTest, SetGetStabilityToArrayTest)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->Array_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
 
     std::array<ani_boolean, LENGTH_5> nativeBuffer = {ANI_TRUE, ANI_FALSE, ANI_TRUE, ANI_FALSE, ANI_TRUE};
     std::array<ani_boolean, LENGTH_5> nativeBuffer2 = {ANI_FALSE};
@@ -177,7 +199,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetGetStabilityToArrayTest)
 TEST_F(ArraySetGetRegionBooleanTest, EscompatGetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
 
     ani_boolean nativeBuffer[5U] = {ANI_FALSE};
     const ani_size offset3 = 0;
@@ -193,18 +215,18 @@ TEST_F(ArraySetGetRegionBooleanTest, EscompatGetRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, EscompatSetRegionBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
     const ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     const ani_size offset4 = 2;
     const ani_size len4 = 3;
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset4, len4, nativeBuffer1), ANI_OK);
-    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "CheckEscompatArray", array), ANI_TRUE);
+    ASSERT_EQ(CallEtsFunction<ani_boolean>("array_region_boolean_test", "checkEscompatArray", array), ANI_TRUE);
 }
 
 TEST_F(ArraySetGetRegionBooleanTest, EscompatInvalidBooleanTest)
 {
     const auto array =
-        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "GetEscompatArray"));
+        static_cast<ani_array_boolean>(CallEtsFunction<ani_ref>("array_region_boolean_test", "getEscompatArray"));
     ani_boolean nativeBuffer1[5U] = {ANI_TRUE, ANI_FALSE, ANI_TRUE};
     const ani_size offset4 = 3;
     const ani_size len4 = 3;

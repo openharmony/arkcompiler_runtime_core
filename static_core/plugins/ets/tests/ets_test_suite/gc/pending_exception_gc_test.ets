@@ -19,13 +19,13 @@
  * (in case of using objects they are wrapped with handles)
  */
 
-function main(): void throws {
+function main(): void {
     // create object of exception class
     let e: Exception = new Exception("test");
 
     // adding a couple Full GC to be run without waiting for its completion
     // in order to have GC running during exception processing
-    GC.startGC(GC.FULL_CAUSE);
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
+    GC.startGC(GC.Cause.FULL);
     throw e;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ class ItemsPool {
         NO_MOVE_SEMANTIC(PaddedItem);
     };
 
-    static constexpr size_t MAX_INDEX = 1U << NR_INDEX_BITS;
+    static constexpr size_t MAX_INDEX = 1ULL << NR_INDEX_BITS;
     static constexpr size_t PADDED_ITEM_SIZE = sizeof(PaddedItem);
 
     static PaddedItem *GetPaddedItem(Item *item)
@@ -58,7 +58,7 @@ class ItemsPool {
     }
 
 public:
-    static constexpr size_t MAX_POOL_SIZE = (1U << NR_INDEX_BITS) * PADDED_ITEM_SIZE;
+    static constexpr size_t MAX_POOL_SIZE = (static_cast<size_t>(1U) << NR_INDEX_BITS) * PADDED_ITEM_SIZE;
 
     ItemsPool(void *data, size_t size)
         : data_(reinterpret_cast<PaddedItem *>(data)),

@@ -76,7 +76,7 @@ function initFormatResults(): void {
         return
     }
 
-    const resultUS = [
+    const resultUS:Intl.DateTimeRangeFormatPart[] = [
         RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("day", "11", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("year", "2024", "startRange"), RPart("literal", " – ", "shared"), 
@@ -87,7 +87,7 @@ function initFormatResults(): void {
 
     addFormatRangeToPartsResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultUS)
 
-    const resultCN = [
+    const resultCN:Intl.DateTimeRangeFormatPart[] = [
         RPart("year", "2024", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("day", "11", "startRange"), RPart("literal", " – ", "shared"), 
@@ -130,7 +130,7 @@ function dateFormatToPartsWithOptions(): void {
         if (!resultIsValid) {
             const range = `${RANGE_START}, ${RANGE_END}`
             const failMsg = `Unexpected DateTimeFormat(${locale}, ${options}).formatRangeToParts(${range}) result`
-            assertTrue(false, failMsg)
+            arktest.assertTrue(false, failMsg)
         }
     })
 }
@@ -138,7 +138,7 @@ function dateFormatToPartsWithOptions(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
     suite.addTest("with formatting options", dateFormatToPartsWithOptions)
     return suite.run()
 }

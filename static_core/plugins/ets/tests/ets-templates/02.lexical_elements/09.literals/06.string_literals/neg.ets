@@ -21,6 +21,6 @@ tags: [negative, compile-only]
 
 function main() {
     let s: string = {{case}}
-    assertTrue(s instanceof Object)
+    arktest.assertTrue(s instanceof Object)
 }
 {% endfor %}

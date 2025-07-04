@@ -18,9 +18,240 @@ Semantic Rules
 .. meta:
     frontend_status: Done
 
-This Chapter contains semantic rules to be used throughout the Specification
+This Chapter contains semantic rules to be used throughout this Specification
 document. The description of the rules is more or less informal. Some details
 are omitted to simplify the understanding.
+
+.. index::
+   semantic rule
+
+|
+
+.. _Semantic Essentials:
+
+Semantic Essentials
+*******************
+
+.. meta:
+    frontend_status: Partly
+
+The section gives a brief introduction to the major semantic terms
+and their usage in several contexts.
+
+|
+
+.. _Type of Standalone Expression:
+
+Type of Standalone Expression
+=============================
+
+.. meta:
+    frontend_status: Done
+
+*Standalone expression* (see :ref:`Type of Expression`) is an expression for
+which no target type is expected in its context.
+
+The type of a *standalone expression* is determined as follows:
+
+- In case of :ref:`Numeric Literals`, the type is the default type of a literal:
+
+    - Type of :ref:`Integer Literals` is ``int`` or ``long``;
+    - Type of :ref:`Floating-Point Literals` is ``double`` or ``float``.
+
+- In case of :ref:`Constant Expressions`, the type is inferred from operand
+  types and operations.
+
+- In case of an :ref:`Array Literal`, the type is inferred from the elements
+  (see :ref:`Array Type Inference from Types of Elements`).
+
+- Otherwise, a :index:`compile-time error` occurs. Specifically,
+  a :index:`compile-time error` occurs if an *object literal* is used
+  as a *standalone expression*.
+
+The situation is represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {
+      1    // type is 'int'
+      1.0  // type is 'number'
+      [1.0, 2.0]  // type is number[]
+      [1, "aa"] // type is (int | string)
+    }
+
+|
+
+.. Specifics of Assignment-like Contexts:
+
+Specifics of Assignment-like Contexts
+=====================================
+
+*Assignment-like context* (see :ref:`Assignment-like Contexts`) can be
+considered as an assignment ``x = expr``, where ``x`` is a left-hand-side
+expression, and ``expr`` is a right-hand-side expression. E.g., there is an
+implicit assignment of ``expr`` to the formal parameter ``foo`` in the call
+``foo(expr)``, and implicit assignments to elements or properties in
+:ref:`Array Literal` and :ref:`Object Literal`.
+
+*Assignment-like context* is specific in that the type of a left-hand-side
+expression is known, but the type of a right-hand-side expression is not
+necessarily known in the context as follows:
+
+-  If the type of a right-hand-side expression is known from the expression
+   itself, then the :ref:`Assignability` check is performed as in the example
+   below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(x: string, y: string) {
+        x = y // ok, assignability is checked
+    }
+
+-  Otherwise, an attempt is made to apply the type of the left-hand-side
+   expression to the right-hand-side expression. A :index:`compile-time error`
+   occurs if the attempt fails as in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(x: int, y: double[]) {
+        x = 1 // ok, type of '1' is inferred from type of 'x'
+        y = [1, 2] // ok, array literal is evaluated as [1.0, 2.0]
+    }
+
+|
+
+.. Specifics of Variable Initialization Context:
+
+Specifics of Variable Initialization Context
+============================================
+
+If the variable or a constant declaration (see
+:ref:`Variable and Constant Declarations`) has an explicit type annotation,
+then the same rules as for *assignment-like contexts* apply. Otherwise, there
+are two cases for ``let x = expr`` (see :ref:`Type Inference from Initializer`)
+as follows:
+
+-  The type of the right-hand-side expression is known from the expression
+   itself, then this type becomes the type of the variable as in the example
+   below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(x: int) {
+        let x = y // type of 'x' is 'int'
+    }
+
+-  Otherwise, the type of ``expr`` is evaluated as type of a standalone
+   expression as in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() {
+        let x = 1 // x is of type 'int' (default type of '1')
+        let y = [1, 2] // x is of type 'number[]'
+    }
+
+|
+
+.. _Specifics of Numeric Operator Contexts:
+
+Specifics of Numeric Operator Contexts
+======================================
+
+.. meta:
+    frontend_status: Done
+
+Operands of unary and binary numeric expressions are widened to a larger numeric
+type. The minimum type is ``int``. Specifically, no arithmetic operator
+evaluates values of types ``byte`` and ``short`` without widening. Details of
+specific operators are discussed in corresponding sections of the Specification.
+
+|
+
+.. _Specifics of String Operator Contexts:
+
+Specifics of String Operator Contexts
+=====================================
+
+.. meta:
+    frontend_status: Done
+
+If one operand of the binary operator ‘`+`’ is of type ``string``, then the
+string conversion applies to another non-string operand to convert it to string
+(see :ref:`String Concatenation` and :ref:`String Operator Contexts`).
+
+|
+
+.. _Other Contexts:
+
+Other Contexts
+==============
+
+.. meta:
+    frontend_status: Done
+
+The only semantic rule for all other contexts, and specifically for
+:ref:`Overriding`, is to use :ref:`Subtyping`.
+
+|
+
+.. _Specifics of Type Parameters:
+
+Specifics of Type Parameters
+============================
+
+.. meta:
+    frontend_status: Done
+
+If the type of a left-hand-side expression in *assignment-like context* is a
+type parameter, then it provides no additional information for type inference
+even where a type parameter constraint is set.
+
+If the *target type* of an expression is a *type parameter*, then the type of
+the expression is inferred as the type of a *standalone expression*.
+
+The semantics is represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C<T extends number> {
+        constructor (x: T) {}
+    }
+
+    new C(1) // compile-time error
+
+The type of '``1``' in the example above is inferred as ``int`` (default type of
+an integer literal). The expression is considered ``new C<int>(1)`` and causes
+a :index:`compile-time error` because ``int`` is not a subtype of ``number``
+(type parameter constraint).
+
+Explicit type argument ``new C<number>(1)`` must be used to fix the code.
+
+|
+
+.. _Semantic Essentials Summary:
+
+Semantic Essentials Summary
+===========================
+
+Major semantic terms are listed below:
+
+- :ref:`Type of Expression`;
+- :ref:`Assignment-like Contexts`;
+- :ref:`Type Inference from Initializer`;
+- :ref:`Numeric Operator Contexts`;
+- :ref:`String Operator Contexts`;
+- :ref:`Subtyping`;
+- :ref:`Assignability`;
+- :ref:`Overriding`;
+- :ref:`Overloading`;
+- :ref:`Type Inference`.
 
 |
 
@@ -35,24 +266,45 @@ Subtyping
 *Subtype* relationship between types ``S`` and ``T``, where ``S`` is a
 subtype of ``T`` (recorded as ``S<:T``), means that any object of type
 ``S`` can be safely used in any context to replace an object of type ``T``.
-The opposite is called *supertype* relationship (see :ref:`Supertyping`).
+The opposite relation (recorded as ``T:>S``) is called *supertype* relationship.
+Each type is its own subtype and supertype (``S<:S``).
 
 By the definition of ``S<:T``, type ``T`` belongs to the set of *supertypes*
-of type ``S``. The set of *supertypes* includes all *direct supertypes* (see
-below), and all their respective *supertypes*. More formally speaking, the set
-is obtained by reflexive and transitive closure over the direct supertype
-relation.
+of type ``S``. The set of *supertypes* includes all *direct supertypes*
+(discussed in subsections), and all their respective *supertypes*.
+More formally speaking, the set is obtained by reflexive and transitive
+closure over the direct supertype relation.
+
+If the subtyping relation of two types is not defined in a section below,
+then such types are not related to each other. Specifically,
+two :ref:`Resizable Array Types`, and two :ref:`Tuple Types`
+are not related to each other, except where they are identical
+(see :ref:`Type Identity`).
 
 .. index::
    subtyping
    subtype
    closure
+   supertype
+   direct supertype
    reflexive closure
    transitive closure
-   object
+   array type
+   array
+   resizable array
+   fixed-size array
+   tuple type
    type
-   direct supertype
-   supertype
+
+|
+
+.. _Subtyping for Classes and Interfaces:
+
+Subtyping for Classes and Interfaces
+====================================
+
+.. meta:
+    frontend_status: Partly
 
 Terms *subclass*, *subinterface*, *superclass*, and *superinterface* are used
 when considering class or interface types.
@@ -74,15 +326,19 @@ are **all** of the following:
    subclass
    subinterface
    superclass
+   superinterface
+   interface type
    direct supertype
+   non-generic class
    direct superclass
-   reflexive closure
-   transitive closure
+   direct superinterface
+   implementation
    non-generic class
    extension clause
    implementation clause
    superinterface
    Object
+   interface type
    direct superinterface
    class extension
    subinterface
@@ -105,35 +361,260 @@ constraint of that type parameter.
    direct supertype
    generic type
    generic class
+   generic interface
    interface type declaration
    direct superinterface
    type parameter
    superclass
+   supertype
+   type
+   constraint
+   type parameter
    superinterface
    bound
    Object
 
 |
 
-.. _Supertyping:
+.. _Subtyping for Literal Types:
 
-Supertyping
-===========
+Subtyping for Literal Types
+===========================
 
 .. meta:
     frontend_status: Done
 
-*Supertype* relationship between types ``T`` and ``S``, where ``T``
-is a supertype of ``S`` (recorded as ``T>:S``), is opposite to subtyping (see
-:ref:`Subtyping`). *Supertyping* means that any object of type ``S`` can be
-safely used in any context to replace an object of type ``T``.
+Any ``string`` literal type (see :ref:`String Literal Types`) is *subtype* of type
+``string``. It affects overriding as shown in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        foo(p: "1"): string { return "42" }
+    }
+    class Derived extends Base {
+        override foo(p: string): "1" { return "1" }
+    }
+    // Type "1" <: string
+
+    let base: Base = new Derived
+    let result: string = base.foo("1")
+    /* Argument "1" (value) is compatible to type "1" and to type string in
+       the overridden method
+       Function result of type string accepts "1" (value) of literal type "1"
+    */
+
+Literal type ``null`` (see :ref:`Literal Types`) is a subtype and a supertype to
+itself. Similarly, literal type ``undefined`` is a subtype and a supertype to
+itself.
 
 .. index::
+   literal type
+   subtype
+   type string
+   overriding
    supertype
-   supertyping
-   context
+   string literal
+   null
+   undefined
+   literal type
+
+|
+
+.. _Subtyping for Union Types:
+
+Subtyping for Union Types
+=========================
+
+.. meta:
+    frontend_status: Done
+
+A union type ``U`` participates in subtyping relations
+(see :ref:`Subtyping`) in the following cases:
+
+1. Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) is a subtype of
+type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
+
+.. code-block:: typescript
+   :linenos:
+
+    let s1: "1" | "2" = "1"
+    let s2: string = s1 // ok
+
+    let a: string | number | boolean = "abc"
+    let b: string | number = 42
+    a = b // OK
+    b = a // compile-time error, boolean is absent is 'b'
+
+    class Base {}
+    class Derived1 extends Base {}
+    class Derived2 extends Base {}
+
+    let x: Base = ...
+    let y: Derived1 | Derived2 = ...
+
+    x = y // OK, both Derived1 and Derived2 are subtypes of Base
+    y = x // compile-time error
+
+    let x: Base | string = ...
+    let y: Derived1 | string ...
+    x = y // OK, Derived1 is subtype of Base
+    y = x // compile-time error
+
+.. index::
+   union type
+   subtyping
+   subtype
    type
-   object
+
+2. Type ``T`` is a subtype of union type ``U``
+(``U``:sub:`1` ``| ... | U``:sub:`n`) if for some ``i``
+``T`` is a subtype of ``U``:sub:`i`.
+
+.. code-block:: typescript
+   :linenos:
+
+    let u: number | string = 1 // ok
+    u = "aa" // ok
+    u = 1.0  // ok, 1.0 is of type 'number' (double)
+    u = 1    // compile-time error, type 'int' is not a subtype of 'number'
+    u = true // compile-time error
+
+**Note**. If union type normalization produces a single type, then this type
+is used instead of the initial set of union types. This concept is represented
+by the example below:
+
+.. index::
+   union type
+   union type normalization
+   subtype
+
+.. code-block:: typescript
+   :linenos:
+
+    let u: "abc" | "cde" | string // type of 'u' is string
+
+|
+
+.. _Subtyping for Function Types:
+
+Subtyping for Function Types
+============================
+
+.. meta:
+    frontend_status: Done
+
+Function type ``F`` with parameters ``FP``:sub:`1` ``, ... , FP``:sub:`m`
+and return type ``FR``  is a *subtype* of function type ``S`` with parameters
+``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
+following conditions are  met:
+
+-  ``m <= n``
+
+-  for each ``i <= m``
+
+   -  Parameter type of ``SP``:sub:`i` is a subtype of
+      parameter type of ``FP``:sub:`i` (contravariance), and
+
+   -  ``FP``:sub:`i` is a rest parameter if ``SP``:sub:`i` is a rest parameter.
+   -  ``FP``:sub:`i` is an optional parameter if ``SP``:sub:`i` is an optional
+      parameter.
+
+-  type ``FR`` is a subtype of ``SR`` (covariance).
+
+.. index::
+   function type
+   subtype
+   parameter type
+   contravariance
+   rest parameter
+   parameter
+   covariance
+   return type
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Derived extends Base {}
+
+    function check(
+       bb: (p: Base) => Base,
+       bd: (p: Base) => Derived,
+       db: (p: Derived) => Base,
+       dd: (p: Derived) => Derived
+    ) {
+       bb = bd
+       /* OK: identical parameter types, and covariant return type */
+       bb = dd
+       /* Compile-time error: parameter type are not contravariant */
+       db = bd
+       /* OK: contravariant parameter types, and covariant  return type */
+
+       let f: (p: Base, n: number) => Base = bb
+       /* OK: subtype has less parameters */
+
+       let g: () => Base = bb
+       /* Compile-time error: too less parameters */
+    }
+
+    let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
+    foo = (p?: number): void => {}                             // OK:  ``m <= n``
+    foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
+    foo = (p: number): void => {}                              
+          // Compile-time error: 1st parameter in type is optional but in lambda mandatory
+    foo = (p1: number, p2?: string): void => {}
+          // Compile-time error:  1st parameter in type is optional but in lambda mandatory
+
+.. index::
+   parameter type
+   covariance
+   contravariance
+   covariant return type
+   contravariant return type
+   supertype
+   parameter
+
+|
+
+.. _Subtyping for Fixed-Size Array Types:
+
+Subtyping for Fixed-Size Array Types
+====================================
+
+Fixed-size array types are covariant, meaning that
+
+``FixedSize<B> <: FixedSize<A>`` if ``B <: A``.
+
+The following example illustrate this:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: FixedArray<number> = [1, 2, 3]
+    let y: FixedArray<Object> = x // ok, as number <: Object
+    y = x // compile-time error
+
+Covariant array assignment can lead to ``ArrayStoreError`` runtime error
+if a value of incorrect type is put into the array. The runtime
+system performs run-time checks to ensure type-safety. It is illustrated
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {}
+    class D extends C {}
+
+    function foo (ca: FixedArray<C>) {
+      ca[0] = new C()
+    }
+
+    let da: FixedArray<D> = [new D()]
+    let ca: FixedArray<C> = da
+
+    foo(ca) // run-time error in 'foo'
 
 |
 
@@ -145,20 +626,46 @@ Type Identity
 .. meta:
     frontend_status: Done
 
-*Identity* relation between two types means
-that types are indistinguishable. This relation is
-commutative and transitive.
+*Identity* relation between two types means that the types are
+indistinguishable. Identity relation is symmetric and transitive.
+Identity relation for types ``A`` and ``B`` is defined as follows:
 
-Types ``A`` and ``B`` are *identical*, if
+- Array types ``A`` = ``T1[]`` and ``B`` = ``Array<T2>`` are identical
+  if ``T1`` and ``T2`` are identical.
 
-- ``A`` is subtype of ``B`` (``A<:B``) and ``B`` is subtype of ``A`` (``A:>B``); or
+- Tuple types ``A`` = [``T``:sub:`1`, ``T``:sub:`2`, ``...``, ``T``:sub:`n`] and
+  ``B`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:sub:`m`]
+  are identical if the following conditions are met:
 
-- ``A`` is defined as ``T[]`` and ``B`` is defined as ``Array<T>``, meaning
-  that two syntax form defines identical types.
+  - ``n`` is equal to ``m``, i.e., the types have the same number of elements;
+  - Every *T*:sub:`i` is identical to *U*:sub:`i` for any *i* in ``1 .. n``.
 
-**Note.** :ref:`Type Alias Declaration` does not create new type, but
-only new name to the existing type, so an alias and its base type
-are also indistinguishable.
+- Union types ``A`` = ``T``:sub:`1` | ``T``:sub:`2` | ``...`` | ``T``:sub:`n` and
+  ``B`` = ``U``:sub:`1` | ``U``:sub:`2` | ``...`` | ``U``:sub:`m`
+  are identical if the following conditions are met:
+
+  - ``n`` is equal to ``m``, i.e., the types have the same number of elements;
+  - *U*:sub:`i` in ``U`` undergoes a permutation after which every *T*:sub:`i`
+    is identical to *U*:sub:`i` for any *i* in ``1 .. n``.
+
+- Types ``A`` and ``B`` are identical if ``A`` is a subtype of ``B`` (``A<:B``),
+  and ``B`` is  at the same time a subtype of ``A`` (``A:>B``).
+
+**Note.** :ref:`Type Alias Declaration` creates no new type but only a new
+name for the existing type. An alias is indistinguishable from its base type.
+
+.. index::
+   type identity
+   identity
+   indistinguishable type
+   array type
+   tuple type
+   union type
+   subtype
+   type
+   type alias
+   declaration
+   base type
 
 |
 
@@ -172,10 +679,15 @@ Assignability
 
 Type ``T``:sub:`1` is assignable to type ``T``:sub:`2` if:
 
--  ``T``:sub:`1` is subtype of ``T``:sub:`2`, or
+-  ``T``:sub:`1` is type ``never``;
 
--  There is an *implicit conversion* (see :ref:`Implicit Conversions`)
-   that allows converting value of type ``T``:sub:`1` to type ``T``:sub:`2`.
+-  ``T``:sub:`1` is identical to ``T``:sub:`2` (see :ref:`Type Identity`);
+
+-  ``T``:sub:`1` is a subtype of ``T``:sub:`2` (see :ref:`Subtyping`); or
+
+-  *Implicit conversion* (see :ref:`Implicit Conversions`) is present that
+   allows converting a value of type ``T``:sub:`1` to type ``T``:sub:`2`.
+
 
 *Assignability* relationship  is asymmetric, i.e., that ``T``:sub:`1`
 is assignable to ``T``:sub:`2` does not imply that ``T``:sub:`2` is
@@ -183,6 +695,9 @@ assignable to type ``T``:sub:`1`.
 
 .. index::
    assignability
+   type
+   type identity
+   subtyping
    conversion
    implicit conversion
    asymmetric relationship
@@ -197,45 +712,59 @@ Invariance, Covariance and Contravariance
 .. meta:
     frontend_status: Done
 
-*Variance* is how subtyping between class types relates to subtyping between
-class member signatures (types of parameters, return type). Variance can be
-of three kinds:
+*Variance* is how subtyping between types relates to subtyping between
+derived types, including generic types (See :ref:`Generics`), member
+signatures of generic types (type of parameters, return type),
+and overriding entities (See :ref:`Override-Compatible Signatures`).
+Variance can be of three kinds:
 
--  Invariance,
--  Covariance, and
--  Contravariance.
+-  Covariance,
+-  Contravariance, and
+-  Invariance.
 
 .. index::
    variance
    subtyping
    type
-   class member signature
+   subtyping
+   derived type
+   generic type
+   generic
+   signature
+   type parameter
+   overriding entity
+   override-compatible signature
    parameter
    return type
+   variance
    invariance
    covariance
    contravariance
 
-*Invariance* refers to the ability to use the originally-specified type as a
-derived one.
-
-.. index::
-   invariance
-
-*Covariance* is the ability to use a type that is more specific than originally
-specified.
+*Covariance* means it is possible to use a type which is more specific than
+originally specified.
 
 .. index::
    covariance
 
-*Contravariance* is the ability to use a type that is more general than
+*Contravariance* means it is possible to use a type which is more general than
 originally specified.
 
 .. index::
    contravariance
 
+*Invariance* means it is only possible to use the original type, i.e., there is
+no subtyping for derived types.
+
+.. index::
+   invariance
+
 The examples below illustrate valid and invalid usages of variance.
 If class ``Base`` is defined as follows:
+
+.. index::
+   variance
+   base class
 
 .. code-block:: typescript
    :linenos:
@@ -264,6 +793,10 @@ If class ``Base`` is defined as follows:
 
 .. index::
    variance
+   subtype
+   base
+   overriding
+   method
 
 On the contrary, the following code causes compile-time errors:
 
@@ -292,42 +825,115 @@ Compatibility of Call Arguments
 .. meta:
     frontend_status: Done
 
-The term *assignable* is defined in :ref:`Assignability`.
 
-The following semantic check must be performed for any function, method, or
-constructor call:
+The following semantic checks must be performed to arguments from the left to
+the right when checking the validity of any function, method, constructor, or
+lambda call:
 
-- Type of any argument (except arguments of a ``rest`` parameter) must be
-  assignable to the type of the corresponding parameter;
+**Step 1**: All arguments in the form of spread expression (see
+:ref:`spread Expression`) are to be linearized recursively to ensure that
+no spread expression is left at the call site.
 
-- Type of each argument corresponding to the ``rest`` parameter without the
-  spread operator (:ref:`Spread Expression`) must be assignable to the element
-  type of the array ``rest`` type parameter. If the rest parameter is a tuple,
-  then the number of arguments must be equal to the number of tuple elements,
-  and argument types must be assignable to the appropriate tuple types;
+**Step 2**: The following checks are performed on all arguments from left to
+right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
 
-- If a single argument corresponding to the ``rest`` parameter has the spread
-  operator (:ref:`Spread Expression`), then the *expression* that follows the
-  operator must refer to one of the following:
+   if parameter at position ``par_pos`` is of non-rest form, then
 
-    - An array of a type assignable to the type of the array ``rest``
-      parameter; or
-    - A tuple of types assignable to the proper types of the tuple ``rest``
-      parameter.
+      if `T`:sub:`arg_pos` <: `T`:sub:`par_pos`, then increment ``arg_pos`` and ``par_pos``
+      else a :index:`compile-time error` occurs, exit Step 2
+
+   else // parameter is of rest form (see :ref:`Rest Parameter`)
+
+      if parameter is of rest_array_form, then
+
+         if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type`, then increment ``arg_pos``
+         else increment ``par_pos``
+
+      else // parameter is of rest_tuple_form
+
+         for `rest_tuple_pos` in 1 .. rest_tuple_types.count do
+
+            if `T`:sub:`arg_pos` <: `T`:sub:`rest_tuple_pos`, then increment ``arg_pos`` and `rest_tuple_pos`
+            else if rest_tuple_pos < rest_tuple_types.count, then increment ``rest_tuple_pos``
+            else a :index:`compile-time error` occurs, exit Step 2
+
+         end
+         increment ``par_pos``
+
+      end
+
+   end
 
 .. index::
-   call argument
+   assignability
+   compatibility
+   semantic check
    function call
    method call
    constructor call
-   semantic check
-   argument
+   function
+   method
+   constructor
    rest parameter
+   parameter
    spread operator
-   assignable
-   type
+   spread expression
+   array
+   tuple
+   argument type
+   expression
+   operator
+   assignable type
+   increment
+   array type
+   rest parameter
+
+The examples below represent the checks:
+
+.. code-block:: typescript
+   :linenos:
+
+    call (...[1, "str", true], ...[ ...123])  // Initial call form
+
+    call (1, "str", true, 123) // To be unfolded into the form with no spread expressions
+
+
+
+    function foo1 (p: Object) {}
+    foo1 (1)  // Type of '1' must be assignable to 'Object'
+              // p becomes 1
+
+    function foo2 (...p: Object[]) {}
+    foo2 (1, "111")  // Types of '1' and "111" must be assignable to 'Object'
+              // p becomes array [1, "111"]
+
+    function foo31 (...p: (number|string)[]) {}
+    foo31 (...[1, "111"])  // Type of array literal [1, "111"] must be assignable to (number|string)[]
+              // p becomes array [1, "111"]
+
+    function foo32 (...p: [number, string]) {}
+    foo32 (...[1, "111"])  // Types of '1' and "111" must be assignable to 'number' and 'string' accordingly
+              // p becomes tuple [1, "111"]
+
+    function foo4 (...p: number[]) {}
+    foo4 (1, ...[2, 3])  //
+              // p becomes array [1, 2, 3]
+
+    function foo5 (p1: number, ...p2: number[]) {}
+    foo5 (...[1, 2, 3])  //
+              // p1 becomes 1, p2 becomes array [2, 3]
+
+
+
+
+.. index::
+   assignable type
+   Object
+   string
+   array
 
 |
+
 
 .. _Type Inference:
 
@@ -338,39 +944,114 @@ Type Inference
     frontend_status: Done
 
 |LANG| supports strong typing but allows not to burden a programmer with the
-task of specifying type annotations everywhere. A smart compiler can infer types
-of some entities from the surrounding context. This technique called *type
-inference* allows keeping type safety and program code readability, doing less
-typing, and focusing on business logic.
-Type inference can be applied by the compiler in the following contexts:
+task of specifying type annotations everywhere. A smart compiler can infer
+types of some entities and expressions from the surrounding context.
+This technique called *type inference* allows keeping type safety and
+program code readability, doing less typing, and focusing on business logic.
+Type inference is applied by the compiler in the following contexts:
 
+- :ref:`Type Inference for Numeric Constant Expressions`;
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
 - Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
-- Function or method return type (see :ref:`Return Type Inference`);
+- Function, method or lambda return type (see :ref:`Return Type Inference`);
 - Lambda expression parameter type (see :ref:`Lambda Signature`);
 - Array literal type inference (see :ref:`Array Literal Type Inference from Context`,
   and :ref:`Array Type Inference from Types of Elements`);
+- Object literal type inference (see :ref:`Object Literal`);
 - Smart types (see :ref:`Smart Types`).
 
 .. index::
    strong typing
-   annotation
+   type annotation
+   smart compiler
    type inference
    entity
+   surrounding context
    code readability
    type safety
    context
-   variable
-   constant
-   declaration
+   variable declaration
+   constant declaration
    generic instantiation
+   function return type
    function
+   method return type
    method
    return type
    lambda expression
    parameter type
    array literal
+   Object literal
    smart type
+
+|
+
+.. _Type Inference for Numeric Constant Expressions:
+
+Type Inference for Numeric Constant Expressions
+===============================================
+
+.. meta:
+    frontend_status: Partly
+
+The type of expression of a numeric type for :ref:`Constant Expressions` is
+first evaluated from the expression as follows:
+
+- Type of an integer literal is the default type of the literal:
+  ``int`` or ``long`` (see :ref:`Integer Literals`);
+
+- Type of a floating-point literal is the default type of the literal:
+  ``double`` or ``float`` (see :ref:`Floating-Point Literals`);
+
+- Type of a named constant is specified in the constant declaration;
+
+- Result type of an operator is evaluated according to the rules of
+  the operator;
+
+- Type of a :ref:`Cast expression` is specified in the expression target type.
+
+The evaluated numeric result type can be inferred to a numeric *target type*
+from the context if the following conditions are met:
+
+#. Last executed operator in the expression is not a cast operator ``as``;
+
+#. The *target type* is a larger numeric type then the evaluated result type or
+   the evaluated result type is an integer type,
+   the *target type* is a smaller integer type
+   and value of the expression fits into the range of the *target type*.
+
+A :index:`compile-time error` occurs if the context is a union type,
+and the evaluated value can be treated
+as value of several of union component types.
+
+The examples below illustrate valid and invalid narrowing.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    let b: byte = 127 // ok, int -> byte narrowing
+    b = 64 + 63 // ok, int -> byte narrowing
+    b = 128 // compile-time-error, value is out of range
+    b = 1.0 // compile-time-error, floating-point value cannot be narrowed
+    b = 1 as short // // compile-time-error, cast expression fixes 'short' type
+
+    let s: short = 32768 // compile-time-error, value is out of range
+
+    let u: byte | int = 1 // compile-time error, ambiguity
+
+.. index::
+   narrowing
+   constant
+   constant expression
+   integer conversion
+   integer type
+   expression
+   conversion
+   type
+   value
 
 |
 
@@ -380,16 +1061,14 @@ Smart Types
 ===========
 
 .. meta:
-   frontend_status: Partly
-   todo: implement a dataflow check for loops and try-catch blocks
+    frontend_status: Partly
+    todo: implement a dataflow check for loops and try-catch blocks
 
-Data entities include the following:
+Data entities like local variables (see :ref:`Variable and Constant Declarations`)
+and parameters (see :ref:`Parameter List`), if not captured in a lambda body and
+modified by the lambda code, are subjected to *smart typing*.
 
--  Variable (see :ref:`Variable and Constant Declarations`),
--  Class field (see :ref:`Field Declarations`), and
--  Parameter of a function or method (see :ref:`Parameter List`).
-
-Every data entity has its static type, which is specified explicitly or
+Every data entity has a static type, which is specified explicitly or
 inferred at the point of declaration. This type defines the set of operations
 that can be applied to the entity (namely, what methods can be called, and what
 other entities can be accessed if the entity acts as a receiver of the
@@ -402,13 +1081,18 @@ operation):
     a.toString() // entity 'a' has method toString()
 
 .. index::
-   entity
+   smart type
+   data entity
    variable
+   parameter
    class variable
    local variable
+   smart typing
+   lambda code
    function
    method
    static type
+   inferred type
    receiver
    access
    declaration
@@ -421,19 +1105,23 @@ allow operations that are specific to the type so narrowed:
 .. code-block:: typescript
    :linenos:
 
-    let a: number | string = 42
-    a++ /* Here we know for sure that type of 'a' is number and number-specific
+    function boo() {
+        let a: number | string = 42
+        a++ /* Here we know for sure that type of 'a' is number and number-specific
            operations are type-safe */
+    }
 
     class Base {}
     class Derived extends Base { method () {} }
-    let b: base = new Derived
-    b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
-           operations are type-safe */
+    function goo() {
+       let b: Base = new Derived
+       b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
+           operations can be applied in type-safe way */
+    }
 
 Other examples are explicit calls to ``instanceof``
 (see :ref:`InstanceOf Expression`) or checks against ``null``
-(see :ref:`Reference Equality`) as part of ``if`` statements
+(see :ref:`Equality Expressions`) as part of ``if`` statements
 (see :ref:`if Statements`) or conditional expressions
 (see :ref:`Conditional Expressions`):
 
@@ -463,229 +1151,305 @@ Other examples are explicit calls to ``instanceof``
    smart type
    if statement
    conditional expression
+   entity
+   class type
+   static type
+   narrowed type
+   instanceof
+   null
+   semantic check
 
 In like cases, a smart compiler can deduce the smart type of an entity without
-requiring unnecessary casting conversions (see :ref:`Cast Expressions`).
+requiring additional checks or casts (see :ref:`Cast Expression`).
 
-Overloading (see :ref:`Function, Method and Constructor Overloading`) can cause
-tricky situations when a smart type leads to the call of a function or a method
-(see :ref:`Overload Resolution`) that suits smart rather than static type of an
-argument:
+Overloading (see :ref:`Overload Declarations`) can cause tricky situations
+when a smart type results in calling an entity that suits the smart type
+rather than a static type of an argument (see
+:ref:`Overload Resolution for Overload Declarations`):
 
 .. code-block:: typescript
    :linenos:
 
-    function foo (p: Base) {}
-    function foo (p: Derived) {}
+    class Base {b = 1}
+    class Derived extends Base{d = 2}
 
-    let b: Base = new Derived
-    foo (b) // potential ambiguity in case of smart type, foo(p:Base) is to be called
-    foo (b as Derived) // no ambiguity,  foo(p:Derived) is to be called
+    function fooBase (p: Base) {}
+    function fooDerived (p: Derived) {}
+
+    overload foo { fooDerived, fooBase }
+
+    function too() {
+        let a: Base = new Base
+        foo (a) // fooBase will be called
+        let b: Base = new Derived
+        foo (b) // as smart type of 'b' is Derived, fooDerived will be called
+    }
 
 Particular cases supported by the compiler are determined by the compiler
 implementation.
 
 .. index::
-   compiler
    smart type
    entity
    casting conversion
-   conversion
+   overloading
    function
    method
    static type
    implementation
+   compiler
 
 |
 
-.. _Overloading and Overriding:
+.. _Overriding:
 
-Overloading and Overriding
-**************************
+Overriding
+**********
 
-Two important concepts apply to different contexts and entities throughout
-this specification as follows:
+*Method overriding* is the language feature closely connected with inheritance.
+It allows a subclass or a subinterface to offer a specific
+implementation of a method already defined in its supertype optionally
+with modified signature.
 
-#. *Overloading* allows defining and using functions (in general sense,
-   including methods and constructors) with the same name but different
-   signatures. The actual function to be called is determined at compile
-   time. Thus, *overloading* is related to compile-time polymorphism.
+The actual method to be called is determined at runtime based on object type.
+Thus, overriding is related to runtime polymorphism.
 
-#. *Overriding* is closely connected with inheritance. It is used on methods
-   but not on functions. Overriding allows a subclass to offer a specific
-   implementation of a method already defined in its parent class.
-   The actual method to be called is determined at runtime based on object type.
-   Thus, overriding is related to runtime polymorphism.
-
-|LANG| uses two semantic rules related to these concepts:
-
--  *Overload-equivalence* rule: the *overloading* of two entities is
-   correct if their signatures are **not** *overload-equivalent* (see
-   :ref:`Overload-Equivalent Signatures`).
-
--  *Override-compatibility* rule: the *overriding* of two entities is
-   correct if their signatures are *override-compatible* (see
-   :ref:`Override-Compatible Signatures`).
-
-See :ref:`Overloading for Functions`,
-:ref:`Overloading and Overriding in Classes`, and
-:ref:`Overloading and Overriding in Interfaces` for details.
+|LANG| uses the *override-compatibility* rule to check the correctness of
+overriding. The *overriding* is correct if method signature in a subtype
+(subclass or subinterface) is *override-compatible* with the method defined
+in a supertype    (see :ref:`Override-Compatible Signatures`).
 
 .. index::
-   overloading
    overriding
-   context
-   entity
-   function
-   constructor
-   method
-   signature
-   compile-time polymorphism
+   subclass
    runtime polymorphism
    inheritance
    parent class
    object type
    runtime
-   overload-equivalence
    override-compatibility
+
+In some case of *method overriding* an implementation is forced to
+:ref:`Make a Bridge Method for Overriding Method`.
 
 |
 
-.. _Overload-Equivalent Signatures:
+.. _Overriding in Classes:
 
-Overload-Equivalent Signatures
-==============================
+Overriding in Classes
+=====================
 
-Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with
-the same number of parameters are *overload-equivalent* if:
+.. meta:
+    frontend_status: Partly
 
-#. Parameter type at some position in *S*:sub:`1` is a *type parameter*
-   (see :ref:`Type Parameters`), and a parameter type at the same position
-   in *S*:sub:`2` is any non-generic reference type (including *union type*)
-   or *type parameter*;
+**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
+overriding. The same rule applies to accessors in case of overriding.
 
-#. Parameter type at some position in *S*:sub:`1` is *generic type*
-   ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, where there is at least one
-   ``T``:sub:`i` which is a type parameter (see :ref:`Type Parameters`), and a
-   parameter type at the same position in *S*:sub:`2` is also ``G`` with any
-   list of :ref:`Type Arguments` or a *union type* that contains ``G``;
+An overriding member can keep or extend an access modifier (see
+:ref:`Access Modifiers`) of a member that is inherited or implemented.
+Otherwise, a :index:`compile-time error` occurs.
 
-#. Parameter types at some position in *S*:sub:`1` and *S*:sub:`2`
-   are *union types*
-   that contain types falling under the cases 1. or 2. above;
+A :index:`compile-time error` occurs if an attempt is made to do the following:
 
-#. All other parameter types in *S*:sub:`1` are identical
-   (see :ref:`Type Identity`) to parameter types
-   in the same positions in *S*:sub:`2` and both parameters are
-   of the same kind, so they both are *required* or *optional* or ``rest``.
+- Override a private method of a superclass; or
+- Declare a method with the same name as that of a private method with default
+  implementation from any superinterface.
 
-Parameter names and return types do not influence *overload equivalence*.
-Signatures are *overload-equivalent*  in the following examples:
 
 .. index::
-   overload-equivalent signature
-   signature
-   parameter
-   type parameter
-   reference type
-   generic type
-   type argument
+   overloading
+   inheritance
    overriding
-   parameter name
-   return type
-   overload equivalence
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   (x: number): void
-   (y: number): void
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   (x: number): void
-   (y: number): number
-
-.. code-block-meta:
+   class
+   constructor
+   accessibility
+   access
+   private method
+   method
+   subclass
+   accessor
+   superclass
+   access modifier
+   implementation
+   superinterface
 
 .. code-block:: typescript
    :linenos:
 
-   class G<T>
-   (y: number): void
-   (x: T): void
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class G<T>
-   (y: G<number>): void
-   (x: G<T>): void
-
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class G<T, S>
-   (y: T): void
-   (x: S): void
-
-
-
-Signatures are not *overload-equivalent* in the following examples:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   (x: number): void
-   (y: string): void
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class A { /*body*/}
-   class B extends A { /*body*/}
-   (x: A): void
-   (y: B): void
-
-   class A<T> {
-       foo(p: T) {}
-       foo(p: T[]) {}
+   class Base {
+      public public_member() {}
+      protected protected_member() {}
+      internal internal_member() {}
+      private private_member() {}
    }
 
-.. code-block-meta:
+   interface Interface {
+      public_member()             // All members are public in interfaces
+      private private_member() {} // Except private methods with default implementation
+   }
+
+   class Derived extends Base implements Interface {
+      public override public_member() {}
+         // Public member can be overridden and/or implemented by the public one
+      public override protected_member() {}
+         // Protected member can be overridden by the protected or public one
+      internal internal_member() {}
+         // Internal member can be overridden by the internal one only
+      override private_member() {}
+         // A compile-time error occurs if an attempt is made to override private member
+         // or implement the private methods with default implementation
+   }
+
+The table below represents semantic rules that apply in various contexts:
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Context
+     - Semantic Check
+   * - An *instance method* is defined in a subclass with the same name as the
+       *instance method* in a superclass.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then *overriding* is used.
+       Otherwise, a :index:`compile-time error` occurs.
+
 
 .. code-block:: typescript
    :linenos:
 
-   class Base {}
-   class Derived1 extends Base {}
-   class Derived2 extends Base {}
-   (p: Derived1 | Derived2 ): void
-   (p: Base): void
+   class Base {
+      method_1() {}
+      method_2(p: number) {}
+   }
+   class Derived extends Base {
+      override method_1() {} // overriding
+      method_2(p: string) {} // compile-time error
+   }
 
-.. code-block-meta:
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
+
+   * - A *static method* is defined in a subclass with the same name as the
+       *static method* in a superclass.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then the static method in the
+       subclass *hides* the previous static method.
+       Otherwise, a :index:`compile-time error` occurs.
+
+.. index::
+   instance method
+   static method
+   subclass
+   superclass
+   override-compatible signature
+   override-compatibility
+   overloading
+   hiding
+   overriding
 
 .. code-block:: typescript
    :linenos:
 
-   class G<T>
-   (y: G<number>): void
-   (x: G<string>): void
+   class Base {
+      static method_1() {}
+      static method_2(p: number) {}
+   }
+   class Derived extends Base {
+      static method_1() {} // hiding
+      static method_2(p: string) {} // compile-time error
+   }
 
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
+
+   * - A *constructor* is defined in a subclass.
+     - All base class constructors are available for call in all derived class
+       constructors via ``super`` call (see :ref:`Explicit Constructor Call`).
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      constructor(p: number) {}
+   }
+   class Derived extends Base {
+      constructor(p: string) {
+           super(5)
+      }
+   }
+
+.. index::
+   constructor
+   subclass
+   class constructor
+   derived class constructor
+
+|
+
+.. _Overriding and Overload Signatures in Interfaces:
+
+Overriding and Overload Signatures in Interfaces
+================================================
+
+.. meta:
+    frontend_status: Done
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Context
+     - Semantic Check
+   * - A method is defined in a subinterface with the same name as the method
+       in the superinterface.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then *overriding* is used.
+       Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Base {
+      method_1()
+      method_2(p: number)
+   }
+   interface Derived extends Base {
+      method_1() // overriding
+      method_2(p: string) // compile-time error
+   }
+
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
+
+   * - Two or more methods with the same name are defined in the same interface.
+     - :ref:`Interface Method Overload Signatures` is used.
+
+
+.. index::
+   method
+   subinterface
+   superinterface
+   semantic check
+   override-compatible
+   interface
+
+.. code-block:: typescript
+   :linenos:
+
+   interface anInterface {
+      instance_method()          // 1st signature
+      instance_method(p: number) // 2nd signature
+   }
 
 |
 
@@ -694,12 +1458,22 @@ Signatures are not *overload-equivalent* in the following examples:
 Override-Compatible Signatures
 ==============================
 
+.. meta:
+    frontend_status: Partly
+
 If there are two classes ``Base`` and ``Derived``, and class ``Derived``
 overrides the method ``foo()`` of ``Base``, then ``foo()`` in ``Base`` has
 signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
 (``U``:sub:`1` ``, ..., U``:sub:`n`) ``:U``:sub:`n+1`, and ``foo()`` in
 ``Derived`` has signature ``S``:sub:`2` <``W``:sub:`1` ``, ... W``:sub:`l`>
 (``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1` as in the example below:
+
+.. index::
+   override-compatible signature
+   class
+   base class
+   derived class
+   signature
 
 .. code-block:: typescript
    :linenos:
@@ -715,14 +1489,18 @@ The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1` only
 if **all** of the following conditions are met:
 
 1. Number of parameters of both methods is the same, i.e., ``n = m``.
-2. Each type ``T``:sub:`i` is override-compatible with type ``U``:sub:`i`
-   for ``i`` in ``1..n+1``. Type override compatibility is defined below.
-3. Number of type parameters of either method is the same, i.e., ``k = l``.
-4. Constraints of ``W``:sub:`1`, ... ``W``:sub:`l` are to be contravariant
-   (see :ref:`Invariance, Covariance and Contravariance`) to the appropriate constraints of ``V``:sub:`1`,
-   ... ``V``:sub:`k`.
+2. Each parameter type ``T``:sub:`i` is a supertype of ``U``:sub:`i`
+   for ``i`` in ``1..n`` (contravariance).
+3. If return type ``T``:sub:`m+1` is ``this``, then ``U``:sub:`n+1` is ``this``,
+   or any of superinterfaces or superclass of the current type. Otherwise,
+   return type ``T``:sub:`m+1` is a subtype of ``U``:sub:`n+1` (covariance).
+4. Number of type parameters of either method is the same, i.e., ``k = l``.
+5. Constraints of ``W``:sub:`1`, ... ``W``:sub:`l` are to be contravariant
+   (see :ref:`Invariance, Covariance and Contravariance`) to the appropriate
+   constraints of ``V``:sub:`1`, ... ``V``:sub:`k`.
 
 .. index::
+   signature
    override-compatible signature
    override compatibility
    class
@@ -731,46 +1509,25 @@ if **all** of the following conditions are met:
    parameter
    type
    contravariant
+   covariance
+   invariance
    constraint
    type parameter
 
-There are two cases of type override-compatibility, as types are used as either
-parameter types, or return types. Each case has the following kinds of types:
-
-- Class/interface type;
-- Function type;
-- Primitive type;
-- Enum types;
-- Union types;
-- Array type;
-- Tuple type; and
-- Type parameter.
-
-Each type is override-compatible with itself (see :ref:`Invariance, Covariance and Contravariance`).
-
-Mixed override-compatibility between types of different kinds is always false,
-except the compatibility with class type ``Object`` as any type is a subtype of
-``Object``.
-
 The following rule applies to generics:
 
-   - Derived class must have type parameter constraints to be assignable
-     (see :ref:`Assignability`) to the respective type parameter
+   - Derived class must have type parameter constraints to be subtype
+     (see :ref:`Subtyping`) of the respective type parameter
      constraint in the base type;
    - Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
-   override compatibility
-   parameter type
-   class type
-   interface type
-   function type
-   primitive type
-   array type
-   tuple type
-   type parameter
+   generic
+   derived class
+   subtyping
    subtype
-   object
+   type parameter
+   base type
 
 .. code-block:: typescript
    :linenos:
@@ -785,120 +1542,102 @@ The following rule applies to generics:
    class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
        // Compile-time error, derived class cannot have non-compatible constraints of type parameters
 
-Variances to be used for types that can be override-compatible in different
-positions are represented in the table below:
+The semantics is illustrated by the examples below:
 
-+-+-----------------------+---------------------+-------------------+
-| | **Positions ==>**     | **Parameter Types** | **Return Types**  |
-+-+-----------------------+---------------------+-------------------+
-| | **Type Kinds**        |                     |                   |
-+=+=======================+=====================+===================+
-|1| Class/interface types | Contravariance >:   | Covariance <:     |
-+-+-----------------------+---------------------+-------------------+
-|2| Function types        | Covariance <:       | Contravariance >: |
-+-+-----------------------+---------------------+-------------------+
-|3| Primitive types       | Invariance          | Invariance        |
-+-+-----------------------+---------------------+-------------------+
-|4| Union types           | Contravariance >:   | Contravariance >: |
-+-+-----------------------+---------------------+-------------------+
-|5| Enum types            | Invariance          | Invariance        |
-+-+-----------------------+---------------------+-------------------+
-|6| Array types           | Invariance          | Invariance        |
-+-+-----------------------+---------------------+-------------------+
-|7| Tuple types           | Invariance          | Invariance        |
-+-+-----------------------+---------------------+-------------------+
-|8| Type parameter        | Contravariance >:   | Contravariance >: |
-| | constraint            |                     |                   |
-+-+-----------------------+---------------------+-------------------+
+1. **Class/Interface Types**
+
+.. code-block:: typescript
+    :linenos:
+
+    interface Base {
+        param(p: Derived): void
+        ret(): Base
+    }
+
+    interface Derived extends Base {
+        param(p: Base): void    // Contravariant parameter
+        ret(): Derived          // Covariant return type
+    }
 
 .. index::
-   variance
-   covariance
-   contravariance
-   invariance
-   semantics
+   class type
+   interface type
+   contravariant parameter
+   covariant return type
 
-The semantics is illustrated by the example below:
+2. **Function Types**
+
+.. code-block:: typescript
+    :linenos:
+
+    interface Base {
+        param(p: (q: Base)=>Derived): void
+        ret(): (q: Derived)=> Base
+    }
+
+    interface Derived extends Base {
+        param(p: (q: Derived)=>Base): void  // Covariant parameter type, contravariant return type
+        ret(): (q: Base)=> Derived          // Contravariant parameter type, covariant return type
+    }
+
+.. index::
+   function type
+   covariant parameter type
+   contravariant return type
+   contravariant parameter type
+   covariant return type
+
+3. **Union Types**
 
 .. code-block:: typescript
    :linenos:
 
-    enum E1  {Red, Green, Blue}
-    enum E2  {A, B, C}
     interface BaseSuperType {}
     interface Base extends BaseSuperType {
        // Overriding for parameters
-       kinds_of_parameters01 <T extends Derived, U extends Base>(p: Derived): void
-       kinds_of_parameters02 <T extends Derived, U extends Base>(p: (q: Base)=>Derived): void
-       kinds_of_parameters03 <T extends Derived, U extends Base>(p: number): void
-       kinds_of_parameters04 <T extends Derived, U extends Base>(p: Number): void
-       kinds_of_parameters05 <T extends Derived, U extends Base>(p: T | U): void
-       kinds_of_parameters06 <T extends Derived, U extends Base>(p: E1): void
-       kinds_of_parameters07 <T extends Derived, U extends Base>(p: Base[]): void
-       kinds_of_parameters08 <T extends Derived, U extends Base>(p: [Base, Base]): void
-       kinds_of_parameters09 <T extends Derived, U extends Base>(p: T): void
-       kinds_of_parameters10 <T extends Derived, U extends Base>(p10: U): void
+       param<T extends Derived, U extends Base>(p: T | U): void
 
        // Overriding for return type
-       kinds_of_return_type01(): Base
-       kinds_of_return_type02(): (q: Derived)=> Base
-       kinds_of_return_type03(): number
-       kinds_of_return_type04(): Number
-       kinds_of_return_type05<T extends Derived, U extends Base>(): T | U
-       kinds_of_return_type06(): E1
-       kinds_of_return_type07(): Base[]
-       kinds_of_return_type08(): [Base, Base]
-       kinds_of_return_type09 <T extends Derived>(): T
+       ret<T extends Derived, U extends Base>(): T | U
     }
 
     interface Derived extends Base {
        // Overriding kinds for parameters, Derived <: Base
-       kinds_of_parameters01 <T extends Base, U extends Object>(
-          p: Base // contravariant parameter type
-       ): void
-       kinds_of_parameters02 <T extends Base, U extends Object>(
-          p: (q: Derived)=>Base // Covariant parameter type, contravariant return type
-       ): void
-       kinds_of_parameters03 <T extends Base, U extends Object>(
-          p: Number // Compile-time error: parameter type is not override-compatible
-       ): void
-       kinds_of_parameters04 <T extends Base, U extends Object>(
-          p: number // Compile-time error: parameter type is not override-compatible
-       ): void
-       kinds_of_parameters05 <T extends Base, U extends Object>(
+       param<T extends Base, U extends Object>(
           p: Base | BaseSuperType // contravariant parameter type:  Derived | Base <: Base | BaseSuperType
        ): void
-       kinds_of_parameters06 <T extends Base, U extends Object>(
-          // p: E2 // Compile-time error: parameter type is not override-compatible
-          p: E1 // Invariance parameter type
-       ): void
-       kinds_of_parameters07 <T extends Base, U extends Object>(
-          p: Base[] // Invariant array element type
-       ): void
-       kinds_of_parameters08 <T extends Base, U extends Object>(
-          p: [Derived, Derived] // Compile-time error: parameter type is not override-compatible
-       ): void
-       kinds_of_parameters09 <T extends Base, U extends Object>(
-          p: T // Contravariance for constraints of type parameters
-       ): void
-       kinds_of_parameters10 <T extends Base, U extends Object>(
-          p: U  // Contravariance for constraints of type parameters
-       ): void
-
        // Overriding kinds for return type
-       kinds_of_return_type01(): Derived // Covariant return type
-       kinds_of_return_type02(): (q: Base)=> Derived // Contravariant parameter type, covariant return type
-       //kinds_of_return_type04(): number // Compile-time error: return type is not override-compatible
-       kinds_of_return_type05<T extends Base, U extends BaseSuperType>(): T | U
-       //kinds_of_return_type06(): E2 // CTE
-       kinds_of_return_type06(): E1 // OK
-       //kinds_of_return_type07(): Derived[] // Compile-time error
-       //kinds_of_return_type08(): [Derived, Derived] // Compile-time error
-       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type
-       kinds_of_return_type09 <T extends Base> (): T // OK, contravariance for constraints of the return type
+       ret<T extends Base, U extends BaseSuperType>(): T | U
     }
 
-The example below illustrates override-compatibility with ``Object``:
+.. index::
+   union type
+   return type
+
+4. **Type Parameter Constraint**
+
+.. code-block:: typescript
+    :linenos:
+
+    interface Base {
+        param<T extends Derived>(p: T): void
+        ret<T extends Derived>(): T
+    }
+
+    interface Derived extends Base {
+        param<T extends Base>(p: T): void       // Contravariance for constraints of type parameters
+        ret<T extends Base>(): T                // Contravariance for constraints of the return type
+    }
+
+
+Override compatibility with ``Object`` is represented by the example below:
+
+.. index::
+   contravariance
+   constraint
+   return type
+   type parameter
+   override compatibility
 
 .. code-block:: typescript
    :linenos:
@@ -914,10 +1653,10 @@ The example below illustrates override-compatibility with ``Object``:
           p07: Base[],
           p08: [Base, Base]
        ): void
-       kinds_of_return_type(): Object // It can be overridden by all subtypes except primitive ones
+       kinds_of_return_type(): Object // It can be overridden by all subtypes of Object
     }
     interface Derived extends Base {
-       kinds_of_parameters( // Object is a supertype for all types except primitive ones
+       kinds_of_parameters( // Object is a supertype for all class types
           p1: Object,
           p2: Object,
           p3: Object, // Compile-time error: number and Object are not override-compatible
@@ -951,598 +1690,484 @@ The example below illustrates override-compatibility with ``Object``:
        kinds_of_return_type(): [Base, Base] // Valid overriding
     }
 
-|
-
-.. _Overloading for Functions:
-
-Overloading for Functions
-=========================
-
-*Overloading* must only be considered for functions because inheritance for
-functions is not defined.
-
-The correctness check for functions overloading is performed if two or more
-functions with the same name are accessible (see :ref:`Accessible`) in a scope
-(see :ref:`Scopes`).
-
-A function can be declared in, or imported to a scope.
-
-The semantic check for overloading functions is as follows:
-
--  If function signatures are *overload-equivalent*, then
-   a :index:`compile-time error` occurs.
-
--  Otherwise, *overloading* is valid.
-
-It is discussed in detail in :ref:`Function Overloading` and
-:ref:`Import and Overloading of Function Names`.
-
 .. index::
-   overloading
-   function
-   inheritance
-   access
-   scope
-   import
-   compilation unit
-   overload-equivalent signature
-
-|
-
-.. _Overloading and Overriding in Classes:
-
-Overloading and Overriding in Classes
-=====================================
-
-Both *overloading* and *overriding* must be considered in case of classes for
-methods and partly for constructors.
-
-**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
-overloading and overriding. For example, neither overriding nor overloading
-is considered if a superclass contains a ``private`` method, and a subclass
-has a method with the same name. The same rules also apply to accessors in
-case of overriding.
-
-An overriding member can keep or extend an access modifier (see
-:ref:`Access Modifiers`) of a member that is inherited or implemented.
-Otherwise, a :index:`compile-time error` occurs:
-
-.. index::
-   overloading
-   inheritance
-   overriding
-   private
-   method
-   superclass
-   access modifier
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      public public_member() {}
-      protected protected_member() {}
-      internal internal_member() {}
-      private private_member() {}
-   }
-
-   interface Interface {
-      public_member() // All members are public in interfaces
-   }
-
-   class Derived extends Base implements Interface {
-      public override public_member() {}
-         // Public member can be overridden and/or implemented by the public one
-      public override protected_member() {}
-         // Protected member can be overridden by the protected or public one
-      internal internal_member() {}
-         // Internal member can be overridden by the internal one only
-      override private_member() {}
-         // A compile-time error occurs if an attempt is made to override private member
-   }
-
-The table below represents semantic rules that apply in various contexts:
-
-+-------------------------------------+----------------------------------------------+
-| **Context**                         | **Semantic Check**                           |
-+=====================================+==============================================+
-| Two *instance methods*,             | If signatures are *overload-equivalent*,     |
-| two *static methods* with the same  | (see :ref:`Overload-Equivalent Signatures`), |
-| name, or two *constructors* are     | then a :index:`compile-time error`           |
-| defined in the same class.          | occurs. Otherwise, *overloading* is used.    |
-+-------------------------------------+----------------------------------------------+
-
-.. index::
-   semantic check
-   instance method
-   method
-   static method
-   constructor
-   overload equivalence
-   overloading
-   overload-equivalent signature
-
-.. code-block:: typescript
-   :linenos:
-
-   class aClass {
-
-      instance_method_1() {}
-      instance_method_1() {} // compile-time error: instance method duplication
-
-      static static_method_1() {}
-      static static_method_1() {} // compile-time error: static method duplication
-
-      instance_method_2() {}
-      instance_method_2(p: number) {} // valid overloading
-
-      static static_method_2() {}
-      static static_method_2(p: string) {} // valid overloading
-
-      constructor() {}
-      constructor() {} // compile-time error: constructor duplication
-
-      constructor(p: number) {}
-      constructor(p: string) {} // valid overloading
-
-   }
-
-+-------------------------------------+---------------------------------------------+
-| An *instance method* is defined     | If signatures are *override-compatible*     |
-| in a subclass with the same name    | (see :ref:`Override-Compatible Signatures`),|
-| as the *instance method* in a       | then *overriding* is used.                  |
-| superclass.                         | Otherwise, *overloading* is used.           |
-+-------------------------------------+---------------------------------------------+
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      method_1() {}
-      method_2(p: number) {}
-   }
-   class Derived extends Base {
-      override method_1() {} // overriding
-      method_2(p: string) {} // overloading
-   }
-
-+-------------------------------------+---------------------------------------------+
-| A *static method* is defined        | If signatures are *overload-equivalent*     |
-| in a subclass with the same name    | (see :ref:`Overload-Equivalent Signatures`),|
-| as the *static method* in a         | then the static method in the subclass      |
-| superclass.                         | *hides* the previous static method.         |
-|                                     | Otherwise, *overloading* is used.           |
-+-------------------------------------+---------------------------------------------+
-
-.. index::
-   instance method
-   static method
-   subclass
-   superclass
-   override-compatible signature
-   override-compatibility
-   overloading
-   hiding
-   overriding
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      static method_1() {}
-      static method_2(p: number) {}
-   }
-   class Derived extends Base {
-      static method_1() {} // hiding
-      static method_2(p: string) {} // overloading
-   }
-
-+-------------------------------------+--------------------------------------------+
-| A *constructor* is defined          | All base class constructors are available  |
-| in a subclass.                      | for call in all derived class constructors.|
-+-------------------------------------+--------------------------------------------+
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      constructor() {}
-      constructor(p: number) {}
-   }
-   class Derived extends Base {
-      constructor(p: string) {
-           super()
-           super(5)
-      }
-   }
-
-.. index::
-   constructor
-   subclass
-   class constructor
-
-|
-
-.. _Overloading and Overriding in Interfaces:
-
-Overloading and Overriding in Interfaces
-========================================
-
-.. meta:
-    frontend_status: Done
-
-+-------------------------------------+---------------------------------------------+
-| **Context**                         | **Semantic Check**                          |
-+=====================================+=============================================+
-| A method is defined                 | If signatures are *override-compatible*     |
-| in a subinterface with the same     | (see :ref:`Override-Compatible Signatures`),|
-| name as the method in               | then *overriding* is used. Otherwise,       |
-| the superinterface.                 | *overloading* is used.                      |
-+-------------------------------------+---------------------------------------------+
-
-.. code-block:: typescript
-   :linenos:
-
-   interface Base {
-      method_1()
-      method_2(p: number)
-   }
-   interface Derived extends Base {
-      method_1() // overriding
-      method_2(p: string) // overloading
-   }
-
-+-------------------------------------+------------------------------------------+
-| Two methods with the same           | A :index:`compile-time error` occurs.    |
-| name are defined in the same        | Otherwise, *overloading* is used.        |
-| interface.                          |                                          |
-+-------------------------------------+------------------------------------------+
-
-.. index::
-   method
-   subinterface
-   superinterface
-   semantic check
-   override compatibility
-   override-compatible signature
-
-.. code-block:: typescript
-   :linenos:
-
-   interface anInterface {
-      instance_method_1()
-      instance_method_1()  // Compile-time error: instance method duplication
-
-      instance_method_2()
-      instance_method_2(p: number)  // Valid overloading
-   }
-
-|
-
-.. _Overload Resolution:
-
-Overload Resolution
-*******************
-
-.. meta:
-    frontend_status: Done
-
-*Overload resolution* is used to select one entity to call from a set of
-*potentially applicable candidates* in a function, method, or constructor call.
-Overload resolution is performed in two steps as follows:
-
-#. Select *applicable candidates* from *potentially applicable candidates*;
-
-#. If there is more than one *applicable candidate*, then select the best
-   candidate.
-
-**Note**. The first step is performed in all cases, even if there is
-only one *applicable candidate* to check *call signature compatibility*.
-
-.. index::
-   overload resolution
-   entity
-   applicable candidate
-   call signature compatibility
-
-|
-
-.. _Selection of Applicable Candidates:
-
-Selection of Applicable Candidates
-==================================
-
-.. meta:
-    frontend_status: Partly
-    todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
-    todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
-
-The selection of *applicable candidates* is the process of checking
-:ref:`Compatibility of Call Arguments` for all entities from the set of
-*potentially applicable candidates*. If any argument is not compatible with
-the corresponding parameter type, then the entity is deleted from the set.
-
-**Note**. Compile-time errors are not reported at this stage.
-
-After processing all entities, one of the following results is achieved:
-
-- Set is empty (all entities are deleted). A compile-time error occurs,
-  and the *overload resolution* is completed.
-
-- Only one entity is left in the set. This is the entity to call, and
-  the *overload resolution* is completed.
-
-- More than one entity is left in the set. The next step of the
-  *overload resolution* is to be performed.
-
-.. index::
-   applicable candidate
-   compatibility
-   call argument
    parameter type
-   overload resolution
-   overloaded function
-
-Two overloaded functions are considered in the following example:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base { }
-   class Derived extends Base { }
-
-   function foo(p: Base) { ... }     // #1
-   function foo(p: Derived) { ... }  // #2
-
-   foo(new Derived) // two applicable candidates for this call
-                    // next step of overload resolution is required
-
-   foo(new Base)    // one applicable candidate
-                    // overload resolution is completed
-                    // #1 will be called
-
-   foo(new Base, 5) // no candidates, compile-time error
+   overriding
+   subtype
+   supertype
+   overriding
+   compatibility
 
 |
 
-.. _Selection of Best Candidate:
+.. _Overriding and Implementing Methods with Overload Signatures:
 
-Selection of Best Candidate
-===========================
-
-.. meta:
-    frontend_status: Partly
-
-If the set of *applicable candidates* has two or more candidates, then the
-best candidate for the given list of arguments is to be identified, if possible.
-
-The selection of the best candidate is based on the following:
-
-- There are no candidates with the same list of parameters, as this situation
-  is already forbidden by the compiler (at the place of declaration or import)
-  (see :ref:`Overload-Equivalent Signatures`);
-
-- If several candidates can be called correctly by using the same argument list,
-  then at least one implicit argument transformation
-  must be applied to make the call.
-
-Possible argument transformations are listed below:
-
-- :ref:`Implicit Conversions`;
-
-- Passing default values to fill any missing arguments
-  (:ref:`Optional Parameters`);
-
-- Passing the empty array to replace a ``rest`` parameter that has no argument;
-
-- Folding several arguments to the array for a ``rest`` parameter.
-
-.. index::
-   applicable candidate
-   best candidate
-   parameter
-   compiler
-   import site
-   argument transformation
-   value
-   rest parameter
-
-The examples of transformations are presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo1(x: number) {}
-   foo1(1) // implicit conversion int -> number, meaning double
-
-   function foo3(x?: string) {}
-   foo3() // passing default value -> foo(undefined)
-
-   function foo4(...x: int[]) {}
-   foo4()     // passing empty array -> foo([])
-   foo4(1, 2) // folding to array -> foo(...[1, 2])
-
-The candidate that does not require transformations for all arguments is the
-*best candidate*. Other candidates are not considered in this case.
-
-The examples below represent the best candidate selected without
-transformation:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(i: int)    // #1
-   function foo(n: number) // #2
-
-   foo(1) // #1 - is the best candidate, no transformations
-
-   function max(a: number, b: number)  // #1
-   function max(...args: number[]) // #2
-
-   max(1, 2) // #1 - is the best candidate, no transformations
-
-.. index::
-   best candidate
-   transformation
-   argument
-
-If there is no *best candidate* on this step,
-then candidates are compared for each
-argument (taking default values for optional parameters
-and arguments of ``rest`` parameter into the account)
-by calculating partial *better* relation.
-
-If for the argument, parameter types and parameter kinds
-(required, optional or rest) are the same,
-this argument is skipped from comparison. Otherwise:
-
-**Case 1**. No argument is *better* than default value for optional parameter
-and empty list for ``rest`` parameter.
-
-**Case 2**. If an argument or several arguments correspond
-to non-optional parameters in the first candidate,
-and the other candidate has a ``rest`` parameter for these arguments,
-then the first one is *better*.
-
-**Case 3**. No transformation for an argument is *better* than any transformation.
-
-**Case 4**. If argument type is of a numeric type (see :ref:`Numeric Types`),
-or char then the candidate with a *shorter* conversion
-is *better*. E.g., the conversion of ``int`` to ``float`` is *better* than
-``int`` to ``double``.
-
-**Case 5**. If transformations are applied to the argument for both first and second
-candidates, then both candidates are not *best candidates*.
-
-.. index::
-   best candidate
-   argument transformation
-   numeric type
-   char
-   conversion
-   parameter
-
-.. code-block:: typescript
-   :linenos:
-
-   // Case 1:
-   function foo(n: number, s?: string)  // #1
-   function foo(n: number)              // #2
-
-   foo(1) // #2 is better, less parameters
-
-   function bar(...args: number[])  // #1
-   function bar()                   // #2
-
-   bar() // #2 is better, less parameters
-
-   // Case 2:
-   function foo(sum: number, a: number, b: number)  // #1
-   function foo(sum: number, ...x: number[])        // #2
-
-   foo(1, 2, 3) // #1 is better, non-rest parameters
-
-   // Case 3:
-   function foo(n: number, s: string|null)  // #1
-   function foo(n: number, s: string)       // #2
-
-   goo(1, "abc") // #2 is better, no transformation for 2nd argument
-
-   // Case 4:
-   function foo(i: long)  // #1
-   function foo(n: float) // #2
-
-   let x: int = 1
-   foo(x) //  #1 is better, conversion is shorter
-
-   // Case 5:
-   function foo(n: number)          // #1
-   function foo(x: number | string) // #2
-
-   foo(1) // different non-compared transformations - compile-time error
-
-If there is exactly one candidate that is *better* than others for at least
-one argument or several arguments and
-other arguments were skipped from comparison,
-then this is the *best candidate*.
-
-A :index:`compile-time error` occurs:
-
--  if no candidate is the *best candidate*.
-
--  if according to some argument the first candidate is better and for other
-   argument the other candidate is better.
-
-Example of the last case is presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function goo(a: int; b: float)  // #1
-   function goo(a: float, b: int)  // #2
-
-   goo(1, 1) // compile-time error, as
-             // #1 is better for 1st argument,
-             // #2 is better for 2nd argument.
-
-.. index::
-   best candidate
-   argument
-
-|
-
-.. _Initializer Block:
-
-Initializer Block
-*****************
+Overriding and Implementing Methods with Overload Signatures
+============================================================
 
 .. meta:
     frontend_status: None
 
-*Initializer block* is used in classes (see :ref:`Class Initializer`),
-packages (see :ref:`Package Initializer`) , and namespaces (see
-:ref:`Namespace Declarations`) to ensure that all their variables (see
-:ref:`Variable and Constant Declarations`) and fields (see
-:ref:`Field Declarations`) have valid initial values.
+If an interface (*derived interface*) extends another interface (*base
+interface*), and the base interface has a set of overload signatures, then the
+derived interface must provide a valid overriding overload signature (or
+signatures) for all overload signatures of the base interface. The derived
+interface can introduce additional overload signatures. The situation is
+represented by the example below:
 
-Appropriate syntax is presented below:
-
-.. code-block:: abnf
-
-      initializerBlock:
-          'static' block
-          ;
-
-If an *initializer block* contains a ``return <expression>`` statement (see
-:ref:`Return Statements`), then a :index:`compile-time error` occurs.
-If the code of an *initializer block* contains an unhandled ``throw`` statement
-(see :ref:`Throw Statements`), then a program terminates (see
-:ref:`Program Exit`).
-
-These situations are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-    static {
-
-        throw new Error // No surrounding 'try'
-
-        try { throw new Error }  // 'try' has no catch
-        finally {}
-
-        try { throw new Error }
-        catch (e) { throw new Error } // No surrounding 'try' in 'catch'
-
-        foo () // Function call throws an error
-
+    interface Interface {
+      foo (p: number): void // 1st overload signature
+      foo (p: string): void // 2nd overload signature
     }
 
-    function foo() {
-        throw new Error // No surrounding 'try'
+    interface Interface1 extends Interface {
+      foo (p: number|string): void // 1st overload signature overrides both foo from Interface
+      foo (p: boolean): void       // 2nd overload signature
+    }
+
+    function demo (p1: Interface1) {
+        p1.foo (5)         // fits 1st signature of Interface1
+        p1.foo ("5 true")  // fits 1st signature of Interface1
+        p1.foo (true)      // fits 2nd signature of Interface1
     }
 
 
+If a class (*derived class*) implements an interface (*base interface*), and
+the base interface has a set of overload signatures, then the derived class
+can provide a valid overriding overload signature (or signatures) for all
+overload signatures of the base interface. The derived class can introduce
+additional overload signatures. The implementation body must have
+the signature ``(...p: Any[]): Any`` (see
+:ref:`Overload Signatures Implementation Body`). This signature is a valid
+overriding for any overloaded signature. The same works if one class extends
+another class. The situation is represented by the example below:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class Class1 implements Interface {
+      foo (p: number): void // 1st overload signature
+      foo (p: string): void // 2nd overload signature
+      foo (...p: Any[]): Any {} // implementation signature + body
+    }
+
+    class Class2 implements Interface {
+      foo (...p: Any[]): Any {} // implementation signature only + body
+    }
+
+    class Class3 extends Class1 {
+      override foo (p: number): void // 1st overload signature
+      override foo (p: string): void // 2nd overload signature
+      override foo (...p: Any[]): Any {} // implementation signature + body
+    }
+
+    class Class4 extends Class3 {
+      override foo (...p: Any[]): Any {} // implementation signature only + body
+    }
+
+    new Class1().foo(5)     // OK
+    new Class1().foo("555") // OK
+    new Class1().foo(true)  // compile-time error - no boolean parameter
+
+    new Class2().foo(5)     // OK
+    new Class2().foo("555") // OK
+
+    function test (p: Interface) {
+        p.foo (5)
+        p.foo ("5555")
+    }
+
+    test(new Class1)
+    test(new Class2)
+    test(new Class3)
+    test(new Class4)
+
+
+|
+
+.. _Overloading:
+
+Overloading
+***********
+
+*Overloading* is the language feature that allows to use one name to
+call several functions, methods, or constructors with different signatures
+and different bodies.
+
+The actual function, method, or constructor to be called is determined at
+compile time. Thus, *overloading* is related to compile-time polymorphism.
+
+|LANG| supports the following two *overloading*  mechanisms:
+
+- |TS|-compatible feature: :ref:`Declarations with Overload Signatures`
+  mainly used to improve type checking; and
+
+- Innovative *managed overloading* (see :ref:`Overload Declarations`).
+
+.. index::
+   overloading
+   context
+   entity
+   function
+   constructor
+   method
+   signature
+   compile-time polymorphism
+   overloading
+
+*Signature resolution* is used to select one entity to call from a set of
+candidates if the name to call refers to a *declaration with overload signatures*
+(see :ref:`Signature Resolution for Overload Signatures`).
+
+*Overload resolution* is used to select one entity to call from a set of
+candidates if the name to call refers to an *overload declaration* (see
+:ref:`Overload Resolution for Overload Declarations`).
+
+Both mechanisms of resolution use the first-match textual order to streamline
+the resolution process.
+
+TBD: A :index:`compile-time warning` is issued if the order of entities in an
+*overload declaration* implies that some overloaded entities can never be
+selected for a call.
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1 (p: number) {}
+    function f2 (p: string) {}
+    function f3 (p: number|string) {}
+    overload foo {f1, f2, f3}  // f3 will never be called as foo()
+
+    foo (5)                    // f1() is called
+    foo ("5")                  // f2() is called
+
+|
+
+.. _Signature Resolution for Overload Signatures:
+
+Signature Resolution for Overload Signatures
+============================================
+
+.. meta:
+    frontend_status: None
+
+*Overload signature* allows specifying a function, method, or constructor that
+can have multiple signatures and a single *implementation body* with its own
+fixed *implementation siganture* (see
+:ref:`Overload Signatures Implementation Body`).
+Call arguments are checked at the call site against such multiple signatures in
+their declaration order: the call is considered valid as soon as the first
+signature is found appropriate for the arguments given.
+A :index:`compile-time error` occurs if no appropriate signature is found.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(s: string)            // signature #1
+    function foo(s: string, n: number) // signature #2
+    function foo(...x: Any[]): Any {}  // implementation signature
+
+    foo("1")     // call fits signature #1
+    foo("1", 5)  // call fits signature #2
+    foo(1, 2, 3) // compile-time error - no appropriate signature for the call
+                 // implementation signature is not accessible at call sites
+
+|
+
+.. _Overload Resolution for Overload Declarations:
+
+Overload Resolution for Overload Declarations
+=============================================
+
+.. meta:
+    frontend_status: None
+
+*Overload declaration* defines an ordered set of entities, and the first entity
+from this set that is *accessible* and has an appropriate signature is used to
+call at the call site.
+This approach is called *managed overloading* because the *first-match*
+algorithm provides full control for a developer to select a specific entity
+to call. This developer control over calls is represented by the following
+example:
+
+.. code-block:: typescript
+   :linenos:
+
+    function max2i(a: int, b: int): int
+        return  a > b ? a : b
+    }
+    function max2d(a: double, b: double): double {
+        return  a > b ? a : b
+    }
+    function maxN(...a: double[]): double {
+        // returns max element in array 'a'
+    }
+    overload max {max2i, max2d, maxN}
+
+    let i = 1
+    let j = 2
+    let pi = 3.14
+
+    max(i, j) // max2i is used
+    max(i, pi) // max2d is used
+    max(i, pi, 4) // maxN is used
+    max(1) // maxN is used
+    max(false, true) // compile-time error, no appropriate signature
+
+|
+
+.. _Type Erasure:
+
+Type Erasure
+*************
+
+.. meta:
+    frontend_status: Done
+
+*Type erasure* is the concept that denotes a special handling of some language
+*types*, primarily :ref:`Generics`, in the semantics of the following language
+operations that require the type to be preserved for execution:
+
+-  :ref:`InstanceOf Expression`;
+-  :ref:`Cast Expression`.
+
+In these operations some *types* are handled as their corresponding *effective
+types*, while the *effective type* is defined as type mapping. The *effective
+type* of a specific type ``T`` is always a supertype of ``T``. As a result,
+two kinds of relationship are possible between an original type and an
+*effective type*:
+
+-  *Effective type* of ``T`` is identical to ``T``, and *type erasure* has no
+   effect.
+
+-  If *effective type* of ``T`` is not identical to ``T``, then the type ``T``
+   is considered affected by *type erasure*, i.e., *erased*.
+
+.. index::
+   type erasure
+   instanceof expression
+   cast expression
+   operation
+   type
+   effective type
+   type mapping
+   supertype
+
+In addition, accessing a value of type ``T``, including by
+:ref:`Field Access Expression`, :ref:`Method Call Expression`, or
+:ref:`Function Call Expression` can cause ``ClassCastError`` thrown if
+type ``T`` and the ``target`` type are both affected by *type erasure*, and the
+value is produced by :ref:`Cast Expression`.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A<T> {
+      field?: T
+
+      test(value: Object) {
+        return value instanceof T  // CTE, T is erased
+      }
+
+      cast(value: Object) {
+        return value as T          // OK, but check is postponed
+      }
+    }
+
+    function castToA(p: Object) {
+      p instanceof A<number> // CTE, A<number> is erased
+
+      return p as A<number>  // OK, but check is performed against A
+    }
+
+.. index::
+   type erasure
+   field access
+   method call
+   target type
+   cast expression
+
+Type mapping determines the *effective types* as follows:
+
+-  :ref:`Type Parameter Constraint` for :ref:`Type Parameters`.
+
+-  Instantiation of the same generic type (see
+   :ref:`Explicit Generic Instantiations`) for *generic types* (see
+   :ref:`Generics`), with its type arguments selected in accordance with
+   :ref:`Type Parameter Variance` as outlined below:
+
+   - *Covariant* type parameters are instantiated with the constraint type;
+
+   - *Contravariant* type parameters are instantiated with the type ``never``;
+
+   - *Invariant* type parameters have no corresponding type argument, **TBD**
+
+-  Union type constructed from the effective types of types ``T1 | T2 ... Tn``
+   within the original union type for :ref:`Union Types` in the form
+   ``T1 | T2 ... Tn``.
+
+-  Same for :ref:`Array Types` in the form ``T[]`` as for generic type ``Array<T>``.
+
+-  Instantiation of ``FixedArray`` for ``FixedArray<T>`` instantiations, with
+   the effective type of type argument ``T`` preserved.
+
+-  Instantiation of an internal generic function type with respect to
+   the number of parameter types *n* for :ref:`Function Types` in the form
+   ``(P1, P2 ..., Pn) => R``. Parameter types ``P1, P2 ... Pn`` are
+   instantiated with ``object | null | undefined``, and the return type ``R``
+   is instantiated with type ``never``.
+
+-  Instantiation of an internal generic tuple type with respect to
+   the number of element types *n* for :ref:`Tuple Types` in the form
+   ``[T1, T2 ..., Tn]``. **TBD**
+
+-  String for :ref:`String Literal Types`.
+
+-  Enumeration base type of the same const enum type for *const enum* types
+   (see :ref:`Enumerations`).
+
+-  Otherwise, the original type is preserved.
+
+.. index::
+   type erasure
+   type mapping
+   generic type
+   effective type
+   instantiation
+   type argument
+   covariant type parameter
+   type parameter
+   contravariant type parameter
+   invariant type parameter
+   parameter type
+   type argument
+   type preservation
+
+|
+
+.. _Static Initialization:
+
+Static Initialization
+*********************
+
+.. meta:
+    frontend_status: Done
+
+*Static initialization* is a routine performed once for each class (see
+:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), separate module
+(see :ref:`Separate Modules`), or package module (see :ref:`Packages`).
+
+*Static initialization* execution involves the execution of the following:
+
+- *Initializers* of *variables* or *static fields*;
+
+- *Top-level statements*;
+
+- Code inside a *static block*.
+
+
+*Static initialization* is performed before the first execution of one of the
+following operations:
+
+- Invocation of a static method or function of an entity scope;
+
+- Access to a static field or variable of an entity scope;
+
+- Instantiation of an entity that is an interface or class;
+
+- *Static initialization* of a direct subclass of an entity that is a class.
+
+**Note**. None of the operations above invokes a *static initialization*
+recursively if the *static initialization* of the same entity is not complete.
+
+If *static initialization* routine execution is terminated due to an
+exception thrown, then the initialization is not complete. A repetitive attempt
+to execute the *static initialization* produces an exception again.
+
+*Static initialization* routine invocation of a concurrent execution (see
+:ref:`Coroutines (Experimental)`) involves synchronization of all *coroutines*
+that try to invoke it. The synchronization is to ensure that the initialization
+is performed only once, and the operations that require the *static
+initialization* to be performed are executed after the initialization completes.
+
+If *static initialization* routines of two concurrently initialized classes are
+circularly dependent, then a deadlock can occur.
+
+|
+
+.. _Static Initialization Safety:
+
+Static Initialization Safety
+============================
+
+.. meta:
+    frontend_status: Done
+
+A compile-time error occurs if a *named reference* refers to a not yet
+initialized *entity*, including one of the following:
+
+- Variable (see :ref:`Variable and Constant Declarations`) of a separate module
+  package (see :ref:`Packages`), or namespace (see :ref:`Namespace Declarations`);
+
+- Static field of a class (see :ref:`Static and Instance Fields`).
+
+If detecting an access to a not yet initialized *entity* is not possible, then
+runtime evaluation is performed as follows:
+
+- Default value is produced if the type of an entity has a default value;
+
+- Otherwise, ``NullPointerError`` is thrown.
+
+|
+
+.. _Dispatch:
+
+Dispatch
+********
+
+.. meta:
+    frontend_status: Done
+
+As a result of assignment (see :ref:`Assignment`) to a variable or call (see
+:ref:`Method Call Expression` or :ref:`Function Call Expression`), the actual
+runtime type of a parameter of class or interface can become different from the
+type explicitly specified or inferred at the point of declaration.
+
+In this situation method calls are dispatched during program execution based on
+their actual type.
+
+This mechanism is called *dynamic dispatch*. Dynamic dispatch is used in
+OOP languages to provide greater flexibility and the required level of
+abstraction. Unlike *static dispatch* where the particular method to be called
+is known at compile time, *dynamic dispatch* requires additional action during
+program code execution. Compilation tools can optimize dynamic to static dispatch.
+
+.. index::
+   dispatch
+   assignment
+   variable
+   call
+   method call expression
+   method
+   method call
+   function call
+   function
+   runtime
+   runtime type
+   parameter
+   class
+   specified type
+   inferred type
+   point of declaration
+   dynamic dispatch
+   OOP (object-oriented programming)
+   static dispatch
+   compile time
 
 |
 
@@ -1550,6 +2175,9 @@ These situations are represented in the examples below:
 
 Compatibility Features
 **********************
+
+.. meta:
+    frontend_status: Done
 
 Some features are added to |LANG| in order to support smooth |TS| compatibility.
 Using these features while doing the |LANG| programming is not recommended in
@@ -1587,47 +2215,76 @@ versions of |LANG|.
 The extended semantics approach is based on the concept of *truthiness* that
 extends the boolean logic to operands of non-boolean types.
 
-Depending on the type kind of a valid expression, the value of such valid
+Depending on the kind of a valid expression's type, the value of the valid
 expression can be handled as ``true`` or ``false`` as described in the table
 below:
 
 .. index::
    extended conditional expression
+   conditional expression
+   alignment
+   semantics
    conditional-and expression
    conditional-or expression
-   conditional expression
    while statement
    do statement
    for statement
    if statement
    truthiness
+   non-boolean type
+   expression type
 
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| Value Type Kind                      | When ``false``              | When ``true``                | |LANG| Code Example to Check       |
-+======================================+=============================+==============================+====================================+
-| ``string``                           | empty string                | non-empty string             | ``s.length == 0``                  |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``boolean``                          | ``false``                   | ``true``                     | ``x``                              |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``enum``                             | ``enum`` constant           | enum constant                | ``x.valueOf()``                    |
-|                                      |                             |                              |                                    |
-|                                      | handled as ``false``        | handled as ``true``          |                                    |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``number`` (``double``/``float``)    | ``0`` or ``NaN``            | any other number             | ``n != 0 && !isNaN(n)``            |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| any integer type                     | ``== 0``                    | ``!= 0``                     | ``i != 0``                         |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``bigint``                           | ``== 0n``                   | ``!= 0n``                    | ``i != 0n``                        |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``char``                             | ``== 0``                    | ``!= 0``                     | ``c != c'\u0000'``                 |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| ``null`` or ``undefined``            | ``always``                  | ``never``                    | ``x != null`` or ``x != undefined``|
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| Union types                          | when value is ``falsy``     | when value is ``truthy``     | ``x != null`` or ``x != undefined``|
-|                                      |                             |                              | for union types with nullish types |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
-| any other nonNullish type            | ``never``                   | ``always``                   | ``new SomeType != null``           |
-+--------------------------------------+-----------------------------+------------------------------+------------------------------------+
+
+.. list-table::
+   :width: 100%
+   :widths: 25 25 25 25
+   :header-rows: 1
+
+   * - Value Type Kind
+     - When ``false``
+     - When ``true``
+     - |LANG| Code Example to Check
+   * - ``string``
+     - empty string
+     - non-empty string
+     - ``s.length == 0``
+   * - ``boolean``
+     - ``false``
+     - ``true``
+     - ``x``
+   * - ``enum``
+     - ``enum`` constant handled as ``false``
+     - ``enum`` constant handled as ``true``
+     - ``x.valueOf()``
+   * - ``number`` (``double``/``float``)
+     - ``0`` or ``NaN``
+     - any other number
+     - ``n != 0 && !isNaN(n)``
+   * - any integer type
+     - ``== 0``
+     - ``!= 0``
+     - ``i != 0``
+   * - ``bigint``
+     - ``== 0n``
+     - ``!= 0n``
+     - ``i != 0n``
+   * - ``null`` or ``undefined``
+     - ``always``
+     - ``never``
+     - ``x != null`` or
+
+       ``x != undefined``
+   * - Union types
+     - When value is ``false`` according to this column
+     - When value is ``true`` according to this column
+     - ``x != null`` or
+
+       ``x != undefined`` for union types with nullish types
+   * - Any other nonNullish type
+     - ``never``
+     - ``always``
+     - ``new SomeType != null``
+
 
 Extended semantics of :ref:`Conditional-And Expression` and
 :ref:`Conditional-Or Expression` affects the resultant type of expressions
@@ -1671,6 +2328,11 @@ The example below illustrates the way this approach works in practice. Any
    conditional-and expression
    conditional-or expression
    loop
+   string
+   integer type
+   union type
+   nullish type
+   nonzero
 
 .. raw:: pdf
 

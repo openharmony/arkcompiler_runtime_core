@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-let resolve: ((value: Object) => void)|null = null;
+let resolve: ((value: Object) => void) | null = null;
 let value = new Object();
 let thenable = Promise.resolve<Object>(value);
-let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Object) => void) => {
+let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 });
 
 p.then<void, void>((v: Object): void => {
     if (v !== value) {
-        console.log("Test failed. The promise should be resolved by the provided value.");
+        console.log('Test failed. The promise should be resolved by the provided value.');
         return;
     }
-    console.log("Test passed.");
-}, (err: Object): void => {
-    console.log("Test failed. The promise should be rejected.");
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should be rejected.');
 });
 
 resolve!(thenable);

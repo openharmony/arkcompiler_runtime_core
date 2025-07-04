@@ -16,7 +16,7 @@
 #include "../../src/mock/abckit_mock.h"
 #include "../../src/mock/mock_values.h"
 
-#include "../include/c/isa/isa_dynamic.h"
+#include "../include/libabckit/c/isa/isa_dynamic.h"
 
 #include <cstring>
 #include <gtest/gtest.h>

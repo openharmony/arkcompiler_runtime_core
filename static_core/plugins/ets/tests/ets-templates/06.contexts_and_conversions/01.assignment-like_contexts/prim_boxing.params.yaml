@@ -19,5 +19,5 @@ boxing_conversions:
   - {origin: char,    dest: Char, value: "c'a'"}
   - {origin: int,     dest: Int,   value: 1}
   - {origin: long,    dest: Long,      value: 1}
-  - {origin: float,   dest: Float,     value: 1.0}
+  - {origin: float,   dest: Float,     value: 1.0f}
   - {origin: double,  dest: Double,    value: 1.0}

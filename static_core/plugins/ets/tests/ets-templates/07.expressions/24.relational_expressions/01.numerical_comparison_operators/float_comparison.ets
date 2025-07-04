@@ -20,13 +20,13 @@ desc: Integer comparison {{fc.xvalue}} {{fc.op}} {{fc.yvalue}}
 ---*/
 
 function main(): void {
-  let x: {{fc.xtype}} = {{fc.xvalue}};
-  let bx: {{fc.xboxed}} = new {{fc.xboxed}}({{fc.xvalue}} as {{fc.xtype}});
-  let y: {{fc.ytype}} = {{fc.yvalue}};
-  let by: {{fc.yboxed}} = new {{fc.yboxed}}({{fc.yvalue}} as {{fc.ytype}});
-  assertEQ( (x {{fc.op}} y), {{fc.result}} )
-  assertEQ( (bx {{fc.op}} by), {{fc.result}} )
-  assertEQ( (x {{fc.op}} by), {{fc.result}} )
+  let x: {{fc.xtype}} = {{fc.xvalue}}.to{{fc.xboxed}}();
+  let bx: {{fc.xboxed}} = new {{fc.xboxed}}(x);
+  let y: {{fc.ytype}} = {{fc.yvalue}}.to{{fc.yboxed}}();
+  let by: {{fc.yboxed}} = new {{fc.yboxed}}(y);
+  arktest.assertEQ( (x {{fc.op}} y), {{fc.result}} )
+  arktest.assertEQ( (bx {{fc.op}} by), {{fc.result}} )
+  arktest.assertEQ( (x {{fc.op}} by), {{fc.result}} )
 }
 
 {% endfor %}

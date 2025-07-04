@@ -14,7 +14,7 @@
  */
 
 namespace anyns {
-    let x: char = 'a';
+    let x: char = c'a';
     let s: String = "abc";
     let z: boolean = false;
 }

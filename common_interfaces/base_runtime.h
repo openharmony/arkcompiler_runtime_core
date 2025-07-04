@@ -22,6 +22,7 @@
 
 #include "base/runtime_param.h"
 
+<<<<<<< HEAD
 namespace common {
 class BaseStringTableImpl;
 template <typename Impl>
@@ -32,12 +33,25 @@ class MutatorManager;
 class ThreadHolderManager;
 class ThreadHolder;
 class BaseClassRoots;
+=======
+namespace panda {
+class BaseObject;
+class HeapManager;
+class LogManager;
+class MutatorManager;
+class ThreadHolderManager;
+class ThreadHolder;
+>>>>>>> OpenHarmony_feature_20250328
 
 enum class GcType : uint8_t {
     ASYNC,
     SYNC,
     FULL,  // Waiting finish
     APPSPAWN,
+<<<<<<< HEAD
+=======
+    FULL_WITH_XREF,     // Waiting finish
+>>>>>>> OpenHarmony_feature_20250328
 };
 using HeapVisitor = const std::function<void(BaseObject*)>;
 
@@ -52,9 +66,18 @@ public:
     void PreFork(ThreadHolder *holder);
     void PostFork();
 
+<<<<<<< HEAD
     void Init(const RuntimeParam &param);   // Support setting custom parameters
     void Init();                            // Use default parameters
     void Fini();
+=======
+    bool HasBeenInitialized();
+    void Init(const RuntimeParam &param);   // Support setting custom parameters
+    void Init();                            // Use default parameters
+    void InitFromDynamic(const RuntimeParam &param);
+    void Fini();
+    void FiniFromDynamic();
+>>>>>>> OpenHarmony_feature_20250328
 
     // Need refactor, move to other file
     static void WriteBarrier(void* obj, void* field, void* ref);
@@ -62,12 +85,17 @@ public:
     static void* ReadBarrier(void* field);
     static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
     static void RequestGC(GcType type);
+<<<<<<< HEAD
     static void WaitForGCFinish();
     static bool ForEachObj(HeapVisitor& visitor, bool safe);
     static void NotifyNativeAllocation(size_t bytes);
     static void NotifyNativeFree(size_t bytes);
     static void NotifyNativeReset(size_t oldBytes, size_t newBytes);
     static size_t GetNotifiedNativeSize();
+=======
+    static bool ForEachObj(HeapVisitor& visitor, bool safe);
+    static void WaitForGCFinish();
+>>>>>>> OpenHarmony_feature_20250328
 
     HeapParam &GetHeapParam()
     {
@@ -93,6 +121,7 @@ public:
     {
         return *heapManager_;
     }
+<<<<<<< HEAD
 
     BaseClassRoots &GetBaseClassRoots()
     {
@@ -103,17 +132,30 @@ public:
     {
         return *stringTable_;
     }
+=======
+>>>>>>> OpenHarmony_feature_20250328
 private:
     RuntimeParam param_ {};
 
     HeapManager* heapManager_ = nullptr;
+<<<<<<< HEAD
     MutatorManager* mutatorManager_ = nullptr;
     ThreadHolderManager* threadHolderManager_  = nullptr;
     BaseClassRoots* baseClassRoots_ = nullptr;
     BaseStringTableInterface<BaseStringTableImpl>* stringTable_ = nullptr;
+=======
+    LogManager* logManager_ = nullptr;
+    MutatorManager* mutatorManager_ = nullptr;
+    ThreadHolderManager* threadHolderManager_  = nullptr;
+
+>>>>>>> OpenHarmony_feature_20250328
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
     static bool initialized_;
 };
+<<<<<<< HEAD
 }  // namespace common
+=======
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif // COMMON_INTERFACES_BASE_RUNTIME_H

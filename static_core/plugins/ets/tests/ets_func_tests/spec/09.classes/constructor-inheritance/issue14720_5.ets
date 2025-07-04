@@ -30,5 +30,5 @@ tags: []
  function main(): void {
     let b = new Base();
 
-    assertEQ( b.age, 0)
+    arktest.assertEQ( b.age, 0)
  }

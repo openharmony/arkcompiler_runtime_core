@@ -18,7 +18,7 @@ function Test_indirect_call_type_value_number_call(): boolean {
     const EXPECTED = 2;
 
     let result = js.indirectCallTypeByValueNumber.call(null, 1) as int;
-    assertTrue(result == EXPECTED);
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -26,8 +26,8 @@ function Test_indirect_call_type_value_number_call(): boolean {
 function Test_indirect_call_type_value_number_apply(): boolean {
     const EXPECTED = 2;
 
-    let result = js.indirectCallTypeByValueNumber.apply(null, [1]) as int;
-    assertTrue(result == EXPECTED);
+    let result = js.indirectCallTypeByValueNumber.apply(null, [1] as FixedArray<int>) as int;
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -36,7 +36,7 @@ function Test_indirect_call_type_value_number_bind_with_arg(): boolean {
     const EXPECTED = 2;
 
     let boundWithArg = js.indirectCallTypeByValueNumber.bind(null, 1);
-    assertTrue(boundWithArg() as int == EXPECTED);
+    arktest.assertTrue(boundWithArg() as int == EXPECTED);
 
     return true;
 }
@@ -45,7 +45,7 @@ function Test_indirect_call_type_value_number_bind_without_arg(): boolean {
     const EXPECTED = 2;
 
     let boundWithoutArg = js.indirectCallTypeByValueNumber.bind(null);
-    assertTrue(boundWithoutArg(1) as int == EXPECTED);
+    arktest.assertTrue(boundWithoutArg(1) as int == EXPECTED);
 
     return true;
 }
@@ -55,7 +55,7 @@ function Test_indirect_call_type_value_string_call(): boolean {
     const EXPECTED = ''.concat(ARG, ARG);
 
     let result = js.indirectCallTypeByValueString.call(null, ARG) as string;
-    assertTrue(result == EXPECTED);
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -64,8 +64,8 @@ function Test_indirect_call_type_value_string_apply(): boolean {
     const ARG = 'foo'
     const EXPECTED = ''.concat(ARG, ARG);
 
-    let result = js.indirectCallTypeByValueString.apply(null, [ARG]) as string;
-    assertTrue(result == EXPECTED);
+    let result = js.indirectCallTypeByValueString.apply(null, [ARG] as FixedArray<string>) as string;
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -75,7 +75,7 @@ function Test_indirect_call_type_value_string_bind_with_arg(): boolean {
     const EXPECTED = ''.concat(ARG, ARG);
 
     let boundWithArg = js.indirectCallTypeByValueString.bind(null, ARG);
-    assertTrue(boundWithArg() as string == EXPECTED);
+    arktest.assertTrue(boundWithArg() as string == EXPECTED);
 
     return true;
 }
@@ -85,7 +85,7 @@ function Test_indirect_call_type_value_string_bind_without_arg(): boolean {
     const EXPECTED = ''.concat(ARG, ARG);
 
     let boundWithoutArg = js.indirectCallTypeByValueString.bind(null);
-    assertTrue(boundWithoutArg(ARG) as string == EXPECTED);
+    arktest.assertTrue(boundWithoutArg(ARG) as string == EXPECTED);
 
     return true;
 }
@@ -95,7 +95,7 @@ function Test_indirect_call_type_value_boolean_call(): boolean {
     const EXPECTED = !ARG;
 
     let result = js.indirectCallTypeByValueBoolean.call(null, ARG) as boolean;
-    assertTrue(result == EXPECTED);
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -104,8 +104,8 @@ function Test_indirect_call_type_value_boolean_apply(): boolean {
     const ARG = true;
     const EXPECTED = !ARG;
 
-    let result = js.indirectCallTypeByValueBoolean.apply(null, [ARG]) as boolean;
-    assertTrue(result == EXPECTED);
+    let result = js.indirectCallTypeByValueBoolean.apply(null, [ARG] as FixedArray<boolean>) as boolean;
+    arktest.assertTrue(result == EXPECTED);
 
     return true;
 }
@@ -115,7 +115,7 @@ function Test_indirect_call_type_value_boolean_bind_with_arg(): boolean {
     const EXPECTED = !ARG;
 
     let boundWithArg = js.indirectCallTypeByValueBoolean.bind(null, ARG);
-    assertTrue(boundWithArg() as boolean == EXPECTED);
+    arktest.assertTrue(boundWithArg() as boolean == EXPECTED);
 
     return true;
 }
@@ -125,7 +125,7 @@ function Test_indirect_call_type_value_boolean_bind_without_arg(): boolean {
     const EXPECTED = !ARG;
 
     let boundWithoutArg = js.indirectCallTypeByValueBoolean.bind(null);
-    assertTrue(boundWithoutArg(ARG) as boolean == EXPECTED);
+    arktest.assertTrue(boundWithoutArg(ARG) as boolean == EXPECTED);
 
     return true;
 }

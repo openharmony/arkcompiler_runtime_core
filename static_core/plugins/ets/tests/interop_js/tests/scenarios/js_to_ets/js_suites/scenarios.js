@@ -263,6 +263,7 @@ export function functionRestParameter(...arg) {
 export function functionSpreadParameter(arg1, arg2) {
 	return arg1 + arg2; // transpiled from Typescript code: export function functionSpreadParameter(arg1: number, arg2: number)
 }
+<<<<<<< HEAD
 
 // export function functionOverloaded() {}
 
@@ -276,6 +277,8 @@ export function functionSpreadParameter(arg1, arg2) {
 // }
 
 
+=======
+>>>>>>> OpenHarmony_feature_20250328
 export function functionArgStringLiteralType(arg) {
 	return arg;
 	// transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString

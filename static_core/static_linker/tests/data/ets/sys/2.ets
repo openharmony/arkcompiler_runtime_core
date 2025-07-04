@@ -18,7 +18,11 @@ export @interface FieldAnno {
 	addr: string = "shanghai"
 	d_int: int = 11
 	d_long: long = 22
+<<<<<<< HEAD
 	d_float: float = 33.3
+=======
+	d_float: float = 33.3f
+>>>>>>> OpenHarmony_feature_20250328
 	d_double: double = 55.55
 }
 
@@ -27,7 +31,11 @@ export @interface MethodAnno {
 	addr: string = "shanghai"
 	d_int: int = 11
 	d_long: long = 22
+<<<<<<< HEAD
 	d_float: float = 33.3
+=======
+	d_float: float = 33.3f
+>>>>>>> OpenHarmony_feature_20250328
 	d_double: double = 55.55
 }
 
@@ -36,7 +44,11 @@ export @interface ClassAnno {
 	addr: string = "shanghai"
 	d_int: int = 11
 	d_long: long = 22
+<<<<<<< HEAD
 	d_float: float = 33.3
+=======
+	d_float: float = 33.3f
+>>>>>>> OpenHarmony_feature_20250328
 	d_double: double = 55.55
 }
 
@@ -47,19 +59,32 @@ export abstract class Base {
 const const_name: string = "billy";
 const const_int: int = 11;
 const const_long: long = 22;
+<<<<<<< HEAD
 const const_float: float = 33.3;
 const const_double: double = 55.55;
 
 @ClassAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3, d_double: 55.55})
 export class Cls extends Base {
     @FieldAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3, d_double: 55.55})
+=======
+const const_float: float = 33.3f;
+const const_double: double = 55.55;
+
+@ClassAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+export class Cls extends Base {
+    @FieldAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+>>>>>>> OpenHarmony_feature_20250328
     name: string = "alice"
     name2: string = const_name
 	d_int: int = 11
 	d_int2: int = const_int
 	d_long: long = 22
 	d_long2: long = const_long
+<<<<<<< HEAD
 	d_float: float = 33.3
+=======
+	d_float: float = 33.3f
+>>>>>>> OpenHarmony_feature_20250328
 	d_float2: float = const_float
 	d_double: double = 55.55
 	d_double2: double = const_double
@@ -84,7 +109,11 @@ export class Cls extends Base {
         }
     }
 
+<<<<<<< HEAD
     @MethodAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3, d_double: 55.55})
+=======
+    @MethodAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+>>>>>>> OpenHarmony_feature_20250328
     add(a: int, b: int): int {
         return a + b;
     }

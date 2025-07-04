@@ -23,6 +23,7 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
+    enable-es2panda: True
     enable-verifier: True
     extension: ${parameters.extension}
     es2panda-extra-args: []
@@ -32,6 +33,10 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     ark-args: []
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    # adds --boot-panda-files option to ark with all dependent and the current abc files
+    # adds --panda-files option to ark with all dependent and the current abc files
+    is-panda: True
 steps:
   imports: 
     only-es2panda:
@@ -40,6 +45,7 @@ steps:
       work-dir: ${parameters.work-dir}
       extension: ${parameters.extension}
       load-runtimes: ${parameters.load-runtimes}
+      enable-es2panda: ${parameters.enable-es2panda}
       enable-verifier: ${parameters.enable-verifier}
       es2panda-timeout: ${parameters.es2panda-timeout}
       verifier-timeout: ${parameters.verifier-timeout}

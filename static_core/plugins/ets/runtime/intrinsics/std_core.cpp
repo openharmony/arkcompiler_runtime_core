@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
+#include "runtime/mem/heap_manager.h"
 #include "runtime/runtime_helpers.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_typeapi_type.h"
 #include "runtime/include/thread_scopes.h"
 
 #include "runtime/include/stack_walker.h"
@@ -30,6 +35,26 @@
 #include "types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
+
+extern "C" EtsInt CountInstancesOfClass(EtsTypeAPIType *paramType)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *heapMgr = coro->GetPandaVM()->GetHeapManager();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
+    EtsHandle<EtsTypeAPIType> safeParamType(coro, paramType);
+    EtsHandle<EtsClass> klass(coro, paramType->GetClass());
+    ASSERT(klass.GetPtr() == PlatformTypes()->coreClassType);
+    EtsField *field = klass->GetFieldIDByName("cls", nullptr);
+    if (field == nullptr) {
+        return EtsInt(0);
+    }
+    auto *clsObj = safeParamType->GetFieldObject(field);
+    if (clsObj == nullptr) {
+        return EtsInt(0);
+    }
+    auto *etsCls = EtsClass::FromEtsClassObject(clsObj);
+    return static_cast<EtsInt>(heapMgr->CountInstancesOfClass(etsCls->GetRuntimeClass()));
+}
 
 extern "C" EtsArray *StdCoreStackTraceLines()
 {
@@ -154,6 +179,12 @@ extern "C" EtsBoolean StdSystemIsMainWorker()
     return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
 }
 
+extern "C" EtsBoolean StdSystemWorkerHasExternalScheduler()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    return static_cast<EtsBoolean>(coro->GetWorker()->IsExternalSchedulingEnabled());
+}
+
 extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
 {
     if (UNLIKELY(scaler == 0)) {
@@ -166,7 +197,44 @@ extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
         coro->GetManager()->CreateWorkers(scaler, runtime, vm);
         return;
     }
+    ScopedNativeCodeThread nativeScope(coro);
     Coroutine::GetCurrent()->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
+}
+
+extern "C" void StdSystemStopTaskpool()
+{
+    auto *runtime = Runtime::GetCurrent();
+    auto *classLinker = runtime->GetClassLinker();
+    ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto klass = cle->GetClass(mutf8Name);
+    if (klass == nullptr) {
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("stopAllWorkers", ":V");
+    ASSERT(method != nullptr);
+    auto coro = EtsCoroutine::GetCurrent();
+    method->GetPandaMethod()->Invoke(coro, nullptr);
+}
+
+extern "C" void StdSystemIncreaseTaskpoolWorkersToN(int32_t workersNum)
+{
+    if (UNLIKELY(workersNum == 0)) {
+        return;
+    }
+    auto *runtime = Runtime::GetCurrent();
+    auto *classLinker = runtime->GetClassLinker();
+    ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto klass = cle->GetClass(mutf8Name);
+    if (klass == nullptr) {
+        return;
+    }
+    auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("increaseWorkersToN", "I:V");
+    ASSERT(method != nullptr);
+    auto coro = EtsCoroutine::GetCurrent();
+    std::array args = {Value(workersNum)};
+    method->GetPandaMethod()->Invoke(coro, args.data());
 }
 
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)

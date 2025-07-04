@@ -421,7 +421,7 @@ function(add_test_file)
         add_dependencies(${suite} ${target}-g1-gc-irtoc)
     endif()
 
-    set(gc_types "stw" "gen-gc" "g1-gc")
+    set(gc_types "stw" "g1-gc")
     foreach (gc_type IN LISTS gc_types)
         panda_add_test_run(
             FILE "${ARG_FILE}"

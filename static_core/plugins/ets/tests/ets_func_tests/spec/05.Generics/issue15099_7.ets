@@ -24,5 +24,5 @@ type TArr = int[];
 
 function main(): void {
     let x = new Array<(((arg:string) => string)|undefined|TArr)>();
-    assertTrue( x != null)
+    arktest.assertTrue( x != null)
 }

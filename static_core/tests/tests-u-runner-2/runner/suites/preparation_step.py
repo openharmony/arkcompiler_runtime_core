@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,15 +23,14 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from pathlib import Path
-from typing import List, Type, Union
 
-from runner.common_exceptions import UnknownException, InvalidConfiguration
+from runner.common_exceptions import InvalidConfiguration, TimeoutException, UnknownException
 from runner.extensions.generators.igenerator import IGenerator
 from runner.logger import Log
 from runner.options.config import Config
 from runner.options.options_collections import CollectionsOptions
 from runner.suites.test_metadata import TestMetadata
-from runner.utils import read_file, write_2_file, get_class_by_name, copy, UiUpdater
+from runner.utils import UiUpdater, copy, get_class_by_name, read_file, write_2_file
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -54,7 +53,7 @@ class TestPreparationStep(ABC):
         return self.__test_gen_path
 
     @abstractmethod
-    def transform(self, force_generated: bool) -> List[Path]:
+    def transform(self, force_generated: bool) -> list[Path]:
         pass
 
 
@@ -72,7 +71,7 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
         return f"Test Generator for {self.config.test_suite.suite_name}' test suite"
 
     @staticmethod
-    def __get_generator_class(clazz: str) -> Type[IGenerator]:
+    def __get_generator_class(clazz: str) -> type[IGenerator]:
         class_obj = get_class_by_name(clazz)
         if not issubclass(class_obj, IGenerator):
             raise InvalidConfiguration(
@@ -80,12 +79,12 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
                 f"Check value of 'generator-class' option")
         return class_obj
 
-    def transform(self, force_generated: bool) -> List[Path]:
+    def transform(self, force_generated: bool) -> list[Path]:
         # call of the custom generator
         if self.test_gen_path.exists() and force_generated:
             shutil.rmtree(self.test_gen_path)
         os.makedirs(self.test_gen_path, exist_ok=True)
-        result: List[str] = []
+        result: list[str] = []
         try:
             if self.collection.generator_class is not None:
                 self.__generate_by_class(self.collection.generator_class)
@@ -98,7 +97,7 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
         return [Path(res) for res in result]
 
     def __generate_by_class(self, clazz: str) -> None:
-        generator_class: Type[IGenerator] = self.__get_generator_class(clazz)
+        generator_class: type[IGenerator] = self.__get_generator_class(clazz)
         ets_templates_generator = generator_class(self.test_source_path, self.test_gen_path, self.config)
         with ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(ets_templates_generator.generate)
@@ -106,7 +105,7 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
                 UiUpdater("Tests are generating").start(future)
 
     def __generate_by_script(self, script: str) -> None:
-        cmd: List[Union[str, Path]] = [
+        cmd: list[str | Path] = [
             script,
             "--source", self.test_source_path,
             "--target", self.test_gen_path
@@ -124,7 +123,7 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
                 process.communicate(timeout=timeout)
             except subprocess.TimeoutExpired as exc:
                 process.kill()
-                raise TimeoutError(f"Generation failed by timeout after {timeout} sec") from exc
+                raise TimeoutException(f"Generation failed by timeout after {timeout} sec") from exc
             except subprocess.SubprocessError as exc:
                 raise UnknownException(f"Generation failed by unknown reason: {exc}") from exc
 
@@ -134,7 +133,7 @@ class CopyStep(TestPreparationStep):
         return (f"Test preparation step: copying *.{self.extension} files "
                 f"from {self.test_source_path} to {self.test_gen_path}")
 
-    def transform(self, force_generated: bool) -> List[Path]:
+    def transform(self, force_generated: bool) -> list[Path]:
         try:
             if self.test_source_path != self.test_gen_path:
                 copy(self.test_source_path, self.test_gen_path, remove_if_exist=False)
@@ -169,7 +168,7 @@ class JitStep(TestPreparationStep):
     def __str__(self) -> str:
         return "Test preparation step for any ets test suite: transforming for JIT testing"
 
-    def transform(self, force_generated: bool) -> List[Path]:
+    def transform(self, force_generated: bool) -> list[Path]:
         glob_expression = os.path.join(self.test_gen_path, f"**/*.{self.extension}")
         tests = list(glob(glob_expression, recursive=True))
         with multiprocessing.Pool(processes=self.config.general.processes) as pool:

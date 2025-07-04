@@ -28,6 +28,6 @@ function main() {
     let func: {{c.type}} = {{c.sign}} => { return a + b }
     let obj: Object = func
     let target = convertObject(obj)
-    assertEQ(target({{c.data}}), {{c.expected}})
+    arktest.assertEQ(target({{c.data}}), {{c.expected}})
 }
 {% endfor %}

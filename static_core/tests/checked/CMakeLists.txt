@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -112,6 +112,12 @@ function(panda_add_checked_test)
         set(ARCHITECTURE "arm32")
     endif()
 
+    if (ARK_HYBRID OR PANDA_TARGET_64 AND NOT PANDA_USE_32_BIT_POINTER)
+        set (CHECKER_BUILD_CONFIG "Hybrid")
+    else()
+        set (CHECKER_BUILD_CONFIG "Static")
+    endif()
+
     # Run checker
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
@@ -123,6 +129,7 @@ function(panda_add_checked_test)
                                          --paoc-options \"${OPTIONS}\"
                                          --command-token \"${COMMAND_TOKEN}\"
                                          --arch ${ARCHITECTURE}
+                                         --build-config ${CHECKER_BUILD_CONFIG}
                                          ${RELEASE_OPT}
                                          ${WITH_LLVM}
                       WORKING_DIRECTORY ${TEST_DIR}
@@ -145,6 +152,7 @@ endif()
 # Disable checked tests with sanitizers for arm64, since it takes too long time running on qemu.
 if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANITIZER AND NOT PANDA_ENABLE_THREAD_SANITIZER))
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/aot_black_list.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/const_array_test.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/disable_intrinsics.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ldarray_obj.pa)
@@ -247,3 +255,7 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/check_verifier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/xor_to_compare_to_xor.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline-external-constructor.pa EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
+
+if (NOT PANDA_TARGET_ARM32)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/boot_an_location.pa)
+endif()

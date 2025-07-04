@@ -17,7 +17,7 @@
 desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue_15669_03
 name: issue_15669_03.ets
 tags: [not-a-test, compile-only]
-files: ['./issue_15669_01.ets', './issue_15669_02.ets']
+files: [./issue_15669_01.ets, ./issue_15669_02.ets]
 ---*/
 
 export * from './issue_15669_01'

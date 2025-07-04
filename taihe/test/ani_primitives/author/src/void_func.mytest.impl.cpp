@@ -162,19 +162,22 @@ void Myfunc16(optional_view<int16_t> option1, ::void_func::mytest::BarTest const
 }
 }  // namespace
 
-TH_EXPORT_CPP_API_Myfunc1(Myfunc1); // NOLINT
-TH_EXPORT_CPP_API_Myfunc2(Myfunc2); // NOLINT
-TH_EXPORT_CPP_API_Myfunc3(Myfunc3); // NOLINT
-TH_EXPORT_CPP_API_Myfunc4(Myfunc4); // NOLINT
-TH_EXPORT_CPP_API_Myfunc5(Myfunc5); // NOLINT
-TH_EXPORT_CPP_API_Myfunc6(Myfunc6); // NOLINT
-TH_EXPORT_CPP_API_Myfunc7(Myfunc7); // NOLINT
-TH_EXPORT_CPP_API_Myfunc8(Myfunc8); // NOLINT
-TH_EXPORT_CPP_API_Myfunc9(Myfunc9); // NOLINT
-TH_EXPORT_CPP_API_Myfunc10(Myfunc10); // NOLINT
-TH_EXPORT_CPP_API_Myfunc11(Myfunc11); // NOLINT
-TH_EXPORT_CPP_API_Myfunc12(Myfunc12); // NOLINT
-TH_EXPORT_CPP_API_Myfunc13(Myfunc13); // NOLINT
-TH_EXPORT_CPP_API_Myfunc14(Myfunc14); // NOLINT
-TH_EXPORT_CPP_API_Myfunc15(Myfunc15); // NOLINT
-TH_EXPORT_CPP_API_Myfunc16(Myfunc16); // NOLINT
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
+TH_EXPORT_CPP_API_Myfunc1(Myfunc1);
+TH_EXPORT_CPP_API_Myfunc2(Myfunc2);
+TH_EXPORT_CPP_API_Myfunc3(Myfunc3);
+TH_EXPORT_CPP_API_Myfunc4(Myfunc4);
+TH_EXPORT_CPP_API_Myfunc5(Myfunc5);
+TH_EXPORT_CPP_API_Myfunc6(Myfunc6);
+TH_EXPORT_CPP_API_Myfunc7(Myfunc7);
+TH_EXPORT_CPP_API_Myfunc8(Myfunc8);
+TH_EXPORT_CPP_API_Myfunc9(Myfunc9);
+TH_EXPORT_CPP_API_Myfunc10(Myfunc10);
+TH_EXPORT_CPP_API_Myfunc11(Myfunc11);
+TH_EXPORT_CPP_API_Myfunc12(Myfunc12);
+TH_EXPORT_CPP_API_Myfunc13(Myfunc13);
+TH_EXPORT_CPP_API_Myfunc14(Myfunc14);
+TH_EXPORT_CPP_API_Myfunc15(Myfunc15);
+TH_EXPORT_CPP_API_Myfunc16(Myfunc16);
+// NOLINTEND

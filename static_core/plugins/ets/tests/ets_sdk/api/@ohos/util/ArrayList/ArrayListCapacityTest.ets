@@ -39,7 +39,11 @@ class Cat {
 }
 
 function main() {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("ArrayList API tests");
+=======
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
+>>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing ArrayList insert->add->remove->subArrayList->getCapacity", testArrayListGetCapacity0001);
     suite.addTest("Testing ArrayList insert->add->remove->subArrayList->clear->getCapacity",
@@ -65,7 +69,11 @@ function testArrayListGetCapacity0001() {
     arrayList.subArrayList(1, 2);
     arrayList.trimToCurrentLength();
     let result = arrayList.getCapacity();
+<<<<<<< HEAD
     assertEQ(result, arrayList.length, "The capacity of the ArrayList should match its length after trimming");
+=======
+    arktest.assertEQ(result, arrayList.length, "The capacity of the ArrayList should match its length after trimming");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListGetCapacity0002() {
@@ -77,9 +85,15 @@ function testArrayListGetCapacity0002() {
     arrayList.subArrayList(1, 2);
     arrayList.clear();
     arrayList.trimToCurrentLength();
+<<<<<<< HEAD
     assertEQ(arrayList.getCapacity(), 0, "The capacity of the ArrayList should be 0 after clearing and trimming");
     arrayList.increaseCapacityTo(1);
     assertEQ(arrayList.getCapacity(), 1, "The capacity of the ArrayList should be 1 after increasing capacity");
+=======
+    arktest.assertEQ(arrayList.getCapacity(), 0, "The capacity of the ArrayList should be 0 after clearing and trimming");
+    arrayList.increaseCapacityTo(1);
+    arktest.assertEQ(arrayList.getCapacity(), 1, "The capacity of the ArrayList should be 1 after increasing capacity");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListConvertToArray0001() {
@@ -88,7 +102,11 @@ function testArrayListConvertToArray0001() {
     arrayList.add(dog);
     let array = arrayList.convertToArray();
     array.filter((value) => {
+<<<<<<< HEAD
         assertTrue(value instanceof Dog, "Each element in the array should be an instance of Dog");
+=======
+        arktest.assertTrue(value instanceof Dog, "Each element in the array should be an instance of Dog");
+>>>>>>> OpenHarmony_feature_20250328
         return (value instanceof Dog);
     });
 }
@@ -100,19 +118,31 @@ function testArrayListConvertToArray0002() {
     let array = arrayList.convertToArray();
     let cat = new Cat(2, "li li");
     array.fill(cat);
+<<<<<<< HEAD
     assertFalse(array[0] instanceof Dog, "The first element in the array should no longer be an instance of Dog after filling with Cat");
+=======
+    arktest.assertFalse(array[0] instanceof Dog, "The first element in the array should no longer be an instance of Dog after filling with Cat");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListIsEmpty0001() {
     let arrayList = new ArrayList<number>();
+<<<<<<< HEAD
     assertTrue(arrayList.isEmpty(), "The ArrayList should be empty initially");
+=======
+    arktest.assertTrue(arrayList.isEmpty(), "The ArrayList should be empty initially");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListIsEmpty0002() {
     let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
     Object>();
     addTestElements(arrayList);
+<<<<<<< HEAD
     assertFalse(arrayList.isEmpty(), "The ArrayList should not be empty after adding elements");
+=======
+    arktest.assertFalse(arrayList.isEmpty(), "The ArrayList should not be empty after adding elements");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListIsEmpty0003() {
@@ -120,7 +150,11 @@ function testArrayListIsEmpty0003() {
     Object>();
     addTestElements(arrayList);
     arrayList.clear();
+<<<<<<< HEAD
     assertTrue(arrayList.isEmpty(), "The ArrayList should be empty after clearing all elements");
+=======
+    arktest.assertTrue(arrayList.isEmpty(), "The ArrayList should be empty after clearing all elements");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListSymbolIterator0001() {
@@ -130,7 +164,11 @@ function testArrayListSymbolIterator0001() {
     let iter = arrayList.$_iterator();
     let tem = iter.next();
     while (!tem.done) {
+<<<<<<< HEAD
         assertTrue(arrayList.has(tem.value), `The ArrayList should contain the value '${tem.value}'`);
+=======
+        arktest.assertTrue(arrayList.has(tem.value), `The ArrayList should contain the value '${tem.value}'`);
+>>>>>>> OpenHarmony_feature_20250328
         tem = iter.next();
     }
 }
@@ -145,7 +183,11 @@ function testArrayListSymbolIterator0002() {
     let expectedValues = [2, 4, 5, 4];
     let index = 0;
     for (let item of arrayList) {
+<<<<<<< HEAD
         assertEQ(item, expectedValues[index], `The element at index ${index} should be ${expectedValues[index]}`);
+=======
+        arktest.assertEQ(item, expectedValues[index], `The element at index ${index} should be ${expectedValues[index]}`);
+>>>>>>> OpenHarmony_feature_20250328
         index++;
     }
 }

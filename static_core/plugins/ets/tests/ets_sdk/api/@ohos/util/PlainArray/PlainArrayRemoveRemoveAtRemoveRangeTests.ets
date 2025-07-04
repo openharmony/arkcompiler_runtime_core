@@ -14,13 +14,21 @@
  */
 
 import { PlainArray } from "@ohos.util.PlainArray";
+<<<<<<< HEAD
+=======
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray remove with exist key", testRemoveWithExistKey);
     suite.addTest("PlainArray remove with non-exist key", testRemoveWithNonExistKey);
     suite.addTest("PlainArray remove empty container", testRemoveWithEmpty);
+    suite.addTest("PlainArray remove out-of-range key", testRemoveOutOfRangeKey);
     suite.addTest("PlainArray removeAt by valid index", testRemoveAtValidIndex);
     suite.addTest("PlainArray removeAt by boundary index", testRemoveAtBoundaryIndex);
     suite.addTest("PlainArray removeAt by exceeded index", testRemoveAtExceededIndex);
@@ -58,132 +66,111 @@ class TestData {
 function testRemoveWithExistKey() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.remove(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
-    assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.remove(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
+    arktest.assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
 }
 
 function testRemoveWithNonExistKey() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.remove(TestData.testNumber6), undefined,
+    arktest.assertEQ(plainArray.remove(TestData.testNumber6), undefined,
         "The result should be undefined when key is not exist");
-    assertEQ(plainArray.toString(), TestData.testString2, "The sequence should not change");
+    arktest.assertEQ(plainArray.toString(), TestData.testString2, "The sequence should not change");
 }
 
 function testRemoveWithEmpty() {
     let plainArray = new PlainArray<number>();
-    assertEQ(plainArray.remove(TestData.testNumber1), undefined,
+    arktest.assertEQ(plainArray.remove(TestData.testNumber1), undefined,
         "The result should be undefined when container is empty");
-    assertEQ(plainArray.length, 0, "The sequence should not change");
+    arktest.assertEQ(plainArray.length, 0, "The sequence should not change");
+}
+
+function testRemoveOutOfRangeKey() {
+    let plainArray = new PlainArray<number>();
+    plainArray.add(TestData.testNumber1, TestData.testNumber1);
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The type of \"key\" must be small integer. Received value is: 2147483648") &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    arktest.expectThrow(() => {plainArray.remove(2147483648)}, exceptionCheck);
 }
 
 function testRemoveAtValidIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.removeAt(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
-    assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.removeAt(TestData.testNumber3), TestData.testNumber3, "The result should be removed value");
+    arktest.assertEQ(plainArray.toString(), TestData.testString1, "The removed sequence is normal");
 }
 
 function testRemoveAtBoundaryIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.removeAt(TestData.testNumber4), TestData.testNumber4, "The result should be removed value");
-    assertEQ(plainArray.removeAt(0), 0, "The result should be removed value");
-    assertEQ(plainArray.toString(), TestData.testString3, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.removeAt(TestData.testNumber4), TestData.testNumber4, "The result should be removed value");
+    arktest.assertEQ(plainArray.removeAt(0), 0, "The result should be removed value");
+    arktest.assertEQ(plainArray.toString(), TestData.testString3, "The removed sequence is normal");
 }
 
 function testRemoveAtExceededIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    let count = 0;
-    try {
-        plainArray.removeAt(-TestData.testNumber1);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
-    }
-    try {
-        plainArray.removeAt(TestData.testNumber6);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
-    }
-    assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+    arktest.assertEQ(plainArray.removeAt(-TestData.testNumber1), undefined);
+    arktest.assertEQ(plainArray.removeAt(TestData.testNumber6), undefined);
 }
 
 function testRemoveAtWithEmpty() {
     let plainArray = new PlainArray<number>();
-    try {
-        plainArray.removeAt(0);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
-    }
-    assertTrue(false, "The result should be 'RangeError'");
+    arktest.assertEQ(plainArray.removeAt(0), undefined);
 }
 
 function testRangeFromValidRange() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber2), TestData.testNumber2,
+    arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber2), TestData.testNumber2,
         "The result should be 2");
-    assertEQ(plainArray.toString(), TestData.testString4, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.toString(), TestData.testString4, "The removed sequence is normal");
 }
 
 function testRangeFromExceededRange() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber6), TestData.testNumber3,
+    arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, TestData.testNumber6), TestData.testNumber3,
         "The result should be 3");
-    assertEQ(plainArray.toString(), TestData.testString5, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.toString(), TestData.testString5, "The removed sequence is normal");
 }
 
 function testRangeFromExceededIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    let count = 0;
-    try {
-        plainArray.removeRangeFrom(-TestData.testNumber2, TestData.testNumber2);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -2") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        plainArray.removeRangeFrom(TestData.testNumber6, TestData.testNumber2);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        count++;
+    let exceptionCheckTwo = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 6") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(-TestData.testNumber2, TestData.testNumber2)}, exceptionCheck);
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(TestData.testNumber6, TestData.testNumber2)}, exceptionCheckTwo);
 }
 
 function testRangeFromWithEmpty() {
     let plainArray = new PlainArray<number>();
-    try {
-        plainArray.removeRangeFrom(0, TestData.testNumber2);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+
+    arktest.expectThrow(() => {plainArray.removeRangeFrom(0, TestData.testNumber2)}, exceptionCheck);
 }
 
 function testRangeFromWithDouble() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, Math.floor(TestData.testDouble)), TestData.testNumber3,
+    arktest.assertEQ(plainArray.removeRangeFrom(TestData.testNumber2, Math.floor(TestData.testDouble)), TestData.testNumber3,
         "The result should be 3");
-    assertEQ(plainArray.toString(), TestData.testString5, "The removed sequence is normal");
+    arktest.assertEQ(plainArray.toString(), TestData.testString5, "The removed sequence is normal");
 }

@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_METADATA_ARKTS_INSPECT_IMPL_H
 #define LIBABCKIT_SRC_METADATA_ARKTS_INSPECT_IMPL_H
 
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/metadata_core.h"
 
 namespace libabckit {
 
@@ -30,8 +30,12 @@ bool ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data,
                                  bool (*cb)(AbckitCoreExportDescriptor *e, void *data));
 bool ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data));
 bool ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data));
+bool ArkTSModuleEnumerateInterfaces(AbckitCoreModule *m, void *data,
+                                    bool (*cb)(AbckitCoreInterface *iface, void *data));
+bool ArkTSModuleEnumerateEnums(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
 bool ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreFunction *function, void *data));
+bool ArkTSModuleEnumerateFields(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreModuleField *field, void *data));
 bool ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                             bool (*cb)(AbckitCoreFunction *function, void *data));
 bool ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
@@ -52,8 +56,25 @@ bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data
 // ========================================
 
 bool ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
+bool ArkTSClassEnumerateFields(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreClassField *field, void *data));
 bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data));
+
+// ========================================
+// Interface
+// ========================================
+
+bool ArkTSInterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
+                                    bool (*cb)(AbckitCoreFunction *method, void *data));
+bool ArkTSInterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
+                                   bool (*cb)(AbckitCoreInterfaceField *field, void *data));
+
+// ========================================
+// Enum
+// ========================================
+
+bool ArkTSEnumEnumerateMethods(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
+bool ArkTSEnumEnumerateFields(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
 
 // ========================================
 // Function

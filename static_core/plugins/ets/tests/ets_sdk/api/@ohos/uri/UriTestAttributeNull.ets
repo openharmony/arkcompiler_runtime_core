@@ -17,6 +17,7 @@ import {uri} from "@ohos.uri";
 
 function testAttributeNull() {
   let gaogao = new uri.URI('/16.9.5.4:99');
+<<<<<<< HEAD
   assertEQ(gaogao.scheme, null);
   assertEQ(gaogao.port, "-1");
   assertEQ(gaogao.authority, null);
@@ -43,6 +44,34 @@ function testAttributeNull() {
 
 function main(): int {
   let suite = new ArkTestsuite("URI UT tests");
+=======
+  arktest.assertEQ(gaogao.scheme, null);
+  arktest.assertEQ(gaogao.port, "-1");
+  arktest.assertEQ(gaogao.authority, null);
+  arktest.assertEQ(gaogao.userInfo, null);
+  arktest.assertEQ(gaogao.query, null);
+  arktest.assertEQ(gaogao.fragment, null);
+  arktest.assertEQ(gaogao.encodedAuthority, null);
+  arktest.assertEQ(gaogao.encodedUserInfo, null);
+  arktest.assertEQ(gaogao.encodedQuery, null);
+  arktest.assertEQ(gaogao.encodedFragment, null);
+
+  gaogao = new uri.URI('http://user@49.10pe8.54.12:80');
+  arktest.assertEQ(gaogao.port, "-1");
+  arktest.assertEQ(gaogao.userInfo, null);
+  arktest.assertEQ(gaogao.host, null);
+  arktest.assertEQ(gaogao.path, null);
+  arktest.assertEQ(gaogao.query, null);
+  arktest.assertEQ(gaogao.fragment, null);
+  arktest.assertEQ(gaogao.encodedUserInfo, null);
+  arktest.assertEQ(gaogao.encodedPath, null);
+  arktest.assertEQ(gaogao.encodedQuery, null);
+  arktest.assertEQ(gaogao.encodedFragment, null);
+}
+
+function main(): int {
+  let suite = new arktest.ArkTestsuite("URI UT tests");
+>>>>>>> OpenHarmony_feature_20250328
   suite.addTest("testAttributeNull", testAttributeNull);
   //passed
   return suite.run();

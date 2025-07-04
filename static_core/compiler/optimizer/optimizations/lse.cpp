@@ -1125,9 +1125,26 @@ void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBl
             }
         }
     }
+
+    orderedAlive_.clear();
+
     COMPILER_LOG(DEBUG, LSE_OPT) << "Loop #" << loop->GetId() << " has the following motion candidates:";
     for (auto alive : beAlive_) {
-        ApplyHoistToCandidate(loop, alive);
+        orderedAlive_.insert(std::make_pair(instOrder_[alive->GetId()], alive));
+    }
+    for (auto alive : orderedAlive_) {
+        ApplyHoistToCandidate(loop, alive.second);
+    }
+}
+
+void Lse::RecordInstOrder()
+{
+    instOrder_.clear();
+    uint32_t order = 0;
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : block->Insts()) {
+            instOrder_[inst->GetId()] = order++;
+        }
     }
 }
 
@@ -1194,6 +1211,7 @@ bool Lse::RunImpl()
     auto markerHolder = MarkerHolder(GetGraph());
     auto phiFixupMrk = markerHolder.GetMarker();
 
+    RecordInstOrder();
     ProcessAllBBs(&heaps, phiFixupMrk);
 
     visitor_->FinalizeShadowedStores();

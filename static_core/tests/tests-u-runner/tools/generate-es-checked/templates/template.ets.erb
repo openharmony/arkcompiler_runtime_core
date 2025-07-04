@@ -27,7 +27,7 @@ function __fail(): void {
   console.println("}");
   if (__fail_count >= __max_errors) {
     console.println("terminating after max (" + __max_errors + ") errors");
-    assertTrue(false);
+    arktest.assertTrue(false);
   }
   __fail_count += 1;
 }
@@ -57,7 +57,7 @@ function __value_rewrap_builtin_array(a: NullishType): NullishType {
   if (!(Type.of(a) instanceof ArrayType)) {
     return a;
   }
-  return new ArrayValueIterator(Value.of(a) as ArrayValue)
+  return new ArrayValueIterator(reflect.Value.of(a) as ArrayValue)
 }
 
 class IterableData {
@@ -95,7 +95,7 @@ function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<
 }
 
 function __value_is_same(a: NullishType, b: NullishType): boolean {
-  if (runtime.sameValue(a, b)) {
+  if (Runtime.sameValue(a, b)) {
     return true;
   }
   if (a instanceof Number && b instanceof Number) {
@@ -171,8 +171,8 @@ function __check_value(a: NullishType, b: NullishType): void {
     return
   }
 
-  __fail_description += "\ngot " + Value.of(a).toPrint(10) + " of type " + Type.of(a).toString();
-  __fail_description += "\nexp " + Value.of(b).toPrint(10) + " of type " + Type.of(b).toString();
+  __fail_description += "\ngot " + reflect.Value.of(a).toPrint(10) + " of type " + Type.of(a).toString();
+  __fail_description += "\nexp " + reflect.Value.of(b).toPrint(10) + " of type " + Type.of(b).toString();
 
   __fail();
 }
@@ -231,5 +231,5 @@ function main(): void {
 % slices.each { |i|
   test<%= i %>();
 % }
-  assertEQ(__fail_count, 0);
+  arktest.assertEQ(__fail_count, 0);
 }

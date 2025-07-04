@@ -25,7 +25,7 @@ interface A {
 
 class C implements A {
     set length(v: number) {
-        assertEQ( v, 5)
+        arktest.assertEQ( v, 5)
     }
 }
 

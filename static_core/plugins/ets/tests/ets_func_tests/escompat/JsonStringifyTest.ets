@@ -49,48 +49,81 @@ class TestClass {
 
  function jsonStringifyUint8Array(): void {
     let value: Uint8Array = Uint8Array.of(UINT8_MIN - 1, UINT8_MIN, UINT8_MAX, UINT8_MAX + 1);
+<<<<<<< HEAD
     assertEQ(`{"0":255,"1":0,"2":255,"3":0}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":255,"1":0,"2":255,"3":0}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyInt8Array(): void {
     let value: Int8Array = Int8Array.of(INT8_MAX,INT8_MIN,100,INT8_MIN + 1);
+<<<<<<< HEAD
     assertEQ(`{"0":127,"1":-128,"2":100,"3":-127}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":127,"1":-128,"2":100,"3":-127}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyUint8ClampedArray(): void {
     let value: Uint8ClampedArray = Uint8ClampedArray.of(UINT8_MIN - 1, UINT8_MIN, UINT8_MAX, UINT8_MAX + 1);
+<<<<<<< HEAD
     assertEQ(`{"0":0,"1":0,"2":255,"3":255}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":0,"1":0,"2":255,"3":255}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyInt16Array(): void {
     let value: Int16Array = Int16Array.of(INT16_MIN,INT16_MAX,12345,-12345);
+<<<<<<< HEAD
     assertEQ(`{"0":-32768,"1":32767,"2":12345,"3":-12345}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":-32768,"1":32767,"2":12345,"3":-12345}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyUint16Array(): void {
     let value: Uint16Array = Uint16Array.of(UINT16_MIN,UINT16_MAX);
+<<<<<<< HEAD
     assertEQ(`{"0":0,"1":65535}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":0,"1":65535}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyInt32Array(): void {
     let value: Int32Array = Int32Array.of(INT32_MIN,INT32_MAX);
+<<<<<<< HEAD
     assertEQ(`{"0":-2147483648,"1":2147483647}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":-2147483648,"1":2147483647}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyUint32Array(): void {
     let uint32Array = new Uint32Array(5);
     let array = [UINT32_MIN,UINT32_MAX,INT32_MIN,INT32_MAX];
     let uint32ArrayFromArray = new Uint32Array(array);
+<<<<<<< HEAD
     assertEQ(`{"0":0,"1":4294967295,"2":2147483648,"3":2147483647}`, JSON.stringify(uint32ArrayFromArray));
+=======
+    arktest.assertEQ('{"0":0,"1":4294967295,"2":2147483648,"3":2147483647}', JSON.stringify(uint32ArrayFromArray));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyFloat32Array(): void {
     let value: Float32Array = Float32Array.of(FLOAT32_MIN,FLOAT32_MAX);
+<<<<<<< HEAD
     assertEQ(`{"0":1.401298464324817e-45,"1":3.4028234663852886e+38}`, JSON.stringify(value));
+=======
+    arktest.assertEQ('{"0":1.401298464324817e-45,"1":3.4028234663852886e+38}', JSON.stringify(value));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyFloat64Array(): void {
     let value: Float64Array = Float64Array.of(FLOAT64_MIN,FLOAT64_MAX);
+<<<<<<< HEAD
     assertEQ(`{"0":5e-324,"1":1.7976931348623157e+308}`, JSON.stringify(value));
 }
 
@@ -99,22 +132,39 @@ function jsonStringifyPromise(): void {
         console.log("test");
     });
     assertEQ("{}", JSON.stringify(pro));
+=======
+    arktest.assertEQ('{"0":5e-324,"1":1.7976931348623157e+308}', JSON.stringify(value));
+}
+
+function jsonStringifyPromise(): void {
+    let pro = new Promise<Object>((resolve: (value: Object) => void): void => {});
+    arktest.assertEQ('{}', JSON.stringify(pro));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifySet(): void {
     let set: Set<string> = new Set<string>();
     set.add("foo");
+<<<<<<< HEAD
     assertEQ("{}", JSON.stringify(set));
+=======
+    arktest.assertEQ("{}", JSON.stringify(set));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyMapEmpty(): void {
     const map1 = new Map<string, string>();
+<<<<<<< HEAD
     assertEQ("{}", JSON.stringify(map1));
+=======
+    arktest.assertEQ("{}", JSON.stringify(map1));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyMapWithEntries(): void {
     const map2 = new Map<string, string>();
     map2.set("key1", "value1");
+<<<<<<< HEAD
     assertEQ("{}", JSON.stringify(map2));
 }
 
@@ -123,12 +173,37 @@ function jsonStringifyRecord(): void {
     record["name"] = "arkts";
     record["version"] = 1;
 
+=======
+    arktest.assertEQ("{}", JSON.stringify(map2));
+}
+
+function jsonStringifyRecord(): void {
+    let record: Record<string | number, NullishType> = {}
+    record["name"] = "arkts";
+    record["version"] = 1;
+
+    const fn: () => void = () => {}
+    record[2] = fn
+
+>>>>>>> OpenHarmony_feature_20250328
     let jsonStr = JSON.stringify(record);
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
     let fields = jsonObj.getFields();
 
+<<<<<<< HEAD
     assertEQ(fields.get("name")?.toString(), "arkts");
     assertEQ(fields.get("version")?.toString(), "1");
+=======
+    arktest.assertEQ(fields.get("name")?.toString(), "arkts");
+    arktest.assertEQ(fields.get("version")?.toString(), "1");
+    arktest.assertTrue(fields.get("2") === undefined)
+}
+
+function jsonStringifyRecordWithSpace(): void {
+    const rec: Record<string, NullishType> = { 'name': 'Rec', 'version': 2 }
+    const recJson = JSON.stringify(rec, undefined, ' ')
+    arktest.assertEQ(recJson, '{\n "name": "Rec",\n "version": 2\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyRecordWithUndefinedValue(): void {
@@ -141,9 +216,21 @@ function jsonStringifyRecordWithUndefinedValue(): void {
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
     let fields = jsonObj.getFields();
 
+<<<<<<< HEAD
     assertEQ(fields.get("name")?.toString(), "arkts");
     assertEQ(fields.get("version")?.toString(), "1");
     assertEQ(fields.has("ignore"), false);
+=======
+    arktest.assertEQ(fields.get("name")?.toString(), "arkts");
+    arktest.assertEQ(fields.get("version")?.toString(), "1");
+    arktest.assertEQ(fields.has("ignore"), false);
+}
+
+function jsonStringifyRecordWithUndefinedValueWithSpace(): void {
+    const record: Record<string, NullishType> = { 'name': 'arkts', 'version': 1, 'ignore': undefined }
+    const recordJson = JSON.stringify(record, undefined, ' ')
+    arktest.assertEQ(recordJson, '{\n "name": "arkts",\n "version": 1\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyNestedRecord(): void {
@@ -162,14 +249,33 @@ function jsonStringifyNestedRecord(): void {
     let innerObj = fields.get("inner") as JSONObject;
     let innerFields = innerObj.getFields();
 
+<<<<<<< HEAD
     assertEQ(innerFields.get("name")?.toString(), "arkts");
     assertEQ(innerFields.get("version")?.toString(), "1");
     assertEQ(fields.get("desc")?.toString(), "nested");
+=======
+    arktest.assertEQ(innerFields.get("name")?.toString(), "arkts");
+    arktest.assertEQ(innerFields.get("version")?.toString(), "1");
+    arktest.assertEQ(fields.get("desc")?.toString(), "nested");
+}
+
+function jsonStringifyNestedRecordWithSpace(): void {
+    const record: Record<string, NullishType> = { 'name': 'arkts', 'version': 1}
+    const nestedRecord: Record<string, NullishType> = { 'desc': 'nested' }
+    record['nested'] = nestedRecord
+
+    const recordJson = JSON.stringify(record, undefined, ' ')
+    arktest.assertEQ(recordJson, '{\n "name": "arkts",\n "version": 1,\n "nested": {\n  "desc": "nested"\n }\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyRecordWithClassInstance(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
+<<<<<<< HEAD
     record["TestClass"] = new TestClass("Test");
+=======
+    record["TestClass"] = new TestClass('Test');
+>>>>>>> OpenHarmony_feature_20250328
 
     let jsonStr = JSON.stringify(record);
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
@@ -178,17 +284,33 @@ function jsonStringifyRecordWithClassInstance(): void {
     let classObj = fields.get("TestClass") as JSONObject;
     let classFields = classObj.getFields();
 
+<<<<<<< HEAD
     assertEQ(classFields.get("value")?.toString(), "Test");
+=======
+    arktest.assertEQ(classFields.get("value")?.toString(), "Test");
+}
+
+function jsonStringifyRecordWithClassInstanceWithSpace(): void {
+    // CC-OFFNXT(G.NAM.03) implementation feature
+    const record: Record<string, NullishType> = { 'TestClass': new TestClass('Test') }
+    const recordJson = JSON.stringify(record, undefined, ' ')
+    arktest.assertEQ(recordJson, '{\n "TestClass": {\n  "value": "Test"\n }\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyRecordWithArray(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
+<<<<<<< HEAD
     record["list"] = new Array<Number>(1, 2, 3);
+=======
+    record['list'] = new Array<Number>(1, 2, 3);
+>>>>>>> OpenHarmony_feature_20250328
 
     let jsonStr = JSON.stringify(record);
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
     let fields = jsonObj.getFields();
 
+<<<<<<< HEAD
     let arr = fields.get("list") as JSONArray;
     let elements = arr.values;
 
@@ -196,18 +318,46 @@ function jsonStringifyRecordWithArray(): void {
     assertEQ(elements[0]?.toString(), "1");
     assertEQ(elements[1]?.toString(), "2");
     assertEQ(elements[2]?.toString(), "3");
+=======
+    let arr = fields.get('list') as JSONArray;
+    let elements = arr.values;
+
+    arktest.assertEQ(elements.length, 3);
+    arktest.assertEQ(elements[0]?.toString(), "1");
+    arktest.assertEQ(elements[1]?.toString(), "2");
+    arktest.assertEQ(elements[2]?.toString(), "3");
+}
+
+function jsonStringifyRecordWithArrayWithSpace(): void {
+    const record: Record<string, NullishType> = { 'list': [1, 2, 3] }
+    arktest.assertEQ(JSON.stringify(record, undefined, ' '), '{\n "list": [\n  1,\n  2,\n  3\n ]\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyRecordWithNull(): void {
     let record: Record<string, NullishType> = new Record<string, NullishType>();
+<<<<<<< HEAD
     record["nullable"] = null;
+=======
+    record['nullable'] = null;
+>>>>>>> OpenHarmony_feature_20250328
 
     let jsonStr = JSON.stringify(record);
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
     let fields = jsonObj.getFields();
 
+<<<<<<< HEAD
     let nullableVal = fields.get("nullable");
     assertEQ(nullableVal instanceof JSONNull, true);
+=======
+    let nullableVal = fields.get('nullable');
+    arktest.assertEQ(nullableVal instanceof JSONNull, true);
+}
+
+function jsonStringifyRecordWithNullWithSpace(): void {
+    const record: Record<string, NullishType> = { 'nullable': null }
+    arktest.assertEQ(JSON.stringify(record, undefined, ' '), '{\n "nullable": null\n}')
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyNestedMap(): void {
@@ -216,7 +366,11 @@ function jsonStringifyNestedMap(): void {
     record["name"] = "arkts";
     map.set("nested", record);
 
+<<<<<<< HEAD
     assertEQ("{}", JSON.stringify(map));
+=======
+    arktest.assertEQ("{}", JSON.stringify(map));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function jsonStringifyCyclicRecord(): void {
@@ -226,7 +380,11 @@ function jsonStringifyCyclicRecord(): void {
         JSON.stringify(cycleRecord);
         throw new Error("Expected JSON.stringify to throw on cyclic structure, but it did not.");
     } catch (e) {
+<<<<<<< HEAD
         assertEQ("cyclic object value", (e as Error).message);
+=======
+        arktest.assertEQ("cyclic object value", (e as Error).message);
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -236,7 +394,11 @@ function jsonStringifyControlCharacter(): void {
                                     '"\\u0011"', '"\\u0012"', '"\\u0013"', '"\\u0014"', '"\\u0015"', '"\\u0016"', '"\\u0017"', '"\\u0018"',
                                     '"\\u0019"', '"\\u001a"', '"\\u001b"', '"\\u001c"', '"\\u001d"', '"\\u001e"', '"\\u001f"'];
     for (let i = 0; i < 32; i++) {
+<<<<<<< HEAD
         assertTrue(JSON.stringify(String.fromCharCode(i)) == res[i]);
+=======
+        arktest.assertEQ(JSON.stringify(String.fromCharCode(i)), res[i]);
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -244,11 +406,16 @@ function jsonStringifyEscapeCharacter(): void {
     let arr: FixedArray<String> = ["\a", "\b", "\f", "\n", "\r", "\t", "\v", "\\", "\'", "\"", "\?", "\0"];
     let res: FixedArray<String> = ['"a"', '"\\b"', '"\\f"', '"\\n"', '"\\r"', '"\\t"', '"\\u000b"', '"\\\\"', "\"'\"", '"\\""', '"?"', '"\\u0000"'];
     for (let i = 0; i < arr.length; i++) {
+<<<<<<< HEAD
         assertTrue(JSON.stringify(arr[i]) == res[i]);
+=======
+        arktest.assertEQ(JSON.stringify(arr[i]), res[i]);
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
 function main(): int {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest("JSON.stringify for Uint8Array", jsonStringifyUint8Array)
     suite.addTest("JSON.stringify for Int8Array", jsonStringifyInt8Array)
@@ -276,3 +443,38 @@ function main(): int {
 
     return suite.run()
 }
+=======
+    const suite = new arktest.ArkTestsuite("Json stringify for ArrayLike tests ")
+    suite.addTest('JSON.stringify for Uint8Array', jsonStringifyUint8Array)
+    suite.addTest('JSON.stringify for Int8Array', jsonStringifyInt8Array)
+    suite.addTest('JSON.stringify for Uint8ClampedArray', jsonStringifyUint8ClampedArray)
+    suite.addTest('JSON.stringify for Int16Array', jsonStringifyInt16Array)
+    suite.addTest('JSON.stringify for Uint16Array', jsonStringifyUint16Array)
+    suite.addTest('JSON.stringify for Int32Array', jsonStringifyInt32Array)
+    suite.addTest('JSON.stringify for Uint32Array', jsonStringifyUint32Array)
+    suite.addTest('JSON.stringify for Float32Array', jsonStringifyFloat32Array)
+    suite.addTest('JSON.stringify for Float64Array', jsonStringifyFloat64Array)
+    suite.addTest('JSON.stringify for Promise', jsonStringifyPromise)
+    suite.addTest('JSON.stringify for Set', jsonStringifySet)
+    suite.addTest('JSON.stringify for empty Map', jsonStringifyMapEmpty);
+    suite.addTest('JSON.stringify for Map with entries', jsonStringifyMapWithEntries);
+    suite.addTest('JSON.stringify for Record', jsonStringifyRecord);
+    suite.addTest('JSON.stringify Record with space', jsonStringifyRecordWithSpace)
+    suite.addTest('JSON.stringify for Record with undefined value', jsonStringifyRecordWithUndefinedValue);
+    suite.addTest('JSON.stringify for Record with undefined value with space', jsonStringifyRecordWithUndefinedValueWithSpace);
+    suite.addTest('JSON.stringify for nested Record', jsonStringifyNestedRecord);
+    suite.addTest('JSON.stringify for nested Record with space', jsonStringifyNestedRecordWithSpace)
+    suite.addTest('JSON.stringify for Record with class instance', jsonStringifyRecordWithClassInstance);
+    suite.addTest('JSON.stringify for Record with class instance with space', jsonStringifyRecordWithClassInstanceWithSpace);
+    suite.addTest('JSON.stringify for Record with array', jsonStringifyRecordWithArray);
+    suite.addTest('JSON.stringify for Record with array with space', jsonStringifyRecordWithArrayWithSpace);
+    suite.addTest('JSON.stringify for Record with null', jsonStringifyRecordWithNull);
+    suite.addTest('JSON.stringify for Record with null with space', jsonStringifyRecordWithNullWithSpace);
+    suite.addTest('JSON.stringify for nested Map', jsonStringifyNestedMap);
+    suite.addTest('JSON.stringify for cyclic Record', jsonStringifyCyclicRecord);
+    suite.addTest('JSON.stringify for control character', jsonStringifyControlCharacter);
+    suite.addTest('JSON.stringify for escape character', jsonStringifyEscapeCharacter);
+
+    return suite.run()
+}
+>>>>>>> OpenHarmony_feature_20250328

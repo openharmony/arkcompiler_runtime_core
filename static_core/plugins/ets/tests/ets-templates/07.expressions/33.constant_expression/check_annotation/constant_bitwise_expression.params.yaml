@@ -14,45 +14,45 @@
 cases:
   - { type: byte,   value: 16,     operation: '& 7' }
   - { type: short,  value: 300,    operation: '& 7' }
-  - { type: char,   value: c'p',   operation: '& 7' }
+  - { type: int,   value: c'p',   operation: '& 7' }
   - { type: int,    value: 3000,   operation: '& 7' }
   - { type: long,   value: 50000,  operation: '& 7' }
-  - { type: float,  value: 120.2f, operation: '& 7', asInt: ' as int' }
-  - { type: number, value: 5050.9, operation: '& 7', asInt: ' as int' }
+  - { type: float,  value: 120.2f, operation: '& 7' }
+  - { type: number, value: 5050.9, operation: '& 7' }
 
   - { type: byte,   value: 16,     operation: '| 7' }
   - { type: short,  value: 300,    operation: '| 7' }
-  - { type: char,   value: c'p',   operation: '| 7', asChar: 'as char' }
+  - { type: int,   value: c'p',   operation: '| 7' }
   - { type: int,    value: 3000,   operation: '| 7' }
   - { type: long,   value: 50000,  operation: '| 7' }
-  - { type: float,  value: 120.2f, operation: '| 7', asInt: ' as int' }
-  - { type: number, value: 5050.9, operation: '| 7', asInt: ' as int' }
+  - { type: float,  value: 120.2f, operation: '| 7' }
+  - { type: number, value: 5050.9, operation: '| 7' }
 
   - { type: byte,   value: 16,     operation: '^ 7' }
   - { type: short,  value: 300,    operation: '^ 7' }
-  - { type: char,   value: c'p',   operation: '^ 7', asChar: 'as char' }
+  - { type: int,   value: c'p',   operation: '^ 7' }
   - { type: int,    value: 3000,   operation: '^ 7' }
   - { type: long,   value: 50000,  operation: '^ 7' }
-  - { type: float,  value: 120.2f, operation: '^ 7', asInt: ' as int' }
-  - { type: number, value: 5050.9, operation: '^ 7', asInt: ' as int' }
+  - { type: float,  value: 120.2f, operation: '^ 7' }
+  - { type: number, value: 5050.9, operation: '^ 7' }
 
   - { type: byte,   value: -16,     operation: '& 7' }
   - { type: short,  value: -300,    operation: '& 7' }
   - { type: int,    value: -3000,   operation: '& 7' }
   - { type: long,   value: -50000,  operation: '& 7' }
-  - { type: float,  value: -120.2f, operation: '& 7', asInt: ' as int' }
-  - { type: number, value: -5050.9, operation: '& 7', asInt: ' as int' }
+  - { type: float,  value: -120.2f, operation: '& 7' }
+  - { type: number, value: -5050.9, operation: '& 7' }
 
   - { type: byte,   value: -16,     operation: '| 7' }
   - { type: short,  value: -300,    operation: '| 7' }
   - { type: int,    value: -3000,   operation: '| 7' }
   - { type: long,   value: -50000,  operation: '| 7' }
-  - { type: float,  value: -120.2f, operation: '| 7', asInt: ' as int' }
-  - { type: number, value: -5050.9, operation: '| 7', asInt: ' as int' }
+  - { type: float,  value: -120.2f, operation: '| 7' }
+  - { type: number, value: -5050.9, operation: '| 7' }
 
   - { type: byte,   value: -16,     operation: '^ 7' }
   - { type: short,  value: -300,    operation: '^ 7' }
   - { type: int,    value: -3000,   operation: '^ 7' }
   - { type: long,   value: -50000,  operation: '^ 7' }
-  - { type: float,  value: -120.2f, operation: '^ 7', asInt: ' as int' }
-  - { type: number, value: -5050.9, operation: '^ 7', asInt: ' as int' }
+  - { type: float,  value: -120.2f, operation: '^ 7' }
+  - { type: number, value: -5050.9, operation: '^ 7' }

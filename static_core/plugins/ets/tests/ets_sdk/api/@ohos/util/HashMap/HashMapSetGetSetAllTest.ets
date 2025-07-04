@@ -15,12 +15,15 @@
 
 import HashMap from "@ohos.util.HashMap";
 import { BusinessError } from "@ohos.base";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashMap Set Get SetAll API tests")
+    const suite = new arktest.ArkTestsuite("HashMap Set Get SetAll API tests")
 
     suite.addTest("HashMap set valid data", testSetValidData)
     suite.addTest("HashMap set empty string", testSetEmptyString)
@@ -43,16 +46,27 @@ function testSetValidData() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.get("squirrel");
-    assertEQ(result, 123, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, 123, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testSetEmptyString() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("", 356);
     let result = hashMap.get("")
-    assertEQ(result, 356, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, 356, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+}
+
+function testSetUndefined() {
+    let hashMap: HashMap<string|undefined, number|undefined> = new HashMap<string|undefined, number|undefined>();
+    try {
+        hashMap.set(undefined, 356);
+    } catch (e: BusinessError) {
+        arktest.assertEQ(e.code, 401, "The HashMap should throw a BusinessError when key is undefined");
+        return;
+    }
+    arktest.assertEQ(0, 1, "The key cannot be undefined");
 }
 
 function testSetUndefined() {
@@ -71,8 +85,8 @@ function testSetKeyLength1024() {
     let param = 'a'.repeat(2048);
     hashMap.set(param, 356);
     let result = hashMap.get(param)
-    assertEQ(result, 356, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, 356, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testSetDataLoop1000() {
@@ -82,40 +96,40 @@ function testSetDataLoop1000() {
     }
     for (let i = 0; i < 1000; i++) {
         let result = hashMap.get("ji" + i)
-        assertEQ(result, i, "The hashMap should return the correct value for the key");
+        arktest.assertEQ(result, i, "The hashMap should return the correct value for the key");
     }
-    assertEQ(hashMap.length, 1000, "The hashMap length should be 1000");
+    arktest.assertEQ(hashMap.length, 1000, "The hashMap length should be 1000");
 }
 
 function testGetValidKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
     let result = hashMap.get("sparrow");
-    assertEQ(result, 356, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, 356, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testGetNotSetKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("sparrow", 356);
     let result = hashMap.get("squirrel");
-    assertEQ(result, undefined, "The hashMap should return undefined for the key that is not set");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, undefined, "The hashMap should return undefined for the key that is not set");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testGetKeyFromEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.get("sparrow");
-    assertEQ(result, undefined, "The hashMap should return undefined for the key when the hashMap is empty");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result, undefined, "The hashMap should return undefined for the key when the hashMap is empty");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testGetEmptyString() {
     let hashMap: HashMap<string, string> = new HashMap<string, string>();
     hashMap.set('', "356");
     let result = hashMap.get('');
-    assertEQ(result, "356", "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, "356", "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testGetDataAfterClearing() {
@@ -124,9 +138,9 @@ function testGetDataAfterClearing() {
     let result1 = hashMap.isEmpty();
     hashMap.clear()
     let result2 = hashMap.get("ji");
-    assertEQ(result1, false, "The hashMap should not be empty");
-    assertEQ(result2, undefined, "The hashMap should return undefined for the key that is not set");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result1, false, "The hashMap should not be empty");
+    arktest.assertEQ(result2, undefined, "The hashMap should return undefined for the key that is not set");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testSetAllDataFromHashMap2ToHashMap1() {
@@ -135,9 +149,9 @@ function testSetAllDataFromHashMap2ToHashMap1() {
     hashMap.set("sparrow", 356);
     let newHashMap: HashMap<string, number> = new HashMap<string, number>();
     newHashMap.setAll(hashMap);
-    assertEQ(newHashMap.length, hashMap.length, "The hashMap should set all elements to another HashMap");
-    assertEQ(hashMap.length, 2, "The hashMap length should be 2");
-    assertEQ(newHashMap.length, 2, "The newHashMap length should be 2");
+    arktest.assertEQ(newHashMap.length, hashMap.length, "The hashMap should set all elements to another HashMap");
+    arktest.assertEQ(hashMap.length, 2, "The hashMap length should be 2");
+    arktest.assertEQ(newHashMap.length, 2, "The newHashMap length should be 2");
 }
 
 function testSetAllSameKeyDiffValue() {
@@ -148,9 +162,9 @@ function testSetAllSameKeyDiffValue() {
     newHashMap.set("sparrow", 100);
     hashMap.setAll(newHashMap);
     let result = hashMap.get("sparrow");
-    assertEQ(result, 100, "The hashMap should set all elements to another HashMap");
-    assertEQ(hashMap.length, 2, "The hashMap length should be 2");
-    assertEQ(newHashMap.length, 1, "The newHashMap length should be 1");
+    arktest.assertEQ(result, 100, "The hashMap should set all elements to another HashMap");
+    arktest.assertEQ(hashMap.length, 2, "The hashMap length should be 2");
+    arktest.assertEQ(newHashMap.length, 1, "The newHashMap length should be 1");
 }
 
 function testSetAllSameData() {
@@ -160,7 +174,7 @@ function testSetAllSameData() {
     newHashMap.set("sparrow", 356);
     hashMap.setAll(newHashMap);
     let result = hashMap.get("sparrow");
-    assertEQ(result, 356, "The hashMap should set all elements to another HashMap");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
-    assertEQ(newHashMap.length, 1, "The newHashMap length should be 1");
+    arktest.assertEQ(result, 356, "The hashMap should set all elements to another HashMap");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(newHashMap.length, 1, "The newHashMap length should be 1");
 }

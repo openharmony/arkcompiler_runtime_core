@@ -26,7 +26,7 @@ function cvt{{loop.index}}(p: {{v.type}}) {
     let d: {{c.to_type}}[] = [p];
     d = []
     d = [p, p]
-    assertEQ(d[1], {{v.val or v.expr}})
+    arktest.assertEQ(d[1], {{v.val or v.expr}})
 }
 {%- endfor %}
 

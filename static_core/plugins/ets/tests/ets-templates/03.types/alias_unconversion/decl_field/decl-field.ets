@@ -26,13 +26,10 @@ class A{{loop.index}} {
 }
 {%- endfor %}
 
-function main(): int {
+function main() {
 {%- for t in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}()
-    if (a{{loop.index}}.d != {{t.val}}) {
-        return 1
-    }
+    arktest.assertEQ(a{{loop.index}}.d, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

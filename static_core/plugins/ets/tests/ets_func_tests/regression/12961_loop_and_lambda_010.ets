@@ -31,7 +31,7 @@ function test () {
 
   let result = f1(k)
   result = f2(result)
-  assertEQ(result,  3)
+  arktest.assertEQ(result,  3)
 
 }
 

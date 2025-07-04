@@ -14,18 +14,18 @@
  */
 
 let error = new Error();
-let reject: ((err: Object) => void)|null = null;
-let p = new Promise<string>((_: (v: string) => void, _reject: (error: Object) => void) => {
+let reject: ((err: Error) => void) | null = null;
+let p = new Promise<string>((_: (v: string) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 });
 
 p.then<void, void>((value: string): void => {
-    console.log("Test failed. The promise should not be fulfilled.");
-}, (err: Object): void => {
+    console.log('Test failed. The promise should not be fulfilled.');
+}, (err: Error): void => {
     if (err !== error) {
-        console.log("Test failed. The promise should be rejected with the resolution value.");
+        console.log('Test failed. The promise should be rejected with the resolution value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
 reject!(error);

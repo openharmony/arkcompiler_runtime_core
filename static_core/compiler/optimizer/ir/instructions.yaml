@@ -316,7 +316,7 @@ instructions:
   - opcode: LoadArray
     base: LoadInst
     signature: [d-real-any, ref-any-nc, int-bc]
-    flags: [load, no_hoist, no_cse, acc_read, acc_write]
+    flags: [load, no_hoist, no_cse, acc_read, acc_write, read_barrier]
     description: Load value from array.
 
   - opcode: LoadCompressedStringChar
@@ -328,13 +328,13 @@ instructions:
   - opcode: StoreArray
     base: StoreInst
     signature: [ref-nc-any, int-bc, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier]
     description: Store value in array.
 
   - opcode: LoadObject
     base: LoadObjectInst
     signature: [d-real-any, ref-nc-any]
-    flags: [load, no_hoist, no_cse, acc_write]
+    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from object's field.
     fields:
       - field_id: TypeId
@@ -348,7 +348,7 @@ instructions:
   - opcode: Load
     base: LoadMemInst
     signature: [d-real-any, ptr-ref, int]
-    flags: [native, low_level, load, no_hoist, no_cse]
+    flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from memory by offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
@@ -361,14 +361,14 @@ instructions:
   - opcode: LoadI
     base: LoadMemInstI
     signature: [d-real-any, ptr-ref]
-    flags: [native, low_level, load, no_hoist, no_cse]
+    flags: [native, low_level, load, no_hoist, no_cse, read_barrier]
     modes: [irtoc]
     description: Load value from memory by immediate offset. If Load is volatile, the address must have the normal alignment(by size of loaded value)
 
   - opcode: Store
     base: StoreMemInst
     signature: [ptr-ref-any, int, real-any]
-    flags: [native, low_level, store, no_dce, no_hoist, no_cse]
+    flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store value in memory by offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
 
@@ -381,7 +381,7 @@ instructions:
   - opcode: StoreI
     base: StoreMemInstI
     signature: [ptr-ref, real-any]
-    flags: [native, low_level, store, no_dce, no_hoist, no_cse]
+    flags: [native, low_level, store, no_dce, no_hoist, no_cse, write_barrier]
     modes: [irtoc]
     description: Store value in memory by immediate offset. If Store is volatile, the address must have the normal alignment(by size of stored value)
 
@@ -397,7 +397,7 @@ instructions:
   - opcode: LoadResolvedObjectField
     base: LoadResolvedObjectFieldInst
     signature: [d-real, ref-nc, u32]
-    flags: [load, no_hoist, no_cse, acc_write]
+    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from resolved object's field.
     fields:
       - field_id: TypeId
@@ -405,7 +405,7 @@ instructions:
   - opcode: StoreObject
     base: StoreObjectInst
     signature: [ref-nc, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
     description: Store value in object's field.
     fields:
       - field_id: TypeId
@@ -419,7 +419,7 @@ instructions:
   - opcode: StoreResolvedObjectField
     base: StoreResolvedObjectFieldInst
     signature: [ref-nc, real, u32]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier]
     description: Store value in resolved object's field.
     fields:
       - field_id: TypeId
@@ -427,7 +427,7 @@ instructions:
   - opcode: LoadStatic
     base: LoadStaticInst
     signature: [d-real, ref]
-    flags: [load, no_hoist, no_cse, acc_write]
+    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load static field from class.
     fields:
       - field_id: TypeId
@@ -444,7 +444,7 @@ instructions:
   - opcode: LoadResolvedObjectFieldStatic
     base: LoadResolvedObjectFieldStaticInst
     signature: [d-real, ref]
-    flags: [load, no_hoist, no_cse, acc_write]
+    flags: [load, no_hoist, no_cse, acc_write, read_barrier]
     description: Load value from resolved static object's field.
     fields:
       - field_id: TypeId
@@ -452,7 +452,7 @@ instructions:
   - opcode: StoreStatic
     base: StoreStaticInst
     signature: [ref, real]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, write_barrier]
     description: Store value into static field.
     fields:
       - field_id: TypeId
@@ -460,7 +460,7 @@ instructions:
   - opcode: UnresolvedStoreStatic
     base: UnresolvedStoreStaticInst
     signature: [real, save_state]
-    flags: [store, can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, implicit_runtime_call, require_tmp]
+    flags: [store, can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, implicit_runtime_call, require_tmp, write_barrier]
     modes: [jit_aot]
     description: Store value into unresolved static field.
     fields:
@@ -469,7 +469,7 @@ instructions:
   - opcode: StoreResolvedObjectFieldStatic
     base: StoreResolvedObjectFieldStaticInst
     signature: [ref, real]
-    flags: [store, no_dce, no_hoist, no_cse]
+    flags: [store, no_dce, no_hoist, no_cse, write_barrier]
     modes: [jit_aot]
     description: Store value into resolved static field.
     fields:
@@ -795,34 +795,6 @@ instructions:
     abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
     description: Calls a vrtual method resolved by ResolveVirtual. First input is a method address.
 
-  - opcode: CallLaunchStatic
-    base: CallInst
-    signature: [d-real-void, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
-    description: Launches static method.
-
-  - opcode: CallResolvedLaunchStatic
-    base: CallInst
-    signature: [d-real-void, ptr, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
-    description: Launches static method resolved by ResolveStatic. First input is a method address.
-
-  - opcode: CallLaunchVirtual
-    base: CallInst
-    signature: [d-real-void, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, runtime_call, call, acc_write, acc_read]
-    description: Launches virtual method. First input is an object reference.
-
-  - opcode: CallResolvedLaunchVirtual
-    base: CallInst
-    signature: [d-real-void, ptr, ref-nc, real-dyn, save_state]
-    flags: [can_throw, no_dce, no_hoist, no_cse, barrier, require_state, call, acc_write, acc_read]
-    abckit_flags: [can_throw, no_dce, no_hoist, no_cse, barrier, call, acc_write, acc_read]
-    description: Launches a virtual method resolved by ResolveVirtual. First input is a method address.
-
   - opcode: CallDynamic
     base: CallInst
     signature: [d-any-void, any-dyn, save_state]
@@ -1081,7 +1053,7 @@ instructions:
   - opcode: LoadArrayI
     base: LoadInstI
     signature: [d-real-any, ref-any-nc]
-    flags: [load, no_hoist, no_cse, low_level, acc_read, acc_write]
+    flags: [load, no_hoist, no_cse, low_level, acc_read, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load value from array.
 
@@ -1094,21 +1066,21 @@ instructions:
   - opcode: StoreArrayI
     base: StoreInstI
     signature: [ref-nc, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
     modes: [jit_aot]
     description: Store value in array.
 
   - opcode: LoadArrayPair
     base: LoadArrayPairInst
     signature: [d-real-any, ref-any-nc, int-bc]
-    flags: [load, no_hoist, no_cse, low_level, acc_write]
+    flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array.
 
   - opcode: LoadArrayPairI
     base: LoadArrayPairInstI
     signature: [d-real-any, ref-any-nc]
-    flags: [load, no_hoist, no_cse, low_level, acc_write]
+    flags: [load, no_hoist, no_cse, low_level, acc_write, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from array at immediate index.
 
@@ -1122,28 +1094,28 @@ instructions:
   - opcode: LoadObjectPair
     base: LoadObjectPairInst
     signature: [d-real-any, ref-any-nc]
-    flags: [load, no_hoist, no_cse, low_level]
+    flags: [load, no_hoist, no_cse, low_level, read_barrier]
     modes: [jit_aot, irtoc]
     description: Load several values at a time from object.
 
   - opcode: StoreArrayPair
     base: StoreArrayPairInst
     signature: [ref-nc, int-bc, real-any, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, require_tmp]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, require_tmp, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array.
 
   - opcode: StoreArrayPairI
     base: StoreArrayPairInstI
     signature: [ref-nc, real-any, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, acc_read, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to array at immediate index.
 
   - opcode: StoreObjectPair
     base: StoreObjectPairInst
     signature: [ref-nc, real-any, real-any]
-    flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp]
+    flags: [store, no_dce, no_hoist, no_cse, low_level, require_tmp, write_barrier]
     modes: [jit_aot, irtoc]
     description: Store several values at a time to object.
 
@@ -1397,6 +1369,8 @@ flags:
   terminator: Execution will be terminated at the given instruction
   load: Instruction loads from memory
   store: Instruction stores into memory
+  read_barrier: Instruction is load in which read barriers may be involved when the field read is an object
+  write_barrier: Instruction is write in which write barriers may be involved when the field written is an object
   can_throw: Instruction can throw exception
   call: Call instruction.
   is_check: Instruction has runtime-checks and has `can_throw` flag

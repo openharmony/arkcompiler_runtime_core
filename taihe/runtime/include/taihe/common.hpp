@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_COMMON_HPP
-#define TAIHE_COMMON_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_COMMON_HPP_
+#define RUNTIME_INCLUDE_TAIHE_COMMON_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.h>
 
@@ -21,10 +22,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
-// This file is used as a standard library and needs to be easy to use.
-// The length limit of functional macros and internal function name does not apply.
-// NOLINTBEGIN
 
 #ifdef __cplusplus
 #ifdef __EXCEPTIONS
@@ -109,46 +106,13 @@ inline cpp_t from_abi(as_abi_t<cpp_t> abi_val)
     return reinterpret_cast<cpp_t>(*abi_val);
 }
 
-// enum tags
+// enum tags //
 
 template <auto tag>
-struct static_tag_t {
-};
+struct static_tag_t {};
 
 template <auto tag>
-constexpr static_tag_t<tag> static_tag = {};
-
-// hash and comparison
-
-struct adl_helper_t {};
-
-template <typename T>
-inline std::size_t hash(T &&val)
-{
-    adl_helper_t adl_helper;
-    return hash_impl(adl_helper, std::forward<T>(val));
-}
-
-template <typename L, typename R>
-inline bool same(L &&lhs, R &&rhs)
-{
-    adl_helper_t adl_helper;
-    return same_impl(adl_helper, std::forward<L>(lhs), std::forward<R>(rhs));
-}
-
-template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
-inline std::size_t hash_impl(adl_helper_t, T val)
-{
-    return std::hash<T> {}(val);
-}
-
-template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
-inline bool same_impl(adl_helper_t, T lhs, T rhs)
-{
-    return lhs == rhs;
-}
+constexpr static_tag_t<tag> static_tag;
 }  // namespace taihe
-
 // NOLINTEND
-
-#endif // TAIHE_COMMON_HPP
+#endif  // RUNTIME_INCLUDE_TAIHE_COMMON_HPP_

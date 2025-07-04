@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#if defined(ARK_HYBRID)
+#include "heap/heap_visitor.h"
+#endif
 #include "libpandabase/macros.h"
 #include "interop_js/napi_impl/napi_impl.h"
 #include "interop_js/napi_impl/detail/enumerate_napi.h"
@@ -27,7 +30,16 @@
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_wrap_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
                     [[maybe_unused]] void *native_object, [[maybe_unused]] napi_finalize finalize_cb,
-                    [[maybe_unused]] napi_ref *result)
+                    [[maybe_unused]] proxy_object_attach_cb proxy_cb, [[maybe_unused]] napi_ref *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_mark_attach_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
+                           [[maybe_unused]] void *attach_data, [[maybe_unused]] proxy_object_attach_cb attach_cb)
 {
     INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
                        << " is implemented in later versions of OHOS, please update." << std::endl;
@@ -51,8 +63,43 @@ napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value valu
     return napi_ok;
 }
 
+#if defined(ARK_HYBRID)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref,
+                      [[maybe_unused]] std::function<void(uintptr_t)> &visitor)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+#endif
+
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_is_alive_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref, [[maybe_unused]] bool *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_is_contain_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref, [[maybe_unused]] bool *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_is_xref_type([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object, [[maybe_unused]] bool *result)
 {
     INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
                        << " is implemented in later versions of OHOS, please update." << std::endl;

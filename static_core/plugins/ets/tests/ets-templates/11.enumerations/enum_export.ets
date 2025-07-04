@@ -24,7 +24,7 @@ import { {{ case.importedEnum }} } from "./to_export"
 
 function main(): void {
     let v: {{ case.importedEnum }} = {{ case.importedEnum }}.{{ case.enumConst }}
-    assertEQ(v.valueOf(), {{ case.value }})
+    arktest.assertEQ(v.valueOf(), {{ case.value }})
 }
 
 {% endfor %}

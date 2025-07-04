@@ -18,11 +18,21 @@ desc: Number toFixed tests
 ---*/
 
 function main(): int {
+<<<<<<< HEAD
    const suite = new ArkTestsuite("Number API test for SDK");
    suite.addTest("number.toFixed(num), treatment of Scientific notation", testNumberToFixed);
    suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
    suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
    return suite.run()
+=======
+    const suite = new arktest.ArkTestsuite("Number API test for SDK");
+    suite.addTest("number.toFixed(num), treatment of Scientific notation", testNumberToFixed);
+    suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
+    suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
+    suite.addTest('number.toFixed(num), the parameter is union', testUnionParameter)
+    suite.addTest('number.toFixed(num), the parameter is union', testUndefined)
+    return suite.run()
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 interface TestCase {
@@ -92,7 +102,11 @@ function testNumberToFixed() {
         let expected: string = testCase.expected;
         let actual: string = new Number(num).toFixed(digits);
 
+<<<<<<< HEAD
         assertEQ(actual, expected, "failed: Expected" + expected + "got: " + actual);
+=======
+        arktest.assertEQ(actual, expected, "failed: Expected" + expected + "got: " + actual);
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -101,7 +115,11 @@ function testLargeParameter() {
     let big_digits: Number = TestData.big_digits;
 
     const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
+<<<<<<< HEAD
     expectThrow((): void throws => { a.toFixed(big_digits) }, errorcheck)
+=======
+    arktest.expectThrow((): void => { a.toFixed(big_digits) }, errorcheck)
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testNegativeParameter() {
@@ -109,5 +127,20 @@ function testNegativeParameter() {
     let negative_digits: Number = TestData.negative_digits;
 
     const errorcheck = (e: Error | Exception) => { return (e instanceof RangeError) }
+<<<<<<< HEAD
     expectThrow((): void throws => { a.toFixed(negative_digits) }, errorcheck)
+=======
+    arktest.expectThrow((): void => { a.toFixed(negative_digits) }, errorcheck)
+}
+
+function testUnionParameter() {
+    let num: Number | undefined = 2;
+    let actual: string = new Number(-1e22).toFixed(num);
+    arktest.assertEQ(actual, '-1e+22')
+}
+
+function testUndefined() {
+    let actual: string = new Number(-1e22).toFixed(undefined);
+    arktest.assertEQ(actual, '-1e+22')
+>>>>>>> OpenHarmony_feature_20250328
 }

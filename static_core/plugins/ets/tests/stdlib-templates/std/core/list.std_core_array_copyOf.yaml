@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "boolean[]",
+    result_type: "FixedArray<boolean>",
     init_value: "[]",
-    method_signature: { arr: "boolean[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<boolean>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "boolean_array", second: "boolean_array"},
     method_throws: "true",
     method_test_index_data:
@@ -73,9 +73,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "byte[]",
+    result_type: "FixedArray<byte>",
     init_value: "[]",
-    method_signature:  { arr: "byte[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<byte>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "byte_array", second: "byte_array"},
     method_throws: "true",
     method_test_index_data:
@@ -124,9 +124,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "short[]",
+    result_type: "FixedArray<short>",
     init_value: "[]",
-    method_signature:  { arr: "short[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<short>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "short_array", second: "short_array"},
     method_throws: "true",
     method_test_index_data:
@@ -175,9 +175,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "int[]",
+    result_type: "FixedArray<int>",
     init_value: "[]",
-    method_signature: { arr: "int[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<int>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "int_array", second: "int_array"},
     method_throws: "true",
     method_test_index_data:
@@ -226,9 +226,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "long[]",
+    result_type: "FixedArray<long>",
     init_value: "[]",
-    method_signature: { arr: "long[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<long>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "long_array", second: "long_array"},
     method_throws: "true",
     method_test_index_data:
@@ -277,9 +277,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "float[]",
+    result_type: "FixedArray<float>",
     init_value: "[]",
-    method_signature:{ arr: "float[]", startIndex: int, endIndex: int },
+    method_signature:{ arr: "FixedArray<float>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "float_array", second: "float_array"},
     method_throws: "true",
     method_test_index_data:
@@ -310,7 +310,7 @@
           },
         test5:
           {
-            arr: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+            arr: "[0.1f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.77f, 8.88f, 9.99f, 10.10101f, 11.11111f, 12.1212f, 13.1313f, 14.1414f, 15.1515f]",
             startIndex: 0,
             endIndex: arr.length,
           },
@@ -327,7 +327,7 @@
         test2: "[10, 11, 12, 13, 14]",
         test3: "[2, 3, 4]",
         test4: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-        test5: "[0.1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.77, 8.88, 9.99, 10.10101, 11.11111, 12.1212, 13.1313, 14.1414, 15.1515]",
+        test5: "[0.1f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.77f, 8.88f, 9.99f, 10.10101f, 11.11111f, 12.1212f, 13.1313f, 14.1414f, 15.1515f]",
         test6: "[]"
       },
   }
@@ -335,9 +335,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "double[]",
+    result_type: "FixedArray<double>",
     init_value: "[]",
-    method_signature: { arr: "double[]", startIndex: int, endIndex: int },
+    method_signature: { arr: "FixedArray<double>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "double_array", second: "double_array"},
     method_throws: "true",
     method_test_index_data:
@@ -393,9 +393,9 @@
     method_name: slice,
     method_nature: function,
     result_nature: array,
-    result_type: "char[]",
+    result_type: "FixedArray<char>",
     init_value: "[]",
-    method_signature:  { arr: "char[]", startIndex: int, endIndex: int },
+    method_signature:  { arr: "FixedArray<char>", startIndex: int, endIndex: int },
     method_signature_desc: {first: "char_array", second: "char_array"},
     method_throws: "true",
     method_test_index_data:

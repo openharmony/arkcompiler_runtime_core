@@ -95,7 +95,7 @@ interface PrimitivesBoolean {
   @gen_promise("TestBaseBoolFunc5Promise")
   TestBaseBoolFunc5(option1:bool):bool;
   @get getBoolTest(): bool;
-  TestBaseBoolFunc7(option1:Map<String,bool>):bool;
+  TestBaseBoolFunc7(option1:@record Map<String,bool>):bool;
 }
 
 function get_interface_bool(): PrimitivesBoolean;

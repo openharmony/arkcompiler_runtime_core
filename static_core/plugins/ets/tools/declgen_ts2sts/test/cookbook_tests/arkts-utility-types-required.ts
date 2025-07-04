@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 interface Person {
+=======
+export interface Person {
+>>>>>>> OpenHarmony_feature_20250328
     name?: string
     age?: number
     address?: string

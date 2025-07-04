@@ -299,9 +299,9 @@ public:
         return false;
     }
 
-    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
+    virtual bool IsClassExternal([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr calleeClass) const
     {
-        return false;
+        return true;
     }
 
     virtual bool IsMethodAbstract([[maybe_unused]] MethodPtr method) const
@@ -309,9 +309,19 @@ public:
         return false;
     }
 
+    virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
     {
         return false;
+    }
+
+    virtual MethodPtr GetMethodAsIntrinsic([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
+    {
+        return nullptr;
     }
 
     // return true if the method is Native with exception
@@ -450,6 +460,21 @@ public:
         UNREACHABLE();
     }
 
+    virtual bool IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
     virtual bool IsFieldStringBuilderBuffer([[maybe_unused]] FieldPtr field) const
     {
         return false;
@@ -514,6 +539,16 @@ public:
     ClassPtr ResolveClassForField(MethodPtr method, size_t fieldId);
 
     virtual bool IsInstantiable([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsBoxedClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassBoxedBoolean([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
@@ -702,6 +737,12 @@ public:
     {
         return 0;
     }
+
+    virtual ::ark::mem::BarrierType GetPreReadType() const
+    {
+        return ::ark::mem::BarrierType::PRE_RB_NONE;
+    }
+
     virtual ::ark::mem::BarrierType GetPreType() const
     {
         return ::ark::mem::BarrierType::PRE_WRB_NONE;
@@ -710,6 +751,26 @@ public:
     virtual ::ark::mem::BarrierType GetPostType() const
     {
         return ::ark::mem::BarrierType::POST_WRB_NONE;
+    }
+
+    bool NeedsPreReadBarrier() const
+    {
+        auto type = GetPreReadType();
+        return type == ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
+    }
+
+    bool NeedsPreWriteBarrier() const
+    {
+        auto type = GetPreType();
+        return type == ::ark::mem::BarrierType::PRE_SATB_BARRIER;
+    }
+
+    bool NeedsPostWriteBarrier() const
+    {
+        auto type = GetPostType();
+        return type == ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+               type == ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 
     virtual ::ark::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::ark::mem::BarrierPosition barrierPosition,
@@ -1165,7 +1226,12 @@ public:
         return false;
     }
 
-    virtual uint64_t GetStaticFieldValue([[maybe_unused]] FieldPtr fieldPtr) const
+    virtual uint64_t GetStaticFieldIntegerValue([[maybe_unused]] FieldPtr fieldPtr) const
+    {
+        return 0;
+    }
+
+    virtual double GetStaticFieldFloatValue([[maybe_unused]] FieldPtr fieldPtr) const
     {
         return 0;
     }
@@ -1326,6 +1392,11 @@ public:
         return false;
     }
 
+    virtual bool IsIntrinsicStringConcat([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
     virtual IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId([[maybe_unused]] DataType::Type type) const
     {
         UNREACHABLE();
@@ -1358,7 +1429,7 @@ public:
 
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(static_cast<uint8_t>(id)));
+        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(id));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()
@@ -1574,6 +1645,11 @@ public:
     virtual void *GetDoubleToStringCache() const
     {
         return nullptr;
+    }
+
+    virtual bool IsStringCachesUsed() const
+    {
+        return false;
     }
 
     NO_COPY_SEMANTIC(RuntimeInterface);

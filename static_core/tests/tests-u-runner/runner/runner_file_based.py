@@ -27,7 +27,7 @@ from typing import List, Dict, Optional, Type, Tuple
 from unittest import TestCase
 
 import pytz
-from runner.code_coverage.coverage import LlvmCov
+from runner.code_coverage.coverage_manager import CoverageManager
 from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv
@@ -130,7 +130,11 @@ class RunnerFileBased(Runner):
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
+<<<<<<< HEAD
         self.coverage = LlvmCov(Path(self.build_dir), self.work_dir.coverage_dir)
+=======
+        self.coverage_manager = CoverageManager(Path(self.build_dir), self.work_dir.coverage_dir)
+>>>>>>> OpenHarmony_feature_20250328
 
         self.__set_test_list_options()
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
@@ -147,7 +151,7 @@ class RunnerFileBased(Runner):
             conf_kind=self.conf_kind,
             cmd_prefix=self.cmd_prefix,
             cmd_env=self.cmd_env,
-            coverage=self.coverage,
+            coverage=self.coverage_manager,
             es2panda=self.binaries.es2panda,
             es2panda_args=[],
             runtime=self.binaries.runtime,
@@ -220,8 +224,13 @@ class RunnerFileBased(Runner):
 
         return dst_abc
 
+    def clear_gcda_files(self) -> None:
+        Log.all(_LOGGER, "Clear gcda files before runner start")
+        self.test_env.coverage.lcov_tool.clear_gcda_files()
+
     def create_coverage_html(self) -> None:
         Log.all(_LOGGER, "Create html report for coverage")
+<<<<<<< HEAD
         if self.test_env.config.general.coverage.llvm_cov_report_by_components:
             self.coverage.make_profdata_list_files_by_components()
             self.coverage.merge_all_profdata_files_by_components()
@@ -231,6 +240,29 @@ class RunnerFileBased(Runner):
             self.coverage.merge_all_profdata_files()
             self.coverage.llvm_cov_export_to_info_file()
         self.coverage.genhtml()
+=======
+        coverage_configs = self.test_env.config.general.coverage
+        llvm_tool = self.test_env.coverage.llvm_cov_tool
+        lcov_tool = self.test_env.coverage.lcov_tool
+
+        if coverage_configs.use_llvm_cov:
+            if coverage_configs.coverage_per_binary:
+                llvm_tool.make_profdata_list_files_by_components()
+                llvm_tool.merge_all_profdata_files_by_components()
+                llvm_tool.export_to_info_file_by_components(coverage_configs.llvm_cov_exclude)
+            else:
+                llvm_tool.make_profdata_list_file()
+                llvm_tool.merge_all_profdata_files()
+                llvm_tool.export_to_info_file(exclude_regex=coverage_configs.llvm_cov_exclude)
+            llvm_tool.generage_html_report()
+        elif coverage_configs.use_lcov:
+            if coverage_configs.coverage_per_binary:
+                lcov_tool.generate_dot_info_file_by_components(coverage_configs.lcov_exclude)
+                lcov_tool.generage_html_report_by_components()
+            else:
+                lcov_tool.generate_dot_info_file(coverage_configs.lcov_exclude)
+                lcov_tool.generage_html_report()
+>>>>>>> OpenHarmony_feature_20250328
 
     def summarize(self) -> int:
         Log.all(_LOGGER, "Processing run statistics")
@@ -317,6 +349,8 @@ class RunnerFileBased(Runner):
             full_template_name += "(-DI)?"
         if self.config.es2panda.is_fullastverifier():
             full_template_name += "(-FULLASTV)?"
+        if self.config.es2panda.is_simultaneous():
+            full_template_name += "(-SIMULTANEOUS)?"
         if self.conf_kind == ConfigurationKind.JIT and self.config.ark.jit.num_repeats > 1:
             full_template_name += "(-(repeats|REPEATS))?"
         full_template_name += f"(-{self.build_type.value})?"
@@ -334,7 +368,7 @@ class RunnerFileBased(Runner):
             glob(glob_expression, recursive=True)
         ))
 
-        Log.all(_LOGGER, f"Loading {kind} test lists: {test_lists}")
+        Log.default(_LOGGER, f"Loading {kind} test lists: {test_lists}")
 
         return test_lists
 

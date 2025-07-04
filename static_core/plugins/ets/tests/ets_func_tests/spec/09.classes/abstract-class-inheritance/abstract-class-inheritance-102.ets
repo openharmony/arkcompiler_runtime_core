@@ -46,6 +46,6 @@ class D extends C {
 
 function main() {
   let d: D = new D("hello", 100);
-  assertEQ( d.getStr(), "hello")
-  assertEQ( d.getNumber(), 100)
+  arktest.assertEQ( d.getStr(), "hello")
+  arktest.assertEQ( d.getNumber(), 100)
 }

@@ -30,6 +30,6 @@ class Person {
 function main(): void {
   let person = Person.getPerson();
   let index = person.weight / person.height;
-  assertEQ( index, 2 );
+  arktest.assertEQ( index, 2 );
 }
   

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +19,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
 
 import pytz
 
 from runner.enum_types.base_enum import BaseEnum
 from runner.enum_types.params import TestEnv, TestReport
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.logger import Log
 from runner.options.local_env import LocalEnv
 from runner.options.options import IOptions
@@ -58,9 +57,9 @@ class Test:
         # Expected output. Used only in the Parser test suite
         self.expected = ""
         # Contains fields output, error, and return_code of the last executed step
-        self.report: Optional[TestReport] = None
+        self.report: TestReport | None = None
         # Test result: True if all steps passed, False is any step fails
-        self.passed: Optional[bool] = None
+        self.passed: bool | None = None
         # If the test is mentioned in any ignored_list
         self.ignored = False
         # Test can detect itself as excluded additionally to excluded_tests
@@ -69,9 +68,9 @@ class Test:
         # Collect all executable commands
         self.reproduce = ""
         # Time to execute in seconds
-        self.time: Optional[float] = None
+        self.time: float | None = None
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
-        self.reports: Dict[ReportFormat, str] = {}
+        self.reports: dict[ReportFormat, str] = {}
         self.repeat = 1
 
     def run(self, repeat: int) -> Test:
@@ -129,8 +128,7 @@ class Test:
     def get_command_line(self) -> str:
         config_cmd = self.test_env.config.get_command_line()
         reproduce_message = [
-            f'{self.test_env.config.general.static_core_root}/tests/tests-u-runner/runner.sh',
-            # self.test_env.config.general.static_core_root,
+            f'{self.test_env.config.general.static_core_root}/tests/tests-u-runner-2/runner.sh',
             config_cmd
         ]
         if config_cmd.find('--test-file') < 0:

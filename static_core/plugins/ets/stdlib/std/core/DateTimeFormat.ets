@@ -23,16 +23,16 @@ export namespace Intl {
             day: "numeric"
         }
 
-        private readonly locale: string | undefined
+        private readonly locale: string
         private readonly options: DateTimeFormatOptions
         private readonly pattern: string
 
         public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
-            if (locales !== undefined) {
-                const lookupLocale = options != null && options!.localeMatcher == "lookup"
-                this.locale = lookupLocale ? intlLookUpLocale(locales) : intlBestFitLocale(locales)
+            if (locales === undefined) {
+                this.locale = Locale.defaultTag()
             } else {
-                this.locale = undefined
+                const lookupLocale = options?.localeMatcher == "lookup"
+                this.locale = lookupLocale ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
             }
 
             if (options === undefined || DateTimeFormatOptions.isEmpty(options)) {
@@ -107,38 +107,16 @@ export namespace Intl {
             return resolvedOptions
         }
 
-        public static supportedLocalesOf(locales: string | Locale | readonly (string | Locale)[]): string[] {
-            const supportedLocales = new Array<string>()
+        public static supportedLocalesOf(locales: string | Locale | ReadonlyArray<string | Locale>, options?: DateTimeFormatOptions): string[] {
+            const langTags = intlLocalesToLanguageTags(locales)
 
-            if (locales instanceof string[]) {
-                return DateTimeFormat.bestFitLocales(Array.from(locales))
-            } else if (locales instanceof Locale[]) {
-                return DateTimeFormat.bestFitLocales(Array.from(locales, (loc: Locale) => loc.toString()))
-            } else if (locales instanceof string) {
-                return DateTimeFormat.bestFitLocales(Array.of(locales))
-            } else if (locales instanceof Locale) { 
-                return DateTimeFormat.bestFitLocales(Array.of(locales).map((loc: Locale) => loc.toString()))
-            } else {
-                throw new TypeError("'locales' parameter has invalid type")
-            }
-        }
-
-        private static bestFitLocales(locales: Array<string>): string[] {
-            const bestFitLocales = new Array<string>()
-
-            for (const locale of locales) {
-                const bestFitLocale = intlBestFitLocale(locale)
-                if (locale.startsWith(bestFitLocale)) {
-                    bestFitLocales.push(locale)
-                }
+            if (options) {
+                return (options.localeMatcher == "best fit")
+                        ? intlBestFitLocales(langTags)
+                        : intlLookUpLocales(langTags)
             }
 
-            const result: string[] = new string[bestFitLocales.length]
-            for (let i = 0; i < result.length; i++) {
-                result[i] = bestFitLocales[i]
-            }
-
-            return result
+            return intlBestFitLocales(langTags)
         }
 
         private native formatImpl(timestamp: number): string
@@ -417,7 +395,7 @@ export namespace Intl {
         era?: "long" | "short" | "narrow"
         formatMatcher?: "basic" | "best fit"
         // NOTE(cheezzario) 'number' literal types are not supported #23963
-        // fractionalSecondsDigits?: 1 | 2 | 3
+        // fractionalSecondDigits?: 1 | 2 | 3
         fractionalSecondDigits?: number
         hour12?: boolean
         hour?: "numeric" | "2-digit"
@@ -431,6 +409,31 @@ export namespace Intl {
         timeZoneName?: TimeZoneName
         weekday?: "long" | "short" | "narrow"
         year?: "numeric" | "2-digit"
+
+        constructor() {}
+
+        constructor(options: Intl.DateTimeFormatOptions) {
+            this.calendar = options.calendar
+            this.localeMatcher = options.localeMatcher
+            this.dateStyle = options.dateStyle
+            this.day = options.day
+            this.dayPeriod = options.dayPeriod
+            this.era = options.era
+            this.formatMatcher = options.formatMatcher
+            this.fractionalSecondDigits = options.fractionalSecondDigits
+            this.hour12 = options.hour12
+            this.hour = options.hour
+            this.hourCycle = options.hourCycle
+            this.minute = options.minute
+            this.month = options.month
+            this.numberingSystem = options.numberingSystem
+            this.second = options.second
+            this.timeStyle = options.timeStyle
+            this.timeZone = options.timeZone
+            this.timeZoneName = options.timeZoneName
+            this.weekday = options.weekday
+            this.year = options.year
+        }
 
         static isEmpty(options: DateTimeFormatOptions): boolean {
             return options.localeMatcher === undefined 

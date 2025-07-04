@@ -23,8 +23,8 @@ tags: []
 type TNumberPair = [number, number];
 
 function receiver(tuple: TNumberPair = [12.0, 123.0]): void {
-    assertEQ( tuple[0], 12.0)
-    assertEQ( tuple[1], 123.0)
+    arktest.assertEQ( tuple[0], 12.0)
+    arktest.assertEQ( tuple[1], 123.0)
 }
 
 function main(): void {

@@ -45,22 +45,40 @@ uv_loop_t *EventLoop::GetEventLoop()
     return loop;
 }
 
-void EventLoop::RunEventLoop(RunMode mode)
+void EventLoop::RunEventLoop(EventLoopRunMode mode)
 {
     auto *loop = GetEventLoop();
     switch (mode) {
-        case EventLoop::RUN_DEFAULT:
+        case EventLoopRunMode::RUN_DEFAULT:
             uv_run(loop, UV_RUN_DEFAULT);
             break;
-        case EventLoop::RUN_ONCE:
+        case EventLoopRunMode::RUN_ONCE:
             uv_run(loop, UV_RUN_ONCE);
             break;
-        case EventLoop::RUN_NOWAIT:
+        case EventLoopRunMode::RUN_NOWAIT:
             uv_run(loop, UV_RUN_NOWAIT);
             break;
         default:
             UNREACHABLE();
     };
+}
+
+void EventLoop::WalkEventLoop(WalkEventLoopCallback &callback, void *args)
+{
+    auto *loop = GetEventLoop();
+
+    struct CallbackStruct {
+        std::function<void(void *, void *)> *callback;
+        void *args;
+    };
+
+    CallbackStruct parsedArgs {&callback, args};
+
+    auto uvCalback = []([[maybe_unused]] uv_handle_t *handle, void *rawArgs) {
+        auto callbackStruct = reinterpret_cast<CallbackStruct *>(rawArgs);
+        (*(callbackStruct->callback))(reinterpret_cast<void *>(handle), callbackStruct->args);
+    };
+    uv_walk(loop, uvCalback, &parsedArgs);
 }
 
 EventLoopCallbackPoster::EventLoopCallbackPoster()
@@ -111,7 +129,7 @@ void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
     auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
     ASSERT(callbackQueue != nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
-    InteropCodeScope<false> codeScope(coro, __PRETTY_FUNCTION__);
+    ScopedInteropCallStackRecord codeScope(coro, __PRETTY_FUNCTION__);
     callbackQueue->ExecuteAllCallbacks();
 }
 

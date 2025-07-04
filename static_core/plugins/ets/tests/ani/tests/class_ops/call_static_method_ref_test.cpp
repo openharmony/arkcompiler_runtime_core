@@ -28,7 +28,7 @@ public:
     void GetMethodDataButton(ani_class *clsResult, ani_static_method *methodResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/Phone;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("call_static_method_ref_test.Phone", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
@@ -42,11 +42,11 @@ public:
     void GetMethodDataString(ani_class *clsResult, ani_static_method *methodResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/Phone;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("call_static_method_ref_test.Phone", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method method;
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_num_string", "II:Lstd/core/String;", &method), ANI_OK);
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_num_string", "ii:C{std.core.String}", &method), ANI_OK);
         ASSERT_NE(method, nullptr);
 
         *clsResult = cls;
@@ -85,6 +85,25 @@ public:
             env_->String_GetUTF8SubString(string, substrOffset, substrSize, utfBuffer, sizeof(utfBuffer), &result);
         ASSERT_EQ(status, ANI_OK);
         ASSERT_STREQ(utfBuffer, "INT5");
+    }
+
+    void TestCombineScene(const char *className, ani_int val1, ani_int val2)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_method method {};
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ii:C{std.core.String}", &method), ANI_OK);
+
+        ani_ref value = nullptr;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &value, val1, val2), ANI_OK);
+        CheckRefNum(value);
+
+        ani_value args[2U];
+        args[0U].i = val1;
+        args[1U].i = val2;
+        ani_ref valueA = nullptr;
+        ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method, &valueA, args), ANI_OK);
+        CheckRefNum(valueA);
     }
 };
 
@@ -289,14 +308,14 @@ TEST_F(CallStaticMethodTest, call_static_method_ref_a_invalid_args)
 TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_1)
 {
     ani_class clsA {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/A;", &clsA), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.A", &clsA), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "II:Lstd/core/String;", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsA, "funcA", "ii:C{std.core.String}", &methodA), ANI_OK);
 
     ani_class clsB {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/B;", &clsB), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.B", &clsB), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "II:Lstd/core/String;", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(clsB, "funcB", "ii:C{std.core.String}", &methodB), ANI_OK);
 
     ani_ref valueA = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(clsA, methodA, &valueA, VAL1, VAL2), ANI_OK);
@@ -321,11 +340,11 @@ TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_1)
 TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.A", &cls), ANI_OK);
     ani_static_method methodA;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "II:Lstd/core/String;", &methodA), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ii:C{std.core.String}", &methodA), ANI_OK);
     ani_static_method methodB;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "DD:D", &methodB), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "dd:d", &methodB), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, methodA, &value, VAL1, VAL2), ANI_OK);
@@ -346,9 +365,9 @@ TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_2)
 TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lcall_static_method_ref_test/A;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.A", &cls), ANI_OK);
     ani_static_method method;
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "II:Lstd/core/String;", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcB", "ii:C{std.core.String}", &method), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &value, VAL1, VAL2), ANI_OK);
@@ -361,6 +380,121 @@ TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_3)
     ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method, &valueA, args), ANI_OK);
     CheckRefNum(valueA);
 }
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_null_env)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodDataString(&cls, &method);
+
+    ani_ref value = nullptr;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Ref(nullptr, cls, method, &value, VAL1, VAL2), ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Ref_A(nullptr, cls, method, &value, args), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.D", &cls), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "funcA", "ii:C{std.core.String}", &method), ANI_OK);
+    ani_ref value = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &value, VAL1, VAL2), ANI_OK);
+    CheckRefUp(value);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_ref valueA = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method, &valueA, args), ANI_OK);
+    CheckRefUp(valueA);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_5)
+{
+    TestCombineScene("call_static_method_ref_test.C", VAL1, VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_6)
+{
+    TestCombineScene("call_static_method_ref_test.E", VAL1, VAL2);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.F", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "increment", nullptr, &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "getCount", nullptr, &method2), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Void(cls, method1, VAL1, VAL2), ANI_OK);
+    ani_ref value = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method2, &value), ANI_OK);
+    CheckRefNum(value);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_ref valueA = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method2, &valueA, args), ANI_OK);
+    CheckRefNum(valueA);
+}
+
+TEST_F(CallStaticMethodTest, call_static_method_ref_combine_scenes_8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_ref_test.G", &cls), ANI_OK);
+    ani_static_method method1 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "publicMethod", "ii:C{std.core.String}", &method1), ANI_OK);
+    ani_static_method method2 {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "callPrivateMethod", "ii:C{std.core.String}", &method2), ANI_OK);
+    ani_ref value = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method1, &value, VAL1, VAL2), ANI_OK);
+    CheckRefNum(value);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method2, &value, VAL1, VAL2), ANI_OK);
+    CheckRefUp(value);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ani_ref valueA = nullptr;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method1, &valueA, args), ANI_OK);
+    CheckRefNum(valueA);
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method2, &valueA, args), ANI_OK);
+    CheckRefUp(valueA);
+}
+
+TEST_F(CallStaticMethodTest, check_initialization_ref)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodDataButton(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+    ani_ref value {};
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, method, &value, VAL1, VAL2), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization_ref_a)
+{
+    ani_class cls {};
+    ani_static_method method {};
+    GetMethodDataButton(&cls, &method);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+    ani_ref value {};
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Ref_A(cls, method, &value, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_ref_test.Phone"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

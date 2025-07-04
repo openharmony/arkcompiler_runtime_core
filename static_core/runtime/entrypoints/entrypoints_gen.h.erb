@@ -72,7 +72,7 @@ extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.entrypoint %>
 
 namespace ark {
 
-enum class EntrypointId : uint8_t {
+enum class EntrypointId : uint32_t {
 % Compiler::entrypoints.each_with_index do |entrypoint, index|
     <%= entrypoint.enum_name %> = <%= index %>,
 % end

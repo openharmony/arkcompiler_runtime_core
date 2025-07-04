@@ -17,6 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -108,7 +109,8 @@ Inst *GetStringFromLength(Inst *inst)
             return nullptr;
         }
         auto input1 = inst->GetInput(1).GetInst();
-        if (!input1->IsConst() || input1->CastToConstant()->GetRawValue() != 1) {
+        if (!input1->IsConst() ||
+            input1->CastToConstant()->GetRawValue() != ark::coretypes::String::STRING_LENGTH_SHIFT) {
             return nullptr;
         }
         lenArray = inst->GetInput(0).GetInst();
@@ -180,6 +182,9 @@ bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr kla
         loadField->SetObjField(field);
         if (runtime->IsFieldVolatile(field)) {
             loadField->SetVolatile(true);
+        }
+        if (type == DataType::REFERENCE && runtime->NeedsPreReadBarrier()) {
+            loadField->SetNeedBarrier(true);
         }
         memObj = loadField;
         intrinsic->ReplaceUsers(loadField);
@@ -353,7 +358,8 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     ASSERT(intrinsic->GetInputsCount() == 3U);
     ASSERT(intrinsic->GetInput(2U).GetInst()->IsSaveState());
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32) {
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32 ||
+        !graph->GetRuntime()->IsStringCachesUsed()) {
         return false;
     }
     auto radix = intrinsic->GetInput(1U).GetInst();
@@ -416,6 +422,40 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
     } else {
         intrinsic->ReplaceUsers(graph->GetOrCreateNullPtr());
     }
+    return true;
+}
+
+bool Peepholes::PeepholeNullcheck([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input = intrinsic->GetInput(0).GetInst();
+    if (IsInstNotNull(input)) {
+        intrinsic->ReplaceUsers(input);
+        intrinsic->ClearFlag(inst_flags::NO_DCE);
+        return true;
+    }
+    return false;
+}
+
+bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    ASSERT(intrinsic->GetInput(1U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+
+    auto pc = intrinsic->GetPc();
+    auto *charCode = intrinsic->GetInput(0).GetInst();
+    auto charCodeInt = graph->CreateInstBitcast(DataType::UINT64, pc, charCode);
+    auto *createStringInst = graph->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE);
+    createStringInst->SetInputs(graph->GetAllocator(),
+                                {{charCodeInt, DataType::UINT64}, {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    intrinsic->InsertBefore(charCodeInt);
+    intrinsic->ReplaceUsers(createStringInst);
+    intrinsic->RemoveInputs();
+    intrinsic->GetBasicBlock()->ReplaceInst(intrinsic, createStringInst);
     return true;
 }
 

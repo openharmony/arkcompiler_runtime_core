@@ -23,7 +23,7 @@
 
 #include <cstdint>
 #include <iomanip>
-#include <charconv>
+#include <cstdlib>
 
 #include "get_language_specific_metadata.inc"
 
@@ -1590,9 +1590,8 @@ void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, s
                 std::string offsetStr = std::get<std::string>(item.value);
                 const int hexBase = 16;
                 const char *begin = offsetStr.data();
-                const char *end = &(*offsetStr.end());
                 uint32_t litArrayOffset = 0;
-                std::from_chars(begin, end, litArrayOffset, hexBase);
+                litArrayOffset = strtoul(begin, nullptr, hexBase);
                 pandasm::LiteralArray litArray;
                 GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
                 DumpLiteralArray(litArray, ss);
@@ -1626,7 +1625,7 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     } else if (f.type.GetRank() > 0) {
         uint32_t litArrayOffset = 0;
         auto value = f.metadata->GetValue().value().GetValue<std::string>();
-        std::from_chars(value.data(), &(*value.end()), litArrayOffset);
+        litArrayOffset = strtoul(value.data(), nullptr, 0);
         pandasm::LiteralArray litArray;
         GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
         ss << " = ";

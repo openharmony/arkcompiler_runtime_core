@@ -14,6 +14,7 @@
  */
 
 function testNaN() {
+<<<<<<< HEAD
     assertEQ(Math.clz32(NaN), 32)
 }
 
@@ -59,10 +60,58 @@ function testSmallScaleNumber() {
     assertEQ(Math.clz32(-1.23e-123), 32)
     assertEQ(Math.clz32(Number.MIN_VALUE), 32)
     assertEQ(Math.clz32(-Number.MIN_VALUE), 32)
+=======
+    arktest.assertEQ(Math.clz32(NaN), 32)
+}
+
+function testInfinity() {
+    arktest.assertEQ(Math.clz32(Infinity), 32)
+    arktest.assertEQ(Math.clz32(-Infinity), 32)
+}
+
+function testZero() {
+    arktest.assertEQ(Math.clz32(0), 32)
+    arktest.assertEQ(Math.clz32(0.0), 32)
+    arktest.assertEQ(Math.clz32(-0), 32)
+    arktest.assertEQ(Math.clz32(-0.0), 32)
+}
+
+function testOne() {
+    arktest.assertEQ(Math.clz32(1), 31)
+    arktest.assertEQ(Math.clz32(-1), 0)
+}
+
+function testNegative() {
+    arktest.assertEQ(Math.clz32(-333), 0)
+    arktest.assertEQ(Math.clz32(-333.333), 0)
+}
+
+function testInUint32Range() {
+    arktest.assertEQ(Math.clz32(123), 25)
+    arktest.assertEQ(Math.clz32(123.456), 25)
+}
+
+function testLargeScaleNumber() {
+    arktest.assertEQ(Math.clz32(1234567890), 1)
+    arktest.assertEQ(Math.clz32(1.23e123), 32)
+    arktest.assertEQ(Math.clz32(-1.23e123), 32)
+    arktest.assertEQ(Math.clz32(Number.MAX_VALUE), 32)
+    arktest.assertEQ(Math.clz32(-Number.MAX_VALUE), 32)
+}
+
+function testSmallScaleNumber() {
+    arktest.assertEQ(Math.clz32(0.23), 32)
+    arktest.assertEQ(Math.clz32(1.23), 31)
+    arktest.assertEQ(Math.clz32(1.23e-123), 32)
+    arktest.assertEQ(Math.clz32(-1.23e-123), 32)
+    arktest.assertEQ(Math.clz32(Number.MIN_VALUE), 32)
+    arktest.assertEQ(Math.clz32(-Number.MIN_VALUE), 32)
+>>>>>>> OpenHarmony_feature_20250328
 
 }
 
 function testInt32CornerCase() {
+<<<<<<< HEAD
     assertEQ(Math.clz32(2147483646), 1)
     assertEQ(Math.clz32(2147483647), 1)
     assertEQ(Math.clz32(2147483648), 0)
@@ -97,6 +146,42 @@ function testRandomCase() {
 
 function main() {
     const suite = new ArkTestsuite("Math.clz32 tests")
+=======
+    arktest.assertEQ(Math.clz32(2147483646), 1)
+    arktest.assertEQ(Math.clz32(2147483647), 1)
+    arktest.assertEQ(Math.clz32(2147483648), 0)
+
+    arktest.assertEQ(Math.clz32(-2147483649), 1)
+    arktest.assertEQ(Math.clz32(-2147483648), 0)
+    arktest.assertEQ(Math.clz32(-2147483647), 0)
+}
+
+function testInt64CornerCase() {
+    arktest.assertEQ(Math.clz32(9.223372036854775806e18), 32)
+    arktest.assertEQ(Math.clz32(9.223372036854775807e18), 32)
+    arktest.assertEQ(Math.clz32(9.223372036854775808e18), 32)
+
+    arktest.assertEQ(Math.clz32(-9.223372036854775809e18), 32)
+    arktest.assertEQ(Math.clz32(-9.223372036854775808e18), 32)
+    arktest.assertEQ(Math.clz32(-9.223372036854775807e18), 32)
+}
+
+function testRandomCase() {
+    arktest.assertEQ(Math.clz32(0.195767e-38), 32)
+    arktest.assertEQ(Math.clz32(-0.624245e2), 0)
+    arktest.assertEQ(Math.clz32(-0.949956e-2), 32)
+    arktest.assertEQ(Math.clz32(0.878439e-18), 32)
+    arktest.assertEQ(Math.clz32(-0.625398e15), 2)
+    arktest.assertEQ(Math.clz32(-0.821849e-26), 32)
+    arktest.assertEQ(Math.clz32(-0.180494e-20), 32)
+    arktest.assertEQ(Math.clz32(-0.655483e-2), 32)
+    arktest.assertEQ(Math.clz32(-0.365771e-6), 32)
+    arktest.assertEQ(Math.clz32(0.995405e53), 32)
+}
+
+function main() {
+    const suite = new arktest.ArkTestsuite("Math.clz32 tests")
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Test NaN", testNaN)
     suite.addTest("Test Infinity", testInfinity)
     suite.addTest("Test Zero", testZero)

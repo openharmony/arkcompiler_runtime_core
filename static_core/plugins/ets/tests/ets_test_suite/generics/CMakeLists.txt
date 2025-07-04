@@ -11,10 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-run_int_jit_aot_ets_code(
-    "${CMAKE_CURRENT_SOURCE_DIR}/generics_methods.ets"
-    "${CMAKE_CURRENT_BINARY_DIR}"
-    ets_test_suite_generics_methods)
+# #21382 fixed array -> T[] casts
+# run_int_jit_aot_ets_code(
+#     "${CMAKE_CURRENT_SOURCE_DIR}/generics_methods.ets"
+#     "${CMAKE_CURRENT_BINARY_DIR}"
+#     ets_test_suite_generics_methods)
 
 run_int_jit_aot_ets_code(
     "${CMAKE_CURRENT_SOURCE_DIR}/generics_functions.ets"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -77,21 +77,13 @@ async def test_primitive_types(
 
     variables = [
         ("boolean", "true", val_type("std.core.BooleanType"), b(True)),
-        ("Boolean", "true", ref_type("std.core.BooleanType"), cls("std.core.Boolean", value=b(True))),
         ("byte", 1, val_type("std.core.ByteType"), n(1)),
-        ("Byte", 1, ref_type("std.core.ByteType"), cls("std.core.Byte", value=n(1))),
         ("short", 1, val_type("std.core.ShortType"), n(1)),
-        ("Short", 1, ref_type("std.core.ShortType"), cls("std.core.Short", value=n(1))),
         ("int", 1, val_type("std.core.IntType"), n(1)),
-        ("Int", 1, ref_type("std.core.IntType"), cls("std.core.Int", value=n(1))),
         ("long", 1, val_type("std.core.LongType"), n(1)),
-        ("Long", 1, ref_type("std.core.LongType"), cls("std.core.Long", value=n(1))),
         ("float", 1, val_type("std.core.FloatType"), n(1)),
-        ("Float", 1, ref_type("std.core.FloatType"), cls("std.core.Float", value=n(1))),
         ("double", 1, val_type("std.core.DoubleType"), n(1)),
-        ("Double", 1, ref_type("std.core.DoubleType"), cls("std.core.Double", value=n(1))),
         ("number", 1, val_type("std.core.DoubleType"), n(1)),
-        ("Number", 1, ref_type("std.core.DoubleType"), cls("std.core.Double", value=n(1))),
     ]
     code = _code_generator(variables)
     async with run_and_stop_on_breakpoint(code) as paused:

@@ -32,3 +32,8 @@ default_value:
   - Object
   - String
   - never
+<<<<<<< HEAD
+=======
+  - bigint
+  - BigInt
+>>>>>>> OpenHarmony_feature_20250328

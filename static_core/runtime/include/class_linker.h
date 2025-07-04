@@ -57,6 +57,7 @@ public:
         OVERRIDES_FINAL,
         MULTIPLE_OVERRIDE,
         MULTIPLE_IMPLEMENT,
+        INVALID_LAMBDA_CLASS,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);

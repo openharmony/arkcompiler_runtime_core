@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "libabckit/include/c/abckit.h"
+#include "libabckit/c/abckit.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-literals.h"

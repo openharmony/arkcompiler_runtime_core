@@ -15,7 +15,11 @@
 import {xml} from "@ohos.xml"
 
 function main(): int {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("XmlPullParser API tests, part6");
+=======
+    const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part6");
+>>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing XML ParseInfo getColumnNumber with WHITESPACE event.", testXmlParseInfoGetColumnNumber0011)
     suite.addTest("Testing XML ParseInfo getColumnNumber with ENTITY_REFERENCE event.", testXmlParseInfoGetColumnNumber0010)
@@ -81,10 +85,17 @@ function testXmlParseInfoGetColumnNumber0001() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:0 value:1"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:0 value:1"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -104,10 +115,17 @@ function testXmlParseInfoGetColumnNumber0002() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:1 value:566"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:1 value:566"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -127,10 +145,17 @@ function testXmlParseInfoGetColumnNumber0003() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:2 value:154"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:2 value:154"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -150,10 +175,17 @@ function testXmlParseInfoGetColumnNumber0004() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options)
+<<<<<<< HEAD
         assertTrue(str.includes("key:3 value:218"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:3 value:218"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -173,10 +205,17 @@ function testXmlParseInfoGetColumnNumber0005() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:4 value:208"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:4 value:208"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -196,10 +235,17 @@ function testXmlParseInfoGetColumnNumber0006() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:5 value:286"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:5 value:286"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -219,10 +265,17 @@ function testXmlParseInfoGetColumnNumber0007() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:6 value:142"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:6 value:142"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -242,10 +295,17 @@ function testXmlParseInfoGetColumnNumber0008() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:7 value:40"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:7 value:40"))
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -265,10 +325,17 @@ function testXmlParseInfoGetColumnNumber0009() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:8 value:365"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:8 value:365"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -288,10 +355,17 @@ function testXmlParseInfoGetColumnNumber0010() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:9 value:59"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:9 value:59"));
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -311,10 +385,17 @@ function testXmlParseInfoGetColumnNumber0011() {
             tokenValueCallbackFunction: func,
         };
         parser.parseXml(options);
+<<<<<<< HEAD
         assertTrue(str.includes("key:10 value:464"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
+=======
+        arktest.assertTrue(str.includes("key:10 value:464"))
+    } catch (err) {
+        console.error(`${TAG} failed, error: ${err}`);
+        arktest.assertTrue(false)
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -344,10 +425,18 @@ function testGetColumnNuber() {
     let expectedTextStr = "{  : 1 }; { note : 63 }; {  : 67 }; { title : 74 }; {  : 79 }; { title : 87 }; \
 {  : 91 }; { todo : 97 }; {  : 101 }; { todo : 108 }; { note : 115 }; {  : 115 }; "
 
+<<<<<<< HEAD
     assertEQ(textStr, expectedTextStr)
 
     let expectedRes = "key:0 value:1 key:2 value:63 key:10 value:67 key:2 value:74 key:4 value:79 key:3 value:87 \
 key:10 value:91 key:2 value:97 key:4 value:101 key:3 value:108 key:3 value:115 key:1 value:115 "
     assertEQ(result, expectedRes)
+=======
+    arktest.assertEQ(textStr, expectedTextStr)
+
+    let expectedRes = "key:0 value:1 key:2 value:63 key:10 value:67 key:2 value:74 key:4 value:79 key:3 value:87 \
+key:10 value:91 key:2 value:97 key:4 value:101 key:3 value:108 key:3 value:115 key:1 value:115 "
+    arktest.assertEQ(result, expectedRes)
+>>>>>>> OpenHarmony_feature_20250328
 }
 

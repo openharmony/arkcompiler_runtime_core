@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,9 @@
 
 from pathlib import Path
 
-from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind, OSKind, BuildTypeKind
+from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.enum_types.qemu import QemuKind
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 
 args = {
     'workflow': 'config-1',
@@ -68,7 +68,7 @@ args = {
     },
     'test_suite1.parameters.filter': '*',
     'test_suite1.parameters.repeats': 1,
-    'test_suite1.parameters.repeats-by-time': None,
+    'test_suite1.parameters.repeats-by-time': 0,
     'test_suite1.parameters.with-js': 'with-js',
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,
@@ -90,15 +90,16 @@ args = {
     'test_suite1.parameters.load-runtimes': 'ets',
     'test_suite1.parameters.work-dir': '.',
     'runner.processes': 1,
-    'runner.detailed_report': False,
-    'runner.detailed_report_file': 'detailed-report-file',
-    'runner.show_progress': False,
+    'runner.detailed-report': False,
+    'runner.detailed-report-file': 'detailed-report-file',
+    'runner.report-dir': 'report',
+    'runner.show-progress': False,
     'runner.verbose': VerboseKind.SILENT,
-    'runner.verbose_filter': VerboseFilter.NEW_FAILURES,
+    'runner.verbose-filter': VerboseFilter.NEW_FAILURES,
     'runner.qemu': QemuKind.NONE,
-    'runner.enable_time_report': False,
-    'runner.time_edges': [1, 5, 10],
-    'runner.use_llvm_cov': False,
-    'runner.llvm_cov_profdata_out_path': None,
-    'runner.llvm_cov_html_out_path': None
+    'runner.enable-time-report': False,
+    'runner.time-edges': [1, 5, 10],
+    'runner.use-llvm-cov': False,
+    'runner.profdata-files-dir': None,
+    'runner.coverage-html-report-dir': None
 }

@@ -33,9 +33,9 @@ class Point {
 
 function main(): void {
 {% if "static" in mm %}
-  assertEQ( Point.foo<{{c.use}}>({{c.p}}), {{c.expected}} )
+  arktest.assertEQ( Point.foo<{{c.use}}>({{c.p}}), {{c.expected}} )
 {% else %}
-  assertEQ( new Point().foo<{{c.use}}>({{c.p}}), {{c.expected}} )
+  arktest.assertEQ( new Point().foo<{{c.use}}>({{c.p}}), {{c.expected}} )
 {% endif %}
 }
 

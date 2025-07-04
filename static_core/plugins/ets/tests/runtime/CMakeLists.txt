@@ -25,6 +25,21 @@ panda_ets_add_gtest(
     TEST_GROUP ets_tests_runtime_gtests
 )
 
+<<<<<<< HEAD
+=======
+panda_ets_add_gtest(
+    NO_CORES
+    NAME static_object_accessor_test
+    SOURCES static_object_accessor_test.cpp
+    LIBRARIES arkbase arkfile arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
+    DEPS_TARGETS mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
+>>>>>>> OpenHarmony_feature_20250328
 panda_add_gtest_with_ani(ets_vm_init_prealloc_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.ets
@@ -33,5 +48,30 @@ panda_add_gtest_with_ani(ets_vm_init_prealloc_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
+<<<<<<< HEAD
+=======
+if (NOT PANDA_QEMU_BUILD)
+    panda_add_gtest_with_ani(ets_vm_postfork_aot_load_test
+        CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.cpp
+        ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.ets
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+        LIBRARIES arkbase arkfile arkruntime
+        TEST_GROUP ets_tests_runtime_gtests
+    )
+endif()
+
+panda_ets_add_gtest(
+    NO_CORES
+    NAME static_type_converter_test
+    SOURCES static_type_converter_test.cpp
+    LIBRARIES arkbase arkfile arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
+    DEPS_TARGETS mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
+>>>>>>> OpenHarmony_feature_20250328
 add_subdirectory(types)
 add_subdirectory(tooling)

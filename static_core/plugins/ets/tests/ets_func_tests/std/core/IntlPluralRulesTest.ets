@@ -15,7 +15,7 @@
 
 const fakeLocale = "er-or"
 
-function main() throws {
+function main() {
     testSelect()
     testResolvedOptions()
     testSelectWithOptions()
@@ -25,7 +25,7 @@ function main() throws {
 function runSelectTest(locale: string, value: number, expected: string, options?: Intl.PluralRulesOptions) {
     const rules = new Intl.PluralRules(locale, options)
     const result = rules.select(value)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testSelect() {
@@ -59,39 +59,39 @@ function testResolvedOptions() {
     {
         const rules = new Intl.PluralRules("en")
         const result = rules.resolvedOptions()
-        assertEQ(result.minimumIntegerDigits, 1)
-        assertEQ(result.minimumFractionDigits, 0)
-        assertEQ(result.maximumFractionDigits, 3)
-        assertEQ(result.minimumSignificantDigits, undefined)
-        assertEQ(result.maximumSignificantDigits, undefined)
-        assertEQ(result.type, "cardinal")
+        arktest.assertEQ(result.minimumIntegerDigits, 1)
+        arktest.assertEQ(result.minimumFractionDigits, 0)
+        arktest.assertEQ(result.maximumFractionDigits, 3)
+        arktest.assertEQ(result.minimumSignificantDigits, undefined)
+        arktest.assertEQ(result.maximumSignificantDigits, undefined)
+        arktest.assertEQ(result.type, "cardinal")
     }
     {
         const rules = new Intl.PluralRules("en", { type: "ordinal" } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
-        assertEQ(result.type, "ordinal")
+        arktest.assertEQ(result.type, "ordinal")
     }
     {
         const rules = new Intl.PluralRules("en", { minimumFractionDigits: 2 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
-        assertEQ(result.minimumFractionDigits, 2)
+        arktest.assertEQ(result.minimumFractionDigits, 2)
     }
     {
         const rules = new Intl.PluralRules("en", { maximumFractionDigits: 4 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
-        assertEQ(result.maximumFractionDigits, 4)
+        arktest.assertEQ(result.maximumFractionDigits, 4)
     }
     {
         const rules = new Intl.PluralRules("en", { minimumSignificantDigits: 3 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
-        assertEQ(result.minimumSignificantDigits, 3)
+        arktest.assertEQ(result.minimumSignificantDigits, 3)
     }
 }
 
 function runTestWithOptions(locale: string, value: number, options: Intl.PluralRulesOptions, expected: string) {
     const rules = new Intl.PluralRules(locale, options)
     const result = rules.select(value)
-    assertEQ(result, expected)
+    arktest.assertEQ(result, expected)
 }
 
 function testSelectWithOptions() {
@@ -187,14 +187,14 @@ function testSelectWithOptions() {
 }
 
 function runSupportedLocalesTest(
-    locales: string | string[],
+    locales: string | FixedArray<string>,
     options: Intl.SupportedLocalesOfOptions | undefined,
     expected: string[])
 {
     const result = Intl.PluralRules.supportedLocalesOf(locales, options)
-    assertEQ(result.length, expected.length)
+    arktest.assertEQ(result.length, expected.length)
     for (let i = 0; i < result.length; i++) {
-        assertEQ(result[i], expected[i])
+        arktest.assertEQ(result[i], expected[i])
     }
 }
 
@@ -202,68 +202,43 @@ function testSupportedLocalesOf() {
     runSupportedLocalesTest(
         "en",
         undefined,
-        [
-            intlBestFitLocale("en")
-        ]
+        intlBestFitLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         undefined,
-        [
-            intlBestFitLocale("fakeLocale")
-        ]
+        intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesTest(
         ["fr", fakeLocale, "ru"],
         undefined,
-        [
-            intlBestFitLocale("fr"),
-            intlBestFitLocale(fakeLocale),
-            intlBestFitLocale("ru")
-        ]
+        intlBestFitLocales(["fr", fakeLocale, "ru"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         { localeMatcher: "best fit" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesTest(
         "en",
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("en")
-        ]
+        intlLookUpLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("fakeLocale")
-        ]
+        intlLookUpLocales(fakeLocale)
     )
 
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", fakeLocale, "en-US"],
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        [
-            intlLookUpLocale("ru-RU"),
-            intlLookUpLocale("zh-CN"),
-            intlLookUpLocale(fakeLocale),
-            intlLookUpLocale("en-US")
-        ]
+        intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
     )
 }

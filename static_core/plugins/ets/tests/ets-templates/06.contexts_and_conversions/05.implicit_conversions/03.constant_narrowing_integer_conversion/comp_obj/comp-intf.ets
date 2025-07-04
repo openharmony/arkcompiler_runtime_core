@@ -24,17 +24,13 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 
 interface J { fld: {{c.to_type}} }
 
-function main(): int {
+function main() {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: J = { fld: {{v.expr|safe}} }  // expression
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
-    d{{loop.index}} = { fld: c{{loop.index}} }  // constant
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
+    let d{{loop.index}}: J = { fld: ({{v.expr|safe}}).to{{c.to_type}}() }  // expression
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
+
+    d{{loop.index}} = { fld: c{{loop.index}}.to{{c.to_type}}() }  // constant
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
 {%- endfor %}
-    return 0
 }
 {%- endfor %}

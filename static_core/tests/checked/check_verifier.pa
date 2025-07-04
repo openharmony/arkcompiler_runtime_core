@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #! CHECKER      Check that the unverified method is not compiled
-#! RUN          force_jit: true, options: "--verification-enabled=true --verification-mode=on-the-fly", entry: "_GLOBAL::main", result: 0
+#! RUN          force_jit: true, options: "--verification-mode=on-the-fly", entry: "_GLOBAL::main", result: 0
 #! EVENT        /Compilation,_GLOBAL::main,.*COMPILED/
 #! EVENT_NOT    /Compilation,_GLOBAL::bad_call,.*COMPILED/
 #! METHOD       "_GLOBAL::main"

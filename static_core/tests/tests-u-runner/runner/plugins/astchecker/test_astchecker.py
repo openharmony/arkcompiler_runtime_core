@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,7 +57,7 @@ class TestASTChecker(TestFileBased):
 
     def do_run(self) -> TestFileBased:
         es2panda_flags = self.flags
-        es2panda_flags.extend(['--output=/dev/null', '--dump-ast'])
+        es2panda_flags.extend(['--dump-ast'])
         desc = Descriptor(self.path).get_descriptor()
 
         if 'flags' in desc and 'dynamic-ast' in desc['flags']:
@@ -70,7 +70,7 @@ class TestASTChecker(TestFileBased):
 
         self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=es2panda_flags,
-            test_abc='',
+            test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
         return self

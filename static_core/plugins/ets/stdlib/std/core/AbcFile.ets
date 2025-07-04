@@ -50,7 +50,7 @@ final class AbcFile {
      *
      * @throws errors happened on loading ABC file.
      */
-    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: byte[]): AbcFile;
+    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile;
 
     /**
      * Loads class from ABC file.

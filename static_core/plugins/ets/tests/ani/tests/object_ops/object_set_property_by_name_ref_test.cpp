@@ -57,38 +57,78 @@ TEST_F(ObjectSetPropertyByNameRefTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_ref highPerformance;
+    ani_ref highPerformance {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "highPerformance", &highPerformance), ANI_OK);
-    std::string defaultVal;
+    std::string defaultVal {};
     RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(highPerformance), defaultVal);
     ASSERT_STREQ(defaultVal.data(), "Porsche 911");
 
     ani_string string {};
     std::string toSet = "Abracadabra";
-    ASSERT_EQ(env_->String_NewUTF8(toSet.data(), toSet.size(), &string), ANI_OK);
-    ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "highPerformance", string), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "highPerformance", &highPerformance), ANI_OK);
-    RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(highPerformance), defaultVal);
-    ASSERT_STREQ(defaultVal.data(), "Abracadabra");
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->String_NewUTF8(toSet.data(), toSet.size(), &string), ANI_OK);
+        ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "highPerformance", string), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "highPerformance", &highPerformance), ANI_OK);
+        RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(highPerformance), defaultVal);
+        ASSERT_STREQ(defaultVal.data(), "Abracadabra");
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameRefTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_ref ecoFriendly;
+    ani_ref ecoFriendly {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    std::string defaultVal;
+    std::string defaultVal {};
+    RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(ecoFriendly), defaultVal);
+    ASSERT_STREQ(defaultVal.data(), "Porsche");
+
+    ani_string string {};
+    std::string toSet = "AbracadabraSetter";
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->String_NewUTF8(toSet.data(), toSet.size(), &string), ANI_OK);
+        ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "ecoFriendly", string), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(ecoFriendly), defaultVal);
+        ASSERT_STREQ(defaultVal.data(), "AbracadabraSetter");
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameRefTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_ref ecoFriendly {};
+    ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+    std::string defaultVal {};
     RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(ecoFriendly), defaultVal);
     ASSERT_STREQ(defaultVal.data(), "Porsche");
 
     ani_string string {};
     std::string toSet = "AbracadabraSetter";
     ASSERT_EQ(env_->String_NewUTF8(toSet.data(), toSet.size(), &string), ANI_OK);
-    ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "ecoFriendly", string), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Ref(nullptr, car, "ecoFriendly", string), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Ref(nullptr, car, "ecoFriendly", &ecoFriendly), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameRefTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_ref ecoFriendly {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+    std::string defaultVal {};
     RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(ecoFriendly), defaultVal);
-    ASSERT_STREQ(defaultVal.data(), "AbracadabraSetter");
+    ASSERT_STREQ(defaultVal.data(), "Porsche");
+
+    ani_string string {};
+    std::string toSet = "AbracadabraSetter";
+    ASSERT_EQ(env_->String_NewUTF8(toSet.data(), toSet.size(), &string), ANI_OK);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "ecoFriendlyA", string), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Ref(car, "", &ecoFriendly), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameRefTest, invalid_argument)
@@ -120,9 +160,9 @@ TEST_F(ObjectSetPropertyByNameRefTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_ref prop;
+    ani_ref prop {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(c1, "prop", &prop), ANI_OK);
-    std::string defaultVal;
+    std::string defaultVal {};
     RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(prop), defaultVal);
     ASSERT_STREQ(defaultVal.data(), "Default");
 
@@ -139,9 +179,9 @@ TEST_F(ObjectSetPropertyByNameRefTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_ref prop;
+    ani_ref prop {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Ref(c2, "prop", &prop), ANI_OK);
-    std::string defaultVal;
+    std::string defaultVal {};
     RetrieveStringFromAni(env_, reinterpret_cast<ani_string>(prop), defaultVal);
     ASSERT_STREQ(defaultVal.data(), "Default");
 

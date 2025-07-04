@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,10 @@
 #
 
 import subprocess
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable, Tuple, Optional
 
-from runner.enum_types.params import TestEnv, BinaryParams, TestReport
+from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -42,12 +42,16 @@ class OneTestRunner:
         return f"{name.upper()}_OTHER"
 
     @staticmethod
+    def __fail_kind_subprocess(name: str) -> str:
+        return f"{name.upper()}_SUBPROCESS"
+
+    @staticmethod
     def __fail_kind_timeout(name: str) -> str:
         return f"{name.upper()}_TIMEOUT"
 
     def run_with_coverage(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> Tuple[bool, TestReport, Optional[str]]:
+            -> tuple[bool, TestReport, str | None]:
         profraw_file, profdata_file = "", ""
         if self.test_env.config.general.coverage.use_llvm_cov and self.test_env.coverage is not None:
             params = deepcopy(params)
@@ -63,9 +67,9 @@ class OneTestRunner:
 
     def run_one_step(self, name: str, params: BinaryParams, result_validator: ResultValidator,
                      return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
-            -> Tuple[bool, TestReport, Optional[str]]:
+            -> tuple[bool, TestReport, str | None]:
 
-        cmd = self.test_env.cmd_prefix + [str(params.executor)]
+        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
         cmd.extend(params.flags)
 
         passed = False
@@ -76,12 +80,13 @@ class OneTestRunner:
             passed, fail_kind, output, error, return_code = self.__run(
                 name, params, result_validator, return_code_interpreter)
         except subprocess.SubprocessError as ex:
-            fail_kind = self.__fail_kind_other(name)
+            fail_kind = self.__fail_kind_subprocess(name)
             fail_kind_msg = f"{name}: Failed with {str(ex).strip()}"
             error = f"{error}\n{fail_kind_msg}" if error else fail_kind_msg
             return_code = -1
         self.__log_cmd(f"{name}: Actual error: {error.strip()}")
         self.__log_cmd(f"{name}: Actual return code: {return_code}\n")
+        fail_kind = fail_kind if fail_kind is not None and not passed else self.__fail_kind_other(name)
 
         report = TestReport(
             output=output,
@@ -95,8 +100,8 @@ class OneTestRunner:
         self.reproduce += f"\n{cmd}"
 
     def __run(self, name: str, params: BinaryParams, result_validator: ResultValidator,
-              return_code_interpreter: ReturnCodeInterpreter) -> Tuple[bool, str, str, str, int]:
-        cmd = self.test_env.cmd_prefix + [str(params.executor)]
+              return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
+        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
         cmd.extend(params.flags)
         passed = False
         output = ""
@@ -112,7 +117,7 @@ class OneTestRunner:
                 encoding='utf-8',
                 errors='ignore',
         ) as process:
-            fail_kind: Optional[str] = None
+            fail_kind: str | None = None
             try:
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = return_code_interpreter(output, error, process.returncode)

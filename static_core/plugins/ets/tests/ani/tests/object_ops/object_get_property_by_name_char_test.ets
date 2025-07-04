@@ -33,5 +33,5 @@ class Car {
 }
 
 function newCarObject() {
-    return new Car("Porsche", "Porsche 911", 'z', 'a');
+    return new Car("Porsche", "Porsche 911", c'z', c'a');
 }

@@ -45,8 +45,8 @@ function main() {
     "Chloe": C,
   };
 
-  assertEQ( map.size, 3)
-  assertEQ( map.get("John"), J)
-  assertEQ( map.get("Alice"), A)
-  assertEQ( map.get("Chloe"), C)
+  arktest.assertEQ( map.size, 3)
+  arktest.assertEQ( map.get("John"), J)
+  arktest.assertEQ( map.get("Alice"), A)
+  arktest.assertEQ( map.get("Chloe"), C)
 }

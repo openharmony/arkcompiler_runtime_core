@@ -18,9 +18,10 @@
 import logging
 import subprocess
 from copy import deepcopy
-from os import path, remove
+from os import path, remove, makedirs
 from typing import List, Callable, Tuple, Optional
 from unittest import TestCase
+from pathlib import Path
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
@@ -98,14 +99,22 @@ class TestFileBased(Test):
     # pylint: disable=too-many-locals
     def run_one_step(self, name: str, params: Params, result_validator: ResultValidator, no_log: bool = False) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
-        profraw_file, profdata_file = None, None
-        if self.test_env.config.general.coverage.use_llvm_cov:
+        coverage_per_binary = self.test_env.config.general.coverage.coverage_per_binary
+        profraw_file, profdata_file, params = self.__get_prof_files(name, params)
+
+        if self.test_env.config.general.coverage.use_lcov and coverage_per_binary:
+            gcov_prefix, gcov_prefix_strip = self.coverage.lcov_tool.get_gcov_prefix(name)
             params = deepcopy(params)
+<<<<<<< HEAD
             if self.test_env.config.general.coverage.llvm_cov_report_by_components:
                 profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths(name)
             else:
                 profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
             params.env['LLVM_PROFILE_FILE'] = profraw_file
+=======
+            params.env['GCOV_PREFIX'] = gcov_prefix
+            params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
+>>>>>>> OpenHarmony_feature_20250328
 
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
@@ -144,7 +153,7 @@ class TestFileBased(Test):
                 return_code = -1
 
         if self.test_env.config.general.coverage.use_llvm_cov and profdata_file and profraw_file:
-            self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
+            self.coverage.llvm_cov_tool.merge_and_delete_prowraw_files(profraw_file, profdata_file)
 
         report = TestReport(output.strip(), error.strip(), return_code)
 
@@ -268,3 +277,28 @@ class TestFileBased(Test):
         )
 
         return *(self.run_one_step("ark_quick", params, result_validator)), dst_abc
+
+    def get_tests_abc(self) -> str:
+        bytecode_path = self.test_env.work_dir.intermediate
+        test_abc = path.join(bytecode_path, f"{self.test_id}.abc")
+        makedirs(path.dirname(test_abc), exist_ok=True)
+        return test_abc
+
+    def __get_prof_files(
+            self,
+            name: str,
+            params: Params
+        ) -> Tuple[Optional[Path], Optional[Path], Params]:
+        profraw_file, profdata_file = None, None
+        if not self.test_env.config.general.coverage.use_llvm_cov:
+            return profraw_file, profdata_file, params
+
+        if self.test_env.config.general.coverage.coverage_per_binary:
+            profraw_file, profdata_file = self.coverage.llvm_cov_tool.get_uniq_profraw_profdata_file_paths(name)
+        else:
+            profraw_file, profdata_file = self.coverage.llvm_cov_tool.get_uniq_profraw_profdata_file_paths()
+
+        params = deepcopy(params)
+        params.env['LLVM_PROFILE_FILE'] = str(profraw_file)
+
+        return profraw_file, profdata_file, params

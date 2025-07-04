@@ -188,6 +188,15 @@ if(TARGET es2panda)
         add_custom_command(TARGET etsstdlib 
             COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
         )
+
+        if (PANDA_TARGET_X86 OR PANDA_TARGET_AMD64)
+            add_custom_target(run-spec-checker
+                COMMENT "Running checker for specification code snippets"
+                COMMAND PANDA_ROOT=${PANDA_BINARY_ROOT} python3 ${CMAKE_SOURCE_DIR}/plugins/ets/tools/specification_checker.py --spec-folder ${CMAKE_SOURCE_DIR}/plugins/ets/doc/concurrency
+                DEPENDS ark)
+            add_dependencies(ets_tests run-spec-checker)
+        endif()
+
     endif()
 else()
     message(WARNING "es2panda was not found for etsstdlib and etssdk build")

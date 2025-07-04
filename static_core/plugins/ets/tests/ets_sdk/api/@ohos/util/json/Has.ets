@@ -28,8 +28,8 @@ function main() {
 
 function testJsonHas() {
     let o = new Obj()
-    assertEQ(json.has(o, "a"), true)
-    assertEQ(json.has(o, "bar"), true)
-    assertEQ(json.has(o, "foo"), true)
-    assertEQ(json.has(o, "blablabla"), false)
+    arktest.assertEQ(json.has(o, "a"), true)
+    arktest.assertEQ(json.has(o, "bar"), true)
+    arktest.assertEQ(json.has(o, "foo"), true)
+    arktest.assertEQ(json.has(o, "blablabla"), false)
 }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,13 @@
 
 class Operations {
     static sum(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
-};
+}
 
 class A {
     static funcA(a0: short, a1: short): short {
-        return a0 + a1 as short;
+        return (a0 + a1).toShort();
     }
 
     static funcA(a0: int, a1: int): int {
@@ -31,9 +32,52 @@ class A {
     static funcB(a0: short, a1: short): short {
         return A.funcA(a0, a1);
     }
-};
+}
+
 class B extends A{
     static funcB(a0: short, a1: short): short {
-        return a1 - a0 as short;
+        return (a1 - a0).toShort();
     }
-};
+}
+
+class C extends A{
+}
+
+class D extends A{
+    static funcA(a0: short, a1: short): short {
+        return (a1 - a0).toShort();
+    }
+}
+
+class E extends A{
+    static funcA(a0: short, a1: short): short {
+        return A.funcA(a0, a1);
+    }
+}
+
+class F {
+    static increment(a0: short, a1: short): void {
+        F.count += a0;
+        F.count += a1;
+    }
+
+    static getCount(): short {
+        return F.count;
+    }
+
+    static count: short = 0;
+}
+
+class G {
+    public static publicMethod(a0: short, a1: short): short {
+        return (a0 + a1).toShort();
+    }
+
+    private static privateMethod(a0: short, a1: short): short {
+        return (a1 - a0).toShort();
+    }
+
+    static callPrivateMethod(a0: short, a1: short): short {
+        return G.privateMethod(a0, a1);
+    }
+}

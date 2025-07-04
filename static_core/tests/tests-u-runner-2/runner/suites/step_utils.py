@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
 
 
 from pathlib import Path
-from typing import List
 
 import yaml
 
@@ -31,7 +30,7 @@ class StepUtils:
         report_path = generated_folder / self.TEST_GENERATOR_REPORT
         return report_path.is_file()
 
-    def create_report(self, generated_folder: Path, tests: List[Path]) -> None:
+    def create_report(self, generated_folder: Path, tests: list[Path]) -> None:
         report_path = generated_folder / self.TEST_GENERATOR_REPORT
         report_obj = {}
         for test_full_name in tests:

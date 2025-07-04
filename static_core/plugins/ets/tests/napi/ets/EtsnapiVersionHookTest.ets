@@ -20,14 +20,14 @@ class EtsnapiVersionHookTest {
 
     public native static hello(): String;
 
-    public run(): void throws {
+    public run(): void {
         if (!("Hello" == EtsnapiVersionHookTest.hello())) {
             throw new Exception("ERROR: error return value from ETSNAPI");
         }
     }
 }
 
-function main(): void throws {
+function main(): void {
     let a: EtsnapiVersionHookTest = new EtsnapiVersionHookTest;
     a.run();
 }

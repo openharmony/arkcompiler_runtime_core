@@ -16,7 +16,7 @@
 import {Stack} from "@ohos.util.Stack";
 
 function main() {
-    const suite = new ArkTestsuite("Stack API tests");
+    const suite = new arktest.ArkTestsuite("Stack API tests");
 
     suite.addTest("Stack create an instance that stores single-type data", testCreateSingleTypeInstance);
     suite.addTest("Stack create an instance that stores multiple types of data", testCreateMultiTypeInstance);
@@ -53,54 +53,37 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let stack: Stack<number>;
-    try {
-        stack = new Stack<number>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Stack");
-        return;
-    }
-    stack.push(TestData.testNumber3);
-    assertEQ(stack.length, TestData.testNumber1, "Stack length should be 1 after adding one element");
+    arktest.expectNoThrow(() => {stack = new Stack<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let stack: Stack<number | string | object>;
-    try {
-        stack = new Stack<number | string | object | boolean>();
-    } catch (e) {
-        assertTrue(false, "Failed to create a single-type instance of Stack");
-        return;
-    }
-    stack.push(TestData.testString1);
-    stack.push(TestData.testObject1);
-    stack.push(TestData.testNumber3);
-    stack.push(true);
-    assertEQ(stack.length, TestData.testNumber4, "Stack length should be 4 after adding four elements");
+    arktest.expectNoThrow(() => {stack = new Stack<number | string | object | boolean>()});
 }
 
 function testStackLength() {
     let stack = new Stack<number>();
-    assertEQ(stack.length, 0, "Initial stack length should be 0");
+    arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     stack.push(TestData.testNumber3);
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
-    assertEQ(stack.length, TestData.testNumber3, "Stack length should be 3 after adding three elements");
+    arktest.assertEQ(stack.length, TestData.testNumber3, "Stack length should be 3 after adding three elements");
     stack.pop();
     stack.pop();
-    assertEQ(stack.length, TestData.testNumber1, "Stack length should be 1 after popping two elements");
+    arktest.assertEQ(stack.length, TestData.testNumber1, "Stack length should be 1 after popping two elements");
 }
 
 function testStackLengthMixedTypes() {
     let stack = new Stack<number | string | boolean | undefined>();
-    assertEQ(stack.length, 0, "Initial stack length should be 0");
+    arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     stack.push(TestData.testNumber3);
     stack.push(TestData.testString1);
     stack.push(true);
     stack.push(undefined);
-    assertEQ(stack.length, TestData.testNumber4, "Stack length should be 4 after adding four elements of mixed types");
+    arktest.assertEQ(stack.length, TestData.testNumber4, "Stack length should be 4 after adding four elements of mixed types");
     stack.pop();
     stack.pop();
-    assertEQ(stack.length, TestData.testNumber2, "Stack length should be 2 after popping two elements");
+    arktest.assertEQ(stack.length, TestData.testNumber2, "Stack length should be 2 after popping two elements");
 }
 
 function testStackLengthLargeNumber() {
@@ -108,7 +91,7 @@ function testStackLengthLargeNumber() {
     for (let i: number = 0; i < TestData.testNumber1w; i++) {
         stack.push(TestData.testNumber1);
     }
-    assertEQ(stack.length, TestData.testNumber1w, "Stack length should be 10000 after adding elements");
+    arktest.assertEQ(stack.length, TestData.testNumber1w, "Stack length should be 10000 after adding elements");
 }
 
 function testStackPush() {
@@ -116,16 +99,16 @@ function testStackPush() {
     initializeStack(stack, TestData.forNumber);
     let countForEach = 0;
     stack.forEach((value: number) => {
-        assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
+        arktest.assertEQ(value, TestData.forNumber[countForEach++], "Element should match");
     });
-    assertEQ(countForEach, stack.length, "Stack length same as foreach");
-    assertEQ(stack.length, TestData.forNumber.length, "Stack length same as TestData.forNumber");
+    arktest.assertEQ(countForEach, stack.length, "Stack length same as foreach");
+    arktest.assertEQ(stack.length, TestData.forNumber.length, "Stack length same as TestData.forNumber");
 }
 
 function testPopFromEmptyStack() {
     let stack = new Stack<number>();
-    assertEQ(stack.length, 0, "Initial stack length should be 0");
-    assertEQ(stack.pop(), undefined, "Pop from empty stack should return undefined");
+    arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
+    arktest.assertEQ(stack.pop(), undefined, "Pop from empty stack should return undefined");
 }
 
 function testPopFromNonEmptyStack() {
@@ -134,33 +117,33 @@ function testPopFromNonEmptyStack() {
         stack.push(TestData.testNumber3);
     }
     stack.push(TestData.testNumber1);
-    assertEQ(stack.length, TestData.testNumber6, "Stack length should be 6 after inserting six elements");
-    assertEQ(stack.pop(), TestData.testNumber1, "Pop from non-empty stack should return last element");
-    assertEQ(stack.length, TestData.testNumber5, "Pop from non-empty stack should update length");
+    arktest.assertEQ(stack.length, TestData.testNumber6, "Stack length should be 6 after inserting six elements");
+    arktest.assertEQ(stack.pop(), TestData.testNumber1, "Pop from non-empty stack should return last element");
+    arktest.assertEQ(stack.length, TestData.testNumber5, "Pop from non-empty stack should update length");
     let countForEach = 0;
     stack.forEach((value: number) => {
-        assertEQ(value, TestData.testNumber3, "Element should match");
+        arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
-    assertEQ(countForEach, stack.length, "Stack length same as foreach");
+    arktest.assertEQ(countForEach, stack.length, "Stack length same as foreach");
 }
 
 function testPeekEmptyStack() {
     let stack = new Stack<number>();
-    assertEQ(stack.length, 0, "Initial stack length should be 0");
-    assertEQ(stack.peek(), undefined, "Peek from empty stack should return undefined");
+    arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
+    arktest.assertEQ(stack.peek(), undefined, "Peek from empty stack should return undefined");
 }
 
 function testPeekNonEmptyStack() {
     let stack = new Stack<number>();
     stack.push(TestData.testNumber1);
     stack.push(TestData.testNumber2);
-    assertEQ(stack.peek(), TestData.testNumber2, "Peek should return the new top element");
-    assertEQ(stack.length, TestData.testNumber2, "Stack length should be 2 after adding two elements");
+    arktest.assertEQ(stack.peek(), TestData.testNumber2, "Peek should return the new top element");
+    arktest.assertEQ(stack.length, TestData.testNumber2, "Stack length should be 2 after adding two elements");
 }
 
 function initializeStack<T>(stack: Stack<T>, sourceArray: T[]) {
     for (let i = 0; i < sourceArray.length; i++) {
-        assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
+        arktest.assertEQ(stack.push(sourceArray[i]), sourceArray[i], "The result should be the added element");
     }
 }

@@ -75,3 +75,4 @@ build-sdk/sdk/tslinter/dist/lib.webworker.importscripts.d.ts
 build-sdk/sdk/tslinter/dist/lib.webworker.iterable.d.ts
 build-sdk/sdk/tslinter/dist/tslinter.js
 build-sdk/sdk/tslinter/package.json
+build-sdk/sdk/tslinter/rule-config.json

@@ -18,12 +18,20 @@
 
 #include "heap/visitor.h"
 
+<<<<<<< HEAD
 namespace common {
+=======
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 class Root {
 public:
     // ArkTS1.2 Roots scanning
     // static inline void VisitStaticRoots(GCRootVisitor *visitor);
 };
 
+<<<<<<< HEAD
 }  // namespace common
+=======
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_HEAP_ROOT_H

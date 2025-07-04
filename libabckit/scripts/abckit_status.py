@@ -55,7 +55,7 @@ specs = ['public:', 'private:', 'protected:']
 libabckit_dir = script_dir.rsplit('/', 1)[0]
 abckit_tests = os.path.join(libabckit_dir, 'tests')
 
-c_sources = {'include/c', 'src/include_v2/c/isa'}
+c_sources = {'include/libabckit/c'}
 
 c_tests = {
     'tests/canary', 'tests/helpers', 'tests/internal', 'tests/null_args_tests',
@@ -63,7 +63,7 @@ c_tests = {
     'tests/stress', 'tests/ut tests/wrong_ctx_tests', 'tests/wrong_mode_tests'
 }
 
-cpp_sources = {'include/cpp'}
+cpp_sources = {'include/libabckit/cpp'}
 
 cpp_tests = {
     'tests/cpp/tests',

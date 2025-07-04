@@ -32,7 +32,7 @@ TEST_F(CallObjectMethodByteTest, object_call_method_byte_a)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_value args[VAL1];
     ani_byte arg1 = VAL4;
@@ -50,7 +50,7 @@ TEST_F(CallObjectMethodByteTest, object_call_method_byte_v)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ani_byte arg1 = VAL1;
@@ -63,7 +63,7 @@ TEST_F(CallObjectMethodByteTest, object_call_method_byte)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ani_byte arg1 = VAL3;
@@ -76,7 +76,7 @@ TEST_F(CallObjectMethodByteTest, call_method_byte_v_invalid_env)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ani_byte arg1 = VAL4;
@@ -88,7 +88,7 @@ TEST_F(CallObjectMethodByteTest, call_method_byte_v_invalid_method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ani_byte arg1 = VAL4;
@@ -100,7 +100,7 @@ TEST_F(CallObjectMethodByteTest, call_method_byte_v_invalid_result)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte arg1 = VAL4;
     ani_byte arg2 = VAL5;
@@ -111,7 +111,7 @@ TEST_F(CallObjectMethodByteTest, call_method_byte_v_invalid_object)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ani_byte arg1 = VAL4;
@@ -123,7 +123,7 @@ TEST_F(CallObjectMethodByteTest, call_method_byte_a_invalid_args)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte sum = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Byte_A(object, method, &sum, nullptr), ANI_INVALID_ARGS);
@@ -133,7 +133,7 @@ TEST_F(CallObjectMethodByteTest, call_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethodVoidParam", ":B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethodVoidParam", ":b", &object, &method);
 
     ani_byte result = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Byte(object, method, &result), ANI_OK);
@@ -148,7 +148,7 @@ TEST_F(CallObjectMethodByteTest, call_Multiple_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethodMultipleParam", "BZFFB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethodMultipleParam", "bzffb:b", &object, &method);
 
     ani_value args[5U] = {};
     ani_byte arg1 = VAL1;
@@ -174,7 +174,7 @@ TEST_F(CallObjectMethodByteTest, call_Parent_Class_Void_Param_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/B;", "byteMethodVoidParam", ":B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.B", "byteMethodVoidParam", ":b", &object, &method);
 
     ani_byte result = 0U;
     ASSERT_EQ(env_->Object_CallMethod_Byte(object, method, &result), ANI_OK);
@@ -188,7 +188,7 @@ TEST_F(CallObjectMethodByteTest, call_Parent_Class_Void_Param_Method)
 TEST_F(CallObjectMethodByteTest, call_Parent_Class_Method)
 {
     ani_class clsC {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_byte_test/C;", &clsC), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_byte_test.C", &clsC), ANI_OK);
     ASSERT_NE(clsC, nullptr);
 
     ani_method method {};
@@ -196,10 +196,10 @@ TEST_F(CallObjectMethodByteTest, call_Parent_Class_Method)
     ASSERT_NE(method, nullptr);
 
     ani_class clsD {};
-    ASSERT_EQ(env_->FindClass("Lcall_object_method_byte_test/D;", &clsD), ANI_OK);
+    ASSERT_EQ(env_->FindClass("call_object_method_byte_test.D", &clsD), ANI_OK);
     ASSERT_NE(clsD, nullptr);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":V", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(clsD, "<ctor>", ":", &ctor), ANI_OK);
 
     ani_object object {};
     ASSERT_EQ(env_->Object_New(clsD, ctor, &object), ANI_OK);
@@ -222,7 +222,7 @@ TEST_F(CallObjectMethodByteTest, call_Sub_Class_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/E;", "func", nullptr, &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.E", "func", nullptr, &object, &method);
 
     ani_byte result = 0U;
     ani_value args[2U] = {};
@@ -241,7 +241,7 @@ TEST_F(CallObjectMethodByteTest, multiple_Call_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "byteMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "byteMethod", "bb:b", &object, &method);
 
     ani_byte result = 0U;
     ani_value args[2U] = {};
@@ -262,7 +262,7 @@ TEST_F(CallObjectMethodByteTest, call_Nested_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "nestedMethod", "BB:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "nestedMethod", "bb:b", &object, &method);
 
     ani_byte result = 0U;
     ani_value args[2U] = {};
@@ -282,7 +282,7 @@ TEST_F(CallObjectMethodByteTest, call_Recursion_Method)
 {
     ani_object object {};
     ani_method method {};
-    GetMethodAndObject("Lcall_object_method_byte_test/A;", "recursionMethod", "B:B", &object, &method);
+    GetMethodAndObject("call_object_method_byte_test.A", "recursionMethod", "b:b", &object, &method);
 
     ani_byte result = 0U;
     ani_value args[1U] = {};

@@ -17,7 +17,9 @@
 #define PANDA_INST_BUILDER_INL_H
 
 #include "inst_builder.h"
+#include "macros.h"
 #include "optimizer/code_generator/encode.h"
+#include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
 
@@ -43,12 +45,11 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
     pc_ = Builder()->GetPc(bcInst->GetAddress());
     hasImplicitArg_ = !GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_);
 
-    if (GetRuntime()->IsMethodIntrinsic(Builder()->GetMethod(), methodId_)) {
-        // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
-        // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
-        method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
-        BuildIntrinsic();
-        return;
+    if (auto *intrinsic = GetRuntime()->GetMethodAsIntrinsic(Builder()->GetMethod(), methodId_)) {
+        method_ = intrinsic;
+        if (TryBuildIntrinsic()) {
+            return;
+        }
     }
     // Here "GetMethodById" can be used without additional checks, result may be nullptr and it is normal situation
     method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
@@ -170,12 +171,10 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
-        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
+        Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId_, SLOT_KIND);
@@ -184,8 +183,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallStatic) {
             call_ =
                 GetGraph()->CreateInstCallStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchStatic(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -201,16 +198,12 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ = GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_,
                                                               method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     } else if (method_ == nullptr || Builder()->ForceUnresolved()) {
         resolver_ = GetGraph()->CreateInstResolveVirtual(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
-        } else {
-            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_);
         }
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(Builder()->GetMethod(), methodId_, SLOT_KIND);
@@ -220,8 +213,6 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
         if constexpr (OPCODE == Opcode::CallVirtual) {
             call_ =
                 GetGraph()->CreateInstCallVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
-        } else {
-            call_ = GetGraph()->CreateInstCallLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     }
 }
@@ -233,11 +224,11 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     [[maybe_unused]] uint32_t classId)
 {
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
+    if constexpr (OPCODE == Opcode::CallStatic) {
         BuildCallStaticInst(classId);
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
+    if constexpr (OPCODE == Opcode::CallVirtual) {
         BuildCallVirtualInst();
     }
     if (UNLIKELY(call_ == nullptr)) {
@@ -383,8 +374,8 @@ void InstBuilder::BuildStringLengthIntrinsic(const BytecodeInstruction *bcInst, 
 
     Inst *stringLength;
     if (graph_->GetRuntime()->IsCompressedStringsEnabled()) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;
@@ -553,6 +544,23 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     Builder()->BuildMonitor(bcInst_, Builder()->GetArgDefinition(bcInst_, 0, ACC_READ), isEnter);
 }
 
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+bool InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::TryBuildIntrinsic()
+{
+    auto runtime = GetRuntime();
+    auto isMethodStatic = runtime->IsMethodStatic(method_);
+    auto isMethodFinal = runtime->IsMethodFinal(method_);
+    auto isClassFinal = runtime->IsClassFinal(runtime->GetClass(method_));
+    if (isMethodStatic || isMethodFinal || isClassFinal) {
+        BuildIntrinsic();
+        return true;
+    }
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Skips building intrinsic '"
+                                    << GetIntrinsicName(runtime->GetIntrinsicId(method_))
+                                    << "' since the method and class is not final.";
+    return false;
+}
+
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
 void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildIntrinsic()
@@ -674,30 +682,6 @@ template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false>:
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
-template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false, false>::BuildCallHelper(
-    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
@@ -744,6 +728,9 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
             loadField->ClearFlag(inst_flags::NO_CSE);
         }
         inst = loadField;
+    }
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        static_cast<LoadInst *>(inst)->SetNeedBarrier(true);
     }
 
     AddInstruction(inst);
@@ -848,8 +835,9 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
         }
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved static field address
-        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolveField,
-                                                                         TypeIdMixin {typeId, GetGraph()->GetMethod()});
+        auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
+        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(
+            type, pc, resolveField, TypeIdMixin {typeId, GetGraph()->GetMethod()}, false, needsBarrier);
         return loadField;
     }
 
@@ -858,8 +846,9 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t 
     auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
                                                         GetRuntime()->GetClassForField(field));
+    auto needsBarrier = (type == DataType::REFERENCE) && GetRuntime()->NeedsPreReadBarrier();
     auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, TypeIdMixin {typeId, GetGraph()->GetMethod()},
-                                                  field, GetRuntime()->IsFieldVolatile(field));
+                                                  field, GetRuntime()->IsFieldVolatile(field), needsBarrier);
     // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
     // `IsInConstructor` check should not be necessary, but need proper frontend support first
     constexpr bool IS_STATIC = true;
@@ -888,7 +877,10 @@ void InstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::T
     }
     auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
     AddInstruction(saveState);
-    Inst *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
+    auto *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        static_cast<LoadStaticInst *>(inst)->SetNeedBarrier(true);
+    }
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
 }
@@ -992,6 +984,9 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Ty
     // Create instruction
     auto inst = graph_->CreateInstLoadArray(type, pc, nullCheck, boundsCheck);
     boundsCheck->SetInput(1, GetDefinitionAcc());
+    if (type == DataType::REFERENCE && GetRuntime()->NeedsPreReadBarrier()) {
+        inst->SetNeedBarrier(true);
+    }
     AddInstruction(saveState, nullCheck, arrayLength, boundsCheck, inst);
     UpdateDefinitionAcc(inst);
 }
@@ -1616,8 +1611,8 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
 
     Inst *stringLength = nullptr;
     if (compressionEnabled) {
-        auto constOneInst = graph_->FindOrCreateConstant(1);
-        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constOneInst);
+        auto constTwoInst = graph_->FindOrCreateConstant(ark::coretypes::String::STRING_LENGTH_SHIFT);
+        stringLength = graph_->CreateInstShr(DataType::INT32, bcAddr, arrayLength, constTwoInst);
         AddInstruction(stringLength);
     } else {
         stringLength = arrayLength;
@@ -1638,6 +1633,80 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
     return true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                          [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildIsInstanceAny([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                     [[maybe_unused]] DataType::Type type)
+{
+    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    failed_ = true;
 }
 
 }  // namespace ark::compiler

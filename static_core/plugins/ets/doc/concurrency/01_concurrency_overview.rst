@@ -10,9 +10,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-###########################
-ArkTS: concurrency
-###########################
+##################
+|LANG| Concurrency
+##################
 
 
 ************
@@ -31,10 +31,10 @@ Overview of concurrency sub-system
 Overview of major concurrency features
 ======================================
 
-In ArkTS we have API for the asynchronous programming(i.e. some tasks can be suspended and resumed later), and support for the coroutines which can run in parallel(implicitly or explicitly).
-Also, since ArkTS coroutines share the memory, the developer should be aware about possible issues with that and use some functionality to guarantee thread safety. 
+In |LANG| we have API for the asynchronous programming(i.e. some tasks can be suspended and resumed later), and support for the coroutines which can run in parallel(implicitly or explicitly).
+Also, since |LANG| coroutines share the memory, the developer should be aware about possible issues with that and use some functionality to guarantee thread safety. 
 
-To support these features and to provide machinery to make trustworthy concurrent programs easily, ArkTS have these items:
+To support these features and to provide machinery to make trustworthy concurrent programs easily, |LANG| have these items:
 
 1. support for asynchronous features (async/await/Promise)
 2. support for coroutines in the standard library
@@ -95,15 +95,15 @@ For async functions lifetime is limited to the lifetime of root coroutine for co
 Threads structure and types of coroutines
 =========================================
 
-In ArkTS VM we have M:N scheduling, i.e. for M coroutines execution N OS-threads are used. The only special thread is `main Thread` and it is always exist. At start we have main Jcoroutine(it is the default main context for execution of JS code) and main Acoroutine(it is default main context for execution of ArkTS code) running on it.  
+In |LANG| VM we have M:N scheduling, i.e. for M coroutines execution N OS-threads are used. The only special thread is `main Thread` and it is always exist. At start we have main Jcoroutine(it is the default main context for execution of JS code) and main Acoroutine(it is default main context for execution of |LANG| code) running on it.  
 
-We have different types of coroutines in ArkTS:
+We have different types of coroutines in |LANG|:
 
 _`Jcoroutine` - async JS function called via interop from the Main or EA domain
 
 _`Acoroutine` - M:N coroutine which can be scheduled to any available thread(except the thread with the main Acoroutine)
 
-_`AJcoroutine` - ArkTS async function(J - means that probably this code was just migrated as it is from JS/TS code and we don't have guarantee that it is safe to apply M:N scheduling for such functions), 
+_`AJcoroutine` - |LANG| async function(J - means that probably this code was just migrated as it is from JS/TS code and we don't have guarantee that it is safe to apply M:N scheduling for such functions), 
 
 _`EAcoroutine` - coroutine which occupy some thread explicitly for itself and for all children(recursively)
 
@@ -113,10 +113,10 @@ _`EAcoroutine` - coroutine which occupy some thread explicitly for itself and fo
   ============================== =================== ================== ========= =================================================
    coroutine type                       Domain        Affinity with      context   how coroutine created                           
   ============================== =================== ================== ========= =================================================
-   Jcoroutine                     Main, EA            root coroutine      JS/TS    interop ArkTS->JS/TS, or directly from JS/TS    
-   main Acoroutine                Main                main thread         ArkTS    interop JS/TS->ArkTS                            
-   Acoroutine                     Main, General, EA   \-                  ArkTS    from main Acoroutine via launch                 
-   AJcoroutine                    Main, General, EA   parent coroutine    ArkTS    from Acoroutine(any) via call of async function 
+   Jcoroutine                     Main, EA            root coroutine      JS/TS    interop |LANG|->JS/TS, or directly from JS/TS    
+   main Acoroutine                Main                main thread         |LANG|   interop JS/TS->|LANG|                            
+   Acoroutine                     Main, General, EA   \-                  |LANG|   from main Acoroutine via launch                 
+   AJcoroutine                    Main, General, EA   parent coroutine    |LANG|   from Acoroutine(any) via call of async function 
   ============================== =================== ================== ========= =================================================
 
 
@@ -152,5 +152,5 @@ If it is possible we need to locate issue with incorrect usage/transfer at Front
 Concurrency: native interop
 ---------------------------
 
-In ArkTS we can have calls to native code. When we have native call the VM cannot control what is happening in it, because the VM is not responsible for execution of native code.
+In |LANG| we can have calls to native code. When we have native call the VM cannot control what is happening in it, because the VM is not responsible for execution of native code.
 It means, that we can't interrupt the coroutine execution for rescheduling. The consequences of it are different, for example if it will happen in the coroutine at the main thread, it will block UI thread and OS could kill application.9

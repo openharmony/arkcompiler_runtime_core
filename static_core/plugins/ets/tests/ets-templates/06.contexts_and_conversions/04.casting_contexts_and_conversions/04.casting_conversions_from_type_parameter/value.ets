@@ -19,7 +19,6 @@
 desc: Casting conversions from type parameter
 tags:
 - compile-only
-- negative
 ---*/
 
 {{c.decl}}

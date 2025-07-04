@@ -19,7 +19,11 @@ cases:
         }
         let lambda = (): A|null => { return new A() }
       use: |-
+<<<<<<< HEAD
           assertEQ( lambda()?.check(), 1 )
+=======
+          arktest.assertEQ( lambda()?.check(), 1 )
+>>>>>>> OpenHarmony_feature_20250328
           
     - decl: |-
         class A {
@@ -27,7 +31,11 @@ cases:
         }
         let lambda = (): A|null => { return new A() }
       use: |-
+<<<<<<< HEAD
           assertTrue( lambda()?.check() === null )
+=======
+          arktest.assertTrue( lambda()?.check() === null )
+>>>>>>> OpenHarmony_feature_20250328
           
     - decl: |-
         class A {
@@ -35,7 +43,11 @@ cases:
         }
         let lambda = (): A|null => { return null }
       use: |-
+<<<<<<< HEAD
           assertTrue( lambda()?.check() === undefined )
+=======
+          arktest.assertTrue( lambda()?.check() === undefined )
+>>>>>>> OpenHarmony_feature_20250328
           
     - decl: |-
         class A {
@@ -43,4 +55,8 @@ cases:
         }
         let lambda = (): A|null => { return null }
       use: |-
+<<<<<<< HEAD
           assertTrue( lambda()?.check() === undefined )
+=======
+          arktest.assertTrue( lambda()?.check() === undefined )
+>>>>>>> OpenHarmony_feature_20250328

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import * as path from 'node:path';
 
 import { logTscDiagnostics } from '../utils/LogTscDiagnostics';
 import { LogLevel, Logger } from '../../utils/logger/Logger';
+import { Extension } from '../utils/Extension'; 
 
 export function defaultCompilerOptions(): ts.CompilerOptions {
   return {
@@ -83,7 +84,7 @@ export function getSourceFilesFromDir(dir: string): string[] {
 
     if (fs.statSync(entityName).isFile()) {
       const extension = path.extname(entityName);
-      if (extension === ts.Extension.Ts || extension === ts.Extension.Tsx) {
+      if (extension === ts.Extension.Ts || extension === ts.Extension.Tsx || extension === Extension.ETS) {
         resultFiles.push(entityName);
       }
     }

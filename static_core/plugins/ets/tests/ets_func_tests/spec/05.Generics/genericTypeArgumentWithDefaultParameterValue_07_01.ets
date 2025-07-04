@@ -31,8 +31,8 @@ class A<T1, T2=string> {
 function main(): void {
     let a = new A<string>("hello", "world");
     let a1 = new A<Int, string>(1, "world")
-    assertTrue( a.data1 instanceof string)
-    assertTrue( a.data2 instanceof string)
-    assertTrue( a1.data1 instanceof Int)
-    assertTrue( a.data2 instanceof string)
+    arktest.assertTrue( a.data1 instanceof string)
+    arktest.assertTrue( a.data2 instanceof string)
+    arktest.assertTrue( a1.data1 instanceof Int)
+    arktest.assertTrue( a.data2 instanceof string)
 }

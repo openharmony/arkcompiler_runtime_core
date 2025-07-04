@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <vector>
-#include <iostream>
 #include "constants.h"
 #include "datatype.h"
 
@@ -163,9 +162,9 @@ enum FlagsIndex {
 };
 }  // namespace internal
 
-enum Flags : uint32_t {
+enum Flags : uint64_t {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FLAG_DEF(flag) flag = (1U << internal::flag##_INDEX),
+#define FLAG_DEF(flag) flag = (1ULL << internal::flag##_INDEX),
     FLAGS_LIST(FLAG_DEF)
 #undef FLAG_DEF
         FLAGS_COUNT = internal::FLAGS_COUNT,
@@ -179,6 +178,11 @@ inline constexpr uintptr_t GetFlagsMask(Opcode opcode)
     constexpr std::array<uintptr_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
 #undef INST_DEF
     return INST_FLAGS_TABLE[static_cast<size_t>(opcode)];
+}
+
+inline constexpr bool HasFlag(Opcode opcode, Flags flag)
+{
+    return (GetFlagsMask(opcode) & flag) != 0;
 }
 }  // namespace inst_flags
 
@@ -863,22 +867,13 @@ public:
     {
         return GetFlag(inst_flags::CF);
     }
-    bool IsVirtualLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchVirtual || GetOpcode() == Opcode::CallResolvedLaunchVirtual;
-    }
     bool IsVirtualCall() const
     {
-        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual ||
-               IsVirtualLaunchCall();
-    }
-    bool IsStaticLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchStatic || GetOpcode() == Opcode::CallResolvedLaunchStatic;
+        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual;
     }
     bool IsStaticCall() const
     {
-        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
+        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic;
     }
     bool IsNativeApiCall() const
     {
@@ -921,10 +916,6 @@ public:
     bool IsDynamicCall() const
     {
         return GetOpcode() == Opcode::CallDynamic;
-    }
-    bool IsLaunchCall() const
-    {
-        return IsStaticLaunchCall() || IsVirtualLaunchCall();
     }
     bool IsIndirectCall() const
     {
@@ -1557,6 +1548,11 @@ public:
         return Accessor::Get(bitFields_);
     }
 
+    void SetAllFields(uint64_t bitFields)
+    {
+        bitFields_ = bitFields;
+    }
+
     uint64_t GetAllFields() const
     {
         return bitFields_;
@@ -1708,7 +1704,7 @@ protected:
     }
 
 protected:
-    using FieldFlags = BitField<uint32_t, 0, MinimumBitsToStore(1U << inst_flags::FLAGS_COUNT)>;
+    using FieldFlags = BitField<uint64_t, 0, MinimumBitsToStore(1ULL << inst_flags::FLAGS_COUNT)>;
     using FieldType = FieldFlags::NextField<DataType::Type, MinimumBitsToStore(DataType::LAST)>;
     using InputsCount = FieldType::NextField<uint32_t, BITS_PER_INPUTS_NUM>;
     using LastField = InputsCount;
@@ -2982,6 +2978,11 @@ public:
         return GetInput(GetObjectIndex()).GetInst();
     }
 
+    const Inst *GetObjectInst() const
+    {
+        return GetInput(GetObjectIndex()).GetInst();
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(inputTypes_ != nullptr);
@@ -3970,21 +3971,55 @@ public:
     }
 
     Inst *Clone(const Graph *targetGraph) const override;
-#ifndef NDEBUG
+
     void SetInputsWereDeleted()
     {
         SetField<FlagInputsWereDeleted>(true);
     }
 
-    bool GetInputsWereDeleted()
+    bool GetInputsWereDeleted() const
     {
         return GetField<FlagInputsWereDeleted>();
+    }
+
+    bool GetInputsWereDeletedRec() const;
+
+    static bool InstMayRequireRegMap(const Inst *inst)
+    {
+        // The call may be inlined later on and have Deoptimize or DeoptimizeIf
+        // Or the block may become try after inlining
+        return inst->RequireRegMap() || inst->IsCall() || inst->CanThrow();
+    }
+
+    template <typename PredT = bool (*)(const Inst *)>
+    bool CanRemoveInputs(PredT &&mayRequireRegMap = SaveStateInst::InstMayRequireRegMap) const
+    {
+        for (auto &user : GetUsers()) {
+            if (mayRequireRegMap(user.GetInst())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+#ifndef NDEBUG
+    bool GetInputsWereDeletedSafely() const
+    {
+        return GetField<FlagInputsWereDeletedSafely>();
+    }
+
+    void SetInputsWereDeletedSafely()
+    {
+        SetField<FlagInputsWereDeletedSafely>(true);
     }
 #endif
 
 protected:
-#ifndef NDEBUG
     using FlagInputsWereDeleted = LastField::NextFlag;
+#ifndef NDEBUG
+    using FlagInputsWereDeletedSafely = FlagInputsWereDeleted::NextFlag;
+    using LastField = FlagInputsWereDeletedSafely;
+#else
     using LastField = FlagInputsWereDeleted;
 #endif
 
@@ -7168,6 +7203,22 @@ InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
 }
 
 INST_CAST_TO_DEF()
+
+template <Opcode OPCODE>
+struct OpcodeTraits;
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define SPECIALIZE_OPCODE_TRAITS(OPCODE, BASE, ...) \
+    template <>                                     \
+    struct OpcodeTraits<Opcode::OPCODE> {           \
+        using BaseType = BASE;                      \
+    }; /* CC-OFF(G.PRE.09) code generation */
+
+OPCODE_LIST(SPECIALIZE_OPCODE_TRAITS)
+#undef SPECIALIZE_OPCODE_TRAITS
+
+template <Opcode OPCODE>
+using BaseTypeOf = typename OpcodeTraits<OPCODE>::BaseType;
 
 inline Inst *User::GetInput()
 {

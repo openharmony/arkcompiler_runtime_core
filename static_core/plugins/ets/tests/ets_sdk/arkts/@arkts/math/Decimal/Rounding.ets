@@ -18,7 +18,7 @@ import {Modulo, Rounding} from "@arkts.math.Decimal"
 function main(): int {
 
     let b: Rounding = 6
-    assertTrue(typeof b == "number", "Rounding type is not a number!")
+    arktest.assertTrue(typeof b == "number", "Rounding type is not a number!")
 
     return 0
 }

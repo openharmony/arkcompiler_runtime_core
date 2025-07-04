@@ -27,15 +27,15 @@ public:
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
         ani_module module {};
-        ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
         ASSERT_NE(module, nullptr);
 
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "Lops;", &ns), ANI_OK);
+        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Namespace_FindFunction(ns, "or", "ZZ:Z", &fn), ANI_OK);
+        ASSERT_EQ(env_->Namespace_FindFunction(ns, "or", "zz:z", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *nsResult = ns;
@@ -131,14 +131,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_a_invalid_args)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_001)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "II:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "ii:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -155,17 +155,17 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_001)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_002)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA/B;", &nB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nB, "booleanFunctionB", "II:Z", &fB), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nB, "booleanFunctionB", "ii:z", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -182,14 +182,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_002)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_003)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "III:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "iii:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -207,11 +207,11 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_003)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_004)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "I:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "i:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -227,12 +227,12 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_004)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_005)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_boolean value = ANI_FALSE;
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "II:Z", &fB), ANI_OK);
+    ASSERT_EQ(env_->Module_FindFunction(module, "moduleFunction", "ii:z", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
 
     ani_value argsB[2U];
@@ -247,14 +247,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_005)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_006)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "II:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ii:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -271,14 +271,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_006)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_007)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "I:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -295,14 +295,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_007)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_008)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateBoolean", "IICD:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateBoolean", "iicd:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -328,14 +328,14 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_008)
 TEST_F(FunctionCallBooleanTest, function_call_boolean_009)
 {
     ani_module module {};
-    ASSERT_EQ(env_->FindModule("L@functionModule/function_call_boolean_test;", &module), ANI_OK);
+    ASSERT_EQ(env_->FindModule("@functionModule.function_call_boolean_test", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
 
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "LA;", &nA), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "II:Z", &fA), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindFunction(nA, "booleanFunctionA", "ii:z", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
 
     ani_boolean value = ANI_FALSE;
@@ -361,6 +361,58 @@ TEST_F(FunctionCallBooleanTest, function_call_boolean_009)
     ASSERT_EQ(env_->Function_Call_Boolean(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, ANI_TRUE);
 }
+
+TEST_F(FunctionCallBooleanTest, function_call_boolean_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Function_Call_Boolean(nullptr, fn, &result, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Boolean_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(nullptr, &result, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, nullptr, ANI_TRUE, ANI_FALSE), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(FunctionCallBooleanTest, check_initialization_bool)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Boolean(fn, &result, ANI_TRUE, ANI_FALSE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+}
+
+TEST_F(FunctionCallBooleanTest, check_initialization_bool_a)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+    ani_boolean result = ANI_FALSE;
+    ani_value args[2U];
+    args[0U].z = ANI_TRUE;
+    args[1U].z = ANI_FALSE;
+    ASSERT_EQ(env_->Function_Call_Boolean_A(fn, &result, args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("@functionModule.function_call_boolean_test.ops"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

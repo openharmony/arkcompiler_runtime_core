@@ -23,5 +23,5 @@ function main(): void {
   let z: int[] = [0, 2, 4];
 
   let x: int[] = true ? y : z;
-  assertTrue( x == y )
+  arktest.assertTrue( x == y )
 }

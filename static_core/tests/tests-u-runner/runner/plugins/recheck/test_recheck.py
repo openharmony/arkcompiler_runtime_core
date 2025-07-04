@@ -33,11 +33,17 @@ class TestRecheck(TestFileBased):
     def do_run(self) -> TestFileBased:
         self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=self.flags,
+<<<<<<< HEAD
             test_abc='',
             result_validator=self.es2panda_result_validator
         )
         if not self.passed and self.report.output != "Before recheck: ":
             self.passed = True
+=======
+            test_abc=self.get_tests_abc(),
+            result_validator=self.es2panda_result_validator
+        )
+>>>>>>> OpenHarmony_feature_20250328
 
         if not self.passed:
             Log.summary(_LOGGER, f"Test {self.path} failed: {self.fail_kind}")

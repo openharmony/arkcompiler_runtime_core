@@ -30,6 +30,19 @@ namespace ark::ets::intrinsics {
 namespace {
 constexpr int INT_MAX_SIZE = 63;
 constexpr double ROUND_BIAS = 0.5;
+<<<<<<< HEAD
+=======
+constexpr uint32_t RIGHT_12 = 12;
+constexpr uint32_t LEFT_25 = 25;
+constexpr uint32_t RIGHT_27 = 27;
+constexpr uint64_t RANDOM_MULTIPLY = 0x2545F4914F6CDD1D;
+constexpr uint64_t DOUBLE_MASK = 0x3FF0000000000000;
+
+union Uint64ToDouble {
+    double to;
+    uint64_t from;
+};
+>>>>>>> OpenHarmony_feature_20250328
 
 int32_t ToInt32(double x)
 {
@@ -46,6 +59,19 @@ int32_t ToInt32(double x)
     double int64Max = std::pow(2, INT_MAX_SIZE);
     intPart = std::fmod(intPart, int64Max);
     return static_cast<int32_t>(static_cast<int64_t>(intPart));
+<<<<<<< HEAD
+=======
+}
+
+uint64_t XorShift64(uint64_t *ptr)
+{
+    uint64_t val = *ptr;
+    val ^= val >> RIGHT_12;
+    val ^= val << LEFT_25;
+    val ^= val >> RIGHT_27;
+    *ptr = val;
+    return val * RANDOM_MULTIPLY;
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 uint32_t ToUint32(double x)
@@ -56,8 +82,14 @@ uint32_t ToUint32(double x)
 
 extern "C" double StdMathRandom()
 {
-    std::uniform_real_distribution<double> urd(0.0, 1.0);
-    return urd(EtsCoroutine::GetCurrent()->GetPandaVM()->GetRandomEngine());
+    uint64_t threadRandom = XorShift64(EtsCoroutine::GetCurrent()->GetThreadRandomState());
+    uint64_t random = (threadRandom >> RIGHT_12) | DOUBLE_MASK;
+    // The use of security functions 'memcpy_s' here will have a greater impact on performance
+    Uint64ToDouble data {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    data.from = random;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+    return data.to - 1;
 }
 
 extern "C" double StdMathAcos(double val)
@@ -112,9 +144,12 @@ extern "C" double StdMathFloor(double val)
 
 extern "C" double StdMathRound(double val)
 {
+<<<<<<< HEAD
     if (std::signbit(val) && val >= -ROUND_BIAS) {
         return -0.0;
     }
+=======
+>>>>>>> OpenHarmony_feature_20250328
     double res = std::ceil(val);
     if (res - val > ROUND_BIAS) {
         res -= 1.0;

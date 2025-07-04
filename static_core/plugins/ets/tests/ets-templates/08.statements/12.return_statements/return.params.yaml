@@ -54,7 +54,11 @@ block_statements:
   - decl: |
       function test(): void {
         return;
+<<<<<<< HEAD
         assertTrue(true);
+=======
+        arktest.assertTrue(true);
+>>>>>>> OpenHarmony_feature_20250328
       }
     use: |
       test()

@@ -45,7 +45,7 @@ public:
 TEST_F(ClassSetStaticFieldByNameRefTest, static_field_by_name_ref_capi)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -65,7 +65,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, static_field_by_name_ref_capi)
 TEST_F(ClassSetStaticFieldByNameRefTest, static_field_by_name_ref)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -85,7 +85,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, static_field_by_name_ref)
 TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -96,7 +96,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_fi
 TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_args_object)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -107,7 +107,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_ar
 TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_args_field)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -118,7 +118,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_ar
 TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_args_value)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
@@ -129,7 +129,7 @@ TEST_F(ClassSetStaticFieldByNameRefTest, set_static_field_by_name_ref_invalid_ar
 TEST_F(ClassSetStaticFieldByNameRefTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
 
     ani_string string {};
     ani_string string2 {};
@@ -156,23 +156,41 @@ TEST_F(ClassSetStaticFieldByNameRefTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldByNameRefTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_ref_test/BoxStaticA;", "string_value");
+    CheckFieldValue("class_set_static_field_by_name_ref_test.BoxStaticA", "string_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameRefTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_by_name_ref_test/BoxStaticFinal;", "string_value");
+    CheckFieldValue("class_set_static_field_by_name_ref_test.BoxStaticFinal", "string_value");
 }
 
 TEST_F(ClassSetStaticFieldByNameRefTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_by_name_ref_test/BoxStatic;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStatic", &cls), ANI_OK);
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("abcdef", 6U, &string), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "", string), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "\n", string), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Ref(nullptr, cls, "string_value", string), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStaticFinal", &cls), ANI_OK);
+
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 6U, &stringValue), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_valuex", stringValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_value", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

@@ -43,12 +43,12 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
         createLocaleFunction()
     }
     catch (e) {
-        assertTrue(e instanceof RangeError)
-        assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
+        arktest.assertTrue(e instanceof RangeError)
+        arktest.assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
         assertOccurred = true
     }
     finally {
-        assertTrue(assertOccurred)
+        arktest.assertTrue(assertOccurred)
     }
 }
 
@@ -62,21 +62,21 @@ function processInvalidValues(createLocaleFunction : ((arg : string) => Intl.Loc
 function test2String() : int {
     {
         const l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "buddhist"} as Intl.LocaleOptions)
-        assertFalse(l.language == null)
-        assertFalse(l.language == undefined)
-        assertEQ(l.toString(), l.language!.toLowerCase() + "-u-ca-buddhist")
+        arktest.assertFalse(l.language == null)
+        arktest.assertFalse(l.language == undefined)
+        arktest.assertEQ(l.toString(), l.language!.toLowerCase() + "-u-ca-buddhist")
     }
     {
         const l = new Intl.Locale("en-u-kn", {"numeric" : false} as Intl.LocaleOptions)
-        assertFalse(l.language == null)
-        assertFalse(l.language == undefined)
-        assertEQ(l.toString(), l.language!.toLowerCase())
+        arktest.assertFalse(l.language == null)
+        arktest.assertFalse(l.language == undefined)
+        arktest.assertEQ(l.toString(), l.language!.toLowerCase())
     }
     {
         const l = new Intl.Locale("en-u-kn")
-        assertFalse(l.language == null)
-        assertFalse(l.language == undefined)
-        assertEQ(l.toString(), l.language!.toLowerCase() + "-u-kn")
+        arktest.assertFalse(l.language == null)
+        arktest.assertFalse(l.language == undefined)
+        arktest.assertEQ(l.toString(), l.language!.toLowerCase() + "-u-kn")
     }
     {
         processCreateLocaleError(()=>new Intl.Locale("ru-u-ca-gregory-u-kn-u-kf-upper"))
@@ -87,15 +87,15 @@ function test2String() : int {
 function testMinimize() : int {
     let l = new Intl.Locale("en-u-ca-gregory", {"calendar" : "chinese"} as Intl.LocaleOptions)
     l = l.minimize()
-    assertEQ(l.region, undefined)
-    assertEQ(l.script, undefined)
+    arktest.assertEQ(l.region, undefined)
+    arktest.assertEQ(l.script, undefined)
     if (l.language != null && l.language != undefined && l.language!.toLowerCase() == "ru") {
-        assertEQ(l.baseName, "ru")
-        assertEQ(l.toString(), "ru-u-ca-chinese")
+        arktest.assertEQ(l.baseName, "ru")
+        arktest.assertEQ(l.toString(), "ru-u-ca-chinese")
     }
     else {
-        assertEQ(l.baseName, "en")
-        assertEQ(l.toString(), "en-u-ca-chinese")
+        arktest.assertEQ(l.baseName, "en")
+        arktest.assertEQ(l.toString(), "en-u-ca-chinese")
     }
     return success
 }
@@ -104,19 +104,19 @@ function testMaximize() : int {
     let l = new Intl.Locale("ru", {collation : "emoji"} as Intl.LocaleOptions)
     l = l.maximize()
     if (l.language != null && l.language != undefined && l.language!.toLowerCase() == "ru") {
-        assertEQ(l.region, "RU")
-        assertEQ(l.script, "Cyrl")
-        assertEQ(l.baseName, "ru-Cyrl-RU")
-        assertEQ(l.toString(), "ru-Cyrl-RU-u-co-emoji")
+        arktest.assertEQ(l.region, "RU")
+        arktest.assertEQ(l.script, "Cyrl")
+        arktest.assertEQ(l.baseName, "ru-Cyrl-RU")
+        arktest.assertEQ(l.toString(), "ru-Cyrl-RU-u-co-emoji")
     }
     else {
         if (l.language != null && l.language != undefined) {
-            assertEQ(l.language!, "en")
+            arktest.assertEQ(l.language!, "en")
         }
-        assertEQ(l.region, "US")
-        assertEQ(l.script, "Latn")
-        assertEQ(l.baseName, "en-Latn-US")
-        assertEQ(l.toString(), "en-Latn-US-u-co-emoji")
+        arktest.assertEQ(l.region, "US")
+        arktest.assertEQ(l.script, "Latn")
+        arktest.assertEQ(l.baseName, "en-Latn-US")
+        arktest.assertEQ(l.toString(), "en-Latn-US-u-co-emoji")
     }
     return success
 }
@@ -126,42 +126,42 @@ function testTagAndOptions() : int {
     {
         // NOTE(ekaterinazaytseva) set collation in u-ext & in options
         const l = new Intl.Locale("ru-u-co-emoji", {"collation" : "phonebk"} as Intl.LocaleOptions)
-        assertEQ(l.collation, "phonebk")
+        arktest.assertEQ(l.collation, "phonebk")
     }
     {
         // NOTE(ekaterinazaytseva) set collation in u-ext & in options
         const l = new Intl.Locale("ru-u-co-invalid", {"collation" : "phonebk"} as Intl.LocaleOptions)
-        assertEQ(l.collation, "phonebk")
+        arktest.assertEQ(l.collation, "phonebk")
     }
     {
         // NOTE(ekaterinazaytseva) set numeric in u-ext & in options
         const l = new Intl.Locale("ru-u-kn", {"numeric" : false} as Intl.LocaleOptions)
-        assertFalse(l.numeric as boolean)
+        arktest.assertFalse(l.numeric as boolean)
     }
     {
         // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
         const l = new Intl.Locale("ru-u-ca-invalid", {"calendar" : "gregory"} as Intl.LocaleOptions)
-        assertEQ(l.calendar, "gregory")
+        arktest.assertEQ(l.calendar, "gregory")
     }
     {
         // NOTE(ekaterinazaytseva) set calendar in u-ext & in options
         const l = new Intl.Locale("ru-u-ca-japanese", {"calendar" : "gregory"} as Intl.LocaleOptions)
-        assertEQ(l.calendar, "gregory")
+        arktest.assertEQ(l.calendar, "gregory")
     }
     {
         // set caseFirst in u-ext & in options
         const l = new Intl.Locale("ru-u-kf-upper", {"caseFirst" : "lower"} as Intl.LocaleOptions)
-        assertEQ(l.caseFirst, "lower")
+        arktest.assertEQ(l.caseFirst, "lower")
     }
     {
         // NOTE(ekaterinazaytseva) set caseFirst in u-ext & in options
         const l = new Intl.Locale("ru-u-kf-invalid", {"caseFirst" : "lower"} as Intl.LocaleOptions)
-        assertEQ(l.caseFirst, "lower")
+        arktest.assertEQ(l.caseFirst, "lower")
     }
     {
         // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
         const l = new Intl.Locale("ru-u-nu-invalid", {"numberingSystem" : "arab"} as Intl.LocaleOptions)
-        assertEQ(l.numberingSystem, "arab")
+        arktest.assertEQ(l.numberingSystem, "arab")
     }
     {
         // set numberingSystem in u-ext & in options
@@ -170,13 +170,13 @@ function testTagAndOptions() : int {
     {
         // NOTE(ekaterinazaytseva) set numberingSystem in u-ext & in options
         const l = new Intl.Locale("ru-u-nu-arab", {"numberingSystem" : "adlm"} as Intl.LocaleOptions)
-        assertEQ(l.numberingSystem, "adlm")
+        arktest.assertEQ(l.numberingSystem, "adlm")
     }
     {
         // NOTE(ekaterinazaytseva) lang conflict
         const l = new Intl.Locale("ru-Cyrl", {language: "de"} as Intl.LocaleOptions)
-        assertEQ(l.language, "de")
-        assertEQ(l.script, "Cyrl")
+        arktest.assertEQ(l.language, "de")
+        arktest.assertEQ(l.script, "Cyrl")
     }
     return success
 }
@@ -224,14 +224,14 @@ function testIncorrectWithoutErr() : int {
         const falseCorrectValues: ReadonlyArray<string> = Array.of<string>("er", "err", "errrrrrr")
         falseCorrectValues.forEach((correctValue : string) => {
             const l = new Intl.Locale(correctValue)
-            assertEQ(l.language, correctValue)
-            assertEQ(l.toString(), correctValue)
+            arktest.assertEQ(l.language, correctValue)
+            arktest.assertEQ(l.toString(), correctValue)
         })
     }
     {
         const l = new Intl.Locale("ru", {language : "Err"} as Intl.LocaleOptions)
-        assertEQ(l.language, "Err")
-        assertEQ(l.toString(), "Err")
+        arktest.assertEQ(l.language, "Err")
+        arktest.assertEQ(l.toString(), "Err")
     }
     return success
 }
@@ -239,21 +239,21 @@ function testIncorrectWithoutErr() : int {
 function testCreateWithOtherLocale() : int {
     {
         const l = new Intl.Locale("ru", {numeric : true, collation : "emoji"} as Intl.LocaleOptions)
-        assertTrue(l.numeric as boolean)
+        arktest.assertTrue(l.numeric as boolean)
         const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
-        assertFalse(l1.numeric as boolean)
-        assertEQ(l.language, (l1.language))
-        assertEQ(l.collation, (l1.collation))
-        assertEQ(l.numberingSystem, (l1.numberingSystem))
+        arktest.assertFalse(l1.numeric as boolean)
+        arktest.assertEQ(l.language, (l1.language))
+        arktest.assertEQ(l.collation, (l1.collation))
+        arktest.assertEQ(l.numberingSystem, (l1.numberingSystem))
     }
     {
         const l = new Intl.Locale("ru", {numeric : true, collation : "emoji"} as Intl.LocaleOptions)
-        assertTrue(l.numeric as boolean)
+        arktest.assertTrue(l.numeric as boolean)
         const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
-        assertFalse(l1.numeric as boolean)
-        assertEQ(l.language, (l1.language))
-        assertEQ(l.collation, (l1.collation))
-        assertEQ(l.numberingSystem, (l1.numberingSystem))
+        arktest.assertFalse(l1.numeric as boolean)
+        arktest.assertEQ(l.language, (l1.language))
+        arktest.assertEQ(l.collation, (l1.collation))
+        arktest.assertEQ(l.numberingSystem, (l1.numberingSystem))
     }
     return success
 }
@@ -278,15 +278,15 @@ function testManyExtensions() : int {
 function testUpperCaseExtensions() : int {
     {
         let l = new Intl.Locale("ru-U-KN-TRUE")
-        assertEQ(l.numeric, true)
+        arktest.assertEQ(l.numeric, true)
     }
     {
         let l = new Intl.Locale("ru-u-KN-TRUE")
-        assertEQ(l.numeric, true)
+        arktest.assertEQ(l.numeric, true)
     }
     {
         let l = new Intl.Locale("ru-u-KN-true")
-        assertEQ(l.numeric, true)
+        arktest.assertEQ(l.numeric, true)
     }
     return success
 }

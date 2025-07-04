@@ -14,6 +14,11 @@
  */
 
 import HashMap from '@ohos.util.HashMap';
+<<<<<<< HEAD
+=======
+
+export type HashSetCbFn<T> = (value: T, key: T, set: HashSet<T>) => void;
+>>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyHashSet<T> extends Iterable<T> {
     /**
@@ -86,7 +91,7 @@ export class HashSet<T> implements ReadonlyHashSet<T> {
      *
      * @param callbackFn to apply; key is always same as value
      */
-    forEach(callbackFn: (value: T, key: T, set: HashSet<T>) => void): void {
+    forEach(callbackFn: HashSetCbFn<T>): void {
         this.buckets.forEach((value: T, key: T) => {
             callbackFn(value, key, this);
         });

@@ -14,12 +14,15 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap HasKey HasValue SetAll ForEach API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap HasKey HasValue SetAll ForEach API tests")
 
     suite.addTest("TreeMap hasKey hasValue key and value", testHasKeyAndValueExisting)
     suite.addTest("TreeMap hasKey hasValue not set key and value", testHasKeyAndValueNonExisting)
@@ -42,9 +45,9 @@ function testHasKeyAndValueExisting() {
     treeMap.set("aa", "123");
     let hasK = treeMap.hasKey("aa");
     let hasV = treeMap.hasValue("123");
-    assertEQ(hasK, true, "The treeMap should contain the key");
-    assertEQ(hasV, true, "The treeMap should contain the value");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(hasK, true, "The treeMap should contain the key");
+    arktest.assertEQ(hasV, true, "The treeMap should contain the value");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
 }
 
 function testHasKeyAndValueNonExisting() {
@@ -55,9 +58,9 @@ function testHasKeyAndValueNonExisting() {
     treeMap.set("aa", "123");
     let hasK = treeMap.hasKey("bb");
     let hasV = treeMap.hasValue("456");
-    assertEQ(hasK, false, "The treeMap should not contain the key that is not set");
-    assertEQ(hasV, false, "The treeMap should not contain the value that is not set");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(hasK, false, "The treeMap should not contain the key that is not set");
+    arktest.assertEQ(hasV, false, "The treeMap should not contain the value that is not set");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
 }
 
 function testHasKeyAndValueEmptyTreeMap() {
@@ -67,9 +70,9 @@ function testHasKeyAndValueEmptyTreeMap() {
         });
     let hasK = treeMap.hasKey("aa");
     let hasV = treeMap.hasValue("123");
-    assertEQ(hasK, false, "The treeMap should not contain any key when the treeMap is empty");
-    assertEQ(hasV, false, "The treeMap should not contain any value when the treeMap is empty");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(hasK, false, "The treeMap should not contain any key when the treeMap is empty");
+    arktest.assertEQ(hasV, false, "The treeMap should not contain any value when the treeMap is empty");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
 function testSetAllFromEmptyTreeMap() {
@@ -83,9 +86,9 @@ function testSetAllFromEmptyTreeMap() {
         });
     treeMap.set("aa", "123");
     treeMapp.setAll(treeMap);
-    assertEQ(treeMap.length, treeMapp.length, "The treeMap should set all elements from another treeMap");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
-    assertEQ(treeMapp.length, 1, "The treeMapp length should be 1");
+    arktest.assertEQ(treeMap.length, treeMapp.length, "The treeMap should set all elements from another treeMap");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(treeMapp.length, 1, "The treeMapp length should be 1");
 }
 
 function testSetAllFromTreeMap() {
@@ -102,8 +105,8 @@ function testSetAllFromTreeMap() {
         });
     newMap.set("demo", '123');
     newMap.setAll(treeMap);
-    assertEQ(treeMap.length, 3, "The treeMap length should be 1");
-    assertEQ(newMap.length, 4, "The newMap should set all elements from another treeMap");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 1");
+    arktest.assertEQ(newMap.length, 4, "The newMap should set all elements from another treeMap");
 }
 
 function testForEachNoReference() {
@@ -118,7 +121,7 @@ function testForEachNoReference() {
         if (treeMap.get("aa") == 123 && treeMap.get("bb") == 456) {
             flag = true
         }
-        assertEQ(flag, true, "The treeMap should iterate over all elements");
+        arktest.assertEQ(flag, true, "The treeMap should iterate over all elements");
     });
 }
 
@@ -133,7 +136,7 @@ function testForEachValueReference() {
     treeMap.forEach((value: string): void => {
         flag = treeMap.get("aa") === "123" && treeMap.get("bb") === "456";
     });
-    assertEQ(flag, true, "The treeMap should iterate over all elements and check values");
+    arktest.assertEQ(flag, true, "The treeMap should iterate over all elements and check values");
 }
 
 function testForEachValueKeyReference() {
@@ -146,7 +149,7 @@ function testForEachValueKeyReference() {
     let flag = false;
     treeMap.forEach((value: string, key: string): void => {
         flag = treeMap.get(key) === value;
-        assertEQ(flag, true, "The treeMap should iterate over all elements and check keys and values");
+        arktest.assertEQ(flag, true, "The treeMap should iterate over all elements and check keys and values");
     });
 }
 
@@ -160,6 +163,6 @@ function testForEachThreeReferences() {
     let flag = false;
     treeMap.forEach((value: string, key: string, treeMap: TreeMap<string, string>): void => {
         flag = treeMap.get(key) === value;
-        assertEQ(flag, true, "The treeMap should iterate over all elements and check keys, values, and the map itself");
+        arktest.assertEQ(flag, true, "The treeMap should iterate over all elements and check keys, values, and the map itself");
     });
 }

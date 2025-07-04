@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,8 +100,12 @@ public:
     static ObjectHeader *GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                               std::memory_order memoryOrder);
 
-    template <typename T>
+    template <typename T, bool USE_UBYTE_ARITHMETIC = false>
     static T GetAndAddFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
+
+    template <typename T, bool USE_UBYTE_ARITHMETIC = false>
+    static std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> GetAndSubFieldPrimitive(
+        void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
     static T GetAndBitwiseOrFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
@@ -119,6 +123,9 @@ public:
     template <typename T>
     static inline void SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value);
 
+    template <bool IS_VOLATILE = false, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
+    static void FillObjects(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
+
     template <class T>
     static inline T GetDynValue(const void *obj, size_t offset)
     {
@@ -135,21 +142,11 @@ public:
         return reinterpret_cast<ObjectHeader *>(v) != nullptr;
     }
 
-    static bool IsHeapObject(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).IsHeapObject();
-    }
-
     static ObjectHeader *DecodeNotNull(ObjectPointerType v)
     {
         auto *p = reinterpret_cast<ObjectHeader *>(v);
         ASSERT(p != nullptr);
         return p;
-    }
-
-    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).GetHeapObject();
     }
 
     template <typename P>
@@ -169,10 +166,23 @@ public:
         *ref = EncodeObjectPointerType(val);
     }
 
+// NOTE(ipetrov): Hack for 128 bit ObjectHeader
+#if !defined(ARK_HYBRID)
+    static bool IsHeapObject(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).IsHeapObject();
+    }
+
+    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).GetHeapObject();
+    }
+
     static void Store(coretypes::TaggedType *ref, ObjectHeader *val)
     {
         *ref = EncodeTaggedType(val);
     }
+#endif
 
 private:
     template <class T, bool IS_VOLATILE>
@@ -187,6 +197,13 @@ private:
         // Atomic with relaxed order reason: to be compatible with other vms
         return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_relaxed);
     }
+
+    template <bool IS_VOLATILE = false, bool IS_DYN = false>
+    static void FillObjsWithPreBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                       ObjectHeader *value);
+
+    template <bool IS_VOLATILE = false, bool IS_DYN = false>
+    static void FillObjsNoBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
 
     template <class T, bool IS_VOLATILE>
     static void Set(void *obj, size_t offset, T value)

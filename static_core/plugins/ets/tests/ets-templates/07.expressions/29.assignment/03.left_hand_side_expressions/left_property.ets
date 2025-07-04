@@ -22,5 +22,5 @@ function main(): void {
   let obj: { [key: string]: number } = {a: 1, b: 2};
   let key: string = "a";
   obj?.[key] = 200;
-  assertEQ(obj?.[key], 200);
+  arktest.assertEQ(obj?.[key], 200);
 }

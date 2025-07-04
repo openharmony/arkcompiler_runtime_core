@@ -23,7 +23,11 @@ export declare interface Iface2 {
     foo1(): void;
 }
 export declare interface Iface3 {
+<<<<<<< HEAD
     foo2(...nums: number[]): void;
+=======
+    foo2(...nums: Array<number>): void;
+>>>>>>> OpenHarmony_feature_20250328
 }
 export declare class C {
     public static foo3(a: Array<string>): void;

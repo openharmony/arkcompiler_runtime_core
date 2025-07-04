@@ -14,7 +14,11 @@
  */
 
 function main(): int {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("Array API tests for SDK");
+=======
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Test reduceRight with array length reducing", testreduceRight);
     suite.addTest("Test reduceRight with array length increasing", testreduceRight1);
     return suite.run(); 
@@ -43,11 +47,19 @@ class TestData1 {
 function testreduceRight() {
     TestData.arr = new Array<number>(1, 2, 3, 4, 5);
     let res = TestData.arr.reduceRight(TestData.callbackfn);
+<<<<<<< HEAD
     assertEQ(TestData.expected, res, `Expected: "${TestData.expected}", Actual: "${res}"`);
+=======
+    arktest.assertEQ(TestData.expected, res, `Expected: "${TestData.expected}", Actual: "${res}"`);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testreduceRight1() {
     TestData1.arr = new Array<number>(1, 2, 3, 4, 5); 
     let res = TestData1.arr.reduceRight(TestData1.callbackfn);
+<<<<<<< HEAD
     assertEQ(TestData1.expected, res, `Expected: "${TestData1.expected}", Actual: "${res}"`);
+=======
+    arktest.assertEQ(TestData1.expected, res, `Expected: "${TestData1.expected}", Actual: "${res}"`);
+>>>>>>> OpenHarmony_feature_20250328
 }

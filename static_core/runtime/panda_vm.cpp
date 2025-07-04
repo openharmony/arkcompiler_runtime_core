@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,14 +42,12 @@ void PandaVM::VisitVmRoots(const GCRootVisitor &visitor)
     }
 }
 
-void PandaVM::UpdateVmRefs()
+void PandaVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 {
     os::memory::LockHolder lock(markQueueLock_);
     // NOLINTNEXTLINE(modernize-loop-convert)
     for (auto it = markQueue_.begin(); it != markQueue_.end(); ++it) {
-        if ((*it)->IsForwarded()) {
-            *it = ark::mem::GetForwardAddress(*it);
-        }
+        gcRootUpdater(&(*it));
     }
 }
 

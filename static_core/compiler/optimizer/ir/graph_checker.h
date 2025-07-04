@@ -394,7 +394,14 @@ private:
                                   (std::cerr << "Memory instruction has wrong type\n", inst->Dump(&std::cerr)));
         if (inst->IsStore() && (inst->GetInputType(0) != DataType::POINTER) && (inst->GetType() == DataType::ANY)) {
             CHECKER_DO_IF_NOT_VISITOR(v, needBarrier,
-                                      (std::cerr << "This store should have barrier:\n", inst->Dump(&std::cerr)));
+                                      (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
+        }
+        auto asGraphChecker = static_cast<GraphChecker *>(v);
+        auto needsPreREB = asGraphChecker->GetGraph()->GetRuntime()->NeedsPreReadBarrier();
+        if (needsPreREB && inst->IsLoad() && (inst->GetInputType(0) != DataType::POINTER) &&
+            (inst->GetType() == DataType::REFERENCE)) {
+            CHECKER_DO_IF_NOT_VISITOR(v, needBarrier,
+                                      (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
         }
     }
 

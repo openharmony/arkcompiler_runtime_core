@@ -23,29 +23,42 @@ namespace ark::ets {
 class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
+class EtsClassLinker;
+template <typename T>
+class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
-    EtsClass *coreBoolean;
-    EtsClass *coreByte;
-    EtsClass *coreChar;
-    EtsClass *coreShort;
-    EtsClass *coreInt;
-    EtsClass *coreLong;
-    EtsClass *coreFloat;
-    EtsClass *coreDouble;
+    // Classes should follow the common naming schema
 
-    EtsClass *escompatBigint;
-    EtsClass *coreFunction;
+    // Arity threshold for functional types
+    static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
+    static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
+<<<<<<< HEAD
     EtsClass *escompatError;
     EtsClass *coreOutOfMemoryError;
     EtsClass *coreException;
+=======
+    /* Core runtime type system */
+    EtsClass *coreObject {};  // IsObjectClass
+    EtsClass *coreClass {};   // IsClassClass
+    EtsClass *coreString {};  // IsStringClass
+>>>>>>> OpenHarmony_feature_20250328
 
-    EtsClass *coreStringBuilder;
+    /* ets numeric classes */
+    EtsClass *coreBoolean {};
+    EtsClass *coreByte {};
+    EtsClass *coreChar {};
+    EtsClass *coreShort {};
+    EtsClass *coreInt {};
+    EtsClass *coreLong {};
+    EtsClass *coreFloat {};
+    EtsClass *coreDouble {};
 
+<<<<<<< HEAD
     EtsClass *corePromise;
     EtsClass *coreJob;
     EtsMethod *corePromiseSubscribeOnAnotherPromise;
@@ -55,13 +68,29 @@ public:
     EtsClass *coreEvent;
     EtsClass *coreCondVar;
     EtsClass *coreQueueSpinlock;
+=======
+    /* ets base language classes */
+    EtsClass *escompatBigint {};
+    EtsClass *escompatError {};
+    EtsClass *coreFunction {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
+    EtsClass *coreTupleN {};
+>>>>>>> OpenHarmony_feature_20250328
 
-    EtsClass *escompatArray;
-    EtsClass *escompatArrayBuffer;
-    EtsClass *containersArrayAsListInt;
+    /* Runtime linkage classes */
+    EtsClass *coreRuntimeLinker {};
+    EtsClass *coreBootRuntimeLinker {};
+    EtsClass *coreAbcRuntimeLinker {};
+    EtsClass *coreMemoryRuntimeLinker {};
+    EtsClass *coreAbcFile {};
 
-    EtsClass *interopJSValue;
+    /* Error handling */
+    EtsClass *coreOutOfMemoryError {};
+    EtsClass *coreException {};
+    EtsClass *coreStackTraceElement {};
 
+<<<<<<< HEAD
     EtsClass *coreTupleN;
 
     EtsClass *coreStackTraceElement;
@@ -69,21 +98,75 @@ public:
     EtsClass *coreFinalizableWeakRef;
     EtsClass *coreFinalizationRegistry;
     EtsMethod *coreFinalizationRegistryExecCleanup;
+=======
+    /* StringBuilder */
+    EtsClass *coreStringBuilder {};
+>>>>>>> OpenHarmony_feature_20250328
 
-    EtsClass *coreRuntimeLinker;
-    EtsClass *coreBootRuntimeLinker;
-    EtsClass *coreAbcRuntimeLinker;
-    EtsClass *coreAbcFile;
+    /* Concurrency classes */
+    EtsClass *corePromise {};
+    EtsClass *coreJob {};
+    EtsMethod *corePromiseSubscribeOnAnotherPromise {};
+    EtsClass *corePromiseRef {};
+    EtsClass *coreWaitersList {};
+    EtsClass *coreMutex {};
+    EtsClass *coreEvent {};
+    EtsClass *coreCondVar {};
+    EtsClass *coreQueueSpinlock {};
 
-    EtsClass *coreField;
-    EtsClass *coreMethod;
-    EtsClass *coreParameter;
+    /* Finalization */
+    EtsClass *coreFinalizableWeakRef {};
+    EtsClass *coreFinalizationRegistry {};
+    EtsMethod *coreFinalizationRegistryExecCleanup {};
 
-    EtsClass *escompatSharedMemory;
+    /* Containers */
+    EtsClass *escompatArray {};
+    EtsMethod *escompatArrayPush {};
+    EtsMethod *escompatArrayPop {};
+    EtsClass *escompatArrayBuffer {};
+    EtsClass *containersArrayAsListInt {};
+    EtsClass *escompatRecord {};
+    EtsMethod *escompatRecordGetter {};
+    EtsMethod *escompatRecordSetter {};
+
+    /* InteropJS */
+    EtsClass *interopJSValue {};
+
+    /* TypeAPI */
+    EtsClass *coreField {};
+    EtsClass *coreMethod {};
+    EtsClass *coreParameter {};
+    EtsClass *coreClassType {};
+
+    /* escompat.Process */
+    EtsClass *escompatProcess {};
+    EtsMethod *escompatProcessListUnhandledJobs {};
+    EtsMethod *escompatProcessListUnhandledPromises {};
+
+    EtsClass *coreTuple {};
+    EtsClass *escompatRegExpExecArray {};
+    EtsClass *escompatJsonReplacer {};
+
+    struct Entry {
+        size_t slotIndex {};
+    };
+
+    /* Internal Caches */
+    void InitializeCaches();
+    void VisitRoots(const GCRootVisitor &visitor) const;
+    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
+    EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
+    {
+        return asciiCharCache_;
+    }
+    Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
+    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
+    void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
+    PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 
     explicit EtsPlatformTypes(EtsCoroutine *coro);
 };

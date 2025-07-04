@@ -23,5 +23,5 @@ type TIntMayBeNull =  Int | null | undefined
 function main() {
   let obj: TIntMayBeNull = 10;
   let testStr = new string(obj);
-  assertEQ( testStr, "10")
+  arktest.assertEQ( testStr, "10")
 }

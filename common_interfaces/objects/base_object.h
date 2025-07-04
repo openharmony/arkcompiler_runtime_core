@@ -16,6 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 
+<<<<<<< HEAD
 #include <stdint.h>
 #include <stdio.h>
 
@@ -25,6 +26,17 @@
 #include "objects/base_state_word.h"
 
 namespace common {
+=======
+#include <cstdint>
+#include <cstdio>
+
+#include "base/common.h"
+#include "objects/base_class.h"
+#include "objects/base_object_operator.h"
+#include "objects/base_state_word.h"
+
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
@@ -32,14 +44,24 @@ public:
     {
         return reinterpret_cast<BaseObject *>(address);
     }
+<<<<<<< HEAD
     static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
     static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
+=======
+
+    static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
+    static PUBLIC_API void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
+>>>>>>> OpenHarmony_feature_20250328
 
     inline size_t GetSize() const
     {
         if (IsForwarded()) {
             return GetSizeForwarded();
+<<<<<<< HEAD
         } else {
+=======
+        } else {  // NOLINT(readability-else-after-return)
+>>>>>>> OpenHarmony_feature_20250328
             return GetOperator()->GetSize(this);
         }
     }
@@ -49,11 +71,28 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
+<<<<<<< HEAD
+=======
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    void ForEachRefFieldSkipReferent(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->ForEachRefFieldSkipReferent(this, visitor);
+    }
+
+>>>>>>> OpenHarmony_feature_20250328
     void ForEachRefField(const RefFieldVisitor &visitor)
     {
         GetOperator()->ForEachRefField(this, visitor);
     }
 
+<<<<<<< HEAD
+=======
+    void IterateXRef(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->IterateXRef(this, visitor);
+    }
+
+>>>>>>> OpenHarmony_feature_20250328
     inline BaseObject *GetForwardingPointer() const
     {
         if (IsForwarded()) {
@@ -75,13 +114,21 @@ public:
         size_t objectHeaderSize = sizeof(BaseStateWord);
         DCHECK_CC(size >= objectHeaderSize + sizeof(size_t));
         auto addr = reinterpret_cast<MAddress>(this) + objectHeaderSize;
+<<<<<<< HEAD
         *reinterpret_cast<size_t*>(addr) = size;
+=======
+        *reinterpret_cast<size_t *>(addr) = size;
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     inline size_t GetSizeForwarded() const
     {
         auto addr = reinterpret_cast<MAddress>(this) + sizeof(BaseStateWord);
+<<<<<<< HEAD
         return *reinterpret_cast<size_t*>(addr);
+=======
+        return *reinterpret_cast<size_t *>(addr);
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     inline bool IsForwarding() const
@@ -94,6 +141,7 @@ public:
         return state_.IsForwarded();
     }
 
+<<<<<<< HEAD
     ALWAYS_INLINE_CC bool IsDynamic() const
     {
         return state_.IsDynamic();
@@ -104,14 +152,22 @@ public:
         return state_.IsStatic();
     }
 
+=======
+>>>>>>> OpenHarmony_feature_20250328
     inline bool IsToVersion() const
     {
         return state_.IsToVersion();
     }
 
+<<<<<<< HEAD
     inline void SetLanguageType(LanguageType language)
     {
         state_.SetLanguageType(language);
+=======
+    inline void SetLanguage(Language language)
+    {
+        state_.SetLanguage(language);
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     BaseStateWord GetBaseStateWord() const
@@ -124,6 +180,19 @@ public:
         state_.SetForwardState(state);
     }
 
+<<<<<<< HEAD
+=======
+    ALWAYS_INLINE_CC bool IsDynamic() const
+    {
+        return state_.IsDynamic();
+    }
+
+    ALWAYS_INLINE_CC bool IsStatic() const
+    {
+        return state_.IsStatic();
+    }
+
+>>>>>>> OpenHarmony_feature_20250328
     template <typename T>
     Field<T> &GetField(uint32_t offset) const
     {
@@ -178,7 +247,11 @@ public:
     void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
         state_ = 0;
+<<<<<<< HEAD
         state_.SetFullBaseClassAddress(reinterpret_cast<common::StateWordType>(cls));
+=======
+        state_.SetFullBaseClassAddress(reinterpret_cast<StateWordType>(cls));
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     BaseClass *GetBaseClass() const
@@ -191,6 +264,7 @@ public:
     {
         return sizeof(BaseObject);
     }
+<<<<<<< HEAD
 protected:
     static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
     {
@@ -198,6 +272,14 @@ protected:
         return ref;
     }
 
+=======
+
+    bool IsString() const
+    {
+        return GetBaseClass()->IsString();
+    }
+protected:
+>>>>>>> OpenHarmony_feature_20250328
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {
@@ -206,8 +288,17 @@ protected:
         return operator_.dynamicObjOp_;
     }
 
+<<<<<<< HEAD
     static BaseObjectOperator operator_;
     BaseStateWord state_;
 };
 }  // namespace common
+=======
+    static PUBLIC_API BaseObjectOperator operator_;
+    BaseStateWord state_;  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H

@@ -14,30 +14,35 @@
  */
 function testVoidInvoke(): void {
     let tmp = Number();
-    assertEQ(tmp.toFixed(2).toString(), '0.00');
+    arktest.assertEQ(tmp.toFixed(2).toString(), '0.00');
 }
 
 function testStringInvoke(): void {
     const str:String = '123.456';
     let tmp = Number(str);
-    assertEQ(tmp.toFixed(2).toString(), '123.46');
+    arktest.assertEQ(tmp.toFixed(2).toString(), '123.46');
 }
 
 function testNumberInvoke(): void {
     const num:Number = 234.567;
     let tmp = Number(num);
-    assertEQ(tmp.toFixed(2).toString(), '234.57');
+    arktest.assertEQ(tmp.toFixed(2).toString(), '234.57');
 }
 
 function testBigintInvoke(): void {
     const big:BigInt = 1234567890n;
     let tmp = Number(big);
-    assertEQ(tmp.toFixed(2).toString(), '1234567890.00');
+    arktest.assertEQ(tmp.toFixed(2).toString(), '1234567890.00');
 }
 
 function testUndefinedInvoke(): void {
     let tmp = Number(undefined);
-    assertEQ(tmp.toFixed(2).toString(), 'NaN');
+    arktest.assertEQ(tmp.toFixed(2).toString(), 'NaN');
+}
+
+function testNullInvoke(): void {
+    let tmp = Number(null);
+    arktest.assertEQ(tmp.toFixed(2).toString(), '0.00');
 }
 
 function main() {
@@ -46,4 +51,5 @@ function main() {
     testNumberInvoke();
     testBigintInvoke();
     testUndefinedInvoke();
+    testNullInvoke();
 }

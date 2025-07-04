@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,10 @@
 
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, List, Any, Dict, cast
+from typing import Any, cast
 
 from runner import utils
+from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
@@ -34,15 +35,18 @@ class CollectionsOptions(IOptions):
     __GENERATOR_CLASS = "generator-class"
     __GENERATOR_SCRIPT = "generator-script"
     __GENERATOR_OPTIONS = "generator-options"
+    __EXCLUDE = "exclude"
 
-    def __init__(self, name: str, args: Dict[str, Any], parent: IOptions):
+    def __init__(self, name: str, args: dict[str, Any], parent: IOptions): # type: ignore[explicit-any]
         super().__init__(None)
         self.__name = name
         self._parent: IOptions = parent
-        self.__args: Dict[str, Any] = args
+        self.__args: dict[str, Any] = args  # type: ignore[explicit-any]
         self.__test_root = self.__get_arg(self.__TEST_ROOT)
         self.__list_root = self.__get_arg(self.__LIST_ROOT)
-        self.__parameters: Dict[str, Any] = args[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
+        self.__exclude: list[str] = args[self.__EXCLUDE] if args and self.__EXCLUDE in args else []
+        self.__parameters: dict[str, Any] = ( # type: ignore[explicit-any]
+            args)[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
         self.__expand_macros_in_parameters()
 
     def __str__(self) -> str:
@@ -61,26 +65,30 @@ class CollectionsOptions(IOptions):
         return Path(self.__list_root)
 
     @cached_property
-    def generator_class(self) -> Optional[str]:
+    def generator_class(self) -> str | None:
         return self.__get_from_args(self.__GENERATOR_CLASS)
 
     @cached_property
-    def generator_script(self) -> Optional[str]:
+    def generator_script(self) -> str | None:
         return self.__get_from_args(self.__GENERATOR_SCRIPT)
 
     @cached_property
-    def generator_options(self) -> List[str]:
-        default_options: List[str] = []
-        return cast(List[str], self.__get_from_args(self.__GENERATOR_CLASS, default_options))
+    def generator_options(self) -> list[str]:
+        default_options: list[str] = []
+        return cast(list[str], self.__get_from_args(self.__GENERATOR_CLASS, default_options))
 
     @cached_property
-    def parameters(self) -> Dict[str, Any]:
+    def exclude(self) -> list[str]:
+        return self.__exclude
+
+    @cached_property
+    def parameters(self) -> dict[str, Any]: # type: ignore[explicit-any]
         return self.__parameters
 
-    def get_parameter(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+    def get_parameter(self, key: str, default: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
-    def __get_from_args(self, key: str, default_value: Optional[Any] = None) -> Optional[Any]:
+    def __get_from_args(self, key: str, default_value: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__args[key] if self.__args and key in self.__args else default_value
 
     def __get_arg(self, prop_name_minused: str) -> str:
@@ -96,7 +104,7 @@ class CollectionsOptions(IOptions):
             if prop_name_minused in params:
                 result = cast(str, Macros.correct_macro(params[prop_name_minused], self._parent))
         else:
-            raise ValueError(f"Unknown key {prop_name_minused}")
+            raise InvalidConfiguration(f"Unknown key {prop_name_minused}")
         return result
 
     def __expand_macros_in_parameters(self) -> None:

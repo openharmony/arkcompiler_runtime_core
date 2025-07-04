@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #
 
 import re
-from typing import Dict, Any
+from typing import Any
 
 from runner.logger import Log
 from runner.options.cli_args_wrapper import CliArgsWrapper
@@ -31,7 +31,7 @@ _LOGGER = Log.get_logger(__file__)
 class Config(IOptions):
     __CONFIG_TYPE = 'type'
 
-    def __init__(self, args: Dict[str, Any]):
+    def __init__(self, args: dict[str, Any]):       # type: ignore[explicit-any]
         super().__init__(None)
         CliArgsWrapper.setup(args)
         self.general = GeneralOptions(args, self)
@@ -45,6 +45,6 @@ class Config(IOptions):
         options = ' '.join([
             self.general.get_command_line(),
         ])
-        options_str = re.sub(r'\s+', ' ', options, re.IGNORECASE | re.DOTALL)
+        options_str = re.sub(r'\s+', ' ', options, flags=re.IGNORECASE | re.DOTALL)
 
         return options_str

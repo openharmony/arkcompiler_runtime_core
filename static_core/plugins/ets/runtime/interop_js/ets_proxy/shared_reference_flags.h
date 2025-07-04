@@ -27,7 +27,7 @@ namespace ark::ets::interop::js::ets_proxy {
 // |------------------------------------------------------------|
 class SharedReferenceFlags {
 public:
-    using ValueType = uint32_t;
+    using ValueType = ObjectPointerType;
     using IndexType = decltype(std::declval<EtsObject>().GetInteropIndex());
     static_assert(sizeof(IndexType) <= sizeof(ValueType));
 

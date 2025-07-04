@@ -27,8 +27,8 @@ function test(actual: String, expected: String, name: String): int {
 }
 
 function testArrayConstructorsFromNumbersInts(): int {
-    const nums = [1, 2, 3, 4, 5, Infinity, -Infinity, NaN, -1, -65536]
-    const ints: int[] = [
+    const nums: FixedArray<number> = [1, 2, 3, 4, 5, Infinity, -Infinity, NaN, -1, -65536]
+    const ints: FixedArray<int> = [
         1 as int, 2 as int, 3 as int, 4 as int,
         5 as int, -1 as int, -65536 as int
     ]

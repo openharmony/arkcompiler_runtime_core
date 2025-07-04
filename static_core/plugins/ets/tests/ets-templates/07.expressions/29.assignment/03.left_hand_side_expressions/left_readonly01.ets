@@ -24,5 +24,5 @@ class MyClass {
 
 function main(): void {
   MyClass.readOnlyStaticProp = 500;
-  assertEQ(MyClass.readOnlyStaticProp, 500);
+  arktest.assertEQ(MyClass.readOnlyStaticProp, 500);
 }

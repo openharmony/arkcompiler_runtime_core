@@ -30,5 +30,5 @@ class Myclass<T> {
 function main(): void {
   const stringBox = new Myclass<string>("hello");
   const value = stringBox.getValue();
-  assertEQ(value, "hello");
+  arktest.assertEQ(value, "hello");
 }

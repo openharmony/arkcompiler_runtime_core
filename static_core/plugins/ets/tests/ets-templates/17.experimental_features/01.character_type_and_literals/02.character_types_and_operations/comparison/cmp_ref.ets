@@ -24,7 +24,7 @@ function main() {
     const v2: Char = new Char({{v.v2}})
 
     {%- for c in v.cases %}
-    assertEQ( (v1 {{c.op}} v2), {{c.r}} )
+    arktest.assertEQ( (v1 {{c.op}} v2), {{c.r}} )
     {%- endfor %}
 }
 {%- endfor %}

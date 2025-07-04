@@ -19,7 +19,7 @@ class A {
     }
 
     byteByNameMethod(a0: byte, a1: byte): byte {
-        return a0 + a1 as byte;
+        return (a0 + a1).toByte();
     }
 }
 
@@ -38,7 +38,7 @@ class B implements ji {
         if (this.data > value1 + value2) {
             return this.data;
         } else {
-            return value1 + value2 as byte;
+            return (value1 + value2).toByte();
         }
     }
 
@@ -51,17 +51,17 @@ class B implements ji {
     }
 
     protected protectedMethod(value: byte): byte {
-        return this.data + value as byte;
+        return (this.data + value).toByte();
     }
 
     private privateMethod(value: byte): byte {
-        return this.data - value as byte;
+        return (this.data - value).toByte();
     }
 
     public nestedMethod(value: byte): byte {
         let lambdaMethod: (p1: byte, p2: byte) => byte =
             (param1: byte, param2: byte): byte => {
-                return param1 + param2 as byte;
+                return (param1 + param2).toByte();
         };
         return lambdaMethod(this.data, value);
     }
@@ -70,23 +70,23 @@ class B implements ji {
         if (value <= 0) {
             return 1;
         } else {
-            return value * this.recursiveMethod(value - 1) as byte;
+            return (value * this.recursiveMethod(value - 1)).toByte();
         }
     }
 
     calculateSum(value1: byte, value2: char, value3: int): byte {
-        let aChar: char = 'A';
+        let aChar: char = c'A';
         if (value2 == aChar) {
-            return this.data - value1 as byte;
+            return (this.data - value1).toByte();
         }
         if (value3 == 1) {
             return value1;
         }
-        return this.data + value1 as byte;
+        return (this.data + value1).toByte();
     }
 
     public jf(value: byte): byte {
-        return this.data - value as byte;
+        return (this.data - value).toByte();
     }
 }
 
@@ -99,11 +99,11 @@ final class C extends B {
     data1: byte;
 
     public byteAddMethod(value1: byte, value2: byte): byte {
-        return this.data1 + value1 + value2 as byte;
+        return (this.data1 + value1 + value2).toByte();
     }
 
     public override byteMethod(value1: byte, value2: byte): byte {
-        return this.data1 - value1 - value2 as byte;
+        return (this.data1 - value1 - value2).toByte();
     }
 
     public callProtected(value: byte): byte {
@@ -111,6 +111,6 @@ final class C extends B {
     }
 
     public jf(value: byte): byte {
-        return this.data1 + value as byte;
+        return (this.data1 + value).toByte();
     }
 }

@@ -29,6 +29,6 @@ function refNullish(): string[]|null {
 }
 
 function main() {
-    assertTrue(refNotNullish()?.[0] == "abc")
-    assertTrue(!(refNullish()?.[0] == "abc"))
+    arktest.assertTrue(refNotNullish()?.[0] == "abc")
+    arktest.assertTrue(!(refNullish()?.[0] == "abc"))
 }

@@ -26,7 +26,7 @@ class Base {}
 
 class Derived extends Base {}
 
-function testNoThrow(fn: () => boolean throws): boolean {
+function testNoThrow(fn: () => boolean): boolean {
     try {
         return fn()
     } catch (ignored) {
@@ -48,7 +48,11 @@ function testGetParameterError(lambdaType: LambdaType): boolean {
 function testLambdaToString(): int {
     let lambda = () => {}; 
     let result = lambda.toLocaleString();
+<<<<<<< HEAD
     assertEQ(result,"Cannot get source code of function");
+=======
+    arktest.assertEQ(result,"Cannot get source code of function");
+>>>>>>> OpenHarmony_feature_20250328
     return 0
 }
 
@@ -68,7 +72,7 @@ function testLambdaType(): int {
             test(foo2Type.getParameter(0).getType().equals(baseType), "       base type param") +
             test(testGetParameterError(foo2Type),                     "   non-existing parameter") +
             test(foo2Type.getResultType().equals(derivedType),        "   Derived result type") +
-            test(testNoThrow((): boolean throws => {
+            test(testNoThrow((): boolean => {
                 const foo2 = fooType.make()
                 return Type.of(foo).equals(Type.of(foo2))
             }),  " Lambda instantiation")

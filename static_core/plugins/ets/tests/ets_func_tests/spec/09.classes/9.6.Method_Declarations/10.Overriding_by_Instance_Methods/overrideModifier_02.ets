@@ -31,5 +31,5 @@ class B implements A {
 
 function main(): void {
     let a: A = new B()
-    assertEQ( a.returnHello(), "hello 1")
+    arktest.assertEQ( a.returnHello(), "hello 1")
 }

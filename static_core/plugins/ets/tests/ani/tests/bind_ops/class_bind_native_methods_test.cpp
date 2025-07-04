@@ -23,12 +23,19 @@ namespace ark::ets::ani::testing {
 
 class ClassBindNativeMethodsTest : public AniTest {};
 
-constexpr std::string_view MODULE_NAME = "L@defModule/class_bind_native_methods_test;";
+constexpr std::string_view MODULE_NAME = "@defModule.class_bind_native_methods_test";
 
 // NOLINTNEXTLINE(readability-named-parameter)
 static ani_int NativeMethodsFooNative(ani_env *, ani_class)
 {
     const ani_int answer = 42U;
+    return answer;
+}
+
+// NOLINTNEXTLINE(readability-named-parameter)
+static ani_int NativeMethodsFooNativeOverride(ani_env *, ani_class)
+{
+    const ani_int answer = 43U;
     return answer;
 }
 
@@ -45,7 +52,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesTest)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -60,7 +67,7 @@ TEST_F(ClassBindNativeMethodsTest, already_binded_method)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -76,7 +83,7 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LRegisteringNativeMethodsTest;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "RegisteringNativeMethodsTest", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -86,6 +93,8 @@ TEST_F(ClassBindNativeMethodsTest, RegisterNativesErrorTest)
     ani_size nrMethods = 2;
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, nullptr, nrMethods), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), nrMethods), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(nullptr, cls, methods.data(), nrMethods), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_BindNativeMethods(nullptr, methods.data(), nrMethods), ANI_INVALID_ARGS);
 }
 
 TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
@@ -93,15 +102,15 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_002)
     ani_namespace ns {};
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "Ltest002A;", &ns), ANI_OK);
+    ASSERT_EQ(env_->Module_FindNamespace(module, "test002A", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest002B;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "test002B", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(result, "LTestA002;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindClass(result, "TestA002", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -140,7 +149,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_003)
     ani_class cls;
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestB003;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestB003", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -179,7 +188,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_004)
     ani_class cls {};
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA004;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA004", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -219,7 +228,7 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_005)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LTestA005;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA005", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -234,7 +243,7 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceBTest)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LB;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array method = {
@@ -269,7 +278,7 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceCTest)
 
     ani_module module;
     ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
-    ASSERT_EQ(env_->Module_FindClass(module, "LC;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array method = {
@@ -293,6 +302,45 @@ TEST_F(ClassBindNativeMethodsTest, BindNativesInheritanceCTest)
                              reinterpret_cast<void *>(NativeMethodsFooNative)},
     };
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, method.data(), method.size()), ANI_NOT_FOUND);
+}
+
+TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
+{
+    ani_class cls {};
+
+    ani_module module;
+    ASSERT_EQ(env_->FindModule(MODULE_NAME.data(), &module), ANI_OK);
+    ASSERT_EQ(env_->Module_FindClass(module, "TestA006", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    std::array methods = {
+        ani_native_function {"foo", "II:I", reinterpret_cast<void *>(NativeMethodsFooNative)},
+        ani_native_function {"foo", "III:I", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
+    };
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
+
+    ani_method constructorMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
+    ASSERT_NE(constructorMethod, nullptr);
+
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
+    ASSERT_NE(object, nullptr);
+
+    ani_method fooMethod {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", "II:I", &fooMethod), ANI_OK);
+    ASSERT_NE(fooMethod, nullptr);
+
+    ani_method fooMethodOverride {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", "III:I", &fooMethodOverride), ANI_OK);
+    ASSERT_NE(fooMethodOverride, nullptr);
+
+    ani_int result = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethod, &result, 0, 1), ANI_OK);
+    ASSERT_EQ(result, 42U);
+
+    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethodOverride, &result, 0, 1, 2U), ANI_OK);
+    ASSERT_EQ(result, 43U);
 }
 
 }  // namespace ark::ets::ani::testing

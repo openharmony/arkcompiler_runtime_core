@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -167,6 +167,25 @@ panda_gen_file(
     OUTPUTFILE ${INTRINSICS_INLINE_NATIVE_METHOD_INL}
 )
 
+set(INTRINSICS_INLINING_EXPANSION_INL_H ${PANDA_BINARY_ROOT}/compiler/generated/intrinsics_inlining_expansion.inl.h)
+panda_gen_file(
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
+    TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/intrinsics_inlining_expansion.inl.h.erb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
+    EXTRA_DEPENDENCIES plugin_options_merge
+    OUTPUTFILE ${INTRINSICS_INLINING_EXPANSION_INL_H}
+)
+
+set(INTRINSICS_INLINING_EXPANSION_SWITCH_CASE_INL
+    ${PANDA_BINARY_ROOT}/compiler/generated/intrinsics_inlining_expansion_switch_case.inl)
+panda_gen_file(
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
+    TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/intrinsics_inlining_expansion_switch_case.inl.erb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
+    EXTRA_DEPENDENCIES plugin_options_merge
+    OUTPUTFILE ${INTRINSICS_INLINING_EXPANSION_SWITCH_CASE_INL}
+)
+
 set(INTRINSICS_PEEPHOLE_INL_H ${PANDA_BINARY_ROOT}/compiler/generated/intrinsics_peephole.inl.h)
 panda_gen_file(
     DATA ${GEN_PLUGIN_OPTIONS_YAML}
@@ -202,6 +221,8 @@ add_custom_target(compiler_intrinsics DEPENDS
     ${INST_BUILDER_EXTENSIONS_H}
     ${INTRINSICS_EXTENSIONS_H}
     ${INTRINSICS_INLINE_INL_H}
+    ${INTRINSICS_INLINING_EXPANSION_INL_H}
+    ${INTRINSICS_INLINING_EXPANSION_SWITCH_CASE_INL}
     ${INTRINSICS_GRAPH_CHECKER_INL}
     ${INTRINSICS_INLINE_NATIVE_METHOD_INL}
     ${INTRINSICS_PEEPHOLE_INL_H}

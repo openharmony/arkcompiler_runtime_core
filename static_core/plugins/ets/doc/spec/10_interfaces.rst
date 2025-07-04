@@ -41,8 +41,6 @@ type that:
 
 Creating an instance of interface type is not possible.
 
-Interfaces can be *top-level* and local (see :ref:`Local Classes and Interfaces`).
-
 An interface can be declared *direct extension* of one or more other
 interfaces. In that case the interface inherits all members from the interfaces
 it extends. Inherited members can be optionally overridden or hidden.
@@ -55,6 +53,8 @@ support common behaviors without sharing a superclass.
 
 .. index::
    interface
+   interface type
+   creation
    instantiation
    direct extension
    inheritance
@@ -79,9 +79,10 @@ Interfaces are assignable to the class
    variable
    interface type
    interface
+   reference
    method
    implementation
-   assignment
+   assignability
 
 |
 
@@ -93,7 +94,10 @@ Interface Declarations
 .. meta:
     frontend_status: Done
 
-*Interface declaration* specifies a new named reference type:
+*Interface declaration* specifies a new named reference type.
+
+The syntax of *interface declarations* is presented below:
+
 
 .. index::
    interface declaration
@@ -126,6 +130,7 @@ The scope of an interface declaration is defined in :ref:`Scopes`.
 .. index::
    identifier
    interface declaration
+   interface name
    class name
    generic interface
    generic declaration
@@ -151,8 +156,6 @@ the declared interface also implements all interfaces that the interface
    superinterface
    subinterface
    extends clause
-   interface
-   inheritance
    direct superinterface
    implementation
    declared interface
@@ -160,36 +163,29 @@ the declared interface also implements all interfaces that the interface
 
 A :index:`compile-time error` occurs if:
 
--  Interface type named by ``typeReference`` in the ``extends`` clause of an
-   interface declaration is not accessible (see :ref:`Accessible`).
+-  `typeReference`` in the ``extends`` clause refers directly to, or is an
+   alias of non-interface type.
+-  Interface type named by ``typeReference`` is not :ref:`Accessible`.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).
 -  The ``extends`` graph has a cycle.
--  At least one ``typeReference`` is an alias of one of primitive, enumeration,
-   union, or function  types.
-
-Each ``typeReference`` in the ``extends`` clause of an interface declaration
-must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
-:index:`compile-time error` occurs.
 
 .. index::
-   compile-time error
    extends clause
    interface declaration
+   interface type
    access
+   accessibility
    scope
    type argument
    parameterized type
    type-parameterized declaration
-   primitive type
+   well-formed parameterized type
    enumeration type
    union type
    function type
    enum type
-   extends clause
-   interface type
-   accessibility
 
 If an interface declaration (possibly generic) ``I`` <``F``:sub:`1` ``,...,
 F``:sub:`n`> (:math:`n\geq{}0`) contains an ``extends`` clause, then the
@@ -247,10 +243,12 @@ If superinterfaces have default implementations (see
 the following occurs:
 
 - Method ``m`` with an override-compatible signature (see
-  :ref:`Override-Compatible Signatures`) must be declared within the current
-  interface that extends these interfaces; or
-- All these methods refer to the same implementation, and this default
-  implementation is the current class method.
+  :ref:`Override-Compatible Signatures`) declared within the current interface
+  overrides all other ``m`` methods inherited from superinterfaces; or
+- All methods from superinterfaces refer to the same implementation, and this default
+  implementation is the current interface method; or
+- There is one method ``m`` in some superinterface which overrides all other
+  methods from other superinterfaces.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -259,64 +257,38 @@ Otherwise, a :index:`compile-time error` occurs.
 
     interface I1 { foo () {} }
     interface I2 { foo () {} }
-    interface C1 extends I1, I2 {
-       foo () {} // foo() from C1 overrides both foo() from I1 and foo() from I2
+    interface II1 extends I1, I2 {
+       foo () {} // foo() from II1 overrides both foo() from I1 and foo() from I2
     }
-    interface C2 implements I1, I2 {
+    interface II2 extends I1, I2 {
        // Compile-time error as foo() from I1 and foo() from I2 have different implementations
     }
     interface I3 extends I1 {}
     interface I4 extends I1 {}
-    interface C3 extends I3, I4 {
+    interface II3 extends I3, I4 {
        // OK, as foo() from I3 and foo() from I4 refer to the same implementation
     }
 
+    class Base {}
+    class Derived extends Base {}
+
+    interface II1 {
+        foo (p: Base) {}
+    }
+    interface II2 {
+        foo (p: Derived) {}
+    }
+    interface II3 extends II1, II2 {}
+        // foo() from II1 overrides foo() from II2
+
 .. index::
-   compile-time error
    interface
    object
    class
    method
    extension
    implementation
-
-|
-
-.. _Interface Body:
-
-Interface Body
-**************
-
-.. meta:
-    frontend_status: Done
-
-*Interface body* can declare members of an interface, i.e., its
-properties (see :ref:`Interface Properties`) and methods (see
-:ref:`Interface Method Declarations`).
-
-.. code-block:: abnf
-
-    interfaceMember
-        : annotationUsage?
-        ( interfaceProperty
-        | interfaceMethodDeclaration
-        )
-        ;
-
-The scope of declaration of a member *m* that the interface type ``I``
-declares or inherits is specified in :ref:`Scopes`.
-
-The usage of annotations is discussed in :ref:`Using Annotations`.
-
-.. index::
-   interface body
-   interface
-   interface member
-   property
-   interface declaration
-   method declaration
-   scope
-   inheritance
+   override-compatible signature
 
 |
 
@@ -328,24 +300,69 @@ Interface Members
 .. meta:
     frontend_status: Done
 
-*Interface type members* are as follows:
+An *interface declaration* can contain *interface members*, i.e., its
+properties (see :ref:`Interface Properties`) and methods (see
+:ref:`Interface Method Declarations`).
 
--  Members declared in the interface body (see :ref:`Interface Body`);
--  Members inherited from a direct superinterface (see
-   :ref:`Superinterfaces and Subinterfaces`).
+The syntax of *interface member* is presented below:
 
-A :index:`compile-time error` occurs if the names of the method explicitly
-declared by the interface, and of the ``Object``'s ``public`` method are the
-same, but their signatures are different.
+.. code-block:: abnf
+
+    interfaceMember
+        : annotationUsage?
+        ( interfaceProperty
+        | interfaceMethodDeclaration
+        | overloadInterfaceMethodDeclaration
+        )
+        ;
+
+The scope of declaration of a member *m* that the interface type ``I``
+declares or inherits is specified in :ref:`Scopes`.
+
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    interface
-   interface body
+   interface member
+   interface type
+   property
+   method
+   interface declaration
+   method declaration
+   scope
+   inheritance
+   annotation
+
+*Interface members* includes:
+
+-  Members declared explicitly in the interface declaration;
+-  Members inherited from a direct superinterface (see
+   :ref:`Superinterfaces and Subinterfaces`).
+
+A :index:`compile-time error` occurs if the method explicitly declared by the
+interface has the same name as the ``Object``'s ``public`` method, but their
+signatures are different or override-compatible (see
+:ref:`Override-Compatible Signatures`) with default implementations (see
+:ref:`Default Interface Method Declarations`).
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        toString (p: number): void // Compile-time error
+        toString(): string { return "some string" } // Compile-time error
+    }
+
+.. index::
+   interface
+   interface member
    inheritance
    direct superinterface
    Object
    public method
    signature
+   override-compatible signature
+   implementation
 
 An interface inherits all members of the interfaces it extends
 (see :ref:`Interface Inheritance`).
@@ -373,7 +390,9 @@ Interface Properties
     frontend_status: Done
 
 *Interface property* can be defined in the form of a field or an accessor
-(a getter or a setter):
+(a getter or a setter).
+
+The syntax of *interface property* is presented below:
 
 .. code-block:: abnf
 
@@ -383,18 +402,32 @@ Interface Properties
         | 'set' identifier '(' parameter ')'
         ;
 
+If '``?``' is used after the name of the property, then the property type is
+semantically equivalent to ``type | undefined``.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        property?: Type
+    }
+    // is the same as
+    interface I {
+        property: Type | undefined
+    }
+
+
 A property defined in the form of a field implicitly defines the following:
 
 -  A getter, if the property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
-If '``?``' is used after the name of the property, then the property type is
-semantically equivalent to ``type | undefined``. As a result, the following
-definitions have the same effect:
+As a result, the following definitions have the same effect:
 
 .. index::
    property
    interface
+   interface property
    field
    accessor
    readonly
@@ -419,6 +452,7 @@ an accessor notation (see :ref:`Implementing Interface Properties`).
 .. index::
    implementation
    interface
+   interface property
    field
    accessor notation
    property
@@ -441,12 +475,16 @@ as an experimental feature.
 
 .. index::
    interface
+   interface method declaration
+   method name
+   method signature
    method
    declaration
-   abstract signature
    signature
    interface method
    method body
+
+The syntax of *interface method declaration* is presented below:
 
 .. code-block:: abnf
 
@@ -461,7 +499,6 @@ A :index:`compile-time error` occurs if the body of an interface declares a
 method with a name that is already used for a property in this declaration.
 
 .. index::
-   interface body
    public method
    method
    interface
@@ -470,26 +507,29 @@ method with a name that is already used for a property in this declaration.
 
 |
 
-.. _Interface Method Overloading:
+.. _Interface Method Overload Signatures:
 
-Interface Method Overloading
-============================
+Interface Method Overload Signatures
+====================================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 |LANG| allows specifying several interface methods with a single name.
-A :index:`compile-time error` occurs if signatures of these methods are
-overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
+It is a special case of :ref:`Declarations with Overload Signatures`.
+
+An *implementation body* cannot be defined in the interface, but must
+be defined in a class that implements this interface.
 
 .. index::
    interface
    method
-   overloading
-   method overloading
-   overload-equivalent method
 
-Overloading methods used in a class are represented in the example below:
+The order of textual declarations of overloaded signatures affects the manner
+a type check is performed at the call site, starting from the signature declared
+first and then proceeding in the proper sequence.
+
+The use of *overload signatures* is represented by the example below:
 
 .. code-block-meta:
 
@@ -497,21 +537,21 @@ Overloading methods used in a class are represented in the example below:
    :linenos:
 
     interface I {
-        foo()           // 1st method
-        foo(x: string)  // 2st method
-    }
-    class C implements I {
-        foo()           {/*1st method body*/}
-        foo(x: string)  {/*2nd method body*/}
+        foo(): number                        // 1st signature
+        foo(p: string): string               // 2nd signature
+        foo(p1: string, p2?: number): number // 3rd signature       
     }
 
     function demo(i: I) {
-       i.foo()           // ok, 1st method is called
-       i.foo("aa")       // ok, 2nd method is called
+       i.foo()                     // ok, call matches the 1st signature
+       i.foo("aa")                 // ok, call matches the 2nd signature
+       let n: number = i.foo("aa") // compile-time error, as the 2nd signature returns string
+       n = i.foo("aa", undefined)  // ok, call matches the 3rd signature
     }
 
 .. index::
-   implementation
+   implementation body
+   overload signatures
 
 |
 
@@ -523,8 +563,9 @@ Interface Inheritance
 .. meta:
     frontend_status: Done
 
-Interface *I* inherits all properties and methods from its direct superinterfaces.
-Semantic checks are described in :ref:`Overloading and Overriding in Interfaces`.
+Interface *I* inherits all properties and methods from its direct
+superinterfaces. Semantic checks are described in
+:ref:`Overriding and Overload Signatures in Interfaces`.
 
 **Note**. The semantic rules of methods apply to properties because any
 interface property implicitly defines a getter, a setter, or both.
@@ -536,18 +577,20 @@ Private methods defined in superinterfaces are not accessible (see
    inheritance
    interface
    direct superinterface
+   superinterface
+   semantic check
+   private method
    property
    getter
    setter
    access
+   accessibility
    interface body
 
-A :index:`compile-time error` occurs if:
-
--  Interface *I* declares a ``private`` method *m*;
--  Signature of *m* is compatible with the ``public`` instance method
-   :math:`m'` in a superinterface of *I* (see :ref:`Override-Compatible Signatures`); and
--  :math:`m'` is otherwise accessible (see :ref:`Accessible`) to code in *I*.
+A :index:`compile-time error` occurs if interface *I* declares a ``private``
+method *m* with a signature compatible with the instance method :math:`m'`
+(see :ref:`Override-Compatible Signatures`) that has any access modifier in the
+superinterface of *I*.
 
 .. index::
    interface

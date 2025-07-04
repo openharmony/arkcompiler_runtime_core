@@ -28,5 +28,5 @@ function f(i: Partial<I>) {
 
 function main(): void {
   const i: I = {value: 1}
-  assertEQ(f(i), 1)
+  arktest.assertEQ(f(i), 1)
 }

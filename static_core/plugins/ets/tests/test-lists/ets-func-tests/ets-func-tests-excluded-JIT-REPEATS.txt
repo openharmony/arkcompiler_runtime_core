@@ -103,6 +103,42 @@ spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands.ets
 escompat/ProcessTest.ets
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9W32L
 
+<<<<<<< HEAD
 # 24811 thread-safe containers tests may cause failure on timeout or gc compatibility - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
+=======
+# 24811 thread-safe containers tests may cause failure on timeout or CoroutineLimitExceedError in JIT_REPEARS - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
+std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
+std/containers/BlockingQueue/AddAndPollStress.ets
+# End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBUDOL
+
+# 25934
+std/core/ConsoleInfoTest.ets
+std/core/ConsoleGroupTest.ets
+# End issue 25934
+
+# 26316
+std/concurrency/workerlocal_test.ets
+# End issue 26316
+
+#24986 (17 tests)
+std/core/Object.ets
+std/core/TypedArrayConstructorNumbersInts.ets
+std/math/std_math_sign_double.ets
+std/core/IntlPluralRulesTest.ets
+std/core/TypeAssignableFromTest.ets
+std/core/std_core_char_instance_Char_toLowerCase.ets
+std/core/std_core_type_numeric_type_numeric_type.ets
+escompat/JsonTest.ets
+regression/15867_spread_in_arrayof_segfaut.ets
+spec/05.Generics/callFromAsyncLambda.ets
+spec/09.classes/Accessor_Declarations/issue-15142_9.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
+std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
+std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
+spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
+std/core/NumberTest.ets
+escompat/JsonStringifyTest.ets
+>>>>>>> OpenHarmony_feature_20250328

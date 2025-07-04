@@ -18,12 +18,23 @@
 
 #include <atomic>
 #include <mutex>
+<<<<<<< HEAD
 #include <pthread.h>
 #include "base/common.h"
 
 namespace common {
 class Mutator;
 class ThreadHolder;
+=======
+#include "base/common.h"
+
+namespace panda {
+class ThreadHolder;
+}  // namespace panda
+
+namespace panda {
+class Mutator;
+>>>>>>> OpenHarmony_feature_20250328
 
 // GCPhase describes phases for stw/concurrent gc.
 enum GCPhase : uint8_t {
@@ -50,9 +61,12 @@ public:
         SUSPENSION_FOR_STW = 2,
         SUSPENSION_FOR_EXIT = 4,
         SUSPENSION_FOR_CPU_PROFILE = 8,
+<<<<<<< HEAD
         SUSPENSION_FOR_PENDING_CALLBACK = 16,
         SUSPENSION_FOR_RUNNING_CALLBACK = 32,
         SUSPENSION_FOR_FINALIZE = 64,
+=======
+>>>>>>> OpenHarmony_feature_20250328
     };
 
     enum GCPhaseTransitionState : uint32_t {
@@ -101,6 +115,7 @@ public:
         return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
     }
 
+<<<<<<< HEAD
     inline void IncObserver() { observerCnt_.fetch_add(1); }
 
     inline void DecObserver() { observerCnt_.fetch_sub(1); }
@@ -109,6 +124,28 @@ public:
     inline bool HasObserver() { return observerCnt_.load() != 0; }
 
     inline size_t GetObserverCount() const { return observerCnt_.load(); }
+=======
+    inline void IncObserver()
+    {
+        observerCnt_.fetch_add(1);
+    }
+
+    inline void DecObserver()
+    {
+        observerCnt_.fetch_sub(1);
+    }
+
+    // Return true indicate there are some observer is visitting this mutator
+    inline bool HasObserver()
+    {
+        return observerCnt_.load() != 0;
+    }
+
+    inline size_t GetObserverCount() const
+    {
+        return observerCnt_.load();
+    }
+>>>>>>> OpenHarmony_feature_20250328
 
     // Force current mutator enter saferegion, internal use only.
     __attribute__((always_inline)) inline void DoEnterSaferegion();
@@ -120,6 +157,14 @@ public:
         if (UNLIKELY_CC(HasAnySuspensionRequest())) {
             HandleSuspensionRequest();
         }
+<<<<<<< HEAD
+=======
+        // temporary impl, and need to refact to call this by flip function
+        if (UNLIKELY_CC(HasCallbackRequest())) {
+            HandleJSGCCallback();
+            ClearCallbackRequest();
+        }
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     // If current mutator is not in saferegion, enter and return true
@@ -130,17 +175,25 @@ public:
     __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
 
     // Called if current mutator should do corresponding task by suspensionFlag value
+<<<<<<< HEAD
     void HandleSuspensionRequest();
+=======
+    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
+>>>>>>> OpenHarmony_feature_20250328
     // Called if current mutator should handle stw request
     void SuspendForStw();
 
     // temporary impl to clean GC callback, and need to refact to flip function
+<<<<<<< HEAD
     void HandleJSGCCallback();
 
     static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
     {
         return (flag & ~clearFlag) | setFlag;
     }
+=======
+    __attribute__((visibility ("default"))) void HandleJSGCCallback();
+>>>>>>> OpenHarmony_feature_20250328
 
     __attribute__((always_inline)) inline bool FinishedTransition() const
     {
@@ -188,6 +241,7 @@ public:
         return (suspensionFlag_.load(std::memory_order_acquire) != 0);
     }
 
+<<<<<<< HEAD
     __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
     {
         return suspensionFlag_.compare_exchange_strong(oldFlag, newFlag);
@@ -201,11 +255,40 @@ public:
     __attribute__((always_inline)) inline void ClearFinalizeRequest()
     {
         ClearSuspensionFlag(SUSPENSION_FOR_FINALIZE);
+=======
+    __attribute__((always_inline)) inline bool HasCallbackRequest() const
+    {
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+        return (callbackRequest_.load(std::memory_order_acquire) != 0);
+    }
+
+    __attribute__((always_inline)) inline void SetCallbackRequest()
+    {
+        callbackRequest_.store(true, std::memory_order_release);
+    }
+
+    __attribute__((always_inline)) inline void ClearCallbackRequest()
+    {
+        callbackRequest_.store(false, std::memory_order_relaxed);
+    }
+
+    void SetSafepointStatePtr(uint64_t* slot)
+    {
+        safepointStatePtr_ = slot;
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     void SetSafepointActive(bool value)
     {
+<<<<<<< HEAD
         safepointActive_ = static_cast<uint32_t>(value);
+=======
+        uint64_t *statePtr = safepointStatePtr_;
+        if (statePtr == nullptr) {
+            return;
+        }
+        *statePtr = static_cast<uint64_t>(value);
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     // Spin wait phase transition finished when GC is tranverting this mutator's phase
@@ -255,6 +338,7 @@ public:
         return mutatorPhase_.load(std::memory_order_acquire);
     }
 
+<<<<<<< HEAD
     bool GetSafepointActiveState() const
     {
         return safepointActive_;
@@ -263,6 +347,22 @@ public:
     void MutatorBaseLock() { mutatorBaseLock_.lock(); }
 
     void MutatorBaseUnlock() { mutatorBaseLock_.unlock(); }
+=======
+    const void *GetSafepointPage() const
+    {
+        return safepointStatePtr_;
+    }
+
+    void MutatorBaseLock()
+    {
+        mutatorBaseLock_.lock();
+    }
+
+    void MutatorBaseUnlock()
+    {
+        mutatorBaseLock_.unlock();
+    }
+>>>>>>> OpenHarmony_feature_20250328
 
     void RegisterJSThread(void *jsThread)
     {
@@ -275,6 +375,7 @@ public:
         jsThread_ = nullptr;
     }
 
+<<<<<<< HEAD
     static constexpr size_t GetSafepointActiveOffset()
     {
         return offsetof(MutatorBase, safepointActive_);
@@ -300,6 +401,30 @@ private:
     std::mutex mutatorBaseLock_;
 
     std::atomic<CpuProfileState> cpuProfileState_ = { NO_CPUPROFILE };
+=======
+private:
+    // Indicate the current mutator phase and use which barrier in concurrent gc
+    // ATTENTION: THE LAYOUT FOR GCPHASE MUST NOT BE CHANGED!
+    std::atomic<GCPhase> mutatorPhase_ = {GCPhase::GC_PHASE_UNDEF};
+    // in saferegion, it will not access any managed objects and can be visitted by observer
+    std::atomic<uint32_t> inSaferegion_ = {SAFE_REGION_TRUE};
+    // Protect observerCnt
+    std::mutex observeCntMutex_;
+    // Increase when this mutator is observed by some observer
+    std::atomic<size_t> observerCnt_ = {0};
+
+    uint64_t *safepointStatePtr_ = nullptr; // state: active or not
+
+    // If set implies this mutator should process suspension requests
+    std::atomic<uint32_t> suspensionFlag_ = {0};
+    std::atomic<bool> callbackRequest_ = {false};
+    // Indicate the state of mutator's phase transition
+    std::atomic<GCPhaseTransitionState> transitionState_ = {NO_TRANSITION};
+
+    std::mutex mutatorBaseLock_;
+
+    std::atomic<CpuProfileState> cpuProfileState_ = {NO_CPUPROFILE};
+>>>>>>> OpenHarmony_feature_20250328
 
     // This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
     void *mutator_ {nullptr};
@@ -308,7 +433,14 @@ private:
     void *jsThread_ {nullptr};
 
     friend Mutator;
+<<<<<<< HEAD
     friend ThreadHolder;
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+=======
+    friend panda::ThreadHolder;
+};
+}  // namespace panda
+#endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+>>>>>>> OpenHarmony_feature_20250328

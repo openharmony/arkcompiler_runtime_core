@@ -74,6 +74,9 @@
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark {
 
@@ -83,7 +86,7 @@ Runtime *Runtime::instance_ = nullptr;
 RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-objects)
 std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
 os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
-taskmanager::TaskScheduler *Runtime::taskScheduler_ = nullptr;
+bool Runtime::isTaskManagerUsed_ = false;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
@@ -348,6 +351,8 @@ bool Runtime::Create(const RuntimeOptions &options)
         return false;
     }
 
+    InitBaseRuntime();
+
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -365,10 +370,13 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
 
-    if (options.IsSamplingProfilerEnable()) {
+    if (options_.IsSamplingProfilerCreate()) {
         instance_->GetTools().CreateSamplingProfiler();
-        instance_->GetTools().StartSamplingProfiler(options.GetSamplingProfilerOutputFile(),
-                                                    options.GetSamplingProfilerInterval());
+        if (options_.IsSamplingProfilerStartupRun()) {
+            instance_->GetTools().StartSamplingProfiler(
+                std::make_unique<tooling::sampler::FileStreamWriter>(options_.GetSamplingProfilerOutputFile().c_str()),
+                options_.GetSamplingProfilerInterval());
+        }
     }
 
     return true;
@@ -406,6 +414,7 @@ bool Runtime::DestroyUnderLockHolder()
     ark::Logger::Sync();
     delete instance_;
     instance_ = nullptr;
+
     ark::mem::MemConfig::Finalize();
 
     return true;
@@ -419,15 +428,15 @@ bool Runtime::Destroy()
     }
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
-
-    if (instance_->SaveProfileInfo()) {
+    if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
         ProfilingSaver profileSaver;
-        auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
-        auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
+        auto classCtxStr = instance_->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                           instance_->GetClassLinker()->GetAotManager()->GetAppClassContext();
         auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
         auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledPandaFiles);
+        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, profiledPandaFiles);
     }
 
     if (GetOptions().ShouldLoadBootPandaFiles()) {
@@ -437,8 +446,9 @@ bool Runtime::Destroy()
         instance_->GetPandaVM()->BeforeShutdown();
     }
 
-    if (instance_->GetOptions().IsSamplingProfilerEnable()) {
+    if (instance_->GetOptions().IsSamplingProfilerCreate()) {
         instance_->GetTools().StopSamplingProfiler();
+        instance_->GetTools().DestroySamplingProfiler();
     }
 
     // when signal start, but no signal stop tracing, should stop it
@@ -460,6 +470,8 @@ bool Runtime::Destroy()
     // Stop debugger first to correctly remove it as listener.
     instance_->UnloadDebugger();
 
+    PreFiniBaseRuntime();
+
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1
@@ -476,11 +488,7 @@ bool Runtime::Destroy()
     // uses barriers
     instance_->GetPandaVM()->StopGC();
 
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Finalize();
-    }
-
-    if (IsEnabled(options_.GetVerificationMode())) {
+    if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());
     }
 
@@ -488,18 +496,16 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-    if (taskScheduler_ != nullptr) {
-        taskmanager::TaskScheduler::Destroy();
-        taskScheduler_ = nullptr;
-    }
+
+    FiniBaseRuntime();
 
     return true;
 }
 
 void Runtime::InitializeVerifierRuntime()
 {
-    auto mode = options_.GetVerificationMode();
-    if (IsEnabled(mode)) {
+    auto mode = verifier::VerificationModeFromString(options_.GetVerificationMode());
+    if (verifier::IsEnabled(mode)) {
         std::string const &cacheFile = options_.GetVerificationCacheFile();
         verifierService_ = ark::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
     }
@@ -563,7 +569,15 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         ark::os::mem_hooks::PandaHooks::Enable();
     }
 
-    saveProfilingInfo_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
+#ifdef PANDA_TARGET_OHOS
+    if (!options_.WasSetProfileOutput()) {
+        options_.SetProfileOutput("/data/storage/ark-profile/profile.ap");
+    }
+
+    if (!options_.WasSetIncrementalProfilesaverEnabled()) {
+        options_.SetIncrementalProfilesaverEnabled(true);
+    }
+#endif
 
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
@@ -571,7 +585,9 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 #else
     isJitEnabled_ = false;
 #endif
-
+    isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
+    saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
+    incrementalSaveProfilingInfo_ = Runtime::GetOptions().IsIncrementalProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
@@ -614,6 +630,11 @@ Runtime::~Runtime()
 
     // crossing map is shared by different VMs.
     mem::CrossingMapSingleton::Destroy();
+
+    if (Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::Finish();
+        Runtime::SetTaskManagerUsed(false);
+    }
 
     RuntimeInternalAllocator::Finalize();
     PoolManager::Finalize();
@@ -694,6 +715,12 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
+#ifdef ARK_HYBRID
+    if (!options.WasSetGcType(plugins::LangToRuntimeType(lang))) {
+        const_cast<RuntimeOptions &>(options).SetGcType("cmc-gc");
+        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+    }
+#endif
     auto gcType = ark::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
@@ -706,7 +733,7 @@ mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::Source
 
 bool Runtime::LoadVerificationConfig()
 {
-    return !IsEnabled(options_.GetVerificationMode()) ||
+    return !verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode())) ||
            verifier::LoadConfigFile(verifierConfig_, options_.GetVerificationConfigFile());
 }
 
@@ -718,10 +745,6 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
     if (pandaVm_ == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to create panda vm";
         return false;
-    }
-
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->Initialize();
     }
 
     panda_file::File::OpenMode openMode = GetLanguageContext(GetRuntimeType()).GetBootPandaFilesOpenMode();
@@ -1524,7 +1547,26 @@ void Runtime::PostZygoteFork()
 // Returns true if profile saving is enabled. GetJit() will be not null in this case.
 bool Runtime::SaveProfileInfo() const
 {
-    return saveProfilingInfo_;
+    return IsProfilerEnabled() && saveProfilingInfo_;
+}
+
+bool Runtime::IncrementalSaveProfileInfo() const
+{
+    return IsProfilerEnabled() && incrementalSaveProfilingInfo_;
+}
+
+bool Runtime::TryCreateSaverTask()
+{
+    if (!IncrementalSaveProfileInfo()) {
+        LOG(INFO, RUNTIME) << "[profile_saver] Incremental profile save disabled.";
+        return false;
+    }
+    auto saverWorker = GetPandaVM()->GetProfileSaverWorker();
+    if (saverWorker == nullptr) {
+        LOG(INFO, RUNTIME) << "[profile_saver] Profile saver worker doesn't exists.";
+        return false;
+    }
+    return saverWorker->TryAddTask();
 }
 
 void Runtime::CheckOptionsFromOs() const
@@ -1533,6 +1575,33 @@ void Runtime::CheckOptionsFromOs() const
     // for qemu-aarch64 we will get 32 from GetCacheLineSize()
     // for native arm and qemu-arm we will get 0 from GetCacheLineSize()
     ASSERT(ark::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
+#endif
+}
+
+void Runtime::InitBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Init();
+#endif
+}
+
+void Runtime::PreFiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    // Stop the current GC before all threads unregister
+    // Change to a more accurate function, when the function was provided (see #26240).
+    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+#endif
+}
+
+void Runtime::FiniBaseRuntime()
+{
+#ifdef ARK_HYBRID
+    auto *baseRuntime = panda::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Fini();
 #endif
 }
 

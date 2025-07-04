@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ public:
         char item_;
     };
 
-    AnnotationDataAccessor(const File &panda_file, File::EntityId annotation_id);
+    PANDA_PUBLIC_API AnnotationDataAccessor(const File &panda_file, File::EntityId annotation_id);
     ~AnnotationDataAccessor() = default;
 
     NO_COPY_SEMANTIC(AnnotationDataAccessor);
@@ -89,9 +89,9 @@ public:
         return count_;
     }
 
-    Elem GetElement(size_t i) const;
+    PANDA_PUBLIC_API Elem GetElement(size_t i) const;
 
-    Tag GetTag(size_t i) const;
+    PANDA_PUBLIC_API Tag GetTag(size_t i) const;
 
     size_t GetSize() const
     {

@@ -13,65 +13,67 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
 let testArrayStr: Array<String> = new Array<String>(elementsNum);
-let queueInt: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-let queueObj: ArrayBlockingQueue<Object> = new ArrayBlockingQueue<Object>(200);
-let queueStr: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
+let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
+let queueObj: containers.ArrayBlockingQueue<Object> = new containers.ArrayBlockingQueue<Object>(200);
+let queueStr: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueuePushTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePushTest");
 
     ArrayBlockingQueueTestsuite.addTest("SimpleQueuePushPopFrontBackSizeEmptyTest", () =>
     {
         let arr: Array<int> = new Array<int>(elementsNum);
         for (let i: int = 0; i < arr.length; ++i) {
-            let el = (random() * 10000) as int;
+            let el = (random() * 10000).toInt();
             arr[i] = el;
             queueInt.push(el);
-            assertEQ(el, queueInt.getEnd());
+            arktest.assertEQ(el, queueInt.getEnd());
         }
         let ind: int = 0;
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
-            assertEQ(el, queueInt.pop());
-            assertEQ(el, arr[ind++]);
+            arktest.assertEQ(el, queueInt.pop());
+            arktest.assertEQ(el, arr[ind++]);
         }
-        assertEQ(ind, arr.length);
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(ind, arr.length);
+        arktest.assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestInt", () =>
     {
-        let p1 = launch pusherInt();
+        let p1 = launch<void, () => void>(pusherInt);
         let arrayToCheck = popperInt();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayInt[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
         }
-        await p1;
-        assertEQ(queueInt.size, 0);
+        p1.Await();
+        arktest.assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestObj", () =>
     {
-        let p1 = launch pusherObj();
+        let p1 = launch<void, () => void>(pusherObj);
         let arrayToCheck = popperObj();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayObj[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
         }
-        await p1;
-        assertEQ(queueObj.size, 0);
+        p1.Await();
+        arktest.assertEQ(queueObj.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch pusherStr();
+        let p1 = launch<void, () => void>(pusherStr);
         let arrayToCheck = popperStr();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayStr[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
-        await p1;
-        assertEQ(queueStr.size, 0);
+        p1.Await();
+        arktest.assertEQ(queueStr.size, 0);
     });
 
     return ArrayBlockingQueueTestsuite.run();
@@ -79,7 +81,7 @@ function main(): int {
 
 function pusherInt() {
     for (let i = 0; i < elementsNum; i++) {
-        let el = (random() * 10000) as int;
+        let el = (random() * 10000).toInt();
         testArrayInt[i] = el;
         queueInt.push(el);
     }

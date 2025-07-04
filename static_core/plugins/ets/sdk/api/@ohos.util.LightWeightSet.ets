@@ -14,6 +14,14 @@
  */
 
 import LightWeightMap from '@ohos.util.LightWeightMap';
+<<<<<<< HEAD
+=======
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+
+export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
+>>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**
@@ -55,6 +63,8 @@ interface ReadonlyLightWeightSet<T> extends Iterable<T> {
 export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
     private buckets: LightWeightMap<T, T>;
 
+    private static readonly SHIFT_COUNT = 31;
+
     private iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
         while (true) {
             const v = x.next();
@@ -85,11 +95,19 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @returns true if the value was added, false otherwise
      */
+<<<<<<< HEAD
     add(value: T): boolean {
         if (this.buckets.hasKey(value)) {
             return false;
         }
         this.buckets.set(value, value);
+=======
+    add(obj: T): boolean {
+        if (this.buckets.hasKey(obj)) {
+            return false;
+        }
+        this.buckets.set(obj, obj);
+>>>>>>> OpenHarmony_feature_20250328
         return true;
     }
 
@@ -152,7 +170,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @param callbackfn to apply; key is always same as value
      */
-    forEach(callbackFn: (value: T, key: T, set: LightWeightSet<T>) => void): void {
+    forEach(callbackFn: LightWeightSetForEachCb<T>): void {
         this.buckets.forEach((value: T, key: T): void => {
             callbackFn(value, key, this);
         });
@@ -178,10 +196,27 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      *
      * @param key the value to find the index of
      *
-     * @returns the index of the value, or -1 if the value is not found
+     * @returns the index of the value, or a negative position if the value is not found
      */
     getIndexOf(key: T): number {
-        return this.buckets.getIndexOfKey(key);
+        const index = this.buckets.getIndexOfKey(key);
+        if (index >= 0) {
+            return index;
+        } else {
+            const hashCode = this.hash(key);
+            let low: int = 0;
+            let high: int = this.buckets.length as int - 1;
+            while (low <= high) {
+                const mid = (low + high) >>> 1;
+                const midHash = this.hash(this.buckets.getKeyAt(mid)!);
+                if (midHash < hashCode) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            return -(low + 1);
+        }
     }
 
     /**
@@ -190,8 +225,15 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @param index the index to get the value from
      *
      * @returns the value at the specified index
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     getValueAt(index: number): T | undefined {
+        this.checkIndex(index);
+
+        if (index < 0 || this.buckets.length <= index) {
+            return undefined;
+        }
         return this.buckets.getKeyAt(index);
     }
 
@@ -239,8 +281,12 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @param index the index to remove the value from
      *
      * @returns true if the value was removed, false otherwise
+     * 
+     * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     removeAt(index: number): boolean {
+        this.checkIndex(index);
+
         return this.buckets.removeAt(index);
     }
 
@@ -263,5 +309,29 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
     toString(): String {
         const res: Array<T> = this.toArray();
         return res.join(',');
+    }
+
+    private hash(key: T): int {
+        if (key === null) {
+            return 0;
+        }
+        if (key === undefined) {
+            return 1;
+        }
+
+        const keyHash: int = (key! as object).$_hashCode(); // #26217
+        const positiveMask: int = 1 << LightWeightSet.SHIFT_COUNT;
+        if (keyHash >= 0) {
+            return (keyHash | positiveMask)
+        } else {
+            return (keyHash & (~positiveMask))
+        }
+    }
+
+    private checkIndex(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId,
+                new Error(`The type of "index" must be small integer. Received value is: ${index}`))
+        }
     }
 }

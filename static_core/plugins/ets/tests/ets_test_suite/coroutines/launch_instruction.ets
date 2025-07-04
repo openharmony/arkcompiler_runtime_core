@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let passed = false;
 
 function reset() {
@@ -117,36 +119,33 @@ function fiveargs(x1: int, x2: int, x3: int, x4: int, x5: int): Object | null {
 }
 
 export function main(): int {
-    // test launch.short instruction
     reset()
-    launch noarg();
+    launch<Object | null , () => Object | null>(noarg);
     Coroutine.Schedule();
     check("noarg");
 
     reset()
-    launch onearg(1);
+    launch<Object | null , (x: int) => Object | null>(onearg, 1);
     Coroutine.Schedule();
     check("onearg");
 
     reset()
-    launch twoargs(1, 2);
+    launch<Object | null , (x1: int, x2: int) => Object | null>(twoargs, 1, 2);
     Coroutine.Schedule();
     check("twoargs");
 
-    // test launch
     reset()
-    launch threeargs(1, 2, 3);
+    launch<Object | null , (x1: int, x2: int, x3: int) => Object | null>(threeargs, 1, 2, 3);
     Coroutine.Schedule();
     check("threeargs");
 
     reset()
-    launch fourargs(1, 2, 3, 4);
+    launch<Object | null , (x1: int, x2: int, x3: int, x4: int) => Object | null>(fourargs, 1, 2, 3, 4);
     Coroutine.Schedule();
     check("fourargs");
 
-    // test launch.range
     reset()
-    launch fiveargs(1, 2, 3, 4, 5);
+    launch<Object | null , (x1: int, x2: int, x3: int, x4: int, x5: int) => Object | null>(fiveargs, 1, 2, 3, 4, 5);
     Coroutine.Schedule();
     check("fiveargs");
     return 0;

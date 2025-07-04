@@ -34,9 +34,9 @@ class Test {
             is_call_regular_lambda = true;
         }
 
-        assertEQ(is_call_regular_lambda, false)
+        arktest.assertEQ(is_call_regular_lambda, false)
         regular_lambda();
-        assertEQ(is_call_regular_lambda, true)
+        arktest.assertEQ(is_call_regular_lambda, true)
     }
 }
 

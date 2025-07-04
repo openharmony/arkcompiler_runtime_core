@@ -18,16 +18,17 @@
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 0
+//! INST_COUNT   "Cast", 6
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 1
-//! INST_COUNT   ".u16  Cast i8", 1
+//! INST_COUNT   "Cast", 6
+//! INST_COUNT   ".u16  Cast i8", 0
 
 
 class A {
     fld: Char
     constructor(p: byte) {
-        this.fld = new Char(p as char);
+        this.fld = new Char(p.toChar());
+        console.log("a side-effect to break LSE")
     }
 }
 
@@ -48,16 +49,17 @@ function main_char(): int {
 //! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
 //! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "Cast", 1
+//! INST_COUNT   "Cast", 7
 //! INST_COUNT   ".u16  Cast i8", 0
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "Cast", 2
-//! INST_COUNT   ".u16  Cast i8", 1
+//! INST_COUNT   "Cast", 7
+//! INST_COUNT   ".u16  Cast i8", 0
 
 class B {
     fld: Char
     constructor(p: int) {
-        this.fld = new Char(p as byte);
+        this.fld = new Char(p.toByte());
+        console.log("a side-effect to break LSE")
     }
 }
 //           |will cut|  |will cut|

@@ -17,7 +17,7 @@ class Operations {
     static sum(a0: double, a1: double): double {
         return a0 + a1 as double;
     }
-}; 
+}
 
 namespace na {
 class A {
@@ -27,7 +27,7 @@ class A {
     static funcA(a0: int, a1: int): int {
         return a1 - a0 as int;
     }
-};
+}
 }
 
 namespace nb {
@@ -36,7 +36,7 @@ class A {
     static funcA(a0: double, a1: double): double {
         return a0 + a1 as double;
     }
-};
+}
 }
 }
 
@@ -45,10 +45,72 @@ class A {
     static funcA(a0: double, a1: double): double {
         return a0 + a1 as double;
     }
-};
+}
+
 class B extends A{
     static funcA(a0: double, a1: double): double {
         return a1 - a0 as double;
     }
-};
+}
+}
+
+class A {
+    static funcA(a0: double, a1: double): double {
+        return a0 + a1 as double;
+    }
+
+    static funcA(a0: int, a1: int): int {
+        return a0 + a1 as int;
+    }
+
+    static funcB(a0: double, a1: double): double {
+        return A.funcA(a0, a1);
+    }
+}
+
+class B extends A{
+    static funcB(a0: double, a1: double): double {
+        return a1 - a0 as double;
+    }
+}
+
+class C extends A{
+}
+
+class D extends A{
+    static funcA(a0: double, a1: double): double {
+        return a1 - a0 as double;
+    }
+}
+
+class E extends A{
+    static funcA(a0: double, a1: double): double {
+        return A.funcA(a0, a1);
+    }
+}
+
+class F {
+    static increment(a0: double, a1: double): void {
+        F.count += a0;
+        F.count += a1;
+    }
+
+    static getCount(): double {
+        return F.count;
+    }
+
+    static count: double = 0;
+}
+class G {
+    public static publicMethod(a0: double, a1: double): double {
+        return a0 + a1 as double;
+    }
+
+    private static privateMethod(a0: double, a1: double): double {
+        return a1 - a0 as double;
+    }
+
+    static callPrivateMethod(a0: double, a1: double): double {
+        return G.privateMethod(a0, a1);
+    }
 }

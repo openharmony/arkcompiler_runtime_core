@@ -27,7 +27,7 @@ function f(i: int): int {
 }
 
 function main(): void {
-  assertEQ(f(0), 3)
-  assertEQ(f(1), 3)
-  assertEQ(f(2), 3)
+  arktest.assertEQ(f(0), 3)
+  arktest.assertEQ(f(1), 3)
+  arktest.assertEQ(f(2), 3)
 }

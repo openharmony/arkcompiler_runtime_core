@@ -17,21 +17,36 @@ class Thenable implements PromiseLike<string> {
     constructor(e: Error) {
         this.error = e;
     }
+<<<<<<< HEAD
     then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<E>((): E|PromiseLike<E> => {
+=======
+    then<U, E>(_?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<E>((): E | PromiseLike<E> => {
+>>>>>>> OpenHarmony_feature_20250328
             return onRejected!(this.error);
         });
     }
     private error: Error;
 };
 
+<<<<<<< HEAD
 let error = new Error("abc");
 Promise.race([new Thenable(error)]).then<void, void>((values: string): void => {
     console.log("Test failed. The promise should not be resolved.");
 }, (e: Object): void => {
     if (error !== e) {
         console.log("Test failed. The promise should be rejected by the specified value.");
+=======
+let error = new Error('abc');
+Promise.race<string>([new Thenable(error)]).then<void, void>((values): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (e: Error): void => {
+    if (error !== e) {
+        console.log('Test failed. The promise should be rejected by the specified value.');
+>>>>>>> OpenHarmony_feature_20250328
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

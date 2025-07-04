@@ -21,7 +21,7 @@ class CallFunctionalObjectTest : public AniTest {
 protected:
     void CheckANIStr(const ani_string &str, const std::string &expected) const
     {
-        const ani_size utfBufferSize = 10;
+        const ani_size utfBufferSize = 20;
         std::array<char, utfBufferSize> utfBuffer = {0};
         ani_size resultSize;
         const ani_size offset = 0;
@@ -54,10 +54,10 @@ TEST_F(CallFunctionalObjectTest, functional_object_call)
     const std::string str = "test";
     ani_string arg1 = {};
     ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
-    std::vector<ani_ref> args = {reinterpret_cast<ani_ref>(arg1)};
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
     ani_ref result;
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
-    CheckANIStr(reinterpret_cast<ani_string>(result), str);
+    CheckANIStr(static_cast<ani_string>(result), str);
 }
 
 TEST_F(CallFunctionalObjectTest, functional_object_call_with_closure)
@@ -67,10 +67,71 @@ TEST_F(CallFunctionalObjectTest, functional_object_call_with_closure)
     const std::string str = "test";
     ani_string arg1 = {};
     ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
-    std::vector<ani_ref> args = {reinterpret_cast<ani_ref>(arg1)};
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
     ani_ref result;
     ASSERT_EQ(env_->FunctionalObject_Call(fnObjWithClosure, args.size(), args.data(), &result), ANI_OK);
-    CheckANIStr(reinterpret_cast<ani_string>(result), str + str);
+    CheckANIStr(static_cast<ani_string>(result), str + str);
 }
 
+TEST_F(CallFunctionalObjectTest, functional_object_call_invalid_args_1)
+{
+    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObj"));
+    const std::string str = "test";
+    ani_string arg1 = {};
+    ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
+    ani_ref result;
+    ASSERT_EQ(env_->c_api->FunctionalObject_Call(nullptr, fnObj, args.size(), args.data(), &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FunctionalObject_Call(nullptr, args.size(), args.data(), &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 1, nullptr, &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, -1, args.data(), &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, args.data(), &result), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 16U, args.data(), &result), ANI_INVALID_ARGS);
+}
+
+TEST_F(CallFunctionalObjectTest, functional_object_call_multiple_call)
+{
+    auto fnObj = reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObj"));
+    const std::string str = "test";
+    ani_string arg1 = {};
+    ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
+    ani_ref result;
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
+    CheckANIStr(static_cast<ani_string>(result), str);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
+    CheckANIStr(static_cast<ani_string>(result), str);
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
+    CheckANIStr(static_cast<ani_string>(result), str);
+}
+
+TEST_F(CallFunctionalObjectTest, functional_object_call_nested)
+{
+    auto fnObj =
+        reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObjNested"));
+    const std::string str1 = "hello ";
+    const std::string str2 = "world";
+    ani_string arg1 = {};
+    ASSERT_EQ(env_->String_NewUTF8(str2.c_str(), str2.size(), &arg1), ANI_OK);
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
+    ani_ref result = nullptr;
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+    CheckANIStr(static_cast<ani_string>(result), str1 + str2);
+}
+
+TEST_F(CallFunctionalObjectTest, functional_object_call_recursive)
+{
+    auto fnObj =
+        reinterpret_cast<ani_fn_object>(CallEtsFunction<ani_ref>("call_functional_object_test", "GetFnObjRecursive"));
+    const std::string str = "hello";
+
+    ani_string arg1 = {};
+    ASSERT_EQ(env_->String_NewUTF8(str.c_str(), str.size(), &arg1), ANI_OK);
+    std::vector<ani_ref> args = {static_cast<ani_ref>(arg1)};
+    ani_ref result;
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_OK);
+    CheckANIStr(static_cast<ani_string>(result), str);
+}
 }  // namespace ark::ets::ani::testing

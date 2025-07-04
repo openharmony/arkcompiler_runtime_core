@@ -36,5 +36,5 @@ class Child extends Person {
 function main(): void {
   let obj: Child = Child.factory();
 
-  assertEQ( obj.getName(), "Bob" )
+  arktest.assertEQ( obj.getName(), "Bob" )
 }

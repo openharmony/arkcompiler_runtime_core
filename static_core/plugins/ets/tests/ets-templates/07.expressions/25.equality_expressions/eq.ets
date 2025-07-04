@@ -25,7 +25,7 @@ desc: >-
 function main() {
     let a = {{c.a}}
     let b = {{c.b}}
-    assertTrue( (a == b) == (a === b) )
-    assertTrue( (a != b) == (a !== b) )
+    arktest.assertTrue( (a == b) == (a === b) )
+    arktest.assertTrue( (a != b) == (a !== b) )
 }
 {%- endfor %}

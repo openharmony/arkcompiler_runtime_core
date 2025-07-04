@@ -16,6 +16,11 @@
 import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
+<<<<<<< HEAD
+=======
+
+export type HashMapCbFn<K, V> = (value: V, key: K, map: HashMap<K, V>) => void;
+>>>>>>> OpenHarmony_feature_20250328
 
 interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     /**
@@ -98,7 +103,7 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      *
      * @param callbackFn to apply
      */
-    forEach(callbackFn: (value: V, key: K, map: HashMap<K, V>) => void): void {
+    forEach(callbackFn: HashMapCbFn<K, V>): void {
         this.buckets.forEach((value: V, key: K) => {
             callbackFn(value, key, this);
         });

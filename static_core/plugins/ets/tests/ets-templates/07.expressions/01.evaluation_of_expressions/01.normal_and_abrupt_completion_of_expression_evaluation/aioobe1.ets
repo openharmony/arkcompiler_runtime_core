@@ -25,9 +25,10 @@ function main(): int {
   let b = 1;
 
   try {
+    // negative because (v[100] = 42) returns void.
     let s = "X" + (a = 2) + (v[100] = 42) + (b = 2);
     return 1;
-  } catch (e: ArrayIndexOutOfBoundsError) {
+  } catch (e: RangeError) {
     if (a != 2 || b != 1) return 1;
     return 0;
   } catch (e) {

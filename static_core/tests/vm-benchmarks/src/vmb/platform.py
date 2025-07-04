@@ -20,7 +20,7 @@ import logging
 from typing import List, Optional, Type  # noqa
 from abc import ABC, abstractmethod
 from pathlib import Path
-from vmb.tool import ToolBase, OptFlags
+from vmb.tool import ToolBase, OptFlags, VmbToolExecError
 from vmb.target import Target
 from vmb.unit import BenchUnit, UNIT_PREFIX
 from vmb.helpers import get_plugins, get_plugin, die
@@ -71,8 +71,7 @@ class PlatformBase(CrossShell, ABC):
         for n, t in tool_plugins.items():
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
-                                    args.get_custom_opts(n))
-            tool.set_custom_opts(args.custom_opts)
+                                    args.custom_opts.get(n, []))
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 
@@ -167,8 +166,10 @@ class PlatformBase(CrossShell, ABC):
                 args.platform,
                 extra=args.extra_plugins)
             platform = platform_module.Platform(args)
+        except VmbToolExecError as e:
+            die(True, e.out)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            die(True, 'Plugin load error: %s', e)
+            die(True, 'Plugin (%s) load error: %s', args.platform, e)
         return platform
 
     @abstractmethod

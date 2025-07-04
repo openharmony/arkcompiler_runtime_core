@@ -24,6 +24,6 @@ type TEmpty = [Two];
 
 function main(): void {
     let t: TEmpty = [[[]]];
-    assertTrue( t[0] != undefined)
-    assertTrue( t[0][0] != undefined)
+    arktest.assertTrue( t[0] != undefined)
+    arktest.assertTrue( t[0][0] != undefined)
 }

@@ -29,6 +29,10 @@ class A {
 
 function main() {
     d = new A().fld
+<<<<<<< HEAD
     assertEQ(d, {{c.expr}})
+=======
+    arktest.assertEQ(d, {{c.expr}})
+>>>>>>> OpenHarmony_feature_20250328
 }
 {%- endfor %}

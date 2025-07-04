@@ -77,7 +77,7 @@ function main() {
     // Simple object
     const user = new User("John", 30, "john@example.com");
     console.dir(user);
-    
+
     // Nested object
     const company = new Company(
         "Tech Corp",
@@ -88,11 +88,11 @@ function main() {
         new Address("123 Main St", "Tech City", "Techland")
     );
     console.dir(company);
-    
+
     // Object with methods
     const calculator = new Calculator();
     console.dir(calculator);
-    
+
     // Array with mixed types
     const mixedArray: NullishType[] = [
         1,
@@ -100,4 +100,9 @@ function main() {
         [1, 2, 3],
     ];
     console.dir(mixedArray);
+
+    console.dir()
+    console.dir(1);
+    console.dir("str");
+    console.dir("count: %d")
 }

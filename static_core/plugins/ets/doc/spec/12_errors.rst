@@ -30,6 +30,8 @@ execution can be interrupted by the occurrence of situations of two kinds:
    not exist on a specified path, read permissions are not available,
    or else).
 
+The term *error* in this specification denotes all kinds of error situations.
+
 .. index::
    execution
    null pointer dereferencing
@@ -41,13 +43,6 @@ execution can be interrupted by the occurrence of situations of two kinds:
    completion failure
    path
    read permission
-
-The term *error* in this specification denotes all kinds of error situations.
-
-.. index::
-   runtime error
-   failure
-   runtime
 
 |
 
@@ -61,7 +56,7 @@ Errors
 
 *Error* is the base class of all error situations. Defining a new
 error class is normally not required because essential error classes for
-various cases (e.g., ``ArrayIndexOutOfBoundsError``) are defined in the
+various cases (e.g., ``RangeError``) are defined in the
 standard library (see :ref:`Standard Library`).
 
 However, a developer can handle a new error situation by using ``Error``
@@ -92,7 +87,7 @@ handling is provided below:
           return array[index] // access array
         }
         catch (error) {
-          if (error instanceof ArrayIndexOutOfBoundsError) // invalid index detected
+          if (error instanceof RangeError) // invalid index detected
              return null
           throw new UnknownError (error) // Unknown error occurred
         }
@@ -109,11 +104,11 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 **Note**. Not every error can be recovered.
 
 .. index::
-   compile-time error
    runtime system
+   standard library
    generic class
    subclass
-   error
+   error situation
    throw statement
    error
    try statement

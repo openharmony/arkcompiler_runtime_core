@@ -12,16 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_CALLBACK_HPP
-#define TAIHE_CALLBACK_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_CALLBACK_HPP_
+#define RUNTIME_INCLUDE_TAIHE_CALLBACK_HPP_
+// NOLINTBEGIN
 
+#include <taihe/callback.abi.h>
 #include <taihe/common.hpp>
+#include <taihe/object.hpp>
 
 #include <type_traits>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename Signature>
 struct callback_view;
@@ -31,127 +31,146 @@ struct callback;
 
 template <typename Return, typename... Params>
 struct callback_view<Return(Params...)> {
-    struct callback_data_t {
-        TRefCount m_count;
-        void (*m_free)(struct callback_data_t *);
-        as_abi_t<Return> (*m_func)(callback_data_t *data_ptr, as_abi_t<Params>... params);
-    };
+    static constexpr bool is_holder = false;
 
-    template <typename Impl>
-    struct callback_data_impl : callback_data_t, Impl {
-        template <typename... Args>
-        callback_data_impl(Args &&...args) : Impl(std::forward<Args>(args)...)
-        {
-            this->m_free = [](callback_data_t *data_ptr) { delete static_cast<callback_data_impl<Impl> *>(data_ptr); };
-            this->m_func = [](callback_data_t *data_ptr, as_abi_t<Params>... params) -> as_abi_t<Return> {
-                if constexpr (std::is_void_v<Return>) {
-                    return (*static_cast<callback_data_impl<Impl> *>(data_ptr))(from_abi<Params>(params)...);
-                } else {
-                    return into_abi<Return>(
-                        (*static_cast<callback_data_impl<Impl> *>(data_ptr))(from_abi<Params>(params)...));
-                }
-            };
-            tref_set(&this->m_count, 1);
-        }
-    };
+    using vtable_type = as_abi_t<Return>(DataBlockHead *, as_abi_t<Params>...);
+    using view_type = callback_view<Return(Params...)>;
+    using holder_type = callback<Return(Params...)>;
 
-    callback_data_t *data_ptr;
+    struct abi_type {
+        vtable_type *vtbl_ptr;
+        DataBlockHead *data_ptr;
+    } m_handle;
 
-    explicit callback_view(callback_data_t *data_ptr) : data_ptr(data_ptr) {}
+    explicit callback_view(abi_type handle) : m_handle(handle) {}
 
-    template <typename Impl, typename... Args>
-    static callback<Return(Params...)> from(Args &&...args)
+    operator data_view() const &
     {
-        return callback<Return(Params...)> {
-            new callback_data_impl<Impl>(std::forward<Args>(args)...),
-        };
+        return data_view(this->m_handle.data_ptr);
     }
 
-    template <typename Impl>
-    static callback<Return(Params...)> from(Impl &&impl)
+    operator data_holder() const &
     {
-        return callback<Return(Params...)> {
-            new callback_data_impl<Impl>(std::forward<Impl>(impl)),
-        };
+        return data_holder(tobj_dup(this->m_handle.data_ptr));
     }
 
-    Return operator()(Params... params) const
+public:
+    bool is_error() const &
+    {
+        return m_handle.vtbl_ptr == nullptr;
+    }
+
+    Return operator()(Params... params) const &
     {
         if constexpr (std::is_void_v<Return>) {
-            return data_ptr->m_func(data_ptr, into_abi<Params>(params)...);
+            return m_handle.vtbl_ptr(m_handle.data_ptr, into_abi<Params>(params)...);
         } else {
-            return from_abi<Return>(data_ptr->m_func(data_ptr, into_abi<Params>(params)...));
+            return from_abi<Return>(m_handle.vtbl_ptr(m_handle.data_ptr, into_abi<Params>(params)...));
         }
     }
+
+public:
+    template <typename Impl>
+    static as_abi_t<Return> vtbl_impl(DataBlockHead *data_ptr, as_abi_t<Params>... params)
+    {
+        if constexpr (std::is_void_v<Return>) {
+            return cast_data_ptr<Impl>(data_ptr)->operator()(from_abi<Params>(params)...);
+        } else {
+            return into_abi<Return>(cast_data_ptr<Impl>(data_ptr)->operator()(from_abi<Params>(params)...));
+        }
+    };
+
+    template <typename Impl>
+    static constexpr struct IdMapItem idmap_impl[0] = {};
 };
 
 template <typename Return, typename... Params>
 struct callback<Return(Params...)> : callback_view<Return(Params...)> {
-    using typename callback_view<Return(Params...)>::callback_data_t;
-    using callback_view<Return(Params...)>::data_ptr;
+    static constexpr bool is_holder = true;
 
-    explicit callback(callback_data_t *data_ptr) : callback_view<Return(Params...)>(data_ptr) {}
+    using typename callback_view<Return(Params...)>::abi_type;
 
-    callback(callback<Return(Params...)> &&other) : callback {other.data_ptr}
-    {
-        other.data_ptr = nullptr;
-    }
-
-    callback(callback<Return(Params...)> const &other) : callback {other.data_ptr}
-    {
-        if (data_ptr) {
-            tref_inc(&data_ptr->m_count);
-        }
-    }
-
-    callback(callback_view<Return(Params...)> const &other) : callback {other.data_ptr}
-    {
-        if (data_ptr) {
-            tref_inc(&data_ptr->m_count);
-        }
-    }
+    explicit callback(abi_type handle) : callback_view<Return(Params...)>(handle) {}
 
     ~callback()
     {
-        if (data_ptr && tref_dec(&data_ptr->m_count)) {
-            data_ptr->m_free(data_ptr);
-        }
+        tobj_drop(this->m_handle.data_ptr);
     }
 
     callback &operator=(callback other)
     {
-        std::swap(data_ptr, other.data_ptr);
+        std::swap(this->m_handle, other.m_handle);
         return *this;
+    }
+
+    callback(callback<Return(Params...)> &&other)
+        : callback({
+              other.m_handle.vtbl_ptr,
+              std::exchange(other.m_handle.data_ptr, nullptr),
+          })
+    {
+    }
+
+    callback(callback<Return(Params...)> const &other)
+        : callback({
+              other.m_handle.vtbl_ptr,
+              tobj_dup(other.m_handle.data_ptr),
+          })
+    {
+    }
+
+    callback(callback_view<Return(Params...)> const &other)
+        : callback({
+              other.m_handle.vtbl_ptr,
+              tobj_dup(other.m_handle.data_ptr),
+          })
+    {
+    }
+
+    operator data_view() const &
+    {
+        return data_view(this->m_handle.data_ptr);
+    }
+
+    operator data_holder() const &
+    {
+        return data_holder(tobj_dup(this->m_handle.data_ptr));
+    }
+
+    operator data_holder() &&
+    {
+        return data_holder(std::exchange(this->m_handle.data_ptr, nullptr));
     }
 };
 
 template <typename Return, typename... Params>
-inline bool same_impl(adl_helper_t, callback_view<Return(Params...)> lhs, callback_view<Return(Params...)> rhs)
-{
-    return lhs.data_ptr == lhs.data_ptr;
-}
-
-template <typename Return, typename... Params>
-inline std::size_t hash_impl(adl_helper_t, callback_view<Return(Params...)> val)
-{
-    return reinterpret_cast<std::size_t>(val.data_ptr);
-}
-
-template <typename Return, typename... Params>
 struct as_abi<callback_view<Return(Params...)>> {
-    using type = void *;
+    using type = TCallback;
 };
 
 template <typename Return, typename... Params>
 struct as_abi<callback<Return(Params...)>> {
-    using type = void *;
+    using type = TCallback;
 };
 
 template <typename Return, typename... Params>
 struct as_param<callback<Return(Params...)>> {
     using type = callback_view<Return(Params...)>;
 };
-}  // namespace taihe
-// NOLINTEND
 
-#endif // TAIHE_CALLBACK_HPP
+template <typename Return, typename... Params>
+inline bool operator==(callback_view<Return(Params...)> lhs, callback_view<Return(Params...)> rhs)
+{
+    return data_view(lhs) == data_view(rhs);
+}
+}  // namespace taihe
+
+template <typename Return, typename... Params>
+struct std::hash<taihe::callback<Return(Params...)>> {
+    std::size_t operator()(taihe::callback_view<Return(Params...)> val) const noexcept
+    {
+        return std::hash<taihe::data_holder>()(val);
+    }
+};
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_CALLBACK_HPP_

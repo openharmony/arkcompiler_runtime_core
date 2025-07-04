@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List remove an unique element", testRemoveUniqueElement);
     suite.addTest("List remove an inexistent element", testRemoveInexistentElement);
@@ -53,33 +53,33 @@ class TestData {
 function testRemoveUniqueElement() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber2);
-    assertTrue(list.remove(TestData.testNumber1), "Element 1 should be removed");
-    assertTrue(list.remove(TestData.testNumber5), "Element 5 should be removed");
+    arktest.assertTrue(list.remove(TestData.testNumber1), "Element 1 should be removed");
+    arktest.assertTrue(list.remove(TestData.testNumber5), "Element 5 should be removed");
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber2[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber2[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(list.length, TestData.arrayForNumber2.length - TestData.testNumber2, "List length should - 2");
+    arktest.assertEQ(list.length, TestData.arrayForNumber2.length - TestData.testNumber2, "List length should - 2");
 }
 
 function testRemoveInexistentElement() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber2);
-    assertFalse(list.remove(TestData.testNumber6), "Element 6 is inexistent");
+    arktest.assertFalse(list.remove(TestData.testNumber6), "Element 6 is inexistent");
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber2[i], "Element should match");
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber2[i], "Element should match");
     }
-    assertEQ(list.length, TestData.arrayForNumber2.length, "List length should should not change");
+    arktest.assertEQ(list.length, TestData.arrayForNumber2.length, "List length should should not change");
 }
 
 function testRemoveRepeatedElement() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber3);
-    assertTrue(list.remove(TestData.testNumber2), "Element 2 should be removed");
-    assertEQ(list.get(0), TestData.testNumber1, "First element should be 1");
+    arktest.assertTrue(list.remove(TestData.testNumber2), "Element 2 should be removed");
+    arktest.assertEQ(list.get(0), TestData.testNumber1, "First element should be 1");
     for (let i: number = TestData.testNumber1; i < list.length - TestData.testNumber1; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber3[i + TestData.testNumber1], "Element should match");
     }
-    assertEQ(list.length, TestData.arrayForNumber3.length - TestData.testNumber1, "List length should - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber3.length - TestData.testNumber1, "List length should - 1");
 }
 
 function testReplaceAllElementsWithConstantValue() {
@@ -89,7 +89,7 @@ function testReplaceAllElementsWithConstantValue() {
         return TestData.testNumber3;
     });
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.testNumber3, `Element at index ${i} should match`);
     }
 }
 
@@ -100,7 +100,7 @@ function testReplaceAllElementsWithLambda() {
         return value + TestData.testNumber3;
     });
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i] + TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i] + TestData.testNumber3, `Element at index ${i} should match`);
     }
 }
 
@@ -111,7 +111,7 @@ function testReplaceAllElementsWithLambdaAndIndex() {
         return value + index;
     });
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i] + i, `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i] + i, `Element at index ${i} should match`);
     }
 }
 
@@ -119,11 +119,11 @@ function testReplaceAllElementsWithLambdaIndexAndTempList() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
     list.replaceAllElements((value: number, index: number, tempList: List<number>): number => {
-        assertEQ(list, tempList, "TempList should be this");
+        arktest.assertEQ(list, tempList, "TempList should be this");
         return value + tempList.get(index)!;
     });
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i] * 2, `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i] * 2, `Element at index ${i} should match`);
     }
 }
 
@@ -132,7 +132,7 @@ function testForEachNoParams() {
     initializeList(list, TestData.arrayForNumber1);
     let count: number = 0;
     list.forEach(() => { count++ });
-    assertEQ(count, list.length, "ForEach count should match list length");
+    arktest.assertEQ(count, list.length, "ForEach count should match list length");
 }
 
 function testForEachSingleParam() {
@@ -140,9 +140,9 @@ function testForEachSingleParam() {
     initializeList(list, TestData.arrayForNumber1);
     let count: number = 0;
     list.forEach((value: number) => {
-        assertEQ(list.get(count++), value, `Element should be equal`);
+        arktest.assertEQ(list.get(count++), value, `Element should be equal`);
     });
-    assertEQ(count, list.length, "ForEach count should match list length");
+    arktest.assertEQ(count, list.length, "ForEach count should match list length");
 }
 
 function testForEachTwoParams() {
@@ -150,10 +150,10 @@ function testForEachTwoParams() {
     initializeList(list, TestData.arrayForNumber1);
     let count: number = 0;
     list.forEach((value: number, index: number) => {
-        assertEQ(list.get(count), value, `Element should be equal`);
-        assertEQ(count++, index, `The index should be equal`);
+        arktest.assertEQ(list.get(count), value, `Element should be equal`);
+        arktest.assertEQ(count++, index, `The index should be equal`);
     });
-    assertEQ(count, list.length, "ForEach count should match list length");
+    arktest.assertEQ(count, list.length, "ForEach count should match list length");
 }
 
 function testForEachThreeParams() {
@@ -161,18 +161,18 @@ function testForEachThreeParams() {
     initializeList(list, TestData.arrayForNumber1);
     let count: number = 0;
     list.forEach((value: number, index: number, tempList: List<number>) => {
-        assertEQ(list, tempList, "TempList should be this");
-        assertEQ(list.get(count), value, `Element should be equal`);
-        assertEQ(count++, index, `The index should be equal`);
+        arktest.assertEQ(list, tempList, "TempList should be this");
+        arktest.assertEQ(list.get(count), value, `Element should be equal`);
+        arktest.assertEQ(count++, index, `The index should be equal`);
     });
-    assertEQ(count, list.length, "ForEach count should match list length");
+    arktest.assertEQ(count, list.length, "ForEach count should match list length");
 }
 
 function testForEachEmptyContainer() {
     let list = new List<number>();
     let count: number = 0;
     list.forEach(() => { count++ });
-    assertEQ(count, 0, "ForEach count should be 0");
+    arktest.assertEQ(count, 0, "ForEach count should be 0");
 }
 
 function testForEachChangeValue() {
@@ -182,7 +182,7 @@ function testForEachChangeValue() {
         value = TestData.testNumber1;
     });
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber1[i], "ForEach should keep all elements the same");
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber1[i], "ForEach should keep all elements the same");
     }
 }
 

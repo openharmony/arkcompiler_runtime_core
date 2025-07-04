@@ -27,13 +27,13 @@ let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
 class Z {
-    fld: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}}{%- endif %}
+    fld?: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}}{%- endif %}
 }
 
 function main() {
 {%- for t in c['values'] %}
     let z{{loop.index}}: Z = { fld: s{{loop.index}} }
-    assertTrue( z{{loop.index}}.fld as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( z{{loop.index}}.fld as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

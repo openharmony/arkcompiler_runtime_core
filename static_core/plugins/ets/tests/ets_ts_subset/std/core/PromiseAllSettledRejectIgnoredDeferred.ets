@@ -13,18 +13,33 @@
  * limitations under the License.
  */
 class Fulfill implements PromiseLike<string> {
+<<<<<<< HEAD
     then<U, E>(onFulfill?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<U>((): U|PromiseLike<U> => {
             return onFulfill!("abc");
+=======
+    then<U, E>(onFulfill?: (value: string) => U | PromiseLike<U>, _?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
+            return onFulfill!('abc');
+>>>>>>> OpenHarmony_feature_20250328
         });
     }
 }
 
 class Reject implements PromiseLike<string> {
+<<<<<<< HEAD
     then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<E>((): E|PromiseLike<E> => {
             onFulfilled!("def");
             return onRejected!("xyz");
+=======
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<E>((): E | PromiseLike<E> => {
+            onFulfilled!('def');
+            return onRejected!(new Error('xyz'));
+>>>>>>> OpenHarmony_feature_20250328
         });
     }
 }
@@ -32,6 +47,7 @@ class Reject implements PromiseLike<string> {
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
 Promise.allSettled(thenable).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 2) {
+<<<<<<< HEAD
         console.log("Test failed. Expected a string array of length 2 but got length " + values.length + ".");
         return;
     }
@@ -54,4 +70,28 @@ Promise.allSettled(thenable).then<void, void>((values: PromiseSettledResult<stri
     console.log("Test failed. The promise should not be rejected.");
 }).catch((e: Object): void => {
     console.log("Test failed: " + e);
+=======
+        console.log('Test failed. Expected a string array of length 2 but got length ' + values.length + '.');
+        return;
+    }
+    if (values[0].status != PromiseStatus.fulfilled || values[1].status != PromiseStatus.fulfilled) {
+        console.log('Test failed. Expected all elements has status \'fulfilled\'.');
+        return;
+    }
+    let v: string = (values[0] as PromiseFulfilledResult<string>).value;
+    if (v != 'abc') {
+        console.log('Test failed. Expected the first elements has value \'abc\' but got ' + v + '.');
+        return;
+    }
+    v = (values[1] as PromiseFulfilledResult<string>).value;
+    if (v != 'def') {
+        console.log('Test failed. Expected the first elements has value \'abc\' but got ' + v + '.');
+        return;
+    }
+    console.log('Test passed.');
+}, (error: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+}).catch((e: Error): void => {
+    console.log('Test failed: ' + e);
+>>>>>>> OpenHarmony_feature_20250328
 });

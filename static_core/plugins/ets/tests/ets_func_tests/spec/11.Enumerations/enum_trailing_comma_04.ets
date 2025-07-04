@@ -26,5 +26,5 @@ enum EmptyEnum {
 
 function main(): void {
     let letters = TrailingComma.values()
-    assertEQ( letters.length, 0)
+    arktest.assertEQ( letters.length, 0)
 }

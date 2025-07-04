@@ -14,6 +14,10 @@
  */
 
 #include <algorithm>
+<<<<<<< HEAD
+=======
+#include <filesystem>
+>>>>>>> OpenHarmony_feature_20250328
 #include <utility>
 #include "include/class.h"
 #include "jit/profiling_data.h"
@@ -171,6 +175,10 @@ class ProfilingRoundTripTest : public ::testing::Test {
 public:
     PandaRunner &CreateRunner()
     {
+<<<<<<< HEAD
+=======
+        runner_.GetRuntimeOptions().SetIncrementalProfilesaverEnabled(false);
+>>>>>>> OpenHarmony_feature_20250328
         runner_.GetRuntimeOptions().SetShouldLoadBootPandaFiles(false);
         runner_.GetRuntimeOptions().SetShouldInitializeIntrinsics(false);
         runner_.GetRuntimeOptions().SetCompilerProfilingThreshold(0U);
@@ -185,6 +193,7 @@ public:
 
     void SaveProfile()
     {
+<<<<<<< HEAD
         pgoFilePath_ = CreateTmpFileName();
         auto *runtime = Runtime::GetCurrent();
 
@@ -194,6 +203,26 @@ public:
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
         profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
                                  profiledPandaFiles);
+=======
+        auto *runtime = Runtime::GetCurrent();
+        if (!runtime->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
+            return;
+        }
+        ProfilingSaver profileSaver;
+        classCtxStr_ = runtime->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
+                       runtime->GetClassLinker()->GetAotManager()->GetAppClassContext();
+        auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
+        auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
+        profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
+                                 writtenMethodsFinal, profiledPandaFiles);
+    }
+
+    void LoadProfileFail(ProfilingLoader &profilingLoader)
+    {
+        auto profileCtxOrError = profilingLoader.LoadProfile(PandaString(pgoFilePath_));
+        ASSERT_FALSE(profileCtxOrError.HasValue());
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     void LoadProfile(ProfilingLoader &profilingLoader)
@@ -261,6 +290,17 @@ public:
         }
     }
 
+<<<<<<< HEAD
+=======
+    void InitPGOFilePath()
+    {
+        pgoFilePath_ = CreateTmpFileName();
+        if (std::filesystem::exists(pgoFilePath_)) {
+            std::filesystem::remove(pgoFilePath_);
+        }
+    }
+
+>>>>>>> OpenHarmony_feature_20250328
 private:
     PandaRunner runner_;
     std::map<std::string, ark::Class *> classMap_;
@@ -272,6 +312,10 @@ private:
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 {
+<<<<<<< HEAD
+=======
+    InitPGOFilePath();
+>>>>>>> OpenHarmony_feature_20250328
     CreateRunner().GetRuntimeOptions().SetInterpreterType("cpp");
     CollectProfile();
     SaveProfile();
@@ -287,6 +331,10 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
 {
+<<<<<<< HEAD
+=======
+    InitPGOFilePath();
+>>>>>>> OpenHarmony_feature_20250328
     CreateRunner();
     CollectProfile();
     SaveProfile();
@@ -300,5 +348,119 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
     Runtime::Destroy();
 }
 
+<<<<<<< HEAD
 // NOLINTEND(readability-magic-numbers)
 }  // namespace ark::test
+=======
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(true);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(true);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithJit)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(true);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithJit)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(true);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfile(profilingLoader);
+        CheckProfile(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithoutJitAndProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetInterpreterType("cpp");
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfileFail(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithoutJitAndProfiler)
+{
+    InitPGOFilePath();
+    auto &runner = CreateRunner();
+    runner.GetRuntimeOptions().SetProfilerEnabled(false);
+    runner.GetRuntimeOptions().SetCompilerEnableJit(false);
+    CollectProfile();
+    SaveProfile();
+
+    {
+        ProfilingLoader profilingLoader;
+        LoadProfileFail(profilingLoader);
+    }
+
+    Runtime::Destroy();
+}
+
+// NOLINTEND(readability-magic-numbers)
+}  // namespace ark::test
+>>>>>>> OpenHarmony_feature_20250328

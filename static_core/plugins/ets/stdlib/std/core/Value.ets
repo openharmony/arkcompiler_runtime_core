@@ -132,6 +132,8 @@ native function ValueAPIGetElementLong(obj: Object, i: long): long
 
 native function ValueAPIGetElementObject(obj: Object, i: long): Object
 
+export namespace reflect {
+
 /**
  * Represents abstract value
  */
@@ -166,40 +168,6 @@ export abstract class Value extends Object {
 
     public static of(v: double): Value {
         return new DoubleValue(DoubleType.VAL, v)
-    }
-
-    // -----
-
-    public static of(v: Boolean): Value {
-        return new BooleanValue(BooleanType.REF, v)
-    }
-
-    public static of(v: Char): Value {
-        return new CharValue(CharType.REF, v)
-    }
-
-    public static of(v: Byte): Value {
-        return new ByteValue(ByteType.REF, v)
-    }
-
-    public static of(v: Short): Value {
-        return new ShortValue(ShortType.REF, v)
-    }
-
-    public static of(v: Int): Value {
-        return new IntValue(IntType.REF, v)
-    }
-
-    public static of(v: Long): Value {
-        return new LongValue(LongType.REF, v)
-    }
-
-    public static of(v: Float): Value {
-        return new FloatValue(FloatType.REF, v)
-    }
-
-    public static of(v: Double): Value {
-        return new DoubleValue(DoubleType.REF, v)
     }
 
     // -----
@@ -240,13 +208,13 @@ export abstract class Value extends Object {
         } else if (t instanceof VoidType) {
             return VoidValue.INSTANCE
         } else if (t instanceof ClassType) {
-            return new ClassValue(t as ClassType, o!)
+            return new ClassValue(t as ClassType, __narrowAny(o)!)
         } else if (t instanceof ArrayType) {
-            return new ArrayValue(t as ArrayType, o!)
+            return new ArrayValue(t as ArrayType, __narrowAny(o)!)
         } else if (t instanceof StringType) {
             return new StringValue(t as StringType, o! as string)
         } else if (t instanceof LambdaType) {
-            return new LambdaValue(t as LambdaType, o!)
+            return new LambdaValue(t as LambdaType, __narrowAny(o)!)
         } else if (t instanceof MethodType) {
             throw new Error("The MethodType cannot be instantiated")
         } else if (t instanceof EnumType) {
@@ -261,35 +229,35 @@ export abstract class Value extends Object {
 
     // -----
 
-    public static of(v: boolean[]): Value {
+    public static of(v: FixedArray<boolean>): Value {
         return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
     }
 
-    public static of(v: char[]): Value {
+    public static of(v: FixedArray<char>): Value {
         return new ArrayValue(ArrayType.CHAR_VAL, v)
     }
 
-    public static of(v: byte[]): Value {
+    public static of(v: FixedArray<byte>): Value {
         return new ArrayValue(ArrayType.BYTE_VAL, v)
     }
 
-    public static of(v: short[]): Value {
+    public static of(v: FixedArray<short>): Value {
         return new ArrayValue(ArrayType.SHORT_VAL, v)
     }
 
-    public static of(v: int[]): Value {
+    public static of(v: FixedArray<int>): Value {
         return new ArrayValue(ArrayType.INT_VAL, v)
     }
 
-    public static of(v: long[]): Value {
+    public static of(v: FixedArray<long>): Value {
         return new ArrayValue(ArrayType.LONG_VAL, v)
     }
 
-    public static of(v: float[]): Value {
+    public static of(v: FixedArray<float>): Value {
         return new ArrayValue(ArrayType.FLOAT_VAL, v)
     }
 
-    public static of(v: double[]): Value {
+    public static of(v: FixedArray<double>): Value {
         return new ArrayValue(ArrayType.DOUBLE_VAL, v)
     }
 
@@ -300,11 +268,13 @@ export abstract class Value extends Object {
     public abstract toPrint(depth: int): string
 }
 
+} // namespace reflect
+
 
 /**
  * Represents value of object of class type
  */
-export final class ClassValue extends Value {
+export final class ClassValue extends reflect.Value {
     private typ: ClassType
     private data: Object
 
@@ -337,9 +307,9 @@ export final class ClassValue extends Value {
      *
      * @throws error when i greater then field's number
      *
-     * @returns field {@link Value}
+     * @returns field {@link reflect.Value}
      */
-    public getField(i: long): Value {
+    public getField(i: long): reflect.Value {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -364,10 +334,10 @@ export final class ClassValue extends Value {
                 return new LongValue(ft as LongType, ValueAPIGetFieldLong(this.data, i))
             }
         }
-        return Value.of(ValueAPIGetFieldObject(this.data, i))
+        return reflect.Value.of(ValueAPIGetFieldObject(this.data, i))
     }
 
-    public getFieldByName(name: string): Value {
+    public getFieldByName(name: string): reflect.Value {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -393,7 +363,7 @@ export final class ClassValue extends Value {
             }
             throw new AssertionError("Type " + f.getType() + " is not a (un)boxed primitive")
         }
-        return Value.of(ValueAPIGetFieldByNameObject(this.data, name))
+        return reflect.Value.of(ValueAPIGetFieldByNameObject(this.data, name))
     }
 
     /**
@@ -401,12 +371,12 @@ export final class ClassValue extends Value {
      *
      * @param name of field
      *
-     * @param val @{link Value}
+     * @param val @{link reflect.Value}
      *
      * @throws error if this value doesn't have field with {@link name}
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setFieldByName(name: string, val: Value) {
+    public setFieldByName(name: string, val: reflect.Value) {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -436,11 +406,15 @@ export final class ClassValue extends Value {
         } else if (ft.assignableFrom(StringType.REF) && val instanceof StringValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData()!)
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as ArrayValue).getData())!)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldByNameObject(this.data, name, val.getData()!)
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny(val.getData())!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
+<<<<<<< HEAD
             ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData()!)
+=======
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as LambdaValue).getData())!)
+>>>>>>> OpenHarmony_feature_20250328
         } else if (ft instanceof DoubleType && val instanceof ByteValue) {
             ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
         } else if (ft instanceof DoubleType && val instanceof ShortValue) {
@@ -480,7 +454,7 @@ export final class ClassValue extends Value {
         }
     }
 
-    private isAssignableToObject(v: Value): boolean {
+    private isAssignableToObject(v: reflect.Value): boolean {
         return v instanceof ClassValue
             || v instanceof LambdaValue
             || v instanceof StringValue
@@ -492,12 +466,12 @@ export final class ClassValue extends Value {
      *
      * @param i of field
      *
-     * @param val @{link Value}
+     * @param val @{link reflect.Value}
      *
      * @throws error if this value doesn't have field with {@link index}'th index
      * or type of {@link val} doesn't assignable to type of this value
      */
-    public setField(i: long, val: Value) {
+    public setField(i: long, val: reflect.Value) {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
             throw new Error("Field must be not static")
@@ -526,17 +500,20 @@ export final class ClassValue extends Value {
         } else if (ft instanceof StringType && val instanceof StringValue) {
             ValueAPISetFieldObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-            ValueAPISetFieldObject(this.data, i, val.getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny(val.getData())!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
     }
 
     public override toPrint(depth: int): string {
+        if (this.typ.getName() == "escompat.Date") {
+            return new StringBuilder("Date: ").append("\"").append((this.data as Date).toISOString()).append("\"").toString()
+        }
         if (depth == 0) {
             return this.typ.getName() + " {...}"
         }
@@ -581,7 +558,7 @@ export final class ClassValue extends Value {
 /**
  * Represents array value
  */
-export final class ArrayValue extends Value {
+export final class ArrayValue extends reflect.Value {
     private typ: ArrayType
     private data: Object
 
@@ -602,7 +579,7 @@ export final class ArrayValue extends Value {
         return ValueAPIGetArrayLength(this.data)
     }
 
-    public getElement(i: long): Value {
+    public getElement(i: long): reflect.Value {
         const et = this.typ.getElementType()
         if (!et.isReference()) {
             if (et instanceof BooleanType) {
@@ -624,7 +601,7 @@ export final class ArrayValue extends Value {
             }
             throw new AssertionError("Type " + et + " is not a (un)boxed primitive")
         }
-        return Value.of(ValueAPIGetElementObject(this.data, i))
+        return reflect.Value.of(ValueAPIGetElementObject(this.data, i))
     }
 
     /**
@@ -632,11 +609,11 @@ export final class ArrayValue extends Value {
      *
      * @param i index
      *
-     * @param val {@link Value} to be set
+     * @param val {@link reflect.Value} to be set
      *
      * @throws error if of {@link val} cannot be assign to i'th element of array
      */
-    public setElement(i: long, val: Value) {
+    public setElement(i: long, val: reflect.Value) {
         let et = this.typ.getElementType()
         let vt = val.getType()
         if (!et.assignableFrom(vt)) {
@@ -661,9 +638,9 @@ export final class ArrayValue extends Value {
         } else if (et instanceof StringType && val instanceof StringValue) {
             ValueAPISetElementObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (et instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData()!)
+            ValueAPISetElementObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
         } else if (et instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetElementObject(this.data, i, (val as ClassValue).getData()!)
+            ValueAPISetElementObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
         } else {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }
@@ -719,7 +696,7 @@ export final class ArrayValue extends Value {
     }
 }
 
-export final class LambdaValue extends Value {
+export final class LambdaValue extends reflect.Value {
     private typ: LambdaType
     private data: Object
 
@@ -757,7 +734,7 @@ export final class LambdaValue extends Value {
 /**
  * Represents boolean value
  */
-export final class BooleanValue extends Value {
+export final class BooleanValue extends reflect.Value {
     private typ: BooleanType
     private data: boolean
 
@@ -778,10 +755,6 @@ export final class BooleanValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: BooleanType, data: Boolean) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -798,7 +771,7 @@ export final class BooleanValue extends Value {
 /**
  * Represents byte value
  */
-export final class ByteValue extends Value {
+export final class ByteValue extends reflect.Value {
     private typ: ByteType
     private data: byte
 
@@ -819,10 +792,6 @@ export final class ByteValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: ByteType, data: Byte) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -839,7 +808,7 @@ export final class ByteValue extends Value {
 /**
  * Represents short value
  */
-export final class ShortValue extends Value {
+export final class ShortValue extends reflect.Value {
     private typ: ShortType
     private data: short
 
@@ -860,10 +829,6 @@ export final class ShortValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: ShortType, data: Short) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -880,7 +845,7 @@ export final class ShortValue extends Value {
 /**
  * Represents char value
  */
-export final class CharValue extends Value {
+export final class CharValue extends reflect.Value {
     private typ: CharType
     private data: char
 
@@ -901,10 +866,6 @@ export final class CharValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: CharType, data: Char) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder("\"").append(this.data).append("\"").toString()
     }
@@ -921,7 +882,7 @@ export final class CharValue extends Value {
 /**
  * Represents int value
  */
-export final class IntValue extends Value {
+export final class IntValue extends reflect.Value {
     private typ: IntType
     private data: int
 
@@ -942,10 +903,6 @@ export final class IntValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: IntType, data: Int) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -962,7 +919,7 @@ export final class IntValue extends Value {
 /**
  * Represents float value
  */
-export final class FloatValue extends Value {
+export final class FloatValue extends reflect.Value {
     private typ: FloatType
     private data: float
 
@@ -983,10 +940,6 @@ export final class FloatValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: FloatType, data: Float) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -1003,7 +956,7 @@ export final class FloatValue extends Value {
 /**
  * Represents double value
  */
-export final class DoubleValue extends Value {
+export final class DoubleValue extends reflect.Value {
     private typ: DoubleType
     private data: double
 
@@ -1024,10 +977,6 @@ export final class DoubleValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: DoubleType, data: Double) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -1044,7 +993,7 @@ export final class DoubleValue extends Value {
 /**
  * Represents long value
  */
-export final class LongValue extends Value {
+export final class LongValue extends reflect.Value {
     private typ: LongType
     private data: long
 
@@ -1065,10 +1014,6 @@ export final class LongValue extends Value {
         this.data = data
     }
 
-    internal constructor(typ: LongType, data: Long) {
-        this(typ, data.unboxed())
-    }
-
     public override toPrint(depth: int): string {
         return new StringBuilder().append(this.data).toString()
     }
@@ -1085,7 +1030,7 @@ export final class LongValue extends Value {
 /**
  * Represents string value
  */
-export final class StringValue extends Value {
+export final class StringValue extends reflect.Value {
     private typ: StringType
     private data: string
 
@@ -1118,7 +1063,7 @@ export final class StringValue extends Value {
 /**
  * Represents null value
  */
-export final class NullValue extends Value {
+export final class NullValue extends reflect.Value {
     public static readonly INSTANCE = new NullValue()
 
     public override getType(): Type {
@@ -1147,7 +1092,7 @@ export final class NullValue extends Value {
 /**
  * Represents undefined value
  */
-export final class UndefinedValue extends Value {
+export final class UndefinedValue extends reflect.Value {
     public static readonly INSTANCE = new UndefinedValue()
 
     public override getType(): Type {
@@ -1176,7 +1121,7 @@ export final class UndefinedValue extends Value {
 /**
  * Represents void value
  */
-export final class VoidValue extends Value {
+export final class VoidValue extends reflect.Value {
     public static readonly INSTANCE = new VoidValue()
 
     public override getType(): Type {

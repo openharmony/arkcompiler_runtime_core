@@ -43,12 +43,12 @@ class ConsoleLogger {
     static logApplicationInfo(): void {
         console.group("Application Info");
         console.log("Version: 1.0.0");
-        
+
         console.group("System Details");
         console.log("OS: Windows");
         console.log("Browser: Chrome");
         console.groupEnd();
-        
+
         console.group("Performance");
         console.log("Memory: 4GB");
         console.log("CPU: 2.4GHz");
@@ -67,15 +67,15 @@ class ConsoleLogger {
     static logApiCalls(): void {
         console.group("API Calls");
         console.log("GET /users");
-        
+
         console.groupCollapsed("Request Details");
         const headers = new RequestHeaders("Bearer token");
         console.log("Headers:", headers);
         console.groupEnd();
-        
+
         console.groupCollapsed("Response");
         console.log("Status: 200");
-        console.log("Data:", [new User(1, "John")]);
+        console.log("Data:", [new User(1, "John")] as FixedArray<User>);
         console.groupEnd();
         console.groupEnd();
     }
@@ -84,13 +84,43 @@ class ConsoleLogger {
 function main() {
     // Basic group
     ConsoleLogger.logUserDetails();
-    
+
     // Nested groups
     ConsoleLogger.logApplicationInfo();
-    
+
     // Collapsed group
     ConsoleLogger.logDebugInfo();
-    
+
     // Mix of normal and collapsed groups
     ConsoleLogger.logApiCalls();
+
+    // Group
+    console.log("outter");
+    console.group();
+    console.log("level 1");
+    console.group("in level 1");
+    console.log("level 2");
+
+    // Reset for next test
+    console.groupEnd()
+    console.groupEnd()
+
+    // Collapsed
+    console.log("outter Collapsed");
+    console.groupCollapsed();
+    console.log("level 1 Collapsed");
+    console.groupCollapsed("in level 1 Collapsed");
+    console.log("level 2 Collapsed");
+
+    // Reset for next test
+    console.groupEnd()
+    console.groupEnd()
+
+    let num = 1
+    let str = "str"
+    console.groupCollapsed(num, str)
+    console.groupCollapsed(str)
+    console.groupCollapsed('count %d')
+    console.groupCollapsed()
+    console.groupCollapsed(num, str, "sdsf")
 }

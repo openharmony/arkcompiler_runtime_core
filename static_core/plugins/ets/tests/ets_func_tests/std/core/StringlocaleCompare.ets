@@ -15,16 +15,17 @@
 
 function testStringlocaleCompare1Param() {
     let str:string = "5";
-    assertEQ(str.localeCompare('3'), 1);
-    assertEQ(str.localeCompare('7'), -1);
-    assertEQ(str.localeCompare('5'), 0);
+    arktest.assertEQ(str.localeCompare('3'), 1);
+    arktest.assertEQ(str.localeCompare('7'), -1);
+    arktest.assertEQ(str.localeCompare('5'), 0);
 }
 
 function testStringlocaleCompare2Param() {
     let str:string = "5";
-    assertEQ(str.localeCompare('3', "zh-CN"), 1);
-    assertEQ(str.localeCompare('7', "zh-CN"), -1);
-    assertEQ(str.localeCompare('5', "zh-CN"), 0);
+    arktest.assertEQ(str.localeCompare('3', "zh-CN"), 1);
+    arktest.assertEQ(str.localeCompare('3', undefined), 1);
+    arktest.assertEQ(str.localeCompare('7', "zh-CN"), -1);
+    arktest.assertEQ(str.localeCompare('5', "zh-CN"), 0);
 }
 
 function testStringlocaleCompare3Param() {
@@ -34,19 +35,19 @@ function testStringlocaleCompare3Param() {
     }
 
     let str:string = "5";
-    assertEQ(str.localeCompare('3', "zh-CN", su), 1);
-    assertEQ(str.localeCompare('7', "zh-CN", su), -1);
-    assertEQ(str.localeCompare('5', "zh-CN", su), 0);
-    assertEQ(str.localeCompare('3', ["zh-CN", "en-US"], su), 1);
-    assertEQ(str.localeCompare('7', ["zh-CN", "en-US"], su), -1);
-    assertEQ(str.localeCompare('5', ["zh-CN", "en-US"], su), 0);
-    assertEQ(str.localeCompare('3', ["error-locale", "en-US"], su), 1);
-    assertEQ(str.localeCompare('7', ["error-locale", "en-US"], su), -1);
-    assertEQ(str.localeCompare('5', ["error-locale", "en-US"], su), 0);
+    arktest.assertEQ(str.localeCompare('3', "zh-CN", su), 1);
+    arktest.assertEQ(str.localeCompare('7', "zh-CN", su), -1);
+    arktest.assertEQ(str.localeCompare('5', "zh-CN", su), 0);
+    arktest.assertEQ(str.localeCompare('3', ["zh-CN", "en-US"], su), 1);
+    arktest.assertEQ(str.localeCompare('7', ["zh-CN", "en-US"], su), -1);
+    arktest.assertEQ(str.localeCompare('5', ["zh-CN", "en-US"], su), 0);
+    arktest.assertEQ(str.localeCompare('3', ["error-locale", "en-US"], su), 1);
+    arktest.assertEQ(str.localeCompare('7', ["error-locale", "en-US"], su), -1);
+    arktest.assertEQ(str.localeCompare('5', ["error-locale", "en-US"], su), 0);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("String.localeCompare");
+    const suite = new arktest.ArkTestsuite("String.localeCompare");
     suite.addTest("Test StringlocaleCompare1Param", testStringlocaleCompare1Param);
     suite.addTest("Test StringlocaleCompare2Param", testStringlocaleCompare2Param);
     suite.addTest("Test StringlocaleCompare3Param", testStringlocaleCompare3Param);

@@ -28,7 +28,7 @@ function main() {
     v1++
     a[1] = v1
 
-    assertEQ( a[0], {{v.r1}} )
-    assertEQ( a[1], {{v.r2}} )
+    arktest.assertEQ( a[0], {{v.r1}} )
+    arktest.assertEQ( a[1], {{v.r2}} )
 }
 {%- endfor %}

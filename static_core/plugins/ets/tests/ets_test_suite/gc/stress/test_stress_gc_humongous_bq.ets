@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
  // This test tries to load gc with a large number of memory allocations 
  // close to the OOM situation
 
 const NUMBER_OF_FREE_REGIONS = 2;
 
 class TestHumongousStress {
-    private static GARBAGE = new LinkedBlockingQueue<Object>();
+    private static GARBAGE = new containers.LinkedBlockingQueue<Object>();
 
     regionSize: int;
     humongousSize: int;
@@ -40,21 +43,21 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
+            TestHumongousStress.GARBAGE = new containers.LinkedBlockingQueue<Object>();
             try {
-                GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+                GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
             catch (e) {
-                assertTrue( false, "Unexpected exception during GC");
+                arktest.assertTrue( false, "Unexpected exception during GC");
             }
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return maxNumberOfObjects;
     }
 
-    private cor(numObjToCreate: int, humongousSize: int): Object|null {
+    private static cor(numObjToCreate: int, humongousSize: int): Object|null {
         try {
             for (let i = 0; i < numObjToCreate; i++) {
                 TestHumongousStress.GARBAGE.push(new byte[humongousSize] as Object);
@@ -67,7 +70,7 @@ class TestHumongousStress {
             return null;
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return new Object();
     };
@@ -76,13 +79,13 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assertTrue( this.threadsCount > 0 && objPerCoroutine > 0);
+        arktest.assertTrue( this.threadsCount > 0 && objPerCoroutine > 0);
 
         let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            corArrayTmp.push(launch this.cor(objPerCoroutine, this.humongousSize));
+            corArrayTmp.push(launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(TestHumongousStress.cor, objPerCoroutine, this.humongousSize));
         }
-        let corArrayLast = launch this.cor(lastCoroutuneNumObjects, this.humongousSize);
+        let corArrayLast = launch<Object|null, (numObjToCreate: int, humongousSize: int) => Object|null>(TestHumongousStress.cor, lastCoroutuneNumObjects, this.humongousSize);
 
         Coroutine.Schedule();
 
@@ -101,18 +104,18 @@ class TestHumongousStress {
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
+        TestHumongousStress.GARBAGE = new containers.LinkedBlockingQueue<Object>();
         try {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
         catch (e) {
-            assertTrue( false, "Unexpected exception during GC");
+            arktest.assertTrue( false, "Unexpected exception during GC");
         }
     }
 }
 
 function main(): void {
-    let tests = new ArrayAsListObject();
+    let tests = new containers.ArrayAsListObject();
 
     tests.pushBack(new TestHumongousStress(4, 3, 1.1));
     tests.pushBack(new TestHumongousStress(16, 5, 2.1));

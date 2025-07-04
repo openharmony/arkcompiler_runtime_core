@@ -1,8 +1,6 @@
-### Issue 22681
-api/@ohos/util/HashMap/HashMapEntriesTest.ets
-api/@ohos/util/HashSet/HashSetEntriesTest.ets
-api/@ohos/util/LightWeightMap/LightWeightMapEntriesTest.ets
-api/@ohos/util/LightWeightSet/LightWeightSetEntriesTest.ets
-api/@ohos/util/TreeMap/TreeMapSetGetTest.ets
-api/@ohos/util/TreeMap/TreeMapEntriesTest.ets
-api/@ohos/util/TreeSet/TreeSetEntriesTest.ets
+### Issue 25591
+api/@ohos/util/StringDecoder/EncodingTest.ets
+### Issue 27038
+api/@ohos/util/types/IsSetIteratorTest.ets
+### Issue 27033
+api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets

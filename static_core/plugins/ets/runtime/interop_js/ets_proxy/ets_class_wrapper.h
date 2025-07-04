@@ -117,6 +117,7 @@ private:
     using MethodsVec = std::vector<EtsMethodSet *>;
 
     std::pair<FieldsVec, MethodsVec> CalculateProperties(const OverloadsMap *overloads);
+    void SetBaseWrapperMethods(napi_env env, const EtsClassWrapper::MethodsVec &methods);
     void UpdatePropsWithBaseClasses(PropsMap *props);
     void CollectConstructors(PropsMap *props);
     void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
@@ -175,6 +176,8 @@ private:
 
     static constexpr const char *INTERFACE_ITERABLE_NAME = "escompat.IterableIterator";
 };
+
+void DoSetPrototype(napi_env env, napi_value obj, napi_value proto);
 
 }  // namespace ark::ets::interop::js::ets_proxy
 

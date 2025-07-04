@@ -56,7 +56,7 @@ class MultipleCatch {
      return res;
   }
 
-  __noinline__multipleCatch(ex0: Exception, ex1: Exception) : int throws {
+  __noinline__multipleCatch(ex0: Exception, ex1: Exception) : int {
     let res : int = 0;
     for (let i : int = 0; i < 16; i++) {
       let k : int = i % 2;

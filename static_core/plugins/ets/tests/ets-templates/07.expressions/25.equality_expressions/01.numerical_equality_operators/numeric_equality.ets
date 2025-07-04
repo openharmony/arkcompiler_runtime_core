@@ -23,7 +23,7 @@ params: {{eq.left}} {{eq.op}} {{eq.right}} is {{eq.result}}
 function main(): void {
   let left = {{eq.left}}
   let right = {{eq.right}}
-  assertEQ( (left {{eq.op}} right), {{eq.result}} )
+  arktest.assertEQ( (left {{eq.op}} right), {{eq.result}} )
 }
 
 {% endfor %}

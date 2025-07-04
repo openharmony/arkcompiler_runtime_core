@@ -14,5 +14,5 @@
  */
 
 function getFloatTuple(): [float, float, float, float, float] {
-    return [3.14, 2.71, 1.61, 0.59, 10.0];
+    return [3.14f, 2.71f, 1.61f, 0.59f, 10.0f];
 }

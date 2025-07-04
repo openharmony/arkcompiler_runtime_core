@@ -14,13 +14,28 @@
  */
 
 import { List } from '@ohos.util.List';
+<<<<<<< HEAD
 
 function main() {
     const suite = new ArkTestsuite("List API tests");
+=======
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
+
+function main() {
+    const suite = new arktest.ArkTestsuite("List API tests");
+>>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("List index getter", testIndexGetter);
     suite.addTest("List index setter", testIndexSetter);
     suite.addTest("List index out of range", testIndexOutOfRange);
+<<<<<<< HEAD
+=======
+    suite.addTest("List index input negative", testIndexInputNegative);
+    suite.addTest("List empty getter out of range", testEmptyGetterOutOfRange);
+    suite.addTest("List getter out of range", testGetterOutOfRange);
+>>>>>>> OpenHarmony_feature_20250328
 
     return suite.run();
 }
@@ -38,7 +53,11 @@ function testIndexGetter() {
     let list = new List<number>();
     initializeList(list, testNumbers);
     for (let i: int = 0; i < list.length; i++) {
+<<<<<<< HEAD
         assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
+=======
+        arktest.assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
+>>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -50,15 +69,23 @@ function testIndexSetter() {
     }
     let forEachCount = 0;
     list.forEach((value: number) => {
+<<<<<<< HEAD
         assertEQ(value, 5, `Element should match`);
         forEachCount++;
     });
     assertEQ(list.length, forEachCount, "List length should match forEach count");
+=======
+        arktest.assertEQ(value, 5, `Element should match`);
+        forEachCount++;
+    });
+    arktest.assertEQ(list.length, forEachCount, "List length should match forEach count");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testIndexOutOfRange() {
     let list = new List<number>();
     initializeList(list, testNumbers);
+<<<<<<< HEAD
     let result = list[testNumbers.length + 1];
     assertEQ(result, undefined, "The result should be undefined");
     
@@ -67,4 +94,58 @@ function testIndexOutOfRange() {
             `The value of index is out of range.`)
     }
     expectThrow(() => {list[testNumbers.length + 1] = 1}, exceptionCheck);
+=======
+
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 22") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => {list[testNumbers.length + 1] = 1}, exceptionCheck);
+}
+
+function testIndexInputNegative() {
+    let list = new List<number>();
+    arktest.expectNoThrow(() => {list[-1] = 1});
+
+    list.add(1);
+    arktest.expectNoThrow(() => {list[-1] = 1});
+}
+
+function testEmptyGetterOutOfRange() {
+    let list = new List<number>();
+
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= -1. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => {let a = list[10000]}, exceptionCheck);
+
+    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= -1. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => {let a = list[-1]}, exceptionCheck1);
+}
+
+function testGetterOutOfRange() {
+    let list = new List<number>();
+    initializeList(list, testNumbers);
+
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: 10000") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => {let a = list[10000]}, exceptionCheck);
+
+    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 20. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    }
+    arktest.expectThrow(() => {let a = list[-1]}, exceptionCheck1);
+>>>>>>> OpenHarmony_feature_20250328
 }

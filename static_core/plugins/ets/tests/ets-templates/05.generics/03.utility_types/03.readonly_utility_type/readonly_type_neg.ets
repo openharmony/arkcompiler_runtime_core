@@ -13,14 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-{% for p in properties %}
+{% for i in init %}
+{% for t in types %}
+{% for check in checks %}
 
 /*---
 desc: >-
     Type Readonly<T> constructs a type with all properties of T set to readonly.
     It means that the properties of the constructed value cannot be reassigned.
-    Using union as T for Readonly<T>.
 tags: [negative, compile-only]
 ---*/
 
@@ -30,22 +30,14 @@ interface I {
 }
 
 class A implements I {
-  i = 0;
-  j = "";
+  i = 1.0;
+  j = "A";
 }
 
-class C {
-  i: number = 0;
-  j: string = "";
-}
+let a: Readonly<{{t}}> = {{i}}
 
-function foo(i: Readonly<A|I|C>) {
-  i.{{p.edit_prop}} = {{p.new_val}}
-}
+{{check}}
 
-function main() {
-  foo( {{c.argument}} )
-}
-
+{% endfor %}
 {% endfor %}
 {% endfor %}

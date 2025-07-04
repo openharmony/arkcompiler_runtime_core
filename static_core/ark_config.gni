@@ -29,8 +29,16 @@ enable_hilog =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
     (current_cpu == "arm64" || current_cpu == "arm")
 
+enable_hitrace =
+    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
+    (current_cpu == "arm64" || current_cpu == "arm")
+
 if (enable_hilog) {
   hiviewdfx_ext_deps += [ "hilog:libhilog" ]
+}
+
+if (enable_hitrace) {
+  hiviewdfx_ext_deps += [ "hitrace:hitrace_meter" ]
 }
 
 if (is_standard_system || ark_standalone_build) {
@@ -95,15 +103,26 @@ ark_plugin_options_yaml = "$concat_gen_dir/plugin_options.yaml"
 isa_gen_dir = get_label_info("$ark_root/isa:isa_combine", "target_gen_dir")
 ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
+# chipset will set runtime_core_enable_codegen as false, not need codegen for it
+declare_args() {
+    runtime_core_enable_codegen = true
+}
+
 enable_irtoc = true
 enable_codegen = true
+if (is_mingw || current_os == "win" || current_os == "mingw" ||
+    current_os == "winuwp" || !runtime_core_enable_codegen) {
+  # Disable irtoc and codegen for:
+  # - mingw and similar configurations
+  # - !runtime_core_enable_codegen in chipset
+  enable_irtoc = false
+  enable_codegen = false
+}
 if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
      (current_os == "win" || current_os == "mingw" ||
       current_os == "winuwp"))) {
-  enable_irtoc = false
-  enable_codegen = false
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false
@@ -170,6 +189,7 @@ is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
 
 if (is_ohos && is_standard_system) {
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
+  hitrace_root = "//base/hiviewdfx/hitrace/interfaces/native/innerkits"
 }
 
 ## TODO add other arch

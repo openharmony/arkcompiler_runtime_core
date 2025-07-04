@@ -13,8 +13,28 @@
 
 module EtsConstants
     CORO_NULL_VALUE_OFFSET = "cross_values::GetEtsCoroutineNullValueOffset(graph->GetArch())"
+    ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
+    BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
 end
 
 macro(:ets_nullvalue) do
   LoadI(%tr).Imm(EtsConstants::CORO_NULL_VALUE_OFFSET).ref
+end
+
+###
+# Resolves a value of type 'ref_uint' stored in the memory by address 'base + offset', where 'offset` is an immediate
+# value, and returns it as a pointer. See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
+#
+macro(:get_object_pointer_imm) do |base, offset|
+  # Cast makes no problem when panda's codegen is in use but leads to an ill-formed 'addrspacecast i32 to ptr'
+  # instruction when the LLVM codegen is used. 'Bitcast' is lowered to the expected instruction 'inttoptr i32 to ptr'.
+  Bitcast(Cast(LoadI(base).Imm(offset).ref_uint).word).ptr
+end
+
+###
+# Resolves a value of type 'ref_uint' stored in the memory by address 'base + offset', and returns it as a pointer.
+# See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
+#
+macro(:get_object_pointer) do |base, offset|
+  Bitcast(Cast(Load(Cast(base).ptr, Cast(offset).word).ref_uint).word).ptr
 end

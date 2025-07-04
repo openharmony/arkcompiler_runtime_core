@@ -29,10 +29,10 @@ let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}};
 function main() {
 {%- for t in c['values'] %}
     let d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    assertTrue( d{{loop.index}} as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( d{{loop.index}} {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 
     const c{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    assertTrue( c{{loop.index}} as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( c{{loop.index}} {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {% endfor %}
 }
 {%- endfor %}

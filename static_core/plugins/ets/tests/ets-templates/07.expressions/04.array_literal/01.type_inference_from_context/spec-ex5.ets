@@ -21,18 +21,18 @@ desc: >-
 ---*/
 
 function bar (tuple: [Number, Boolean]) {
-    assertEQ(tuple[0].unboxed(), 1.0)
-    assertEQ(tuple[1].unboxed(), true)
+    arktest.assertEQ(tuple[0].unboxed(), 1.0)
+    arktest.assertEQ(tuple[1].unboxed(), true)
 }
 
 function main() {
     let tuple: [Number, Boolean] = [1, true] // assignment context
-    assertEQ(tuple[0].unboxed(), 1.0)
-    assertEQ(tuple[1].unboxed(), true)
+    arktest.assertEQ(tuple[0].unboxed(), 1.0)
+    arktest.assertEQ(tuple[1].unboxed(), true)
 
     bar([1, true])  // call context
 
     let t: [Number, Boolean] = [1, true] as [Number, Boolean] // casting conversion
-    assertEQ(t[0].unboxed(), 1.0)
-    assertEQ(t[1].unboxed(), true)
+    arktest.assertEQ(t[0].unboxed(), 1.0)
+    arktest.assertEQ(t[1].unboxed(), true)
 }

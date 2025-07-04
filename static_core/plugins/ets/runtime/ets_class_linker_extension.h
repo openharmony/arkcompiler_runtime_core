@@ -71,6 +71,8 @@ public:
 
     bool InitializeClass(Class *klass) override;
 
+    bool InitializeClass(Class *klass, ClassLinkerErrorHandler *handler) override;
+
     bool IsMethodNativeApi(const Method *method) const override;
 
     const void *GetNativeEntryPointFor(Method *method) const override;

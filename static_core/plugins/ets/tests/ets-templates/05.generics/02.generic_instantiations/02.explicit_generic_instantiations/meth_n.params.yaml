@@ -14,10 +14,10 @@
 ---
 cases:
     - use: |-
-          assertTrue(cls.foo<number>(null, 1) === 1)
+          arktest.assertTrue(cls.foo<number>(null, 1) === 1)
     - use: |-
           let a = 42
-          assertTrue(cls.foo<number>(a, new Object()) == 42)
+          arktest.assertTrue(cls.foo<number>(a, new Object()) == 42)
 
     - decl: |-
         class Cls {
@@ -29,4 +29,4 @@ cases:
       use: |-
         let cls = new Cls()
         let v = cls.foo<function, function>((p: number): number => p * p, (p: number): number => p + p)
-        assertTrue(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)          
+        arktest.assertTrue(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)          

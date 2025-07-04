@@ -16,18 +16,29 @@
 #ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
 #define COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
 
+<<<<<<< HEAD
 #include "thread/mutator_base.h"
 
 #include "base/common.h"
 
 namespace common {
+=======
+#include "base/common.h"
+#include "thread/mutator_base.h"
+
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 inline void MutatorBase::DoEnterSaferegion()
 {
     // set current mutator in saferegion.
     SetInSaferegion(SAFE_REGION_TRUE);
 }
 
+<<<<<<< HEAD
 inline bool MutatorBase::EnterSaferegion(bool updateUnwindContext) noexcept
+=======
+inline bool MutatorBase::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
+>>>>>>> OpenHarmony_feature_20250328
 {
     if (LIKELY_CC(!InSaferegion())) {
         DoEnterSaferegion();
@@ -75,5 +86,9 @@ bool MutatorBase::TransitionToCpuProfile(bool bySelf)
         }
     } while (true);
 }
+<<<<<<< HEAD
 }  // namespace common
+=======
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H

@@ -33,10 +33,10 @@ class A<T1=Int, T2=string, T3=long> {
 function main(): void {
     let a = new A(1, "world", 2 as Long);
     let a1 = new A<Int, string, Long>(1, "world", 2 as Long)
-    assertTrue( a.data1 instanceof Int)
-    assertTrue( a.data2 instanceof string)
-    assertTrue( a.data3 instanceof Long)
-    assertTrue( a1.data1 instanceof Int)
-    assertTrue( a1.data2 instanceof string)
-    assertTrue( a1.data3 instanceof Long)
+    arktest.assertTrue( a.data1 instanceof Int)
+    arktest.assertTrue( a.data2 instanceof string)
+    arktest.assertTrue( a.data3 instanceof Long)
+    arktest.assertTrue( a1.data1 instanceof Int)
+    arktest.assertTrue( a1.data2 instanceof string)
+    arktest.assertTrue( a1.data3 instanceof Long)
 }

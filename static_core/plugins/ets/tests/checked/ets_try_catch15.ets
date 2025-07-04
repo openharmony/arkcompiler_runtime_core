@@ -52,7 +52,7 @@ class A {
     getType() : string {
         return this.t
     }
-    constructor(p: int) throws { if (p == 0) throw ex; else this.t = "int" }
+    constructor(p: int) { if (p == 0) throw ex; else this.t = "int" }
 }
 
 function __noinline__test() {
@@ -61,7 +61,7 @@ function __noinline__test() {
             throw Error()
         }
     } catch (e) {
-        assertTrue(false);
+        arktest.assertTrue(false);
     }
 }
 

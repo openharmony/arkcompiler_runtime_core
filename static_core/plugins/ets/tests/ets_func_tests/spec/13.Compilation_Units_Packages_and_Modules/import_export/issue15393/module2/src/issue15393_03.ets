@@ -27,5 +27,5 @@ function foo(): num {
 }
 
 function main(): void {
-  assertEQ(foo(), 0)
+  arktest.assertEQ(foo(), 0)
 }

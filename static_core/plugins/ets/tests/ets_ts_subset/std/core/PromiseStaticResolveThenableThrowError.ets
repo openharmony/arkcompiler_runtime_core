@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 let error = new Error("error");
 
 class Thenable implements PromiseLike<string> {
@@ -30,4 +31,46 @@ Promise.resolve(poisonedThen).then(() : void => {
     } else {
         console.log("Test failed. The promise should be rejected with the provided value.");
     } 
+=======
+let error = new Error('error');
+
+class Thenable implements PromiseLike<string> {
+<<<<<<<< HEAD:static_core/plugins/ets/tests/ets_ts_subset/std/core/PromiseAllReject.ets
+    constructor(e: Error) {
+        this.error = e;
+========
+    then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        throw error;
+>>>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets_ts_subset/std/core/PromiseStaticResolveThenableThrowError.ets
+    }
+
+    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+        return Promise.resolve<E>(onRejected!(this.error));
+    }
+
+    private error: Error;
+};
+
+<<<<<<<< HEAD:static_core/plugins/ets/tests/ets_ts_subset/std/core/PromiseAllReject.ets
+let error = new Error("abc");
+let thenable = new Thenable(error);
+Promise.all([thenable]).then<void, void>((value: Array<string>): void => {
+    console.log("Test failed. The promise should not be resolved.");
+}, (e: Object): void => {
+    if (error !== e) {
+        console.log("Test failed. The promise should be rejected by the provided value.");
+        return;
+========
+let poisonedThen = new Thenable();
+Promise.resolve(poisonedThen).then(() : void => {
+    console.log('Test failed. The promise shouldn`t be fulfilled.');
+}, (val: Error) :void => {
+    if(val == error) {
+        console.log('Test passed.');
+    } else {
+        console.log('Test failed. The promise should be rejected with the provided value.');
+>>>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets_ts_subset/std/core/PromiseStaticResolveThenableThrowError.ets
+    }
+>>>>>>> OpenHarmony_feature_20250328
 })

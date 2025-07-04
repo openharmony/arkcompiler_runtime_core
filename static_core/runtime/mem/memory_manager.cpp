@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ static HeapManager *CreateHeapManager(InternalAllocatorPtr internalAllocator, co
     if (!heapManager->Initialize(gcType, options.multithreadingMode, options.isUseTlabForAllocations, memStats,
                                  internalAllocator, options.isStartAsZygote)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize HeapManager";
+        delete heapManager;
         return nullptr;
     }
     heapManager->SetIsFinalizableFunc(options.isObjectFinalizebleFunc);

@@ -137,6 +137,11 @@ export enum FaultID {
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,
+<<<<<<< HEAD
+=======
+  AddDeclareToTopLevelInterfaces,
+  RemoveLimitDecorator,
+>>>>>>> OpenHarmony_feature_20250328
   // this should always be last enum
   LAST_ID
 }

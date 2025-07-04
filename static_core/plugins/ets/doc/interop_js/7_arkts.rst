@@ -785,7 +785,6 @@ Async Functions and Methods (empty)
 
 Basic Coroutines (empty)
 ************************
-- launchExpression
 - awaitExpression
 
 Communication Channels (empty)

@@ -24,7 +24,7 @@ const testStr: string = "value: " + (value1 {{c.expression}})
 
 function main() {
     enum TestEnum { One = testStr }
-    assertEQ(TestEnum.One.valueOf(), "value: {{c.expected}}")
+    arktest.assertEQ(TestEnum.One.valueOf(), "value: {{c.expected}}")
 }
 
 {% endfor %}

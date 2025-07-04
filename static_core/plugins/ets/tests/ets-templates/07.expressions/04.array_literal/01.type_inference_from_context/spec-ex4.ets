@@ -21,21 +21,21 @@ desc: >-
 ---*/
 
 function foo (array: Number[]) {
-    assertEQ(array[0].unboxed(), 1.0)
-    assertEQ(array[1].unboxed(), 2.0)
-    assertEQ(array[2].unboxed(), 3.0)
+    arktest.assertEQ(array[0].unboxed(), 1.0)
+    arktest.assertEQ(array[1].unboxed(), 2.0)
+    arktest.assertEQ(array[2].unboxed(), 3.0)
 }
 
 function main() {
     let array: Number[] = [1, 2, 3] // assignment context
-    assertEQ(array[0].unboxed(), 1.0)
-    assertEQ(array[1].unboxed(), 2.0)
-    assertEQ(array[2].unboxed(), 3.0)
+    arktest.assertEQ(array[0].unboxed(), 1.0)
+    arktest.assertEQ(array[1].unboxed(), 2.0)
+    arktest.assertEQ(array[2].unboxed(), 3.0)
 
     foo([1, 2, 3])  // call context
 
     let n: Number[] = [1, 2, 3] as Number[] // casting conversion
-    assertEQ(n[0].unboxed(), 1.0)
-    assertEQ(n[1].unboxed(), 2.0)
-    assertEQ(n[2].unboxed(), 3.0)
+    arktest.assertEQ(n[0].unboxed(), 1.0)
+    arktest.assertEQ(n[1].unboxed(), 2.0)
+    arktest.assertEQ(n[2].unboxed(), 3.0)
 }

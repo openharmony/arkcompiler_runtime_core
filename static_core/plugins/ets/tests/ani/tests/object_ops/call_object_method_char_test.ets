@@ -26,24 +26,24 @@ class A {
 
     public charMethodVoidParam(): char
     {
-        return 'A';
+        return c'A';
     }
 
     public charMethodMultipleParam(a0: byte, a1: boolean, a2: float, a3: float, a4: byte): char
     {
         if (a1) {
-            return 'A';
+            return c'A';
         } else if (a2 > a3) {
-            return 'B';
+            return c'B';
         } else {
-            return 'C';
+            return c'C';
         }
     }
 
     public nestedMethod(data1: char, data2: int): char
     {
         let method = (value1: char, value2: int): char => {
-            return (value1 + value2) as char;
+            return (value1 + value2).toChar();
         }
 
         return method(data1, data2);
@@ -54,7 +54,7 @@ class A {
         if (a0 > 100) {
             return a0 as char;
         } else {
-            return this.recursionMethod((a0 + 5) as char);
+            return this.recursionMethod((a0 + 5).toChar());
         }
     }
 }
@@ -63,7 +63,7 @@ final class B extends A {
 
     public subCharMethodVoidParam(): char
     {
-        return 'W';
+        return c'W';
     }
 }
 
@@ -73,12 +73,12 @@ abstract class C {
 
 class D extends C {
     public override func(a: char, b: byte): char {
-        return (a + b) as char;
+        return (a + b).toChar();
     }
 }
 
 class E extends D {
     public override func(a: char, b: byte): char {
-        return (a - b) as char;
+        return (a - b).toChar();
     }
 }

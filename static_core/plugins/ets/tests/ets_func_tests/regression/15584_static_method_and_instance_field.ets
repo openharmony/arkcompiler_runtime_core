@@ -28,7 +28,7 @@ class Test extends Base {
 }
 
 function main(): int {
-    assertEQ(Test.foo(), -10)
-    assertEQ((new Test).foo, 10)
+    arktest.assertEQ(Test.foo(), -10)
+    arktest.assertEQ((new Test).foo, 10)
     return 0;
 }

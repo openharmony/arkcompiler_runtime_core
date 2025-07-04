@@ -92,18 +92,18 @@ function main(): int {
     i = ~ - t2 - t4; if (i != -3) return 1;
 
     // casting
-    i = + t258 as byte; if (i != 2) return 1;
-    i = + + t258 as byte; if (i != 2) return 1;
-    i = - t258 as byte; if (i != -2) return 1;
-    i = - - t258 as byte; if (i != 2) return 1;
-    i = ~ t258 as byte; if (i != -3) return 1;
-    i = ~ ~ t258 as byte; if (i != 2) return 1;
-    i = + - t258 as byte; if (i != -2) return 1;
-    i = + ~ t258 as byte; if (i != -3) return 1;
-    i = - + t258 as byte; if (i != -2) return 1;
-    i = - ~ t258 as byte; if (i != 3) return 1;
-    i = ~ + t258 as byte; if (i != -3) return 1;
-    i = ~ - t258 as byte; if (i != 1) return 1;
+    i = (+ t258).toByte(); if (i != 2) return 1;
+    i = (+ + t258).toByte(); if (i != 2) return 1;
+    i = (- t258).toByte(); if (i != -2) return 1;
+    i = (- - t258).toByte(); if (i != 2) return 1;
+    i = (~ t258).toByte(); if (i != -3) return 1;
+    i = (~ ~ t258).toByte(); if (i != 2) return 1;
+    i = (+ - t258).toByte(); if (i != -2) return 1;
+    i = (+ ~ t258).toByte(); if (i != -3) return 1;
+    i = (- + t258).toByte(); if (i != -2) return 1;
+    i = (- ~ t258).toByte(); if (i != 3) return 1;
+    i = (~ + t258).toByte(); if (i != -3) return 1;
+    i = (~ - t258).toByte(); if (i != 1) return 1;
 
     // right shift
     i = + t255 >> t3; if (i != 31) return 1;

@@ -14,12 +14,15 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet ToString IncreaseCapacityTo ToArray API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet ToString IncreaseCapacityTo ToArray API tests")
 
     suite.addTest("LightWeightSet toString output data as a string",
         testToStringOutputData)
@@ -46,15 +49,15 @@ function testToStringOutputData() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.toString();
-    assertEQ(result, "aa,bb", "The lightWeightSet should return a string representation of the set");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, "aa,bb", "The lightWeightSet should return a string representation of the set");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testToStringEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = lightWeightSet.toString();
-    assertEQ(result, "", "The lightWeightSet should return a string representation of the set");
-    assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
+    arktest.assertEQ(result, "", "The lightWeightSet should return a string representation of the set");
+    arktest.assertEQ(lightWeightSet.length, 0, "The lightWeightSet length should be 0");
 }
 
 function testToStringLargeData() {
@@ -62,53 +65,37 @@ function testToStringLargeData() {
     const MY_MAX = 1024000;
     lightWeightSet.add(MY_MAX);
     let result = lightWeightSet.toString();
-    assertEQ(result, MY_MAX + '', "The lightWeightSet should return a string representation of the set");
-    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+    arktest.assertEQ(result, MY_MAX + '', "The lightWeightSet should return a string representation of the set");
+    arktest.assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
 
 function testIncreaseCapacityTo() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(16);
-        lightWeightSet.increaseCapacityTo(2);
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightSet should not throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(16); });
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(2); });
 }
 
 function testIncreaseCapacityToLessThanLength() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(1);
-    } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightSet should throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(1); });
 }
 
 function testIncreaseCapacityToLeftFloat() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(Math.floor(1.2));
-    } catch (err: Error) {
-        assertEQ(err.message, "LightWeightSet should throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(1.2)); });
 }
 
 function testIncreaseCapacityToRightFloat() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.increaseCapacityTo(Math.floor(3.8));
-    } catch (err: Error) {
-        assertEQ(err.message, "LightWeightSet should not throw an error when increasing the capacity");
-    }
+    arktest.expectNoThrow(() => { lightWeightSet.increaseCapacityTo(Math.floor(3.8)); });
 }
 
 function testToArray() {
@@ -119,6 +106,6 @@ function testToArray() {
     let test2 = new Array<string>(2)
     test2[0] = "aa"
     test2[1] = "bb"
-    assertEQ(test1[0], test2[0], "The lightWeightSet fail at 1st judgement");
-    assertEQ(test1[1], test2[1], "The lightWeightSet fail at 2nd judgement");
+    arktest.assertEQ(test1[0], test2[0], "The lightWeightSet fail at 1st judgement");
+    arktest.assertEQ(test1[1], test2[1], "The lightWeightSet fail at 2nd judgement");
 }

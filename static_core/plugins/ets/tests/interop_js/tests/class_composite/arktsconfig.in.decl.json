@@ -5,10 +5,17 @@
 			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
                         "std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
 		},
+<<<<<<< HEAD
 		"dynamicPaths": {
 			"js": {
                 "language": "js",
                 "declPath": "${CMAKE_CURRENT_SOURCE_DIR}/js/index.ets",
+=======
+		"dependencies": {
+			"js": {
+                "language": "js",
+                "path": "${CMAKE_CURRENT_SOURCE_DIR}/js/index.ets",
+>>>>>>> OpenHarmony_feature_20250328
                 "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/js/index"
             }
 		}

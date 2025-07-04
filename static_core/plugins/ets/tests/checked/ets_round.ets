@@ -20,7 +20,7 @@
 //! INST_COUNT    /Intrinsic.StdMathRound/, 11
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
-//! ASM           x64: /roundsd.*3,/, arm64: "frinta", arm32: "vrinta"
+//! ASM           x64: /roundsd.*0x02,/, arm64: "frintp", arm32: "vrintp"
 
 //! CHECKER       Math.round AOT
 //! SKIP_IF       @architecture == "arm32"
@@ -30,7 +30,7 @@
 //! INST_COUNT    /Intrinsic.StdMathRound/, 11
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
-//! ASM           x64: /roundsd.*3,/, arm64: "frinta"
+//! ASM           x64: /roundsd.*0x02,/, arm64: "frintp"
 //! RUN           entry: "ets_round.ETSGLOBAL::main"
 
 //! CHECKER       Math.round LLVM AOT
@@ -48,8 +48,15 @@ function main(): int {
     if (round(1.5) != 2.) return 7;
     if (round(1.6) != 2.) return 8;
     if (round(1.4) != 1.) return 9;
+<<<<<<< HEAD
     if (round(-1.6) != -2.) return 10;
     if (round(-1.4) != -1.) return 11;
     
+=======
+    if (round(-1.5) != -1.) return 10;
+    if (round(-1.6) != -2.) return 11;
+    if (round(-1.4) != -1.) return 12;
+
+>>>>>>> OpenHarmony_feature_20250328
     return 0;
 }

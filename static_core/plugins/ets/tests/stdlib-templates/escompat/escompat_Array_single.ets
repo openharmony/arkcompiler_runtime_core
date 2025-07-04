@@ -39,7 +39,7 @@ function testCreateFromString(): int {
 
     for(let i: int = 0; i < src.length; i++) {
         let cc: char = src.charAt(i);
-        let ac: char = (test[i] as Object as String).charAt(0);
+        let ac: char = test[i].charAt(0);
         if(ac == cc) continue;
         console.println("Array data mismatch");
         return 1;
@@ -58,7 +58,7 @@ function testCreateFromString1(): int {
     let exp: String = "hello";
 
     for (let i: int = 0; i < exp.length; i++) {
-        let tmp: String = test[i] as Object as String; // <- verifier fails otherwise
+        let tmp: String = test[i]; // <- verifier fails otherwise
         let ac: char = tmp.charAt(0);
         let cc: char = exp.charAt(i);
 
@@ -71,13 +71,13 @@ function testCreateFromString1(): int {
 
 function testCreateFromString2(): int {
     let src: String = "Hello";
-    let test = Array.from(src, (v: String, k: number): Int => { return k as Int; });
+    let test = Array.from(src, (v: String, k: number): Int => { return k.toInt(); });
     if(test.length != src.length) {
         console.println("Array size mismatch");
         return 1;
     }
     for(let i: int = 0; i < src.length; i++) {
-        let av: Int = test[i] as Object as Int; // <- verifier fails otherwise
+        let av: Int = (test[i] as Object) as Int; // <- verifier fails otherwise
         if(av == i) continue;
         console.println("Array data mismatch");
         return 1;
@@ -97,7 +97,7 @@ function testFiltered(): int {
     }
 
     for(let i: int = 0; i < exp.length; i++) {
-        let ac: char = (test[i] as Object as String).charAt(0);
+        let ac: char = test[i].charAt(0);
         let cc: char = exp.charAt(i);
 
         if(ac == cc) continue;

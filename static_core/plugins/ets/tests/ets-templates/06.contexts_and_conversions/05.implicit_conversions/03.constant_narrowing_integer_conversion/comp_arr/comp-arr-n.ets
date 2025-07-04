@@ -18,9 +18,11 @@
 desc: Composite context, array element, constant narrowing integer conversion, implicit
 tags: [compile-only, negative]
 ---*/
+const s: {{c.from_type}} = {{c.expr|safe}}
+
 function main() {
     // constant expression doesn't fit in array type range
-    let d: {{c.to_type}}[] = [{{c.expr|safe}}]
+    let d: {{c.to_type}}[] = [s]
     let x = d[0]
 }
 {%- endfor %}

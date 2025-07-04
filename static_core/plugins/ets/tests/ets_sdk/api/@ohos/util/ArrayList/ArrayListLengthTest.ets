@@ -21,10 +21,18 @@ class Temp {
 }
 
 function main() {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("ArrayList API tests");
 
     suite.addTest("Testing ArrayList length is ok", testArrayListLength0001);
     suite.addTest("Testing ArrayList constructor support dataType", testArrayListConstructor0001);
+=======
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
+
+    suite.addTest("Testing ArrayList length is ok", testArrayListLength0001);
+    suite.addTest("Testing ArrayList constructor support dataType", testArrayListConstructor0001);
+    suite.addTest("Testing ArrayList add different dataType data", testArrayListAdd0001);
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Testing ArrayList add special string", testArrayListAdd0002);
     suite.addTest("Testing ArrayList insert data in start and end", testArrayListInsert0001);
     suite.addTest("Testing ArrayList insert special string", testArrayListInsert0002);
@@ -37,14 +45,50 @@ function main() {
 
 function testArrayListLength0001() {
     const arrayList = new ArrayList<number>();
+<<<<<<< HEAD
     assertEQ(arrayList.length, 0, "The length of a newly created ArrayList should be 0");
+=======
+    arktest.assertEQ(arrayList.length, 0, "The length of a newly created ArrayList should be 0");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListConstructor0001() {
     let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | bigint | Int8Array |
     Int16Array | Int32Array | undefined | null | Uint8Array | Uint16Array | Uint32Array |
     BigInt64Array | BigUint64Array>();
+<<<<<<< HEAD
     assertEQ(arrayList.length, 0, "The length of a newly created ArrayList with various data types should be 0");
+=======
+    arktest.assertEQ(arrayList.length, 0, "The length of a newly created ArrayList with various data types should be 0");
+}
+
+function testArrayListAdd0001() {
+    let arrayList = new ArrayList<number | string | Array<number | string | boolean> | boolean | undefined | null |
+    Object>();
+    arrayList.add("zhang san");
+    arrayList.add(1);
+    let temp: Temp = {
+        age: 10, name: "zhang"
+    };
+    arrayList.add(temp);
+    arrayList.add(undefined);
+    arrayList.add(null);
+    arrayList.add(true);
+    arrayList.insert("insert", 0);
+    arrayList.add([0, 1, 2, 4]);
+    arrayList.removeByIndex(0);
+
+    arktest.assertEQ(arrayList[0], "zhang san", "The first element should be 'zhang san'");
+    arktest.assertEQ(arrayList[1], 1, "The second element should be 1");
+    arktest.assertEQ(arrayList[2], temp, "The third element should match the Temp object");
+    arktest.assertEQ(arrayList[3], undefined, "The fourth element should be undefined");
+    arktest.assertEQ(arrayList[4], null, "The fifth element should be null");
+    arktest.assertEQ(arrayList[5], true, "The sixth element should be true");
+    for (let i = 0; i < 4; i++) {
+        arktest.assertEQ((arrayList[6]! as Array<int>)[i], [0, 1, 2, 4][i],
+            `The element at index ${i} of the seventh element should be ${[0, 1, 2, 4][i]}`);
+    }
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListAdd0002() {
@@ -55,10 +99,17 @@ function testArrayListAdd0002() {
     arrayList.add("%");
     arrayList.add(`"`);
 
+<<<<<<< HEAD
     assertEQ(arrayList[0], "", "The first element should be an empty string");
     assertEQ(arrayList[1], "`", "The second element should be '`'");
     assertEQ(arrayList[2], "%", "The third element should be '%'");
     assertEQ(arrayList[3], `"`, "The fourth element should be '\"'");
+=======
+    arktest.assertEQ(arrayList[0], "", "The first element should be an empty string");
+    arktest.assertEQ(arrayList[1], "`", "The second element should be '`'");
+    arktest.assertEQ(arrayList[2], "%", "The third element should be '%'");
+    arktest.assertEQ(arrayList[3], `"`, "The fourth element should be '\"'");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListInsert0001() {
@@ -70,8 +121,13 @@ function testArrayListInsert0001() {
     arrayList.removeByIndex(startIndex);
     let endIndex = arrayList.getIndexOf("end");
     arrayList.removeByIndex(endIndex);
+<<<<<<< HEAD
     assertFalse(arrayList.has("start"), "The ArrayList should not contain 'start' after removal");
     assertFalse(arrayList.has("end"), "The ArrayList should not contain 'end' after removal");
+=======
+    arktest.assertFalse(arrayList.has("start"), "The ArrayList should not contain 'start' after removal");
+    arktest.assertFalse(arrayList.has("end"), "The ArrayList should not contain 'end' after removal");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListInsert0002() {
@@ -85,9 +141,15 @@ function testArrayListInsert0002() {
     arrayList.removeByIndex(index2);
     let index3 = arrayList.getIndexOf(`"`);
     arrayList.removeByIndex(index3);
+<<<<<<< HEAD
     assertFalse(arrayList.has("`"), "The ArrayList should not contain '`' after removal");
     assertFalse(arrayList.has("%"), "The ArrayList should not contain '%' after removal");
     assertFalse(arrayList.has(`"`), "The ArrayList should not contain '\"' after removal");
+=======
+    arktest.assertFalse(arrayList.has("`"), "The ArrayList should not contain '`' after removal");
+    arktest.assertFalse(arrayList.has("%"), "The ArrayList should not contain '%' after removal");
+    arktest.assertFalse(arrayList.has(`"`), "The ArrayList should not contain '\"' after removal");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListHas0001() {
@@ -108,6 +170,7 @@ function testArrayListHas0001() {
     arrayList.add("`");
     arrayList.add("%");
     arrayList.add(`"`);
+<<<<<<< HEAD
     assertTrue(arrayList.has("zhang san"), "The ArrayList should contain 'zhang san'");
     assertTrue(arrayList.has(1), "The ArrayList should contain the number 1");
     assertTrue(arrayList.has(temp), "The ArrayList should contain the Temp object");
@@ -119,6 +182,19 @@ function testArrayListHas0001() {
     assertTrue(arrayList.has("`"), "The ArrayList should contain '`'");
     assertTrue(arrayList.has("%"), "The ArrayList should contain '%'");
     assertTrue(arrayList.has(`"`), "The ArrayList should contain '\"'");
+=======
+    arktest.assertTrue(arrayList.has("zhang san"), "The ArrayList should contain 'zhang san'");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should contain the number 1");
+    arktest.assertTrue(arrayList.has(temp), "The ArrayList should contain the Temp object");
+    arktest.assertTrue(arrayList.has(undefined), "The ArrayList should contain undefined");
+    arktest.assertTrue(arrayList.has(null), "The ArrayList should contain null");
+    arktest.assertTrue(arrayList.has(true), "The ArrayList should contain true");
+    arktest.assertTrue(arrayList.has(array), "The ArrayList should contain the array [0, 1, 2, undefined]");
+    arktest.assertTrue(arrayList.has(""), "The ArrayList should contain an empty string");
+    arktest.assertTrue(arrayList.has("`"), "The ArrayList should contain '`'");
+    arktest.assertTrue(arrayList.has("%"), "The ArrayList should contain '%'");
+    arktest.assertTrue(arrayList.has(`"`), "The ArrayList should contain '\"'");
+>>>>>>> OpenHarmony_feature_20250328
     arrayList.remove("zhang san");
     arrayList.remove(1);
     arrayList.remove(temp);
@@ -130,6 +206,7 @@ function testArrayListHas0001() {
     arrayList.remove("`");
     arrayList.remove("%");
     arrayList.remove(`"`);
+<<<<<<< HEAD
     assertFalse(arrayList.has("zhang san"), "The ArrayList should not contain 'zhang san' after removal");
     assertFalse(arrayList.has(1), "The ArrayList should not contain the number 1 after removal");
     assertFalse(arrayList.has(temp), "The ArrayList should not contain the Temp object after removal");
@@ -141,6 +218,19 @@ function testArrayListHas0001() {
     assertFalse(arrayList.has("`"), "The ArrayList should not contain '`' after removal");
     assertFalse(arrayList.has("%"), "The ArrayList should not contain '%' after removal");
     assertFalse(arrayList.has(`"`), "The ArrayList should not contain '\"' after removal");
+=======
+    arktest.assertFalse(arrayList.has("zhang san"), "The ArrayList should not contain 'zhang san' after removal");
+    arktest.assertFalse(arrayList.has(1), "The ArrayList should not contain the number 1 after removal");
+    arktest.assertFalse(arrayList.has(temp), "The ArrayList should not contain the Temp object after removal");
+    arktest.assertFalse(arrayList.has(undefined), "The ArrayList should not contain undefined after removal");
+    arktest.assertFalse(arrayList.has(null), "The ArrayList should not contain null after removal");
+    arktest.assertFalse(arrayList.has(true), "The ArrayList should not contain true after removal");
+    arktest.assertFalse(arrayList.has(array), "The ArrayList should not contain the array [0, 1, 2, undefined] after removal");
+    arktest.assertFalse(arrayList.has(""), "The ArrayList should not contain an empty string after removal");
+    arktest.assertFalse(arrayList.has("`"), "The ArrayList should not contain '`' after removal");
+    arktest.assertFalse(arrayList.has("%"), "The ArrayList should not contain '%' after removal");
+    arktest.assertFalse(arrayList.has(`"`), "The ArrayList should not contain '\"' after removal");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListGetIndexOf0001() {
@@ -164,6 +254,7 @@ function testArrayListGetIndexOf0001() {
     arrayList.add("zhang san");
     arrayList.add(1);
     let index1 = arrayList.getIndexOf("zhang san");
+<<<<<<< HEAD
     assertEQ(index1, 0, "The index of 'zhang san' should be 0");
     let index2 = arrayList.getIndexOf(1);
     assertEQ(index2, 1, "The index of the number 1 should be 1");
@@ -172,6 +263,16 @@ function testArrayListGetIndexOf0001() {
     assertTrue(arrayList.has("zhang san"),
         "The ArrayList should still contain 'zhang san' after removing another instance");
     assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+=======
+    arktest.assertEQ(index1, 0, "The index of 'zhang san' should be 0");
+    let index2 = arrayList.getIndexOf(1);
+    arktest.assertEQ(index2, 1, "The index of the number 1 should be 1");
+    arrayList.remove(1);
+    arrayList.remove("zhang san");
+    arktest.assertTrue(arrayList.has("zhang san"),
+        "The ArrayList should still contain 'zhang san' after removing another instance");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListGetLastIndexOf0001() {
@@ -195,6 +296,7 @@ function testArrayListGetLastIndexOf0001() {
     arrayList.add("zhang san");
     arrayList.add(1);
     let index1 = arrayList.getLastIndexOf("zhang san");
+<<<<<<< HEAD
     assertEQ(index1, 11, "The last index of 'zhang san' should be 11");
     let index2 = arrayList.getLastIndexOf(1);
     assertEQ(index2, 12, "The last index of the number 1 should be 12");
@@ -203,4 +305,14 @@ function testArrayListGetLastIndexOf0001() {
     assertTrue(arrayList.has("zhang san"),
         "The ArrayList should still contain 'zhang san' after removing another instance");
     assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+=======
+    arktest.assertEQ(index1, 11, "The last index of 'zhang san' should be 11");
+    let index2 = arrayList.getLastIndexOf(1);
+    arktest.assertEQ(index2, 12, "The last index of the number 1 should be 12");
+    arrayList.remove(1);
+    arrayList.remove("zhang san");
+    arktest.assertTrue(arrayList.has("zhang san"),
+        "The ArrayList should still contain 'zhang san' after removing another instance");
+    arktest.assertTrue(arrayList.has(1), "The ArrayList should still contain the number 1 after removing another instance");
+>>>>>>> OpenHarmony_feature_20250328
 }

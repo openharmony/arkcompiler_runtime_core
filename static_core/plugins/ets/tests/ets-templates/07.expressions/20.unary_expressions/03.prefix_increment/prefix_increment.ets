@@ -19,13 +19,13 @@ desc: Prefix increment operator
 
 function main(): void {
   let a = 5;
-  assertEQ(++a, 6);
-  assertEQ(a, 6);
+  arktest.assertEQ(++a, 6);
+  arktest.assertEQ(a, 6);
   a += ++a
-  assertEQ(a, 13)
+  arktest.assertEQ(a, 13)
   let b = 1.0
   b += ++b
-  assertEQ(b, 3)
+  arktest.assertEQ(b, 3)
   let c = -1.0
-  assertEQ(++c, 0.0)
+  arktest.assertEQ(++c, 0.0)
 }

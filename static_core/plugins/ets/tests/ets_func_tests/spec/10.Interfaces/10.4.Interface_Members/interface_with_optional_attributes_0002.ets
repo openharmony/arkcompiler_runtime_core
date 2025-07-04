@@ -58,12 +58,12 @@ function main() : void {
   let s : Student = new Student("Klara", 18, "an excellent student", new Teacher("Anna"));
   let s1 : Student = new Student("Karl", 18, "a bad student");
 
-  assertEQ( s.name, "Klara")
-  assertEQ( s.age, 18)
-  assertEQ( s.desc, "an excellent student")
-  assertEQ( s.teacher?.name, "Anna")
-  assertEQ( s1.name, "Karl")
-  assertEQ( s1.age, 18)
-  assertEQ( s1.desc, "a bad student")
-  assertEQ( s1.teacher?.name, undefined)
+  arktest.assertEQ( s.name, "Klara")
+  arktest.assertEQ( s.age, 18)
+  arktest.assertEQ( s.desc, "an excellent student")
+  arktest.assertEQ( s.teacher?.name, "Anna")
+  arktest.assertEQ( s1.name, "Karl")
+  arktest.assertEQ( s1.age, 18)
+  arktest.assertEQ( s1.desc, "a bad student")
+  arktest.assertEQ( s1.teacher?.name, undefined)
 }

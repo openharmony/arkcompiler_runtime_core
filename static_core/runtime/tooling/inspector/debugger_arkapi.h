@@ -1,0 +1,49 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef PANDA_DEBUGGER_ARKAPI_H
+#define PANDA_DEBUGGER_ARKAPI_H
+
+#include <functional>
+#include <memory>
+#include <string>
+#include "libpandabase/macros.h"
+
+namespace ark {
+class PANDA_PUBLIC_API ArkDebugNativeAPI final {
+public:
+    using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
+
+    static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
+    static bool NotifyDebugMode(int tid, int32_t instanceId = 0, bool debugApp = false);
+    static bool StopDebugger();
+    static bool IsDebugModeEnabled();
+
+    static bool StartProfiling(const std::string &filepath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
+    static bool StopProfiling();
+
+    ArkDebugNativeAPI() = delete;
+    ~ArkDebugNativeAPI() = delete;
+
+    NO_COPY_SEMANTIC(ArkDebugNativeAPI);
+    NO_MOVE_SEMANTIC(ArkDebugNativeAPI);
+
+private:
+    static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
+};
+
+}  // namespace ark
+
+#endif  // PANDA_DEBUGGER_ARKAPI_H

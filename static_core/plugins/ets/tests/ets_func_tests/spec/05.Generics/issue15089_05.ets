@@ -31,5 +31,5 @@ class MyClass {
 
 function main(): void {
   let x = new Array<MyClass>(new MyClass("Name", 831))
-  assertTrue( x[0] instanceof MyClass)
+  arktest.assertTrue( x[0] instanceof MyClass)
 }

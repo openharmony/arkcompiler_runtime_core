@@ -18,12 +18,14 @@ package escompat;
 /**
  * Represents the NaN value according to IEEE-754 specification
  */
-export const NaN = Double.NaN;
+// initialized in _initializerBlock_.ets
+export const NaN: number;
 
 /**
  * Represents the +Infinity value according to IEEE-754 specification
  */
-export const Infinity = Double.POSITIVE_INFINITY;
+// initialized in _initializerBlock_.ets
+export const Infinity: number;
 
 /**
  * Parses integer number from `String` with specified radix
@@ -70,17 +72,6 @@ export function parseFloat(s: String): number {
 }
 
 /**
- * Checks if Double is `NaN` (not a number)
- *
- * @param d the Double to test
- *
- * @returns `true` if the argument is `NaN`, `false` otherwise.
- */
-export function isNaN(d: Number): boolean {
-    return d.isNaN();
-}
-
-/**
  * Checks if double is `NaN` (not a number)
  *
  * @param d the `double` to test
@@ -88,18 +79,7 @@ export function isNaN(d: Number): boolean {
  * @returns `true` if the argument is `NaN`, `false` otherwise.
  */
 export function isNaN(d: number): boolean {
-    return Double.isNaN(d);
-}
-
-/**
- * Checks if `Float` value is `NaN` (not a number)
- *
- * @param f the `Float` value to test
- *
- * @returns `true` if the argument is `NaN`, `false` otherwise.
- */
-export function isNaN(f: Float): boolean {
-    return f.isNaN();
+    return d.isNaN();
 }
 
 /**
@@ -150,53 +130,6 @@ export function isNaN(s: short): boolean { return false; }
 export function isNaN(l: long): boolean { return false; }
 
 /**
- * Checks if `Byte` value is `NaN` (not a number)
- *
- * @param b the `Byte` value to test
- *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
- */
-export function isNaN(b: Byte): boolean { return false; }
-
-/**
- * Checks if `Int` value is `NaN` (not a number)
- *
- * @param i the `Int` value to test
- *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
- */
-export function isNaN(i: Int): boolean { return false; }
-
-/**
- * Checks if `Short` value is `NaN` (not a number)
- *
- * @param s the `Short` value to test
- *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
- */
-export function isNaN(s: Short): boolean { return false; }
-
-/**
- * Checks if `Long` value is `NaN` (not a number)
- *
- * @param l the `Long` value to test
- *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
- */
-export function isNaN(l: Long): boolean { return false; }
-
-/**
- * Checks if `Double` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param d the `Double` value to test
- *
- * @returns `true` if the argument is a floating point value, `false` otherwise.
- */
-export function isFinite(d: Number): boolean {
-    return d.isFinite();
-}
-
-/**
  * Checks if `double` value is a floating point value (not a `NaN` or `Infinity`)
  *
  * @param d the `double` value to test
@@ -204,7 +137,7 @@ export function isFinite(d: Number): boolean {
  * @returns `true` if the argument is a floating point value, `false` otherwise.
  */
 export function isFinite(d: number): boolean {
-    return Double.isFinite(d);
+    return d.isFinite();
 }
 
 /**
@@ -214,19 +147,8 @@ export function isFinite(d: number): boolean {
  *
  * @returns `true` if the argument is a floating point value, `false` otherwise.
  */
-export function isFinite(f: Float): boolean {
-    return f.isFinite();
-}
-
-/**
- * Checks if `float` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param f the `float` value to test
- *
- * @returns `true` if the argument is a floating point value, `false` otherwise.
- */
 export function isFinite(f: float): boolean {
-    return Float.isFinite(f);
+    return f.isFinite();
 }
 
 /**
@@ -266,42 +188,6 @@ export function isFinite(s: short): boolean { return true; }
 export function isFinite(l: long): boolean { return true; }
 
 /**
- * Checks if `Byte` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param b the `Byte` value to test
- *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
- */
-export function isFinite(b: Byte): boolean { return true; }
-
-/**
- * Checks if `Int` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param i the `Int` value to test
- *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
- */
-export function isFinite(i: Int): boolean { return true; }
-
-/**
- * Checks if `Short` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param s the `Short` value to test
- *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
- */
-export function isFinite(s: Short): boolean { return true; }
-
-/**
- * Checks if `Long` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param l the `Long` value to test
- *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
- */
-export function isFinite(l: Long): boolean { return true; }
-
-/**
  * Checks if float is similar to an integer value
  *
  * @param v the float to test
@@ -309,17 +195,6 @@ export function isFinite(l: Long): boolean { return true; }
  * @returns boolean - true if the argument is similar to an integer value
  */
 export function isInteger(v: float): boolean {
-    return Float.isInteger(v);
-}
-
-/**
- * Checks if Float is similar to an integer value
- *
- * @param v the Float to test
- *
- * @returns boolean - true if the argument is similar to an integer value
- */
-export function isInteger(v: Float): boolean {
     return v.isInteger();
 }
 
@@ -331,17 +206,6 @@ export function isInteger(v: Float): boolean {
  * @returns boolean - true if the argument is similar to an integer value
  */
 export function isInteger(v: number): boolean {
-    return Double.isInteger(v);
-}
-
-/**
- * Checks if Double is similar to an integer value
- *
- * @param v the Double to test
- *
- * @returns boolean - true if the argument is similar to an integer value
- */
-export function isInteger(v: Number): boolean {
     return v.isInteger();
 }
 
@@ -382,42 +246,6 @@ export function isInteger(s: short): boolean { return true; }
 export function isInteger(l: long): boolean { return true; }
 
 /**
- * Checks if `Byte` is similar to an integer value
- *
- * @param b the `Byte` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(b: Byte): boolean { return true; }
-
-/**
- * Checks if `Int` is similar to an integer value
- *
- * @param i the `Int` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(i: Int): boolean { return true; }
-
-/**
- * Checks if `Short` is similar to an integer value
- *
- * @param s the `Short` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(s: Short): boolean { return true; }
-
-/**
- * Checks if `Long` value is similar to an integer value
- *
- * @param l the `Long` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(l: Long): boolean { return true; }
-
-/**
  * Checks if float is a safe integer value
  *
  * @param v: float - the float to test
@@ -425,17 +253,6 @@ export function isInteger(l: Long): boolean { return true; }
  * @returns boolean - true if the argument is integer and less than Float.MAX_SAFE_INTEGER
  */
 export function isSafeInteger(v: float): boolean {
-    return Float.isSafeInteger(v);
-}
-
-/**
- * Checks if Float is a safe integer value
- *
- * @param v: Float - the Float to test
- *
- * @returns boolean - true if the underlying float is a safe integer
- */
-export function isSafeInteger(v: Float): boolean {
     return v.isSafeInteger();
 }
 
@@ -447,17 +264,6 @@ export function isSafeInteger(v: Float): boolean {
  * @returns boolean - true if the argument is integer and less than Double.MAX_SAFE_INTEGER
  */
 export function isSafeInteger(v: number): boolean {
-    return Double.isSafeInteger(v);
-}
-
-/*
- * Checks if Double is a safe integer value
- *
- * @param v the Double to test
- *
- * @returns boolean - true if the underlying double is a safe integer
- */
-export function isSafeInteger(v: Number): boolean {
     return v.isSafeInteger();
 }
 
@@ -473,17 +279,6 @@ export function isSafeInteger(v: int): boolean {
 }
 
 /**
- * Checks if Int can be represented in float without lossing precision
- *
- * @param v: Int - the Int to test
- *
- * @returns boolean - true if the argument is less than Float.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: Int): boolean {
-    return v.unboxed() <= Float.MAX_SAFE_INTEGER as int;
-}
-
-/**
  * Checks if long can be represented in double without lossing precision
  *
  * @param v: long - the long to test
@@ -491,25 +286,19 @@ export function isSafeInteger(v: Int): boolean {
  * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
  */
 export function isSafeInteger(v: long): boolean {
-    return v <= Double.MAX_SAFE_INTEGER as long;
-}
-
-/**
- * Checks if Long can be represented in double without lossing precision
- *
- * @param v: Long - the Long to test
- *
- * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: Long): boolean {
-    return v.unboxed() <= Double.MAX_SAFE_INTEGER as long;
+    return v <= Double.MAX_SAFE_INTEGER.toLong();
 }
 
 /**
  * Execute function on the next cycle.
  *
+<<<<<<< HEAD
  * @param func: Function - the function to be executed on the next cycle.
  * @returns number - timer id
+=======
+ * @param { Function } func - the function to be executed on the next cycle.
+ * @returns { number } timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(func: Function): number {
     return setTimeout(func, 0);
@@ -518,6 +307,7 @@ export function setTimeout(func: Function): number {
 /**
  * Execute function with parameters after the timer expires.
  *
+<<<<<<< HEAD
  * @param func: Function - the function to be executed after the timer expires.
  * @param delayMs: number - timeout in milliseconds, decimals will be rounded down.
  * @param ...args: NullishType[] - parameters passed to func.
@@ -527,13 +317,28 @@ export function setTimeout(func: Function, delayMs: number, ...args: NullishType
     return startTimer(():void => {
         func.unsafeCall(...args)
     }, delayMs, true);
+=======
+ * @param { Function } func - the function to be executed after the timer expires.
+ * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
+ * @param { ...NullishType } args - parameters passed to func.
+ * @returns { number } timer id
+ */
+export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
  * Print error message on the next cycle.
+<<<<<<< HEAD
  * 
  * @param msg: string - the message to be printed on the next cycle.
  * @returns number - timer id
+=======
+ *
+ * @param { string } msg - the message to be printed on the next cycle.
+ * @returns { number } timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(msg: string): number {
     return setTimeout(():void => {
@@ -544,9 +349,15 @@ export function setTimeout(msg: string): number {
 /**
  * Print error message after the timer expires.
  *
+<<<<<<< HEAD
  * @param msg: string - the message to be printed after the timer expires.
  * @param delayMs: number - timeout in milliseconds, decimals will be rounded down.
  * @returns number - timer id
+=======
+ * @param { string } msg - the message to be printed after the timer expires.
+ * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
+ * @returns { number } timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(msg: string, delayMs: number): number {
     return setTimeout(():void => {
@@ -557,7 +368,11 @@ export function setTimeout(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
+<<<<<<< HEAD
  * @param timerId: number - the id of the timer returned from setTimeout.
+=======
+ * @param { number } timerId - the id of the timer returned from setTimeout.
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function clearTimeout(timerId: number): void {
     stopTimer(timerId);
@@ -566,8 +381,13 @@ export function clearTimeout(timerId: number): void {
 /**
  * Repeatedly do asynchronous call of the function.
  *
+<<<<<<< HEAD
  * @param func: Function - the function to be executed.
  * @returns number - timer id
+=======
+ * @param { Function } func - the function to be executed.
+ * @returns { number } timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(func: Function): number {
     return setInterval(func, 0);
@@ -576,6 +396,7 @@ export function setInterval(func: Function): number {
 /**
  * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
  *
+<<<<<<< HEAD
  * @param func: Function - the function to be executed.
  * @param delayMs: number - timeout in milliseconds.
  * @param ...args: NullishType[] - parameters passed to func.
@@ -585,13 +406,27 @@ export function setInterval(func: Function, delayMs: number, ...args: NullishTyp
     return startTimer(():void => {
         func.unsafeCall(...args)
     }, delayMs, false);
+=======
+ * @param { Function } func - the function to be executed.
+ * @param { number } delayMs - timeout in milliseconds.
+ * @param { ...NullishType } args - parameters passed to func.
+ * @returns { number } - timer id
+ */
+export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
  * Repeatedly print the error message asynchronously.
  *
+<<<<<<< HEAD
  * @param msg: string - the message to be printed.
  * @returns number - timer id
+=======
+ * @param { string } msg - the message to be printed.
+ * @returns { number } - timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(msg: string): number {
     return setInterval(():void => {
@@ -602,9 +437,15 @@ export function setInterval(msg: string): number {
 /**
  * Repeatedly print the error message with delayMs interval between calls. The first print will be after delayMs.
  *
+<<<<<<< HEAD
  * @param msg: string - the message to be printed.
  * @param delayMs: number - timeout in milliseconds.
  * @returns number - timer id
+=======
+ * @param { string } msg - the message to be printed.
+ * @param { number } delayMs - timeout in milliseconds.
+ * @returns { number } timer id
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(msg: string, delayMs: number): number {
     return setInterval(():void => {
@@ -615,12 +456,17 @@ export function setInterval(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
+<<<<<<< HEAD
  * @param timerId: number - the id of the timer returned from setInterval.
+=======
+ * @param { number } timerId - the id of the timer returned from setInterval.
+>>>>>>> OpenHarmony_feature_20250328
  */
 export function clearInterval(timerId: number): void {
     stopTimer(timerId);
 }
 
+<<<<<<< HEAD
 function startTimer(func: () => void, delayMs: number, oneShotTimer: boolean): number
 {
     const realDelayMs = delayMs as int; 
@@ -628,16 +474,33 @@ function startTimer(func: () => void, delayMs: number, oneShotTimer: boolean): n
         return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, oneShotTimer) as number;
     }
     return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, !oneShotTimer) as number;
+=======
+function startTimer(func: () => void, delayMs: number, repeat: boolean): number
+{
+    const realDelayMs = delayMs.toInt();
+    if (CoroutineExtras.workerHasExternalScheduler()) {
+        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
+    }
+    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function stopTimer(timerId: number): void
 {
+<<<<<<< HEAD
     if (CoroutineExtras.isMainWorker()) {
         stopTimerImpl(timerId as int);
         return;
     }
     clearTimer(timerId as int);
+=======
+    if (CoroutineExtras.workerHasExternalScheduler()) {
+        stopTimerImpl(timerId.toInt());
+        return;
+    }
+    clearTimer(timerId.toInt());
+>>>>>>> OpenHarmony_feature_20250328
 }
 
-native function startTimerImpl(func: Object, delayMs: int, oneShotTimer: boolean): int;
+native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;
 native function stopTimerImpl(timerId: int): void;

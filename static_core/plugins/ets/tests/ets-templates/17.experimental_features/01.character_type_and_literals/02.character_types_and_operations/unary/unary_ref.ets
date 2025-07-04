@@ -21,17 +21,17 @@ desc: >-
 
 function minus(p: Char): Char {
     // Widening to int happens
-    return -p as Char
+    return (-p).toChar()
 }
 
 function plus(p: Char): Char {
     // Widening to int happens
-    return +p as Char
+    return (+p).toChar()
 }
 
 function main() {
     const v1 = new Char({{v.v1}})
 
-    assertEQ( ({{v.exp}}), {{v.r}} )
+    arktest.assertEQ( ({{v.exp}}), {{v.r}} )
 }
 {%- endfor %}

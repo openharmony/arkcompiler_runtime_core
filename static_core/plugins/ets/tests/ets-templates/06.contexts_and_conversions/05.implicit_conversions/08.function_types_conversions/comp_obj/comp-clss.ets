@@ -31,7 +31,7 @@ class Z{{loop.index}} {
 function main() {
 {% for t in c['to'] %}
     let z{{loop.index}}: Z{{loop.index}} = { fld: foo }
-    assertTrue( z{{loop.index}}.fld{{t.call}} )
+    arktest.assertTrue( z{{loop.index}}.fld{{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

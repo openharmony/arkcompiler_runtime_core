@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "types/ets_array.h"
 #include "types/ets_box_primitive.h"
 #include "types/ets_class.h"
@@ -111,7 +112,7 @@ void ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject *va
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
 
     auto typeClass = objHandle->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(nameHandle->GetMutf8().c_str());
+    auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, nameHandle->GetMutf8());
     objHandle->SetFieldObject(fieldObject, valHandle.GetPtr());
 }
 
@@ -124,7 +125,7 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     VMHandle<EtsString> nameHandle(coroutine, name->GetCoreType());
 
     auto typeClass = objHandle->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(nameHandle->GetMutf8().c_str());
+    auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, nameHandle->GetMutf8());
     if (fieldObject->GetType()->IsBoxed()) {
         auto *boxedVal = EtsBoxPrimitive<T>::Create(coroutine, val);
         objHandle->SetFieldObject(fieldObject, boxedVal);
@@ -246,7 +247,7 @@ EtsObject *ValueAPIGetFieldByNameObject(EtsObject *obj, EtsString *name)
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
     auto typeClass = objHandle->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(name->GetMutf8().c_str());
+    auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, name->GetMutf8());
     return objHandle->GetFieldObject(fieldObject);
 }
 
@@ -258,7 +259,7 @@ T GetFieldByNameValue(EtsObject *obj, EtsString *name)
     VMHandle<EtsObject> objHandle(coroutine, obj->GetCoreType());
 
     auto typeClass = objHandle->GetClass();
-    auto fieldObject = typeClass->GetFieldIDByName(name->GetMutf8().c_str());
+    auto fieldObject = ManglingUtils::GetFieldIDByDisplayName(typeClass, name->GetMutf8());
     if (fieldObject->GetType()->IsBoxed()) {
         return EtsBoxPrimitive<T>::FromCoreType(objHandle->GetFieldObject(fieldObject))->GetValue();
     }

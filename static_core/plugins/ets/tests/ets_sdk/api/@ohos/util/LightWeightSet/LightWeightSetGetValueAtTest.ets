@@ -14,12 +14,15 @@
  */
 
 import {LightWeightSet} from "@ohos.util.LightWeightSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightSet GetValueAt API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightSet GetValueAt API tests")
 
     suite.addTest("LightWeightSet getValueAt value by index", testGetValueAtValidIndex)
     suite.addTest("LightWeightSet getValueAt value by boundary index", testGetValueAtBoundaryIndex)
@@ -39,8 +42,8 @@ function testGetValueAtValidIndex() {
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
     let result = lightWeightSet.getValueAt(1);
-    assertEQ(result, "bb", "The lightWeightSet should return the value at the specified index");
-    assertEQ(lightWeightSet.length, 3, "The lightWeightSet length should be 3");
+    arktest.assertEQ(result, "bb", "The lightWeightSet should return the value at the specified index");
+    arktest.assertEQ(lightWeightSet.length, 3, "The lightWeightSet length should be 3");
 }
 
 function testGetValueAtBoundaryIndex() {
@@ -49,39 +52,30 @@ function testGetValueAtBoundaryIndex() {
     lightWeightSet.add("bb");
     lightWeightSet.add("cc");
     let result = lightWeightSet.getValueAt(0);
-    assertEQ(result, "aa", "The lightWeightSet should return the value at the boundary index");
-    assertEQ(lightWeightSet.length, 3, "LightWeightSet length should be 3");
+    arktest.assertEQ(result, "aa", "The lightWeightSet should return the value at the boundary index");
+    arktest.assertEQ(lightWeightSet.length, 3, "LightWeightSet length should be 3");
 }
 
 function testGetValueAtLeftExceededIndex() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.getValueAt(-2);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(-2);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtRightExceededIndex() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
-    try {
-        lightWeightSet.getValueAt(2);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(2);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtIndexOfEmptySet() {
     let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
-    try {
-        lightWeightSet.getValueAt(4);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
-    }
+    let result = lightWeightSet.getValueAt(4);
+    arktest.assertEQ(result, undefined);
 }
 
 function testGetValueAtLeftFloatIndex() {
@@ -89,8 +83,8 @@ function testGetValueAtLeftFloatIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getValueAt(Math.floor(1.2));
-    assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetValueAtRightFloatIndex() {
@@ -98,8 +92,8 @@ function testGetValueAtRightFloatIndex() {
     lightWeightSet.add("aa");
     lightWeightSet.add("bb");
     let result = lightWeightSet.getValueAt(Math.floor(1.8));
-    assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
-    assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+    arktest.assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
+    arktest.assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
 }
 
 function testGetValueAtLongString() {
@@ -111,5 +105,9 @@ function testGetValueAtLongString() {
     lightWeightSet.add(str2);
     lightWeightSet.add(str3);
     let result = lightWeightSet.getValueAt(1);
+<<<<<<< HEAD
     assertEQ(result, "sparrow", "The lightWeightSet should return the value at the specified index");
+=======
+    arktest.assertEQ(result, "sparrow", "The lightWeightSet should return the value at the specified index");
+>>>>>>> OpenHarmony_feature_20250328
 }

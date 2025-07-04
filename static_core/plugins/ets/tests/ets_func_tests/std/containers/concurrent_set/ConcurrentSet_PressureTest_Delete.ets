@@ -13,27 +13,30 @@
  * limitations under the License.
  */
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentDeletePressureTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentDeletePressureTest");
 
     ConcurrentSetTestsuite.addTest("deletePressureTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         for (let i: int = 0; i < 100; i++) {
             addMore(i);
         }
-        assertEQ(ConcurrentSetTestOne.size, 100);
-        let promises = new Array<Promise<void>>(100);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 100);
+        let jobs = new Array<Job<void>>(100);
         for (let i: int = 0; i < 100; i++) {
-            promises[i] = launch deleteMore(i);
+            jobs[i] = launch<void, (i: int) => void>(deleteMore, i);
         }
         for (let i: int = 0; i < 100; i++) {
-            await promises[i];
+            jobs[i].Await();
         }
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
 
     return ConcurrentSetTestsuite.run();

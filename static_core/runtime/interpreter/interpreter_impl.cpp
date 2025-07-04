@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,47 @@ extern "C" void ExecuteImplFastEH_LLVM(void *, void *, void *, void *);  // NOLI
 namespace ark::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
+
+#if !defined(PANDA_TARGET_ARM32)
+namespace {
+InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
+{
+    auto interpreterType = InterpreterType::CPP;
+    bool wasSet = Runtime::GetOptions().WasSetInterpreterType();
+    // Dynamic languages default is always cpp interpreter (unless option was set)
+    if (!frame->IsDynamic() || wasSet) {
+        auto interpreterTypeStr = Runtime::GetOptions().GetInterpreterType();
+        if (interpreterTypeStr == "llvm") {
+            interpreterType = InterpreterType::LLVM;
+        } else if (interpreterTypeStr == "irtoc") {
+            interpreterType = InterpreterType::IRTOC;
+        } else {
+            ASSERT(interpreterTypeStr == "cpp");
+        }
+        if (!wasSet) {
+#ifndef PANDA_LLVM_INTERPRETER
+            if (interpreterType == InterpreterType::LLVM) {
+                interpreterType = InterpreterType::IRTOC;
+            }
+#endif
+#ifdef ARK_HYBRID
+            // CMC GC will be supported with LLVM interpreter with issue27125
+            if (interpreterType == InterpreterType::LLVM) {
+                LOG(INFO, RUNTIME) << "--interpreter-type=LLVM is downgraded into IRTOC in CMC GC if no setting";
+                interpreterType = InterpreterType::IRTOC;
+            }
+#endif
+#ifndef PANDA_WITH_IRTOC
+            if (interpreterType == InterpreterType::IRTOC) {
+                interpreterType = InterpreterType::CPP;
+            }
+#endif
+        }
+    }
+    return interpreterType;
+}
+}  // namespace
+#endif  // #if !defined(PANDA_TARGET_ARM32)
 
 void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, const uint8_t *pc, Frame *frame,
                      bool jumpToEh)
@@ -80,48 +121,40 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
     frame->SetInstruction(inst);
     InterpreterType interpreterType = InterpreterType::CPP;
 #if !defined(PANDA_TARGET_ARM32)  // Arm32 sticks to cpp - irtoc is not available there
-    bool wasSet = Runtime::GetOptions().WasSetInterpreterType();
-    // Dynamic languages default is always cpp interpreter (unless option was set)
-    if (!frame->IsDynamic() || wasSet) {
-        auto interpreterTypeStr = Runtime::GetOptions().GetInterpreterType();
-        if (interpreterTypeStr == "llvm") {
-            interpreterType = InterpreterType::LLVM;
-        } else if (interpreterTypeStr == "irtoc") {
-            interpreterType = InterpreterType::IRTOC;
-        } else {
-            ASSERT(interpreterTypeStr == "cpp");
-        }
-        if (!wasSet) {
-#ifndef PANDA_LLVM_INTERPRETER
-            if (interpreterType == InterpreterType::LLVM) {
-                interpreterType = InterpreterType::IRTOC;
-            }
-#endif
-#ifndef PANDA_WITH_IRTOC
-            if (interpreterType == InterpreterType::IRTOC) {
-                interpreterType = InterpreterType::CPP;
-            }
-#endif
-        }
-    }
+    interpreterType = GetInterpreterTypeFromRuntimeOptions(frame);
     if (interpreterType > InterpreterType::CPP) {
         if (Runtime::GetCurrent()->IsDebugMode()) {
             LOG(FATAL, RUNTIME) << "--debug-mode=true option is supported only with --interpreter-type=cpp";
             return;
         }
+        auto gcType = thread->GetVM()->GetGC()->GetType();
+#ifdef ARK_HYBRID
+        if (gcType != mem::GCType::CMC_GC) {
+            LOG(FATAL, RUNTIME) << "--gc-type=" << mem::GCStringFromType(gcType) << " option is supported only with "
+                                << "--interpreter-type=cpp. Use --gc-type=cmc-gc instead.";
+            return;
+        }
+#else
         if (frame->IsDynamic()) {
-            auto gcType = thread->GetVM()->GetGC()->GetType();
             if (gcType != mem::GCType::G1_GC) {
                 LOG(FATAL, RUNTIME) << "For dynamic languages, --gc-type=" << mem::GCStringFromType(gcType)
                                     << " option is supported only with --interpreter-type=cpp";
                 return;
             }
-            if (Runtime::GetCurrent()->IsJitEnabled()) {
+            if (Runtime::GetCurrent()->IsProfilerEnabled()) {
                 LOG(INFO, RUNTIME) << "Dynamic types profiling disabled, use --interpreter-type=cpp to enable";
             }
         }
+#endif  // #ifdef ARK_HYBRID
     }
-#endif
+#ifdef ARK_HYBRID
+    // CMC GC will be supported with LLVM interpreter with issue27125
+    if (interpreterType == InterpreterType::LLVM) {
+        LOG(FATAL, RUNTIME) << "CMC GC is only supported to be set with --interpreter-type=cpp or irtoc";
+        return;
+    }
+#endif  // #ifdef ARK_HYBRID
+#endif  // #if !defined(PANDA_TARGET_ARM32)
     ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }
 

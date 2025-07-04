@@ -100,10 +100,18 @@ export namespace MyNamespace {
     export class Kitten {
         id: number;
         name: string;
+<<<<<<< HEAD
+=======
+        male: boolean;
+>>>>>>> OpenHarmony_feature_20250328
 
         constructor(id: number, name: string) {
             this.id = id;
             this.name = name;
+<<<<<<< HEAD
+=======
+            this.male = false;
+>>>>>>> OpenHarmony_feature_20250328
         }
     }
 

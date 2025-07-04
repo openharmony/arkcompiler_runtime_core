@@ -21,5 +21,6 @@ function main(): void {
     let a = +0.0;
     let b = -0.0;
 
-    assertEQ( a, b )
+    arktest.assertTrue( a == b )
+    arktest.assertTrue( a === b )
 }

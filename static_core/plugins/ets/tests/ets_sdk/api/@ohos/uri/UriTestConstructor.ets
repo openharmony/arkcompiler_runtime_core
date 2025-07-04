@@ -13,371 +13,389 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {uri} from "@ohos.uri";
+=======
+import { uri } from "@ohos.uri";
+import { BusinessError } from "@ohos.base";
+>>>>>>> OpenHarmony_feature_20250328
 
 function ConstructorTest001() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@www.baidu.com:99");
-  assertEQ(uri.getSsp(), "//username:password@www.baidu.com:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "www.baidu.com");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@www.test.com:99");
+  arktest.assertEQ(muri.ssp, "//username:password@www.test.com:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "www.test.com");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest002() {
-  let uri = new uri.UriEntry("http://username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[1080::8:800:200C:417A]:99");
-  assertEQ(uri.getSsp(), "//username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[1080::8:800:200C:417A]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/66path1");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[1080::8:800:200C:417A]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[1080::8:800:200C:417A]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/66path1");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest003() {
-  let uri = new uri.UriEntry("http://username:password@[::]:88/path/path66?foooo#gaogao");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[::]:88");
-  assertEQ(uri.getSsp(), "//username:password@[::]:88/path/path66?foooo");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[::]");
-  assertEQ(uri.getPort(), 88);
-  assertEQ(uri.getPath(), "/path/path66");
-  assertEQ(uri.getQuery(), "foooo");
-  assertEQ(uri.getFragment(), "gaogao");
+  let muri = new uri.URI("http://username:password@[::]:88/path/path66?foooo#gaogao");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[::]:88");
+  arktest.assertEQ(muri.ssp, "//username:password@[::]:88/path/path66?foooo");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[::]");
+  arktest.assertEQ(muri.port, '88');
+  arktest.assertEQ(muri.path, "/path/path66");
+  arktest.assertEQ(muri.query, "foooo");
+  arktest.assertEQ(muri.fragment, "gaogao");
 }
 
 function ConstructorTest004() {
-  let uri = new uri.UriEntry("http://username:password@[1:0:0:1:2:1:2:1]:99/path/66path1?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[1:0:0:1:2:1:2:1]:99");
-  assertEQ(uri.getSsp(), "//username:password@[1:0:0:1:2:1:2:1]:99/path/66path1?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[1:0:0:1:2:1:2:1]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/66path1");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[1:0:0:1:2:1:2:1]:99/path/66path1?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[1:0:0:1:2:1:2:1]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[1:0:0:1:2:1:2:1]:99/path/66path1?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[1:0:0:1:2:1:2:1]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/66path1");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest005() {
-  let uri = new uri.UriEntry("http://username:password@[::FFFF:129.144.52.38]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[::FFFF:129.144.52.38]:99");
-  assertEQ(uri.getSsp(), "//username:password@[::FFFF:129.144.52.38]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[::FFFF:129.144.52.38]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[::FFFF:129.144.52.38]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[::FFFF:129.144.52.38]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[::FFFF:129.144.52.38]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[::FFFF:129.144.52.38]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest006() {
-  let uri = new uri.UriEntry("http://username:password@[::192.9.5.5]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[::192.9.5.5]:99");
-  assertEQ(uri.getSsp(), "//username:password@[::192.9.5.5]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[::192.9.5.5]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[::192.9.5.5]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[::192.9.5.5]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[::192.9.5.5]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[::192.9.5.5]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest007() {
-  let uri = new uri.UriEntry("http://username:password@[22::22:2:2%ss]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[22::22:2:2%ss]:99");
-  assertEQ(uri.getSsp(), "//username:password@[22::22:2:2%ss]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[22::22:2:2%ss]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[22::22:2:2%ss]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[22::22:2:2%ss]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[22::22:2:2%ss]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[22::22:2:2%ss]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest008() {
-  let uri = new uri.UriEntry("http://username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99");
-  assertEQ(uri.getSsp(), "//username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[fe80:0000:0001:0000:0440:44ff:1233:5678]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[fe80:0000:0001:0000:0440:44ff:1233:5678]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[fe80:0000:0001:0000:0440:44ff:1233:5678]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest009() {
-  let uri = new uri.UriEntry("http://username:password@[fe80::0001:0000]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@[fe80::0001:0000]:99");
-  assertEQ(uri.getSsp(), "//username:password@[fe80::0001:0000]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "[fe80::0001:0000]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@[fe80::0001:0000]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@[fe80::0001:0000]:99");
+  arktest.assertEQ(muri.ssp, "//username:password@[fe80::0001:0000]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "[fe80::0001:0000]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest010() {
-  let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@www.baidu.com:99");
-  assertEQ(uri.getSsp(), "//username:password@www.baidu.com:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "www.baidu.com");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@www.test.com:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@www.test.com:99");
+  arktest.assertEQ(muri.ssp, "//username:password@www.test.com:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "www.test.com");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest011() {
-  let uri = new uri.UriEntry("http://username:password@199.98.55.44:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "username:password@199.98.55.44:99");
-  assertEQ(uri.getSsp(), "//username:password@199.98.55.44:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "username:password");
-  assertEQ(uri.getHost(), "199.98.55.44");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://username:password@199.98.55.44:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "username:password@199.98.55.44:99");
+  arktest.assertEQ(muri.ssp, "//username:password@199.98.55.44:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, "username:password");
+  arktest.assertEQ(muri.host, "199.98.55.44");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest012() {
-  let uri = new uri.UriEntry("http://16.9.5.4:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "16.9.5.4:99");
-  assertEQ(uri.getSsp(), "//16.9.5.4:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "16.9.5.4");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://16.9.5.4:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "16.9.5.4:99");
+  arktest.assertEQ(muri.ssp, "//16.9.5.4:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, "16.9.5.4");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest013() {
-  let uri = new uri.UriEntry("http://[::168:169:333]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "[::168:169:333]:99");
-  assertEQ(uri.getSsp(), "//[::168:169:333]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "[::168:169:333]");
-  assertEQ(uri.getPort(), 99);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http://[::168:169:333]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "[::168:169:333]:99");
+  arktest.assertEQ(muri.ssp, "//[::168:169:333]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, "[::168:169:333]");
+  arktest.assertEQ(muri.port, '99');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest014() {
-  let uri = new uri.UriEntry("http://user@49.10hh8.54.12:80/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "user@49.10hh8.54.12:80");
-  assertEQ(uri.getSsp(), "//user@49.10hh8.54.12:80/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://user@49.10hh8.54.12:80/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "user@49.10hh8.54.12:80");
+  arktest.assertEQ(muri.ssp, "//user@49.10hh8.54.12:80/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest015() {
-  let uri = new uri.UriEntry("http://user@www.baidu.com/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "user@www.baidu.com");
-  assertEQ(uri.getSsp(), "//user@www.baidu.com/path/path?query");
-  assertEQ(uri.getUserinfo(), "user");
-  assertEQ(uri.getHost(), "www.baidu.com");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://user@www.test.com/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "user@www.test.com");
+  arktest.assertEQ(muri.ssp, "//user@www.test.com/path/path?query");
+  arktest.assertEQ(muri.userInfo, "user");
+  arktest.assertEQ(muri.host, "www.test.com");
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest016() {
-  let uri = new uri.UriEntry("ftp://user@www.1hw.1com:77/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "ftp");
-  assertEQ(uri.getAuthority(), "user@www.1hw.1com:77");
-  assertEQ(uri.getSsp(), "//user@www.1hw.1com:77/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("ftp://user@www.1hw.1com:77/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "ftp");
+  arktest.assertEQ(muri.authority, "user@www.1hw.1com:77");
+  arktest.assertEQ(muri.ssp, "//user@www.1hw.1com:77/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest017() {
-  let uri = new uri.UriEntry("http://user@hosthost/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "user@hosthost");
-  assertEQ(uri.getSsp(), "//user@hosthost/path/path?query");
-  assertEQ(uri.getUserinfo(), "user");
-  assertEQ(uri.getHost(), "hosthost");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://user@hosthost/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "user@hosthost");
+  arktest.assertEQ(muri.ssp, "//user@hosthost/path/path?query");
+  arktest.assertEQ(muri.userInfo, "user");
+  arktest.assertEQ(muri.host, "hosthost");
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest018() {
-  let uri = new uri.UriEntry("http://user@[::]/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "user@[::]");
-  assertEQ(uri.getSsp(), "//user@[::]/path/path?query");
-  assertEQ(uri.getUserinfo(), "user");
-  assertEQ(uri.getHost(), "[::]");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://user@[::]/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "user@[::]");
+  arktest.assertEQ(muri.ssp, "//user@[::]/path/path?query");
+  arktest.assertEQ(muri.userInfo, "user");
+  arktest.assertEQ(muri.host, "[::]");
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest019() {
-  let uri = new uri.UriEntry("http://[::192:0:5]/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "[::192:0:5]");
-  assertEQ(uri.getSsp(), "//[::192:0:5]/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "[::192:0:5]");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://[::192:0:5]/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "[::192:0:5]");
+  arktest.assertEQ(muri.ssp, "//[::192:0:5]/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, "[::192:0:5]");
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest020() {
-  let uri = new uri.UriEntry("http://[::192:0:5]/path/path?query#qwer");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "[::192:0:5]");
-  assertEQ(uri.getSsp(), "//[::192:0:5]/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "[::192:0:5]");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "qwer");
+  let muri = new uri.URI("http://[::192:0:5]/path/path?query#qwer");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, "[::192:0:5]");
+  arktest.assertEQ(muri.ssp, "//[::192:0:5]/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, "[::192:0:5]");
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "qwer");
 }
 
 function ConstructorTest021() {
-  let uri = new uri.UriEntry("http:/&username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "");
-  assertEQ(uri.getSsp(), "/&username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/&username:password@[1080::8:800:200C:417A]:99/path/66path1");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http:/&username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, null);
+  arktest.assertEQ(muri.ssp, "/&username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/&username:password@[1080::8:800:200C:417A]:99/path/66path1");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest022() {
-  let uri = new uri.UriEntry("http:/[username:password@[::FFFF:129.144.52.38]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "");
-  assertEQ(uri.getSsp(), "/[username:password@[::FFFF:129.144.52.38]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "/[username:password@[::FFFF:129.144.52.38]:99/path/path");
-  assertEQ(uri.getQuery(), "query");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http:/[username:password@[::FFFF:129.144.52.38]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, null);
+  arktest.assertEQ(muri.ssp, "/[username:password@[::FFFF:129.144.52.38]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, "/[username:password@[::FFFF:129.144.52.38]:99/path/path");
+  arktest.assertEQ(muri.query, "query");
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest023() {
-  let uri = new uri.UriEntry("http:username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "");
-  assertEQ(uri.getSsp(), "username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "");
-  assertEQ(uri.getQuery(), "");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http:username:password@[1080::8:800:200C:417A]:99/path/66path1?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, null);
+  arktest.assertEQ(muri.ssp, "username:password@[1080::8:800:200C:417A]:99/path/66path1?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, null);
+  arktest.assertEQ(muri.query, null);
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest024() {
-  let uri = new uri.UriEntry("http:^$username:password@[::192.9.5.5]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "");
-  assertEQ(uri.getSsp(), "^$username:password@[::192.9.5.5]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "");
-  assertEQ(uri.getQuery(), "");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http:^$username:password@[::192.9.5.5]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, null);
+  arktest.assertEQ(muri.ssp, "^$username:password@[::192.9.5.5]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, null);
+  arktest.assertEQ(muri.query, null);
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest025() {
-  let uri = new uri.UriEntry("http:[?]username:password@[fe80::0001:0000]:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "http");
-  assertEQ(uri.getAuthority(), "");
-  assertEQ(uri.getSsp(), "[?]username:password@[fe80::0001:0000]:99/path/path?query");
-  assertEQ(uri.getUserinfo(), "");
-  assertEQ(uri.getHost(), "");
-  assertEQ(uri.getPort(), -1);
-  assertEQ(uri.getPath(), "");
-  assertEQ(uri.getQuery(), "");
-  assertEQ(uri.getFragment(), "fagment");
+  let muri = new uri.URI("http:[?]username:password@[fe80::0001:0000]:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "http");
+  arktest.assertEQ(muri.authority, null);
+  arktest.assertEQ(muri.ssp, "[?]username:password@[fe80::0001:0000]:99/path/path?query");
+  arktest.assertEQ(muri.userInfo, null);
+  arktest.assertEQ(muri.host, null);
+  arktest.assertEQ(muri.port, '-1');
+  arktest.assertEQ(muri.path, null);
+  arktest.assertEQ(muri.query, null);
+  arktest.assertEQ(muri.fragment, "fagment");
 }
 
 function ConstructorTest026() {
-  let uri = new uri.UriEntry("");
-  assertEQ(uri.getErrStr(), "Uri is empty.");
+  let uriText = "";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Uri is empty.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest027() {
-  let uri = new uri.UriEntry("#asd;");
-  assertEQ(uri.getErrStr(), "#It can't be the first.");
+  let uriText = "#asd;";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The #It can't be the first.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest028() {
-  let uri = new uri.UriEntry("?sa^d:s#asd;");
-  assertEQ(uri.getErrStr(), "Query does not conform to the rule.");
+  let uriText = "?sa^d:s#asd;";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Query does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest029() {
-  let uri = new uri.UriEntry("?sad:s#a^sd;");
-  assertEQ(uri.getErrStr(), "Fragment does not conform to the rule.");
+  let uriText = "?sad:s#a^sd;";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Fragment does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest030() {
-  let uri = new uri.UriEntry("4http:/username:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "Scheme the first character must be a letter.");
+  let uriText = "4http:/username:password@www.test.com:99/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.";
+  testConstructorThrow(uriText, errText);
 }
 
 function ConstructorTest031() {
-  let uri = new uri.UriEntry("ht*tp:/username:password@www.baidu.com:99/path/path?query#fagment");
-  assertEQ(uri.getScheme(), "ht*tp");
+  let muri = new uri.URI("ht*tp:/username:password@www.test.com:99/path/path?query#fagment");
+  arktest.assertEQ(muri.scheme, "ht*tp");
 }
 
 function ConstructorTest032() {
-  let uri = new uri.UriEntry("/usern]ame/path/path?query#fagment");
-  assertEQ(uri.getErrStr(), "SpecialPath does not conform to the rule.");
+  let uriText = "/usern]ame/path/path?query#fagment";
+  let errText = "BusinessError: Syntax Error. Invalid Uri string: The SpecialPath does not conform to the rule.";
+  testConstructorThrow(uriText, errText);
 }
 
 
+function testConstructorThrow(uriText: string, errText: string) {
+  let exceptionCheck = (e: Error | Exception): boolean | string => {
+    return (e instanceof BusinessError) && ((e as BusinessError).toString() == errText)
+  }
+  arktest.expectThrow((): void => { let that = new uri.URI(uriText); }, exceptionCheck)
+}
+
 function main(): int {
-  let suite = new ArkTestsuite("URI UT tests");
+  let suite = new arktest.ArkTestsuite("URI UT tests");
   suite.addTest("ConstructorTest001", ConstructorTest001);
   suite.addTest("ConstructorTest002", ConstructorTest002);
   suite.addTest("ConstructorTest003", ConstructorTest003);

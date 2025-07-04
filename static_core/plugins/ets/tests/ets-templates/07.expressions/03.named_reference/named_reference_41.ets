@@ -26,8 +26,8 @@ function bar(p: number) {
 
 function main(): void {
   let a: string = bar("abc");
-  assertEQ(a, 'abc');
+  arktest.assertEQ(a, 'abc');
 
   let b: number = bar(123);
-  assertEQ(b, 123);
+  arktest.assertEQ(b, 123);
 }

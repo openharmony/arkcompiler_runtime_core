@@ -16,15 +16,15 @@ cases:
   - { type: byte,   value: 10,    expression: '< 12f',    expected: 10  }
   - { type: short,  value: 10,    expression: '< 12',     expected: 10  }
   - { type: short,  value: 10,    expression: '< 12f',    expected: 10  }
-  
+
   - { type: short,  value: 260,   expression: '<= 25',    expected: 285 }
   - { type: int,    value: 30,    expression: '>= -30',   expected: 30  }
   - { type: long,   value: 260,   expression: '== 259',   expected: 285 }
-  - { type: float,  value: 26.0f, expression: '== 26',    expected: 26  }
+  - { type: float,  value: 26.0f, expression: '== 26f',    expected: 26  }
   - { type: number, value: 27.0,  expression: '== 27',    expected: 27  }
   - { type: number, value: 28.3,  expression: '== 28.3',  expected: 28  }
-  - { type: float,  value: 21.7f, expression: '== 21.7',  expected: 21  }
-  - { type: number, value: 22.3,  expression: '== 22.3f', expected: 22  }
+  - { type: float,  value: 21.7f, expression: '== 21.7f',  expected: 21  }
+  - { type: number, value: 22.3,  expression: '== 22.3', expected: 22  }
 
   - { type: char,   value: c'p',  expression: '== 112',   expected: 112 }
   - { type: char,   value: c'p',  expression: '> 100',    expected: 112 }

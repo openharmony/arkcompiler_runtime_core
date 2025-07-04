@@ -42,26 +42,55 @@ TEST_F(ObjectSetPropertyByNameBooleanTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_boolean highPerformance;
+    ani_boolean highPerformance = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(highPerformance, ANI_FALSE);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "highPerformance", ANI_TRUE), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(highPerformance, ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "highPerformance", ANI_TRUE), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "highPerformance", ANI_FALSE), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, ANI_FALSE);
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameBooleanTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_boolean ecoFriendly;
+    ani_boolean ecoFriendly = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(ecoFriendly, ANI_FALSE);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "ecoFriendly", ANI_TRUE), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(ecoFriendly, ANI_TRUE);
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "ecoFriendly", ANI_TRUE), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, ANI_TRUE);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "ecoFriendly", ANI_FALSE), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, ANI_FALSE);
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameBooleanTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Boolean(nullptr, car, "ecoFriendly", ANI_TRUE), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameBooleanTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "ecoFriendlyA", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(car, "", ANI_TRUE), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameBooleanTest, invalid_argument)
@@ -90,7 +119,7 @@ TEST_F(ObjectSetPropertyByNameBooleanTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_boolean prop;
+    ani_boolean prop = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, ANI_FALSE);
 
@@ -103,7 +132,7 @@ TEST_F(ObjectSetPropertyByNameBooleanTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_boolean prop;
+    ani_boolean prop = ANI_FALSE;
     ASSERT_EQ(env_->Object_SetPropertyByName_Boolean(c2, "prop", ANI_FALSE), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Boolean(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, ANI_FALSE);

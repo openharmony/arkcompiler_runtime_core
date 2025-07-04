@@ -32,7 +32,7 @@ function foo(p: {{c.to_type}}): {{c.to_type}} {
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( foo(s{{loop.index}}) == {{t.expr|safe}} )
+    arktest.assertTrue( foo(s{{loop.index}}) == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

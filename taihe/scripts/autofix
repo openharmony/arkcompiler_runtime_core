@@ -18,21 +18,70 @@
 source "$(dirname "$0")/common_lib.sh"
 init_py_env
 
+# --- Argument Parsing ---
+run_python=false
+run_cpp=false
+run_arkts=false
+run_all=true
+
+if [ "$#" -gt 0 ]; then
+    run_all=false
+    for arg in "$@"; do
+        case "$arg" in
+            --python)
+                run_python=true
+                ;;
+            --cpp)
+                run_cpp=true
+                ;;
+            --arkts)
+                run_arkts=true
+                ;;
+            *)
+                echo "Error: Unknown argument '$arg'"
+                echo "Usage: $0 [--python] [--cpp] [--arkts]"
+                exit 1
+                ;;
+        esac
+    done
+fi
+
+# If no specific arguments were given, run all
+if "$run_all"; then
+    run_python=true
+    run_cpp=true
+    run_arkts=true
+fi
+
+# --- Formatting Steps (Conditional) ---
+
 # Python
-black taihe tests
-ruff check taihe tests --fix
+if "$run_python"; then
+    log_stage "Formatting Python code"
+    removestar -i taihe tests || true
+    black taihe tests
+    ruff check taihe tests --fix
+fi
 
-# Cpp, runtime
-find ../runtime/include ../runtime/src -type f |
-    clang-format --verbose -i @/dev/stdin
+# Cpp, runtime and tests
+if "$run_cpp"; then
+    log_stage "Formatting C++ code"
+    # Cpp, runtime
+    find ../runtime/include ../runtime/src -type f |
+        clang-format-19 --verbose -i @/dev/stdin
 
-# Cpp, tests
-find ../test ../cookbook \
-    \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) \
-    -not -path '*generated*' -type f |
-    clang-format --verbose -i @/dev/stdin
+    # Cpp, tests
+    find ../test ../cookbook \
+         \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) \
+         -not -path '*generated*' -type f |
+        clang-format-19 --verbose -i @/dev/stdin
+fi
 
 # ArkTS
-find ../test ../cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
-    clang-format --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
-done
+if "$run_arkts"; then
+    log_stage "Formatting ArkTS code"
+    find ../test ../cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
+        log_verbose "Formatting $file"
+        clang-format-19 --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
+    done
+fi

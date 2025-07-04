@@ -14,3 +14,7 @@
 add_subdirectory(asm)
 add_subdirectory(managed)
 add_subdirectory(native)
+<<<<<<< HEAD
+=======
+add_subdirectory(sampler_ani)
+>>>>>>> OpenHarmony_feature_20250328

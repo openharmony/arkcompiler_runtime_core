@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,11 +33,11 @@ function main(): int {
   let max_test : int = {{.item.max_attempt}}
 {%- else %}
   {% if item.param_list | length > 0 %}
-    let max_step : int = TEST_DATA_{{.item.param_list.keys()|first|upper}}.length;
+    let max_step : int = TEST_DATA_{{.item.param_list.keys()|first|upper}}.length.toInt();
   {% else %}
-    let max_step : int = TEST_DATA_EXPECTED.length;
+    let max_step : int = TEST_DATA_EXPECTED.length.toInt();
   {% endif %}
-  let max_test : int = TEST_DATA_EXPECTED.length;
+  let max_test : int = TEST_DATA_EXPECTED.length.toInt();
 {%- endif %}
   let passed_counter : int = 0;
   for (let i = 0; i < max_step; i++, exp_idx++) {
@@ -89,7 +89,7 @@ function main(): int {
         console.println();
         continue;
       }
-        actual = tmp.doubleValue();
+        actual = tmp.toDouble();
         {%- else %}
         actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
         {%- endif %}
@@ -142,7 +142,8 @@ function main(): int {
         // No exception occurs. Check test result
         let expected = TEST_DATA_EXPECTED[exp_idx];
         {% raw %}// Workaround possible verifier bug, since we can't simply write: "actual as {{.actualType}}" for primitive types {% endraw %}
-        if ({{.item.verify_test_result_function}}(() => { return actual }() as {{.actualType}}, expected)) {
+        let toCompare = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
+        if ({{.item.verify_test_result_function}}(toCompare, expected)) {
       {%- else %}
         // No exception occurs. Check test result
         let expected = TEST_DATA_EXPECTED[exp_idx];
@@ -159,6 +160,6 @@ function main(): int {
         console.println();
       {% if item.method_throws == true %}}{%- endif %}
     }
-  assertEQ(passed_counter, max_test)
+  arktest.assertEQ(passed_counter, max_test)
   return 0;
   }

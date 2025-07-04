@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
 
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"

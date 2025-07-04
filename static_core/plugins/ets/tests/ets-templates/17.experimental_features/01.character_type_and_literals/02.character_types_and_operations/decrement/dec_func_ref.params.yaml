@@ -21,11 +21,11 @@ vals:
       res: c'!'
 
     - v1: c'"'
-      exp: "(c' ' + decPre(v1)) as Char"
+      exp: "(c' ' + decPre(v1)).toChar()"
       res: c'A'
 
     - v1: c'\u0020'
-      exp: "(c' ' + decPost(v1)) as Char"
+      exp: "(c' ' + decPost(v1)).toChar()"
       res: c'?'
 
     - v1: c'\u0000'
@@ -37,27 +37,27 @@ vals:
       res: c'\uFFFF'
 
     - v1: c'\u00FF'
-      exp: "decPre((c'!' + v1 + v1) as Char)"
+      exp: "decPre((c'!' + v1 + v1).toChar())"
       res: c'\u021E'
 
     - v1: c'\u0001'
-      exp: "decPost((v1 - c'!' - v1) as Char)"
+      exp: "decPost((v1 - c'!' - v1).toChar())"
       res: c'\uFFDE'
 
     - v1: c'\u0F0F'
-      exp: "(decPre((v1 - c'1') as Char) - decPre(c'\\uACD9')) as Char"
+      exp: "(decPre((v1 - c'1').toChar()) - decPre(c'\\uACD9')).toChar()"
       res: c'\u6205'
 
     - v1: c'\u0F0F'
-      exp: "(decPost((v1 + c'1') as Char) + decPost(c'\\uACD9')) as Char"
+      exp: "(decPost((v1 + c'1').toChar()) + decPost(c'\\uACD9')).toChar()"
       res: c'\uBC17'
 
     - v1: c'\u1110'
-      exp: "(decPre(c'\\u0000') - decPre(v1)) as Char"
+      exp: "(decPre(c'\\u0000') - decPre(v1)).toChar()"
       res: c'\uEEF0'
 
     - v1: c'\u1000'
-      exp: "(decPost(c'\\u0000') - decPost(v1)) as Char"
+      exp: "(decPost(c'\\u0000') - decPost(v1)).toChar()"
       res: c'\uF000'
 
     - v1: c'∬'

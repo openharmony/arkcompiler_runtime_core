@@ -16,6 +16,9 @@
 #ifndef PANDA_STS_VM_INTERFACE_H
 #define PANDA_STS_VM_INTERFACE_H
 
+#if defined(ARK_HYBRID)
+#include "heap/heap_visitor.h"
+#endif
 #include "hybrid/vm_interface.h"
 #include <cstdint>
 #include <cstddef>
@@ -43,6 +46,14 @@ public:
         return STSVMInterface::VMInterfaceType::ETS_VM_IFACE;
     }
 
+#if defined(ARK_HYBRID)
+    /**
+     * @brief executes marking operation of CMC-GC that will be started from gotten object.
+     * @param obj: pointer to object from which marking will be started.
+     * @param visitor: mark object callback.
+     */
+    virtual void MarkFromObject(void *obj, const panda::RefFieldVisitor &visitor) = 0;
+#endif
     /**
      * @brief executes marking operation of STS VM GC that will be started from gotten object.
      * @param obj: pointer to object from which marking will be started.

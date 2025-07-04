@@ -27,5 +27,5 @@ function main(): void {
     let tmp: FuncTypeBaseBase;
     let tmp1: FuncTypeBaseDerived = (p: Base): Derived => new Derived();
     tmp = tmp1;
-    assertTrue(tmp == tmp1);
+    arktest.assertTrue(tmp == tmp1);
 }

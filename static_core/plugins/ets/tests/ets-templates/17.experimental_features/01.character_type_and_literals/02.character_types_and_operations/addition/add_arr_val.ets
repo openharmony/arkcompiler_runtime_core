@@ -19,13 +19,14 @@ desc: >-
     Character operators are identical to integer operators, so produce a value of type int.
 ---*/
 
-const a: char[] = new char[1]
+const a: Char[] = new Char[1]
 
 function main() {
     const v1 = {{v.v1}}
     const v2 = {{v.v2}}
 
-    a[0] = ({{v.exp}}) as char
-    assertEQ(a[0], {{v.r}})
+    const v3: Int = {{v.exp}}
+    a[0] = v3.toChar()
+    arktest.assertEQ(a[0], {{v.r}})
 }
 {%- endfor %}

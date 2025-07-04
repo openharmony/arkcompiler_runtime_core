@@ -15,10 +15,10 @@
 cases:
     - to_type: byte|short|int|long # normalized to Long
       values:
-          - { from_type: 'byte', ref_type: 'Long', expr: '127', eq: '==' }
-          - { from_type: 'short', ref_type: 'Long', expr: '-7', eq: '==' }
-          - { from_type: 'int', ref_type: 'Long', expr: '0xCAFE', eq: '==' }
-          - { from_type: 'long', ref_type: 'Long', expr: '0o777', eq: '==' }
+        - { from_type: 'byte', ref_type: 'Byte', expr: '127', eq: '==' }
+        - { from_type: 'short', ref_type: 'Short', expr: '-7', eq: '==' }
+        - { from_type: 'int', ref_type: 'Int', expr: '0xCAFE', eq: '==' }
+        - { from_type: 'long', ref_type: 'Long', expr: '0o777', eq: '==' }
 
     - to_type: Byte|Short|Int|Long # normalized to Byte|Short|Int|Long
       init_value: 0

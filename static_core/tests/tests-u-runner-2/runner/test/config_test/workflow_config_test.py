@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,12 @@ import os
 import unittest
 from pathlib import Path
 
-from runner.options.options_general import GeneralOptions
-from runner.options.step import StepKind
-from runner.test.config_test import data_1
 from runner.options.options import IOptions
+from runner.options.options_general import GeneralOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
+from runner.options.step import StepKind
+from runner.test.config_test import data_1
 
 
 class WorkflowConfigTest(unittest.TestCase):
@@ -31,7 +31,8 @@ class WorkflowConfigTest(unittest.TestCase):
     args = data_1.args
 
     def setUp(self) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
         self.general = GeneralOptions(self.args, IOptions())
@@ -63,8 +64,8 @@ class WorkflowConfigTest(unittest.TestCase):
 
     def test_test_suite(self) -> None:
         self.assertEqual(self.test_suite.suite_name, "test_suite1")
-        self.assertEqual(self.test_suite.test_root, Path(".").resolve())
-        self.assertEqual(self.test_suite.list_root, Path(".").resolve())
+        self.assertEqual(self.test_suite.test_root, Path.cwd().resolve())
+        self.assertEqual(self.test_suite.list_root, Path.cwd().resolve())
         self.assertEqual(self.test_suite.extension(), "sts")
         self.assertEqual(self.test_suite.load_runtimes(), "ets")
         self.assertEqual(self.test_suite.work_dir, ".")

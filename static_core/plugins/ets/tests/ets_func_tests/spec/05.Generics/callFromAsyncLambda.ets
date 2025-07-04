@@ -36,11 +36,11 @@ function main(): void {
     let arr: Int[] = [0, 1, 2];
     let foo: fooAsyncLambda = async (): Promise<void> => {
         let str = getter.get<string>("F");
-        assertTrue( str instanceof string)
+        arktest.assertTrue( str instanceof string)
 
         let arr2: Int[] = getter.get<Int>(arr);
-        assertTrue( arr2 instanceof Object)
-        assertTrue( arr2[0] instanceof Int)
+        arktest.assertTrue( arr2 instanceof Object)
+        arktest.assertTrue( arr2[0] instanceof Int)
     }
     await foo();
 }

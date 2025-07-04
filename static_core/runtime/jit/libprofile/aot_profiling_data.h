@@ -158,8 +158,14 @@ public:
     template <typename Rng>
     void AddPandaFiles(Rng &&profiledPandaFiles)
     {
-        uint32_t count = 0;
+        uint32_t count = pandaFileMap_.size();
         for (auto &pandaFile : profiledPandaFiles) {
+<<<<<<< HEAD
+=======
+            if (pandaFileMap_.find(pandaFile) != pandaFileMap_.end()) {
+                continue;
+            }
+>>>>>>> OpenHarmony_feature_20250328
             pandaFileMap_[pandaFile] = count;
             pandaFileMapRev_[count] = pandaFile;
             count++;
@@ -168,7 +174,10 @@ public:
 
     void AddMethod(PandaFileIdxType pfIdx, uint32_t methodIdx, AotMethodProfilingData &&profData)
     {
-        allMethodsMap_[pfIdx].insert(std::make_pair(methodIdx, profData));
+        if (allMethodsMap_[pfIdx].find(methodIdx) != allMethodsMap_[pfIdx].end()) {
+            allMethodsMap_[pfIdx].erase(methodIdx);
+        }
+        allMethodsMap_[pfIdx].insert(std::make_pair(methodIdx, std::move(profData)));
     }
 
 private:

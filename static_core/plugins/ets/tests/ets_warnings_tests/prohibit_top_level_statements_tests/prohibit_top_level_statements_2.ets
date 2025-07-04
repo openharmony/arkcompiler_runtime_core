@@ -15,13 +15,13 @@
 
 let x: int = 5;
 
-let z: float = 3.0;
+let z: float = 3.0f;
 
 while (x < 10) {
     x = x + 1;
 }
 
-for (z = 3.0; z < 10; z++) {
+for (z = 3.0f; z < 10; z++) {
     console.println("Hello!");
 }
 
@@ -30,7 +30,7 @@ if (x == z) {
 }
 
 class A {
-    k: float = 5.0;
+    k: float = 5.0f;
     foo(): int {
         return 10;
     }

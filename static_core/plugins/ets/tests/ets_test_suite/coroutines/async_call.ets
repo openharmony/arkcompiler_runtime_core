@@ -192,52 +192,56 @@ async function crasher(): Promise<Int> {
 try {
     let x = crasher();
 } catch (e) {
+<<<<<<< HEAD
     assertTrue(e instanceof InvalidCoroutineOperationError);
+=======
+    arktest.assertTrue(e instanceof InvalidCoroutineOperationError);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): void {
     prepare();
     let p = foo();
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = amd64_small(1, 2, 3, 4, 5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = amd64_large(1, 2, 3, 4, 5, 6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm32_small(1, 2, 3);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm32_large(1, 2, 3, 4, 5);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm32hf_small(1, 2, 3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm32hf_large(1, 2, 3, 4, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm64_small(1, 2, 3, 4, 5, 6, 7, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 
     prepare();
     p = arm64_large(1, 2, 3, 4, 5, 6, 7, 8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
-    assertTrue(called);
+    arktest.assertTrue(called);
     await p;
 }

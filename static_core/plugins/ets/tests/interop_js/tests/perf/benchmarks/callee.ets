@@ -31,7 +31,7 @@ export class STSCallee
     static GetString(): string {
         return 'abc';
     };
-    static GetArray(): double[] {
+    static GetArray(): FixedArray<double> {
         return [1, 2, 5];
     };
     static PassVoid(): void {};
@@ -50,16 +50,16 @@ export class STSCallee
     ): void {};
 
     static PassArrays (
-        u0: number[],
-        u1: number[],
-        u2: number[],
-        u3: number[],
-        u4: number[],
-        u5: number[],
-        u6: number[],
-        u7: number[],
-        u8: number[],
-        u9: number[]
+        u0: FixedArray<double>,
+        u1: FixedArray<double>,
+        u2: FixedArray<double>,
+        u3: FixedArray<double>,
+        u4: FixedArray<double>,
+        u5: FixedArray<double>,
+        u6: FixedArray<double>,
+        u7: FixedArray<double>,
+        u8: FixedArray<double>,
+        u9: FixedArray<double>
     ): void {};
 
     static PassNumbers (

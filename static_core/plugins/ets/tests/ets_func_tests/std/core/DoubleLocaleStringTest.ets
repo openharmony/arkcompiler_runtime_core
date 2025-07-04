@@ -18,15 +18,15 @@ function eArabic(x: Number): string {
 }
 
 function testEArabic1(): void {
-    assertEQ("ليس\u00A0رقم", eArabic(NaN), "Number toLocaleString not equals to ليس رقم");
+    arktest.assertEQ("ليس\u00A0رقم", eArabic(NaN), "Number toLocaleString not equals to ليس رقم");
 }
 
 function testEArabic2(): void {
-    assertEQ("١٬٢٣٤", eArabic(1234), "1234 should format as '١٬٢٣٤'");
+    arktest.assertEQ("١٬٢٣٤", eArabic(1234), "1234 should format as '١٬٢٣٤'");
 }
 
 function main() {
-    let myTestsuite = new ArkTestsuite("myTestsuite");
+    let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
     myTestsuite.addTest("testEArabic1", testEArabic1);
     myTestsuite.addTest("testEArabic2", testEArabic2);
     myTestsuite.run();

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "boolean[]",
-    method_signature: { arr: "boolean[]", fn : "(value:boolean,index:number,self:boolean[])=>boolean" },
+    result_type: "FixedArray<boolean>",
+    method_signature: { arr: "FixedArray<boolean>", fn : "(value:boolean,index:number,self:FixedArray<boolean>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "boolean_array", fn: "func_boolean_int_boolean_array"},
     method_test_index_data:
@@ -24,22 +24,22 @@
         test1:
           {
             arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
-            fn: '(value:boolean,index:number,self:boolean[]): boolean =>  {return true}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]",
-            fn: '(value:boolean,index:number,self:boolean[]): boolean =>  {return false}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false]",
-            fn: '(value:boolean,index:number,self:boolean[]): boolean =>  {return (!value)}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): boolean =>  {return (!value)}',
           },
           test4:
           {
             arr: "[]",
-            fn: '(value:boolean,index:number,self:boolean[]): boolean =>  {return (!value)}',
+            fn: '(value:boolean,index:number,self:FixedArray<boolean>): boolean =>  {return (!value)}',
           },
 
       },
@@ -55,8 +55,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "byte[]",
-    method_signature: { arr: "byte[]", fn : "(value:byte,index:number,self:byte[])=>boolean" },
+    result_type: "FixedArray<byte>",
+    method_signature: { arr: "FixedArray<byte>", fn : "(value:byte,index:number,self:FixedArray<byte>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "byte_array", fn: "func_byte_int_byte_array"},
     method_test_index_data:
@@ -64,27 +64,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:byte[]): boolean =>  {return true}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:byte[]): boolean =>  {return false}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:byte,index:number,self:byte[]): boolean =>  {return (value > 1)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:number,self:byte[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:byte,index:number,self:byte[]): boolean =>  {return (value>1)}',
+            fn: '(value:byte,index:number,self:FixedArray<byte>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -100,8 +100,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "short[]",
-    method_signature: { arr: "short[]", fn : "(value:short,index:number,self:short[])=>boolean" },
+    result_type: "FixedArray<short>",
+    method_signature: { arr: "FixedArray<short>", fn : "(value:short,index:number,self:FixedArray<short>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "short_array", fn: "func_short_int_short_array"},
     method_test_index_data:
@@ -109,27 +109,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:short[]): boolean =>  {return true}',
+            fn: '(value:short,index:number,self:FixedArray<short>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:short[]): boolean =>  {return false}',
+            fn: '(value:short,index:number,self:FixedArray<short>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:short,index:number,self:short[]): boolean =>  {return (value > 1)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:number,self:short[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:short,index:number,self:short[]): boolean =>  {return (value>1)}',
+            fn: '(value:short,index:number,self:FixedArray<short>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -145,8 +145,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "int[]",
-    method_signature: { arr: "int[]", fn : "(value:int,index:number,self:int[])=>boolean" },
+    result_type: "FixedArray<int>",
+    method_signature: { arr: "FixedArray<int>", fn : "(value:int,index:number,self:FixedArray<int>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "int_array", fn: "func_int_int_int_array"},
     method_test_index_data:
@@ -154,27 +154,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:int[]): boolean =>  {return true}',
+            fn: '(value:int,index:number,self:FixedArray<int>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:int[]): boolean =>  {return false}',
+            fn: '(value:int,index:number,self:FixedArray<int>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:int,index:number,self:int[]): boolean =>  {return (value > 1)}',
+            fn: '(value:int,index:number,self:FixedArray<int>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:int[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:int,index:number,self:FixedArray<int>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:int,index:number,self:int[]): boolean =>  {return (value>1)}',
+            fn: '(value:int,index:number,self:FixedArray<int>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -190,8 +190,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "long[]",
-    method_signature: { arr: "long[]", fn : "(value:long,index:number,self:long[])=>boolean" },
+    result_type: "FixedArray<long>",
+    method_signature: { arr: "FixedArray<long>", fn : "(value:long,index:number,self:FixedArray<long>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "long_array", fn: "func_long_int_long_array"},
     method_test_index_data:
@@ -199,27 +199,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:long[]): boolean =>  {return true}',
+            fn: '(value:long,index:number,self:FixedArray<long>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:long[]): boolean =>  {return false}',
+            fn: '(value:long,index:number,self:FixedArray<long>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:long,index:number,self:long[]): boolean =>  {return (value > 1)}',
+            fn: '(value:long,index:number,self:FixedArray<long>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:long[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:long,index:number,self:FixedArray<long>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:long,index:number,self:long[]): boolean =>  {return (value>1)}',
+            fn: '(value:long,index:number,self:FixedArray<long>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -235,8 +235,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "float[]",
-    method_signature: { arr: "float[]", fn : "(value:float,index:number,self:float[])=>boolean" },
+    result_type: "FixedArray<float>",
+    method_signature: { arr: "FixedArray<float>", fn : "(value:float,index:number,self:FixedArray<float>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "float_array", fn: "func_float_int_float_array"},
     method_test_index_data:
@@ -244,27 +244,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:float[]): boolean =>  {return true}',
+            fn: '(value:float,index:number,self:FixedArray<float>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:float[]): boolean =>  {return false}',
+            fn: '(value:float,index:number,self:FixedArray<float>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:float,index:number,self:float[]): boolean =>  {return (value > 1)}',
+            fn: '(value:float,index:number,self:FixedArray<float>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:float[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:float,index:number,self:FixedArray<float>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:float,index:number,self:float[]): boolean =>  {return (value>1)}',
+            fn: '(value:float,index:number,self:FixedArray<float>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -280,8 +280,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "double[]",
-    method_signature: { arr: "double[]", fn : "(value:double,index:number,self:double[])=>boolean" },
+    result_type: "FixedArray<double>",
+    method_signature: { arr: "FixedArray<double>", fn : "(value:double,index:number,self:FixedArray<double>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "double_array", fn: "func_double_int_double_array"},
     method_test_index_data:
@@ -289,27 +289,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:number,self:double[]): boolean =>  {return true}',
+            fn: '(value:double,index:number,self:FixedArray<double>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:number,self:double[]): boolean =>  {return false}',
+            fn: '(value:double,index:number,self:FixedArray<double>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:double,index:number,self:double[]): boolean =>  {return (value > 1)}',
+            fn: '(value:double,index:number,self:FixedArray<double>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:number,self:double[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:double,index:number,self:FixedArray<double>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:double,index:number,self:double[]): boolean =>  {return (value>1)}',
+            fn: '(value:double,index:number,self:FixedArray<double>): boolean =>  {return (value>1)}',
           },
       },
     method_expected_data:
@@ -325,8 +325,8 @@
     method_name: filter,
     method_nature: function,
     result_nature: array,
-    result_type: "char[]",
-    method_signature: { arr: "char[]", fn : "(value:char,index:number,self:char[])=>boolean" },
+    result_type: "FixedArray<char>",
+    method_signature: { arr: "FixedArray<char>", fn : "(value:char,index:number,self:FixedArray<char>)=>boolean" },
     method_throws: "false",
     method_signature_desc: {arr: "char_array", fn: "func_char_int_char_array"},
     method_test_index_data:
@@ -334,27 +334,27 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:char[]): boolean =>  {return true}',
+            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return true}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:char[]): boolean =>  {return false}',
+            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return false}',
           },
           test3:
           {
             arr: "[0, 1, 1, 1, 4, 5, 1, 7, 8, 1, 10, 11, 12, 13, 14, 1]",
-            fn: '(value:char,index:number,self:char[]): boolean =>  {return (value > 1)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value > 1)}',
           },
           test4:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:number,self:char[]): boolean =>  {return ((index % 2) == 0)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return ((index % 2) == 0)}',
           },
           test5:
           {
             arr: "[]",
-            fn: '(value:char,index:number,self:char[]): boolean =>  {return (value >1)}',
+            fn: '(value:char,index:number,self:FixedArray<char>): boolean =>  {return (value >1)}',
           },
       },
     method_expected_data:

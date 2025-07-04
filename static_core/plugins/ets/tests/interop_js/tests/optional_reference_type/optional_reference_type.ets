@@ -100,7 +100,7 @@ function referenceLiteralParam(): boolean {
  }
 
  function referenceUnionArrParam(): boolean {
-   const arr = ['param1', 'param2'];
+   const arr: FixedArray<string> = ['param1', 'param2'];
    return fnWithUnionParam(arr) == 'This is an array';
  }
 

@@ -146,12 +146,18 @@ function(irtoc_compile)
         endif()
     endif()
 
+    set(compiler_cpu_features "")
+    if (NOT "${PANDA_TARGET_CPU_FEATURES}" STREQUAL "")
+        set(compiler_cpu_features "--compiler-cpu-features=${PANDA_TARGET_CPU_FEATURES}")
+    endif()
+
     add_custom_command(OUTPUT ${IRTOC_OUTPUT} ${IRTOC_OUTPUT_LLVM}
         COMMENT             ${command_comment}
         COMMAND             touch disasm.txt
         COMMAND             ${PANDA_RUN_PREFIX} ${IRTOC_EXEC}
                                 --irtoc-output ${IRTOC_OUTPUT}
                                 --compiler-cross-arch ${IRTOC_TARGET}
+                                ${compiler_cpu_features}
                                 ${IRTOC_OUTPUT_LLVM_OPTION}
                                 --compiler-disasm-dump:single-file
                                 ${llvm_inline_module}

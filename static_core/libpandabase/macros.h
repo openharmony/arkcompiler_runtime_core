@@ -16,6 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_MACROS_H
 #define PANDA_LIBPANDABASE_PBASE_MACROS_H
 
+<<<<<<< HEAD
 #include <cassert>
 #include <iostream>
 
@@ -337,7 +338,11 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define CONSTEXPR_IN_RELEASE constexpr
 #endif
 
+=======
+>>>>>>> OpenHarmony_feature_20250328
 #include "os/stacktrace.h"
 #include "utils/debug.h"
+
+#include "../../libpandabase/macros.h"
 
 #endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H

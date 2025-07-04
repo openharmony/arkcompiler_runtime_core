@@ -18,7 +18,11 @@ desc: The forms using the keyword super are valid in instance methods, construct
 ---*/
 
 class A {
-  protected x: String = new String("some text");
+  private _x: String = new String("some text");
+
+  protected get x(): String{
+    return this._x;
+  }
 }
 
 class B extends A{
@@ -30,5 +34,5 @@ class B extends A{
 
 function main(): void {
   let instance: B = new B();
-  assertEQ( instance.foo(), "some text" )
+  arktest.assertEQ( instance.foo(), "some text" )
 }

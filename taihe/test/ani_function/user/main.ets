@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as FuncTest from "@generated/function_test";
-import * as System from "std/core/System";
+import {BusinessError} from "@ohos.base";
+import * as FuncTest from "function_test";
 
 loadLibrary("ani_function");
 
@@ -59,7 +59,7 @@ function test_void_input_void_output() {
 function test_int_input_void_output() {
     let foo = FuncTest.makeFoo();
     foo.test_cb_i((a) => {
-        assertEQ(a, 1);
+        arktest.assertEQ(a, 1);
     });
 }
 
@@ -67,7 +67,7 @@ function test_string_boolean_input() {
     let foo = FuncTest.makeFoo();
     foo.test_cb_s((a, b) => {
         if (b) {
-            assertEQ(a, "hello");
+            arktest.assertEQ(a, "hello");
         }
     });
 }
@@ -77,52 +77,61 @@ function test_string_return_value() {
     let result = foo.test_cb_rs((a) => {
         return a * 2;
     });
-    assertEQ(result, "888");
+    arktest.assertEQ(result, "888");
 }
 
 function test_from_callback() {
     let foo = FuncTest.makeFoo();
-    foo.add(10, NUMBER_TWENTY, (error: Error, data?: int) => {
-        assertEQ(data, 30);
-        if (!error.message) {
-            console.log("main finsih test async success ", data);
-        } else {
-            console.log("main finsih test async ERROR ", error);
-        }
-    })
+    let p = new Promise<int>((resolve, reject) => {
+        foo.add(10, NUMBER_TWENTY, (error: BusinessError, data?: int) => {
+            if (error.message) {
+                reject(error);
+            } else {
+                resolve(data!);
+            }
+        });
+    });
+    let res: int;
+    let err: BusinessError = new BusinessError();
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    arktest.assertEQ(res, 30);
 }
 
 function test_static_func_add() {
     const result = FuncTest.FooCls.static_func_add(20, 10);
-    assertEQ(result, 30);
+    arktest.assertEQ(result, 30);
 }
 
 function test_static_func_sub() {
     const result = FuncTest.FooCls.static_func_sub(20, 10);
-    assertEQ(result, 10);
+    arktest.assertEQ(result, 10);
 }
 
 function test_static_property() {
-    assertEQ(FuncTest.FooCls.static_property, 0);
+    arktest.assertEQ(FuncTest.FooCls.static_property, 0);
     FuncTest.FooCls.static_property = 123;
-    assertEQ(FuncTest.FooCls.static_property, 123);
+    arktest.assertEQ(FuncTest.FooCls.static_property, 123);
 }
 
 function test_new_class() {
     let test = new FuncTest.FooCls("hello");
     console.log("test_new_class test is:", test.get());
-    assertEQ(test.get(), "zhangsan");
+    arktest.assertEQ(test.get(), "zhangsan");
 }
 
 function test_new_class_with_two_args() {
     let test = new FuncTest.FooCls("hello", "test");
     console.log("test_new_class_with_two_args test is:", test.get());
-    assertEQ(test.get(), "zhangsan");
+    arktest.assertEQ(test.get(), "zhangsan");
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("FuncTest Test");
+    const suite = new arktest.ArkTestsuite("FuncTest Test");
 
     suite.addTest("test func no input no output", test_func_no_input_no_output);
     suite.addTest(
@@ -146,5 +155,5 @@ function main() {
     suite.addTest("test new class with two args", test_new_class_with_two_args);
 
     suite.addTest("test static property", test_static_property);
-    System.exit(suite.run());
+    exit(suite.run());
 }

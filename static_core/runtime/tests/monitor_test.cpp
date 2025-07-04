@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -254,6 +254,10 @@ TEST_F(MonitorTest, HeavyMonitorGcTest)
 
 TEST_F(MonitorTest, MonitorTestLightLockOverflow)
 {
+    if constexpr (std::is_same_v<MemoryModelConfig::Size, uint64_t>) {
+        GTEST_SKIP() << "Value MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT too high for iterating";
+    }
+
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     Class *cls = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::OBJECT);
     auto header = ObjectHeader::Create(cls);

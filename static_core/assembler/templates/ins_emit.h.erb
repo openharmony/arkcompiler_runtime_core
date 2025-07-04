@@ -113,7 +113,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %     end
 %   end
 %   ops << "profileId" if insn.profiled?
-%   if insn.properties.include?('short_long_range')
+%   if insn.properties.include?('id_shift')
 %     ops << ops.shift
 %   end
 %   ops

@@ -187,6 +187,26 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     public static readonly FALSE = new Boolean(false);
 
     /**
+     * Returns the primitive as boolean value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static toBoolean(value: boolean): boolean {
+        return value;
+    }
+
+     /**
+     * Returns value of this instance
+     *
+     * @returns value as boolean
+     */
+    public toBoolean(): boolean {
+        return this.value;
+    }
+
+    /**
      * Static method that converts primitive boolean to boxed version
      *
      * @param b value to be converted

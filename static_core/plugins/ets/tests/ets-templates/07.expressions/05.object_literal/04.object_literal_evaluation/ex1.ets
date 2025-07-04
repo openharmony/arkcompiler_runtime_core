@@ -28,8 +28,8 @@ function main(): int {
   let a: A|null = null;
   try {
       a = { name: "Bob", age: t[5] } as A
-  } catch (e: ArrayIndexOutOfBoundsError) {
-      assertTrue( a == null );
+  } catch (e: RangeError) {
+      arktest.assertTrue( a == null );
       return 0;
   }
   return 1;

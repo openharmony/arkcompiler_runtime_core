@@ -25,12 +25,13 @@ from vmb.helpers import ColorFormatter, \
 from vmb.generate import generate_main
 from vmb.run import VmbRunner
 from vmb.report import report_main
+from vmb.log import log_main
 from vmb.cli import Args, Command, LOG_LEVELS
 from vmb.platform import PlatformBase
 
 __all__ = ['main', 'VERSION']
 
-VERSION = '0.0.5'
+VERSION = '0.1.2'
 log = logging.getLogger("vmb")
 # Inject new log level above info
 logging.addLevelName(PASS_LOG_LEVEL, "PASS")
@@ -69,7 +70,8 @@ def main() -> None:
         log_handler.setFormatter(
             logging.Formatter('[%(levelname)s] %(message)s'))
     else:
-        log_handler.setFormatter(ColorFormatter())
+        # pylint: disable-next=no-member
+        log_handler.setFormatter(ColorFormatter(timestamps=args.timestamps))
     log.addHandler(log_handler)
 
     if args.command == Command.VERSION:
@@ -82,6 +84,10 @@ def main() -> None:
 
     if args.command == Command.REPORT:
         report_main(args)
+        return
+
+    if args.command == Command.LOG:
+        log_main(args)
         return
 
     if args.command == Command.GEN:
@@ -98,13 +104,14 @@ def main() -> None:
         bench_units = PlatformBase.search_units(args.paths)
 
     bus, ext_info, timer = runner.run(bench_units)
-
-    if bus:
-        if not args.dry_run:
-            report_main(args, bus=bus, ext_info=ext_info, timer=timer)
-    else:
+    if not bus:
         log.error('No tests run!')
         sys.exit(1)
+    if args.dry_run:
+        sys.exit(0)
+    if args.fail_list:
+        VmbRunner.save_failure_lists(bus, args.fail_list)
+    report_main(args, bus=bus, ext_info=ext_info, timer=timer)
 
 
 if __name__ == '__main__':

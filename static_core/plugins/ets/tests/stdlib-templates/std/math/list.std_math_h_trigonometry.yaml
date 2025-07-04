@@ -44,8 +44,8 @@
         test8:  27.289917197128,
         test9: -27.289917197128,
         test10: -doubleNaN,
-        test11: -doubleNaN,
-        test12: -doubleNaN,
+        test11: doubleInf,
+        test12: -doubleInf,
       },
   }
 - {

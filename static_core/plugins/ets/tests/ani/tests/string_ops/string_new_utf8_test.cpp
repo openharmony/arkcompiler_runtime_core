@@ -66,6 +66,14 @@ TEST_F(StringNewUtf8Test, StringNewUtf8_ValidMultibyteString)
     ASSERT_STREQ(utfBuffer, example.c_str());
 }
 
+TEST_F(StringNewUtf8Test, StringNewUtf8_NullEnv)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->c_api->String_NewUTF8(nullptr, example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_INVALID_ARGS);
+}
+
 TEST_F(StringNewUtf8Test, StringNewUtf8_SmallerSize)
 {
     const std::string example {"example"};

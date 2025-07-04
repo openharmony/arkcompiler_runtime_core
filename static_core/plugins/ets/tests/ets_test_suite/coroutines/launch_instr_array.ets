@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
- // This test covers case of storing Promises returned from launch instruction
- // into array for different modes: INT, AOT, JIT
- 
- class TestCoroutine {
-    public static threadsCount: int = 2;
-    public static corArray: (Promise<Object> | null)[] = [null, null];
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
 
-    public cor(): Object {
-        return new Object();
+// This test covers case of storing Promises returned from launch instruction
+// into array for different modes: INT, AOT, JIT
+
+class TestCoroutine {
+    public static threadsCount: int = 2;
+    public static jArray: (Job<Object> | null)[] = [null, null];
+
+    public jCor(): Job<Object> {
+        const factory = () => {return new Object();}
+        return launch<Object, () => Object>(factory);
     }
 
     public run(): void {
         for(let i = 0; i < TestCoroutine.threadsCount; i++) {
-            TestCoroutine.corArray[i] = launch this.cor();
+            TestCoroutine.jArray[i] = this.jCor();
         }
         Coroutine.Schedule();
     }

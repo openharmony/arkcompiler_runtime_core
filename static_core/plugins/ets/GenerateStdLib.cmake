@@ -18,12 +18,20 @@ function(regenerate_and_check_stdlib)
     set(ESCOMPAT_GEN_FILES "DataView.ets" "TypedUArrays.ets" "TypedArrays.ets" "Array.ets")
     set(STD_CORE "stdlib/std/core")
     set(STD_CORE_GEN_FILES "Function.ets" "Tuple.ets" "BuiltinArray.ets" "BuiltinArraySort.ets" "BuiltinArrayAlgorithms.ets")
+<<<<<<< HEAD
+=======
+    set(STD_INTEROP "stdlib/std/interop/js")
+    set(STD_INTEROP_GEN_FILES "InteropTransferHelper.ets")
+>>>>>>> OpenHarmony_feature_20250328
     set(GEN_FILES )
     foreach(file ${ESCOMPAT_GEN_FILES})
         list(APPEND GEN_FILES "${ESCOMPAT}/${file}")
     endforeach()
     foreach(file ${STD_CORE_GEN_FILES})
         list(APPEND GEN_FILES "${STD_CORE}/${file}")
+    endforeach()
+    foreach(file ${STD_INTEROP_GEN_FILES})
+        list(APPEND GEN_FILES "${STD_INTEROP}/${file}")
     endforeach()
 
     set(GEN_SCRIPTS "genlib.sh" )
@@ -46,7 +54,7 @@ function(regenerate_and_check_stdlib)
             RESULT_VARIABLE compare_result
         )
         if( NOT compare_result EQUAL 0)
-            message(FATAL_ERROR "Generated ${file} is not equal to currently used ${file}, fix and rerun generating script. "
+            message(FATAL_ERROR "Generate ${file} is not equal to currently used ${file}, fix and rerun generating script. "
             "Checkout the guide: "
             "https://gitee.com/OpenHarmony/arkcompiler_runtime_core/blob/master/static_core/plugins/ets/stdlib/README.md")
         endif()

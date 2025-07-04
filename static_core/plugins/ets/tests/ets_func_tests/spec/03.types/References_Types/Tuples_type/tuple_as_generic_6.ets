@@ -37,8 +37,8 @@ function main(): int {
 
     let tp: TupleProvider<String, number> = new TupleProvider<String, number>("Hello", 42.0);
     let result = tp.publish();
-    assertEQ(tp.one, result[1])
-    assertEQ(tp.two, result[0])
+    arktest.assertEQ(tp.one, result[1])
+    arktest.assertEQ(tp.two, result[0])
 
     return 0;
 }

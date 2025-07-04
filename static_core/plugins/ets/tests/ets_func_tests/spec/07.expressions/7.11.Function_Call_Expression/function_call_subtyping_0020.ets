@@ -49,14 +49,14 @@ function f(): D {
 
 function main() {
   let x : A = f()
-  assertEQ(x.countA, 6)
+  arktest.assertEQ(x.countA, 6)
 
   let y : B = f()
-  assertEQ(y.countA, 6)
-  assertEQ(y.countB, 28)
+  arktest.assertEQ(y.countA, 6)
+  arktest.assertEQ(y.countB, 28)
 
   let z : D = f()
-  assertEQ(y.countA, 6)
-  assertEQ(y.countB, 28)
-  assertEQ(y.countD, 496)
+  arktest.assertEQ(y.countA, 6)
+  arktest.assertEQ(y.countB, 28)
+  arktest.assertEQ(y.countD, 496)
 }

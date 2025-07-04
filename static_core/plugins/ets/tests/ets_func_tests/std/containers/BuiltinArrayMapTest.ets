@@ -18,7 +18,7 @@ function main(): void {
     const res: string[] = map<string>(arr, (x: int): string => {
         return (x as Int).toString()
     })
-    assertEQ( res.length, 2)
-    assertEQ( res[0], "1")
-    assertEQ( res[1], "2")
+    arktest.assertEQ( res.length, 2)
+    arktest.assertEQ( res[0], "1")
+    arktest.assertEQ( res[1], "2")
 }

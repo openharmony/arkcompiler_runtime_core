@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 #include "types/ets_primitives.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsStackTraceElementTest;
+}  // namespace test
 
 class EtsStackTraceElement : public ObjectHeader {
 public:
@@ -77,7 +81,11 @@ private:
     ObjectPointer<EtsString> methodName_;
     ObjectPointer<EtsString> sourceFileName_;
     FIELD_UNUSED EtsInt lineNumber_;  // note alignment
+    FIELD_UNUSED EtsInt colNumber_;
+
+    friend class test::EtsStackTraceElementTest;
 };
 
 }  // namespace ark::ets
-#endif
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H

@@ -30,7 +30,7 @@ function foo{{loop.index}}(p: {{v.type}}): string {
 
 function main() {
 {%- for v in c['vals'] %}
-    assertEQ( foo{{loop.index}}({{v.expr}}), "{{c.res}}" )
+    arktest.assertEQ( foo{{loop.index}}({{v.expr}}), "{{c.res}}" )
 {%- endfor %}
 }
 {%- endfor %}

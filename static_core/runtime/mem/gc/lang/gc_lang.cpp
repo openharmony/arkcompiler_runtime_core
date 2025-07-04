@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,43 +72,15 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
 
-    auto cb = [this](ManagedThread *thread) {
-        UpdateRefsInVRegs(thread);
-        return true;
-    };
-    // Update refs in vregs
-    GetPandaVm()->GetThreadManager()->EnumerateThreads(cb);
-    if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {  // NOLINT
-        // Update refs inside monitors
-        GetPandaVm()->GetMonitorPool()->EnumerateMonitors([this](Monitor *monitor) {
-            ObjectHeader *objectHeader = monitor->GetObject();
-            if (objectHeader == nullptr) {
-                return true;
-            }
-            MarkWord markWord = objectHeader->AtomicGetMark();
-            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
-                MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-                LOG_DEBUG_GC << "Update monitor " << std::hex << monitor << " object, old val = 0x" << std::hex
-                             << objectHeader << ", new val = 0x" << addr;
-                monitor->SetObject(reinterpret_cast<ObjectHeader *>(addr));
-            }
+    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
+        if ((*object)->IsForwarded()) {
+            *object = GetForwardAddress(*object);
             return true;
-        });
-    }
-    // Update string table
-    if (GetPandaVm()->UpdateMovedStrings()) {
-        // AOT string slots are pointing to strings from the StringTable,
-        // so we should update it only if StringTable's pointers were updated.
-        rootManager_.UpdateAotStringRoots();
-    }
-    // Update thread locals
-    UpdateThreadLocals();
-    // Update refs in vm
-    UpdateVmRefs();
-    // Update refs in class linker contexts
-    UpdateClassLinkerContextRoots();
-    // Update global refs
-    UpdateGlobalObjectStorage();
+        }
+        return false;
+    };
+
+    rootManager_.UpdateRefsToMovedObjects(gcRootUpdaterCallback);
 }
 
 template <class LanguageConfig>

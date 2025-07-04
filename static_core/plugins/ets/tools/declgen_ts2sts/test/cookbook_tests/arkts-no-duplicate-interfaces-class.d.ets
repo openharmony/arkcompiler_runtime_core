@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +19,11 @@ export declare namespace A {
         name: string;
     }
 }
-export interface Calculator {
+export declare interface Calculator {
     add(a: number, b: number): number;
     subtract(a: number, b: number): number;
 }
-export interface I {
+export declare interface I {
     foo(a: number): void;
-    foo(a?: number): void;
     setAge(age: number): void;
 }

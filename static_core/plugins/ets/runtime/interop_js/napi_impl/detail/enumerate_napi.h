@@ -96,6 +96,7 @@
     FN_MACRO(napi_get_value_bool, napi_env, env, napi_value, value, bool *, result)                                    \
     FN_MACRO(napi_get_named_property, napi_env, env, napi_value, object, const char *, utf8name, napi_value *, result) \
     FN_MACRO(napi_create_error, napi_env, env, napi_value, code, napi_value, msg, napi_value *, result)                \
+    FN_MACRO(napi_create_type_error, napi_env, env, napi_value, code, napi_value, msg, napi_value *, result)           \
     FN_MACRO(napi_coerce_to_string, napi_env, env, napi_value, value, napi_value *, result)                            \
     FN_MACRO(napi_create_int64, napi_env, env, int64_t, value, napi_value *, result)                                   \
     FN_MACRO(napi_reference_ref, napi_env, env, napi_ref, ref, uint32_t *, result)                                     \
@@ -132,6 +133,12 @@
     FN_MACRO(napi_is_arraybuffer, napi_env, env, napi_value, value, bool *, result)                                    \
     FN_MACRO(napi_close_handle_scope, napi_env, env, napi_handle_scope, scope)                                         \
     FN_MACRO(napi_create_string_utf16, napi_env, env, const char16_t *, str, size_t, length, napi_value *, result)     \
+    FN_MACRO(napi_get_last_error_info, napi_env, env, const napi_extended_error_info **, result)                       \
+    FN_MACRO(napi_create_typedarray, napi_env, env, napi_typedarray_type, type, size_t, length, napi_value,            \
+             arraybuffer, size_t, byte_offset, napi_value *, result)                                                   \
+    FN_MACRO(napi_create_dataview, napi_env, env, size_t, length, napi_value, arraybuffer, size_t, byte_offset,        \
+             napi_value *, result)                                                                                     \
+    FN_MACRO(napi_get_property_names, napi_env, env, napi_value, object, napi_value *, result)                         \
     FN_MACRO(napi_create_object, napi_env, env, napi_value *, result)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

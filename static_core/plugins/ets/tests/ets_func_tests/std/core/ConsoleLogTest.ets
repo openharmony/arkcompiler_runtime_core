@@ -30,24 +30,36 @@ function main() {
     console.log(true);
     console.log(undefined);
     console.log(null);
-    
+    console.log()
+
     // Multiple arguments
     console.log("User:", "John", "Age:", 30);
 
-    // Objects and arrays
+    // Object
     console.log(new A("John", 30));
-    console.log([1, 2, 3, 4, 5]);
-    
+
     // Template strings
     const name = "Alice";
     console.log(`Hello, ${name}!`);
-    
+
     // Styled console output
     console.log(
-        "%c Styled text", 
+        "%c Styled text",
         "color: blue;"
     );
-    
+
     // Error objects
     console.log(new Error("Test error"));
+
+    console.log(null, undefined, 11, "123", new Object())
+    let arr = new Array<string | null | undefined>(3)
+    console.log(arr)
+
+    // Formatted strings
+    console.log("%d")
+    console.log("%d", 1)
+    console.log("%d", 1, 2)
+
+    console.log("%s %s", "37", 37)
+    console.log("%s %s", "19.5", 19.5)
 }

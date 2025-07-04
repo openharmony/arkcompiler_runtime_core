@@ -30,6 +30,8 @@ public:
     static constexpr const char *CHECK_ARRAY_BUFFER_FUNCTION = "checkCreatedArrayBuffer";
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     static constexpr const char *MODULE_NAME = "arraybuffer_create_test";
+    static constexpr ani_int LOOP_COUNT = 3;
+    static constexpr ani_int TEST_VALUE_5 = 5U;
 };
 
 TEST_F(ArrayBufferCreateTest, InvalidArgs)
@@ -162,6 +164,27 @@ TEST_F(ArrayBufferCreateTest, TestGC)
         CallEtsFunction<ani_boolean>(MODULE_NAME, CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, EXPECTED_SIZE);
     ASSERT_EQ(bufferIsCorrect, ANI_TRUE);
 }
+
+TEST_F(ArrayBufferCreateTest, TestLoopGetData)
+{
+    ani_arraybuffer arrayBuffer = nullptr;
+    uint8_t *data = nullptr;
+    uint8_t *data2 = nullptr;
+    for (int i = 0; i < LOOP_COUNT; i++) {
+        auto status = env_->CreateArrayBuffer(EXPECTED_SIZE, reinterpret_cast<void **>(&data), &arrayBuffer);
+        ASSERT_EQ(status, ANI_OK);
+        data[0U] = 10U;
+        data[1U] = 11U;
+        ani_size length = 0;
+        auto resultStatus = env_->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void **>(&data2), &length);
+        ASSERT_EQ(resultStatus, ANI_OK);
+        ASSERT_EQ(data2, data);
+        ASSERT_EQ(length, EXPECTED_SIZE);
+        ASSERT_EQ(data2[0U], 10U);
+        ASSERT_EQ(data2[1U], 11U);
+    }
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

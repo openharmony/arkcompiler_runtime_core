@@ -38,30 +38,82 @@ public:
     }
 };
 
+TEST_F(ObjectGetPropertyByNameByteTest, set_field)
+{
+    ani_object car = NewCar();
+
+    ani_byte highPerformance {};
+    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, 0U);
+
+    const ani_byte value = 0;
+    const ani_byte value1 = 1;
+    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "highPerformance", value), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value);
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "ecoFriendly", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "ecoFriendly", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value1);
+}
+
 TEST_F(ObjectGetPropertyByNameByteTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_byte highPerformance;
+    ani_byte highPerformance {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(highPerformance, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(highPerformance, 1U);
+    const int32_t loopCount = 3;
+    const ani_byte value = -128;
+    const ani_byte value1 = 127;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "highPerformance", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "highPerformance", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value1);
+    }
 }
 
 TEST_F(ObjectGetPropertyByNameByteTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_byte ecoFriendly;
+    ani_byte ecoFriendly {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(ecoFriendly, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(ecoFriendly, 1U);
+    const int32_t loopCount = 3;
+    const ani_byte value = -128;
+    const ani_byte value1 = 127;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "ecoFriendly", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "ecoFriendly", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Byte(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value1);
+    }
+}
+
+TEST_F(ObjectGetPropertyByNameByteTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Byte(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameByteTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Byte(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameByteTest, invalid_argument)
@@ -90,7 +142,7 @@ TEST_F(ObjectGetPropertyByNameByteTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_byte prop;
+    ani_byte prop {};
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);
 
@@ -103,7 +155,7 @@ TEST_F(ObjectGetPropertyByNameByteTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_byte prop;
+    ani_byte prop {};
     ASSERT_EQ(env_->Object_SetPropertyByName_Byte(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Byte(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);

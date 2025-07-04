@@ -23,4 +23,7 @@ class My_obj {
     }
 }
 
-const my_obj = new My_obj()
+const my_obj: My_obj;
+static {
+    my_obj = new My_obj()
+}

@@ -18,7 +18,7 @@ export function Identity<T>(x: T): T {
     return x;
 }
 
-export function ForEach<T extends Object>(a: T[], cb: (e: T, idx: int) => void) {
+export function ForEach<T extends Object>(a: FixedArray<T>, cb: (e: T, idx: int) => void) {
     for (let i = 0; i < a.length; i++) {
         cb(a[i], i);
     }
@@ -56,6 +56,13 @@ export class C2 {
     }
 }
 
+<<<<<<< HEAD
+=======
+export let cb1: <T>(x: T) => T
+export let cb2: <T>(x: T) => T = <T>(p: T): T => p
+export let cb3 = <T, U> (p: T, q: U): [T, U] => [p, q]
+
+>>>>>>> OpenHarmony_feature_20250328
 // NOTE(ivagin): enable when supported by interop
 // export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
 //    I0Method(a: U): U { return a; };

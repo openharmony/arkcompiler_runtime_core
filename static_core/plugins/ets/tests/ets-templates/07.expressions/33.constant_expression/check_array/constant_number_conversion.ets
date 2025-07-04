@@ -22,8 +22,8 @@ desc:
 const size: {{c.type}} = {{c.value}}
 
 function main() {
-    const data = new int[size as int]
-    assertEQ(data.length, {{c.expected}})
+    const data = new int[size.toInt()]
+    arktest.assertEQ(data.length, {{c.expected}})
 }
 
 {% endfor %}

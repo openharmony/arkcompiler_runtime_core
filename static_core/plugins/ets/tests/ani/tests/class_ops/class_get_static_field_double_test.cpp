@@ -42,7 +42,7 @@ public:
 TEST_F(ClassGetStaticFieldDoubleTest, get_double)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, get_double)
 TEST_F(ClassGetStaticFieldDoubleTest, get_double_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, get_double_c_api)
 TEST_F(ClassGetStaticFieldDoubleTest, get_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -79,7 +79,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -90,7 +90,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_double result = 0.0;
     ASSERT_EQ(env_->Class_GetStaticField_Double(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -98,7 +98,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -108,7 +108,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument3)
 TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field = nullptr;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -119,7 +119,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldDoubleTest, special_values)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     ani_double single = 0.0;
     const int32_t fieldNum = 4;
@@ -146,7 +146,7 @@ TEST_F(ClassGetStaticFieldDoubleTest, special_values)
 TEST_F(ClassGetStaticFieldDoubleTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_double_test/TestDouble;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDouble", &cls), ANI_OK);
     ani_static_field field {};
     const ani_double setTar = 28.0;
     const ani_double setTar2 = 18.0;
@@ -166,18 +166,33 @@ TEST_F(ClassGetStaticFieldDoubleTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldDoubleTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_double_test/TestDoubleA;", "double_value");
+    CheckFieldValue("class_get_static_field_double_test.TestDoubleA", "double_value");
 }
 
 TEST_F(ClassGetStaticFieldDoubleTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_double_test/TestDoubleA;", "double_value");
+    CheckFieldValue("class_get_static_field_double_test.TestDoubleA", "double_value");
 }
 
 TEST_F(ClassGetStaticFieldDoubleTest, combination_test4)
 {
-    CheckFieldValue("Lclass_get_static_field_double_test/TestDoubleFinal;", "double_value");
+    CheckFieldValue("class_get_static_field_double_test.TestDoubleFinal", "double_value");
 }
+
+TEST_F(ClassGetStaticFieldDoubleTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_double_test.TestDoubleFinal", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "double_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_double_test.TestDoubleFinal"));
+    ani_double doubleValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Double(cls, field, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_double_test.TestDoubleFinal"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

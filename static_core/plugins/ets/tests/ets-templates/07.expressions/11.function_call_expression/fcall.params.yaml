@@ -20,7 +20,7 @@ cases:
           }
       use: |-
           let f: F = (p: string): number => { return p.length }
-          assertEQ( f("abcdef"), foo("ABCDEF") )
+          arktest.assertEQ( f("abcdef"), foo("ABCDEF") )
 
     - decl: |-
           class A {
@@ -37,7 +37,7 @@ cases:
           type F<T extends A> = (p: T) => number
       use: |-
           let f: F<B> = (v: B): number => { return v.getFld() }
-          assertEQ( f(new B()), foo<B>(new B()) )
+          arktest.assertEQ( f(new B()), foo<B>(new B()) )
 
     - decl: |-
           let globl: number = 3.5
@@ -50,7 +50,7 @@ cases:
       use: |-
           globl = 3.5
           let res = foo(2.0, ():void => { globl *= 2.0 })
-          assertEQ( res, 16.0 )
+          arktest.assertEQ( res, 16.0 )
 
     - decl: |-
           let globl: number = 3.5
@@ -65,7 +65,7 @@ cases:
           let res = foo(2.0) {
               globl *= 2.0
           }
-          assertEQ( res, 16.0 )
+          arktest.assertEQ( res, 16.0 )
 
     - decl: |-
           let globl: number = 0.0
@@ -85,7 +85,7 @@ cases:
                   foo(4.0, lambda);
               }
           }
-          assertEQ( foo(2.0, lambda), 13.5 )
+          arktest.assertEQ( foo(2.0, lambda), 13.5 )
 
     - decl: |-
           let globl: number = 0.0
@@ -110,7 +110,7 @@ cases:
           let res: number = foo(2.0) {
               lambda()
           }
-          assertEQ( res, 13.5 )
+          arktest.assertEQ( res, 13.5 )
 
     - decl: |-
           type ss = (p: string) => string
@@ -122,8 +122,8 @@ cases:
           let nbar: ss|undefined
       use: |-
           globl = "G"
-          assertTrue( nbar?.("abc") === undefined )
-          assertEQ( globl, "G" )
+          arktest.assertTrue( nbar?.("abc") === undefined )
+          arktest.assertEQ( globl, "G" )
 
     - decl: |-
           type ss = (p: string) => string
@@ -136,8 +136,8 @@ cases:
       use: |-
           globl = "G"
           nbar = bar
-          assertEQ( nbar?.("abc"), "Gabc" )
-          assertEQ( globl, "Gabc" )
+          arktest.assertEQ( nbar?.("abc"), "Gabc" )
+          arktest.assertEQ( globl, "Gabc" )
 
     - decl: |-
           let globl: number = 0.0
@@ -148,10 +148,10 @@ cases:
           }
       use: |-
           let v: UT = 3.14
-          assertEQ( v as number, 3.14 )
+          arktest.assertEQ( v as number, 3.14 )
           v = foo
           globl = 9.81
-          assertEQ( (v as NumberFunc)(), 9.81 )
+          arktest.assertEQ( (v as NumberFunc)(), 9.81 )
 
     - decl: |-
           let globl: number = 0.0
@@ -159,10 +159,14 @@ cases:
           type UT = NumberFunc | number
       use: |-
           let v: UT = 3.14
-          assertEQ( v as number, 3.14 )
+          arktest.assertEQ( v as number, 3.14 )
           v = (): number => { return globl }
           globl = 9.81
+<<<<<<< HEAD
           assertEQ( (v as NumberFunc)(), 9.81 )
+=======
+          arktest.assertEQ( (v as NumberFunc)(), 9.81 )
+>>>>>>> OpenHarmony_feature_20250328
 
     - decl: |-
           function foo(): int { return 1 }
@@ -174,6 +178,12 @@ cases:
             method(): int { return 3 }
           }
       use: |-
+<<<<<<< HEAD
           assertEQ(call(foo), 1)
           assertEQ(call(A.method), 2)
           assertEQ(call((new A).method), 3)
+=======
+          arktest.assertEQ(call(foo), 1)
+          arktest.assertEQ(call(A.method), 2)
+          arktest.assertEQ(call((new A).method), 3)
+>>>>>>> OpenHarmony_feature_20250328

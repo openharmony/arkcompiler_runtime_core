@@ -276,6 +276,7 @@ public:
         ASSERT(ic != nullptr);
         if (ic != nullptr) {
             ic->UpdateInlineCaches(cls);
+            isUpdated_ = true;
         }
     }
 
@@ -284,6 +285,7 @@ public:
         auto branch = FindBranchData(pc);
         ASSERT(branch != nullptr);
         branch->IncrementTaken();
+        isUpdated_ = true;
     }
 
     void UpdateBranchNotTaken(uintptr_t pc)
@@ -291,6 +293,7 @@ public:
         auto branch = FindBranchData(pc);
         ASSERT(branch != nullptr);
         branch->IncrementNotTaken();
+        isUpdated_ = true;
     }
 
     int64_t GetBranchTakenCounter(uintptr_t pc)
@@ -312,6 +315,17 @@ public:
         auto thr0w = FindThrowData(pc);
         ASSERT(thr0w != nullptr);
         thr0w->IncrementTaken();
+        isUpdated_ = true;
+    }
+
+    bool IsUpdateSinceLastSave() const
+    {
+        return isUpdated_;
+    }
+
+    void DataSaved()
+    {
+        isUpdated_ = false;
     }
 
     int64_t GetThrowTakenCounter(uintptr_t pc)
@@ -368,6 +382,7 @@ private:
     Span<CallSiteInlineCache> inlineCaches_;
     Span<BranchData> branchData_;
     Span<ThrowData> throwData_;
+    std::atomic_bool isUpdated_ {true};
 };
 
 }  // namespace ark

@@ -83,7 +83,8 @@ void TryCatchResolving::DeoptimizeIfs()
         ASSERT(ifImm->GetCc() == ConditionCode::CC_NE || ifImm->GetCc() == ConditionCode::CC_EQ);
         ASSERT(ifImm->GetImm() == 0);
         auto saveState = tryBB->GetFirstInst();
-        if (saveState == nullptr || saveState->GetOpcode() != Opcode::SaveState) {
+        if (saveState == nullptr || saveState->GetOpcode() != Opcode::SaveState ||
+            static_cast<SaveStateInst *>(saveState)->GetInputsWereDeletedRec()) {
             continue;
         }
         auto cc = ifImm->GetCc();

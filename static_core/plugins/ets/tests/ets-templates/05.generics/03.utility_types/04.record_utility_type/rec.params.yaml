@@ -23,8 +23,8 @@ cases:
       use: |-
           let r: R1 = {}
           r = foo(r)
-          assertTrue(r["Null Pointer Error"] instanceof Error)
-          assertTrue(r["NPE"] == undefined)
+          arktest.assertTrue(r["Null Pointer Error"] instanceof Error)
+          arktest.assertTrue(r["NPE"] == undefined)
 
     - decl: |-
           // use it as alias with parameters
@@ -36,8 +36,8 @@ cases:
       use: |-
           let r: R1<string> = {}
           r = foo(r)
-          assertTrue(r["Null Pointer Error"] instanceof Error)
-          assertTrue(r["NPE"] == undefined)
+          arktest.assertTrue(r["Null Pointer Error"] instanceof Error)
+          arktest.assertTrue(r["NPE"] == undefined)
 
     - decl: |-
           // builtin array of records
@@ -46,8 +46,8 @@ cases:
           r[0] = { "A": 1 }
           r[1] = { "B": 2 }
           r[2] = { "C": 3 }
-          assertTrue(r[0]["A"] == 1 && r[1]["B"] == 2 && r[2]["C"] == 3)
-          assertTrue(r[0]["a"] == undefined && r[1]["b"] == undefined && r[2]["c"] == undefined)
+          arktest.assertTrue(r[0]["A"] == 1 && r[1]["B"] == 2 && r[2]["C"] == 3)
+          arktest.assertTrue(r[0]["a"] == undefined && r[1]["b"] == undefined && r[2]["c"] == undefined)
 
     - decl: |-
           // array of records
@@ -56,9 +56,9 @@ cases:
           r.push({ "A": 1 })
           r.push({ "B": 2 })
           let v = r.pop()
-          assertTrue(v!["B"] == 2 && v!["A"] == undefined)
+          arktest.assertTrue(v!["B"] == 2 && v!["A"] == undefined)
           v = r.pop()
-          assertTrue(v!["A"] == 1 && v!["B"] == undefined)
+          arktest.assertTrue(v!["A"] == 1 && v!["B"] == undefined)
 
     - decl: |-
           // tuple of records
@@ -67,13 +67,13 @@ cases:
               { 1: "1", 2: "2", 3: "3" },
               { "A": (p: number): string => "A" + p, "B": (p: number): string => "B" + p }
           ]
-          assertTrue(r[0][1] == "1")
-          assertTrue(r[0][2] == "2")
-          assertTrue(r[0][3] == "3")
-          assertTrue(r[0][4] == undefined)
-          assertTrue(r[1]["A"]!(42) == "A42")
-          assertTrue(r[1]["B"]!(33) == "B33")
-          assertTrue(r[1]["C"] == undefined)
+          arktest.assertTrue(r[0][1] == "1")
+          arktest.assertTrue(r[0][2] == "2")
+          arktest.assertTrue(r[0][3] == "3")
+          arktest.assertTrue(r[0][4] == undefined)
+          arktest.assertTrue(r[1]["A"]!(42) == "A42")
+          arktest.assertTrue(r[1]["B"]!(33) == "B33")
+          arktest.assertTrue(r[1]["C"] == undefined)
 
     - decl: |-
           // fields of Record type
@@ -87,8 +87,8 @@ cases:
           a.f1["0"] = false
           a.f2[1] = false
           a.f2[0] = true
-          assertTrue(a.f1["1"]! && !(a.f1["0"]!) && !(a.f2[1]!) && a.f2[0]!)
-          assertTrue(a.f1[""] == undefined && a.f2[42] == undefined)
+          arktest.assertTrue(a.f1["1"]! && !(a.f1["0"]!) && !(a.f2[1]!) && a.f2[0]!)
+          arktest.assertTrue(a.f1[""] == undefined && a.f2[42] == undefined)
 
     - decl: |-
           let a = 2, b = 1;
@@ -106,7 +106,7 @@ cases:
               "c": 3,
           }
           let q = foo<Record<"a"|"b"|"c", number>>(r)
-          assertTrue(q["a"] == 1 && q["b"] == 2 && q["c"] == 3)
+          arktest.assertTrue(q["a"] == 1 && q["b"] == 2 && q["c"] == 3)
 
     - decl: |-
           // generic argument of record type
@@ -132,12 +132,12 @@ cases:
               12345.0: "1 2 3 4 5",
               67890.0: "6 7 8 9 0",
           });
-          assertTrue(b.meth()[12345] == "1 2 3 4 5")
-          assertTrue(b.meth()[67890] == "6 7 8 9 0")
-          assertTrue(b.meth()[11111] == undefined)
+          arktest.assertTrue(b.meth()[12345] == "1 2 3 4 5")
+          arktest.assertTrue(b.meth()[67890] == "6 7 8 9 0")
+          arktest.assertTrue(b.meth()[11111] == undefined)
           b.put({ 1.0: "A", 2.0: "B" })
-          assertTrue(b.meth()[1] == "A")
-          assertTrue(b.meth()[2] == "B")
+          arktest.assertTrue(b.meth()[1] == "A")
+          arktest.assertTrue(b.meth()[2] == "B")
 
     - decl: |-
           let a = 2, b = 1;
@@ -161,7 +161,7 @@ cases:
           // casting record to object and back
           obj = to_obj(r)
           let q = to_rec(obj)
-          assertTrue(q[1] == 101 && q[2] == 202 && q[3] == 303)
+          arktest.assertTrue(q[1] == 101 && q[2] == 202 && q[3] == 303)
 
     - decl: |-
           // record with union keys
@@ -172,12 +172,12 @@ cases:
               1: 100n,
               2: 200n,
           }
-          assertTrue(r["A"] == 1n && r["B"] == 2n)
-          assertTrue(r[1] == 100n && r[2] == 200n)
+          arktest.assertTrue(r["A"] == 1n && r["B"] == 2n)
+          arktest.assertTrue(r[1] == 100n && r[2] == 200n)
           r["C"] = 3n
           r[3] = 300n
-          assertTrue(r["C"] == 3n && r[3] == 300n)
-          assertTrue(r["D"] == undefined && r[4] == undefined)
+          arktest.assertTrue(r["C"] == 3n && r[3] == 300n)
+          arktest.assertTrue(r["D"] == undefined && r[4] == undefined)
 
     - decl: |-
           // record with union values
@@ -190,12 +190,12 @@ cases:
           r[8] = true
           r[9] = "abc"
           r[0] = 111111111111111111111111111111111111111111111111111111111111111111111111111111111111n
-          assertTrue(r[0] == 111111111111111111111111111111111111111111111111111111111111111111111111111111111111n)
-          assertTrue(r[9] == "abc")
-          assertTrue(r[8] == true)
-          assertTrue(r["7"] == c'\u0007')
-          assertTrue(r[6] == 6.01)
-          assertTrue(r["1"] == 42.0)
+          arktest.assertTrue(r[0] == 111111111111111111111111111111111111111111111111111111111111111111111111111111111111n)
+          arktest.assertTrue(r[9] == "abc")
+          arktest.assertTrue(r[8] == true)
+          arktest.assertTrue(r["7"] == c'\u0007')
+          arktest.assertTrue(r[6] == 6.01)
+          arktest.assertTrue(r["1"] == 42.0)
 
     - decl: |-
           // use generic arguments in record value
@@ -208,9 +208,9 @@ cases:
           let a: A<Record<string, number>> = new A<Record<string, number>>;
           a.set(1, { "A": 100 })
           a.set(2, { "B": 200 })
-          assertTrue(a.get(1)!["A"] == 100)
-          assertTrue(a.get(2)!["B"] == 200)
-          assertTrue(a.get(3) == undefined)
+          arktest.assertTrue(a.get(1)!["A"] == 100)
+          arktest.assertTrue(a.get(2)!["B"] == 200)
+          arktest.assertTrue(a.get(3) == undefined)
 
     - decl: |-
           // use generic argument in record key
@@ -223,11 +223,11 @@ cases:
           let a: A<Int> = new A<Int>;
           a.set(42, "42")
           a.set(33, "33")
-          assertTrue(a.get(42) == "42")
-          assertTrue(a.get(33) == "33")
-          assertTrue(a.get(34) == undefined)
+          arktest.assertTrue(a.get(42) == "42")
+          arktest.assertTrue(a.get(33) == "33")
+          arktest.assertTrue(a.get(34) == undefined)
           a.set(42, "0")
-          assertTrue(a.get(42) == "0")
+          arktest.assertTrue(a.get(42) == "0")
 
     - use: |-
           let r: Record<char, string> = {}  // CTE: wrong key type

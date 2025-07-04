@@ -177,10 +177,6 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 
-//! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=gen-gc)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part3.ETSGLOBAL::main"
-
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part3.ETSGLOBAL::main"
@@ -318,17 +314,17 @@ function _5_toString_0_append6(): string {
 }
 
 function main() : int {
-    assertEQ(_0_int_3_append4(), "0123", 'Wrong result at _0_int_3_append4');
-    assertEQ(_1_int_2_append4(), "0123", 'Wrong result at _1_int_2_append4');
-    assertEQ(_2_int_1_append4(), "0123", 'Wrong result at _2_int_1_append4');
-    assertEQ(_3_int_0_append4(), "0123", 'Wrong result at _3_int_0_append4');
+    arktest.assertEQ(_0_int_3_append4(), "0123", 'Wrong result at _0_int_3_append4');
+    arktest.assertEQ(_1_int_2_append4(), "0123", 'Wrong result at _1_int_2_append4');
+    arktest.assertEQ(_2_int_1_append4(), "0123", 'Wrong result at _2_int_1_append4');
+    arktest.assertEQ(_3_int_0_append4(), "0123", 'Wrong result at _3_int_0_append4');
 
-    assertEQ(_0_toString_5_append6(), "12345", 'Wrong result at _0_toString_5_append6');
-    assertEQ(_1_toString_4_append6(), "002345", 'Wrong result at _1_toString_4_append6');
-    assertEQ(_2_toString_3_append6(), "0101345", 'Wrong result at _2_toString_3_append6');
-    assertEQ(_3_toString_2_append6(), "01201245", 'Wrong result at _3_toString_2_append6');
-    assertEQ(_4_toString_1_append6(), "012301235", 'Wrong result at _4_toString_1_append6');
-    assertEQ(_5_toString_0_append6(), "0123401234", 'Wrong result at _5_toString_0_append6');
+    arktest.assertEQ(_0_toString_5_append6(), "12345", 'Wrong result at _0_toString_5_append6');
+    arktest.assertEQ(_1_toString_4_append6(), "002345", 'Wrong result at _1_toString_4_append6');
+    arktest.assertEQ(_2_toString_3_append6(), "0101345", 'Wrong result at _2_toString_3_append6');
+    arktest.assertEQ(_3_toString_2_append6(), "01201245", 'Wrong result at _3_toString_2_append6');
+    arktest.assertEQ(_4_toString_1_append6(), "012301235", 'Wrong result at _4_toString_1_append6');
+    arktest.assertEQ(_5_toString_0_append6(), "0123401234", 'Wrong result at _5_toString_0_append6');
 
     return 0
 }

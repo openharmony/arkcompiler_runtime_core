@@ -67,6 +67,10 @@ options:
     type: bool
     default: false
     description: Dump a textual representation of .llvm_stackmaps section into "llvm-stackmaps.txt"
+  - name: llvm-gc
+    type: bool
+    default: true
+    description: Run GC intrusion pass
   - name: llvm-gc-check
     type: bool
     default: false

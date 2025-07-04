@@ -20,5 +20,5 @@ desc: Convert to obj-obj type.
 function main(): void {
   const o : object = 20;
   const obj1: object = o;
-  assertTrue(obj1 == o);
+  arktest.assertTrue(obj1 == o);
 }

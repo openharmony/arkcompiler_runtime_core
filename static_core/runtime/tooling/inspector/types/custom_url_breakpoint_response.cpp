@@ -23,7 +23,8 @@ void CustomUrlBreakpointResponse::Serialize(JsonObjectBuilder &builder) const
 {
     std::string id = id_.has_value() ? std::to_string(*id_) : "invalid";
     builder.AddProperty("id", id);
-    builder.AddProperty("lineNumber", lineNumber_);
+    // NOTE(fangting, #IC98WJ): make 0-based line numbers default for Inspector
+    builder.AddProperty("lineNumber", lineNumber_ - 1);
     builder.AddProperty("columnNumber", columnNumber_);
     builder.AddProperty("scriptId", scriptId_);
 }

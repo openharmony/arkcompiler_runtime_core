@@ -32,7 +32,7 @@ class Extender extends Base {
 function main(): void {
     let a = new Extender();
 
-    assertEQ( a.field, 20)
-    assertEQ( Extender.field, 10)
+    arktest.assertEQ( a.field, 20)
+    arktest.assertEQ( Extender.field, 10)
 
 }

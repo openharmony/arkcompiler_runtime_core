@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Union, Any, Optional, NoReturn, cast
+from typing import Any, cast
 
 from runner import utils
-from runner.common_exceptions import MalformedStepConfigurationException, IncorrectEnumValue
+from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, MalformedStepConfigurationException
 from runner.enum_types.base_enum import BaseEnum
 from runner.logger import Log
 from runner.options.options import IOptions
@@ -28,7 +28,7 @@ from runner.utils import to_bool
 
 _LOGGER = Log.get_logger(__file__)
 
-PropType = Union[str, int, bool, List[str], Dict[str, Any], BaseEnum]
+PropType = str | int | bool | list[str] | dict[str, Any] | BaseEnum  # type: ignore[explicit-any]
 
 
 class StepKind(BaseEnum):
@@ -43,11 +43,11 @@ class StepKind(BaseEnum):
 class Step(IOptions):
     name: str
     timeout: int
-    args: List[str]
-    env: Dict[str, Any]
+    args: list[str]
+    env: dict[str, str]
     step_kind: StepKind
     enabled: bool = True
-    executable_path: Optional[Path] = None
+    executable_path: Path | None = None
     can_be_instrumented: bool = False
     DEFAULT_TIMEOUT = 30
 
@@ -57,7 +57,7 @@ class Step(IOptions):
     __INDENT_ARG = __INDENT_STEP * 2
     __INDENT_SUB_ARG = __INDENT_STEP * 3
 
-    def __init__(self, name: str, step_body: Dict[str, Any]):
+    def __init__(self, name: str, step_body: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__()
         self.name = name
         self.executable_path = self.__get_path_property(step_body, 'executable-path')
@@ -86,7 +86,8 @@ class Step(IOptions):
         return "\n".join(result)
 
     @staticmethod
-    def __get_int_property(step_body: Dict[str, Any], name: str, default: Optional[int] = None) -> int:
+    def __get_int_property(step_body: dict[str, Any],   # type: ignore[explicit-any]
+                           name: str, default: int | None = None) -> int:
         value = Step.__get_property(step_body, name, default)
         try:
             return int(value)
@@ -94,7 +95,8 @@ class Step(IOptions):
             return False
 
     @staticmethod
-    def __get_bool_property(step_body: Dict[str, Any], name: str, default: Optional[bool] = None) -> bool:
+    def __get_bool_property(step_body: dict[str, Any],  # type: ignore[explicit-any]
+                            name: str, default: bool | None = None) -> bool:
         value = Step.__get_property(step_body, name, default)
         try:
             return to_bool(value)
@@ -102,61 +104,59 @@ class Step(IOptions):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'") from exc
 
     @staticmethod
-    def __get_list_property(step_body: Dict[str, Any], name: str, default: Optional[List[str]] = None) -> List[str]:
+    def __get_list_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: list[str] | None = None) -> list[str]:
         value = Step.__get_property(step_body, name, default)
-        if isinstance(value, list):
-            return cast(List[str], value)
-        else:
+        if not isinstance(value, list):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
-                                                      f"Expected list.")
+                                                      "Expected list.")
+        return cast(list[str], value)
 
     @staticmethod
-    def __get_dict_property(step_body: Dict[str, Any], name: str, default: Optional[Dict[str, Any]] = None) \
-            -> Dict[str, Any]:
+    def __get_dict_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: dict[str, Any] | None = None) -> dict[str, str]:
         value = Step.__get_property(step_body, name, default)
-        if isinstance(value, dict):
-            return cast(Dict[str, Any], value)
-        else:
+        if not isinstance(value, dict):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
-                                                      f"Expected dict.")
+                                                      "Expected dict.")
+        return cast(dict[str, str], value)
 
     @staticmethod
-    def __get_str_property(step_body: Dict[str, Any], name: str, default: Optional[str] = None) -> str:
+    def __get_str_property(step_body: dict[str, Any], name: str,     # type: ignore[explicit-any]
+                           default: str | None = None) -> str:
         value = Step.__get_property(step_body, name, default)
-        if not isinstance(value, dict) and not isinstance(value, list):
-            return str(value)
-        else:
+        if isinstance(value, (dict | list)):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
-                                                      f"Expected str.")
+                                                      "Expected str.")
+        return str(value)
 
     @staticmethod
-    def __get_path_property(step_body: Dict[str, Any], name: str) -> Optional[Path]:
+    def __get_path_property(step_body: dict[str, Any], name: str) -> Path | None:  # type: ignore[explicit-any]
         value = Step.__get_str_property(step_body, name, "")
-        if value == '':
+        if value == "":
             return None
-        else:
-            value_path = Path(value)
-            if not value_path.exists():
-                raise FileNotFoundError(f"Cannot find {value_path}. Check value of 'executable-path'")
-            return value_path
+        value_path = Path(value)
+        if not value_path.exists():
+            raise FileNotFoundException(f"Cannot find {value_path}. Check value of 'executable-path'")
+        return value_path
 
     @staticmethod
-    def __get_kind_property(step_body: Dict[str, Any], name: str, default: Optional[StepKind] = None) \
-            -> StepKind:
+    def __get_kind_property(step_body: dict[str, Any], name: str,   # type: ignore[explicit-any]
+                            default: StepKind | None = None) -> StepKind:
         value = Step.__get_property(step_body, name, default)
         try:
             if isinstance(value, StepKind):
-                return cast(StepKind, value)
+                return value
             return StepKind.is_value(value, option_name="'step-type' from workflow config")
         except IncorrectEnumValue as exc:
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
                                                       f"Expected one of {StepKind.values()}.") from exc
 
     @staticmethod
-    def __get_property(step_body: Dict[str, Any],
+    def __get_property(step_body: dict[str, Any],  # type: ignore[explicit-any]
                        name: str,
-                       default: Optional[PropType] = None) -> \
-            Union[Any, NoReturn]:
+                       default: PropType | None = None) -> \
+            Any:
         if name in step_body:
             value = step_body[name]
         elif default is not None:
@@ -169,13 +169,13 @@ class Step(IOptions):
         if not str(self.executable_path):
             return ''
         result = f"Step '{self.name}':"
-        args: List[str] = [self.__pretty_arg_str(arg) for arg in self.args]
+        args: list[str] = [self.__pretty_arg_str(arg) for arg in self.args]
         args_str = '\n'.join(args)
         result += f"\n{self.__INDENT_STEP}{self.executable_path}\n{args_str}"
         return result
 
     def __pretty_arg_str(self, arg: str) -> str:
-        args: List[str] = []
+        args: list[str] = []
         arg = str(arg)
         if len(arg) < self.__MAX_ARG_LENGTH:
             args.append(f"{self.__INDENT_ARG}{arg}")
@@ -184,9 +184,9 @@ class Step(IOptions):
             args.extend(self.__pretty_sub_arg(sub_args))
         return '\n'.join(args)
 
-    def __pretty_sub_arg(self, sub_args: List[str]) -> List[str]:
+    def __pretty_sub_arg(self, sub_args: list[str]) -> list[str]:
         acc = ''
-        result: List[str] = []
+        result: list[str] = []
         for sub_arg in sub_args:
             if len(sub_arg) > self.__MIN_ARG_LENGTH:
                 if len(acc) > 0:
@@ -199,10 +199,10 @@ class Step(IOptions):
             result.append(f"{self.__INDENT_SUB_ARG}{acc}")
         return result
 
-    def __str_process_env(self, indent: int) -> List[str]:
+    def __str_process_env(self, indent: int) -> list[str]:
         result = [f"{utils.indent(indent)}env:"]
         for key in self.env:
-            env_value: Union[str, List[str]] = self.env[key]
+            env_value: str | list[str] = self.env[key]
             if isinstance(env_value, list):
                 result += [f"{utils.indent(indent + 1)}{key}:"]
                 for item in env_value:
@@ -211,7 +211,7 @@ class Step(IOptions):
                 result += [f"{utils.indent(indent + 1)}{key}: {env_value}"]
         return result
 
-    def __str_process_args(self, indent: int) -> List[str]:
+    def __str_process_args(self, indent: int) -> list[str]:
         result = [f"{utils.indent(indent)}args:"]
         for arg in self.args:
             if arg.strip():

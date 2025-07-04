@@ -34,7 +34,7 @@ TEST_F(ObjectSetFieldByNameBooleanTest, set_field)
         ANI_TRUE);
 
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "value", ANI_FALSE), ANI_OK);
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_by_name_boolean_test", "checkObjectField", animal,
                                                ANI_FALSE),
@@ -54,10 +54,17 @@ TEST_F(ObjectSetFieldByNameBooleanTest, set_field)
     }
 }
 
+TEST_F(ObjectSetFieldByNameBooleanTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Boolean(nullptr, animal, "value", ANI_FALSE), ANI_INVALID_ARGS);
+}
+
 TEST_F(ObjectSetFieldByNameBooleanTest, not_found_name)
 {
     ani_object animal = NewAnimal();
     ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "x", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Boolean(animal, "", ANI_TRUE), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameBooleanTest, invalid_type)

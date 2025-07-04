@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,7 +237,7 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
             AddPassIf(functionPm, passes::PandaRuntimeLowering(arkInterface_));
             AddPassIf(functionPm, passes::InsertSafepoints(), options_.useSafepoint);
             AddPassIf(functionPm, passes::GepPropagation());
-            AddPassIf(functionPm, passes::GcIntrusion());
+            AddPassIf(functionPm, passes::GcIntrusion(), options_.gcIntrusion);
             AddPassIf(functionPm, passes::GcIntrusionCheck(), options_.gcIntrusionChecks);
         }
         AddPassIf(functionPm, passes::ExpandAtomics());

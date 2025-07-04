@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@
     method_name: lastIndexOf,
     method_nature: function,
     result_type: int,
-    method_signature: { arr: "boolean[]", key: "boolean", fromIndex: int },
+    method_signature: { arr: "FixedArray<boolean>", key: "boolean", fromIndex: int },
     method_signature_desc: {arr: boolean_array, key: boolean, fromIndex: int},
     method_throws: "true",
     method_test_index_data:

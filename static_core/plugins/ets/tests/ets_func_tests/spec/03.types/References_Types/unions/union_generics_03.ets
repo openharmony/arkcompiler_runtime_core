@@ -76,5 +76,5 @@ function main(): void {
     arr.push(new Item<number>(3, compareMargin))
     arr.push(undefined)
     let maxx: Margin = superMax<Margin>(arr)
-    assertEQ( (maxx as number), 11)
+    arktest.assertEQ( (maxx as number), 11)
 }

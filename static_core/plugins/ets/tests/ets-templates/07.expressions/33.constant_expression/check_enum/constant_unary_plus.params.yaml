@@ -17,12 +17,13 @@ cases:
   - { type: char,   value: c'p',    expected: 112    }
   - { type: int,    value: 3000,    expected: 3000   }
   - { type: long,   value: 50000,   expected: 50000  }
-  - { type: float,  value: 120.2f,  expected: 120,   conversion: as int }
-  - { type: number, value: 5050.9,  expected: 5050,  conversion: as int }
+  - { type: float,  value: 120.2f,  expected: 120, neg: 'compile-only, negative'    }
+  - { type: number, value: 5050.9,  expected: 5050, neg: 'compile-only, negative'   }
   - { type: byte,   value: -16,     expected: -16    }
   - { type: short,  value: -300,    expected: -300   }
   - { type: int,    value: -3000,   expected: -3000  }
   - { type: long,   value: -50000,  expected: -50000 }
-  - { type: float,  value: -120.2f, expected: -120,  conversion: as int }
-  - { type: number, value: -5050.9, expected: -5050, conversion: as int }
+  - { type: float,  value: -120.2f, expected: -120, neg: 'compile-only, negative'   }
+  - { type: number, value: -5050.9, expected: -5050, neg: 'compile-only, negative'  }
+
       

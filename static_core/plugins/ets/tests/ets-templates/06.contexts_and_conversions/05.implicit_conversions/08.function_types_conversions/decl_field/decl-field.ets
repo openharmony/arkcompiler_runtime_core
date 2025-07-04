@@ -31,7 +31,7 @@ class Z {
 function main() {
     let z: Z = new Z()
 {% for t in c['to'] %}
-    assertTrue( z.w{{loop.index}}{{t.call}} )
+    arktest.assertTrue( z.w{{loop.index}}{{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

@@ -14,6 +14,10 @@
  */
 
 import { BusinessError } from "@ohos.base";
+<<<<<<< HEAD
+=======
+import { jsonx } from "std/core"
+>>>>>>> OpenHarmony_feature_20250328
 
 const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
@@ -34,11 +38,94 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     return value.buffer;
 }
 
+<<<<<<< HEAD
 function fillInPaddingBase64(str: string): string {
     let base64Divisible: int = 4;
     let remainder: int = str.length % base64Divisible as int;
     const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
     return str.padRight(c'=', str.length as int + paddingCount);
+=======
+function normalizeBase64Url(str: string): string {
+    return str
+        .replace(new RegExp('-', 'g'), '+')
+        .replace(new RegExp('_', 'g'), '/');
+}
+
+function sanitizeBase64(str: string, urlSafe: boolean = false): string {
+    const allowedPattern = urlSafe
+        ? "[^A-Za-z0-9\\-_=]"
+        : "[^A-Za-z0-9+/=]";
+    return str.replace(new RegExp(allowedPattern, "g"), "");
+}
+
+function getLength(value: buffer.Buffer | Uint8Array): number {
+    if (value instanceof Uint8Array) {
+        return value.length;
+    }
+    return value.buffer.byteLength;
+}
+
+function fillInPaddingBase64(str: string): string {
+    const base64Divisible: int = 4;
+    const normalized: String = normalizeBase64Url(str);
+    const clean: String = sanitizeBase64(normalized);
+    const remainder: int = clean.length.toInt() % base64Divisible;
+    const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
+    return clean.padRight(c'=', clean.length.toInt() + paddingCount);
+}
+
+function takeValidHexPrefix(str: string): string {
+    const hexPairRegex = new RegExp('^[0-9A-Fa-f]{2}$');
+    let prefix = '';
+    for (let i = 0; i + 1 < str.length; i += 2) {
+        const pair = str.slice(i, i + 2);
+        if (hexPairRegex.test(pair)) {
+            prefix += pair;
+        } else {
+            break;
+        }
+    }
+    return prefix;
+}
+
+function sanitizeAscii(str: string): string {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) & 0x7F);
+    }
+    return result;
+}
+
+function sanitizeUtf8(str: string): string {
+    const sb = new StringBuilder();
+    for (let i = 0; i < str.length; i++) {
+        const cu = str.charCodeAt(i).toChar();
+        if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
+            const cu2 = str.charCodeAt(i + 1).toChar();
+            if (Char.isLowSurrogate(cu2)) {
+                sb.append(str.charAt(i));
+                sb.append(str.charAt(i + 1));
+                i++;
+                continue;
+            }
+        }
+        if (Char.isHighSurrogate(cu) || Char.isLowSurrogate(cu)) {
+            sb.append('\uFFFD');
+        } else {
+            sb.append(str.charAt(i));
+        }
+    }
+    return sb.toString();
+}
+
+function sanitizeLatin1(str: string): string {
+    const sb = new StringBuilder();
+    for (let i = 0; i < str.length; i++) {
+        const low = str.charCodeAt(i) & 0xFF;
+        sb.append(String.fromCharCode(low));
+    }
+    return sb.toString();
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
@@ -100,7 +187,7 @@ export default namespace buffer {
     export function from(arrayBuffer: ArrayBuffer, byteOffset?: number, length?: number): Buffer {
         const resolvedByteOffset: number = byteOffset ?? 0;
         const resolvedLength: number = length ?? arrayBuffer.byteLength - resolvedByteOffset;
-        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
+        return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength), resolvedByteOffset);
     }
 
     /**
@@ -112,8 +199,9 @@ export default namespace buffer {
     * @param { number } length - length length A length
     * @returns { Buffer } Return a new allocated Buffer
     */
-    function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
-        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length))
+    export function from(object: Object, offsetOrEncoding: number | string, length: number): Buffer {
+        const resolvedByteOffset: number = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
+        return new Buffer(ArrayBuffer.fromObject(object, offsetOrEncoding, length), resolvedByteOffset);
     }
 
     /**
@@ -140,7 +228,23 @@ export default namespace buffer {
     export function from(string: String, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
         let resolvedString = string;
+<<<<<<< HEAD
         if (encoding == 'base64' || encoding == 'base64url') {
+=======
+        if (resolvedEncoding == 'ascii') {
+            resolvedString = sanitizeAscii(resolvedString);
+        } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+            resolvedString = sanitizeUtf8(resolvedString);
+        }
+         else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+            resolvedString = sanitizeLatin1(resolvedString);
+        } else if (resolvedEncoding == 'hex') {
+            resolvedString = takeValidHexPrefix(resolvedString);
+            if (resolvedString.length == 0) {
+                return new Buffer(new ArrayBuffer(0));
+            }
+        } else if (encoding == 'base64' || encoding == 'base64url') {
+>>>>>>> OpenHarmony_feature_20250328
             resolvedString = fillInPaddingBase64(string);
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
@@ -280,13 +384,17 @@ export default namespace buffer {
     export function compare(buf1: Buffer | Uint8Array, buf2: Buffer | Uint8Array): number {
         const resolvedBuf1 = getArrayBufferFrom(buf1);
         const resolvedBuf2 = getArrayBufferFrom(buf2);
-        const len1 = resolvedBuf1.byteLength;
-        const len2 = resolvedBuf2.byteLength;
+        const len1 = getLength(buf1);
+        const len2 = getLength(buf2);
         const minLength = Math.min(len1, len2);
+        let i1 = buf1.byteOffset.toInt();
+        let i2 = buf2.byteOffset.toInt();
         for (let i = 0; i < minLength; i++) {
-            if (resolvedBuf1.at(i) != resolvedBuf2.at(i)) {
-                return resolvedBuf1.at(i) < resolvedBuf2.at(i) ? -1 : 1;
+            if (resolvedBuf1.at(i1) != resolvedBuf2.at(i2)) {
+                return resolvedBuf1.at(i1) < resolvedBuf2.at(i2) ? -1 : 1;
             }
+            i1++;
+            i2++;
         }
         return len1 == len2 ? 0 : (len1 < len2 ? -1 : 1);
     }
@@ -376,7 +484,11 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
      */
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         const resolvedSource = getArrayBufferFrom(source);
+<<<<<<< HEAD
         const sourceBytesLength = resolvedSource.byteLength as int;
+=======
+        const sourceBytesLength = resolvedSource.byteLength.toInt();
+>>>>>>> OpenHarmony_feature_20250328
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
@@ -386,7 +498,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private length: int
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
         }
         public override $_iterator(): IterableIterator<number> {
             return this
@@ -395,7 +507,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             if (this.idx < 0 || this.idx >= this.length) {
                 return new IteratorResult<number>()
             }
-            return new IteratorResult<number>(false, this.idx++ as number)
+            return new IteratorResult<number>(false, (this.idx++).toDouble())
         }
     }
 
@@ -404,7 +516,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private parent: Buffer
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
             this.parent = parent
         }
         public override $_iterator(): IterableIterator<number> {
@@ -423,7 +535,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         private parent: Buffer
         private idx: int = 0
         constructor(parent: Buffer) {
-            this.length = parent.length as int
+            this.length = parent.length.toInt()
             this.parent = parent
         }
         public override $_iterator(): IterableIterator<[number, number]> {
@@ -445,13 +557,15 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /** The underlying ArrayBuffer storing the binary data */
         public buffer: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
-        private byteOffset: number;
+        internal readonly byteOffsetNumber: number;
 
         /**
          * Gets the length of the buffer in bytes
          * @returns {number} The number of bytes in the buffer
          */
         get length(): number { return this.buffer.getByteLength() }
+
+        get byteOffset(): number { return this.byteOffsetNumber }
 
         /**
          * Creates a new Buffer instance
@@ -461,7 +575,13 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
         {
             this.buffer = buffer;
-            this.byteOffset = 0;
+            this.byteOffsetNumber = byteOffset;
+            if (byteOffset >= this.buffer.getByteLength() && this.buffer.getByteLength() > 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. Received value is: ${byteOffset}`)
+            }
+            if (byteOffset < 0) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. It must be >= 0. Received value is: ${byteOffset}`)
+            }
         }
 
         /**
@@ -472,7 +592,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public toString(): string {
             let resolvedEncoding: string = "utf8";
             let resolvedStart: int = 0;
-            let resolvedEnd: int = buffer.byteLength(this.buffer) as int;
+            let resolvedEnd: int = buffer.byteLength(this.buffer).toInt();
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -487,18 +607,31 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
+<<<<<<< HEAD
             let resolvedEnd: int = this.length as int;
             if (start && !isNaN(start!) && start! > 0) {
                 resolvedStart = start as int;
             }
             if (end && !isNaN(end!)) {
                 resolvedEnd = end as int;
+=======
+            let resolvedEnd: int = (this.length).toInt();
+            if (start && !isNaN(start!) && start! > 0) {
+                resolvedStart = start.toInt();
+            }
+            if (end && !isNaN(end!)) {
+                resolvedEnd = end.toInt();
+>>>>>>> OpenHarmony_feature_20250328
             }
             let bufLength = this.length;
             if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
                  return '';
             }
+<<<<<<< HEAD
             resolvedEnd = resolvedEnd > bufLength ? bufLength as int : resolvedEnd
+=======
+            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd
+>>>>>>> OpenHarmony_feature_20250328
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -601,7 +734,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
                 return false;
             }
             for (let j: int = 0; j < searchBuffer.length; j++) {
-                if (this.at(startIndex as int + j) != searchBuffer.at(j)) {
+                if (this.at(startIndex.toInt() + j) != searchBuffer.at(j)) {
                     return false;
                 }
             }
@@ -663,9 +796,9 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         {
             const resolvedTarget = getArrayBufferFrom(target);
             const resolvedSource = this.buffer;
-            const resolvedTargetStart = (targetStart ?? 0) as int;
-            const resolvedSourceStart = (sourceStart ?? 0) as int;
-            const resolvedSourceEnd = (sourceEnd ?? this.length) as int;
+            const resolvedTargetStart = (targetStart ?? 0).toInt();
+            const resolvedSourceStart = (sourceStart ?? 0).toInt();
+            const resolvedSourceEnd = (sourceEnd ?? this.length).toInt();
 
             if (resolvedTargetStart < 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0.
@@ -753,34 +886,73 @@ Received value is: ${resolvedEnd}`)
                 klass = parts[parts.length - 1];
             }
 
-            const offsetInt = offset as int;
-            const resolvedEndInt = resolvedEnd as int;
+            const offsetInt = offset.toInt();
+            const resolvedEndInt = resolvedEnd.toInt();
             const resolvedEncoding: BufferEncoding = encoding ?? "utf-8";
 
             switch (klass) {
                 case "string":
+<<<<<<< HEAD
                     let buff = ArrayBuffer.from(value as string,
                                                 resolvedEncoding as string);
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
                         this.buffer.set(i, buff.at((i % buff.byteLength) as int) as byte);
+=======
+                    let strValue = value as string;
+                    if (resolvedEncoding == 'ascii') {
+                        strValue = sanitizeAscii(strValue);
+                    } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+                        strValue = sanitizeUtf8(strValue);
+                    } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+                        strValue = sanitizeLatin1(strValue);
+                    } else if (resolvedEncoding == 'hex') {
+                        strValue = takeValidHexPrefix(strValue);
+                        if (strValue.length == 0) {
+                            return this;
+                        }
+                    } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
+                        strValue = fillInPaddingBase64(strValue);
+                    }
+                    let buff: Uint8Array;
+
+                    if (resolvedEncoding === 'ucs2' || resolvedEncoding === 'ucs-2' || resolvedEncoding === 'utf16le') {
+                        const u16 = new Uint16Array(strValue.length);
+                        for (let i = 0; i < strValue.length; i++) {
+                            u16[i] = strValue.charCodeAt(i);
+                        }
+                        buff = new Uint8Array(u16.buffer);
+                    } else {
+                        buff = new Uint8Array(ArrayBuffer.from(strValue, resolvedEncoding as string));
+                    }
+
+                    let pos = offsetInt;
+                    while (pos + buff.byteLength <= resolvedEndInt) {
+                        for (let j: int = 0; j < buff.byteLength; j++) {
+                            this.buffer.set(pos++, buff[j].toByte());
+                        }
+                    }
+
+                    for (let j: int = 0; pos < resolvedEndInt; j++, pos++) {
+                        this.buffer.set(pos, buff[j].toByte());
+>>>>>>> OpenHarmony_feature_20250328
                     }
                     return this;
                 case "number":
                     let asNum = value as number;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asNum as byte);
+                        this.buffer.set(i, asNum.toByte());
                     }
                     return this;
                 case "Buffer":
                     let asBuf = value as Buffer;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asBuf.at((i % asBuf.length) as int));
+                        this.buffer.set(i, asBuf.at((i % asBuf.length).toInt()));
                     }
                     return this;
                 case "Uint8Array":
                     let asU8a = value as Uint8Array;
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asU8a.at(i % asU8a.length)! as byte);
+                        this.buffer.set(i, asU8a.at(i % asU8a.length)!.toByte());
                     }
                     return this;
                 default:
@@ -847,9 +1019,21 @@ Received value is: ${value}`)
          * @returns { Buffer } Returns a new Buffer that references the same memory as the original
          */
         public subarray(start?: number, end?: number): Buffer {
-            const resolvedStart = start ?? 0 as number;
-            const resolvedEnd = end ?? this.length;
-            return new Buffer(this.buffer.slice(resolvedStart, resolvedEnd));
+            if (start == undefined || isNaN(start!)) {
+                start = 0
+            }
+            if (end == undefined || isNaN(end!)) {
+                end = this.length
+            }
+            let e = end!
+            if (e > this.length) {
+                e = this.length
+            }
+            let s = start!
+            if (s < 0 || e < 0 || e <= s) {
+                return new Buffer(new ArrayBuffer(0))
+            }
+            return new Buffer(this.buffer.slice(s, e));
         }
 
         /**
@@ -1126,7 +1310,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
-                this.buffer.set((offset + i) as int, strBuffer.at(i));
+                this.buffer.set((offset + i).toInt(), strBuffer.at(i));
             }
             return Math.min(resolvedLength, byteLen);
         }
@@ -1551,6 +1735,27 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             }
             this.getDataView().setUint8(index, value);
         }
+<<<<<<< HEAD
+=======
+
+        /**
+         * Converts this Buffer instance into a JsonElement.
+         *
+         * @returns {JsonElement} A new JsonElement containing the Buffer
+         */
+        public toJSON(): jsonx.JsonElement {
+            const arr = new Array<jsonx.JsonElement>;
+            for (let i: int = 0; i < this.length; ++i) {
+                const intElement = new jsonx.JsonElement();
+                intElement.setInteger(this.at(i).toInt());
+                arr.push(intElement);
+            }
+            const objectElem = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>);
+            objectElem.setElement("type", jsonx.JsonElement.createString("Buffer"));
+            objectElem.setElement("data", jsonx.JsonElement.createArray(arr));
+            return objectElem;
+        }
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     enum TypeParameters {

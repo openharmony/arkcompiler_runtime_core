@@ -38,6 +38,15 @@ TEST_F(StringNewUtf16Test, StringNewUtf16_EmptyString)
     ASSERT_NE(result, nullptr);
 }
 
+TEST_F(StringNewUtf16Test, StringNewUtf16_NullEnv)
+{
+    ani_string result = nullptr;
+    const uint16_t example[] = {0x0048, 0x0065, 0x006C, 0x006C, 0x006F, 0x0000};
+    size_t length = sizeof(example) / sizeof(example[0U]) - 1U;
+    auto status = env_->c_api->String_NewUTF16(nullptr, example, length, &result);
+    ASSERT_EQ(status, ANI_INVALID_ARGS);
+}
+
 TEST_F(StringNewUtf16Test, StringNewUtf16_AsciiString1)
 {
     ani_string result = nullptr;

@@ -22,11 +22,12 @@ cases:
                   return "N"
               }
           }
+      tags: 'compile-only, negative'
       use: |-
           // select method with no boxing/unboxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -38,8 +39,8 @@ cases:
       use: |-
           // select method with with unboxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -51,24 +52,25 @@ cases:
       use: |-
           // select method with boxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "N" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "N" )
+          arktest.assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
           class C {
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
+      tags: 'compile-only, negative'
       use: |-
           // select method with rest parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
-          assertEQ( c.met(new Number()),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "nR" )
+          arktest.assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -80,8 +82,8 @@ cases:
       use: |-
           // select method with rest parameter and unboxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
-          assertEQ( c.met(new Number()),  "nR" )
+          arktest.assertEQ( c.met(0.0),  "nR" )
+          arktest.assertEQ( c.met(new Number()),  "nR" )
 
 
     - decl: |-
@@ -93,8 +95,8 @@ cases:
       use: |-
           // select method with rest parameter and boxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "NR" )
-          assertEQ( c.met(new Number()),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "NR" )
+          arktest.assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -106,11 +108,12 @@ cases:
                   return "ND1"
               }
           }
+      tags: 'compile-only, negative'
       use: |-
           // select method with default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD1" )
-          assertEQ( c.met(new Number()),  "ND1" )
+          arktest.assertEQ( c.met(0.0),  "nD1" )
+          arktest.assertEQ( c.met(new Number()),  "ND1" )
 
 
     - decl: |-
@@ -122,8 +125,8 @@ cases:
       use: |-
           // select method with default parameter and unboxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD1" )
-          assertEQ( c.met(new Number()),  "nD1" )
+          arktest.assertEQ( c.met(0.0),  "nD1" )
+          arktest.assertEQ( c.met(new Number()),  "nD1" )
 
 
     - decl: |-
@@ -135,8 +138,8 @@ cases:
       use: |-
           // select method with default parameter and boxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "ND1" )
-          assertEQ( c.met(new Number()),  "ND1" )
+          arktest.assertEQ( c.met(0.0),  "ND1" )
+          arktest.assertEQ( c.met(new Number()),  "ND1" )
 
 
     - decl: |-
@@ -148,11 +151,12 @@ cases:
                   return "ND2"
               }
           }
+      tags: 'compile-only, negative'
       use: |-
           // select method with undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD2" )
-          assertEQ( c.met(new Number()),  "ND2" )
+          arktest.assertEQ( c.met(0.0),  "nD2" )
+          arktest.assertEQ( c.met(new Number()),  "ND2" )
 
 
     - decl: |-
@@ -164,8 +168,8 @@ cases:
       use: |-
           // select method with undefined parameter and unboxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD2" )
-          assertEQ( c.met(new Number()),  "nD2" )
+          arktest.assertEQ( c.met(0.0),  "nD2" )
+          arktest.assertEQ( c.met(new Number()),  "nD2" )
 
 
     - decl: |-
@@ -177,10 +181,12 @@ cases:
       use: |-
           // select method with undefined parameter and boxing
           let c: C = new C()
-          assertEQ( c.met(0.0),  "ND2" )
-          assertEQ( c.met(new Number()),  "ND2" )
+          arktest.assertEQ( c.met(0.0),  "ND2" )
+          arktest.assertEQ( c.met(new Number()),  "ND2" )
 
-
+    # step2_12
+    # The best candidate is the candidate that requires no transformation for all arguments.
+    # If such a candidate is available, then other candidates are not considered.
     - decl: |-
           class C {
               met(...p: number[]): string {
@@ -190,29 +196,31 @@ cases:
                   return "ND1"
               }
           }
+      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
-          assertEQ( c.met(new Number()),  "ND1" )
+          arktest.assertEQ( c.met(0.0),  "nR" )
+          arktest.assertEQ( c.met(1, 2),  "ND1" )
 
-
+    # step2_13
     - decl: |-
           class C {
               met(...p: number[]): string {
                   return "nR"
               }
               met(p: Number, q?: Number): string {
-                  return "ND2"
+                  return "nR"
               }
           }
+      tags: 'compile-only'
       use: |-
           // select method with rest parameter and undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
-          assertEQ( c.met(new Number()),  "ND2" )
+          arktest.assertEQ( c.met(0.0),  "nR" )
+          arktest.assertEQ( c.met(2, 3),  "ND2" )
 
-
+    # step2_14
     - decl: |-
           class C {
               met(p: number, q: number = 0.0): string {
@@ -222,13 +230,14 @@ cases:
                   return "NR"
               }
           }
+      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD1" )
-          assertEQ( c.met(new Number()),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "nD1" )
+          arktest.assertEQ( c.met(3, 4),  "NR" )
 
-
+    # step2_15
     - decl: |-
           class C {
               met(p: number, q?: Number): string {
@@ -238,11 +247,12 @@ cases:
                   return "NR"
               }
           }
+      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nD2" )
-          assertEQ( c.met(new Number()),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "nD2" )
+          arktest.assertEQ( c.met(4, 5),  "NR" )
 
 
     - decl: |-
@@ -253,18 +263,19 @@ cases:
               met(p: Number): string {
                   return "N"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
+      tags: 'compile-only, negative'
       use: |-
           // select method without boxing/unboxing and without rest
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -272,18 +283,18 @@ cases:
               met(p: number): string {
                   return "n"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
       use: |-
           // select method with unboxing and without rest
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -291,30 +302,24 @@ cases:
               met(p: Number): string {
                   return "N"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
       use: |-
           // select method with boxing and without rest
           let c: C = new C()
-          assertEQ( c.met(0.0),  "N" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "N" )
+          arktest.assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
           class C {
               met(p: number): string {
                   return "n"
-              }
-              met(p: Number): string {
-                  return "N"
-              }
-              met(p: number, q: number = 0.0): string {
-                  return "nD1"
               }
               met(p: Number, q: number = 0.0): string {
                   return "ND1"
@@ -323,8 +328,8 @@ cases:
       use: |-
           // select method without boxing/unboxing and without default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -342,8 +347,8 @@ cases:
       use: |-
           // select method with unboxing and without default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -361,20 +366,14 @@ cases:
       use: |-
           // select method with boxing and without default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "N" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "N" )
+          arktest.assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
           class C {
               met(p: number): string {
                   return "n"
-              }
-              met(p: Number): string {
-                  return "N"
-              }
-              met(p: number, q?: Number): string {
-                  return "nD2"
               }
               met(p: Number, q?: Number): string {
                   return "ND2"
@@ -383,8 +382,8 @@ cases:
       use: |-
           // select method without boxing/unboxing and without undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -402,8 +401,8 @@ cases:
       use: |-
           // select method with unboxing and without undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-          assertEQ( c.met(new Number()),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -421,10 +420,10 @@ cases:
       use: |-
           // select method with boxing and without undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "N" )
-          assertEQ( c.met(new Number()),  "N" )
+          arktest.assertEQ( c.met(0.0),  "N" )
+          arktest.assertEQ( c.met(new Number()),  "N" )
 
-
+    # step2_25
     - decl: |-
           class A {
               met(p: boolean): string {
@@ -433,7 +432,7 @@ cases:
           }
           class B extends A {
               met(p: Boolean): string {
-                  return "B-" + p.unboxed()
+                  return "B-" + p
               }
           }
           class C extends B {
@@ -441,15 +440,13 @@ cases:
                   return "C-" + p
               }
           }
+      tags: 'compile-only'
       use: |-
           let a: A = new C()
-          assertEQ( a.met(true),  "C-true" )
-          assertEQ( a.met(new Boolean()),  "B-false" )
+          arktest.assertEQ( a.met(true),  "C-true" ) // overriding
 
           let b: B = new B()
-          assertEQ( b.met(true),  "A-true" )
-          assertEQ( b.met(new Boolean()),  "B-false" )
-
+          arktest.assertEQ( b.met(false),  "B-false" )
 
     - decl: |-
           class C {
@@ -466,7 +463,7 @@ cases:
       use: |-
           // more than one applicable method
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
 
     - decl: |-
           class C {
@@ -483,4 +480,4 @@ cases:
       use: |-
           // more than one applicable method
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )

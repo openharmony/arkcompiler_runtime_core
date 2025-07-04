@@ -14,29 +14,40 @@
  */
 
 function main(): int {
-    let failures = 0;
+    const suite = new arktest.ArkTestsuite("Date")
 
-    failures += test(testIntMsConstructor(), "Test MS constructor with Long");
-    failures += test(testIntYearMonthConstructor(), "Test year and month constructor with Long");
-    failures += test(testIntYearMonthDayConstructor(), "Test year, month and day constructor with Long");
-    failures += test(testIntYearMonthDayHoursConstructor(), "Test YMDH constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesConstructor(),"Test YMDH and minutes constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesSecondsConstructor(),"Test YMDH minutes and seconds constructor with Long");
-    failures += test(testIntYearMonthDayHoursMinutesSecondsMillisConstructor(),"Test YMDH minutes seconds and millis constructor with Long");
+    suite.addTest("Test MS constructor with Long", testIntMsConstructor)
+    suite.addTest("Test year and month constructor with Long", testIntYearMonthConstructor)
+    suite.addTest("Test year, month and day constructor with Long", testIntYearMonthDayConstructor)
+    suite.addTest("Test YMDH constructor with Long", testIntYearMonthDayHoursConstructor)
+    suite.addTest("Test YMDH and minutes constructor with Long", testIntYearMonthDayHoursMinutesConstructor)
+    suite.addTest("Test YMDH minutes and seconds constructor with Long", testIntYearMonthDayHoursMinutesSecondsConstructor)
+    suite.addTest("Test YMDH minutes seconds and millis constructor with Long", testIntYearMonthDayHoursMinutesSecondsMillisConstructor)
+    suite.addTest("Test MS constructor with Double", testDoubleMsConstructor)
+    suite.addTest("Test year and month constructor with Double", testDoubleYearMonthConstructor)
+    suite.addTest("Test year, month and day constructor with Double", testDoubleYearMonthDayConstructor);
+    suite.addTest("Test YMDH constructor with Double", testDoubleYearMonthDayHoursConstructor)
+    suite.addTest("Test YMDH and minutes constructor with Double", testDoubleYearMonthDayHoursMinutesConstructor)
 
-    failures += test(testDoubleMsConstructor(), "Test MS constructor with Double");
-    failures += test(testDoubleYearMonthConstructor(), "Test year and month constructor with Double");
-    failures += test(testDoubleYearMonthDayConstructor(), "Test year, month and day constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursConstructor(),"Test YMDH constructor with Double")
-    failures += test(testDoubleYearMonthDayHoursMinutesConstructor(),"Test YMDH and minutes constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursMinutesSecondsConstructor(),"Test YMDH minutes and seconds constructor with Double");
-    failures += test(testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(),"Test YMDH minutes seconds and millis constructor with Double");
+    suite.addTest("Test YMDH minutes and seconds constructor with Double", testDoubleYearMonthDayHoursMinutesSecondsConstructor);
+    suite.addTest("Test YMDH minutes seconds and millis constructor with Double", testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor);
 
+<<<<<<< HEAD
     failures += test(testStringConstructor(), "Test constructor with string")
     failures += test(testDateConstructor(), "Test constructor with Date object")
     failures += test(testNaNConstructor(), "Test constructor with NaN")
     
     return test(failures, "All tests run");
+=======
+    suite.addTest("Test constructor with string", testStringConstructor)
+    suite.addTest("Test constructor with Date object", testDateConstructor)
+    suite.addTest("Test constructor with NaN", testNaNConstructor)
+    suite.addTest("Test constructor with string (local TZ)", testStringConstructorLocalTZ)
+    suite.addTest("Test constructor with string (invalid arguments)", testStringConstructorInvalidArgs)
+    suite.addTest("Test constructor with string (expanded year)", testStringConstructorExpandedYear)
+
+    return suite.run()
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function test(result: int, message: String ): int {
@@ -62,30 +73,16 @@ const valueDoubleYears: double[] = [-300, -72.0, 1901.0, 1900.0, 1999.9, 100.3, 
 
 const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.950Z", "2000-01-01T00:00:00.001Z"]
 
-function testIntMsConstructor(): int {
-
-    let failures = 0;
-
+function testIntMsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-
         let cd = new Date(longYears[i]);
-        
-        try {
-            if(cd.valueOf() as long != longYears[i]) failures++;
-        } catch (e) {
-            return 1;
-        }
-        
+        arktest.assertEQ(Double.toLong(cd.valueOf()), longYears[i])
     }
-
-    return failures;
 }
 
-function testIntYearMonthConstructor(): int {
-    let md: long[] = longMonths;
-    let failures = 0;
-
+function testIntYearMonthConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
+<<<<<<< HEAD
         let cd = new Date(longYears[i], md[i]);
         let utc = Date.UTC(longYears[i], md[i]);
         try {
@@ -95,16 +92,19 @@ function testIntYearMonthConstructor(): int {
         }
         failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], 1);
     }
+=======
+        let cd = new Date(longYears[i], longMonths[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i]);
+>>>>>>> OpenHarmony_feature_20250328
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], 1)
+    }
 }
 
-function testIntYearMonthDayConstructor(): int {
-
-    let md: long[] = longMonths;
-    let failures = 0;
-
+function testIntYearMonthDayConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
+<<<<<<< HEAD
         let day: long = md[i] + 1;
         let cd = new Date(longYears[i], md[i], day);
         let utc = Date.UTC(longYears[i], md[i], day);
@@ -115,17 +115,20 @@ function testIntYearMonthDayConstructor(): int {
         }
         failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], day);
     }
+=======
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day);
+        let utc = Date.UTC(longYears[i], longMonths[i], day);
+>>>>>>> OpenHarmony_feature_20250328
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMD(cd, valueLongYears[i], longMonths[i], day);
+    }
 }
 
-function testIntYearMonthDayHoursConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let failures = 0;
-
+function testIntYearMonthDayHoursConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
+<<<<<<< HEAD
         let day: long = md[i] + 1;
         let cd = new Date(longYears[i], md[i], day, ht[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i]);
@@ -136,18 +139,20 @@ function testIntYearMonthDayHoursConstructor(): int {
         }
         failures += checkDateWithLongYMDH(cd, valueLongYears[i], md[i], day, ht[i]);
     }
+=======
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i]);
+>>>>>>> OpenHarmony_feature_20250328
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMDH(cd, valueLongYears[i], longMonths[i], day, longHours[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes;
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
+<<<<<<< HEAD
         let day: long = md[i] + 1;
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i]);
@@ -158,19 +163,20 @@ function testIntYearMonthDayHoursMinutesConstructor(): int {
         }
         failures += checkDateWithLongYMDHM(cd, valueLongYears[i], md[i], day, ht[i], mh[i]);
     }
+=======
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
+>>>>>>> OpenHarmony_feature_20250328
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMDHM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes;
-
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
+<<<<<<< HEAD
         let day: long = md[i] + 1;
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
@@ -181,21 +187,23 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
         }
         failures += checkDateWithLongYMDHMS(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i]);
     }
+=======
+        let day: long = longMonths[i] + 1;
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
+>>>>>>> OpenHarmony_feature_20250328
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMDHMS(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i]);
+    }
 }
 
-function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
-
-    let md: long[] = longMonths;
-    let ht: long[] = longHours;
-    let mh: long[] = longMinutes
-    let failures = 0;
-
+function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
     for(let i: int = 0; i < longYears.length; i++) {
-        let day: long = md[i] + 1;
-        let millis: long = mh[i]*10;
+        let day: long = longMonths[i] + 1;
+        let millis: long = longMinutes[i] * 10;
 
+<<<<<<< HEAD
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         try {
@@ -204,11 +212,17 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
             return 1;
         }
         failures += checkDateWithLongYMDHMSM(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
-    }
+=======
+        let cd = new Date(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
+        let utc = Date.UTC(longYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
 
-    return failures;
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithLongYMDHMSM(cd, valueLongYears[i], longMonths[i], day, longHours[i], longMinutes[i], longMinutes[i], millis);
+>>>>>>> OpenHarmony_feature_20250328
+    }
 }
 
+<<<<<<< HEAD
 function testDoubleMsConstructor(): int {
     let id: double[] = doubleYears;
     let failures = 0;
@@ -222,16 +236,23 @@ function testDoubleMsConstructor(): int {
             return 1;
         }
 
+=======
+function testDoubleMsConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let cd = new Date(doubleYears[i]);
+        arktest.assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
+        let cd2 = new Date(doubleYears[i]);
+        arktest.assertEQ(Double.valueOf(doubleYears[i]).intValue(), cd2.valueOf())
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let failures = 0;
+function testDoubleYearMonthConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let cd = new Date(doubleYears[i], doubleMonths[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i]);
 
+<<<<<<< HEAD
     for(let i: int = 0; i < id.length; i++) {
         let cd = new Date(id[i], md[i]);
         let utc = Date.UTC(id[i], md[i]);
@@ -241,16 +262,20 @@ function testDoubleYearMonthConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], 1);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], 1);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let failures = 0;
+function testDoubleYearMonthDayConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day));
 
+<<<<<<< HEAD
     for(let i: int = 0; i < id.length; i++) {
         let day: double = md[i] + 1;
         let cd = new Date(id[i], md[i], day);
@@ -261,17 +286,20 @@ function testDoubleYearMonthDayConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], day);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMD(cd, valueDoubleYears[i], doubleMonths[i], day);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let failures = 0;
+function testDoubleYearMonthDayHoursConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]));
 
+<<<<<<< HEAD
     for(let i: int = 0; i < id.length; i++) {
         let day: double = md[i] + 1;
         let cd = new Date(id[i], md[i], day, ht[i]);
@@ -282,18 +310,20 @@ function testDoubleYearMonthDayHoursConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMDH(cd, valueDoubleYears[i], md[i], day, ht[i]);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMDH(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i]);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]));
 
+<<<<<<< HEAD
     for(let i: int = 0; i < id.length; i++) {
 
         let day: double = md[i] + 1;
@@ -305,18 +335,20 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i]);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i]);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]));
 
+<<<<<<< HEAD
     for(let i: int = 0; i < id.length; i++) {
 
         let day: double = md[i] + 1;
@@ -329,20 +361,23 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures = 0;
+function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let millis: double = doubleMinutes[i] * 10;
 
-    for(let i: int = 0; i < id.length; i++) {
+        let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day),
+                new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]), new Double(millis));
 
+<<<<<<< HEAD
         let day: double = md[i] + 1;
         let millis: double = mh[i]*10;
 
@@ -354,47 +389,78 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
             return 1;
         }
         failures += checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
+=======
+        arktest.assertEQ(Double.toLong(utc), Double.toLong((cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)))
+        checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
+>>>>>>> OpenHarmony_feature_20250328
     }
-
-    return failures;
 }
 
-function testStringConstructor(): int {
-    let failures = 0;
-    let sd: string[] = dateString;
-
-    for(let i: int = 0; i < sd.length; i++) {
-        let cd: Date = new Date(sd[i]);
-        try {
-            if(sd[i] != cd.toISOString()) failures++;
-        } catch (e) {
-            return 1;
-        }
+function testStringConstructor(): void {
+    for(let i: int = 0; i < dateString.length; i++) {
+        let cd: Date = new Date(dateString[i]);
+        arktest.assertEQ(dateString[i], cd.toISOString())
     }
-    return failures;
 }
 
-function testDateConstructor(): int {
-    let id: double[] = doubleYears;
-    let md: double[] = doubleMonths;
-    let ht: double[] = doubleHours;
-    let mh: double[] = doubleMinutes;
-    let failures: int = 0;
-    for(let i: int = 0; i < id.length; i++) {
-
-        let day: double = md[i] + 1;
-        let tmp = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
+function testDateConstructor(): void {
+    for(let i: int = 0; i < doubleYears.length; i++) {
+        let day: double = doubleMonths[i] + 1;
+        let tmp = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
         let cd = new Date(tmp);
+<<<<<<< HEAD
         try {
             if(tmp.valueOf() != cd.valueOf()) failures++;
         } catch (e) {
             return 1;
         }
         failures += checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
-    }
+=======
 
-    return failures;
-    
+        arktest.assertEQ(tmp.valueOf(), cd.valueOf())
+        checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i]);
+>>>>>>> OpenHarmony_feature_20250328
+    }
+}
+
+function testNaNConstructor(): void {
+    let d1 = new Date(Number.NaN);
+    let val = d1.valueOf();
+    arktest.assertTrue(isNaN(val));
+}
+
+function testStringConstructorLocalTZ(): void {
+    const localDateTime = new Date(2024, 1, 19, 8, 0, 0)
+    const isoLocalDateTime = new Date("2024-02-19T08:00:00")
+    arktest.assertEQ(localDateTime.getTime(), isoLocalDateTime.getTime())
+
+    const isoLocalDate = new Date("1970-01-01")
+    arktest.assertEQ(isoLocalDate.getTime(), 0)
+}
+
+function testStringConstructorInvalidArgs(): void {
+    const startingSpaceDate = new Date(" 2024-02-19T08:00:00")
+    arktest.assertTrue(isNaN(startingSpaceDate.valueOf()))
+    arktest.assertTrue(isNaN(startingSpaceDate.getTime()))
+
+    const trailingSpaceDate = new Date("2024-02-19T08:00:00 ")
+    arktest.assertTrue(isNaN(trailingSpaceDate.valueOf()))
+    arktest.assertTrue(isNaN(trailingSpaceDate.getTime()))
+
+    const ms4Date = new Date("2024-02-28T00:55:31.1234Z")
+    arktest.assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 123), ms4Date.getTime())
+
+    const ms2Date = new Date("2024-02-28T00:55:31.12Z")
+    arktest.assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 120), ms2Date.getTime())
+
+    const missingMsDate = new Date("2024-02-28T00:55:31.")
+    arktest.assertTrue(isNaN(missingMsDate.valueOf()))
+    arktest.assertTrue(isNaN(missingMsDate.getTime()))
+}
+
+function testStringConstructorExpandedYear(): void {
+    const date = new Date("-000001-07-01T00:00Z")
+    arktest.assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
 }
 
 function testNaNConstructor(): int {
@@ -411,91 +477,56 @@ function testNaNConstructor(): int {
 
 //*************************************************************************************************************************************************************
 
-function checkDateWithLongYMD(date: Date, year: long, month: long, day: long): int {
-    return  checkDateWithLongYMDH(date, year, month, day, 0);
+function checkDateWithLongYMD(date: Date, year: long, month: long, day: long): void {
+    checkDateWithLongYMDH(date, year, month, day, 0);
 }
 
-function checkDateWithLongYMDH(date: Date, year: long, month: long, day: long, hour: long): int {
-    return checkDateWithLongYMDHM(date, year, month, day, hour, 0);
+function checkDateWithLongYMDH(date: Date, year: long, month: long, day: long, hour: long): void {
+    checkDateWithLongYMDHM(date, year, month, day, hour, 0);
 }
 
-function checkDateWithLongYMDHM(date: Date, year: long, month: long, day: long, hour: long, minutes: long): int {
-    return checkDateWithLongYMDHMS(date, year, month, day, hour, minutes, 0);
+function checkDateWithLongYMDHM(date: Date, year: long, month: long, day: long, hour: long, minutes: long): void {
+    checkDateWithLongYMDHMS(date, year, month, day, hour, minutes, 0);
 }
 
-function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long): int {
-    return checkDateWithLongYMDHMSM(date, year, month, day, hour, minutes, seconds, 0);
+function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long): void {
+    checkDateWithLongYMDHMSM(date, year, month, day, hour, minutes, seconds, 0);
 }
 
-function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): int {
-    let failures = 0;
-
-
-        if(cd.getFullYear() != year) {
-            failures++
-            //console.println("" + year + "<->" + cd.getFullYear())
-        }
-        if(cd.getMonth() != month) {
-            failures++
-            //console.println("" + month + "<->" + cd.getMonth())
-        }
-        if(cd.getDate() != day) {
-            failures++;
-            //console.println("Day mismatch for " + cd + " " + cd.getDate() + " vs: " + day)
-        }
-        if(cd.getHours() != hour) {
-            failures++;
-            //console.println("Hours mismatch for " + cd + " " + cd.getHours() + " vs: " + hour)
-        }
-        if(cd.getMinutes() != minutes) failures++;
-        if(cd.getSeconds() != seconds) failures++;
-        if(cd.getMilliseconds() != millis) failures++;
-
-    if(failures > 0) return 1;
-    return 0;
+function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): void {
+    arktest.assertEQ(cd.getFullYear(), year, "year mismatch")
+    arktest.assertEQ(cd.getMonth(), month, "month mismatch")
+    arktest.assertEQ(cd.getDate(), day, "day mismatch")
+    arktest.assertEQ(cd.getHours(), hour, "hour mismatch")
+    arktest.assertEQ(cd.getMinutes(), minutes, "minute mismatch")
+    arktest.assertEQ(cd.getSeconds(), seconds, "second mismatch")
+    arktest.assertEQ(cd.getMilliseconds(), millis, "ms mismatch")
 }
 
 //*************************************************************************************************************************************************************
 
-function checkDateWithDoubleYMD(date: Date, year: double, month: double, day: double): int {
-    return  checkDateWithDoubleYMDH(date, year, month, day, 0 as double);
+function checkDateWithDoubleYMD(date: Date, year: double, month: double, day: double): void {
+    checkDateWithDoubleYMDH(date, year, month, day, 0 as double);
 }
 
-function checkDateWithDoubleYMDH(date: Date, year: double, month: double, day: double, hour: double): int {
-    return checkDateWithDoubleYMDHM(date, year, month, day, hour, 0 as double);
+function checkDateWithDoubleYMDH(date: Date, year: double, month: double, day: double, hour: double): void {
+    checkDateWithDoubleYMDHM(date, year, month, day, hour, 0 as double);
 }
 
-function checkDateWithDoubleYMDHM(date: Date, year: double, month: double, day: double, hour: double, minutes: double): int {
-    return checkDateWithDoubleYMDHMS(date, year, month, day, hour, minutes, 0 as double);
+function checkDateWithDoubleYMDHM(date: Date, year: double, month: double, day: double, hour: double, minutes: double): void {
+    checkDateWithDoubleYMDHMS(date, year, month, day, hour, minutes, 0 as double);
 }
 
-function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double): int {
-    return checkDateWithDoubleYMDHMSM(date, year, month, day, hour, minutes, seconds, 0 as double);
+function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double): void {
+    checkDateWithDoubleYMDHMSM(date, year, month, day, hour, minutes, seconds, 0 as double);
 }
 
-function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): int {
-    let failures = 0;
-        if(cd.getFullYear() != trunc(year)) {
-            failures++
-            //console.println("" + year + "<->" + cd.getFullYear())
-        }
-        if(cd.getMonth() != trunc(month)) {
-            failures++
-            //console.println("" + month + "<->" + cd.getMonth())
-        }
-        if(cd.getDate() != trunc(day)) {
-            failures++;
-            //console.println("Day mismatch for " + cd + " " + cd.getDate() + " vs: " + day)
-        }
-        if(cd.getHours() != trunc(hour)) {
-            failures++;
-            //console.println("Hours mismatch for " + cd + " " + cd.getHours() + " vs: " + hour)
-        }
-        if(cd.getMinutes() != trunc(minutes)) failures++;
-        if(cd.getSeconds() != trunc(seconds)) failures++;
-        if(cd.getMilliseconds() != trunc(millis)) failures++;
-
-    if(failures > 0) return 1;
-    return 0;
+function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): void {
+    arktest.assertEQ(cd.getFullYear(), trunc(year), "truncated year mismatch")
+    arktest.assertEQ(cd.getMonth(), trunc(month), "truncated month mismatch")
+    arktest.assertEQ(cd.getDate(), trunc(day), "truncated day mismatch")
+    arktest.assertEQ(cd.getHours(), trunc(hour), "truncated hour mismatch")
+    arktest.assertEQ(cd.getMinutes(), trunc(minutes), "truncated minute mismatch")
+    arktest.assertEQ(cd.getSeconds(), trunc(seconds), "truncated second mismatch")
+    arktest.assertEQ(cd.getMilliseconds(), trunc(millis), "truncated ms mismatch")
 }
-

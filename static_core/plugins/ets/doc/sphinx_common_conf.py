@@ -35,7 +35,7 @@ version = u'1.2.0'
 
 # The full version, including alpha/beta/rc tags
 # CC-OFFNXT(G.NAM.01): project code style
-release = u'1.2.0-alpha'
+release = u'1.2.0-alpha2'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''

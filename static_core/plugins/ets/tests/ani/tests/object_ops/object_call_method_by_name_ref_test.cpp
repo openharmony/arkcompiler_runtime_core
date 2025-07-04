@@ -27,11 +27,11 @@ public:
     void GetMethodData(ani_object *objectResult)
     {
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/A;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.A", &cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_static_method newMethod {};
-        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":Lobject_call_method_by_name_ref_test/A;", &newMethod),
+        ASSERT_EQ(env_->Class_FindStaticMethod(cls, "new_A", ":C{object_call_method_by_name_ref_test.A}", &newMethod),
                   ANI_OK);
         ani_ref ref {};
         ASSERT_EQ(env_->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
@@ -110,7 +110,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_a_abnormal)
     args[1U].i = VAL2;
     ani_ref ref = nullptr;
     ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "xxxxxx", nullptr, &ref, args), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "II:Z", &ref, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "ii:z", &ref, args), ANI_NOT_FOUND);
 }
 
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_a_invalid_object)
@@ -216,7 +216,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_abnormal)
 
     ani_ref ref = nullptr;
     ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "xxxxxxxx", nullptr, &ref, VAL1, VAL2), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "II:J", &ref, VAL1, VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "ii:l", &ref, VAL1, VAL2), ANI_NOT_FOUND);
 }
 
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_invalid_object)
@@ -249,18 +249,18 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_invalid_res
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     std::string result {};
     ani_ref ref = nullptr;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, VAL1, VAL2), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -268,7 +268,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
     ani_value args[2U];
     args[0U].i = VAL1;
     args[1U].i = VAL2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -277,25 +277,25 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_001)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_002)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
 
     std::string result {};
     ani_ref ref = nullptr;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "I:Lstd/core/String;", &ref, VAL1), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "i:C{std.core.String}", &ref, VAL1), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Greater");
 
     ani_value args[1U];
     args[0U].i = VAL1;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "I:Lstd/core/String;", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "i:C{std.core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Greater");
@@ -304,11 +304,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_002)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_003)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
@@ -334,11 +334,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_003)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
@@ -347,7 +347,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 8;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value2),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -356,7 +356,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
     ani_value args[2U];
     args[0U].i = value1;
     args[1U].i = value2;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
@@ -365,11 +365,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_004)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_005)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
@@ -399,7 +399,7 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_005)
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Greater");
 
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &method), ANI_OK);
     ASSERT_EQ(env_->Object_New(cls, method, &obj, VAL0), ANI_OK);
@@ -417,11 +417,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_005)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_006)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -446,11 +446,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_006)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_007)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -476,11 +476,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_007)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_008)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 6;
@@ -516,11 +516,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_008)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/B;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.B", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 15;
@@ -530,14 +530,14 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_ref ref = nullptr;
     const ani_int value1 = 5;
     const ani_int value2 = 6;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value2),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value2),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value3 = 7;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value3),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value3),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -547,20 +547,20 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
     ani_value args[3U];
     args[0U].i = value1;
     args[1U].i = value4;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "II:Lstd/core/String;", &ref, args), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(obj, "refMethod", "ii:C{std.core.String}", &ref, args), ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Inequality");
 
     const ani_int value5 = 5;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value5),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value5),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Equality");
 
     const ani_int value6 = 12;
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "II:Lstd/core/String;", &ref, value1, value6),
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(obj, "refMethod", "ii:C{std.core.String}", &ref, value1, value6),
               ANI_OK);
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
@@ -570,11 +570,11 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_009)
 TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_010)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lobject_call_method_by_name_ref_test/C;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("object_call_method_by_name_ref_test.C", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &method), ANI_OK);
 
     ani_object obj {};
     const ani_int arg = 10;
@@ -594,6 +594,82 @@ TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_010)
     ASSERT_NE(ref, nullptr);
     GetStdString(static_cast<ani_string>(ref), result);
     ASSERT_STREQ(result.c_str(), "Equality");
+}
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_011)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].i = VAL1;
+    args[1U].i = VAL2;
+
+    ani_ref res = nullptr;
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Ref(nullptr, object, "getName", "ii:C{std.core.String}", &res, VAL1, VAL2),
+        ANI_INVALID_ARGS);
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Ref_A(nullptr, object, "getName", "ii:C{std.core.String}", &res, args),
+        ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(nullptr, "getName", "ii:C{std.core.String}", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(nullptr, "getName", "ii:C{std.core.String}", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, nullptr, "ii:C{std.core.String}", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, nullptr, "ii:C{std.core.String}", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", "ii:C{std.core.String}", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", "ii:C{std.core.String}", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_ref res = nullptr;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(
+            env_->Object_CallMethodByName_Ref(object, methodName.data(), "ii:C{std.core.String}", &res, VAL1, VAL2),
+            ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, methodName.data(), "ii:C{std.core.String}", &res, args),
+                  ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodByNameRefTest, object_call_method_by_name_ref_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].l = VAL1;
+    args[1U].l = VAL2;
+
+    ani_ref res = nullptr;
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref(object, "getName", methodName.data(), &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Ref_A(object, "getName", methodName.data(), &res, args), ANI_NOT_FOUND);
+    }
 }
 }  // namespace ark::ets::ani::testing
 

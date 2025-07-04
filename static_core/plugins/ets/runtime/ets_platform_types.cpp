@@ -25,6 +25,35 @@
 
 namespace ark::ets {
 
+void EtsPlatformTypes::InitializeCaches()
+{
+    auto *charClass = this->coreString;
+    asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
+                                                             ark::SpaceType::SPACE_TYPE_OBJECT);
+
+    for (uint32_t i = 0; i < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE; ++i) {
+        auto *str = EtsString::CreateNewStringFromCharCode(i);
+        asciiCharCache_->Set(i, str);
+    }
+}
+
+void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
+{
+    if (asciiCharCache_ != nullptr) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
+    }
+}
+
+void EtsPlatformTypes::UpdateCachesVmRefs(const GCRootUpdater &updater) const
+{
+    if (asciiCharCache_ != nullptr) {
+        auto *obj = static_cast<ark::ObjectHeader *>(asciiCharCache_->GetCoreType());
+        if (updater(&obj)) {
+            asciiCharCache_ = reinterpret_cast<EtsTypedObjectArray<EtsString> *>(obj);
+        }
+    }
+}
+
 EtsPlatformTypes const *PlatformTypes(PandaEtsVM *vm)
 {
     return vm->GetClassLinker()->GetEtsClassLinkerExtension()->GetPlatformTypes();
@@ -51,13 +80,18 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     return klass;
 }
 
+<<<<<<< HEAD
 template <bool IS_STATIC>
 static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *signature)
+=======
+static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *signature, bool isStatic)
+>>>>>>> OpenHarmony_feature_20250328
 {
     if (klass == nullptr) {
         return nullptr;
     }
 
+<<<<<<< HEAD
     EtsMethod *method = [&]() {
         if constexpr (IS_STATIC) {
             return klass->GetStaticMethod(name, signature);
@@ -66,6 +100,9 @@ static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *sign
         }
     }();
 
+=======
+    EtsMethod *method = isStatic ? klass->GetStaticMethod(name, signature) : klass->GetInstanceMethod(name, signature);
+>>>>>>> OpenHarmony_feature_20250328
     if (method == nullptr) {
         LOG(ERROR, RUNTIME) << "Method " << name << " is not found in class " << klass->GetDescriptor();
         return nullptr;
@@ -73,30 +110,69 @@ static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *sign
     return method;
 }
 
+EtsPlatformTypes::Entry const *EtsPlatformTypes::GetTypeEntry(const uint8_t *descriptor) const
+{
+    if (auto it = entryTable_.find(descriptor); it != entryTable_.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+void EtsPlatformTypes::PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor)
+{
+    auto cls = FindType(linker, descriptor);
+    if (cls == nullptr) {
+        return;
+    }
+    *slot = cls;
+
+    size_t offset = ToUintPtr(slot) - ToUintPtr(this);
+    ASSERT(IsAligned(offset, sizeof(uintptr_t)));
+    Entry entry = {offset / sizeof(uintptr_t)};
+    entryTable_.insert({utf::CStringAsMutf8(cls->GetDescriptor()), entry});
+}
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
     using namespace panda_file_items::class_descriptors;
 
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto const findType = [classLinker](std::string_view descriptor) { return FindType(classLinker, descriptor); };
+    [[maybe_unused]] size_t orderOffset = 0;
+    auto const updateOffset = [this, &orderOffset](auto *slot) {
+        size_t newOffset = ToUintPtr(slot) - ToUintPtr(this);
+        ASSERT_PRINT(newOffset == 0 || (newOffset == orderOffset + sizeof(uintptr_t)),
+                     "type preloading should follow the definition order");
+        orderOffset = newOffset;
+    };
+    auto const findType = [this, classLinker, &updateOffset](EtsClass *ark::ets::EtsPlatformTypes::*field,
+                                                             std::string_view descriptor) {
+        auto slot = &(this->*field);
+        PreloadType(classLinker, slot, descriptor);
+        updateOffset(slot);
+    };
+    auto const findMethod = [this, &updateOffset](EtsMethod *ark::ets::EtsPlatformTypes::*field, EtsClass *cls,
+                                                  char const *name, char const *signature, bool isStatic) {
+        auto slot = &(this->*field);
+        *slot = FindMethod(cls, name, signature, isStatic);
+        updateOffset(slot);
+    };
 
-    coreBoolean = findType(BOX_BOOLEAN);
-    coreByte = findType(BOX_BYTE);
-    coreChar = findType(BOX_CHAR);
-    coreShort = findType(BOX_SHORT);
-    coreInt = findType(BOX_INT);
-    coreLong = findType(BOX_LONG);
-    coreFloat = findType(BOX_FLOAT);
-    coreDouble = findType(BOX_DOUBLE);
-    escompatBigint = findType(BIG_INT);
-    coreFunction = findType(FUNCTION);
+    findType(&EtsPlatformTypes::coreObject, OBJECT);
+    findType(&EtsPlatformTypes::coreClass, CLASS);
+    findType(&EtsPlatformTypes::coreString, STRING);
 
-    coreRuntimeLinker = findType(RUNTIME_LINKER);
-    coreBootRuntimeLinker = findType(BOOT_RUNTIME_LINKER);
-    coreAbcFile = findType(ABC_FILE);
-    coreAbcRuntimeLinker = findType(ABC_RUNTIME_LINKER);
+    findType(&EtsPlatformTypes::coreBoolean, BOX_BOOLEAN);
+    findType(&EtsPlatformTypes::coreByte, BOX_BYTE);
+    findType(&EtsPlatformTypes::coreChar, BOX_CHAR);
+    findType(&EtsPlatformTypes::coreShort, BOX_SHORT);
+    findType(&EtsPlatformTypes::coreInt, BOX_INT);
+    findType(&EtsPlatformTypes::coreLong, BOX_LONG);
+    findType(&EtsPlatformTypes::coreFloat, BOX_FLOAT);
+    findType(&EtsPlatformTypes::coreDouble, BOX_DOUBLE);
 
+<<<<<<< HEAD
     corePromise = findType(PROMISE);
     corePromiseSubscribeOnAnotherPromise =
         FindMethod<false>(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
@@ -115,14 +191,32 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreStringBuilder = findType(STRING_BUILDER);
     containersArrayAsListInt = findType(ARRAY_AS_LIST_INT);
     escompatArray = findType(ARRAY);
+=======
+    findType(&EtsPlatformTypes::escompatBigint, BIG_INT);
+    findType(&EtsPlatformTypes::escompatError, ERROR);
+    findType(&EtsPlatformTypes::coreFunction, FUNCTION);
 
-    coreField = findType(FIELD);
-    coreMethod = findType(METHOD);
-    coreParameter = findType(PARAMETER);
+    for (size_t i = 0; i < coreFunctions.size(); ++i) {
+        PandaString descr = "Lstd/core/Function" + PandaString(std::to_string(i)) + ";";
+        PreloadType(classLinker, &coreFunctions[i], descr);
+        updateOffset(&coreFunctions[i]);
+    }
+    for (size_t i = 0; i < coreFunctionRs.size(); ++i) {
+        PandaString descr = "Lstd/core/FunctionR" + PandaString(std::to_string(i)) + ";";
+        PreloadType(classLinker, &coreFunctionRs[i], descr);
+        updateOffset(&coreFunctionRs[i]);
+    }
+>>>>>>> OpenHarmony_feature_20250328
 
-    escompatSharedMemory = findType(SHARED_MEMORY);
-    interopJSValue = findType(JS_VALUE);
+    findType(&EtsPlatformTypes::coreTupleN, TUPLEN);
 
+    findType(&EtsPlatformTypes::coreRuntimeLinker, RUNTIME_LINKER);
+    findType(&EtsPlatformTypes::coreBootRuntimeLinker, BOOT_RUNTIME_LINKER);
+    findType(&EtsPlatformTypes::coreAbcRuntimeLinker, ABC_RUNTIME_LINKER);
+    findType(&EtsPlatformTypes::coreMemoryRuntimeLinker, MEMORY_RUNTIME_LINKER);
+    findType(&EtsPlatformTypes::coreAbcFile, ABC_FILE);
+
+<<<<<<< HEAD
     coreTupleN = findType(TUPLEN);
 
     coreStackTraceElement = findType(STACK_TRACE_ELEMENT);
@@ -131,6 +225,59 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
     coreFinalizationRegistryExecCleanup =
         FindMethod<true>(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");
+=======
+    findType(&EtsPlatformTypes::coreOutOfMemoryError, OUT_OF_MEMORY_ERROR);
+    findType(&EtsPlatformTypes::coreException, EXCEPTION);
+    findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
+
+    findType(&EtsPlatformTypes::coreStringBuilder, STRING_BUILDER);
+
+    findType(&EtsPlatformTypes::corePromise, PROMISE);
+    findType(&EtsPlatformTypes::coreJob, JOB);
+
+    findMethod(&EtsPlatformTypes::corePromiseSubscribeOnAnotherPromise, corePromise, "subscribeOnAnotherPromise",
+               "Lstd/core/PromiseLike;:V", false);
+    findType(&EtsPlatformTypes::corePromiseRef, PROMISE_REF);
+    findType(&EtsPlatformTypes::coreWaitersList, WAITERS_LIST);
+    findType(&EtsPlatformTypes::coreMutex, MUTEX);
+    findType(&EtsPlatformTypes::coreEvent, EVENT);
+    findType(&EtsPlatformTypes::coreCondVar, COND_VAR);
+    findType(&EtsPlatformTypes::coreQueueSpinlock, QUEUE_SPINLOCK);
+
+    findType(&EtsPlatformTypes::coreFinalizableWeakRef, FINALIZABLE_WEAK_REF);
+    findType(&EtsPlatformTypes::coreFinalizationRegistry, FINALIZATION_REGISTRY);
+    findMethod(&EtsPlatformTypes::coreFinalizationRegistryExecCleanup, coreFinalizationRegistry, "execCleanup",
+               "[Lstd/core/WeakRef;I:V", true);
+
+    findType(&EtsPlatformTypes::escompatArray, ARRAY);
+    findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
+    findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
+    findType(&EtsPlatformTypes::escompatArrayBuffer, ARRAY_BUFFER);
+    findType(&EtsPlatformTypes::containersArrayAsListInt, ARRAY_AS_LIST_INT);
+    findType(&EtsPlatformTypes::escompatRecord, RECORD);
+    findMethod(&EtsPlatformTypes::escompatRecordGetter, escompatRecord, GET_INDEX_METHOD, nullptr, false);
+    findMethod(&EtsPlatformTypes::escompatRecordSetter, escompatRecord, SET_INDEX_METHOD, nullptr, false);
+
+    findType(&EtsPlatformTypes::interopJSValue, JS_VALUE);
+
+    findType(&EtsPlatformTypes::coreField, FIELD);
+    findType(&EtsPlatformTypes::coreMethod, METHOD);
+    findType(&EtsPlatformTypes::coreParameter, PARAMETER);
+    findType(&EtsPlatformTypes::coreClassType, CLASS_TYPE);
+
+    findType(&EtsPlatformTypes::escompatProcess, PROCESS);
+    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",
+               "Lescompat/Array;:V", true);
+    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledPromises, escompatProcess, "listUnhandledPromises",
+               "Lescompat/Array;:V", true);
+
+    findType(&EtsPlatformTypes::coreTuple, TUPLE);
+    findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
+    findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        InitializeCaches();
+    }
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 }  // namespace ark::ets

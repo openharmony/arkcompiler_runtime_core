@@ -19,126 +19,171 @@ function testUriGetQueryValue001() {
   let route = new uri.URI('https://www.test.com?param1=value1&param2=value2');
   let param1Value = route.getQueryValue("param1");
   let param2Value = route.getQueryValue("param2");
-  assertEQ(param1Value, "value1");
-  assertEQ(param2Value, "value2");    
+  arktest.assertEQ(param1Value, "value1");
+  arktest.assertEQ(param2Value, "value2");    
 }
 
 function testUriGetQueryValue002() {
   let route = new uri.URI('https://www.test.com');
+<<<<<<< HEAD
   assertEQ(route.getQueryValue("param1"), null);
   let include = new uri.URI('https://www.test.com?param1=value1');
   assertEQ(include.getQueryValue("param"), null);
+=======
+  arktest.assertEQ(route.getQueryValue("param1"), null);
+  let include = new uri.URI('https://www.test.com?param1=value1');
+  arktest.assertEQ(include.getQueryValue("param"), null);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriGetQueryValue003() {
   let route = new uri.URI('https://www.test.com?param1=value1&param1=value2&param1=value3');
   let param1Value = route.getQueryValue("param1");
+<<<<<<< HEAD
   assertEQ(param1Value, "value1");    
   assertEQ(route.getQueryValues("param1")[0], "value1");
+=======
+  arktest.assertEQ(param1Value, "value1");    
+  arktest.assertEQ(route.getQueryValues("param1")[0], "value1");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriGetQueryValue004() {
   let route = new uri.URI('https://www.test.com?param1=hello%20world');
-  assertEQ(route.getQueryValue("param1"), "hello world");
+  arktest.assertEQ(route.getQueryValue("param1"), "hello world");
   let specialSymbol = new uri.URI('https://www.test.com?param1=hello+world');
+<<<<<<< HEAD
   assertEQ(specialSymbol.getQueryValue("param1"), "hello world");
+=======
+  arktest.assertEQ(specialSymbol.getQueryValue("param1"), "hello world");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriGetQueryValue005() {
   let route = new uri.URI('https://www.test.com?param%201=hello');
+<<<<<<< HEAD
   assertEQ(route.getQueryValue("param 1"), "hello");
   assertEQ(route.getQueryValue("1"), null);
   assertEQ(route.getQueryValue(" 1"), null);
+=======
+  arktest.assertEQ(route.getQueryValue("param 1"), "hello");
+  arktest.assertEQ(route.getQueryValue("1"), null);
+  arktest.assertEQ(route.getQueryValue(" 1"), null);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriGetQueryValue006() {
   let route = new uri.URI('https://www.test.com?param1=&param2=');
-  assertEQ(route.getQueryValue("param1"), "");
-  assertEQ(route.getQueryValue("param2"), "");
+  arktest.assertEQ(route.getQueryValue("param1"), "");
+  arktest.assertEQ(route.getQueryValue("param2"), "");
   let noNameUri = new uri.URI('https://www.test.com?=value');
+<<<<<<< HEAD
   assertEQ(noNameUri.getQueryValue(""), "value");
+=======
+  arktest.assertEQ(noNameUri.getQueryValue(""), "value");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriGetQueryValue007() {
   let emptyParameter1 = new uri.URI('https://www.test.com?param1=value1&&param3=value3');
-  assertEQ(emptyParameter1.getQueryValue(""), "");
+  arktest.assertEQ(emptyParameter1.getQueryValue(""), "");
   let emptyParameter12 = new uri.URI('https://www.test.com?param1=value1&');
-  assertEQ(emptyParameter12.getQueryValue(""), "");
+  arktest.assertEQ(emptyParameter12.getQueryValue(""), "");
   let router = new uri.URI('https://www.test.com?');
+<<<<<<< HEAD
   assertEQ(router.getQueryValue(""), null);
+=======
+  arktest.assertEQ(router.getQueryValue(""), null);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriAddQueryValue001() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param1", "value1");
-  assertEQ(newRoute.getQueryValue("param1"), "value1");
+  arktest.assertEQ(newRoute.getQueryValue("param1"), "value1");
   let clearRoute = newRoute.clearQuery();
+<<<<<<< HEAD
   assertEQ(clearRoute.toString(), "https://www.test.com");
+=======
+  arktest.assertEQ(clearRoute.toString(), "https://www.test.com");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriAddQueryValue002() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param2", "value2");
-  assertEQ(newRoute.getQueryValue('param1'), "value1");
-  assertEQ(newRoute.getQueryValue('param2'), "value2");
-  assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=value2");
+  arktest.assertEQ(newRoute.getQueryValue('param1'), "value1");
+  arktest.assertEQ(newRoute.getQueryValue('param2'), "value2");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=value2");
 }
 
 function testUriAddQueryValue003() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param1", "hello world");
-  assertEQ(newRoute.toString(), "https://www.test.com?param1=hello%20world");
-  assertEQ(newRoute.getQueryValue("param1"), "hello world");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=hello%20world");
+  arktest.assertEQ(newRoute.getQueryValue("param1"), "hello world");
   let paramNames = newRoute.getQueryNames();
-  assertEQ(paramNames.length, 1);
-  assertEQ(paramNames.values().next().value, "param1");
+  arktest.assertEQ(paramNames.length, 1);
+  arktest.assertEQ(paramNames.values().next().value, "param1");
 }
 
 function testUriAddQueryValue004() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param1", "value2");
-  assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param1=value2");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param1=value2");
 }
 
 function testUriAddQueryValue005() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param1", "value1").addQueryValue("param2", "null")
-  assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=null");
+  arktest.assertEQ(newRoute.toString(), "https://www.test.com?param1=value1&param2=null");
   let values = newRoute.getQueryValues("param1");
-  assertEQ(values[0], "value1");
+  arktest.assertEQ(values[0], "value1");
 }
 
 function testUriAddQueryValue006() {
   let value = "value";
   let testUri = new uri.URI('https://www.test.com');
   let addQuery = testUri.addQueryValue("param", value);
-  assertEQ(addQuery.getQueryValue("param"), value);
-  assertEQ(addQuery.getQueryValues("param")[0], value);
-  assertEQ(addQuery.toString(), "https://www.test.com?param=value");
+  arktest.assertEQ(addQuery.getQueryValue("param"), value);
+  arktest.assertEQ(addQuery.getQueryValues("param")[0], value);
+  arktest.assertEQ(addQuery.toString(), "https://www.test.com?param=value");
   value = "value1";
   let valueChange = testUri.addQueryValue("param", value);
-  assertEQ(valueChange.toString(), "https://www.test.com?param=value1");
+  arktest.assertEQ(valueChange.toString(), "https://www.test.com?param=value1");
   let newChange = addQuery.addQueryValue("param", value);
-  assertEQ(newChange.toString(), "https://www.test.com?param=value&param=value1");
+  arktest.assertEQ(newChange.toString(), "https://www.test.com?param=value&param=value1");
 }
 
 function testUriAddQueryValue007() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param 1", "value 1");
+<<<<<<< HEAD
   assertEQ(newRoute.getQueryValue("param 1"), "value 1");
   let mui = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
   assertEQ(mui.getQueryValue('sa='), "\ud83d\ude0a");
+=======
+  arktest.assertEQ(newRoute.getQueryValue("param 1"), "value 1");
+  let mui = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
+  arktest.assertEQ(mui.getQueryValue('sa='), "\ud83d\ude0a");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testUriAddQueryValue008() {
   let route = new uri.URI('https://www.com?param1=\ud83d\ude0a&param2=value2');
+<<<<<<< HEAD
   assertEQ(route.getQueryValue("abc"), null);
   let newRoute = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
   assertEQ(newRoute.getQueryValue('aa'), null);
+=======
+  arktest.assertEQ(route.getQueryValue("abc"), null);
+  let newRoute = new uri.URI('http://www.test.com?sa%3D=\ud83d\ude0a')
+  arktest.assertEQ(newRoute.getQueryValue('aa'), null);
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): int {
-  let suite = new ArkTestsuite("URI XTS tests");
+  let suite = new arktest.ArkTestsuite("URI XTS tests");
   suite.addTest("testUriGetQueryValue001", testUriGetQueryValue001);
   suite.addTest("testUriGetQueryValue002", testUriGetQueryValue002);
   suite.addTest("testUriGetQueryValue003", testUriGetQueryValue003);

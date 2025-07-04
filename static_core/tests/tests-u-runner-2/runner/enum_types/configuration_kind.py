@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,9 @@ from runner.enum_types.base_enum import BaseEnum
 
 class ConfigurationKind(BaseEnum):
     INT = "INT"
-    OTHER_INT = "INT-OTHER"
     AOT = "AOT"
     AOT_FULL = "AOT-FULL"
+    AOT_PGO = "AOT-PGO"
     JIT = "JIT"
     QUICK = "QUICK"
 

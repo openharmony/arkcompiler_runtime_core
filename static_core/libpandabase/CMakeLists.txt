@@ -45,9 +45,10 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/os/property.cpp
     ${PANDA_ROOT}/libpandabase/os/dfx_option.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/task_manager.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/task_queue_set.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_scheduler.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/worker_thread.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_selector.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_time_stats.cpp
     ${ARKBASE_LTO_SOURCES}
 )

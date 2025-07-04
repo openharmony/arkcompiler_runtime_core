@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 type Test = () => void;
 
 let tests = new Array<Test>(
@@ -40,14 +42,24 @@ function setTimeoutTest() {
     let flag = false;
     let start = Date.now();
     setTimeout(() => {
+<<<<<<< HEAD
         assertTrue(flag);
         assertTrue(Date.now() - start >= shortTimeout);
+=======
+        arktest.assertTrue(flag);
+        arktest.assertTrue(Date.now() - start >= shortTimeout);
+>>>>>>> OpenHarmony_feature_20250328
     }, shortTimeout);
     flag = true;
 }
 
+function firstTimerIdTest() {
+    let id = setTimeout(() => {}, 0);
+    arktest.assertTrue(id == 1);
+}
+
 function clearTimeoutTest() {
-    let id = setTimeout(() => { assertTrue(false); }, mediumTimeout);
+    let id = setTimeout(() => { arktest.assertTrue(false); }, mediumTimeout);
     clearTimeout(id);
 }
 
@@ -55,9 +67,9 @@ function clearIntervalTestFromCallback() {
     let flag = true;
     let id: number = -1;
     id = setInterval(() => {
-        assertTrue(flag);
+        arktest.assertTrue(flag);
         flag = false;
-        assertTrue(id != -1);
+        arktest.assertTrue(id != -1);
         clearInterval(id);
     }, zeroTimeout);
 }
@@ -66,24 +78,28 @@ function clearIntervalFromAnotherTimer() {
     let flag = false;
     let id = setInterval(() => { flag = true; }, shortTimeout);
     setTimeout(() => {
-        assertTrue(flag);
+        arktest.assertTrue(flag);
         clearInterval(id);
     }, mediumTimeout);
 }
 
 function clearTimeoutFromAnotherWorkerTest() {
-    let id = setTimeout(() => { assertTrue(false); }, longTimeout);
-    launch clearTimeout(id);
+    let id = setTimeout(() => { arktest.assertTrue(false); }, longTimeout);
+    launch<void, (i: number) => void>(clearTimeout, id);
 }
 
 function sameWorkerIdTest() {
     let parentWorkerId = CoroutineExtras.getWorkerId();
-    setTimeout(() => { assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
+    setTimeout(() => { arktest.assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
 }
 
 function main() {
+    firstTimerIdTest();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     for (let test of tests) {
-        launch test();
+        test();
+    }
+    for (let test of tests) {
+        launch<void, () => void>(test);
     }
 }

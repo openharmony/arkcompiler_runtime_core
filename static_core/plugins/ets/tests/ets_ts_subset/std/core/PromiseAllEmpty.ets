@@ -16,10 +16,16 @@
 let arg: Object[] = [];
 Promise.all(arg).then<void, void>((value: Array<Object>): void => {
     if (value.length != 0) {
-        console.log("Test failed. The array should be empty.");
+        console.log('Test failed. The array should be empty.');
         return;
     }
+<<<<<<< HEAD
     console.log("Test passed.");
 }, (err: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
+=======
+    console.log('Test passed.');
+}, (err: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+>>>>>>> OpenHarmony_feature_20250328
 });

@@ -20,7 +20,7 @@ desc: Nested if statement
 function main(): void {
   if (false) {
     if (true) {
-      assertTrue(false)
+      arktest.assertTrue(false)
     }
-  } else assertTrue(true)
+  } else arktest.assertTrue(true)
 }

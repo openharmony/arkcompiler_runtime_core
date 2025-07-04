@@ -43,6 +43,24 @@ TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorString)
 TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorBoolean)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorBoolean"));
+<<<<<<< HEAD
+=======
+}
+
+TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorBooleanEntries)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorBooleanEntries"));
+}
+
+TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorStringEntries)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorStringEntries"));
+}
+
+TEST_F(EtsMimicIteratorEtsToTsTest, testMimicIteratorNumberEntries)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMimicIteratorNumberEntries"));
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 }  // namespace ark::ets::interop::js::testing

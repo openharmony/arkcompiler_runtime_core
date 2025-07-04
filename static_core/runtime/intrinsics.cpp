@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -443,5 +443,7 @@ void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 }  // namespace ark::intrinsics
+
+#include "core_any_intrinsics.inc"
 
 #include <intrinsics_gen.h>

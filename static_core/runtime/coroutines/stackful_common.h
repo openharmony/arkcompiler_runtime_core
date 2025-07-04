@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,10 @@ using WorkerId = size_t;
 inline constexpr WorkerId INVALID_WORKER_ID = std::numeric_limits<WorkerId>::max();
 // must be something easy to assign and comprehend
 inline constexpr WorkerId MAIN_WORKER_ID = 0U;
-
+// taskpool eaworker limit
+inline constexpr size_t TASKPOOL_EAWORKER_LIMIT = 2;
+// taskpool eaworker mode
+inline static constexpr const char *TASKPOOL_EAWORKER_MODE = "eaworker";
 }  // namespace ark::stackful_coroutines
 
 #endif /* PANDA_RUNTIME_COROUTINES_STACKFUL_COMMON_H */

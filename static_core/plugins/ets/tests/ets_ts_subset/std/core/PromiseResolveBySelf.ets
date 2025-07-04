@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-let resolve: ((value: Object) => void)|null = null;
-let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Object) => void) => {
+let resolve: ((value: Object) => void) | null = null;
+let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 });
 
 p.then<void, void>((value: Object): void => {
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+    console.log('Test failed. The promise should not be resolved.');
+}, (err: Error): void => {
     if (err instanceof TypeError) {
-        console.log("Test passed.");
+        console.log('Test passed.');
         return;
     }
-    console.log("Test failed. The promise should be rejected with a TypeError.");
+    console.log('Test failed. The promise should be rejected with a TypeError.');
 }).catch((e: Object): void => {
-    console.log("Test failed: " + e);
+    console.log('Test failed: ' + e);
 });
 
 resolve!(p);

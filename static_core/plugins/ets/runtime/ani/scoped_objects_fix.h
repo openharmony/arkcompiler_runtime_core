@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_module.h"
 #include "plugins/ets/runtime/types/ets_namespace.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 
 namespace ark::ets::ani {
 
@@ -91,18 +92,27 @@ public:
         return AddLocalRef(nullObject, result);
     }
 
-    EtsArray *ToInternalType(ani_array array)
+    EtsArray *ToInternalType(ani_fixedarray array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsArray *>(GetInternalType(array));
     }
 
-    EtsObjectArray *ToInternalType(ani_array_ref array)
+    EtsObjectArray *ToInternalType(ani_fixedarray_ref array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
     }
 
+<<<<<<< HEAD
+=======
+    EtsEscompatArray *ToInternalType(ani_array array)
+    {
+        ASSERT(!IsNullishValue(array));
+        return reinterpret_cast<EtsEscompatArray *>(GetInternalType(array));
+    }
+
+>>>>>>> OpenHarmony_feature_20250328
     EtsEscompatArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
     {
         ASSERT(!IsNullishValue(arraybuffer));

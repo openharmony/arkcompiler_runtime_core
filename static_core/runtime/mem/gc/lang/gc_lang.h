@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ public:
     NO_MOVE_SEMANTIC(GCLang);
     void SetPandaVM(PandaVM *vm) override
     {
-        rootManager_.SetPandaVM(vm);
+        rootManager_ = RootManager<LanguageConfig>(vm);
         GC::SetPandaVM(vm);
     }
 
@@ -76,29 +76,9 @@ protected:
     size_t VerifyHeap() override;
 
 private:
-    void UpdateVmRefs() override
-    {
-        rootManager_.UpdateVmRefs();
-    }
-
-    void UpdateGlobalObjectStorage() override
-    {
-        rootManager_.UpdateGlobalObjectStorage();
-    }
-
-    void UpdateClassLinkerContextRoots() override
-    {
-        rootManager_.UpdateClassLinkerContextRoots();
-    }
-
-    void UpdateThreadLocals() override
-    {
-        rootManager_.UpdateThreadLocals();
-    }
-
     void ClearLocalInternalAllocatorPools() override;
 
-    RootManager<LanguageConfig> rootManager_ {};
+    RootManager<LanguageConfig> rootManager_ {nullptr};
     friend class RootManager<LanguageConfig>;
 };
 

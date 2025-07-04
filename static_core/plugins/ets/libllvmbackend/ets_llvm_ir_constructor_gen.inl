@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -274,7 +274,7 @@ void LLVMIrConstructor::StringBuilderAppendStringMain(Inst *inst, llvm::Value *s
     auto strLengthOffset =
         builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), str, runtime->GetStringLengthOffset(arch));
     auto strLength = builder_.CreateLoad(builder_.getInt32Ty(), strLengthOffset);
-    auto strLengthShr = builder_.CreateLShr(strLength, builder_.getInt32(1));
+    auto strLengthShr = builder_.CreateLShr(strLength, builder_.getInt32(ark::coretypes::String::STRING_LENGTH_SHIFT));
     auto strLengthZero = builder_.CreateICmpEQ(strLengthShr, builder_.getInt32(0));
     builder_.CreateCondBr(strLengthZero, contBb, mainBb);
 
@@ -414,3 +414,110 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
     ValueMapAdd(inst, charIndex);
     return true;
 }
+
+bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
+{
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    auto getEntryId = [inst]() {
+        switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED;
+            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED;
+            default:
+                UNREACHABLE();
+        }
+    };
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+    auto call = CreateFastPathCall(inst, getEntryId(), {GetInputValue(inst, 0), klass});
+    MarkAsAllocation(call);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitFloat32ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt32Ty());
+}
+
+bool LLVMIrConstructor::EmitFloat64ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt64Ty());
+}
+
+bool LLVMIrConstructor::EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid,
+                                                   llvm::IntegerType *bitcastType)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+    auto val = GetInputValue(inst, 1U);
+    auto bitcast = builder_.CreateBitCast(val, bitcastType);
+
+    auto ref = GetInputValue(inst, 0);
+    auto beginPos = GetInputValue(inst, 2U);
+    auto endPos = GetInputValue(inst, 3U);
+    ArenaVector<llvm::Value *> args({ref, bitcast, beginPos, endPos}, GetGraph()->GetLocalAllocator()->Adapter());
+    CreateFastPathCall(inst, eid, args);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitReadString(Inst *inst)
+{
+    auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_MEM;
+    auto buf = GetInputValue(inst, 0);
+    auto len = GetInputValue(inst, 1);
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+
+    auto result = CreateFastPathCall(inst, entryId, {buf, len, klass});
+
+    MarkAsAllocation(result);
+    ValueMapAdd(inst, result);
+
+    return true;
+}
+
+bool LLVMIrConstructor::EmitWriteString(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::WRITE_STRING_TO_MEM, 2U);
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_WITH_INT(Name, Type)                                  \
+    /* CC-OFFNXT(G.PRE.02) name part */                                        \
+    bool LLVMIrConstructor::Emit##Name##ArrayWith(Inst *inst)                  \
+    {                                                                          \
+        auto entrypointId = RuntimeInterface::EntrypointId::Type##_ARRAY_WITH; \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                 \
+        return EmitFastPath(inst, entrypointId, 3U);                           \
+    }
+
+EMIT_TYPED_ARRAY_WITH_INT(Int8, INT8)
+EMIT_TYPED_ARRAY_WITH_INT(Int16, INT16)
+EMIT_TYPED_ARRAY_WITH_INT(Int32, INT32)
+EMIT_TYPED_ARRAY_WITH_INT(BigInt64, BIG_INT64)
+EMIT_TYPED_ARRAY_WITH_INT(Uint8Clamped, UINT8_CLAMPED)
+EMIT_TYPED_ARRAY_WITH_INT(Uint8, UINT8)
+EMIT_TYPED_ARRAY_WITH_INT(Uint16, UINT16)
+EMIT_TYPED_ARRAY_WITH_INT(Uint32, UINT32)
+EMIT_TYPED_ARRAY_WITH_INT(BigUint64, BIG_UINT64)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_WITH_FLOAT(Name, Type, InType)                                                            \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                            \
+    bool LLVMIrConstructor::Emit##Name##ArrayWith(Inst *inst)                                                      \
+    {                                                                                                              \
+        auto val = builder_.CreateSExtOrBitCast(GetInputValue(inst, 2), builder_.get##InType##Ty());               \
+        auto entrypointId = RuntimeInterface::EntrypointId::Type##_ARRAY_WITH;                                     \
+        auto call = CreateFastPathCall(inst, entrypointId, {GetInputValue(inst, 0), GetInputValue(inst, 1), val}); \
+        ValueMapAdd(inst, call);                                                                                   \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                     \
+        return true;                                                                                               \
+    }
+
+EMIT_TYPED_ARRAY_WITH_FLOAT(Float32, FLOAT32, Int32)
+EMIT_TYPED_ARRAY_WITH_FLOAT(Float64, FLOAT64, Int64)

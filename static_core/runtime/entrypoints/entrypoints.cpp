@@ -15,6 +15,7 @@
 
 #include "runtime/entrypoints/entrypoints.h"
 
+#include "include/object_header.h"
 #include "libpandabase/events/events.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utils.h"
@@ -41,6 +42,10 @@
 #include "utils/cframe_layout.h"
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
+
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark {
 
@@ -384,6 +389,39 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
     return ObjectHeader::Clone(obj);
 }
 
+extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
+                                    [[maybe_unused]] ark::ObjectHeader *ref)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    panda::BaseRuntime::WriteBarrier(obj, field, ref);
+#else
+    UNREACHABLE();
+#endif
+}
+
+extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    return panda::BaseRuntime::ReadBarrier(obj, field);
+#else
+    UNREACHABLE();
+    return nullptr;  // No-op
+#endif
+}
+
+extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
+{
+#ifdef ARK_HYBRID
+    void *field = ToVoidPtr(ToUintPtr(obj) + offset);
+    return panda::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
+#else
+    UNREACHABLE();
+    return nullptr;  // No-op
+#endif
+}
+
 extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t size)
 {
     LOG_ENTRYPOINT();
@@ -485,7 +523,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
         return str;
     }
 
-    auto counter = reinterpret_cast<std::atomic_uint32_t *>(slot);
+    auto counter = reinterpret_cast<std::atomic<ObjectPointerType> *>(slot);
 
     // Atomic with acquire order reason: data race with slot with dependecies on reads after the load which should
     // become visible
@@ -501,8 +539,8 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
                                          std::memory_order_relaxed);
     } else {
         // try to replace the counter with string pointer and register the slot as GC root in case of success
-        if (counter->compare_exchange_strong(counterVal, static_cast<uint32_t>(reinterpret_cast<uint64_t>(str)),
-                                             std::memory_order_release, std::memory_order_relaxed)) {
+        if (counter->compare_exchange_strong(counterVal, ToObjPtr(str), std::memory_order_release,
+                                             std::memory_order_relaxed)) {
             bool isYoung = vm->GetHeapManager()->IsObjectInYoungSpace(str);
             aotManager->RegisterAotStringRoot(slot, isYoung);
             EVENT_AOT_RESOLVE_STRING(ConvertToString(str));
@@ -1622,8 +1660,8 @@ static T *ToClassPtr(uintptr_t obj)
 }
 
 /* offset values to be aligned with the StringBuilder class layout */
-static constexpr uint32_t SB_COUNT_OFFSET = 12;
-static constexpr uint32_t SB_VALUE_OFFSET = 8;
+static constexpr uint32_t SB_VALUE_OFFSET = ark::ObjectHeader::ObjectHeaderSize();
+static constexpr uint32_t SB_COUNT_OFFSET = SB_VALUE_OFFSET + ark::OBJECT_POINTER_SIZE;
 
 static uint32_t GetCountValue(ObjectHeader *sb)
 {

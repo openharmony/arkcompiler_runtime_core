@@ -16,10 +16,53 @@ limitations under the License.
 {% for kwd in keywords %}
 /*---
 desc: The following words have special meaning in certain contexts (soft keywords) but are valid identifiers elsewhere
-tags: [compile-only]
 params: '{{kwd}}'
 ---*/
 
 let {{kwd}} = 0;
+{{kwd}} = 1
+
+class A {
+    {{kwd}} = 1
+}
+
+class B {
+    readonly {{kwd}} = 1
+}
+
+interface I{
+    test({{kwd}}: String): String; 
+}
+
+class C implements I{
+    test({{kwd}}: String): String{
+        return {{kwd}};
+    }
+}
+
+abstract class AD {
+    readonly {{kwd}} = 1
+    abstract test({{kwd}}: String): String;
+}
+
+class D extends AD{
+    test({{kwd}}: String): String{
+        return {{kwd}};
+    }
+}
+
+function main(): void{
+    arktest.assertEQ({{kwd}}, 1)
+    let ca = new A()
+    ca.{{kwd}} = 2
+    arktest.assertEQ(ca.{{kwd}}, 2)
+    let cb = new B() 
+    arktest.assertEQ(cb.{{kwd}}, 1)
+    let cc = new C()
+    arktest.assertEQ(cc.test("test"), "test")
+    let cd = new D()
+    arktest.assertEQ(cd.test("test"), "test")
+    arktest.assertEQ(cd.{{kwd}}, 1)
+}
 
 {% endfor %}

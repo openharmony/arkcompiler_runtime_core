@@ -14,7 +14,11 @@
  */
 
 function main(): int {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("Array API tests for SDK");
+=======
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Test ArrayBuffer.isView with DataView", test1IsView);
     suite.addTest("Test ArrayBuffer.isView with TypedArray", test2IsView);
     suite.addTest("Test ArrayBuffer.isView with Illegal Scenes", test3IsView);
@@ -45,6 +49,7 @@ class TestData {
 function test1IsView() {
     let sample = TestData.sample1;
     let res = ArrayBuffer.isView(sample);
+<<<<<<< HEAD
     assertEQ(TestData.expected1, res, `Expected: "${TestData.expected1}", Actual: "${res}"`);
 }
 
@@ -64,4 +69,25 @@ function test2IsView() {
 
 function test3IsView() {
     assertEQ(TestData.expected3, ArrayBuffer.isView(TestData.sample13), `Expected: "${TestData.expected3}", Actual: "${ArrayBuffer.isView(TestData.sample13)}"`);
+=======
+    arktest.assertEQ(TestData.expected1, res, `Expected: "${TestData.expected1}", Actual: "${res}"`);
+}
+
+function test2IsView() {
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample2), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample2)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample3), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample3)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample4), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample4)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample5), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample5)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample6), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample6)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample7), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample7)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample8), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample8)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample9), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample9)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample10), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample10)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample11), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample11)}"`);
+    arktest.assertEQ(TestData.expected2, ArrayBuffer.isView(TestData.sample12), `Expected: "${TestData.expected2}", Actual: "${ArrayBuffer.isView(TestData.sample12)}"`);
+}
+
+function test3IsView() {
+    arktest.assertEQ(TestData.expected3, ArrayBuffer.isView(TestData.sample13), `Expected: "${TestData.expected3}", Actual: "${ArrayBuffer.isView(TestData.sample13)}"`);
+>>>>>>> OpenHarmony_feature_20250328
 }

@@ -9,7 +9,7 @@
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
 		},
-		"dynamicPaths": {
+		"dependencies": {
 			"org_error_js": {
 				"language": "js",
 				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/org_error"

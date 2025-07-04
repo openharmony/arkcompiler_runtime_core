@@ -14,12 +14,15 @@
  */
 
 import LightWeightMap from "@ohos.util.LightWeightMap";
+<<<<<<< HEAD
+=======
+import { BusinessError } from "@ohos.base";
+>>>>>>> OpenHarmony_feature_20250328
 
-const success = 0;
-const fail = 1;
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap GetKeyAt API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap GetKeyAt API tests")
 
     suite.addTest("LightWeightMap getKeyAt key by index", testGetKeyAtValidIndex)
     suite.addTest("LightWeightMap getKeyAt key by boundary index", testGetKeyAtBoundaryIndex)
@@ -39,7 +42,7 @@ function testGetKeyAtValidIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.getKeyAt(1);
-    assertEQ(result, "test", "The lightWeightMap should return the correct key at the specified index");
+    arktest.assertEQ(result, "test", "The lightWeightMap should return the correct key at the specified index");
 }
 
 function testGetKeyAtBoundaryIndex() {
@@ -48,7 +51,7 @@ function testGetKeyAtBoundaryIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.getKeyAt(2);
-    assertEQ(result, "sparrow", "The lightWeightMap should return the correct key at the boundary index");
+    arktest.assertEQ(result, "sparrow", "The lightWeightMap should return the correct key at the boundary index");
 }
 
 function testGetKeyAtLeftExceededIndex() {
@@ -56,11 +59,12 @@ function testGetKeyAtLeftExceededIndex() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    try {
-        lightWeightMap.getKeyAt(-1);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+    arktest.expectThrow(() => { lightWeightMap.getKeyAt(-1) }, exceptionCheck);
 }
 
 function testGetKeyAtRightExceededIndex() {
@@ -68,20 +72,21 @@ function testGetKeyAtRightExceededIndex() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    try {
-        lightWeightMap.getKeyAt(5);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: 5") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+    arktest.expectThrow(() => { lightWeightMap.getKeyAt(5) }, exceptionCheck);
 }
 
 function testGetKeyAtIndexOfEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
-    try {
-        lightWeightMap.getKeyAt(5);
-    } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
+    arktest.expectThrow(() => { lightWeightMap.getKeyAt(5) }, exceptionCheck);
 }
 
 function testGetKeyAtLeftFloatIndex() {
@@ -90,7 +95,7 @@ function testGetKeyAtLeftFloatIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.getKeyAt(Math.floor(1.2));
-    assertEQ(result, "test", "The lightWeightMap should return the correct key at the floored left float index");
+    arktest.assertEQ(result, "test", "The lightWeightMap should return the correct key at the floored left float index");
 }
 
 function testGetKeyAtRightFloatIndex() {
@@ -99,5 +104,5 @@ function testGetKeyAtRightFloatIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.getKeyAt(Math.floor(1.8));
-    assertEQ(result, "test", "The lightWeightMap should return the correct key at the floored right float index");
+    arktest.assertEQ(result, "test", "The lightWeightMap should return the correct key at the floored right float index");
 }

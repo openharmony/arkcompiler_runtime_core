@@ -27,6 +27,6 @@ class Z {
 
 function main() {
     let z: Z = { fld: [{% for t in c['values'] %}{{t.expr|safe}}{% if not loop.last %}, {% endif %}{% endfor %}] }
-    assertTrue( {% for t in c['values'] %}z.fld[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
+    arktest.assertTrue( {% for t in c['values'] %}z.fld[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
 }
 {%- endfor %}

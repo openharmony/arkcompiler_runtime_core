@@ -44,7 +44,7 @@
 class Exception0 extends Exception {}
 
 class MultipleCatch {
-    __noinline__multipleCatch(a: int, b: int, c: int) : int throws {
+    __noinline__multipleCatch(a: int, b: int, c: int) : int {
     let res : int = 0;
 
     for (let i : int = 0; i < 16; i++) {

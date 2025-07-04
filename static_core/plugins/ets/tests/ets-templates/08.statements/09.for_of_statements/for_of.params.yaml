@@ -16,21 +16,21 @@ cases:
     - use: |-
           let arr: int[] = new int[0]
           for (let v of arr) res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           let arr: int[]|null = new int[0]
           for (let v of arr) res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           let arr: int[]|null = (): int[]|null => { return new int[0]; }()
           for (let v of arr!) res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           for (let v of "") res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           let arr: int[][] = [[1,2,3], [4,5,6], [7,8,9]]
@@ -39,87 +39,87 @@ cases:
               for (const q of v)
                   res += q
           }
-          assertEQ( res, " 123 456 789" )
+          arktest.assertEQ( res, " 123 456 789" )
 
     - use: |-
           const v: int = 0;
           for (let v of [1,2,3,4]) res += v
-          assertEQ( res, "1234" )
-          assertEQ( v, 0 )
+          arktest.assertEQ( res, "1234" )
+          arktest.assertEQ( v, 0 )
 
     - use: |-
           let v: int;
           for (v of [1,2,3,4]) res += v
-          assertEQ( res, "1234" )
+          arktest.assertEQ( res, "1234" )
 
     - use: |-
-          let v: float;
-          for (v of [1.1,2.2,3.3,4.4] as float[]) res += v
-          assertEQ( res, "1.12.23.34.4" )
+          let v: Float;
+          for (v of [1.1f,2.2f,3.3f,4.4f] as Float[]) res += v
+          arktest.assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           let v: double
           for (v of [1.1,2.2,3.3,4.4]) res += v
-          assertEQ( res, "1.12.23.34.4" )
+          arktest.assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           let v: long;
           for (v of [1,2,3,4]) res += v
-          assertEQ( res, "1234" )
+          arktest.assertEQ( res, "1234" )
 
     - use: |-
           let v: number;
           for (v of [1.1,2.2,3.3,4.4]) res += v
-          assertEQ( res, "1.12.23.34.4" )
+          arktest.assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           for (const ch of [c'1', c'2', c'3', c'4']) res += ch
-          assertEQ( res, "1234" )
+          arktest.assertEQ( res, "1234" )
 
     - use: |-
-          const ch: char = c'X'
+          const ch: string = 'X'
           for (let ch of "A" + "B" + "CD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
-          assertEQ( res, "A B C D " )
+          arktest.assertEQ( res, "A B C D " )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") res += ch
-          assertEQ( res, "ABCD" )
+          arktest.assertEQ( res, "ABCD" )
 
     - use: |-
-          let ch: char
+          let ch: string
           for (ch of "ABCD") {
               res += ch
-              ch = c' '
+              ch = ' '
               res += ch
           }
-          assertEQ( res, "A B C D " )
+          arktest.assertEQ( res, "A B C D " )
 
     - use: |-
         let foo: () => String = ():String => { return "ABCD" }
-        for (let ch of foo()) res += ++ch
-        assertEQ( res, "BCDE" )
+        for (let ch of foo()) res += ch
+        arktest.assertEQ( res, "ABCD" )
 
     - use: |-
           let arr: Long[] = new Long[3]
           for (let i: int = 0; i < 3; i++) arr[i] = new Long(i as long)
           for (let i of arr) res += i
-          assertEQ( res, "012" )
+          arktest.assertEQ( res, "012" )
 
     - use: |-
           let arr: int[] = [1,2,3]
           for (let v of arr) {v *= 2; res += v }
-          assertEQ( res, "246" )
+          arktest.assertEQ( res, "246" )
 
     - use: |-
           let arr: int[] = [1,2,3]
           let v = 4
           for (v of arr); res += v
-          assertEQ( res, "3" )
+          arktest.assertEQ( res, "3" )
 
     - decl: |-
           function foo<T extends String>(s: T): T[] {
@@ -127,38 +127,38 @@ cases:
           }
       use: |-
           for (let v of foo<String>("A")) res += v
-          assertEQ( res, "AAA" )
+          arktest.assertEQ( res, "AAA" )
 
     - use: |-
           let s: String|null = ""
           for (let v of s) res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           let s: String|null = (): string|null => { return ""; }();
           for (let v of s!) res += v
-          assertEQ( res, "" )
+          arktest.assertEQ( res, "" )
 
     - use: |-
           let s: string|null = (): string|null => { return null; }();
           try {
               for (let v of s!) res += v
-              assertTrue( false )
+              arktest.assertTrue( false )
           } catch (e: NullPointerError) {
-              assertTrue( true )
+              arktest.assertTrue( true )
           } catch (e) {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
 
     - use: |-
           let s: string|undefined = (): string|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
-              assertTrue( false )
+              arktest.assertTrue( false )
           } catch (e: NullPointerError) {
-              assertTrue( true )
+              arktest.assertTrue( true )
           } catch (e) {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
 
     - decl: |-
@@ -174,28 +174,28 @@ cases:
           let array: A[] = new A[10];
           let c = 0;
           for (let x of array) c += x.i;
-          assertEQ( c, 45)
+          arktest.assertEQ( c, 45)
 
     - use: |-
           let s: number[]|null = (): number[]|null => { return null; }();
           try {
               for (let v of s!) res += v
-              assertTrue(false)
+              arktest.assertTrue(false)
           } catch (e: NullPointerError) {
-              assertTrue(true)
+              arktest.assertTrue(true)
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - use: |-
           let s: number[]|undefined = (): number[]|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
-              assertTrue( false )
+              arktest.assertTrue( false )
           } catch (e: NullPointerError) {
-              assertTrue(true)
+              arktest.assertTrue(true)
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -221,7 +221,7 @@ cases:
       use: |-
           let a = new A();
           for (let x of a) res += x;
-          assertEQ( res, "abc")
+          arktest.assertEQ( res, "abc")
 
     - decl: |-
           type UT = string[] | string
@@ -232,4 +232,4 @@ cases:
                   res += y
               }
           }
-          assertEQ(res, 'abcdefghi')
+          arktest.assertEQ(res, 'abcdefghi')

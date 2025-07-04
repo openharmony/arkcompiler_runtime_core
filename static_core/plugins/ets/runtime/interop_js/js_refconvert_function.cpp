@@ -26,7 +26,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
         ThrowNoInteropContextException();
         return nullptr;
     }
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     size_t argc;
     napi_value athis;
@@ -43,6 +43,11 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
+<<<<<<< HEAD
+=======
+    method = method == nullptr ? etsThis->GetClass()->GetInstanceMethod(STD_CORE_FUNCTION_UNSAFECALL_METHOD, nullptr)
+                               : method;
+>>>>>>> OpenHarmony_feature_20250328
     ASSERT(method != nullptr);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
@@ -55,9 +60,12 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto env = ctx->GetJSEnv();
 
     ASSERT(obj->GetClass() == klass_);
+<<<<<<< HEAD
     [[maybe_unused]] EtsMethod *method = klass_->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
     method = method == nullptr ? klass_->GetStaticMethod(INVOKE_METHOD_NAME, nullptr) : method;
     ASSERT(method != nullptr);
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
     JSValue *jsValue;
     {
@@ -123,7 +131,7 @@ EtsObject *JSRefConvertFunction::CreateJSFunctionProxy(InteropCtx *ctx, napi_val
         return nullptr;
     }
 
-    auto *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsFun);
+    auto *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, etsObject, jsFun);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;

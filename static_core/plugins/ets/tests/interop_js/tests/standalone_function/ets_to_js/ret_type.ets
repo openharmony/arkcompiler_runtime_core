@@ -15,23 +15,23 @@
 
 package interopStandaloneFnTest
 
-const functionRetTypeNumberEts = makeFunctionReturningValueType<number>(1);
+const functionRetTypeNumberEts: () => number;
 
-const functionRetTypeByteEts = makeFunctionReturningValueType<byte>(1);
+const functionRetTypeByteEts: () => byte;
 
-const functionRetTypeShortEts = makeFunctionReturningValueType<short>(1);
+const functionRetTypeShortEts: () => short;
 
-const functionRetTypeIntEts = makeFunctionReturningValueType<int>(1);
+const functionRetTypeIntEts: () => int;
 
-const functionRetTypeLongEts = makeFunctionReturningValueType<long>(1);
+const functionRetTypeLongEts: () => long;
 
-const functionRetTypeFloatEts = makeFunctionReturningValueType<float>(3.140000104904175);
+const functionRetTypeFloatEts: () => float;
 
-const functionRetTypeCharEts = makeFunctionReturningValueType<char>(c'c');
+const functionRetTypeCharEts: () => char;
 
-const functionRetTypeBooleanEts = makeFunctionReturningValueType<boolean>(true);
+const functionRetTypeBooleanEts: () => boolean;
 
-const functionRetTypeStringEts = makeFunctionReturningValueType<string>('test');
+const functionRetTypeStringEts: () => string;
 
 function functionRetTypeNumberLitEts(): number {
     return 1;
@@ -83,8 +83,8 @@ function functionRetTypeClassEts(): ClassWithMethodEts {
     return x;
 }
 
-function functionRetTypeArrayEts(): string[] {
-    let x: string[] = ['one', 'two'];
+function functionRetTypeArrayEts(): FixedArray<string> {
+    let x: FixedArray<string> = ['one', 'two'];
     return x;
 }
 

@@ -25,7 +25,11 @@ function main(): int {
     failure += ((new Boolean(false)).valueOf() == false) ? 0 : 1
     failure += ((new Boolean(true)).valueOf() == true) ? 0 : 1
 
+<<<<<<< HEAD
     const suite = new ArkTestsuite("Boolean API test for SDK");
+=======
+    const suite = new arktest.ArkTestsuite("Boolean API test for SDK");
+>>>>>>> OpenHarmony_feature_20250328
     suite.addTest("Boolean constructor", testBooleanConstructor);
     failure += suite.run();
 
@@ -39,5 +43,9 @@ class TestData {
 
 function testBooleanConstructor() {
     let a = TestData.a;
+<<<<<<< HEAD
     assertEQ(TestData.expected, a);
+=======
+    arktest.assertEQ(TestData.expected, a);
+>>>>>>> OpenHarmony_feature_20250328
 }

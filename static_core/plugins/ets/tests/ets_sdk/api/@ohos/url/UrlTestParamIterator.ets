@@ -33,7 +33,7 @@ function testParamsEntries001() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[1], "value1");
+ arktest.assertEQ(arr[1], "value1");
 }
 
 /**
@@ -54,7 +54,7 @@ function testParamsEntries002() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[2], "key2")
+ arktest.assertEQ(arr[2], "key2")
 }
 
 /**
@@ -76,7 +76,7 @@ function testParamsEntries003() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[5], "jk")
+ arktest.assertEQ(arr[5], "jk")
 }
 
 /**
@@ -97,7 +97,7 @@ function testParamsEntries004() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[3], "value2")
+ arktest.assertEQ(arr[3], "value2")
 }
 
 /**
@@ -119,7 +119,7 @@ function testParamsEntries005() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[4], "jss")
+ arktest.assertEQ(arr[4], "jss")
 }
 
 /**
@@ -140,7 +140,7 @@ function testParamsIterator001() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[1], "value1");
+ arktest.assertEQ(arr[1], "value1");
 }
 
 /**
@@ -161,7 +161,7 @@ function testParamsIterator002() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[2], "key2")
+ arktest.assertEQ(arr[2], "key2")
 }
 
 /**
@@ -183,7 +183,7 @@ function testParamsIterator003() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[5], "jk")
+ arktest.assertEQ(arr[5], "jk")
 }
 
 /**
@@ -204,7 +204,7 @@ function testParamsIterator004() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[3], "value2")
+ arktest.assertEQ(arr[3], "value2")
 }
 
 /**
@@ -226,7 +226,7 @@ function testParamsIterator005() {
 		arr.push(pair[1]);
 		i++;
 	}
-	assertEQ(arr[4], "jss")
+ arktest.assertEQ(arr[4], "jss")
 }
 
 
@@ -247,7 +247,7 @@ function testParamsForEach001() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "value1 key1 true");
+ arktest.assertEQ(arr[0], "value1 key1 true");
 }
 
 /**
@@ -267,7 +267,7 @@ function testParamsForEach002() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[1], "value2 key2 true");
+ arktest.assertEQ(arr[1], "value2 key2 true");
 }
 
 /**
@@ -288,7 +288,7 @@ function testParamsForEach003() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[2], "jk foo true");
+ arktest.assertEQ(arr[2], "jk foo true");
 }
 
 /**
@@ -308,7 +308,7 @@ function testParamsForEach004() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[1], "txt jss true");
+ arktest.assertEQ(arr[1], "txt jss true");
 }
 
 /**
@@ -329,7 +329,7 @@ function testParamsForEach005() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "bar foo true");
+ arktest.assertEQ(arr[0], "bar foo true");
 }
 function testParamsForEach007() {
 	let params = new url.URLParams("key1=value1&key2=value2");
@@ -340,7 +340,19 @@ function testParamsForEach007() {
 		arr.push(value + " " + key + " " + (params == searchParams));
 		i++
 	});
-	assertEQ(arr[0], "value1 key1 true");
+ arktest.assertEQ(arr[0], "value1 key1 true");
+}
+
+function testParamsArrayFrom() {
+    let params = new url.URLParams("key1=\b&\b=val2&key3=val3");
+    let arrayFromEntries = Array.from(params.entries());
+    let arrayFromKeys = Array.from(params.keys());
+    let arrayFromValues = Array.from(params.values());
+    let arrayFromIterator = Array.from(params.$_iterator());
+    arktest.assertEQ(arrayFromEntries.toString(), "key1,\b,\b,val2,key3,val3");
+    arktest.assertEQ(arrayFromIterator.toString(), "key1,\b,\b,val2,key3,val3");
+    arktest.assertEQ(arrayFromKeys.toString(), "key1,\b,key3");
+    arktest.assertEQ(arrayFromValues.toString(), "\b,val2,val3");
 }
 
 function testParamsArrayFrom() {
@@ -356,7 +368,7 @@ function testParamsArrayFrom() {
 }
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testParamsEntries001", testParamsEntries001);
 	suite.addTest("testParamsEntries002", testParamsEntries002);
 	suite.addTest("testParamsEntries003", testParamsEntries003);

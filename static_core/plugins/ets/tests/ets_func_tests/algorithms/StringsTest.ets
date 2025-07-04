@@ -15,9 +15,9 @@
 
 
 function is_palindrom(text: String): boolean {
-    let halve: int = text.length as int / 2;
+    let halve: int = text.length.toInt() / 2;
     for (let i: int = 0; i < halve; i++) {
-        if (text.charAt(i) != text.charAt(text.length as int - i - 1)) {
+        if (text.charAt(i) != text.charAt(text.length.toInt() - i - 1)) {
             return false;
         }
     }
@@ -29,7 +29,7 @@ function random_string(len: int): String {
     const l = t.length;
     let sb = new StringBuilder();
     for (let i = 0; i < len; i++) {
-        sb.append(t.charAt((random()*l) as int));
+        sb.append(t.charAt((random()*l).toInt()));
     }
     return sb.toString();
 }

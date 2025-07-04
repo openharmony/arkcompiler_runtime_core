@@ -23,7 +23,7 @@ tags: [negative, compile-only]
 function main(): void {
   let x: string = {{str.left}}
   let y: string = {{str.right}}
-  assertEQ( ( x {{str.op}} y), {{str.result}} )
+  arktest.assertEQ( ( x {{str.op}} y), {{str.result}} )
 }
 
 {% endfor %}

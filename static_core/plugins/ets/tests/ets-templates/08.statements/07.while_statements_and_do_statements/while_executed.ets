@@ -20,6 +20,10 @@ tags: [compile-only]
 
 function main(): void {
     while (false) {
+<<<<<<< HEAD
         assertTrue( false );
+=======
+        arktest.assertTrue( false );
+>>>>>>> OpenHarmony_feature_20250328
     }
 }

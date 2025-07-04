@@ -46,7 +46,7 @@ public:
 TEST_F(ClassGetStaticFieldRefTest, get_ref)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -63,7 +63,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_ref)
 TEST_F(ClassGetStaticFieldRefTest, get_ref_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -80,7 +80,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_ref_c_api)
 TEST_F(ClassGetStaticFieldRefTest, get_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -91,7 +91,7 @@ TEST_F(ClassGetStaticFieldRefTest, get_invalid_field_type)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -102,7 +102,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument1)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_ref result = nullptr;
     ASSERT_EQ(env_->Class_GetStaticField_Ref(cls, nullptr, &result), ANI_INVALID_ARGS);
 }
@@ -110,7 +110,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument2)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -120,7 +120,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument3)
 TEST_F(ClassGetStaticFieldRefTest, invalid_argument4)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field = nullptr;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -131,7 +131,7 @@ TEST_F(ClassGetStaticFieldRefTest, invalid_argument4)
 TEST_F(ClassGetStaticFieldRefTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_get_static_field_ref_test/TestRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRef", &cls), ANI_OK);
     ani_static_field field {};
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("testString", 10U, &string), ANI_OK);
@@ -160,18 +160,33 @@ TEST_F(ClassGetStaticFieldRefTest, combination_test1)
 
 TEST_F(ClassGetStaticFieldRefTest, combination_test2)
 {
-    CheckFieldValue("Lclass_get_static_field_ref_test/TestRef;", "string_value");
+    CheckFieldValue("class_get_static_field_ref_test.TestRef", "string_value");
 }
 
 TEST_F(ClassGetStaticFieldRefTest, combination_test3)
 {
-    CheckFieldValue("Lclass_get_static_field_ref_test/TestRefA;", "string_value");
+    CheckFieldValue("class_get_static_field_ref_test.TestRefA", "string_value");
 }
 
 TEST_F(ClassGetStaticFieldRefTest, combination_test4)
 {
-    CheckFieldValue("Lclass_get_static_field_ref_test/TestRefFinal;", "string_value");
+    CheckFieldValue("class_get_static_field_ref_test.TestRefFinal", "string_value");
 }
+
+TEST_F(ClassGetStaticFieldRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_ref_test.TestRefA", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_ref_test.TestRefA"));
+    ani_ref refValue {};
+    ASSERT_EQ(env_->Class_GetStaticField_Ref(cls, field, &refValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_ref_test.TestRefA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

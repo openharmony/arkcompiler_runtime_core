@@ -46,7 +46,7 @@ public:
 TEST_F(ClassSetStaticFieldRefTest, set_ref)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_ref)
 TEST_F(ClassSetStaticFieldRefTest, set_ref_c_api)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -90,7 +90,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_ref_c_api)
 TEST_F(ClassSetStaticFieldRefTest, set_invalid_field_type)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -104,7 +104,7 @@ TEST_F(ClassSetStaticFieldRefTest, set_invalid_field_type)
 TEST_F(ClassSetStaticFieldRefTest, invalid_argument1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -118,7 +118,7 @@ TEST_F(ClassSetStaticFieldRefTest, invalid_argument1)
 TEST_F(ClassSetStaticFieldRefTest, invalid_argument2)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
 
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("testString", 6U, &string), ANI_OK);
@@ -129,7 +129,7 @@ TEST_F(ClassSetStaticFieldRefTest, invalid_argument2)
 TEST_F(ClassSetStaticFieldRefTest, invalid_argument3)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field = nullptr;
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
@@ -143,7 +143,7 @@ TEST_F(ClassSetStaticFieldRefTest, invalid_argument3)
 TEST_F(ClassSetStaticFieldRefTest, combination_test1)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_ref_test/TestSetRef;", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRef", &cls), ANI_OK);
     ani_static_field field {};
     ani_string string {};
     ASSERT_EQ(env_->String_NewUTF8("testString", 10U, &string), ANI_OK);
@@ -173,13 +173,30 @@ TEST_F(ClassSetStaticFieldRefTest, combination_test1)
 
 TEST_F(ClassSetStaticFieldRefTest, combination_test2)
 {
-    CheckFieldValue("Lclass_set_static_field_ref_test/TestSetRefA;", "string_value");
+    CheckFieldValue("class_set_static_field_ref_test.TestSetRefA", "string_value");
 }
 
 TEST_F(ClassSetStaticFieldRefTest, combination_test3)
 {
-    CheckFieldValue("Lclass_set_static_field_ref_test/TestSetRefFinal;", "string_value");
+    CheckFieldValue("class_set_static_field_ref_test.TestSetRefFinal", "string_value");
 }
+
+TEST_F(ClassSetStaticFieldRefTest, check_initialization)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_ref_test.TestSetRefA", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
+
+    ani_string string {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 10U, &string), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_ref_test.TestSetRefA"));
+    ASSERT_EQ(env_->Class_SetStaticField_Ref(cls, field, string), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_ref_test.TestSetRefA"));
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

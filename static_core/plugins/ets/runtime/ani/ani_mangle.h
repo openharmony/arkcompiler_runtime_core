@@ -22,7 +22,11 @@ namespace ark::ets::ani {
 
 class Mangle {
 public:
+<<<<<<< HEAD
     static PandaString ConvertDescriptor(const std::string_view descriptor);
+=======
+    static PandaString ConvertDescriptor(const std::string_view descriptor, bool allowArray = false);
+>>>>>>> OpenHarmony_feature_20250328
     static PandaString ConvertSignature(const std::string_view descriptor);
 };
 

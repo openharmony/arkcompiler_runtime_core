@@ -25,7 +25,7 @@ public:
         auto sarah = static_cast<ani_object>(sarahRef);
 
         ani_class cls;
-        ASSERT_EQ(env_->FindClass("Lobject_get_field_boolean_test/Woman;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_get_field_boolean_test.Woman", &cls), ANI_OK);
 
         ani_field fieldName;
         ASSERT_EQ(env_->Class_FindField(cls, "name", &fieldName), ANI_OK);
@@ -46,9 +46,20 @@ TEST_F(ObjectGetFieldBooleanTest, get_field_boolean)
     ani_field fieldMarried {};
     GetTestData(&sarah, &field, &fieldMarried);
 
-    ani_boolean married;
+    ani_boolean married = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetField_Boolean(sarah, fieldMarried, &married), ANI_OK);
     ASSERT_EQ(married, true);
+}
+
+TEST_F(ObjectGetFieldBooleanTest, get_field_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldMarried {};
+    GetTestData(&sarah, &field, &fieldMarried);
+
+    ani_boolean married = ANI_FALSE;
+    ASSERT_EQ(env_->c_api->Object_GetField_Boolean(nullptr, sarah, fieldMarried, &married), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldBooleanTest, get_field_boolean_invalid_field_type)
@@ -58,7 +69,7 @@ TEST_F(ObjectGetFieldBooleanTest, get_field_boolean_invalid_field_type)
     ani_field fieldMarried {};
     GetTestData(&sarah, &field, &fieldMarried);
 
-    ani_boolean married;
+    ani_boolean married = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetField_Boolean(sarah, field, &married), ANI_INVALID_TYPE);
 }
 
@@ -69,7 +80,7 @@ TEST_F(ObjectGetFieldBooleanTest, invalid_argument1)
     ani_field fieldMarried {};
     GetTestData(&sarah, &field, &fieldMarried);
 
-    ani_boolean married;
+    ani_boolean married = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetField_Boolean(nullptr, field, &married), ANI_INVALID_ARGS);
 }
 
@@ -80,7 +91,7 @@ TEST_F(ObjectGetFieldBooleanTest, invalid_argument2)
     ani_field fieldMarried {};
     GetTestData(&sarah, &field, &fieldMarried);
 
-    ani_boolean married;
+    ani_boolean married = ANI_FALSE;
     ASSERT_EQ(env_->Object_GetField_Boolean(sarah, nullptr, &married), ANI_INVALID_ARGS);
 }
 

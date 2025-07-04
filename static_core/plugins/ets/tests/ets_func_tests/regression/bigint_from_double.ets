@@ -28,12 +28,12 @@ function test(s: string): String {
 
 function positiveTest(s: string, expected: string): void {
     let result = test(s);
-    assertEQ( result, expected,  result + " [" + s + "] != " + expected)
+    arktest.assertEQ( result, expected,  result + " [" + s + "] != " + expected)
 }
 
 function negativeTest(s: string, expected: string): void {
     let result = test(s);
-    assertTrue( result.match(expected) != null,  result + " [" + s + "] != " + expected)
+    arktest.assertTrue( result.match(expected) != null,  result + " [" + s + "] != " + expected)
 }
 
 function main(): void {

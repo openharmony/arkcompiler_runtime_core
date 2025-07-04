@@ -14,17 +14,13 @@
 ---
 cases:
     - use: |-
-          assertTrue(foo("a", "b") == "a")
+          foo("a", "b")
     - use: |-
-          assertTrue(foo(null, 1) === 1)
+          foo(null, 1)
     - use: |-
           let a = 42
-          assertTrue(foo(a, new Object()) == 42)
+          foo(a, new Object())
     - use: |-
           let a = new Object()
           let b = "abc"
-          assertTrue(foo(a, b) instanceof String)
-    - use: |-
-          let a = new Object()
-          let b = "abc"
-          assertTrue(foo(b, a) instanceof String)
+          foo(b, a)

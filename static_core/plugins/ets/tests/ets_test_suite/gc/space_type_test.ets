@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-function NonMovableTest(): void throws {
-    assertEQ(GC.getObjectSpaceType("spaceTypeTest"), GC.NON_MOVABLE_SPACE, "Must be non movable space");
+function NonMovableTest(): void {
+    arktest.assertEQ(GC.getObjectSpaceType("spaceTypeTest"), GC.ObjectSpaceType.NON_MOVABLE, "Must be non movable space");
 }
 
-function AllocateAndMoveTest(): void throws {
+function AllocateAndMoveTest(): void {
     let obj: Object = new Object();
-    assertEQ(GC.getObjectSpaceType(obj), GC.YOUNG_SPACE, "Must be young space");
+    arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.YOUNG, "Must be young space");
 
-    let gc_id = GC.startGC(GC.YOUNG_CAUSE);
+    let gc_id = GC.startGC(GC.Cause.YOUNG);
     GC.waitForFinishGC(gc_id);
 
-    assertEQ(GC.getObjectSpaceType(obj), GC.TENURED_SPACE, "Must be tenured space");
+    arktest.assertEQ(GC.getObjectSpaceType(obj), GC.ObjectSpaceType.TENURED, "Must be tenured space");
 }
 
-function HumongousObjectTest(): void throws
+function HumongousObjectTest(): void
 {
-    let h_obj = new long[1024 * 1024];
-    assertEQ(GC.getObjectSpaceType(h_obj), GC.HUMONGOUS_SPACE, "Must be humongous space");
+    let h_obj: FixedArray<long> = new long[1024 * 1024];
+    arktest.assertEQ(GC.getObjectSpaceType(h_obj), GC.ObjectSpaceType.HUMONGOUS, "Must be humongous space");
 }
 
 /**
@@ -43,7 +43,7 @@ function main(): int {
         HumongousObjectTest();
     }
     catch (e) {
-        assertTrue(false, "Space allocation test must not throw exceptions");
+        arktest.assertTrue(false, "Space allocation test must not throw exceptions");
     }
     return 0;
 }

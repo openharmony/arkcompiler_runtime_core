@@ -89,7 +89,7 @@ function TestFunctionArgTypeClassOpt(): boolean {
 }
 
 function TestFunctionArgTypeArrayOpt(): boolean {
-    let arg: int[] = [1, 2, 3];
+    let arg: FixedArray<int> = [1, 2, 3];
     return functionArgTypeArrayOpt(arg) as int == functionArgTypeArrayOpt() as int;
 }
 

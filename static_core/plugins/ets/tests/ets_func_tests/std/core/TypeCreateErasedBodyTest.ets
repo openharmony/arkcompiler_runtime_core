@@ -25,25 +25,24 @@ class C {
 }
 
 
-function erasedM(recv: NullishType, args: NullishType[]): NullishType {
-	assertEQ( args.length, 1)
-	return (args[0] as string) + "123" + (recv as C).dat
+function erasedM(recv: NullishType, args: FixedArray<NullishType>): NullishType {
+	arktest.assertEQ( args.length, 1)
+	return (args[0]?.toString()) + "123" + (recv as C).dat
 }
 
-function erased(recv: NullishType, args: NullishType[]): NullishType {
-	assertEQ( args.length, 3)
-	const a1: int = args[0] as Int
-	const a2: long = args[1] as Long
-	const c: boolean = args[2] as Boolean
+function erased(recv: NullishType, args: FixedArray<NullishType>): NullishType {
+	arktest.assertEQ( args.length, 3)
+	const a1: int = args[0] as int
+	const a2: long = args[1] as long
+	const c: boolean = args[2] as boolean
 	if (c) {
-		const r = a1 as long
-		return r as Long
+		return a1.toLong()
 	} else {
-		return a2 as Long
+		return a2
 	}
 }
 
-function main(): void throws {
+function main(): void {
 	const c = Type.of(new C()) as ClassType
 	const creator = new ClassTypeCreator("C1").addBaseType(c)
 	creator
@@ -68,7 +67,7 @@ function main(): void throws {
 		)
 	const ty = creator.create()
 	const i = ty.make() as C
-	assertEQ(i.c(10, 11, true), 10)
-	assertEQ(i.c(10, 11, false), 11)
-	assertEQ(i.m("abc"), "abc123DATA!")
+ arktest.assertEQ(i.c(10, 11, true), 10)
+ arktest.assertEQ(i.c(10, 11, false), 11)
+ arktest.assertEQ(i.m("abc"), "abc123DATA!")
 }

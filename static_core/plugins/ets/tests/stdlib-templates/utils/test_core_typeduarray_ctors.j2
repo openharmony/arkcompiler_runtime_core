@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,12 +51,6 @@ function main(): int {
     failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffset(),"Create default empty {{.item.objectType}} from non empty source with offset");
     failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(),"Create default empty {{.item.objectType}} from non empty source with offset and size");
 
-    failures += check(createTAFromEmptySharedArrayBuffer(),"Create default empty {{.item.objectType}} from empty source");
-    failures += check(createTAFromNonEmptySharedArrayBuffer(),"Create default empty {{.item.objectType}} from non empty source");
-    failures += check(createTAFromNonEmptySharedArrayBufferOneParamWithOffset(),"Create default empty {{.item.objectType}} from non empty source with offset");
-    failures += check(createTAFromNonEmptySharedArrayBufferOneParamWithOffsetAndSize(),"Create default empty {{.item.objectType}} from non empty source with offset and size");
-
-
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -87,25 +81,25 @@ const abnormalSource: {{.item.sourceElementsType}}[] = {{.item.abnormalData}};
 
 function createDefault(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}();
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
 function createEmptyWithLength(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}(0);
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
 function createEmptyWithNaNLength(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}(NaN);
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
 function createNonEmptyWithFloatingLength(): number {
     let target: {{.item.objectType}} = new {{.item.objectType}}(5.4);
-    if (target.length as int == 5 && target.byteOffset as int == 0 && target.byteLength as int == 5 * {{.item.primitiveSizeBytes}}) {
+    if (target.length.toInt() == 5 && target.byteOffset.toInt() == 0 && target.byteLength.toInt() == 5 * {{.item.primitiveSizeBytes}}) {
       return success;
     }
     return fail;
@@ -113,7 +107,7 @@ function createNonEmptyWithFloatingLength(): number {
 
 function createNonEmptyWithLength(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}(5);
-  if (target.length as int == 5 && target.byteOffset as int == 0 && target.byteLength as int == 5 * {{.item.primitiveSizeBytes}}){
+  if (target.length.toInt() == 5 && target.byteOffset.toInt() == 0 && target.byteLength.toInt() == 5 * {{.item.primitiveSizeBytes}}){
     return success;
   }
   return fail;
@@ -121,7 +115,7 @@ function createNonEmptyWithLength(): number {
 
 function createtypedUArrayWithNegativeLength(): number {
   try {
-    let target: {{.item.objectType}} = new {{.item.objectType}}(-1 as number);
+    let target: {{.item.objectType}} = new {{.item.objectType}}(-1);
   } catch(e) {
     if (e instanceof TypeError) { 
       return success;
@@ -157,13 +151,13 @@ function createtypedUArrayWithPositiveInfinityLength(): number {
 
 function createtypedUArrayWithNegativeNaNLength(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}(-NaN);
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
 function createtypedUArrayWithPositiveNaNLength(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}(+NaN);
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
@@ -181,7 +175,7 @@ function createEmptyWithIterable(): number {
     return fail;
   }
 
-  if (target.length as int == 0){
+  if (target.length.toInt() == 0){
     return success;
   }
 
@@ -195,7 +189,7 @@ function createNonEmptyWithIterable(): number {
   array.push({{.item.create}}(3));
   let target: {{.item.objectType}} = new {{.item.objectType}}(array.values() as Iterable<{{.item.type}}>);
 
-  if (target.length as int == 3 && target.byteOffset as int == 0 && target.byteLength as int == 3*{{.item.primitiveSizeBytes}}){
+  if (target.length.toInt() == 3 && target.byteOffset.toInt() == 0 && target.byteLength.toInt() == 3*{{.item.primitiveSizeBytes}}){
     return success;
   }
 
@@ -206,7 +200,7 @@ function createNonEmptyWithIterable(): number {
   }
 
   let origin: {{.item.objectType}} = new {{.item.objectType}}(exceptArray.values() as Iterable<{{.item.type}}>);
-  for (let i: int = 0; i< target.length as int; i++) {
+  for (let i: int = 0; i< target.length.toInt(); i++) {
     let tv = target[i]{{.item.cast2primitive}};
     let ov = origin[i]{{.item.cast2primitive}};
     console.log(tv + "->" + ov);
@@ -393,12 +387,12 @@ function testTypedUArrayIteratorAfterCompletion(): number {
 
 function createtypedUArrayWithArrayLike(): number {
   let array = new Array<{{.item.type}}>();
-  array.push({{.item.create}}(1 as Number));
-  array.push({{.item.create}}(2 as Number));
-  array.push({{.item.create}}(3 as Number));
+  array.push({{.item.create}}(1));
+  array.push({{.item.create}}(2));
+  array.push({{.item.create}}(3));
 
   let target: {{.item.objectType}} = new {{.item.objectType}} (array as ArrayLike<{{.item.type}}>);
-  if (target.length as int == 3 && target.byteOffset as int == 0){
+  if (target.length.toInt() == 3 && target.byteOffset.toInt() == 0){
     return success;
   }
   return fail;
@@ -413,7 +407,7 @@ function createTAFromEmptyArrayBuffer(): number {
     return fail;
   }
 
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  if (target.length.toInt() == 0 && target.byteOffset.toInt() == 0) return success;
   return fail;
 }
 
@@ -426,39 +420,10 @@ function createTAFromNonEmptyArrayBuffer(): number {
     return fail;
   }
 
-  if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return success;
+  if (target.byteLength.toInt() == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset.toInt() == 0) return success;
   console.println("Error: Actual bytes length: " + target.byteLength);
   return fail;
 }
-
-function createTAFromEmptySharedArrayBuffer(): number {
-  let ss = new SharedArrayBuffer(0);  // Buffer 0-bytes length;
-  let target: {{.item.objectType}};
-  try {
-    target = new {{.item.objectType}}(ss);
-  } catch(e) {
-    return fail;
-  }
-
-  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
-  return fail;
-}
-
-function createTAFromNonEmptySharedArrayBuffer(): number {
-  let ss = new SharedArrayBuffer(5 * {{.item.primitiveSizeBytes}});  // Buffer 5-items length;
-  let target: {{.item.objectType}};
-  try {
-    target = new {{.item.objectType}}(ss);
-  } catch(e) {
-    return fail;
-  }
-
-  if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return success;
-  console.println("Error: Actual bytes length: " + target.byteLength);
-  return fail;
-}
-
-
 
 function createTAFromEmptyArrayBufferOneParamNoOffset(): number {
   let ss = new ArrayBuffer(0);
@@ -468,17 +433,17 @@ function createTAFromEmptyArrayBufferOneParamNoOffset(): number {
   } catch(e) {
     return fail;
   }
-  if (target.length as number != 0 || target.byteOffset as number != 0) {
+  if (target.length.toDouble() != 0 || target.byteOffset.toDouble() != 0) {
     return fail;
   }
 
   try {
-    target = new {{.item.objectType}}(ss, undefined);
+    target = new {{.item.objectType}}(ss);
   } catch(e) {
     return fail;
   }
 
-  if (target.length as number != 0 || target.byteOffset as number != 0) {
+  if (target.length.toDouble() != 0 || target.byteOffset.toDouble() != 0) {
     return fail;
   }
 
@@ -517,20 +482,20 @@ function createTAFromNonEmptyArrayBufferOneParamNoOffset(): number {
     return fail;
   }
 
-  if (target.byteLength as number != 5 * {{.item.primitiveSizeBytes}} || target.byteOffset as number != 0
-    || target.length as number != 5){
+  if (target.byteLength.toDouble() != 5 * {{.item.primitiveSizeBytes}} || target.byteOffset.toDouble() != 0
+    || target.length.toDouble() != 5){
     console.println("Error: Actual bytes length: " + target.byteLength);
     return fail;
   }
 
   try {
-    target = new {{.item.objectType}}(ss, undefined);
+    target = new {{.item.objectType}}(ss);
   } catch(e) {
     return fail;
   }
 
-  if (target.byteLength as number != 5 * {{.item.primitiveSizeBytes}} || target.byteOffset as number != 0
-    || target.length as number != 5){
+  if (target.byteLength.toDouble() != 5 * {{.item.primitiveSizeBytes}} || target.byteOffset.toDouble() != 0
+    || target.length.toDouble() != 5){
     console.println("Error: Actual bytes length: " + target.byteLength);
     return fail;
   }
@@ -569,8 +534,8 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffset(): number {
     return fail;
   }
 
-  if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}}
-    && target.length as int == 5){
+  if (target.byteLength.toInt() == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset.toInt() == 2*{{.item.primitiveSizeBytes}}
+    && target.length.toInt() == 5){
     return success;
   }
   console.println("Error: Actual bytes length: " + target.byteLength);
@@ -589,50 +554,12 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): number {
     return fail;
   }
 
-  if (target.byteLength as int == 4*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) return success;
+  if (target.byteLength.toInt() == 4*{{.item.primitiveSizeBytes}} && target.byteOffset.toInt() == 2*{{.item.primitiveSizeBytes}} && target.length.toInt() == 4) return success;
   console.println("Error: Actual bytes length: " + target.byteLength);
   console.println("Error: Actual bytes offset: " + target.byteOffset);
   console.println("Error: length: " + target.length);
   return fail;
 }
-
-function createTAFromNonEmptySharedArrayBufferOneParamWithOffset(): number {
-  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
-  let target: {{.item.objectType}};
-  try {
-    target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}});
-  } catch(e) {
-    console.println(e);
-    return fail;
-  }
-
-  if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}}
-    && target.length as int == 5){
-    return success;
-  }
-  console.println("withSharedArrayBuffer1 Error: Actual bytes length: " + target.byteLength);
-  console.println("withSharedArrayBuffer1 Error: Actual bytes offset: " + target.byteOffset);
-  console.println("withSharedArrayBuffer1 Error: Actual length: " + target.length);
-  return fail;
-}
-
-function createTAFromNonEmptySharedArrayBufferOneParamWithOffsetAndSize(): number {
-  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
-  let target: {{.item.objectType}};
-  try {
-    target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}}, 4);
-  } catch(e) {
-    console.println(e);
-    return fail;
-  }
-
-  if (target.byteLength as int == 4*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) return success;
-  console.println("withSharedArrayBuffer2 Error: Actual bytes length: " + target.byteLength);
-  console.println("withSharedArrayBuffer2 Error: Actual bytes offset: " + target.byteOffset);
-  console.println("withSharedArrayBuffer2 Error: length: " + target.length);
-  return fail;
-}
-
 
 function createTAFromEmptyArrayBufferTwoParams(): number {
   let ss = new ArrayBuffer(0);
@@ -643,7 +570,7 @@ function createTAFromEmptyArrayBufferTwoParams(): number {
     return fail;
   }
 
-  if (target.length as number != 0 || target.byteOffset as number != 0) {
+  if (target.length.toDouble() != 0 || target.byteOffset.toDouble() != 0) {
     return fail;
   }
 
@@ -653,7 +580,7 @@ function createTAFromEmptyArrayBufferTwoParams(): number {
     return fail;
   }
 
-  if (target.length as number != 0 || target.byteOffset as number != 0) {
+  if (target.length.toDouble() != 0 || target.byteOffset.toDouble() != 0) {
     return fail;
   }
 
@@ -669,7 +596,7 @@ function createTAFromNonEmptyArrayBufferTwoParams(): number {
     return fail;
   }
 
-  if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 0 && target.length == 5){
+  if (target.byteLength.toInt() == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset.toInt() == 0 && target.length == 5){
     return success;
   }
   console.println("Error: Actual bytes length: " + target.byteLength);

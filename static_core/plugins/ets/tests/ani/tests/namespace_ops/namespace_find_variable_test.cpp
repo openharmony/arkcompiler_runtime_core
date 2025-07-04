@@ -22,7 +22,7 @@ class NamespaceFindVariableTest : public AniTest {};
 TEST_F(NamespaceFindVariableTest, get_int_variable_1)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -33,7 +33,7 @@ TEST_F(NamespaceFindVariableTest, get_int_variable_1)
 TEST_F(NamespaceFindVariableTest, variable_env)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -43,7 +43,7 @@ TEST_F(NamespaceFindVariableTest, variable_env)
 TEST_F(NamespaceFindVariableTest, get_ref_variable)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
@@ -51,39 +51,80 @@ TEST_F(NamespaceFindVariableTest, get_ref_variable)
     ASSERT_NE(variable, nullptr);
 }
 
-TEST_F(NamespaceFindVariableTest, get_ref_invalid_variable_name)
+TEST_F(NamespaceFindVariableTest, invalid_nev)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
-    ASSERT_EQ(env_->Namespace_FindVariable(ns, "sss", &variable), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->c_api->Namespace_FindVariable(nullptr, ns, "s", &variable), ANI_INVALID_ARGS);
 }
 
-TEST_F(NamespaceFindVariableTest, invalid_args_ns)
+TEST_F(NamespaceFindVariableTest, invalid_namespace)
 {
     ani_variable variable {};
     ASSERT_EQ(env_->Namespace_FindVariable(nullptr, "s", &variable), ANI_INVALID_ARGS);
 }
 
-TEST_F(NamespaceFindVariableTest, invalid_args_name)
+TEST_F(NamespaceFindVariableTest, invalid_variable_name_1)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_variable variable {};
     ASSERT_EQ(env_->Namespace_FindVariable(ns, nullptr, &variable), ANI_INVALID_ARGS);
 }
 
+TEST_F(NamespaceFindVariableTest, invalid_variable_name_2)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "", &variable), ANI_NOT_FOUND);
+}
+
+TEST_F(NamespaceFindVariableTest, invalid_variable_name_3)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "sss", &variable), ANI_NOT_FOUND);
+}
+
+TEST_F(NamespaceFindVariableTest, invalid_variable_name_4)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "测试emoji🙂🙂", &variable), ANI_NOT_FOUND);
+}
+
 TEST_F(NamespaceFindVariableTest, invalid_args_result)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_variable_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "s", nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(NamespaceFindVariableTest, check_initialization)
+{
+    ani_namespace ns {};
+    ASSERT_EQ(env_->FindNamespace("namespace_find_variable_test.anyns", &ns), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_variable_test.anyns"));
+    ani_variable variable {};
+    ASSERT_EQ(env_->Namespace_FindVariable(ns, "x", &variable), ANI_OK);
+    ASSERT_FALSE(IsRuntimeClassInitialized("namespace_find_variable_test.anyns"));
 }
 
 }  // namespace ark::ets::ani::testing

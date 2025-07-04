@@ -30,8 +30,15 @@ export function main(): void {
 function testGlobalVars(): void {
 	s.add(58);
 	const obj = {};
+<<<<<<< HEAD
 	weakMap.set(obj, "58");
   
 	assertEq(s.has(58), true);
 	assertEq(weakMap.get(obj), "58");
+=======
+	weakMap.set(obj, '58');
+  
+	assertEq(s.has(58), true);
+	assertEq(weakMap.get(obj), '58');
+>>>>>>> OpenHarmony_feature_20250328
 }

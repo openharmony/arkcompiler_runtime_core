@@ -95,8 +95,18 @@ export native function asinh(v: double): double;
  * @param v angle in radians
  *
  * @returns Arcsine of angle `v`
+ *
+ * @example
+ * ```
+ * asin(doubleInf) = nan
+ * asin(doubleNegInf) = nan
+ * asin(doubleNaN) = nan
+ *
+ * @remark
+ * Implemented as native function,  @see `asin()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
  */
 export native function asin(v: double): double;
+
 /**
  *
  * @returns The angle in radians (between -π and π, inclusive) between the positive x-axis and the ray from (0, 0) to the point (x, y).
@@ -104,6 +114,12 @@ export native function asin(v: double): double;
  * @remark
  * The atan2() method measures the counterclockwise angle θ, in radians, between the positive x-axis and the point (x, y).
  * Note that the arguments to this function pass the y-coordinate first and the x-coordinate second.
+ *
+ * @example
+ * ```
+ * atan2(doubleInf, doubleInf)= 0.7853981633974483
+ * atan2(doubleNegInf, doubleNegInf)= -0.7853981633974483
+ * atan2(doubleNaN, doubleNaN)= -nan
  */
 export native function atan2(y: double, x: double): double;
 
@@ -146,11 +162,20 @@ export native function atan(v: double): double;
 /**
  * The cbrt() function returns the cube root of a number.
  *
- * @param v arbitrary number
+ * @param v arbitrary number.
+ *
+ * @returns Returns the cube root of number.
  *
  * @remark
  * 𝚌uberoot(𝚡) = ∛x = the unique y such that y³ = x.
-*/
+ *
+ * @example
+ * ```
+ * cbrt(doubleNaN) = nan
+ * cbrt(doubleInf) = inf
+ * cbrt(doubleNegInf) = -inf
+ * cbrt(-1) = -1
+ */
 export native function cbrt(v: double): double;
 
 /**
@@ -187,25 +212,41 @@ export native function ceil(v: double): double;
 export native function clz64(v: long): int;
 
 export function clz64(v: int) {
+<<<<<<< HEAD
     let extendedNum: long = (v as long);
+=======
+    let extendedNum: long = v.toLong();
+>>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 32) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: short) {
+<<<<<<< HEAD
     let extendedNum: long = (v as long);
+=======
+    let extendedNum: long = v.toLong();
+>>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: byte) {
+<<<<<<< HEAD
     let extendedNum: long = (v as long);
+=======
+    let extendedNum: long = v.toLong();
+>>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 8) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: char) {
+<<<<<<< HEAD
     let extendedNum: long = (v as long);
+=======
+    let extendedNum: long = v.toLong();
+>>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);
 }
@@ -283,9 +324,15 @@ export native function cos(v: double): double;
 /**
  * 2 raised to power `v`
  *
- * @param v power value
+ * @param v power value.
  *
- * @returns the value of a 2 raised to a power of `v`
+ * @returns the value of a 2 raised to a power of `v`.
+ *
+ * @example
+ * ```
+ * power2(doubleInf) = inf
+ * power2(doubleNegInf) = 0
+ * power2(doubleNaN) = nan
  */
 export function power2(v: double): double {
     return power(2, v);
@@ -349,6 +396,11 @@ export native function floor(v: double): double;
  *
  * @remark
  * Implemented as native function,  @see `hypot()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L540).
+ *
+ * @example
+ * hypot(doubleInf) = inf
+ * hypot(doubleNegInf) = inf
+ * hypot(doubleNaN) = nan
  */
 export native function hypot(u: double, v: double): double;
 
@@ -370,15 +422,15 @@ export native function log10(v: double): double;
 /**
  * Natural logarithm of (1 + `v`)
  *
- * @param v arbitrary number
+ * @param v A numeric expression.
  *
- * @returns The square root of the sum of squares of its arguments
+ * @returns Returns the natural logarithm of 1 + x.
  *
  * @example
  * ```
- * log1p(doubleNaN) = -nan
+ * log1p(doubleNaN) = nan
  * log1p(doubleInf) = inf
- * log1p(doubleNegInf) = -nan
+ * log1p(doubleNegInf) = nan
  */
 export function log1p(v: double): double {
     return log(1.0 + v);
@@ -643,7 +695,24 @@ export function min(v: char, u: char): char {
     }
 }
 
-// Remainder of `v / u`, reunded towards zero
+/**
+ * Remainder of `v / u`, reunded towards zero
+ *
+ * @param u dividend, which is the number to be divided.
+ *
+ * @param v divisor, which is the number by which the dividend is divided.
+ *
+ * @returns The remainder of the division of `v` by `u`.
+ *
+ * @remark
+ * Implemented as native function,  @see `power()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L54).
+ *
+ * @example
+ * ```
+ * mod(doubleInf, doubleInf) = nan
+ * mod(doubleNegInf, doubleNegInf) = nan
+ * mod(doubleNaN, doubleNaN) = nan
+ */
 export native function mod(u: double, v: double): double;
 
 /**
@@ -696,7 +765,23 @@ export native function rem(v: double, u: double): double;
  */
 export native function round(v: double): double;
 
-// `v` * 2 ** `n`
+/**
+ * Multiplies `v` by 2 raised to the power of `n` (`v * 2 ** n`).
+ *
+ * @param v The base value to be scaled.
+ * @param n The exponent value, indicating the power of 2 to scale `v` by.
+ *
+ * @returns The result of `v * 2 ** n`, computed as a floating-point number.
+ *
+ * @remark
+ * Implemented as a native function, @see [scalbn intrinsic](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ *
+ * @example
+ * ```
+ * scalbn(doubleNaN, 5) = nan
+ * scalbn(doubleInf, 10) = inf
+ * scalbn(doubleNegInf, -5) = -inf
+ */
 export function scalbn(v: double, n: int): double {
     return v * power(2, n);
 }
@@ -719,11 +804,14 @@ export native function signbit(v: double): boolean;
 
 /**
  * @param v arbitrary number
+ *
  * @returns sign of `v`
+ *
  * @example
  * sign(0) = 0
- * sign(-Infinity) = -1
- * sign(NaN) ==== NaN
+ * sign(doubleInf) = 1
+ * sign(doubleNegInf) = -1
+ * sign(doubleNaN) = nan
  */
 export function sign(v: double): int {
     if(v < 0){
@@ -738,7 +826,22 @@ export function sign(v: double): int {
     throw new Error("NaN passed to sign");
 }
 
-// Hyperbolic sine of `v`
+/**
+ * Hyperbolic sine of a number
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the hyperbolic sine of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `sinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ *
+ * @example
+ * ```
+ * sinh(doubleInf) = inf
+ * sinh(doubleNegInf) = -inf
+ * sinh(doubleNaN) = nan
+ */
 export native function sinh(v: double): double;
 
 /**
@@ -772,16 +875,46 @@ export native function sin(v: double): double;
  *
  * @example
  * ```
- * sqrt(doubleNaN) = -nan
+ * sqrt(doubleNaN) = nan
  * sqrt(doubleInf) = inf
- * sqrt(doubleNegInf) = -nan
+ * sqrt(doubleNegInf) = nan
+ * sqrt(-1.0) = nan
  */
 export native function sqrt(v: double): double;
 
-// Hyperbolic tangent of `v`
+/**
+ * Hyperbolic tangent of a number.
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the hyperbolic tangent of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `tanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * @example
+ * ```
+ * tanh(doubleInf) = 1.0
+ * tanh(doubleNegInf) = -1.0
+ * tanh(doubleNaN) = nan
+ */
 export native function tanh(v: double): double;
 
-// Tangent of `v`
+/**
+ * Tangent of a number
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the tangent of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `tan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ *
+ * @example
+ * ```
+ * tan(doubleInf) = nan
+ * tan(doubleNegInf) = nan
+ * tan(doubleNaN) = nan
+ */
 export native function tan(v: double): double;
 
 /**
@@ -815,7 +948,17 @@ export function seedRandom(value: long): void {}
  */
 export native function random(): double;
 
-export function log10(v: int): int throws {
+/**
+ * Base 10 logarithm of a number
+ *
+ * @param v An integer expression.
+ *
+ * @throws ArgumentOutOfRangeException if v < 1.
+ *
+ * @returns Returns the base 10 logarithm of a number.
+ *
+ */
+export function log10(v: int): int {
     if (v < 1) {
         throw new ArgumentOutOfRangeException("Integer argument for log10 should be positive");
     }
@@ -826,20 +969,28 @@ export function log10(v: int): int throws {
 }
 
 /**
- * "imul" method returns the result of the C-like 32-bit manipulation of the two parameters
+ * C-like 32-bit manipulation of the two numbers
  *  a cast to i32
  *  b cast to i32
  *  return (a * b) % 2 ** 32
  *
- *  imul(Infinity, 1) // 0
- *  imul(NaN, 1) // 0
- *  imul(2.5, 2.5) // 4
- *  imul(-5, 5.05) // 25
+ * @param a First number
  *
- *  ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.imul
+ * @param b Second number
+ *
+ * @returns Returns the result of 32-bit multiplication of two numbers.
  *
  * @remark
+ * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.imul
  * Implemented as native function,  @see `imul()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L327).
+ *
+ * @example
+ * ```
+ * imul(doubleInf, 1) = 0
+ * imul(doubleNegInf, 1) = 0
+ * imul(doubleNaN, 1) = 0
+ * imul(2.5, 2.5) = 4
+ * imul(-5, 5.05) = 25
  */
 export native function imul(a: double, b: double): int;
 

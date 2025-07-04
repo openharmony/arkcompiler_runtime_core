@@ -23,30 +23,34 @@ cases:
       use: |-
         let cls = new Cls()
         let z = cls.foo<number, boolean>(1.0, true)
-        assertTrue(typeof z == 'object' && typeof z[0] == 'number' && typeof z[1] == 'boolean')
-        assertTrue(z[0] == 1.0 && z[1])
+        arktest.assertTrue(typeof z == 'object' && typeof z[0] == 'number' && typeof z[1] == 'boolean')
+        arktest.assertTrue(z[0] == 1.0 && z[1])
 
         let y = cls.foo<Error, string>(new Error(), "abc")
-        assertTrue(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
-        assertTrue(y[0] instanceof Error && y[1] == "abc")
+        arktest.assertTrue(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
+        arktest.assertTrue(y[0] instanceof Error && y[1] == "abc")
 
         let x = cls.foo<[Number, Boolean], [Error, string]>(z, y)
+<<<<<<< HEAD
         assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
+=======
+        arktest.assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
+>>>>>>> OpenHarmony_feature_20250328
 
         let w = cls.foo<null, undefined>(null, undefined)
-        assertTrue(w[0] === null && w[1] === undefined)
+        arktest.assertTrue(w[0] === null && w[1] === undefined)
     - decl: |-
         class Cls {
             // no constraints, union
             foo<T, U>(p: T, q: U): T|U {
-                return p!.toString() > q!.toString() ? p : q
+                return (p! as object).toString() > (q! as object).toString() ? p : q
             }
         }
       use: |-
         let cls = new Cls()
 
         let v = cls.foo<number, number>(1.0, 11.0)
-        assertTrue(v as number == 11.0)
+        arktest.assertTrue(v as number == 11.0)
 
         let w = cls.foo<[string, string, string, string], [number, number]>(["a", "b", "c", "d"], [1, 2])
     - decl: |-
@@ -66,7 +70,7 @@ cases:
       use: |-
         let err = new Error()
         let z = new Foo().foo<float, Error>(42f, err)
-        assertTrue(z[0][0] == 42f && z[0][4] == 42f && z[1][0] == err && z[1][4] == err)
+        arktest.assertTrue(z[0][0] == 42f && z[0][4] == 42f && z[1][0] == err && z[1][4] == err)
     - decl: |-
         class A {}
         class B extends A {}
@@ -79,12 +83,12 @@ cases:
         }
       use: |-
         let cls = new Cls()
-        assertTrue(cls.foo<Object, Object>(new Object(), new Object()))
-        assertTrue(cls.foo<A, Object>(new A(), new Object()))
-        assertTrue(cls.foo<B, Object>(new B(), new Object()))
-        assertTrue(cls.foo<A, A>(new A(), new A()))
-        assertTrue(cls.foo<B, A>(new B(), new A()))
-        assertTrue(cls.foo<B, B>(new B(), new B()))
+        arktest.assertTrue(cls.foo<Object, Object>(new Object(), new Object()))
+        arktest.assertTrue(cls.foo<A, Object>(new A(), new Object()))
+        arktest.assertTrue(cls.foo<B, Object>(new B(), new Object()))
+        arktest.assertTrue(cls.foo<A, A>(new A(), new A()))
+        arktest.assertTrue(cls.foo<B, A>(new B(), new A()))
+        arktest.assertTrue(cls.foo<B, B>(new B(), new B()))
     - decl: |-
         class A {}
         class B extends A {}
@@ -97,7 +101,7 @@ cases:
         }
       use: |-
         let cls = new Cls
-        assertTrue(cls.foo<C, boolean>(new C(), true))
-        assertTrue(cls.foo<B, B>(new B(), new B()))
-        assertTrue(cls.foo<C, double>(new C(), 42.0))
-        assertTrue(cls.foo<B, null>(new B(), null))
+        arktest.assertTrue(cls.foo<C, boolean>(new C(), true))
+        arktest.assertTrue(cls.foo<B, B>(new B(), new B()))
+        arktest.assertTrue(cls.foo<C, double>(new C(), 42.0))
+        arktest.assertTrue(cls.foo<B, null>(new B(), null))

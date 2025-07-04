@@ -13,7 +13,7 @@
 
 [MAIN]
 ignore=.git
-py-version=3.8
+py-version=3.10
 recursive=yes
 
 [MESSAGES CONTROL]

@@ -16,7 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
-    const suite = new ArkTestsuite("ArrayList API tests");
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
 
     suite.addTest("ArrayList replaceAllElements with constant value", testReplaceAllElementsWithConstantValue);
     suite.addTest("ArrayList replaceAllElements with lambda", testReplaceAllElementsWithLambda);
@@ -48,7 +48,7 @@ function testReplaceAllElementsWithConstantValue() {
         return TestData.testNumber3;
     });
     for (let i: number = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.testNumber3, `Element at index ${i} should match`);
     }
 }
 
@@ -59,7 +59,7 @@ function testReplaceAllElementsWithLambda() {
         return value + TestData.testNumber3;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i] + TestData.testNumber3, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i] + TestData.testNumber3, `Element at index ${i} should match`);
     }
 }
 
@@ -70,7 +70,7 @@ function testReplaceAllElementsWithLambdaAndIndex() {
         return value + index;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i] + i, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i] + i, `Element at index ${i} should match`);
     }
 }
 
@@ -78,11 +78,11 @@ function testReplaceAllElementsWithLambdaIndexAndTempArrayList() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
     arrayList.replaceAllElements((value: number, index: number, tempArrayList: ArrayList<number>): number => {
-        assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
+        arktest.assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
         return value + tempArrayList[index];
     });
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i] * 2, `Element at index ${i} should match`);
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i] * 2, `Element at index ${i} should match`);
     }
 }
 
@@ -93,7 +93,7 @@ function testForEachNoParameterFunction() {
     arrayList.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
+    arktest.assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
 }
 
 function testForEachFunctionWithValue() {
@@ -106,8 +106,8 @@ function testForEachFunctionWithValue() {
             forEachFlag = TestData.testNumber1;
         }
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
 }
 
 function testForEachFunctionWithValueAndIndex() {
@@ -121,8 +121,8 @@ function testForEachFunctionWithValueAndIndex() {
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
 }
 
 function testForEachFunctionWithValueIndexAndTempArrayList() {
@@ -131,15 +131,15 @@ function testForEachFunctionWithValueIndexAndTempArrayList() {
     let forEachCount: number = 0;
     let forEachFlag: number = 0;
     arrayList.forEach((value: number, index: number, tempArrayList: ArrayList<number>) => {
-        assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
+        arktest.assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
         if (value != arrayList[forEachCount] || index != forEachCount ||
             tempArrayList[forEachCount] != arrayList[forEachCount]) {
             forEachFlag = TestData.testNumber1;
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.testNumber5, "ForEach count should match arrayList length");
 }
 
 function testForEachChangeElements() {
@@ -150,7 +150,7 @@ function testForEachChangeElements() {
         value = TestData.testNumber12;
     });
     for (let i: int = 0; i < arrayList.length; i++) {
-        assertEQ(arrayList[i], TestData.forNumber[i], "ForEach should keep all elements the same");
+        arktest.assertEQ(arrayList[i], TestData.forNumber[i], "ForEach should keep all elements the same");
     }
 }
 

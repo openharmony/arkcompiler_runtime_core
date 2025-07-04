@@ -28,13 +28,13 @@ class A<T> {
 
 function main(): void {
   let x1 = new A<Byte>(1)
-  assertTrue( x1.data instanceof Byte)
+  arktest.assertTrue( x1.data instanceof Byte)
   let x2 = new A<Short>(2)
-  assertTrue( x2.data instanceof Short)
+  arktest.assertTrue( x2.data instanceof Short)
   let x3 = new A<Int>(3)
-  assertTrue( x3.data instanceof Int)
+  arktest.assertTrue( x3.data instanceof Int)
   let x4 = new A<Long>(4)
-  assertTrue( x4.data instanceof Long)
+  arktest.assertTrue( x4.data instanceof Long)
   let x5 = new A<BigInt>(5)
-  assertTrue( x5.data instanceof BigInt)
+  arktest.assertTrue( x5.data instanceof BigInt)
 }

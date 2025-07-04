@@ -28,6 +28,6 @@
  function main() {
      let obj: Object = {{c.init}}
      let target: {{c.type}} = convertObject(obj)
-     assertEQ(target{{c.call}}, {{c.expected}})
+     arktest.assertEQ(target{{c.call}}, {{c.expected}})
  }
  {% endfor %}

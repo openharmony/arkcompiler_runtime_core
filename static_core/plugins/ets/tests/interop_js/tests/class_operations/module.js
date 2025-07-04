@@ -101,6 +101,10 @@ export class Kitten {
     constructor(id, name) {
       this.id = id;
       this.name = name;
+<<<<<<< HEAD
+=======
+      this.male = false;
+>>>>>>> OpenHarmony_feature_20250328
     }
   }
 

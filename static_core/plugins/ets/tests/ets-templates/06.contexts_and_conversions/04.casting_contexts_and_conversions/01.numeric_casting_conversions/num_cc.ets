@@ -24,7 +24,7 @@ let d{{loop.index}}: {{c.to_type}} = {{v.dval}}
 
 function main(): int {
     let d: {{c.to_type}}
-    d = s{{loop.index}} as {{c.to_type}}
+    d = {{c.from_type}}.to{{c.to_type}}(s{{loop.index}})
     if (d != d{{loop.index}}) {
         return 1
     }

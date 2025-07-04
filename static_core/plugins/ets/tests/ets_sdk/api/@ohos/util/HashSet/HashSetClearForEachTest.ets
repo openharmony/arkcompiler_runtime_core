@@ -14,12 +14,15 @@
  */
 
 import {HashSet} from "@ohos.util.HashSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Clear Foreach API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Clear Foreach API tests")
 
     suite.addTest("HashSet clear data", testClearData)
     suite.addTest("HashSet clear the null hashSet", testClearEmptyHashSet)
@@ -38,15 +41,15 @@ function testClearData() {
     let result1 = hashSet.isEmpty();
     hashSet.clear();
     let result2 = hashSet.has("squirrel");
-    assertEQ(result1, false, "The hashSet should not be empty");
-    assertEQ(result2, false, "The hashSet should be cleared");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result1, false, "The hashSet should not be empty");
+    arktest.assertEQ(result2, false, "The hashSet should be cleared");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testClearEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.clear();
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testClearBeforeAddData() {
@@ -56,9 +59,9 @@ function testClearBeforeAddData() {
     let result1 = hashSet.isEmpty();
     hashSet.add("squirrel");
     let result2 = hashSet.has("squirrel");
-    assertEQ(result1, true, "The hashSet should be cleared");
-    assertEQ(result2, true, "The hashSet should contain the specified value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result1, true, "The hashSet should be cleared");
+    arktest.assertEQ(result2, true, "The hashSet should contain the specified value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testForEachNoReference() {
@@ -69,7 +72,7 @@ function testForEachNoReference() {
     hashSet.forEach(() => {
         count++;
     });
-    assertEQ(count, 2, "The hashSet forEach should iterate over all elements");
+    arktest.assertEQ(count, 2, "The hashSet forEach should iterate over all elements");
 }
 
 function testForEachValueReference() {
@@ -79,7 +82,7 @@ function testForEachValueReference() {
     let flag: boolean = false;
     hashSet.forEach((value: string | null) => {
         flag = hashSet.has(value);
-        assertEQ(flag, true, "The hashSet forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The hashSet forEach should iterate over all values");
     });
 }
 
@@ -90,7 +93,7 @@ function testForEachKeyValueReference() {
     let flag: boolean = false;
     hashSet.forEach((value: string | null, key: string | null) => {
         flag = hashSet.has(value);
-        assertEQ(flag, true, "The hashSet forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The hashSet forEach should iterate over all values");
     });
 }
 
@@ -101,6 +104,6 @@ function testForEachThreeReferences() {
     let flag: boolean = false;
     hashSet.forEach((value: string | null, key: string | null, tempHashSet: HashSet<string | null>) => {
         flag = tempHashSet.has(value);
-        assertEQ(flag, true, "The hashSet forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The hashSet forEach should iterate over all values");
     });
 }

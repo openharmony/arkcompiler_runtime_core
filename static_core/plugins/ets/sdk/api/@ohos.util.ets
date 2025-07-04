@@ -17,6 +17,10 @@ import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: number = 401;
 const percentRate = 100;
+<<<<<<< HEAD
+=======
+const syntaxErrorCode: number = 10200002;
+>>>>>>> OpenHarmony_feature_20250328
 
 function createBusinessError(code: number, message: string) {
     let err = new BusinessError();
@@ -132,6 +136,7 @@ export namespace util {
         }
 
         public getCreateCount(): number {
+<<<<<<< HEAD
             return this.createCount as number;
         }
 
@@ -149,6 +154,25 @@ export namespace util {
 
         public getPutCount(): number {
             return this.putCount as number;
+=======
+            return this.createCount.toDouble();
+        }
+
+        public getMissCount(): number {
+            return this.missCount.toDouble();
+        }
+
+        public getRemovalCount(): number {
+            return this.evictionCount.toDouble();
+        }
+
+        public getMatchCount(): number {
+            return this.hitCount.toDouble();
+        }
+
+        public getPutCount(): number {
+            return this.putCount.toDouble();
+>>>>>>> OpenHarmony_feature_20250328
         }
 
         public $_iterator(): IterableIterator<[K, V]> {
@@ -295,11 +319,19 @@ export namespace util {
             let bytes: Array<number> = new Array<number>();
 
             for (let i = 0; i < cleaned.length; i++) {
+<<<<<<< HEAD
                 let ch: string = cleaned[i];
                 if (ch == "=") {
                     break;
                 }
                 let index: int = table.indexOf(ch) as int;
+=======
+                let ch = cleaned[i];
+                if (ch == c'=') {
+                    break;
+                }
+                let index: int = table.indexOf(ch).toInt();
+>>>>>>> OpenHarmony_feature_20250328
                 if (index == -1) {
                     continue;
                 }
@@ -319,7 +351,10 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Uint8Array containing the Base64 encoded string.
          */
-        encodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+        encodeSync(src: Uint8Array, options?: Type): Uint8Array {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             let encoded: string = Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
             let result: Uint8Array = new Uint8Array(encoded.length);
             for (let i: int = 0; i < encoded.length; i++) {
@@ -334,17 +369,31 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A string containing the Base64 encoded result.
          */
-        encodeToStringSync(src: Uint8Array, options: Type = Type.BASIC): string {
+        encodeToStringSync(src: Uint8Array, options?: Type): string {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Base64Helper.encodeBase64(src, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE, options === Type.MIME || options === Type.MIME_URL_SAFE);
         }
 
         /**
          * Synchronously decodes a Base64 encoded Uint8Array into a byte array.
-         * @param src A Uint8Array containing the Base64 encoded string.
+         * @param src A Uint8Array containing the Base64 encoded string or the Base64 encoded string.
          * @param options The decoding options (Base64 type).
          * @returns A Uint8Array with the decoded bytes.
          */
-        decodeSync(src: Uint8Array, options: Type = Type.BASIC): Uint8Array {
+        decodeSync(src: Uint8Array | string, options?: Type): Uint8Array {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
+            if (src instanceof Uint8Array) {
+                return this.decodeSyncUint8Array(src, options);
+            } else {
+                return this.decodeSyncString(src, options);
+            }
+        }
+
+        private decodeSyncUint8Array(src: Uint8Array, options: Type): Uint8Array {
             let base64String: string;
             let charArray: Array<string> = new Array<string>();
             for (let i: int = 0; i < src.length; i++) {
@@ -357,13 +406,7 @@ export namespace util {
             return Base64Helper.decodeBase64(base64String, options === Type.BASIC_URL_SAFE || options === Type.MIME_URL_SAFE);
         }
 
-        /**
-        * Synchronously decodes a Base64 encoded string into a byte array.
-        * @param src The Base64 encoded string.
-        * @param options The decoding options (Base64 type).
-        * @returns A Uint8Array with the decoded bytes.
-        */
-        decodeSync(src: string, options: Type = Type.BASIC): Uint8Array {
+        private decodeSyncString(src: string, options: Type): Uint8Array {
             let newString: string = src;
             if (options === Type.MIME || options === Type.MIME_URL_SAFE) {
                 newString = src.replace(new RegExp("[\\r\\n]", "g"), "");
@@ -377,27 +420,35 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Promise that resolves to a Uint8Array containing the Base64 encoded string.
          */
-        encode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+        encode(src: Uint8Array, options?: Type): Promise<Uint8Array> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Promise.resolve(this.encodeSync(src, options));
         }
 
         /**
          * Asynchronously decodes a Base64 encoded string into a byte array.
-         * @param src The Base64 encoded string.
+         * @param src The Base64 encoded string or a Uint8Array containing the Base64 encoded string.
          * @param options The decoding options (Base64 type).
          * @returns A Promise that resolves to a Uint8Array with the decoded bytes.
          */
-        decode(src: string, options: Type = Type.BASIC): Promise<Uint8Array> {
+        decode(src: Uint8Array | string, options?: Type): Promise<Uint8Array> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
+            if (src instanceof Uint8Array) {
+                return this.decodeUint8Array(src, options);
+            } else {
+                return this.decodeString(src, options);
+            }
+        }
+
+        private decodeString(src: string, options: Type): Promise<Uint8Array> {
             return Promise.resolve(this.decodeSync(src, options));
         }
 
-        /**
-         * Asynchronously decodes a Base64 encoded Uint8Array into a byte array.
-         * @param src A Uint8Array containing the Base64 encoded string.
-         * @param options The decoding options (Base64 type).
-         * @returns A Promise that resolves to a Uint8Array with the decoded bytes.
-         */
-        decode(src: Uint8Array, options: Type = Type.BASIC): Promise<Uint8Array> {
+        private decodeUint8Array(src: Uint8Array, options: Type): Promise<Uint8Array> {
             return Promise.resolve(this.decodeSync(src, options));
         }
 
@@ -407,7 +458,10 @@ export namespace util {
          * @param options The encoding options (Base64 type).
          * @returns A Promise that resolves to a string containing the Base64 encoded result.
          */
-        encodeToString(src: Uint8Array, options: Type = Type.BASIC): Promise<string> {
+        encodeToString(src: Uint8Array, options?: Type): Promise<string> {
+            if (options === undefined) {
+                options = Type.BASIC;
+            }
             return Promise.resolve(this.encodeToStringSync(src, options));
         }
     }
@@ -440,15 +494,12 @@ export namespace util {
     * @returns Returns: <string> The formatted string
     */
     export function format(s: string, ...args: Object[]): string {
-        let preI: int = 0
-        let i: int = 0
-        let argCounter = 0
-        const flags: string = "cdfijoOs"
-        let res = new StringBuilder
-        let ss = ""
-        if (args.length == 0) {
-            return s.replaceAll("%%", "%")
+        // arrays are invariant, need to copy Objects to NullishTypes
+        let a = new Array<NullishType>(args.length)
+        for (let i = 0; i < args.length; ++i) {
+            a[i] = args[i]
         }
+<<<<<<< HEAD
 
         while ((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
             res.append(s.substring(preI, preI + i))
@@ -471,6 +522,9 @@ export namespace util {
         let strArgsList = UtilHelper.joinLastArgs(argCounter, ...args)
         let resStr = res.toString()
         return resStr.length == 0 ? res + strArgsList.slice(1) : res + strArgsList
+=======
+        return (new Formatter).format(s, a)
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     export function generateRandomUUID(entropyCache?: boolean): string {
@@ -651,7 +705,11 @@ export namespace util {
             }
         }
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> OpenHarmony_feature_20250328
     export interface TextDecoderOptions {
         fatal?: boolean;
         ignoreBOM?: boolean;
@@ -672,8 +730,8 @@ export namespace util {
         private encoding_: string = "utf-8";
         private fatal_: boolean = false;
         ignoreBOM_: boolean = false;
-        const CONVERTER_FLAGS_FATAL = 0x2;
-        const CONVERTER_FLAGS_IGNORE_BOM = 0x4;
+        readonly CONVERTER_FLAGS_FATAL = 0x2;
+        readonly CONVERTER_FLAGS_IGNORE_BOM = 0x4;
         private nativeDecoder_: long;
 
         constructor(encoding?: string, options?: TextDecoderOptions) {
@@ -730,6 +788,241 @@ export namespace util {
         constructor(outRead: int, outWritten: int) {
             this.read = outRead;
             this.written = outWritten;
+        }
+    }
+
+    export class RationalNumber {
+        private mnum: number = 0;
+        private mden: number = 0;
+        private sign: number;
+
+        constructor() {}
+
+        /**
+         * Check whether the string is number.
+         * @param { string } str a rationalNumber object of the string type.
+         * @returns { boolean } when the str can be parsed into a finite number return true otherwise return false.
+         */
+        static isNumeric(str: string): boolean {
+            let val = Double.parseFloat(str)
+            return !isNaN(val) && isFinite(val);
+        }
+
+        /**
+         * Used to create a RationalNumber instance with a given numerator and denominator.
+         * @param { number } num represents the numerator.
+         * @param { number } den represents the denominator.
+         * @returns { RationalNumber } return a RationalNumber object.
+         */
+        static parseRationalNumber(num: number, den: number): RationalNumber {
+            if (!Number.isInteger(num) || !Number.isInteger(den)) {
+                console.error('parseRationalNumber: The type of Parameter must be integer');
+            }
+            let sign = (num < 0) !== (den < 0) ? -1 : 1;
+            num = Math.abs(num);
+            den = Math.abs(den);
+            let ratNum = new RationalNumber();
+            if (den === 0) {
+                if (num !== 0) {
+                    ratNum.mnum = sign;
+                    ratNum.mden = 0;
+                } else {
+                    ratNum.mnum = 0;
+                    ratNum.mden = 0;
+                }
+            } else if (num === 0) {
+                ratNum.mnum = 0;
+                ratNum.mden = 1;
+            } else {
+                let gnum = RationalNumber.getCommonFactor(num, den);
+                if (gnum !== 0) {
+                    ratNum.mnum = (num / gnum) * sign;
+                    ratNum.mden = den / gnum;
+                }
+            }
+            return ratNum;
+        }
+
+        /**
+         * Create a RationalNumber object based on a given string.
+         * @param { string } str represents a string.
+         * @returns { RationalNumber } return a RationalNumber object.
+         */
+        static createRationalFromString(str: string): RationalNumber {
+            const regex = new RegExp('^(.*)([:\\/])(.*)$');
+            const match = str.match(regex);
+            if (!match) {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The type of ${str} must be effective string`));
+            }
+            const str1 = match[1];
+            const separator = match[2];
+            const str2 = match[3];
+            if (RationalNumber.isNumeric(str1) && RationalNumber.isNumeric(str2)) {
+                const num1 = Number(str1);
+                 const num2 = Number(str2);
+                if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
+                    console.error('createRationalFromString: The type of Parameter must be integer string');
+                }
+                return RationalNumber.parseRationalNumber(num1, num2);
+            } else {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The type of ${str} must be character string`));
+            }
+        }
+
+        /**
+         * Compares the current RationalNumber object with the target RationalNumber object and returns the comparison result.
+         * @param { RationalNumber } other RationalNumber object.
+         * @returns { number } if equal return 0, If the givens smaller than the current return 1, otherwise return -1.
+         */
+        public compare(other: RationalNumber): number {
+            if (this.mnum === other.mnum && this.mden === other.mden) {
+                return 0;
+            } else if (this.isNaN()) {
+                return 1;
+            } else if (other.isNaN()) {
+                return -1;
+            } else if ((this.mden === 0 && this.mnum > 0) || (other.mden === 0 && other.mnum < 0)) {
+                return 1;
+            } else if ((this.mden === 0 && this.mnum < 0) || (other.mden === 0 && other.mnum > 0)) {
+                return -1;
+            }
+            let thisnum: number = this.mnum * other.mden;
+            let othernum: number = other.mnum * this.mden;
+            if (thisnum < othernum) {
+                return -1;
+            } else if (thisnum > othernum) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        /**
+         * Compare the current RationalNumber object to the given object equally.
+         * @param { object } obj the given object.
+         * @returns { boolean } if the given object is same as the current object return true otherwise return false.
+         */
+        public equals(obj: object): boolean {
+            if (!(obj instanceof RationalNumber)) {
+                return false;
+            }
+            return this.compare(obj) === 0;
+        }
+
+        /**
+         * Gets the value of the current RationalNumber object as an integer or float number.
+         *
+         * @returns { number } returns the value of an integer or float number.
+         */
+        public valueOf(): number {
+            if (this.mnum > 0 && this.mden === 0) {
+                return Number.POSITIVE_INFINITY;
+            } else if (this.mnum < 0 && this.mden === 0) {
+                return Number.NEGATIVE_INFINITY;
+            } else if (this.isNaN()) {
+                return Number.NaN;
+            } else {
+                return this.mnum / this.mden;
+            }
+        }
+
+        /**
+         * Gets the greatest common divisor of two specified integers.
+         * @param { number } firNum the integer.
+         * @param { number } SecNum the integer.
+         * @returns { number } returns the greatest common divisor of firNum and SecNum.
+         */
+        static getCommonFactor(firNum: number, SecNum: number): number {
+            if (firNum === 0 || SecNum === 0) {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The Parameter cannot be zero`));
+            }
+            if (!Number.isInteger(firNum) || !Number.isInteger(SecNum)) {
+                console.error('getCommonFactor: The type of Parameter must be integer');
+            }
+            return RationalNumber.getGCD(firNum, SecNum);
+        }
+
+        private static getGCD(firNum: number, SecNum: number): number {
+            let temp: number = 0;
+            if (firNum < SecNum) {
+                temp = firNum;
+                firNum = SecNum;
+                SecNum = temp;
+            }
+            while (firNum % SecNum !== 0) {
+                temp = firNum % SecNum;
+                firNum = SecNum;
+                SecNum = temp;
+            }
+            return SecNum;
+        }
+
+        /**
+         * Gets the denominator of the current RationalNumber object.
+         *
+         * @returns { number } returns the denominator.
+         */
+        public getDenominator(): number {
+            return this.mden;
+        }
+
+        /**
+         * Gets the numerator of the current RationalNumber object.
+         *
+         * @returns { number } returns the numerator.
+         */
+        public getNumerator(): number {
+            return this.mnum;
+        }
+
+        /**
+         * Check if the current RationalNumber object represents a finite value.
+         *
+         * @returns { boolean } if the denominator is not 0 return true otherwise return false.
+         */
+        public isFinite(): boolean {
+            return this.mden !== 0;
+        }
+
+        /**
+         * Check if the current RationalNumber object represents a finite value.
+         *
+         * @returns { boolean } if both the denominator and the numerator are 0 return true otherwise return false.
+         */
+        public isNaN(): boolean {
+            return this.mnum === 0 && this.mden === 0;
+        }
+
+        /**
+         * Check whether the current RationalNumber object is 0.
+         *
+         * @returns { boolean } if the value represented by the current object is 0 return true Otherwise return false.
+         */
+        public isZero(): boolean {
+            return this.mnum === 0 && this.mden !== 0;
+        }
+
+        /**
+         * Gets the string representation of the current RationalNumber object.
+         *
+         * @returns { string } returns a string in Numerator/Denominator format if the denominator is 0 return Infinity.
+         * If both the numerator and denominator are 0 return NaN.
+         */
+        public toString(): string {
+            let buf: string;
+            if (this.isNaN()) {
+                buf = 'NaN';
+            } else if (this.mnum > 0 && this.mden === 0) {
+                buf = 'Infinity';
+            } else if (this.mnum < 0 && this.mden === 0) {
+                buf = '-Infinity';
+            } else {
+                buf = String(this.mnum) + '/' + String(this.mden);
+            }
+            return buf;
         }
     }
 
@@ -801,6 +1094,7 @@ export namespace util {
         private static native doEncodeInfoUint8Array(
             input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
     }
+<<<<<<< HEAD
 
     export class UtilHelper {
 
@@ -1084,4 +1378,667 @@ export namespace util {
 
     }  // class UtilHelper
 }
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
+    export class StringDecoder {
+        static { loadLibrary("ets_sdk_native"); }
+
+        private encoding_: string = 'utf-8';
+        private nativeDecoder_: long;
+        private static knownEncodings: FixedArray<string> = [
+            "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
+            "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
+            "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
+            "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
+            "windows-874", "windows-1250", "windows-1251", "windows-1252",
+            "windows-1253", "windows-1254", "windows-1255", "windows-1256",
+            "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
+            "shift_jis", "euc-kr", "x-mac-cyrillic"
+        ];
+
+        constructor(encoding?: string)
+        {
+            if (!encoding) {
+                this.encoding_ = 'utf-8';
+            } else {
+                let tempString: string = encoding.toLowerCase();
+                let flag: boolean = StringDecoder.checkEncodingFormat(tempString);
+                if (!flag) {
+                    throw createBusinessError(TypeErrorCodeId,
+                        `Wrong encoding format, the current '${encoding}' format is not support.`);
+                }
+                this.encoding_ = tempString;
+            }
+            this.bindNativeStringDecoder(this.encoding_);
+        }
+
+        write(chunk: string | Uint8Array): string
+        {
+            if (chunk instanceof string) {
+                return chunk;
+            }
+            return this.doWrite(chunk);
+        }
+
+        end(chunk?: string | Uint8Array): string
+        {
+            if (chunk && chunk instanceof string) {
+                return chunk;
+            }
+            return this.doEnd(chunk);
+        }
+
+        private static checkEncodingFormat(encoding: string): boolean
+        {
+            for (const enc of StringDecoder.knownEncodings) {
+                if (enc == encoding) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private native bindNativeStringDecoder(encoding: string): void;
+
+        private native doWrite(chunk: Uint8Array): string;
+
+        private native doEnd(chunk?: Uint8Array): string;
+    }
+
+    export class UtilHelper {
+
+        static {
+            loadLibrary("ets_sdk_native")
+        }
+
+        static native generateRandomUUID(entropyCache: boolean): string
+
+        static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
+
+    internal static objectToString(obj: Object, full: boolean = false): string {
+            return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
+        }
+
+        private static isNullObject(obj: NullishType): boolean {
+            return (obj == undefined) || (obj == null)
+        }
+
+        private static isFunction(obj: Object): boolean {
+            return (typeof obj === 'function')
+        }
+
+        private static isObject(obj: Object): boolean {
+            return (typeof obj === 'object')
+        }
+
+        private static isString(obj: Object): boolean {
+            return (typeof obj === 'string')
+        }
+
+        private static isArray(obj: Object): boolean {
+            return obj instanceof Array
+        }
+
+        private stringifySubObject(delimiter: string, subObj: NullishType, subObjName: string, depth: number, full: boolean = false): string {
+
+            if (UtilHelper.isNullObject(subObj)) {
+                return UtilHelper.nullObjectDescription(subObjName) + ',' + delimiter
+            }
+
+            let strB = new StringBuilder
+            subObj = __narrowAny(subObj)
+
+            if (UtilHelper.isArray(subObj!)) {
+                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
+            } else if (UtilHelper.isObject(subObj!)) {
+                strB.append(this.subObjectDescription(subObj!, subObjName, this.isCircular(subObj!), delimiter, depth))
+            } else if (UtilHelper.isFunction(subObj!)) {
+                strB.append(UtilHelper.functionDescription(subObj!, delimiter, true, full))
+            } else {
+                strB.append(UtilHelper.simpleObjectDescription(subObj!, subObjName, true))
+            }
+            this.objects.add(subObj!)
+
+            strB.append(',' + delimiter)
+            return strB.toString()
+        }
+
+        private objectDescription(obj: Object, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+
+            let strB = new StringBuilder('{ ')
+            let isComplexObject: boolean = false
+
+            for (const objEntry of Object.entries(obj)) {
+                if (!objEntry) {
+                    continue
+                }
+                isComplexObject = true
+                strB.append(this.stringifySubObject(delimiter, objEntry[1], objEntry[0], depth, full))
+            }
+
+            if (!isComplexObject) {
+                return JSON.stringify(obj)
+            }
+
+            return strB.toString().slice(0, - delimiter.length - 1) + ' }'
+        }
+
+        private subObjectDescription(obj: Object, objName: string, isCircular: boolean, delimiter: string, depth: number): string {
+            if (isCircular) {
+                return objName + ': [Circular]' + delimiter
+            }
+            return objName + ':' + delimiter + this.stringifyObject(obj, delimiter + '  ', depth + 1, true)
+        }
+
+        private objects = new Set<Object>
+
+        private isCircular(obj: NullishType): boolean {
+            if (obj == null) {
+                return false
+            }
+
+            return this.objects.has(__narrowAny<object>(obj))
+        }
+
+        private static nullObjectDescription(objName: string = ''): string {
+            return ((objName != '') ? objName + ': ' : '') + null
+        }
+
+        private static simpleObjectDescription(obj: Object, objName: string = '', isSub: boolean = false): string {
+            let quotesStr = UtilHelper.isString(obj) ? '\'' : ''
+            return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
+        }
+
+        private stringifyObject(obj: NullishType, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+
+            if (UtilHelper.isNullObject(obj)) {
+                return UtilHelper.nullObjectDescription()
+            }
+            obj = __narrowAny(obj)
+            this.objects.add(obj!)
+            let strB = new StringBuilder
+            if (UtilHelper.isArray(obj!)) {
+                strB.append(UtilHelper.arrayToString(delimiter, obj! as Array<Object>, depth, full))
+            } else if (UtilHelper.isFunction(obj!)) {
+                strB.append(UtilHelper.functionDescription(obj!, delimiter, false, full))
+                if (!full) {
+                    strB = (new StringBuilder).append('{ ').append(strB.toString()).append(' }')
+                }
+            } else if (UtilHelper.isObject(obj!)) {
+                strB.append(this.objectDescription(obj!, delimiter, depth, full))
+            } else {
+                strB.append(UtilHelper.simpleObjectDescription(obj!, ''))
+            }
+            return strB.toString()
+        }
+
+        private static arrayToString(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+            return ('[ ' + UtilHelper.arrayToStringImpl(delimiter, arr, depth, full) + (full ? ('[length]: ' + arr.length) : '') + ' ]')
+        }
+
+        private static functionDescription(obj: Object, delimiter: string = '\n', isSub: boolean = false, full: boolean = false, inArray: boolean = false): string {
+            let strB = new StringBuilder
+            let functionName = UtilHelper.getName(obj)
+            strB.append((isSub && functionName !== '') ? (functionName + ':' + delimiter) : '');
+
+            let baseFunctionStr = '[Function: ' + functionName + ']'
+
+            if (full) {
+                let end = delimiter + (inArray || isSub) ? '  ' : '';
+                let length = UtilHelper.getLength(obj)
+                strB.append('{ ' + baseFunctionStr + end +
+                    '[length]: ' + (length ? length : 0) + ',' + end +
+                    '[name] :\'' + functionName + '\',' + end +
+                    '[prototype]: ' + functionName + ' { [constructor]: [Circular] } }')
+            } else {
+                strB.append(baseFunctionStr)
+            }
+
+            return strB.toString()
+        }
+
+        private static arrayToStringImpl(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+            if (!arr.length) {
+                return ''
+            }
+
+            let arrayDelimiter: string = ', '
+
+            for (let item of arr) {
+                if (!UtilHelper.isNullObject(item) && (UtilHelper.isFunction(item) || UtilHelper.isObject(item) && depth <= 2)) {
+                    arrayDelimiter += delimiter
+                    break
+                }
+            }
+
+            let strB = new StringBuilder
+            for (let item of arr) {
+                if (UtilHelper.isObject(item)) {
+                    strB.append((new UtilHelper).stringifyObject(item, delimiter + '  ', depth + 1, full))
+                } else if (UtilHelper.isFunction(item)) {
+                    strB.append(UtilHelper.functionDescription(item, delimiter, false, full, true))
+                } else {
+                    strB.append(UtilHelper.simpleObjectDescription(item, full ? UtilHelper.getName(item) : ''))
+                }
+                strB.append(arrayDelimiter)
+            }
+
+            return strB.toString().slice(0, -arrayDelimiter.length)
+        }
+
+        private static getName(obj: Object): string {
+            let subObj = UtilHelper.getValue("name", obj)
+            return subObj ? subObj! as string : 'null'
+        }
+
+        private static getLength(obj: Object): int {
+            let subObj = UtilHelper.getValue("length", obj)
+            return subObj ? subObj! as int : 0
+        }
+
+        private static getValue(key: string, obj: Object): NullishType {
+            if (!obj) {
+                return null
+            }
+            for (const objEntry of Object.entries(obj)) {
+                if (!objEntry) {
+                    continue
+                }
+                if ((!objEntry[0]) && (objEntry[0] == key)) {
+                    return objEntry[1]
+                }
+            }
+            return null
+        }
+
+        /**
+          * Remove html tag, css, js of html string to extract the contents
+          * @param {String} html
+          * @return {String} contents of the html
+          */
+        static extractContents(html: string): string {
+            return html
+                .replace(new RegExp("(\n|\r|\t)", "gm"), '') // remove linebreaks
+                .replace(new RegExp("<(style|script|link|noscript).*?>.*?<\/(style|script|link|noscript)>", "g"), '') // remove css, js blocks
+                .replace(new RegExp("<!--.*?-->", "g"), '') // remove comments
+                .replace(new RegExp("<.*?>", "g"), '') // remove tags
+                .replace(new RegExp("[\s\!\@\#\$\%\^\&\*\(\)\_\+\-\=\{\}\[\]\:\"\;\'\<\>\?\,\.\/\|\\\`\~]+", "g"), '') // remove Chars
+                .trim()
+        }
+
+        static processArg(flag: string, arg: Object): string {
+            // %c: CSS. This specifier is ignored and will skip any CSS passed in.
+            if (flag == "c" && (arg instanceof String)) {
+                return UtilHelper.extractContents(arg as string)
+            } else if (flag == "s" && !(arg instanceof BigInt)) {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return arg as string
+            } else if (flag == "d") {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + new Number(arg.toString())
+            } else if (flag == "i") {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + parseInt(arg as string, 10)
+            }
+            else if (flag == "f") {
+                if (arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + parseFloat(arg as string)
+            } else if (flag == "j") {
+                let res = ""
+                try {
+                    res = JSON.stringify(arg)
+                }
+                catch (error) {
+                    if (typeof arg === "object") {
+                        return UtilHelper.objectToString(arg)
+                    } else {
+                        throw new Error("error parse json")
+                    }
+                }
+
+                return res
+            } else if (flag == "o") {
+                // Object. A string representation of an object
+                // Similar to util.inspect() with options { showHidden: true, showProxy: true }
+                return UtilHelper.objectToString(arg, true)
+            } else if (flag == "O") {
+                // Object. A string representation of an object
+                // Similar to util.inspect() without options
+                return UtilHelper.objectToString(arg)
+            }
+
+            return "%" + flag
+        }
+
+        static joinLastArgs(index: int, ...args: Object[]): string {
+            let sb = new StringBuilder
+            for (let i = index; i < args.length; ++i) {
+                sb.append(" ")
+                sb.append(args[i])
+            }
+            let res = sb.toString()
+            return res
+        }
+
+    }  // class UtilHelper
+
+    /**
+     * Check the type of parameter.
+     */
+    export class types {
+
+        /**
+         * Check whether the entered value is of bigint64array array type.
+         * @param { Object } value - A BigInt64Array value
+         * @returns { boolean } Returns true if the value is a BigInt64Array instance.
+         */
+        isBigInt64Array(value: Object): boolean {
+            return value instanceof BigInt64Array;
+        }
+
+        /**
+         * Check whether the entered value is of biguint64array array array type.
+         * @param { Object } value - A BigUint64Array value
+         * @returns { boolean } Returns true if the value is a BigUint64Array instance.
+         */
+        isBigUint64Array(value: Object): boolean {
+            return value instanceof BigUint64Array;
+        }
+
+        /**
+         * Check whether the entered value is of arraybuffer type.
+         * @param { Object } value - A ArrayBuffer value
+         * @returns { boolean } Returns true if the value is a built-in ArrayBuffer instance.
+         */
+        isAnyArrayBuffer(value: Object): boolean {
+            return this.isArrayBuffer(value);
+        }
+
+        /**
+         * Check whether the type is included in the isAnyArrayBuffer.
+         * @param { Object } value - A included in the isAnyArrayBuffer value
+         * @returns { boolean } Returns true if the value is an instance of one of the ArrayBuffer views,
+         * such as typed array objects or DataView.
+         */
+        isArrayBufferView(value: Object): boolean {
+            return this.isDataView(value) || this.isTypedArray(value);
+        }
+
+        /**
+         * Check whether the entered value is of arraybuffer type.
+         * @param { Object } value - A arraybuffer value
+         * @returns { boolean } Returns true if the value is a built-in ArrayBuffer instance. This does not include SharedArrayBuffer instances.
+         */
+        isArrayBuffer(value: Object): boolean {
+            return value instanceof ArrayBuffer;
+        }
+
+        /**
+         * Check whether the entered value is of DataView type.
+         * @param { Object } value - A DataView value
+         * @returns { boolean } Returns true if the value is a built-in DataView instance.
+         */
+        isDataView(value: Object): boolean {
+            return value instanceof DataView;
+        }
+
+        /**
+         * Check whether the entered value is of type date.
+         * @param { Object } value - A Date value
+         * @returns { boolean } Returns true if the value is a built-in Date instance.
+         */
+        isDate(value: Object): boolean {
+            return value instanceof Date;
+        }
+
+        /**
+         * Check whether the entered value is of float32array array type.
+         * @param { Object } value - A Float32Array value
+         * @returns { boolean } Returns true if the value is a built-in Float32Array instance.
+         */
+        isFloat32Array(value: Object): boolean {
+            return value instanceof Float32Array;
+        }
+
+        /**
+         * Check whether the entered value is of float64array array type.
+         * @param { Object } value - A Float64Array value
+         * @returns { boolean } Returns true if the value is a built-in Float64Array instance.
+         */
+        isFloat64Array(value: Object): boolean {
+            return value instanceof Float64Array;
+        }
+
+        /**
+         * Check whether the entered value is of int8array array type.
+         * @param { Object } value - A Int8Array value
+         * @returns { boolean } Returns true if the value is a built-in Int8Array instance.
+         */
+        isInt8Array(value: Object): boolean {
+            return value instanceof Int8Array;
+        }
+
+        /**
+         * Check whether the entered value is the int16array type.
+         * @param { Object } value - A Int16Array value
+         * @returns { boolean } Returns true if the value is a built-in Int16Array instance.
+         */
+        isInt16Array(value: Object): boolean {
+            return value instanceof Int16Array;
+        }
+
+        /**
+         * Check whether the entered value is the int32array array type.
+         * @param { Object } value - A Int32Array value
+         * @returns { boolean } Returns true if the value is a built-in Int32Array instance.
+         */
+        isInt32Array(value: Object): boolean {
+            return value instanceof Int32Array;
+        }
+
+        /**
+         * Check whether the entered value is of map type.
+         * @param { Object } value - A Map value
+         * @returns { boolean } Returns true if the value is a built-in Map instance.
+         */
+        isMap(value: Object): boolean {
+            return value instanceof Map;
+        }
+
+        /**
+         * Check whether the entered value is the iterator type of map.
+         * @param { Object } value - A Map iterator value
+         * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
+         */
+        isMapIterator(value: Object): boolean {
+            return value instanceof MapIterator || value instanceof EmptyMapIterator;
+        }
+
+        /**
+         * Check whether the value entered is of type error.
+         * @param { Object } value - A Error value
+         * @returns { boolean } Returns true if the value is an instance of a built-in Error type.
+         */
+        isNativeError(value: Object): boolean {
+            return value instanceof Error;
+        }
+
+        /**
+         * Check whether the entered value is of promise type.
+         * @param { Object } value - A Promise value
+         * @returns { boolean } Returns true if the value is a built-in Promise.
+         */
+        isPromise(value: Object): boolean {
+            return value instanceof Promise;
+        }
+
+        /**
+         * Check whether the entered value is of type regexp.
+         * @param { Object } value - A regular expression object value
+         * @returns { boolean } Returns true if the value is a regular expression object.
+         */
+        isRegExp(value: Object): boolean {
+            return value instanceof RegExp;
+        }
+
+        /**
+         * Check whether the entered value is of type set.
+         * @param { Object } value - A Set instance value
+         * @returns { boolean } Returns true if the value is a built-in Set instance.
+         */
+        isSet(value: Object): boolean {
+            return value instanceof Set;
+        }
+
+        /**
+         * Check whether the entered value is the iterator type of set.
+         * @param { Object } value - A Set iterator value
+         * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
+         * 
+         * Since the current interface cannot be correctly determined, it returns false by default
+         */
+        isSetIterator(value: Object): boolean {
+            return false;
+        }
+
+        /**
+         * Check whether the entered value is a type contained in typedarray.
+         * @param { Object } value - A TypedArray instance value
+         * @returns { boolean } Returns true if the value is a built-in TypedArray instance.
+         */
+        isTypedArray(value: Object): boolean {
+            return this.isInt8Array(value) ||
+                this.isUint8Array(value) ||
+                this.isUint8ClampedArray(value) ||
+                this.isInt16Array(value) ||
+                this.isUint16Array(value) ||
+                this.isInt32Array(value) ||
+                this.isUint32Array(value) ||
+                this.isFloat32Array(value) ||
+                this.isFloat64Array(value) ||
+                this.isBigInt64Array(value) ||
+                this.isBigUint64Array(value);
+        }
+
+        /**
+         * Check whether the entered value is the uint8array array type.
+         * @param { Object } value - A Uint8Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint8Array instance.
+         */
+        isUint8Array(value: Object): boolean {
+            return value instanceof Uint8Array;
+        }
+
+        /**
+         * Check whether the entered value is the uint8clapedarray array type.
+         * @param { Object } value - A Uint8ClampedArray value
+         * @returns { boolean } Returns true if the value is a built-in Uint8ClampedArray instance.
+         */
+        isUint8ClampedArray(value: Object): boolean {
+            return value instanceof Uint8ClampedArray;
+        }
+
+        /**
+         * Check whether the entered value is the uint16array array array type.
+         * @param { Object } value - A Uint16Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint16Array instance.
+         */
+        isUint16Array(value: Object): boolean {
+            return value instanceof Uint16Array;
+        }
+
+        /**
+         * Check whether the entered value is the uint32array array type.
+         * @param { Object } value - A Uint32Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint32Array instance.
+         */
+        isUint32Array(value: Object): boolean {
+            return value instanceof Uint32Array;
+        }
+
+        /**
+         * Check whether the entered value is of type weakmap.
+         * @param { Object } value - A WeakMap value
+         * @returns { boolean } Returns true if the value is a built-in WeakMap instance.
+         */
+        isWeakMap(value: Object): boolean {
+            return value instanceof WeakMap;
+        }
+
+        /**
+         * Check whether the entered value is of type weakset.
+         * @param { Object } value - A WeakSet value
+         * @returns { boolean } Returns true if the value is a built-in WeakSet instance.
+         */
+        isWeakSet(value: Object): boolean {
+            return value instanceof WeakSet;
+        }
+    }
+
+    export function promisify(original: Function): (...args: FixedArray<Any>) => Promise<Any> {
+        return (...args: FixedArray<Any>): Promise<Any> => {
+            return new Promise<Any>((resolve, reject) => {
+                let callback: Function = (err: Error | null, ...value: FixedArray<Any>) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                };
+                const newArgs: FixedArray<Any> = new Any[args.length + 1];
+                for (let i = 0; i < args.length; i++) {
+                    newArgs[i] = args[i];
+                }
+                newArgs[args.length] = callback;
+                original.unsafeCall(...newArgs);
+            });
+        };
+    }
+
+    /**
+     * Get the hash code of an object.
+     * @param { object } [object] - The object that need to get hash code.
+     * @returns { number } Return a hash code of an object.
+     */
+    export function getHash(obj: object): number {
+        let result: number = obj.$_hashCode();
+        return result;
+    }
+
+    /**
+    * Generates a random binary UUID.
+    * @param { boolean } entropyCache - Whether to use cached UUIDs for generation
+    * @returns { Uint8Array | undefined } A Uint8Array containing the generated binary UUID, or undefined on failure.
+    */
+    export function generateRandomBinaryUUID(entropyCache?: boolean): Uint8Array | undefined {
+        let arr = UtilHelper.generateRandomBinaryUUID((entropyCache == undefined) ? false : entropyCache)
+        return arr;
+    }
+
+    /**
+    * Parses a UUID string into a binary representation (Uint8Array).
+    * @param { string } uuid - The UUID string to parse
+    * @returns { Uint8Array } A Uint8Array containing the 16-byte binary representation of the UUID.
+    */
+    export function parseUUID(uuid: string): Uint8Array {
+        const format = new RegExp("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        if (!format.test(uuid)) {
+            throw new BusinessError(syntaxErrorCode, new Error(`Syntax Error.Invalid ${uuid} string`));
+        }
+        const hex = uuid.replace(new RegExp('-', 'g'), '');
+        const uuidArray = new Uint8Array(16);
+        for (let i = 0; i < 16; i++) {
+            uuidArray[i] = parseInt(hex.substr(i * 2, 2), 16);
+        }
+        return uuidArray;
+    }
+}

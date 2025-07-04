@@ -28,5 +28,5 @@ class Person {
 
 function main(): void {
   const bob = new Person("Bob");
-  assertEQ(bob.getGreeting?.(), undefined);
+  arktest.assertEQ(bob.getGreeting?.(), undefined);
 }

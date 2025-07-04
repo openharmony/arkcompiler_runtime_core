@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -306,7 +306,6 @@ double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int rad
 EtsString *DoubleToExponential(double number, int digit);
 EtsString *DoubleToFixed(double number, int digit);
 EtsString *DoubleToPrecision(double number, int digit);
-double GetStdDoubleArgument(ObjectHeader *obj);
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 inline const char *FpNonFiniteToString(FpType number)
@@ -374,6 +373,7 @@ inline float FpDelta(FpType number)
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 EtsString *FpToString(FpType number, int radix)
 {
+    EVENT_ETS_CACHE("Slowpath: create string from number without cache");
     // check radix range
     if (UNLIKELY(radix > helpers::MAX_RADIX || radix < helpers::MIN_RADIX)) {
         constexpr size_t MAX_BUF_SIZE = 128;

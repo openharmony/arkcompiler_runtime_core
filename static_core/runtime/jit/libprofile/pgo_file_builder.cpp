@@ -373,6 +373,7 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     std::ofstream fd(fileName.data(), std::ios::binary | std::ios::out);
     if (!fd.is_open()) {
         return 0;
@@ -398,10 +399,6 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     fd.seekp(offset, std::ios::beg);
     auto sectionInfoBytes = WriteSectionInfosSection(fd, sectionInfos_);
     CheckAndAddBytes(fd, fileName, sectionInfoBytes, writtenBytes);
-
-    if (chmod(fileName.data(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) == -1) {
-        return 0;
-    }
 
     return writtenBytes;
 }

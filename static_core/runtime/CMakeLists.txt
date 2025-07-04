@@ -30,12 +30,15 @@ set(SOURCES
     class_initializer.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
+    tooling/inspector/debugger_arkapi.cpp
+    tooling/inspector/types/profile_result.cpp
     tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp
     tooling/sampler/sampling_profiler.cpp
     tooling/sampler/sample_writer.cpp
+    tooling/sampler/samples_record.cpp
     tooling/sampler/thread_communicator.cpp
     tooling/sampler/stack_walker_base.cpp
     tooling/sampler/lock_free_queue.cpp
@@ -79,6 +82,8 @@ set(SOURCES
     mem/gc/stw-gc/stw-gc.cpp
     mem/gc/gc_barrier_set.cpp
     mem/gc/gen-gc/gen-gc.cpp
+    mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp
+    mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp
     mem/refstorage/ref_block.cpp
     mem/refstorage/reference_storage.cpp
     mem/refstorage/global_object_storage.cpp
@@ -113,6 +118,7 @@ set(SOURCES
     runtime_controller.cpp
     string_table.cpp
     thread.cpp
+    thread_proxy.cpp
     mt_thread_manager.cpp
     lock_order_graph.cpp
     time_utils.cpp
@@ -132,6 +138,7 @@ set(SOURCES
     jit/libprofile/pgo_file_builder.cpp
     jit/profiling_loader.cpp
     jit/profiling_saver.cpp
+    jit/profile_saver_worker.cpp
     cha.cpp
     runtime_helpers.cpp
     handle_scope.cpp
@@ -158,8 +165,10 @@ set(SOURCES
     coroutines/threaded_coroutine_manager.cpp
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
+    coroutines/stackful_coroutine_state_info.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
+    coroutines/priority_queue.cpp
     fibers/fiber_context.cpp
     compiler_thread_pool_worker.cpp
     compiler_task_manager_worker.cpp
@@ -268,6 +277,16 @@ panda_isa_gen(
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/interpreter/templates
     DESTINATION ${GEN_INCLUDE_DIR}
 )
+
+panda_gen_file(
+        DATA ${CMAKE_BINARY_DIR}/plugin_options.yaml
+        TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/interpreter/templates/core_any_intrinsics.inc.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES plugin_options_merge
+        OUTPUTFILE ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc
+)
+add_custom_target(core_any_intrinsics_inc DEPENDS ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc)
+add_dependencies(arkruntime_interpreter_impl core_any_intrinsics_inc)
 
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
@@ -584,6 +603,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${PANDA_BINARY_ROOT}/runtime/asm_defines
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${VERIFIER_INCLUDE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tooling/inspector
 )
 
 panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
@@ -829,7 +849,6 @@ add_gtests(
     tests/histogram_test.cpp
     tests/mem_stats_additional_info_test.cpp
     tests/mem_stats_gc_test.cpp
-    tests/mem_stats_gen_gc_test.cpp
     tests/mem_stats_test.cpp
 )
 
@@ -862,12 +881,6 @@ add_gtests(
 add_gtests(
     arkruntime_memory_management_malloc-proxy-allocator-test
     tests/malloc-proxy-allocator-test.cpp
-)
-
-add_gtests(
-    arkruntime_memory_management_pygote_space_allocator_gen_test
-    tests/pygote_space_allocator_test_base.cpp
-    tests/pygote_space_allocator_gen_test.cpp
 )
 
 add_gtests(

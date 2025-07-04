@@ -29,5 +29,5 @@ class Person {
 function main(): void {
   const bob = new Person("Bob");
   bob.scores = [90, 85, 95];
-  assertEQ(bob.scores?.[0], 90);
+  arktest.assertEQ(bob.scores?.[0], 90);
 }

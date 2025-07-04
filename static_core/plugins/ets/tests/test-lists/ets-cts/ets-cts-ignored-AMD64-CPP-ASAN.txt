@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #22377
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_14.ets
 
@@ -9,3 +10,10 @@
 
 #22382
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_27.ets
+=======
+#22380
+16.concurrency/03.asynchronous_api/01.async_functions/afunc_27.ets
+
+#22382
+16.concurrency/03.asynchronous_api/03.async_methods/ameth_27.ets
+>>>>>>> OpenHarmony_feature_20250328

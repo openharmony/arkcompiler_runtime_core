@@ -46,7 +46,7 @@ function foo(i: Required<A>) {
 
 function main() {
   let f: {{s}} = {{c.argument}}
-  assertTrue( foo(f) == {{c.result}} )
+  arktest.assertTrue( foo(f) == {{c.result}} )
 }
 
 {% endfor %}

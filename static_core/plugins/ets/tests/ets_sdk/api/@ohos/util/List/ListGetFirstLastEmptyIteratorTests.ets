@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List getFirst when the container is non-empty", testGetFirstNonEmptyContainer);
     suite.addTest("List getFirst when the container is empty", testGetFirstEmptyContainer);
@@ -48,50 +48,50 @@ class TestData {
 function testGetFirstNonEmptyContainer() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.getFirst(), 0, "First element should be 0");
+    arktest.assertEQ(list.getFirst(), 0, "First element should be 0");
 }
 
 function testGetFirstEmptyContainer() {
     let list = new List<number>();
-    assertEQ(list.getFirst(), undefined, "First element should be undefined when container is empty");
+    arktest.assertEQ(list.getFirst(), undefined, "First element should be undefined when container is empty");
 }
 
 function testGetFirstUndefined() {
     let list = new List<number | undefined>();
     list.add(undefined);
     list.add(TestData.testNumber1);
-    assertEQ(list.getFirst(), undefined, "First element should be undefined");
+    arktest.assertEQ(list.getFirst(), undefined, "First element should be undefined");
 }
 
 function testGetLastNonEmptyContainer() {
     let list = new List<number>();
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.getLast(), TestData.testNumber20, "Last element should be 20");
+    arktest.assertEQ(list.getLast(), TestData.testNumber20, "Last element should be 20");
 }
 
 function testGetLastEmptyContainer() {
     let list = new List<number>();
-    assertEQ(list.getLast(), undefined, "Last element should be undefined when container is empty");
+    arktest.assertEQ(list.getLast(), undefined, "Last element should be undefined when container is empty");
 }
 
 function testGetLastUndefined() {
     let list = new List<number | undefined>();
     list.add(TestData.testNumber1);
     list.add(undefined);
-    assertEQ(list.getLast(), undefined, "Last element should be undefined");
+    arktest.assertEQ(list.getLast(), undefined, "Last element should be undefined");
 }
 
 function testIsEmptyAfterAddingElement() {
     let list = new List<number>();
     list.add(TestData.testNumber3);
     let result: boolean = list.isEmpty();
-    assertFalse(result, "List should not be empty after adding an element");
+    arktest.assertFalse(result, "List should not be empty after adding an element");
 }
 
 function testIsEmptyInitially() {
     let list = new List<number>();
     let result: boolean = list.isEmpty();
-    assertTrue(result, "List should be empty initially");
+    arktest.assertTrue(result, "List should be empty initially");
 }
 
 function testIteratorEmptyContainer() {
@@ -100,7 +100,7 @@ function testIteratorEmptyContainer() {
     for (let item of list) {
         count++;
     }
-    assertEQ(count, 0, "Iterator count should be 0");
+    arktest.assertEQ(count, 0, "Iterator count should be 0");
 }
 
 function testIteratorNonEmptyContainer() {
@@ -110,8 +110,8 @@ function testIteratorNonEmptyContainer() {
     let iter = list.$_iterator();
     let temp: IteratorResult<number> = iter.next();
     while (!temp.done) {
-        assertEQ(list.get(count++), temp.value, `Element should be equal`);
+        arktest.assertEQ(list.get(count++), temp.value, `Element should be equal`);
         temp = iter.next();
     }
-    assertEQ(count, list.length, "Iterator count should match list length");
+    arktest.assertEQ(count, list.length, "Iterator count should match list length");
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,13 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
 
     auto tParse = Clock::now();
 
+    ctx.TryDelete();
+    if (ctx.HasErrors()) {
+        return ctx.GetResult();
+    }
+
+    auto tDelete = Clock::now();
+
     ctx.ComputeLayout();  // sync
     if (ctx.HasErrors()) {
         return ctx.GetResult();
@@ -100,7 +107,8 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
     res.stats.elapsed.read = delta(tStart, tRead);
     res.stats.elapsed.merge = delta(tRead, tMerge);
     res.stats.elapsed.parse = delta(tMerge, tParse);
-    res.stats.elapsed.layout = delta(tParse, tLayout);
+    res.stats.elapsed.trydelete = delta(tParse, tDelete);
+    res.stats.elapsed.layout = delta(tDelete, tLayout);
     res.stats.elapsed.patch = delta(tLayout, tPatch);
     res.stats.elapsed.write = delta(tPatch, tEnd);
     res.stats.elapsed.total = delta(tStart, tEnd);
@@ -132,6 +140,7 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
     printTimeHist("read", s.elapsed.read);
     printTimeHist("merge", s.elapsed.merge);
     printTimeHist("parse", s.elapsed.parse);
+    printTimeHist("delete", s.elapsed.trydelete);
     printTimeHist("layout", s.elapsed.layout);
     printTimeHist("patch", s.elapsed.patch);
     printTimeHist("write", s.elapsed.write);

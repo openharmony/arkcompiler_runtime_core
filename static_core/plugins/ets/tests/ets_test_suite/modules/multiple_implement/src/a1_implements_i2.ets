@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [i2.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { I2 } from "./i2";
 
 export abstract class A1 implements I2 { }

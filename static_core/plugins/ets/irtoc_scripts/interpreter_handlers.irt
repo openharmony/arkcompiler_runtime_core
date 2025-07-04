@@ -145,7 +145,7 @@ end
 
 macro(:"load_field_obj") do |field, klass|
   offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
-  Load(klass, offset).ref
+  Load(klass, offset).SetNeedBarrier(true).ref
 end
 
 ['short', 'long', 'obj'].each do |flavor|
@@ -303,8 +303,8 @@ end
           result_1 := 0
         end
       } Else {
-        v1cls := GetInstanceClass(v1).ref
-        v2cls := GetInstanceClass(v2).ref
+        v1cls := load_class(v1)
+        v2cls := load_class(v2)
         If(And(is_valuetyped_cls(v1cls), is_valuetyped_cls(v2cls)).b, 0).EQ.Likely {
           result_2 := 0
         } Else {
@@ -389,3 +389,13 @@ macro(:"handle_ets_call_name_range") do |v, id, size|
   }
   generic_call(id, size, false, method, nil, copy_lambda)
 end
+<<<<<<< HEAD
+=======
+
+macro(:handle_ets_nullcheck) do
+  If(acc.ref, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
+end
+>>>>>>> OpenHarmony_feature_20250328

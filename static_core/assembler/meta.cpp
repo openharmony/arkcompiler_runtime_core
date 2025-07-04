@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,7 +237,7 @@ std::optional<Metadata::Error> AnnotationMetadata::AnnotationElementBuilder::Add
 
 std::optional<Metadata::Error> AnnotationMetadata::Store(std::string_view attribute)
 {
-    if (IsParseAnnotationElement() && !annotationElementBuilder_.IsCompleted()) {
+    if (IsParseAnnotationElement() && !GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element isn't completely defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
@@ -253,7 +253,7 @@ std::optional<Metadata::Error> AnnotationMetadata::Store(std::string_view attrib
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(std::string_view attribute,
                                                                           std::string_view value)
 {
-    if (IsParseAnnotationElement() && !annotationElementBuilder_.IsCompleted()) {
+    if (IsParseAnnotationElement() && !GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element isn't completely defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
@@ -273,13 +273,13 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(std::strin
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (annotationBuilder_.HasId()) {
+    if (GetOrCreateAnnotationBuilder()->HasId()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation id attribute already defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    annotationBuilder_.SetId(value);
+    GetOrCreateAnnotationBuilder()->SetId(value);
 
     return {};
 }
@@ -293,7 +293,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(s
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (IsParseAnnotationElement() && !annotationElementBuilder_.IsCompleted()) {
+    if (IsParseAnnotationElement() && !GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Previous annotation element isn't defined completely",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
@@ -313,13 +313,13 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(s
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (annotationElementBuilder_.IsTypeSet()) {
+    if (GetOrCreateAnnotationElementBuilder()->IsTypeSet()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element type attribute already defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    annotationElementBuilder_.SetType(GetType(value));
+    GetOrCreateAnnotationElementBuilder()->SetType(GetType(value));
 
     return {};
 }
@@ -333,18 +333,18 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentT
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (!annotationElementBuilder_.IsArray()) {
+    if (!GetOrCreateAnnotationElementBuilder()->IsArray()) {
         return Error(std::string("Unexpected attribute '").append(attribute) + "'. Annotation element type isn't array",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (annotationElementBuilder_.IsComponentTypeSet()) {
+    if (GetOrCreateAnnotationElementBuilder()->IsComponentTypeSet()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element array component type attribute already defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    annotationElementBuilder_.SetComponentType(GetType(value));
+    GetOrCreateAnnotationElementBuilder()->SetComponentType(GetType(value));
 
     return {};
 }
@@ -358,25 +358,26 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementValueAttribute(
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (!annotationElementBuilder_.IsTypeSet()) {
+    if (!GetOrCreateAnnotationElementBuilder()->IsTypeSet()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element type attribute isn't defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (annotationElementBuilder_.IsArray() && !annotationElementBuilder_.IsComponentTypeSet()) {
+    if (GetOrCreateAnnotationElementBuilder()->IsArray() &&
+        !GetOrCreateAnnotationElementBuilder()->IsComponentTypeSet()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element array component type attribute isn't defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    if (!annotationElementBuilder_.IsArray() && annotationElementBuilder_.IsCompleted()) {
+    if (!GetOrCreateAnnotationElementBuilder()->IsArray() && GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element is completely defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
     }
 
-    return annotationElementBuilder_.AddValue(value, idMap_);
+    return GetOrCreateAnnotationElementBuilder()->AddValue(value, idMap_);
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::StoreValue(std::string_view attribute, std::string_view value)
@@ -410,7 +411,7 @@ std::optional<Metadata::Error> AnnotationMetadata::StoreValue(std::string_view a
         return MeetExpElementValueAttribute(attribute, value);
     }
 
-    if (IsParseAnnotationElement() && !annotationElementBuilder_.IsCompleted()) {
+    if (IsParseAnnotationElement() && !GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
                          "'. Annotation element isn't completely defined",
                      Error::Type::UNEXPECTED_ATTRIBUTE);
@@ -425,7 +426,7 @@ std::optional<Metadata::Error> AnnotationMetadata::StoreValue(std::string_view a
 
 std::optional<Metadata::Error> AnnotationMetadata::ValidateData()
 {
-    if (IsParseAnnotationElement() && !annotationElementBuilder_.IsCompleted()) {
+    if (IsParseAnnotationElement() && !GetOrCreateAnnotationElementBuilder()->IsCompleted()) {
         return Error("Annotation element isn't completely defined", Error::Type::MISSING_ATTRIBUTE);
     }
 

@@ -17,8 +17,17 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
+<<<<<<< HEAD
+=======
+
+namespace test {
+class EtsEscompatTypedArrayBaseTest;
+}  // namespace test
+
+>>>>>>> OpenHarmony_feature_20250328
 class EtsEscompatTypedArrayBase : public EtsObject {
 public:
     EtsEscompatTypedArrayBase() = delete;
@@ -26,10 +35,26 @@ public:
 
     NO_COPY_SEMANTIC(EtsEscompatTypedArrayBase);
     NO_MOVE_SEMANTIC(EtsEscompatTypedArrayBase);
+<<<<<<< HEAD
+=======
+
+    static constexpr size_t GetClassSize()
+    {
+        return sizeof(EtsEscompatTypedArrayBase);
+    }
+>>>>>>> OpenHarmony_feature_20250328
 
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, buffer_);
+<<<<<<< HEAD
+=======
+    }
+
+    static constexpr size_t GetBytesPerElementOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, bytesPerElement_);
+>>>>>>> OpenHarmony_feature_20250328
     }
 
     static constexpr size_t GetByteOffsetOffset()
@@ -52,54 +77,89 @@ public:
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, lengthInt_);
     }
 
-    static constexpr size_t GetArrayBufferBackedOffset()
+    ObjectPointer<EtsObject> GetBuffer() const
     {
+<<<<<<< HEAD
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, arrayBufferBacked_);
+=======
+        return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetBufferOffset()));
+>>>>>>> OpenHarmony_feature_20250328
     }
 
-    ObjectPointer<EtsObject> GetBuffer()
+    void SetBuffer(ObjectPointer<EtsObject> buffer)
     {
-        return buffer_;
+        buffer_ = buffer;
     }
 
-    EtsDouble GetByteOffset()
+    EtsDouble GetByteOffset() const
     {
         return byteOffset_;
     }
 
-    EtsDouble GetByteLength()
+    void SetByteOffset(EtsDouble offset)
+    {
+        byteOffset_ = offset;
+    }
+
+    EtsDouble GetByteLength() const
     {
         return byteLength_;
     }
 
-    EtsDouble GetBytesPerElement()
+    void SetByteLength(EtsDouble byteLength)
+    {
+        byteLength_ = byteLength;
+    }
+
+    EtsInt GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
 
-    EtsInt GetLengthInt()
+    EtsInt GetLengthInt() const
     {
         return lengthInt_;
     }
 
-    bool IsArrayBufferBacked()
+    void SetLengthInt(EtsInt length)
     {
-        return arrayBufferBacked_ != 0;
+        lengthInt_ = length;
     }
 
-    ObjectPointer<EtsString> GetName()
+    ObjectPointer<EtsString> GetName() const
     {
-        return name_;
+        return EtsString::FromEtsObject(EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetNameOffset())));
+    }
+
+    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsDouble byteOffset,
+                    EtsObject *buffer, EtsString *name)
+    {
+        ASSERT(buffer != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetNameOffset(), name != nullptr ? name->GetCoreType() : nullptr);
+        bytesPerElement_ = bytesPerElement;
+        byteOffset_ = byteOffset;
+        byteLength_ = static_cast<EtsDouble>(lengthInt) * bytesPerElement;
+        lengthInt_ = lengthInt;
     }
 
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
+<<<<<<< HEAD
     EtsDouble bytesPerElement_;
+=======
+>>>>>>> OpenHarmony_feature_20250328
     EtsDouble byteOffset_;
     EtsDouble byteLength_;
+    EtsInt bytesPerElement_;
     EtsInt lengthInt_;
+<<<<<<< HEAD
     EtsBoolean arrayBufferBacked_;
+=======
+
+    friend class test::EtsEscompatTypedArrayBaseTest;
+>>>>>>> OpenHarmony_feature_20250328
 };
 
 template <typename T>
@@ -114,6 +174,7 @@ class EtsEscompatInt32Array : public EtsEscompatTypedArray<EtsInt> {};
 class EtsEscompatBigInt64Array : public EtsEscompatTypedArray<EtsLong> {};
 class EtsEscompatFloat32Array : public EtsEscompatTypedArray<EtsFloat> {};
 class EtsEscompatFloat64Array : public EtsEscompatTypedArray<EtsDouble> {};
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H

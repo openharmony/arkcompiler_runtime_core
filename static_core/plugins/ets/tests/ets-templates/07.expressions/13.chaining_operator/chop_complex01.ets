@@ -45,5 +45,5 @@ class Company {
 
 function main(): void {
   const company = new Company();
-  assertEQ(company.CEO?.address?.zipCode, undefined);
+  arktest.assertEQ(company.CEO?.address?.zipCode, undefined);
 }

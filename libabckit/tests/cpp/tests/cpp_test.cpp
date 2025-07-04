@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/cpp/abckit_cpp.h"
+#include "libabckit/cpp/abckit_cpp.h"
 
 #include "helpers/helpers_runtime.h"
 #include "helpers/helpers.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/metadata_core.h"
 
 #include <gtest/gtest.h>
 #include <string_view>
@@ -327,6 +327,9 @@ TEST_F(LibAbcKitCppTest, CppTest11)
     for (auto &mdl : file.GetModules()) {
         moduleSet.insert(mdl);
     }
+
+    const int sizeT = 2;
+    ASSERT_EQ(moduleSet.size(), sizeT);
 }
 
 // Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=cpp

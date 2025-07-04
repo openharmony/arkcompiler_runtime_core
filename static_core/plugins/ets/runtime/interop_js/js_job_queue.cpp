@@ -13,29 +13,31 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include <node_api.h>
+#include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/interop_js/js_value.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/mem/refstorage/reference.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_utils.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/interop_js/js_job_queue.h"
-#include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "plugins/ets/runtime/interop_js/js_value.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/ets_handle_scope.h"
-#include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
 
 namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
@@ -60,7 +62,7 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 void JsJobQueue::Post(EtsObject *callback)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
 
     auto *ctx = InteropCtx::Current(coro);
     if (ctx == nullptr) {
@@ -103,7 +105,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;
@@ -128,7 +130,21 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
             ASSERT(refconv != nullptr);
+<<<<<<< HEAD
             auto error = refconv->Unwrap(ctx, value);
+=======
+            bool isInstanceof = false;
+            EtsObject *error = nullptr;
+            NAPI_CHECK_FATAL(napi_is_error(env, value, &isInstanceof));
+            if (!isInstanceof) {
+                auto res = JSConvertESError::UnwrapImpl(ctx, env, value);
+                if (LIKELY(res.has_value())) {
+                    error = AsEtsObject(res.value());
+                }
+            } else {
+                error = refconv->Unwrap(ctx, value);
+            }
+>>>>>>> OpenHarmony_feature_20250328
             ASSERT(error != nullptr);
             ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), error, ark::ets::ToEtsBoolean(false));
         }
@@ -194,7 +210,7 @@ void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    INTEROP_CODE_SCOPE_ETS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     CreatePromiseLink(source, EtsPromise::FromEtsObject(target));
 }
 

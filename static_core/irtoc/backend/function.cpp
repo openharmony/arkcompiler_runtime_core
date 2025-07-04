@@ -234,7 +234,10 @@ bool Function::SkippedByLLVM()
 #ifdef PANDA_LLVM_FASTPATH
     if (GetGraph()->GetMode().IsFastPath()) {
         ASSERT(GetArch() == Arch::AARCH64);
-        return std::find(SKIPPED_FASTPATHS.begin(), SKIPPED_FASTPATHS.end(), name) != SKIPPED_FASTPATHS.end();
+        return std::find(SKIPPED_FASTPATHS.begin(), SKIPPED_FASTPATHS.end(), name) != SKIPPED_FASTPATHS.end() ||
+               (compiler::g_options.IsCpuFeatureEnabled(compiler::CpuFeature::JSCVT) &&
+                std::find(SKIPPED_FASTPATHS_JSCVT.begin(), SKIPPED_FASTPATHS_JSCVT.end(), name) !=
+                    SKIPPED_FASTPATHS_JSCVT.end());
     }
 #endif
     return true;

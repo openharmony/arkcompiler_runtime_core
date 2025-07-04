@@ -20,12 +20,12 @@ tags: []
 
 function main() : int {
     let index : int = 0;
-    let tmp : char = c'z';
+    let tmp : string = 'z';
     let initialString : String = "";
     for (tmp of initialString) {
         index++;
     }
-    assertEQ(index, 0)
+    arktest.assertEQ(index, 0)
     return 0;
 }
 

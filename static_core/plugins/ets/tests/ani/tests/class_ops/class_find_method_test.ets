@@ -100,12 +100,12 @@ class C implements I {
 
     public imethod(x: string): int
     {
-        return x.length as int
+        return x.length.toInt()
     }
 
     public override imethod_tuple(tuple: [int, long]): int
     {
-        return tuple[0] + tuple[1] as int
+        return (tuple[0] + tuple[1]).toInt()
     }
 
     public imethod_optional(z?: string): int
@@ -116,7 +116,7 @@ class C implements I {
         return 4
     }
 
-    public method_rest(...numbers: int[]): int
+    public method_rest(...numbers: FixedArray<int>): int
     {
         let res = 0
         for (let n of numbers) {
@@ -128,7 +128,7 @@ class C implements I {
     public method_union(x: int | string): int
     {
         if (x instanceof string) {
-            return x.length as int
+            return x.length.toInt()
         }
         return x
     }
@@ -217,7 +217,7 @@ class SpecialTypes {
     }
 
     public string_literal_method(a: "aaa"): int {
-        return a.length as int
+        return a.length.toInt()
     }
 
     public null_method(a: null): int {
@@ -444,7 +444,7 @@ final class Operations {
     static sum(a0: int, a1: int): int {
         return a0 + a1;
     }
-};
+}
 
 class ClassA {
     static calculateSquareArea(length: int, wide: int, height: int): int {
@@ -464,18 +464,18 @@ class ClassA {
     static sumB(a0: int, a1: int, a2: int): int {
         return a2 + ClassA.sumA(a0, a1);
     }
-};
+}
 
 class ClassB extends ClassA {
     static or(a0: boolean, a1: boolean): boolean {
         return a0 || a1;
     }
-};
+}
 
 interface ICalculator {
     add(x: int, y: int): int;
     subtract(x: int, y: int): int;
-};
+}
  
 class BasicCalculator implements ICalculator {
     add(x: int, y: int): int {
@@ -487,7 +487,7 @@ class BasicCalculator implements ICalculator {
     static multiply(x: int, y: int): int {
         return x * y;
     }
-};
+}
 
 class SubCalculator extends BasicCalculator {
     constructor(a: int, b: int) {
@@ -502,9 +502,17 @@ class SubCalculator extends BasicCalculator {
     static divide(x: int, y: int): int {
         return x / y;
     }
+
+    static multiply(x: int, y: int): int {
+        return x + y;
+    }
     private width: int;
     private height: int;
+<<<<<<< HEAD
 };
+=======
+}
+>>>>>>> OpenHarmony_feature_20250328
 
 class AllFunctions {
     static foo (): int {
@@ -537,3 +545,10 @@ class NotOverloaded {
         return 1
     }
 };
+<<<<<<< HEAD
+=======
+
+class FindNativeMethods {
+    native foo(): int;
+}
+>>>>>>> OpenHarmony_feature_20250328

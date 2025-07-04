@@ -26,7 +26,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.getInner().i == 2);
+        arktest.assertTrue(a.getInner().i == 2);
       }
 
   - decl: |-
@@ -56,7 +56,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assertTrue(a.getInner().foo() == 1);
+        arktest.assertTrue(a.getInner().foo() == 1);
       }
 
   - decl: |-

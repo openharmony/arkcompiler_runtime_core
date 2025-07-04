@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,7 @@ void HandleStorage<T>::ZapFreedHandles()
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
+inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject(const GCRootUpdater &gcRootUpdater)
 {
     if (lastIndex_ == 0) {
         return;
@@ -96,8 +96,12 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
         for (uint32_t j = 0; j < count; ++j) {
             coretypes::TaggedValue obj(node->at(j));
-            if (obj.IsHeapObject() && obj.GetHeapObject()->IsForwarded()) {
-                (*node)[j] = coretypes::TaggedValue(ark::mem::GetForwardAddress(obj.GetHeapObject())).GetRawData();
+            if (!obj.IsHeapObject()) {
+                continue;
+            }
+            ObjectHeader *objH = obj.GetHeapObject();
+            if (gcRootUpdater(&objH)) {
+                (*node)[j] = coretypes::TaggedValue(objH).GetRawData();
             }
         }
     }
@@ -130,7 +134,7 @@ inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] 
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
+inline void HandleStorage<ObjectHeader *>::UpdateHeapObject(const GCRootUpdater &gcRootUpdater)
 {
     if (lastIndex_ == 0) {
         return;
@@ -145,10 +149,7 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
         auto node = nodes_.at(i);
         uint32_t count = (i != nid) ? NODE_BLOCK_SIZE : offset;
         for (uint32_t j = 0; j < count; ++j) {
-            auto *obj = reinterpret_cast<ObjectHeader *>(node->at(j));
-            if (obj->IsForwarded()) {
-                (*node)[j] = ::ark::mem::GetForwardAddress(obj);
-            }
+            gcRootUpdater(reinterpret_cast<ObjectHeader **>(&(*node)[j]));
         }
     }
 }

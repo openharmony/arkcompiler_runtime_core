@@ -16,7 +16,6 @@
 /*---
 desc: 13.compilation_units\13.06.export_directives\13.06.03.re-export_directives\issue15371
 name: issue15371_06.ets
-tags:
 files: [./issue15371_03.ets]
 ---*/
 
@@ -24,6 +23,6 @@ import { boo } from './issue15371_03'
 import { bar } from './issue15371_03'
 
 function main(): void {
-  assertEQ( boo(), 0)
-  assertEQ( bar(3), 9)
+  arktest.assertEQ( boo(), 0)
+  arktest.assertEQ( bar(3), 9)
 }

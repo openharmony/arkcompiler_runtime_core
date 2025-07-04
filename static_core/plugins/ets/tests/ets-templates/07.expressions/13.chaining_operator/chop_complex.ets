@@ -49,5 +49,5 @@ function main(): void {
   company.CEO = new Person("Alice");
   company.CEO.address = new Address("San Francisco");
   company.CEO.address.zipCode = "94105";
-  assertEQ(company.CEO?.address?.zipCode, "94105");
+  arktest.assertEQ(company.CEO?.address?.zipCode, "94105");
 }

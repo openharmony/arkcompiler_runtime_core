@@ -21,6 +21,6 @@ params: {{ni.x}} % {{ni.y}}
 ---*/
 
 function main(): void {
-  assertTrue( Double.isNaN({{ni.x}} % {{ni.y}}) )
+  arktest.assertTrue( Double.isNaN({{ni.x}} % {{ni.y}}) )
 }
 {% endfor %}

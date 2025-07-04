@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameLongTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_long length;
+    ani_long length = 0L;
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "length", &length), ANI_OK);
     ASSERT_EQ(length, 4275L);
 }
@@ -39,16 +39,33 @@ TEST_F(ObjectGetPropertyByNameLongTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_long year;
+    ani_long year = 0L;
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "year", &year), ANI_OK);
     ASSERT_EQ(year, 1989L);
+}
+
+TEST_F(ObjectGetPropertyByNameLongTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_long year = 0L;
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Long(nullptr, car, "year", &year), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameLongTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_long year = 0L;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "yearA", &year), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "", &year), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameLongTest, invalid_argument)
 {
     ani_object car = NewCar();
 
-    ani_long length;
+    ani_long length = 0L;
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(nullptr, "length", &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, nullptr, &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "length", nullptr), ANI_INVALID_ARGS);
@@ -58,7 +75,7 @@ TEST_F(ObjectGetPropertyByNameLongTest, get_field_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_long manufacturer;
+    ani_long manufacturer = 0L;
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "manufacturer", &manufacturer), ANI_INVALID_TYPE);
 }
 
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameLongTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_long model;
+    ani_long model = 0L;
     ASSERT_EQ(env_->Object_GetPropertyByName_Long(car, "model", &model), ANI_INVALID_TYPE);
 }
 

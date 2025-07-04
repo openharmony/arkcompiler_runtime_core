@@ -24,8 +24,8 @@ let index: int = -10
 
 function main(): int {
     try {
-        assertTrue( arr[index] == 0 )
-    } catch (e: ArrayIndexOutOfBoundsError) {
+        arktest.assertTrue( arr[index] == 0 )
+    } catch (e: RangeError) {
         return 0
     }
     return 1

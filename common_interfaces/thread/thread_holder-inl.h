@@ -18,11 +18,18 @@
 
 #include <unordered_set>
 
+<<<<<<< HEAD
 #include "thread/thread_holder.h"
 
 #include "thread/mutator_base-inl.h"
 
 namespace common {
+=======
+#include "thread/mutator_base-inl.h"
+#include "thread/thread_holder.h"
+
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 void ThreadHolder::TransferToRunning()
 {
     mutatorBase_->DoLeaveSaferegion();
@@ -42,5 +49,9 @@ bool ThreadHolder::TransferToNativeIfInRunning()
 {
     return mutatorBase_->EnterSaferegion(false);
 }
+<<<<<<< HEAD
 }  // namespace common
+=======
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_INL_H

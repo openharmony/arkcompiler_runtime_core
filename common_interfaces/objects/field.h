@@ -18,11 +18,19 @@
 
 #include <atomic>
 
+<<<<<<< HEAD
 namespace common {
+=======
+namespace panda {
+>>>>>>> OpenHarmony_feature_20250328
 class BaseObject;
 
 using MemoryOrder = std::memory_order;
 // T is primitive field
+<<<<<<< HEAD
+=======
+// NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
+>>>>>>> OpenHarmony_feature_20250328
 template <typename T, bool isAtomic = false>
 class Field {
 public:
@@ -77,5 +85,10 @@ public:
 private:
     T value;
 };
+<<<<<<< HEAD
 }  // namespace common
+=======
+// NOLINTEND(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H

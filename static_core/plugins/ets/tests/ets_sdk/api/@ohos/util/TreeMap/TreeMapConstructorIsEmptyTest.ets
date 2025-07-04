@@ -14,12 +14,15 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap Constructor IsEmpty API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap Constructor IsEmpty API tests")
 
     suite.addTest("TreeMap construct default empty string treeMap", testConstructDefaultEmptyStringTreeMap)
     suite.addTest("TreeMap construct default empty number treeMap", testConstructDefaultEmptyNumberTreeMap)
@@ -46,8 +49,8 @@ function testConstructDefaultEmptyStringTreeMap() {
             return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
-    assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
 }
 
 function testConstructDefaultEmptyNumberTreeMap() {
@@ -58,8 +61,8 @@ function testConstructDefaultEmptyNumberTreeMap() {
     treeMap.set(111, 999)
     treeMap.set(222, 888)
     treeMap.set(333, 777)
-    assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testConstructDefaultEmptyObjectTreeMap() {
@@ -70,8 +73,8 @@ function testConstructDefaultEmptyObjectTreeMap() {
     let obj: MyObject = new MyObject(1);
     let obj2: MyObject = new MyObject(2);
     treeMapo.set(obj, obj2);
-    assertTrue(treeMapo instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
-    assertEQ(treeMapo.length, 1, "The treeMap length should be 1");
+    arktest.assertTrue(treeMapo instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
+    arktest.assertEQ(treeMapo.length, 1, "The treeMap length should be 1");
 }
 
 function testConstructNoComparatorTreeMap() {
@@ -79,8 +82,8 @@ function testConstructNoComparatorTreeMap() {
     treeMap.set(111, 999)
     treeMap.set(222, 888)
     treeMap.set(333, 777)
-    assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testIsEmptyReturnsTrue() {
@@ -89,8 +92,8 @@ function testIsEmptyReturnsTrue() {
             return secondValue.compareTo(firstValue)
         });
     let result = treeMap.isEmpty();
-    assertEQ(result, true, "The treeMap should be empty");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(result, true, "The treeMap should be empty");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
 function testIsEmptyReturnsFalse() {
@@ -100,8 +103,8 @@ function testIsEmptyReturnsFalse() {
         });
     treeMap.set("aa", "123");
     let result = treeMap.isEmpty();
-    assertEQ(result, false, "The treeMap should not be empty");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(result, false, "The treeMap should not be empty");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
 }
 
 function testIsEmptyReturnsTrueAfterRemove() {
@@ -113,7 +116,7 @@ function testIsEmptyReturnsTrueAfterRemove() {
     let result1 = treeMap.isEmpty();
     treeMap.remove("aa");
     let result2 = treeMap.isEmpty();
-    assertEQ(result1, false, "The treeMap should not be empty");
-    assertEQ(result2, true, "The treeMap should be empty");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(result1, false, "The treeMap should not be empty");
+    arktest.assertEQ(result2, true, "The treeMap should be empty");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }

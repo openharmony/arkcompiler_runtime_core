@@ -23,6 +23,6 @@ type Margin = number | string
 
 function main(): void {
     let a1: Margin = 5
-    let b1: byte = a1 as byte
-    assertEQ( b1, 5)
+    let b1: byte = a1.toByte()
+    arktest.assertEQ( b1, 5)
 }

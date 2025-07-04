@@ -24,5 +24,5 @@ type Padding = Margin | string
 
 function main(): void {
     let a: Padding = null
-    assertEQ( a, null)
+    arktest.assertEQ( a, null)
 }

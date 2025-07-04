@@ -26,9 +26,10 @@ function main(): int {
 
   try {
     let ind = 1
+    // Negative because (v[0][1] = "B") returns void.
     let s: String = "S" + (v[0][1] = "B") + (a = 2) + v[ind][0] + (b = 2);
     return 1;
-  } catch (e: ArrayIndexOutOfBoundsError) {
+  } catch (e: RangeError) {
     if (a != 2 || b != 1) return 1;
     return 0;
   } catch (e) {

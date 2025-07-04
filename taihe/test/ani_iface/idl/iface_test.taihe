@@ -13,10 +13,32 @@
  * limitations under the License.
  */
 interface Foo {
-    bar(): void;
-    @set("name") setName(name: String): void;
-    @get("name") getName(): String;
+    Bar(): void;
+    @set("name") SetName(name: String): void;
+    @get("name") GetName(): String;
 }
 
-function getFooIface(): Foo;
-function printFooName(foo: Foo): String;
+function GetFooIface(): Foo;
+function PrintFooName(foo: Foo): String;
+
+interface BaseFun {
+    Base(): String;
+    Fun(): String;
+}
+function GetBaseFun(): BaseFun;
+
+interface SubBaseFun: BaseFun {
+    Sub(): String;
+}
+function GetSubBaseFun(): SubBaseFun;
+
+interface BaseElem {
+    @get GetBase(): String;
+    @set SetBase(s: String): void;
+}
+function GetBaseElem(): BaseElem;
+
+interface SubBaseElem: BaseElem {
+    Sub(): String;
+}
+function GetSubBaseElem(): SubBaseElem;

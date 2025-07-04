@@ -14,14 +14,14 @@
 ---
 cases:
     - from_type: char
-      to_type: byte
+      to_type: Byte
       values:
-          - { expr: "c'\\u007F'", val: 127 as byte }
-          - { expr: "c'\\u0000'", val: 0 as byte }
-          - { expr: c' ', val: 32 as byte }
+          - { expr: "c'\\u007F'", val: 127 }
+          - { expr: "c'\\u0000'", val: 0 }
+          - { expr: c' ', val: 32 }
 
-    - from_type: int
-      to_type: char
+    - from_type: Int
+      to_type: Char
       values:
           - { expr: 0, val: "c'\\u0000'" }
           - { expr: 32767, val: "c'\\u7fff'" }

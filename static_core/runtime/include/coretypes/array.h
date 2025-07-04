@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,11 +158,43 @@ public:
     template <typename T>
     T GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
-    template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    void Set(ArraySizeT idx, T elem);
+    template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false, bool IS_VOLATILE = false>
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Set(ArraySizeT idx, T elem,
+                                                                          uint32_t byteOffset = 0);
 
-    template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    T Get(ArraySizeT idx) const;
+    template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false, bool IS_VOLATILE = false>
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Get(ArraySizeT idx, uint32_t byteOffset = 0) const;
+
+    template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, std::pair<bool, T>> CompareAndExchange(
+        ArraySizeT idx, T oldValue, T newValue, std::memory_order memoryOrder, bool strong, uint32_t byteOffset = 0);
+
+    template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Exchange(ArraySizeT idx, T value,
+                                                                            std::memory_order memoryOrder,
+                                                                            uint32_t byteOffset = 0);
+
+    template <class T>
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndAdd(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                           uint32_t byteOffset = 0);
+
+    template <class T>
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndSub(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                           uint32_t byteOffset = 0);
+
+    template <class T>
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseOr(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                                 uint32_t byteOffset = 0);
+
+    template <class T>
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseAnd(ArraySizeT idx, T value,
+                                                                  std::memory_order memoryOrder,
+                                                                  uint32_t byteOffset = 0);
+
+    template <class T>
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseXor(ArraySizeT idx, T value,
+                                                                  std::memory_order memoryOrder,
+                                                                  uint32_t byteOffset = 0);
 
     template <class T, bool IS_DYN>
     static constexpr size_t GetElementSize();
@@ -176,6 +208,9 @@ public:
 
     template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false>
     T Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx) const;
+
+    template <class T, bool NEED_BARRIER = true, bool IS_DYN = false>
+    void Fill(T elem, ArraySizeT start, ArraySizeT end);
 
     size_t ObjectSize(uint32_t componentSize) const
     {
@@ -217,6 +252,9 @@ private:
         length_.store(length, std::memory_order_relaxed);
     }
 
+    template <class T>
+    void FillPrimitiveElem(T elem, ArraySizeT start, ArraySizeT end, size_t elemSize);
+
     std::atomic<ArraySizeT> length_;
     // Align by 64bits, because dynamic language data is always 64bits
     __extension__ alignas(sizeof(uint64_t)) uint32_t data_[0];  // NOLINT(modernize-avoid-c-arrays)
@@ -226,12 +264,11 @@ static_assert(Array::GetLengthOffset() == sizeof(ObjectHeader));
 static_assert(Array::GetDataOffset() == AlignUp(Array::GetLengthOffset() + sizeof(ArraySizeT), sizeof(uint64_t)));
 static_assert(Array::GetDataOffset() % sizeof(uint64_t) == 0);
 
-#ifdef PANDA_TARGET_64
-constexpr uint32_t ARRAY_LENGTH_OFFSET = 8U;
+constexpr uint32_t ARRAY_LENGTH_OFFSET = sizeof(ObjectHeader);
 static_assert(ARRAY_LENGTH_OFFSET == ark::coretypes::Array::GetLengthOffset());
-constexpr uint32_t ARRAY_DATA_OFFSET = 16U;
+constexpr uint32_t ARRAY_DATA_OFFSET = ARRAY_LENGTH_OFFSET + sizeof(uint64_t);
 static_assert(ARRAY_DATA_OFFSET == ark::coretypes::Array::GetDataOffset());
-#endif
+
 }  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "mem_hooks.h"
 #include "libpandabase/utils/span.h"
+#include "utils/logger.h"
 
 namespace ark::os::unix::mem_hooks {
 
@@ -60,13 +61,25 @@ void PandaHooks::SaveRealFunctions()
 {
     realMalloc_ = reinterpret_cast<decltype(realMalloc_)>(
         dlsym(RTLD_NEXT, "malloc"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(realMalloc_ != nullptr);
+    // NOTE(audovichenko): #26275
+    if (realMalloc_ == nullptr) {
+        realMalloc_ = reinterpret_cast<decltype(realMalloc_)>(
+            dlsym(RTLD_DEFAULT, "malloc"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+    }
     realMemalign_ = reinterpret_cast<decltype(realMemalign_)>(
         dlsym(RTLD_NEXT, "memalign"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(realMemalign_ != nullptr);
+    // NOTE(audovichenko): #26275
+    if (realMemalign_ == nullptr) {
+        realMemalign_ = reinterpret_cast<decltype(realMemalign_)>(
+            dlsym(RTLD_DEFAULT, "memalign"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+    }
     realFree_ = reinterpret_cast<decltype(realFree_)>(
         dlsym(RTLD_NEXT, "free"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(realFree_ != nullptr);
+    // NOTE(audovichenko): #26275
+    if (realFree_ == nullptr) {
+        realFree_ = reinterpret_cast<decltype(realFree_)>(
+            dlsym(RTLD_DEFAULT, "free"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+    }
 }
 
 /* static */

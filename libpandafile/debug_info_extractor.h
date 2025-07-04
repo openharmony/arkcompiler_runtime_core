@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,24 +56,24 @@ public:
         std::string signature;
     };
 
-    explicit DebugInfoExtractor(const File *pf);
+    PANDA_PUBLIC_API explicit DebugInfoExtractor(const File *pf);
 
     ~DebugInfoExtractor() = default;
 
     DEFAULT_COPY_SEMANTIC(DebugInfoExtractor);
     DEFAULT_MOVE_SEMANTIC(DebugInfoExtractor);
 
-    const LineNumberTable &GetLineNumberTable(File::EntityId method_id) const;
+    PANDA_PUBLIC_API const LineNumberTable &GetLineNumberTable(File::EntityId method_id) const;
 
-    const ColumnNumberTable &GetColumnNumberTable(File::EntityId method_id) const;
+    PANDA_PUBLIC_API const ColumnNumberTable &GetColumnNumberTable(File::EntityId method_id) const;
 
-    const LocalVariableTable &GetLocalVariableTable(File::EntityId method_id) const;
+    PANDA_PUBLIC_API const LocalVariableTable &GetLocalVariableTable(File::EntityId method_id) const;
 
     const std::vector<ParamInfo> &GetParameterInfo(File::EntityId method_id) const;
 
-    const char *GetSourceFile(File::EntityId method_id) const;
+    PANDA_PUBLIC_API const char *GetSourceFile(File::EntityId method_id) const;
 
-    const char *GetSourceCode(File::EntityId method_id) const;
+    PANDA_PUBLIC_API const char *GetSourceCode(File::EntityId method_id) const;
 
     std::vector<File::EntityId> GetMethodIdList() const;
 

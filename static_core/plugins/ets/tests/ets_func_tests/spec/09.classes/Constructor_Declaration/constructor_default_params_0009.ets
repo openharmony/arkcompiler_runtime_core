@@ -38,8 +38,8 @@ class X extends Y {
 
 function main() : int {
     let x : X = new X(1000);
-    assertEQ( x.dataY1, 1000)
-    assertEQ( x.dataX1, 0)
-    assertEQ( x.dataX2, 1)
+    arktest.assertEQ( x.dataY1, 1000)
+    arktest.assertEQ( x.dataX1, 0)
+    arktest.assertEQ( x.dataX2, 1)
     return 0;
 }

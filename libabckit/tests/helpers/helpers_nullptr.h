@@ -15,12 +15,12 @@
 #ifndef LIBABCKIT_TESTS_INVALID_HELPERS
 #define LIBABCKIT_TESTS_INVALID_HELPERS
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/c/ir_core.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
+#include "libabckit/c/extensions/js/metadata_js.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
+#include "libabckit/c/ir_core.h"
 
 namespace libabckit::test::helpers_nullptr {
 
@@ -145,6 +145,7 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreAnnotationInterface *));
 void TestNullptr(AbckitLiteralArray *(*apiToCheck)(AbckitValue *));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreClass *, void *, bool (*cb)(AbckitCoreAnnotation *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreClass *, void *, bool (*cb)(AbckitCoreFunction *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreClass *, void *, bool (*cb)(AbckitCoreClassField *, void *)));
 void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreClass *));
 void TestNullptr(AbckitCoreModule *(*apiToCheck)(AbckitCoreClass *));
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreClass *));
@@ -180,7 +181,10 @@ void TestNullptr(AbckitCoreFunction *(*apiToCheck)(AbckitCoreFunction *));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreFunction *));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreAnnotationInterface *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreFunction *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreModuleField *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreClass *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreInterface *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreEnum *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreExportDescriptor *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreImportDescriptor *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *, void *, bool (*cb)(AbckitCoreNamespace *, void *)));
@@ -188,6 +192,12 @@ void TestNullptr(AbckitFile *(*apiToCheck)(AbckitCoreModule *));
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreModule *));
 void TestNullptr(AbckitTarget (*apiToCheck)(AbckitCoreModule *));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreModule *));
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreInterface *));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreInterface *, void *, bool (*cb)(AbckitCoreFunction *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreInterface *, void *, bool (*cb)(AbckitCoreInterfaceField *, void *)));
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreEnum *));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreEnum *, void *, bool (*cb)(AbckitCoreFunction *, void *)));
+void TestNullptr(bool (*apiToCheck)(AbckitCoreEnum *, void *, bool (*cb)(AbckitCoreEnumField *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreNamespace *, void *, bool (*cb)(AbckitCoreClass *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreNamespace *, void *, bool (*cb)(AbckitCoreNamespace *, void *)));
 void TestNullptr(bool (*apiToCheck)(AbckitCoreNamespace *, void *, bool (*cb)(AbckitCoreFunction *, void *)));

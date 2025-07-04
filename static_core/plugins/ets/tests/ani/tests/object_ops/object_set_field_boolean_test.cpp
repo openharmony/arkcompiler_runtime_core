@@ -24,7 +24,7 @@ public:
         auto packRef = CallEtsFunction<ani_ref>("object_set_field_boolean_test", "newPackObject");
 
         ani_class cls {};
-        ASSERT_EQ(env_->FindClass("Lobject_set_field_boolean_test/Pack;", &cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("object_set_field_boolean_test.Pack", &cls), ANI_OK);
 
         ani_field fieldBool {};
         ASSERT_EQ(env_->Class_FindField(cls, "bool_value", &fieldBool), ANI_OK);
@@ -45,7 +45,7 @@ TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_success)
     ani_field fieldString {};
     GetTestData(&pack, &fieldBool, &fieldString);
     const int32_t loopCount = 3;
-    for (int i = 1; i <= loopCount; i++) {
+    for (int32_t i = 1; i <= loopCount; i++) {
         ASSERT_EQ(CallEtsFunction<ani_boolean>("object_set_field_boolean_test", "checkBooleanValue", pack, ANI_FALSE),
                   ANI_TRUE);
 
@@ -66,6 +66,16 @@ TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_success)
         ASSERT_EQ(env_->Object_GetField_Boolean(pack, fieldBool, &married), ANI_OK);
         ASSERT_EQ(married, false);
     }
+}
+
+TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_invalid_env)
+{
+    ani_object pack {};
+    ani_field fieldBool {};
+    ani_field fieldString {};
+    GetTestData(&pack, &fieldBool, &fieldString);
+
+    ASSERT_EQ(env_->c_api->Object_SetField_Boolean(nullptr, pack, fieldBool, ANI_TRUE), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldBooleanTest, set_field_boolean_invalid_field_type)

@@ -25,5 +25,5 @@ function main(): void {
     let cmp1: boolean = (a == b) == (b != c);
     let cmp2: boolean = (a == b) & b != c;
 
-    assertEQ( cmp1, cmp2 )
+    arktest.assertEQ( cmp1, cmp2 )
 }

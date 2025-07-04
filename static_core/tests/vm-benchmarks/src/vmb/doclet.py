@@ -25,11 +25,28 @@ from itertools import combinations, product
 from dataclasses import dataclass, field
 from collections import namedtuple
 from vmb.lang import LangBase
-from vmb.helpers import StringEnum, split_params
+from vmb.helpers import StringEnum, split_params, die
 from vmb.cli import Args, add_measurement_opts
 
 log = logging.getLogger('vmb')
 NameVal = namedtuple("NameVal", "name value")
+
+
+class TestFilter:
+    def __init__(self, patterns: Iterable[str]):
+        to_strip = '\'\"'
+        self.patterns = []
+        for x in patterns:
+            try:
+                self.patterns.append(re.compile(f'^{x.strip(to_strip)}$'))
+            except re.error as e:
+                die(True, f'RegExp error in [{x}]: {e}')
+
+    def match(self, name: str):
+        # empty filter match all
+        if not self.patterns:
+            return True
+        return any(r.search(name) is not None for r in self.patterns)
 
 
 class LineParser:
@@ -71,6 +88,7 @@ class Doclet(StringEnum):
     RETURNS = "returns"
     # Lang-agnostic
     IMPORT = "Import"
+    INCLUDE = "Include"
     TAGS = "Tags"
     BUGS = "Bugs"
     GENERATOR = "Generator"  # Legacy code generation
@@ -97,6 +115,7 @@ class BenchClass:
     benches: List[BenchFunc] = field(default_factory=list)
     bench_args: Optional[argparse.Namespace] = None
     imports: List[str] = field(default_factory=list)
+    includes: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     bugs: List[str] = field(default_factory=list)
     generator: Optional[str] = None
@@ -118,6 +137,7 @@ class DocletParser(LineParser):
         self.__pending_tags: List[str] = []
         self.__pending_bugs: List[str] = []
         self.__pending_imports: List[str] = []
+        self.__pending_includes: List[str] = []
 
     @staticmethod
     def validate_comment(doclets: List[NameVal]) -> None:
@@ -176,11 +196,11 @@ class DocletParser(LineParser):
         class_name = self.lang.parse_state(self.current)
         if not class_name:
             raise ValueError('Bench class declaration not found!')
-        self.state = BenchClass(name=class_name, tags=self.__pending_tags,
-                                bugs=self.__pending_bugs,
-                                imports=self.__pending_imports)
+        self.state = BenchClass(name=class_name,
+                                tags=self.__pending_tags, bugs=self.__pending_bugs,
+                                imports=self.__pending_imports, includes=self.__pending_includes)
         self.__pending_tags, self.__pending_bugs = [], []
-        self.__pending_imports = []
+        self.__pending_imports, self.__pending_includes = [], []
         # check if there are overrides for whole class
         for _, value in benchmarks:
             self.state.bench_args = self.parse_bench_overrides(value)
@@ -257,6 +277,12 @@ class DocletParser(LineParser):
                 self.state.imports.append(value)
             else:
                 self.__pending_imports.append(value)
+        for _, value in filter_doclets(Doclet.INCLUDE):
+            value = str(value).strip("\'\"")
+            if self.state:
+                self.state.includes.append(value)
+            else:
+                self.__pending_includes.append(value)
         for _ in states:
             self.process_state(benchmarks, generators)
             return
@@ -317,6 +343,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     bench_name: str = ''
     bench_path: str = ''
     common: str = ''  # common feature is obsoleted
+    print_func: str = ''
     # this should be the only place with defaults
     mi: int = 3
     wi: int = 2
@@ -327,6 +354,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     tags: Any = None
     bugs: Any = None
     imports: Any = None
+    includes: Any = None
     generator: str = ''
     config: Dict[str, Any] = field(default_factory=dict)
     aot_opts: str = ''
@@ -340,7 +368,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                            ) -> Iterable[TemplateVars]:
         """Produce all combinations of Benches and Params."""
         tags_filter = args.tags if args else []
-        tests_filter = args.tests if args else []
+        tests_filter = TestFilter(args.tests if args else [])
         skip_tags = args.skip_tags if args else set()
         # list of lists of tuples (param_name, param_value)
         # sorting by param name to keep fixture indexing
@@ -354,10 +382,10 @@ class TemplateVars:  # pylint: disable=invalid-name
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
             if skip_tags and set.intersection(tags, skip_tags):
-                log.debug("%s skipped by skip-tags %s", b.name, skip_tags)
+                log.trace("`%s` skipped by tags: Unwanted: %s Tagged: %s", b.name, skip_tags, tags)
                 continue
             if tags_filter and not set.intersection(tags, tags_filter):
-                log.debug("%s filtered out by tags %s", b.name, tags)
+                log.trace("`%s` skipped by tags: Wanted: %s Tagged: %s", b.name, tags_filter, tags)
                 continue
             # if no params fixtures will be [()]
             fix_id = 0
@@ -378,8 +406,8 @@ class TemplateVars:  # pylint: disable=invalid-name
                 tp.bench_name = f'{parsed.name}_{b.name}'
                 if tp.fix_id > 0:
                     tp.bench_name = f'{tp.bench_name}_{tp.fix_id}'
-                if tests_filter and \
-                        not any((x in tp.bench_name) for x in tests_filter):
+                # if requested specific tests skip all other
+                if not tests_filter.match(tp.bench_name):
                     fix_id += 1
                     continue
                 tp.state_setup = f'bench.{parsed.setup}();' \
@@ -390,6 +418,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                 # Defaults -> CmdLine -> Class -> Bench
                 tp.set_measure_overrides(args, parsed.bench_args, b.args)
                 tp.imports = parsed.imports
+                tp.includes = parsed.includes
                 yield tp
                 fix_id += 1
 

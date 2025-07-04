@@ -16,36 +16,53 @@
 package std.core;
 
 export class LocaleMatch {
-    native static bestFitLocale(locale: string): string
-    native static lookupLocale(locale: string[]): string
-}
-
-export function localesToString(locale: Intl.BCP47LanguageTag[]): string {
-    return string.join(locale, ",")
-}
-
-export function localesToString(locale: Intl.BCP47LanguageTag): string {
-    return locale
-}
-
-export function localesToString(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
-    if (locale instanceof Intl.BCP47LanguageTag) {
-        return locale
-    } else {
-        return localesToString(locale)
-    }
+    static native bestFitLocale(locale: string[]): string
+    static native lookupLocale(locale: string[]): string
+    static native bestFitLocales(locale: string[]): string[]
+    static native lookupLocales(locale: string[]): string[]
 }
 
 export function intlLookUpLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
-    let tagList: string[]
-    if (locale instanceof Intl.BCP47LanguageTag) {
-        tagList = [locale]
-    } else {
-        tagList = locale
-    }
+    const tagList = locale instanceof Intl.BCP47LanguageTag ? [locale] : locale
     return LocaleMatch.lookupLocale(tagList)
 }
 
 export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
-    return LocaleMatch.bestFitLocale(localesToString(locale))
+    const tagList = locale instanceof Intl.BCP47LanguageTag ? [locale] : locale
+    return LocaleMatch.bestFitLocale(tagList)
+}
+
+export function intlLookUpLocales(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string[] {
+    const tagList = locale instanceof Intl.BCP47LanguageTag ? [locale] : locale
+    return LocaleMatch.lookupLocales(tagList)
+}
+
+export function intlBestFitLocales(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string[] {
+    const tagList = locale instanceof Intl.BCP47LanguageTag ? [locale] : locale
+    return LocaleMatch.bestFitLocales(tagList)
+}
+
+export function intlLocalesToLanguageTags(locales: string | Intl.Locale | ReadonlyArray<string | Intl.Locale> | undefined): string[] {
+    if (locales === undefined) {
+        return []
+    }
+
+    if (locales instanceof string) {
+        return [locales]
+    } else if (locales instanceof Intl.Locale) {
+        return [locales.toString()]
+    } else if (locales instanceof ReadonlyArray) {
+        if (locales.length == 0) {
+            return []
+        }
+
+        const langTags = new string[locales.length]
+        for (let i = 0; i < locales.length; i++) {
+            const locale = locales[i] as string | Intl.Locale
+            langTags[i] = locale instanceof string ? locale : locale.toString()
+        }
+        return langTags
+    } else {
+        throw new TypeError("'locales' parameter has invalid type")
+    }
 }

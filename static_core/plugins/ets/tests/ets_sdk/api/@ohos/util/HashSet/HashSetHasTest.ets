@@ -14,12 +14,15 @@
  */
 
 import {HashSet} from "@ohos.util.HashSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Has API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Has API tests")
 
     suite.addTest("HashSet has value of the hashSet", testHasValue)
     suite.addTest("HashSet has not set value of the hashSet", testHasNotSetValue)
@@ -36,39 +39,39 @@ function testHasValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.has("squirrel");
-    assertEQ(result, true, "The hashSet should contain the specified value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the specified value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testHasNotSetValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.has("test");
-    assertEQ(result, false, "The hashSet should not contain the specified value that is not set");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, false, "The hashSet should not contain the specified value that is not set");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testHasValueOfEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let result = hashSet.has("test");
-    assertEQ(result, false, "The hashSet should not contain the specified value when the hashSet is empty");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, false, "The hashSet should not contain the specified value when the hashSet is empty");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testHasNullValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add(null);
     let result = hashSet.has(null);
-    assertEQ(result, true, "The hashSet should contain the null value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the null value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testHasNotSetNullValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.has(null);
-    assertEQ(result, false, "The hashSet should not contain the specified value that is not set");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, false, "The hashSet should not contain the specified value that is not set");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testHasValueAfterClear() {
@@ -77,15 +80,15 @@ function testHasValueAfterClear() {
     let result1 = hashSet.isEmpty();
     hashSet.clear();
     let result2 = hashSet.has("squirrel");
-    assertEQ(result1, false, "The hashSet should not be empty");
-    assertEQ(result2, false, "The hashSet should contain the specified value that is not set");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result1, false, "The hashSet should not be empty");
+    arktest.assertEQ(result2, false, "The hashSet should contain the specified value that is not set");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testHasEmptyString() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("");
     let result = hashSet.has("");
-    assertEQ(result, true, "The hashSet should contain the specified value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the specified value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }

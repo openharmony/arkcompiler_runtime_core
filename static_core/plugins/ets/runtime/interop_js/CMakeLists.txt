@@ -61,13 +61,16 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_method_set.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage_verifier.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_proxy.cpp
         ${ETS_EXT_SOURCES}/interop_js/event_loop_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_value.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_builtin.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_function.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_refconvert_record.cpp
         ${ETS_EXT_SOURCES}/interop_js/napi_impl/napi_impl.cpp
+        ${ETS_EXT_SOURCES}/interop_js/native_api/arkts_interop_js_api_impl.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_common.cpp
         ${ETS_EXT_SOURCES}/interop_js/timer_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
@@ -76,6 +79,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc.cpp
         ${ETS_EXT_SOURCES}/interop_js/jsbacktrace/backtrace.cpp
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc_vm_adaptor.cpp
+        ${ETS_EXT_SOURCES}/interop_js/code_scopes.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
 )
@@ -92,5 +96,14 @@ else()
         # NOTE(konstanting, #23205): A workaround for the hybrid cmake build. Will be removed soon
         # using a separate .cpp file with weak symbols.
         panda_target_compile_definitions(arkruntime_obj PRIVATE PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
+    endif()
+    if (ARK_HYBRID)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE ARK_HYBRID)
+    endif()
+    if (USE_CMC_GC)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE USE_CMC_GC)
+    endif()
+    if (USE_READ_BARRIER)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE USE_READ_BARRIER)
     endif()
 endif()

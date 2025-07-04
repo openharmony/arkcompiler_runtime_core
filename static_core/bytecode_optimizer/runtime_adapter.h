@@ -208,14 +208,20 @@ public:
         return mda.IsExternal();
     }
 
-    bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const override
+    bool IsMethodIntrinsic(MethodPtr method) const override
     {
-        return false;
+        return GetIntrinsicId(method) != IntrinsicId::INVALID;
     }
 
-    bool IsMethodIntrinsic([[maybe_unused]] MethodPtr caller, MethodId id) const override
+    bool IsMethodIntrinsic(MethodPtr caller, MethodId id) const override
     {
-        return GetIntrinsicId(GetMethodById(caller, id)) != IntrinsicId::INVALID;
+        return GetMethodAsIntrinsic(caller, id) != nullptr;
+    }
+
+    MethodPtr GetMethodAsIntrinsic(MethodPtr caller, MethodId id) const override
+    {
+        auto *method = GetMethodById(caller, id);
+        return IsMethodIntrinsic(method) ? method : nullptr;
     }
 
     IntrinsicId GetIntrinsicId([[maybe_unused]] MethodPtr method) const override
@@ -461,9 +467,6 @@ private:
 
     static IntrinsicId GetIntrinsicId(std::string_view className, std::string_view methodName,
                                       panda_file::MethodDataAccessor mda);
-
-    static bool IsEqual(panda_file::MethodDataAccessor mda, std::initializer_list<panda_file::Type::TypeId> shorties,
-                        std::initializer_list<std::string_view> refTypes);
 
     const panda_file::File &pandaFile_;
 };

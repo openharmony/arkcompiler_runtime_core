@@ -33,11 +33,11 @@ function foo (bar: Partial<I>) {
 function main(): void {
   let a: I = {var_one: false, var_two: false}
   foo(a.var_one)
-  assertEQ( a.var_one, true)
-  assertEQ( a.var_two, false)
+  arktest.assertEQ( a.var_one, true)
+  arktest.assertEQ( a.var_two, false)
 
   let b: I = {var_two: 3false}
   foo(b.var_one)
-  assertEQ( b.var_one, undefined)
-  assertEQ( b.var_two, false)
+  arktest.assertEQ( b.var_one, undefined)
+  arktest.assertEQ( b.var_two, false)
 }

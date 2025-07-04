@@ -24,14 +24,14 @@ class C {
 function main(): void {
     const c = new C(1)
     const cType = Type.of(c) as ClassType
-    assertEQ( cType.getConstructorsNum(), 1)
+    arktest.assertEQ( cType.getConstructorsNum(), 1)
     const m = cType.getConstructor(0)
-    const args = new Object[1];
+    const args : FixedArray<NullishType> = new NullishType[1];
     args[0] = 10
     let res = m.invoke(null, args) as C
-    assertEQ( res.a, 10)
+    arktest.assertEQ( res.a, 10)
 
     args[0] = 30
     res = m.invoke(null, args) as C
-    assertEQ( res.a, 30)
+    arktest.assertEQ( res.a, 30)
 }

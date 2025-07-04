@@ -29,6 +29,19 @@ export class EvalError extends Error {
 }
 
 /**
+ * @class Represents an error that occurs when a numeric types conversion is performed on an index expression, and the fractional part differs from 0.
+ */
+export class NonIntegralIndexError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NonIntegralIndexError", message, options)
+    }
+
+    static $_invoke(message?: String, options?: ErrorOptions): NonIntegralIndexError {
+        return new NonIntegralIndexError(message, options)
+    }
+}
+
+/**
  * @class Represents an error that occurs when an operation could not be performed, typically (but not exclusively) when a value is not of the expected type
  */
 export class TypeError extends Error {
@@ -108,8 +121,3 @@ export class AggregateError extends Error {
     }
 
 }
-
-/**
- * Represents error that is thrown when Date is malformed
- */
-export final class InvalidDate extends Error {}

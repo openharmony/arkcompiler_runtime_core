@@ -14,12 +14,15 @@
  */
 
 import HashMap from "@ohos.util.HashMap";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashMap ForEach Keys Values Iterator API tests")
+    const suite = new arktest.ArkTestsuite("HashMap ForEach Keys Values Iterator API tests")
 
     suite.addTest("HashMap forEach the data with no reference", testForEachWithoutReference)
     suite.addTest("HashMap forEach the data with reference is value", testForEachWithValueReference)
@@ -43,7 +46,7 @@ function testForEachWithoutReference() {
     hashMap.forEach(() => {
         count++;
     });
-    assertEQ(count, 2, "The hashMap forEach should iterate over all elements");
+    arktest.assertEQ(count, 2, "The hashMap forEach should iterate over all elements");
 }
 
 function testForEachWithValueReference() {
@@ -53,7 +56,7 @@ function testForEachWithValueReference() {
     let flag: boolean = false;
     hashMap.forEach((value: number) => {
         flag = hashMap.hasValue(value);
-        assertEQ(flag, true, "The hashMap forEach should iterate over all values");
+        arktest.assertEQ(flag, true, "The hashMap forEach should iterate over all values");
     });
 }
 
@@ -66,8 +69,8 @@ function testForEachWithKeyAndValueReference() {
     hashMap.forEach((value: number, key: string) => {
         flag1 = hashMap.hasValue(value);
         flag2 = hashMap.hasKey(key);
-        assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
-        assertEQ(flag2, true, "The hashMap forEach should iterate over all keys");
+        arktest.assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
+        arktest.assertEQ(flag2, true, "The hashMap forEach should iterate over all keys");
     });
 }
 
@@ -80,8 +83,8 @@ function testForEachWithThreeReferences() {
     hashMap.forEach((value: number, key: string, tempHashMap: HashMap<string, number>) => {
         flag1 = tempHashMap.hasValue(value);
         flag2 = tempHashMap.hasKey(key);
-        assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
-        assertEQ(flag2, true, "The hashMap forEach should iterate over all keys");
+        arktest.assertEQ(flag1, true, "The hashMap forEach should iterate over all values");
+        arktest.assertEQ(flag2, true, "The hashMap forEach should iterate over all keys");
     });
 }
 
@@ -90,17 +93,17 @@ function testKeysIterator() {
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let iteratorSetValues = hashMap.keys();
-    assertEQ(iteratorSetValues.next().value, "sparrow", "The hashMap keys iterator should return the first key");
-    assertEQ(iteratorSetValues.next().value, "gull", "The hashMap keys iterator should return the second key");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap keys iterator should return undefined for no more keys");
+    arktest.assertEQ(iteratorSetValues.next().value, "sparrow", "The hashMap keys iterator should return the first key");
+    arktest.assertEQ(iteratorSetValues.next().value, "gull", "The hashMap keys iterator should return the second key");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap keys iterator.done should true for no more keys");
 }
 
 function testKeysIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.keys();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap keys iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap keys iterator.done should true when the hashMap is empty");
 }
 
 function testValuesIterator() {
@@ -108,17 +111,17 @@ function testValuesIterator() {
     hashMap.set("sparrow", 123);
     hashMap.set("gull", 357);
     let iteratorSetValues = hashMap.values();
-    assertEQ(iteratorSetValues.next().value, 123, "The hashMap values iterator should return the first value");
-    assertEQ(iteratorSetValues.next().value, 357, "The hashMap values iterator should return the second value");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap values iterator should return undefined for no more values");
+    arktest.assertEQ(iteratorSetValues.next().value, 123, "The hashMap values iterator should return the first value");
+    arktest.assertEQ(iteratorSetValues.next().value, 357, "The hashMap values iterator should return the second value");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap values iterator.done should true for no more values");
 }
 
 function testValuesIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.values();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap values iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap values iterator.done should true when the hashMap is empty");
 }
 
 function testIterator() {
@@ -136,12 +139,12 @@ function testIterator() {
         }
     }
     let strAll = "sparrow,123,gull,357,test,111,apply,222";
-    assertEQ(str, strAll, "The hashMap $_iterator should return all key-value pairs");
+    arktest.assertEQ(str, strAll, "The hashMap $_iterator should return all key-value pairs");
 }
 
 function testIteratorWithEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let iteratorSetValues = hashMap.$_iterator();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashMap $_iterator should return undefined when the hashMap is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashMap iterator.done should true when the hashMap is empty");
 }

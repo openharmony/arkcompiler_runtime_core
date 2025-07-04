@@ -21,7 +21,7 @@ vals:
     # 1.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: (foo(false, v1, v2) +v1) as char
+      exp: (foo(false, v1, v2) +v1).toChar()
       r: c'A'
 
     # 2.
@@ -33,11 +33,11 @@ vals:
     # 3.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: "(c' ' + foo(false, v1, v2) + v1) as char"
+      exp: "(c' ' + foo(false, v1, v2) + v1).toChar()"
       r: c'a'
 
     # 4.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: "(c' ' + foo(false, (v2 + v1) as char, (v2 - v1) as char)) as char"
+      exp: "(c' ' + foo(false, (v2 + v1).toChar(), (v2 - v1).toChar())).toChar()"
       r: v2

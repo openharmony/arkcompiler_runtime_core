@@ -24,7 +24,7 @@ tags: [compile-only, negative]
 
 function main(): int {
   let v: {{c.type}} = {{c.val}};
-  let arr: {{c.type}}[][] = new {{c.type}}[v][v];
+  let arr: FixedArray<FixedArray<{{c.type}}>> = new {{c.type}}[v][v];
   if (arr.length != {{c.len}}) {
     return 1;
   }

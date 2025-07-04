@@ -33,8 +33,8 @@
 
 function main(): void {
     let str = "abcdefg";
-    assertEQ(str[0], c'a', "Wrong str.get(0)");
-    assertEQ(str[6], c'g', "Wrong str.get(6)");
+    arktest.assertEQ(str[0], c'a', "Wrong str.get(0)");
+    arktest.assertEQ(str[6], c'g', "Wrong str.get(6)");
 
     let exceptionFlag = 0;
     try {
@@ -44,7 +44,7 @@ function main(): void {
     } catch (e) {
         exceptionFlag = 2;
     }
-    assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, exceptionFlag);
 
     exceptionFlag = 0;
     try {
@@ -54,5 +54,5 @@ function main(): void {
     } catch (e) {
         exceptionFlag = 2;
     }
-    assertEQ(1, exceptionFlag);
+    arktest.assertEQ(1, exceptionFlag);
 }

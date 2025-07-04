@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [module2.ets, module3.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import * as foo from "@foo/foo"
 import * as bar from "@bar/bar"
 import * as module2 from "./module2"
@@ -23,38 +28,34 @@ export class Dummy { }
 
 export function dummy(): Dummy { return new Dummy() }
 
-function getCurrentLinker() {
-    return Class.ofCaller().getLinker();
-}
-
 function testLazyLoading() {
-    const appLinker = getCurrentLinker();
+    const appLinker = Class.current().getLinker();
 
-    // disabled as runtime verication is enabled
+    // disabled as runtime verification is enabled
     const verifierEnabled: boolean = true;
 
     if (!verifierEnabled) {
-        assertEQ(appLinker.findLoadedClass("@bar.bar.ETSGLOBAL"), undefined, "module must be loaded lazily");
+        arktest.assertEQ(appLinker.findLoadedClass("@bar.bar.ETSGLOBAL"), undefined, "module must be loaded lazily");
     }
 
-    assertFalse(bar.ClassLoadingChecker_init, "`@bar.bar.ClassLoadingChecker` must be not initialized");
-    assertNE(appLinker.findLoadedClass("@bar.bar.ETSGLOBAL"), undefined,
+    arktest.assertFalse(bar.ClassLoadingChecker_init, "`@bar.bar.ClassLoadingChecker` must be not initialized");
+    arktest.assertNE(appLinker.findLoadedClass("@bar.bar.ETSGLOBAL"), undefined,
         "module must be loaded after accessing `bar.ClassLoadingChecker_init`");
 
     if (!verifierEnabled) {
-        assertEQ(appLinker.findLoadedClass("@bar.bar.ClassLoadingChecker"), undefined,
+        arktest.assertEQ(appLinker.findLoadedClass("@bar.bar.ClassLoadingChecker"), undefined,
             "`@bar.bar.ClassLoadingChecker` must not be loaded yet");
     }
 
     const instance = new bar.ClassLoadingChecker();
-    assertEQ(appLinker.findLoadedClass("@bar.bar.ClassLoadingChecker"), Class.of(instance));
-    assertTrue(bar.ClassLoadingChecker_init, "`@bar.bar.ClassLoadingChecker` must be initialized");
+    arktest.assertEQ(appLinker.findLoadedClass("@bar.bar.ClassLoadingChecker"), Class.of(instance));
+    arktest.assertTrue(bar.ClassLoadingChecker_init, "`@bar.bar.ClassLoadingChecker` must be initialized");
 }
 
 function triggerGC() {
     // Check that garbage collection does not break user-defined RuntimeLinker
-    expectNoThrow((): void throws => {
-        const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+    arktest.expectNoThrow((): void => {
+        const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         if(gcId > 0) {
         GC.waitForFinishGC(gcId);
     }
@@ -78,24 +79,24 @@ function getMethodByName(classType: ClassType, name: string): Method | undefined
 
 function testStdCoreType() {
     const obj = foo.dummy();
-    assertTrue(obj instanceof foo.Dummy);
+    arktest.assertTrue(obj instanceof foo.Dummy);
     const objName = getNameOfClass(obj);
-    assertEQ(objName, "@foo.foo.Dummy");
+    arktest.assertEQ(objName, "@foo.foo.Dummy");
 
     const objType = Type.of(obj);
-    assertEQ(objType.getName(), objName, "names obtained via std.core.Type and std.core.Class must match");
+    arktest.assertEQ(objType.getName(), objName, "names obtained via std.core.Type and std.core.Class must match");
 
     const classType = objType as ClassType;
     const objClass = Class.of(obj);
-    assertEQ(classType.getName(), objClass.getName(), "Class objects must match");
+    arktest.assertEQ(classType.getName(), objClass.getName(), "Class objects must match");
     const classTypeFromLinker = objClass.getLinker().getType(objClass.getName());
-    assertNE(classTypeFromLinker, undefined, "RuntimeLinker must correctly resolve class type '" + objClass.getName() + "'");
-    assertTrue(classType.equals(classTypeFromLinker!), "RuntimeLinker must correctly resolve class type '" + objClass.getName() + "'");
+    arktest.assertNE(classTypeFromLinker, undefined, "RuntimeLinker must correctly resolve class type '" + objClass.getName() + "'");
+    arktest.assertTrue(classType.equals(classTypeFromLinker!), "RuntimeLinker must correctly resolve class type '" + objClass.getName() + "'");
 
     const method = getMethodByName(classType, "foo");
-    assertNE(method, undefined, "method 'foo' must be in class @foo.foo.Dummy");
-    assertTrue(method!.getType().hasReceiver());
-    assertEQ((method!.getType().getReceiverType() as ClassType).getName(), classType.getName(), "method 'foo' must be declared in interface 'Base'");
+    arktest.assertNE(method, undefined, "method 'foo' must be in class @foo.foo.Dummy");
+    arktest.assertTrue(method!.getType().hasReceiver());
+    arktest.assertEQ((method!.getType().getReceiverType() as ClassType).getName(), classType.getName(), "method 'foo' must be declared in interface 'Base'");
 }
 
 function testStdCoreProxy() {
@@ -104,43 +105,43 @@ function testStdCoreProxy() {
     class Handler extends DefaultProxyHandler<Map<string, string>> { };
     const mapProxy = Proxy.create(map, new Handler());
 
-    assertTrue(map === mapProxy, "std.core.Proxy must work correctly in application context");
+    arktest.assertTrue(map === mapProxy, "std.core.Proxy must work correctly in application context");
 }
 
 function testArrayClass() {
-    const arr = new foo.Dummy[0]
+    const arr: FixedArray<foo.Dummy> = new foo.Dummy[0]
     const arrClass = Class.of(arr);
-    assertNE(arrClass, undefined);
+    arktest.assertNE(arrClass, undefined);
 
     const element = foo.dummy();
     const elementClass = Class.of(element);
-    assertNE(elementClass, undefined);
-    assertEQ(arrClass.getLinker(), elementClass.getLinker());
+    arktest.assertNE(elementClass, undefined);
+    arktest.assertEQ(arrClass.getLinker(), elementClass.getLinker());
 }
 
 function testNames() {
     triggerGC();
 
-    assertEQ(Class.current().getName(), "@app.module1.ETSGLOBAL")
+    arktest.assertEQ(Class.current().getName(), "@app.module1.ETSGLOBAL")
 
     testLazyLoading();
 
     triggerGC();
 
-    assertTrue(bar.dummy() instanceof bar.Dummy);
-    assertEQ(getNameOfClass(bar.dummy()), "@bar.bar.Dummy");
+    arktest.assertTrue(bar.dummy() instanceof bar.Dummy);
+    arktest.assertEQ(getNameOfClass(bar.dummy()), "@bar.bar.Dummy");
 
-    assertTrue(foo.dummy() instanceof foo.Dummy);
-    assertEQ(getNameOfClass(foo.dummy()), "@foo.foo.Dummy");
+    arktest.assertTrue(foo.dummy() instanceof foo.Dummy);
+    arktest.assertEQ(getNameOfClass(foo.dummy()), "@foo.foo.Dummy");
 
-    assertTrue(dummy() instanceof Dummy);
-    assertEQ(getNameOfClass(dummy()), "@app.module1.Dummy");
+    arktest.assertTrue(dummy() instanceof Dummy);
+    arktest.assertEQ(getNameOfClass(dummy()), "@app.module1.Dummy");
 
-    assertTrue(module2.dummy() instanceof module2.Dummy);
-    assertEQ(getNameOfClass(module2.dummy()), "@app.module2.Dummy");
+    arktest.assertTrue(module2.dummy() instanceof module2.Dummy);
+    arktest.assertEQ(getNameOfClass(module2.dummy()), "@app.module2.Dummy");
 
-    assertTrue(module3.dummy() instanceof module3.Dummy);
-    assertEQ(getNameOfClass(module3.dummy()), "@app.module3.Dummy");
+    arktest.assertTrue(module3.dummy() instanceof module3.Dummy);
+    arktest.assertEQ(getNameOfClass(module3.dummy()), "@app.module3.Dummy");
 
     testStdCoreType();
     testStdCoreProxy();

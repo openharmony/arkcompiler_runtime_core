@@ -20,5 +20,5 @@ desc: Convert to number-binary type.
 function main(): void {
   let binary: number = 0b1010; // 10
   const obj1: object = binary;
-  assertTrue(obj1 == binary);
+  arktest.assertTrue(obj1 == binary);
 }

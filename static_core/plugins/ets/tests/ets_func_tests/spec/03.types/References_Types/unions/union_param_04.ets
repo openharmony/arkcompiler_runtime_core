@@ -24,7 +24,7 @@ class A {}
 type Margin = A | string
 
 function format(margin: Margin) {
-    assertTrue( (margin instanceof A))
+    arktest.assertTrue( (margin instanceof A))
 }
 
 function main(): void {

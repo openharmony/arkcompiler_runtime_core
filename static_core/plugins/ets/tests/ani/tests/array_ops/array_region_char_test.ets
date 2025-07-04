@@ -14,34 +14,34 @@
  */
 
 function getArray(): char[] {
-    let a : char[] = ['a', 'b', 'c', 'd', 'e']
+    let a: char[] = [c'a', c'b', c'c', c'd', c'e']
     return a
 }
 
 function checkArray(a: char[]): boolean {
-    let b : char[] = ['a', 'b', 'x', 'y', 'z']
+    let b: char[] = [c'a', c'b', c'x', c'y', c'z']
     return compareCharArrays(a, b) == 0
 }
 
-function changeArray(arr: char[]): char[] {
-    arr[0] = 'a';
-    arr[1] = 'b';
-    arr[2] = 'x';
-    arr[3] = 'y';
-    arr[4] = 'z';
-    return arr;
+function changeArray(arr: FixedArray<char>): FixedArray<char> {
+    arr[0] = c'a'
+    arr[1] = c'b'
+    arr[2] = c'x'
+    arr[3] = c'y'
+    arr[4] = c'z'
+    return arr
 }
 
 function compareCharArrays(a: char[], b: char[]): int {
     for (let i: int = 0; i < a.length; ++i) {
         if (a[i] != b[i]) {
-            return 1;
+            return 1
         }
     }
-    return 0;
+    return 0
 }
 
-function GetSpecialArray(): char[] {
-    let aChar : char[] = ['\0', '\0', '\n', '\r', '\t', '\b', '\a', '\v', '\f', '\0']
+function getSpecialArray(): char[] {
+    let aChar: char[] = [c'\0', c'\0', c'\n', c'\r', c'\t', c'\b', c'\a', c'\v', c'\f', c'\0']
     return aChar
 }

@@ -25,14 +25,14 @@ function main(): int {
     alloc();
     let gc: long = -100;
     try {
-        gc = GC.startGC(GC.THRESHOLD_CAUSE, (): void => {
+        gc = GC.startGC(GC.Cause.THRESHOLD, (): void => {
             flag = true;
         });
     }
     catch (e) {
-        assertTrue(false, "startGC must not throw exceptions in this case");
+        arktest.assertTrue(false, "startGC must not throw exceptions in this case");
     }
-    assertEQ(gc, 0, "GC with callback must be run in place");
-    assertTrue(flag, "Callback hasn't been called");
+    arktest.assertEQ(gc, 0, "GC with callback must be run in place");
+    arktest.assertTrue(flag, "Callback hasn't been called");
     return 0;
 }

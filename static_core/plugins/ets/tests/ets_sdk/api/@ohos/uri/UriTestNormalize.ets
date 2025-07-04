@@ -18,57 +18,57 @@ import { uri } from "@ohos.uri"
 function testNormalize001() {
   let gaogao = new uri.URI('http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path/66./../././mm/.././path1?query#fagment');
   let res = gaogao.normalize();
-  assertEQ(res.path, "/path/path1");
-  assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
+  arktest.assertEQ(res.path, "/path/path1");
+  arktest.assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
 }
 
 function testNormalize002() {
   let gaogao = new uri.URI('http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment');
   let res = gaogao.normalize();
-  assertEQ(res.path, "/../../path");
-  assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
+  arktest.assertEQ(res.path, "/../../path");
+  arktest.assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
 }
 
 function testNormalize003() {
   let gaogao = new uri.URI('http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path/.././../aa/bb/cc?query#fagment');
   let res = gaogao.normalize();
-  assertEQ(res.path, "/../../../aa/bb/cc");
-  assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
+  arktest.assertEQ(res.path, "/../../../aa/bb/cc");
+  arktest.assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
 }
 
 function testNormalize004() {
   let gaogao = new uri.URI('http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../path/.././../aa/bb/cc?query');
   let res = gaogao.normalize();
-  assertEQ(res.path, "/../../aa/bb/cc");
-  assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../aa/bb/cc?query");
+  arktest.assertEQ(res.path, "/../../aa/bb/cc");
+  arktest.assertEQ(res.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../aa/bb/cc?query");
 }
 
 function NormalizeTest001() {
-  let uri = new uri.UriEntry("http://user@[1:0:0:1:2:1:2:1]:99/path/66./../././mm/.././path1?query#fagment");
-  let normalize = uri.normalize();
-  assertEQ(normalize, "http://user@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
+  let muri = new uri.URI("http://user@[1:0:0:1:2:1:2:1]:99/path/66./../././mm/.././path1?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://user@[1:0:0:1:2:1:2:1]:99/path/path1?query#fagment");
 }
 
 function NormalizeTest002() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
-  let normalize = uri.normalize();
-  assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path?query#fagment");
 }
 
 function NormalizeTest003() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path/.././../aa/bb/cc?query#fagment");
-  let normalize = uri.normalize();
-  assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../path/.././../aa/bb/cc?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99/../../../aa/bb/cc?query#fagment");
 }
 
 function NormalizeTest004() {
-  let uri = new uri.UriEntry("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
-  let normalize = uri.normalize();
-  assertEQ(normalize, "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
+  let muri = new uri.URI("http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
+  let normalize = muri.normalize();
+  arktest.assertEQ(normalize.toString(), "http://gg:gaogao@[1:0:0:1:2:1:2:1]:99?query#fagment");
 }
 
 function main(): int {
-  let suite = new ArkTestsuite("URI Normalize tests");
+  let suite = new arktest.ArkTestsuite("URI Normalize tests");
   suite.addTest("testNormalize001", testNormalize001);
   suite.addTest("testNormalize002", testNormalize002);
   suite.addTest("testNormalize003", testNormalize003);

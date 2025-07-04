@@ -67,18 +67,18 @@ function not_equals_str_null(str: String | null) {
 function main() {
     let str = "abc";
 
-    assertTrue(equals_str_str(str, str));
-    assertTrue(!equals_str_str(null, str));
-    assertTrue(!equals_str_str(str, null));
-    assertTrue(equals_str_str(null, null));
+    arktest.assertTrue(equals_str_str(str, str));
+    arktest.assertTrue(!equals_str_str(null, str));
+    arktest.assertTrue(!equals_str_str(str, null));
+    arktest.assertTrue(equals_str_str(null, null));
 
-    assertTrue(!equals_null_str(str));
-    assertTrue(not_equals_null_str(str));
-    assertTrue(!equals_str_null(str));
-    assertTrue(not_equals_str_null(str));
+    arktest.assertTrue(!equals_null_str(str));
+    arktest.assertTrue(not_equals_null_str(str));
+    arktest.assertTrue(!equals_str_null(str));
+    arktest.assertTrue(not_equals_str_null(str));
 
-    assertTrue(equals_null_str(null));
-    assertTrue(!not_equals_null_str(null));
-    assertTrue(equals_str_null(null));
-    assertTrue(!not_equals_str_null(null));
+    arktest.assertTrue(equals_null_str(null));
+    arktest.assertTrue(!not_equals_null_str(null));
+    arktest.assertTrue(equals_str_null(null));
+    arktest.assertTrue(!not_equals_str_null(null));
 }

@@ -14,12 +14,15 @@
  */
 
 import {HashSet} from "@ohos.util.HashSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Values Iterator API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Values Iterator API tests")
 
     suite.addTest("HashSet values return iterator by value", testValuesIterator)
     suite.addTest("HashSet values return iterator by value with null hashSet", testValuesIteratorWithEmptyHashSet)
@@ -34,17 +37,17 @@ function testValuesIterator() {
     hashSet.add("squirrel");
     hashSet.add("sparrow");
     let iteratorSetValues = hashSet.values();
-    assertEQ(iteratorSetValues.next().value, "squirrel", "The hashSet values iterator should return the first value");
-    assertEQ(iteratorSetValues.next().value, "sparrow", "The hashSet values iterator should return the second value");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet values iterator should return undefined for no more values");
+    arktest.assertEQ(iteratorSetValues.next().value, "squirrel", "The hashSet values iterator should return the first value");
+    arktest.assertEQ(iteratorSetValues.next().value, "sparrow", "The hashSet values iterator should return the second value");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet values iterator.done should true for no more values");
 }
 
 function testValuesIteratorWithEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let iteratorSetValues = hashSet.values();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet values iterator should return undefined when the hashSet is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet values iterator.done should true when the hashSet is empty");
 }
 
 function testIterator() {
@@ -52,15 +55,15 @@ function testIterator() {
     hashSet.add("squirrel");
     hashSet.add("sparrow");
     let iteratorSetValues = hashSet.$_iterator();
-    assertEQ(iteratorSetValues.next().value, "squirrel", "The hashSet $_iterator should return the first value");
-    assertEQ(iteratorSetValues.next().value, "sparrow", "The hashSet $_iterator should return the second value");
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet $_iterator should return undefined for no more values");
+    arktest.assertEQ(iteratorSetValues.next().value, "squirrel", "The hashSet $_iterator should return the first value");
+    arktest.assertEQ(iteratorSetValues.next().value, "sparrow", "The hashSet $_iterator should return the second value");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet iterator.done should true for no more values");
 }
 
 function testIteratorWithEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let iteratorSetValues = hashSet.$_iterator();
-    assertEQ(iteratorSetValues.next().value, undefined,
-        "The hashSet $_iterator should return undefined when the hashSet is empty");
+    arktest.assertTrue(iteratorSetValues.next().done,
+        "The hashSet iterator.done should true when the hashSet is empty");
 }

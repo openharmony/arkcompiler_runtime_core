@@ -22,13 +22,17 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+from sphinx.directives.code import CodeBlock
+from docutils import nodes
+
+sys.path.insert(0, os.path.abspath(".."))
 
 import sphinx_common_conf
 
 # -- Project information -----------------------------------------------------
 
-project = u'{p} Concurrency Specification'.format(p=sphinx_common_conf.project)
+project = "{p} Concurrency Specification".format(p=sphinx_common_conf.project)
 author = sphinx_common_conf.author
 copyright = sphinx_common_conf.copyright
 version = sphinx_common_conf.version
@@ -43,17 +47,18 @@ today_fmt = sphinx_common_conf.default_today_fmt
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx_markdown_builder', 'sphinx.ext.todo', 'sphinxcontrib.plantuml']
+extensions = ["sphinx_markdown_builder", "sphinx.ext.todo", "sphinxcontrib.plantuml"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = ['.rst']
+source_suffix = [".rst"]
 
 # The master toctree document.
-master_doc = 'index'
+# CC-OFFNXT(G.NAM.01): project code style
+master_doc = "index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -72,8 +77,33 @@ html_theme = sphinx_common_conf.default_html_theme
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Documentationdoc'
+# CC-OFFNXT(G.NAM.01): project code style
+htmlhelp_basename = "Documentationdoc"
 
 # include refs to todos
 # CC-OFFNXT(G.NAM.01): project code style
 todo_include_todos = True
+
+# -- Directive options extension ---------------------------------------------
+
+
+class CustomCodeBlock(CodeBlock):
+    option_spec = CodeBlock.option_spec.copy()
+    option_spec["language-to-compile"] = lambda arg: arg
+    option_spec["donotcompile"] = lambda arg: True
+
+    def run(self):
+        language_value = self.options.get("language-to-compile")
+        no_compile = "donotcompile" in self.options
+        result = super().run()
+
+        for node in result:
+            if isinstance(node, nodes.literal_block):
+                node["language-to-compile"] = language_value
+                node["donotcompile"] = no_compile
+
+        return result
+
+
+def setup(app):
+    app.add_directive("code-block", CustomCodeBlock, override=True)

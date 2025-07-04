@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "objects/base_state_word.h"
+<<<<<<< HEAD
 
 namespace common {
 using Address32 = uint32_t;
@@ -33,6 +34,23 @@ public:
     static Address AllocateInHuge(size_t size, LanguageType language);
     static Address AllocateInReadOnly(size_t size, LanguageType language);
     static uintptr_t AllocateLargeJitFortRegion(size_t size, LanguageType language);
+=======
+#include "base/common.h"
+
+namespace panda {
+using Address32 = uint32_t;
+using Address = uint64_t;
+
+class PUBLIC_API HeapAllocator {
+public:
+    static Address Allocate(size_t size, Language language);
+    static Address AllocateInNonmove(size_t size, Language language);
+    static Address32 Allocate32(size_t size, Language language);
+    static Address AllocateInOld(size_t size, Language language);
+    static Address AllocateInHuge(size_t size, Language language);
+    static Address AllocateInReadOnly(size_t size, Language language);
+    static Address AllocateLargeJitFortRegion(size_t size, Language language);
+>>>>>>> OpenHarmony_feature_20250328
     // below are interfaces used for serialize
     static Address AllocateNoGC(size_t size);
     static Address AllocatePinNoGC(size_t size);
@@ -40,5 +58,9 @@ public:
     static Address AllocatePinnedRegion();
     static Address AllocateLargeRegion(size_t size);
 };
+<<<<<<< HEAD
 }  // namespace common
+=======
+}  // namespace panda
+>>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_HEAP_ALLOCATOR_H

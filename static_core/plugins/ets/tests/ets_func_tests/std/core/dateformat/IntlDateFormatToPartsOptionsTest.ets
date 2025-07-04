@@ -64,7 +64,7 @@ function initFormatResults(): void {
         return
     }
 
-    const result001 = [FmtPart("year", "2023"), FmtPart("literal", "/"), FmtPart("month", "10"), FmtPart("literal", "/"), FmtPart("day", "11")]
+    const result001:Intl.DateTimeFormatPart[] = [FmtPart("year", "2023"), FmtPart("literal", "/"), FmtPart("month", "10"), FmtPart("literal", "/"), FmtPart("day", "11")]
     addFormatToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }, result001)
 }
 
@@ -92,14 +92,14 @@ function dateFormatToPartsWithOptions(): void {
         const expectedResult = res[2]
 
         const failMsg = `Unexpected DateTimeFormat.formatToParts(${locale}, ${options}) result`
-        assertTrue(verifyResults(actualResult, expectedResult), failMsg)
+        arktest.assertTrue(verifyResults(actualResult, expectedResult), failMsg)
     })
 }
 
 function main(): int {
     initFormatResults()
 
-    const suite = new ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
+    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
     suite.addTest("with formatting options", dateFormatToPartsWithOptions)
     return suite.run()
 }

@@ -26,5 +26,5 @@ function getArrRef(): Int[]|null {
 }
 
 function main(): void {
-  assertTrue( getArrRef()?.[0] == 11 )
+  arktest.assertTrue( getArrRef()?.[0] == 11 )
 }

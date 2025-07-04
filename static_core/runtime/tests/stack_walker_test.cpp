@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -364,7 +364,11 @@ static bool CheckVregs(int *regIndex, ObjectHeader *obj, const VRegInfo &regInfo
 {
     if (!regInfo.IsAccumulator()) {
         if (reg.HasObject()) {
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+            HOOK_ASSERT(reg.GetReference() == obj, return false);
+#else
             HOOK_ASSERT((reg.GetReference() == reinterpret_cast<ObjectHeader *>(Low32Bits(obj))), return false);
+#endif
         } else {
             if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
                 HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000L), return false);

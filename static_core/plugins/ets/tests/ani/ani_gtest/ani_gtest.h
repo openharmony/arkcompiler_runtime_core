@@ -23,7 +23,7 @@
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::testing {
 
@@ -137,6 +137,24 @@ public:
         result.resize(sz);
     }
 
+    bool IsRuntimeClassInitialized(std::string_view classDescriptor, bool isClass = true)
+    {
+        PandaString desc;
+        if (isClass) {
+            desc = Mangle::ConvertDescriptor(classDescriptor, true);
+        } else {
+            desc = Mangle::ConvertDescriptor(std::string(classDescriptor) + ".ETSGLOBAL", true);
+        }
+        PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env_);
+        ScopedManagedCodeFix s(pandaEnv);
+
+        EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
+        EtsClass *klass = classLinker->GetClass(desc.c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
+        ASSERT(klass);
+
+        return klass->IsInitialized();
+    }
+
 protected:
     virtual std::vector<ani_option> GetExtraAniOptions()
     {
@@ -233,6 +251,24 @@ private:
         ASSERT_EQ(status, ANI_OK);
 
         result->emplace(value);
+<<<<<<< HEAD
+=======
+    }
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
+
+    static ClassLinkerContext *GetClassLinkerContext(ark::ets::EtsCoroutine *coroutine)
+    {
+        auto stack = StackWalker::Create(coroutine);
+        if (!stack.HasFrame()) {
+            return nullptr;
+        }
+
+        auto *method = ark::ets::EtsMethod::FromRuntimeMethod(stack.GetMethod());
+        if (method != nullptr) {
+            return method->GetClass()->GetLoadContext();
+        }
+        return nullptr;
+>>>>>>> OpenHarmony_feature_20250328
     }
     // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 

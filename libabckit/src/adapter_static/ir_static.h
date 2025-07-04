@@ -16,10 +16,10 @@
 #ifndef LIBABCKIT_SRC_ADAPTER_STATIC_IR_STATIC_H
 #define LIBABCKIT_SRC_ADAPTER_STATIC_IR_STATIC_H
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
+#include "libabckit/c/metadata_core.h"
+#include "libabckit/c/ir_core.h"
+#include "libabckit/c/isa/isa_dynamic.h"
+#include "libabckit/c/isa/isa_static.h"
 
 #include <cstdint>
 #include <cstdarg>

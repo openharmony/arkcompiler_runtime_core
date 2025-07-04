@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 let resolve: ((value: number) => void)|null = null;
+=======
+let resolve: ((value: number) => void) | null = null;
+>>>>>>> OpenHarmony_feature_20250328
 let p1 = new Promise<number>((_resolve: (value: number) => void): void => {
     resolve = _resolve;
 });
@@ -22,11 +26,20 @@ let p2 = new Promise<number>((_resolve: (value: number | PromiseLike<number>) =>
 });
 p2.then((v:number): void => {
     if(v == 5) {
+<<<<<<< HEAD
         console.log("Test passed.");
     } else {
         console.log("Test failed. Expected 5, but got " + v + ".");
     }
 }, (err: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
+=======
+        console.log('Test passed.');
+    } else {
+        console.log('Test failed. Expected 5, but got ' + v + '.');
+    }
+}, (err: Error): void => {
+    console.log('Test failed. The promise should not be rejected.');
+>>>>>>> OpenHarmony_feature_20250328
 })
 resolve!(5);

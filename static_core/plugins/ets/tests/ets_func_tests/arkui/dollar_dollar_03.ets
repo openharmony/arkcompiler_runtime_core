@@ -26,9 +26,9 @@ function reverse(b: boolean): void {
 function main(): void {
   let b = false
   reverse($$b)
-  assertEQ(b,  true)
+  arktest.assertEQ(b,  true)
 
   let bb = false
   reverse(bb)
-  assertEQ(bb,  false)
+  arktest.assertEQ(bb,  false)
 }

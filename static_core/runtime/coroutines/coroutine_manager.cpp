@@ -26,11 +26,21 @@ CoroutineManager::CoroutineManager(CoroutineFactory factory) : coFactory_(factor
 Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 {
     CoroutineContext *ctx = CreateCoroutineContext(false);
-    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt, Coroutine::Type::MUTATOR);
+    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt, Coroutine::Type::MUTATOR,
+                            CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(main != nullptr);
 
     Coroutine::SetCurrent(main);
     main->InitBuffers();
+#ifdef ARK_HYBRID
+    auto hasJsRuntime = panda::ThreadHolder::GetCurrent() != nullptr;
+    main->LinkToExternalHolder(true);
+    // We need to unbind mutator before binding in the RequestResume,
+    // as it was bound during JS runtime creation/execution
+    if (hasJsRuntime) {
+        main->UnbindMutator();
+    }
+#endif
     main->RequestResume();
     main->NativeCodeBegin();
 
@@ -49,7 +59,8 @@ void CoroutineManager::DestroyMainCoroutine()
 }
 
 Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent,
-                                                           PandaString name, Coroutine::Type type)
+                                                           PandaString name, Coroutine::Type type,
+                                                           CoroutinePriority priority)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -60,11 +71,12 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt, type);
+    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt, type, priority);
     ASSERT(co != nullptr);
     co->InitBuffers();
     if (makeCurrent) {
         Coroutine::SetCurrent(co);
+        co->LinkToExternalHolder(true);
         co->RequestResume();
         co->NativeCodeBegin();
     }
@@ -82,9 +94,8 @@ void CoroutineManager::DestroyEntrypointlessCoroutine(Coroutine *co)
     DeleteCoroutineContext(context);
 }
 
-Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                                     PandaVector<Value> &&arguments, PandaString name,
-                                                     Coroutine::Type type)
+Coroutine *CoroutineManager::CreateCoroutineInstance(EntrypointInfo &&epInfo, PandaString name, Coroutine::Type type,
+                                                     CoroutinePriority priority)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -98,7 +109,7 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completion
     // assuming that the main coro is already created and Coroutine::GetCurrent is not nullptr
     ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *coro = coFactory_(Runtime::GetCurrent(), Coroutine::GetCurrent()->GetVM(), std::move(name), ctx,
-                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)}, type);
+                            std::move(epInfo), type, priority);
     return coro;
 }
 

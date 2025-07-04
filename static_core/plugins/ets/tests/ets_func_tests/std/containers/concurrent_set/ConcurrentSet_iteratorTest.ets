@@ -13,25 +13,27 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-let ConcurrentSetTestOne: ConcurrentSet<number> = new ConcurrentSet<number>();
+let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new ArkTestsuite("ConcurrentSet$_iteratorTest");
+    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSet$_iteratorTest");
     // Single Thread Test
     ConcurrentSetTestsuite.addTest("$_iteratorTest001", () =>
     {
-        let ConcurrentSetTest: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         for (let i: int = 0; i < 10 ; i++) {
             ConcurrentSetTest.add(arrValues[i]);
         }
         res = ConcurrentSetTest.size;
-        assertEQ(res, 10);
+        arktest.assertEQ(res, 10);
         let iterValues: IterableIterator<string> = ConcurrentSetTest.$_iterator();
         flag = 0;
         for (let i: int = 0; i < 10; i++) {
@@ -39,59 +41,59 @@ function main(): int {
                 flag++;
             }
         }
-        assertEQ(flag, 0);
-        assertEQ(iterValues.next().value, undefined);
+        arktest.assertEQ(flag, 0);
+        arktest.assertEQ(iterValues.next().value, undefined);
     });
     ConcurrentSetTestsuite.addTest("$_iteratorTest002", () =>
     {
-        let ConcurrentSetTestNull: ConcurrentSet<string> = new ConcurrentSet<string>();
+        let ConcurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTestNull.size;
-        assertEQ(res, 0);
+        arktest.assertEQ(res, 0);
         let iterValue: IterableIterator<string> = ConcurrentSetTestNull.$_iterator();
-        assertEQ(iterValue.next().value, undefined);
+        arktest.assertEQ(iterValue.next().value, undefined);
     });
     // Multiple Threads Test
     ConcurrentSetTestsuite.addTest("$_iterator&AddTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
-        let p1 = launch addBack();
-        let p2 = launch $_iteratorAll();
-        await p1;
-        await p2;
-        assertEQ(ConcurrentSetTestOne.size, 10);
+        let p1 = launch<void, () => void>(addBack);
+        let p2 = launch<void, () => void>($_iteratorAll);
+        p1.Await();
+        p2.Await();
+        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("$_iterator&DeteleTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch deleteAll();
-        let p2 = launch $_iteratorAll();
-        await p1;
-        await p2;
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>($_iteratorAll);
+        p1.Await();
+        p2.Await();
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("$_iterator&DeteleTest002", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         deleteAll();
         $_iteratorAll();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
     });
     ConcurrentSetTestsuite.addTest("$_iterator&ClearTest001", () =>
     {
         ConcurrentSetTestOne.clear();
-        assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
-        let p1 = launch $_iteratorAll();
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
-        assertTrue(ConcurrentSetTestOne.size < 11);
+        let p1 = launch<void, () => void>($_iteratorAll);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
+        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
     });
 
     return ConcurrentSetTestsuite.run();

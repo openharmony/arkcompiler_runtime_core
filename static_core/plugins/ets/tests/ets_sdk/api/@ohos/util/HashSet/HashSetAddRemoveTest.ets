@@ -14,12 +14,15 @@
  */
 
 import {HashSet} from "@ohos.util.HashSet";
+<<<<<<< HEAD
 
 const success = 0;
 const fail = 1;
+=======
+>>>>>>> OpenHarmony_feature_20250328
 
 function main(): int {
-    const suite = new ArkTestsuite("HashSet Add Remove API tests")
+    const suite = new arktest.ArkTestsuite("HashSet Add Remove API tests")
 
     suite.addTest("HashSet add data", testAddData)
     suite.addTest("HashSet add null data", testAddNullData)
@@ -40,24 +43,24 @@ function testAddData() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.has("squirrel");
-    assertEQ(result, true, "The hashSet should contain the added value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the added value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testAddNullData() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add(null);
     let result = hashSet.has(null);
-    assertEQ(result, true, "The hashSet should contain the added null value");
-    assertEQ(hashSet.length, 1, "HashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the added null value");
+    arktest.assertEQ(hashSet.length, 1, "HashSet length should be 1");
 }
 
 function testAddEmptyString() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("");
     let result = hashSet.has("");
-    assertEQ(result, true, "The hashSet should contain the added value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the added value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testAddDataStringLength2048() {
@@ -65,8 +68,8 @@ function testAddDataStringLength2048() {
     let param = 'a'.repeat(2048);
     hashSet.add(param);
     let result = hashSet.has(param);
-    assertEQ(result, true, "The hashSet should contain the added value");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, true, "The hashSet should contain the added value");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testAddDataLoop1000() {
@@ -76,54 +79,54 @@ function testAddDataLoop1000() {
     }
     for (let i = 0; i < hashSet.length; i++) {
         let result = hashSet.has(i);
-        assertEQ(result, true, "The hashSet should contain the added value");
+        arktest.assertEQ(result, true, "The hashSet should contain the added value");
     }
-    assertEQ(hashSet.length, 1000, "The hashSet length should be 1000");
+    arktest.assertEQ(hashSet.length, 1000, "The hashSet length should be 1000");
 }
 
 function testRemoveValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.remove("squirrel");
-    assertEQ(result, true, "The hashSet should remove the value");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, true, "The hashSet should remove the value");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testRemoveNotSetValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.remove("test");
-    assertEQ(result, false, "The hashSet should return false when the value is not set");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, false, "The hashSet should return false when the value is not set");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testRemoveValueFromEmptyHashSet() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     let result = hashSet.remove("test");
-    assertEQ(result, false, "The hashSet should return false when the hashSet is empty");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, false, "The hashSet should return false when the hashSet is empty");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testRemoveNullValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add(null);
     let result = hashSet.remove(null);
-    assertEQ(result, true, "The hashSet should remove the null value");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, true, "The hashSet should remove the null value");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }
 
 function testRemoveNotSetNullValue() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("squirrel");
     let result = hashSet.remove(null);
-    assertEQ(result, false, "The hashSet should return false when the value is not set");
-    assertEQ(hashSet.length, 1, "The hashSet length should be 1");
+    arktest.assertEQ(result, false, "The hashSet should return false when the value is not set");
+    arktest.assertEQ(hashSet.length, 1, "The hashSet length should be 1");
 }
 
 function testRemoveEmptyString() {
     let hashSet: HashSet<string | null> = new HashSet<string | null>();
     hashSet.add("");
     let result = hashSet.remove("");
-    assertEQ(result, true, "The hashSet should remove the value");
-    assertEQ(hashSet.length, 0, "The hashSet length should be 0");
+    arktest.assertEQ(result, true, "The hashSet should remove the value");
+    arktest.assertEQ(hashSet.length, 0, "The hashSet length should be 0");
 }

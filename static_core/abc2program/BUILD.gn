@@ -21,6 +21,33 @@ if (ark_standalone_build) {
   import("//build/ohos.gni")
 }
 
+ohos_static_library("libarktsabc2program_package") {
+  deps = []
+  if (enable_static_vm) {
+    # NOTE: in GN build static and dynamic libraries are mixed.
+    # To remove this if GN refactoring is needed
+    if (ark_static_standalone_build || ark_standalone_build || abckit_enable) {
+      deps += [ ":arkts_abc2program" ]
+    } else {
+      deps += [ ":arkts_abc2program_static" ]
+    }
+  }
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+config("arkts_abc2program_public_config") {
+  defines = []
+  if (abckit_enable) {
+    defines += [ "ENABLE_LIBABCKIT" ]
+  }
+  include_dirs = [
+    "$ark_root/abc2program",
+    "$target_gen_dir",
+  ]
+}
+
 abc2program_sources = [
   "$target_gen_dir/abc_inst_convert.cpp",
   "$target_gen_dir/abc_opcode_convert.cpp",
@@ -39,6 +66,7 @@ abc2program_sources = [
   "abc_literal_array_processor.cpp",
   "abc_method_processor.cpp",
   "abc_string_table.cpp",
+  "abc_annotation_processor.cpp",
   "common/abc_code_converter.cpp",
   "program_dump.cpp",
 ]
@@ -49,9 +77,11 @@ abc2program_configs = [
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/assembler:arkassembler_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
+  ":arkts_abc2program_public_config",
 ]
 
 ohos_shared_library("arkts_abc2program") {
+<<<<<<< HEAD
   stack_protector_ret = false
   sources = abc2program_sources
 
@@ -93,16 +123,48 @@ ohos_shared_library("arkts_abc2program") {
 
 ohos_static_library("arkts_abc2program_frontend_static") {
   stack_protector_ret = false
+=======
+>>>>>>> OpenHarmony_feature_20250328
   sources = abc2program_sources
-
-  include_dirs = [
-    "$ark_root/abc2program",
-    "$target_gen_dir",
-  ]
 
   configs = abc2program_configs
 
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+
+  deps = [
+    ":abc2program_plugins_inc",
+    ":abc_type_convert_cpp",
+    ":get_language_specific_metadata_inc",
+    ":isa_gen_abc2program_abc_inst_convert_cpp",
+    ":isa_gen_abc2program_abc_opcode_convert_cpp",
+    "$ark_root/assembler:libarktsassembler",
+    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/libpandafile:libarktsfile",
+  ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_static_library("arkts_abc2program_static") {
+  sources = abc2program_sources
+
+  configs = abc2program_configs
+
+<<<<<<< HEAD
   external_deps = [ sdk_libc_secshared_dep ]
+=======
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+
+>>>>>>> OpenHarmony_feature_20250328
   deps = [
     ":abc2program_plugins_inc",
     ":abc_type_convert_cpp",
@@ -114,8 +176,8 @@ ohos_static_library("arkts_abc2program_frontend_static") {
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
 
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_executable("arkts_abc2prog") {
@@ -134,10 +196,10 @@ ohos_executable("arkts_abc2prog") {
   ]
 
   deps = [
-    ":arkts_abc2program_frontend_static",
-    "$ark_root/assembler:libarktsassembler_frontend_static",
-    "$ark_root/libpandabase:libarktsbase_frontend_static",
-    "$ark_root/libpandafile:libarktsfile_frontend_static",
+    ":arkts_abc2program",
+    "$ark_root/assembler:libarktsassembler",
+    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/libpandafile:libarktsfile",
   ]
 
   libs = platform_libs
@@ -146,8 +208,8 @@ ohos_executable("arkts_abc2prog") {
   }
 
   install_enable = false
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ark_isa_gen("isa_gen_abc2program") {

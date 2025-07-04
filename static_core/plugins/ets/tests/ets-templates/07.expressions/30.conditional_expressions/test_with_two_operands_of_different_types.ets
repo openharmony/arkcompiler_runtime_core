@@ -15,11 +15,11 @@
 
 /*---
 desc: Test with an object incompatible with the specified type
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 
 function main(): void {
       let x: int = true ? 4: "hello"
-      assertTrue( x == 4 )
+      arktest.assertTrue( x == 4 )
 }

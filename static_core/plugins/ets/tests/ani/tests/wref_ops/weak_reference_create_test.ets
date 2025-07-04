@@ -14,18 +14,18 @@
  */
 
 class MobilePhone {
-    constructor(model: String, weight: int) {
-        this.model = model;
-        this.weight = weight;
+    constructor(model: string, weight: int) {
+        this.model = model
+        this.weight = weight
     }
-    model: String;
-    weight: int;
+    model: string
+    weight: int
 }
 
 function getObjectA(): Object {
-    return new String("Hello World!");
+    return "Hello World!"
 }
 
 function getObjectB(): Object {
-    return new String("Hello World!");
+    return "Hello World!"
 }

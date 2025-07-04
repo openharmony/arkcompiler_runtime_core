@@ -20,7 +20,6 @@
 
 namespace ark::ets {
 
-constexpr uint32_t ACC_FUNCTION = 0x40000000;               // method (ets runtime)
 constexpr uint32_t ACC_DEPRECATED_NATIVE_API = 0x80000000;  // method (ets runtime)
 // NOTE: Delete ACC_DEPRECATED_NATIVE_API flag whfen ets_napi will be dropped, #22435
 

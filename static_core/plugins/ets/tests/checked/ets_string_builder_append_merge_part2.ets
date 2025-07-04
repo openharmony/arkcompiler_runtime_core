@@ -95,10 +95,6 @@
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
 
-//! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=gen-gc)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
-
 //! CHECKER       JIT IR Builder, check StringBuilder append calls merging (--gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-regex='.*append[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_append_merge_part2.ETSGLOBAL::main"
@@ -177,16 +173,16 @@ function _0_if2_else2_0_append4(cond: boolean): string {
 }
 
 function main() : int {
-    assertEQ(_0_if1_else1_2_append4(true ), "023", 'Wrong result at _0_if1_else1_2_append4(true )');
-    assertEQ(_0_if1_else1_2_append4(false), "123", 'Wrong result at _0_if1_else1_2_append4(false)');
-    assertEQ(_1_if1_else1_1_append4(true ), "013", 'Wrong result at _1_if1_else1_1_append4(true )');
-    assertEQ(_1_if1_else1_1_append4(false), "023", 'Wrong result at _1_if1_else1_1_append4(false)');
-    assertEQ(_2_if1_else1_0_append4(true ), "012", 'Wrong result at _2_if1_else1_0_append4(true )');
-    assertEQ(_2_if1_else1_0_append4(false), "013", 'Wrong result at _2_if1_else1_0_append4(false)');
-    assertEQ(_1_if2_else1_0_append4(true ), "012", 'Wrong result at _1_if2_else1_0_append4(true )');
-    assertEQ(_1_if2_else1_0_append4(false), "03" , 'Wrong result at _1_if2_else1_0_append4(false)');
-    assertEQ(_0_if2_else2_0_append4(true ), "01" , 'Wrong result at _0_if2_else2_0_append4(true )');
-    assertEQ(_0_if2_else2_0_append4(false), "23" , 'Wrong result at _0_if2_else2_0_append4(false)');
+    arktest.assertEQ(_0_if1_else1_2_append4(true ), "023", 'Wrong result at _0_if1_else1_2_append4(true )');
+    arktest.assertEQ(_0_if1_else1_2_append4(false), "123", 'Wrong result at _0_if1_else1_2_append4(false)');
+    arktest.assertEQ(_1_if1_else1_1_append4(true ), "013", 'Wrong result at _1_if1_else1_1_append4(true )');
+    arktest.assertEQ(_1_if1_else1_1_append4(false), "023", 'Wrong result at _1_if1_else1_1_append4(false)');
+    arktest.assertEQ(_2_if1_else1_0_append4(true ), "012", 'Wrong result at _2_if1_else1_0_append4(true )');
+    arktest.assertEQ(_2_if1_else1_0_append4(false), "013", 'Wrong result at _2_if1_else1_0_append4(false)');
+    arktest.assertEQ(_1_if2_else1_0_append4(true ), "012", 'Wrong result at _1_if2_else1_0_append4(true )');
+    arktest.assertEQ(_1_if2_else1_0_append4(false), "03" , 'Wrong result at _1_if2_else1_0_append4(false)');
+    arktest.assertEQ(_0_if2_else2_0_append4(true ), "01" , 'Wrong result at _0_if2_else2_0_append4(true )');
+    arktest.assertEQ(_0_if2_else2_0_append4(false), "23" , 'Wrong result at _0_if2_else2_0_append4(false)');
 
     return 0
 }

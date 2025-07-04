@@ -32,37 +32,37 @@ class B extends A {
 
 function main() {
   let f: Partial<B> = { }
-  assertTrue( !f.k )
-  assertTrue( f.i == undefined )
-  assertTrue( f.j == undefined )
+  arktest.assertTrue( !f.k )
+  arktest.assertTrue( f.i == undefined )
+  arktest.assertTrue( f.j == undefined )
 
   f = { k: false }
-  assertTrue( !f.k )
-  assertTrue( f.i == undefined )
-  assertTrue( f.j == undefined )
+  arktest.assertTrue( !f.k )
+  arktest.assertTrue( f.i == undefined )
+  arktest.assertTrue( f.j == undefined )
   f.i = 2;
   f.j = "new str"
-  assertTrue( f.i == 2 )
-  assertTrue( f.j == "new str" )
+  arktest.assertTrue( f.i == 2 )
+  arktest.assertTrue( f.j == "new str" )
 
   f = { j: "str" }
-  assertTrue( !f.k )
-  assertTrue( f.i == undefined )
-  assertTrue( f.j == "str" )
+  arktest.assertTrue( !f.k )
+  arktest.assertTrue( f.i == undefined )
+  arktest.assertTrue( f.j == "str" )
 
   f = { i: 4 }
-  assertTrue( !f.k )
-  assertTrue( f.i == 4 )
-  assertTrue( f.j == undefined )
+  arktest.assertTrue( !f.k )
+  arktest.assertTrue( f.i == 4 )
+  arktest.assertTrue( f.j == undefined )
 
   f = { i: 5, j: "some str" }
-  assertTrue( !f.k )
-  assertTrue( f.i == 5 )
-  assertTrue( f.j == "some str" )
+  arktest.assertTrue( !f.k )
+  arktest.assertTrue( f.i == 5 )
+  arktest.assertTrue( f.j == "some str" )
 
   f = { k: true , i: 5, j: "some str" }
-  assertTrue( f.k == true )
-  assertTrue( f.i == 5 )
-  assertTrue( f.j == "some str" )
+  arktest.assertTrue( f.k == true )
+  arktest.assertTrue( f.i == 5 )
+  arktest.assertTrue( f.j == "some str" )
 
 }

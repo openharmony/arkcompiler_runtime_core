@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+'use static'
+>>>>>>> OpenHarmony_feature_20250328
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +27,10 @@ export declare class C {
     static foo(a: Array<string>): void;
     bar(a: Array<string>): void;
 }
+<<<<<<< HEAD
 export interface Iface {
+=======
+export declare interface Iface {
+>>>>>>> OpenHarmony_feature_20250328
     foo(a: Array<string>): void;
 }

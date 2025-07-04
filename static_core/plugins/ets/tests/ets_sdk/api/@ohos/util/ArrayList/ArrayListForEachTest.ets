@@ -21,7 +21,11 @@ class Temp {
 }
 
 function main() {
+<<<<<<< HEAD
     const suite = new ArkTestsuite("ArrayList API tests");
+=======
+    const suite = new arktest.ArkTestsuite("ArrayList API tests");
+>>>>>>> OpenHarmony_feature_20250328
 
     suite.addTest("Testing ArrayList replaceAllElement add same data", testArrayListReplaceAllElement0001);
     suite.addTest("Testing ArrayList replaceAllElement insert new string", testArrayListReplaceAllElement0002);
@@ -48,7 +52,11 @@ function testArrayListReplaceAllElement0001() {
         let tmp = value;
         value = tmp + value;
         let result = arrayList[index];
+<<<<<<< HEAD
         assertEQ(value, result + result, `The value at index ${index} should be '${result + result}'`);
+=======
+        arktest.assertEQ(value, result + result, `The value at index ${index} should be '${result + result}'`);
+>>>>>>> OpenHarmony_feature_20250328
         return value;
     });
 }
@@ -79,7 +87,11 @@ function testArrayListReplaceAllElement0002() {
         }
         return value;
     });
+<<<<<<< HEAD
     assertTrue(arrayList.has(`"add last index`),
+=======
+    arktest.assertTrue(arrayList.has(`"add last index`),
+>>>>>>> OpenHarmony_feature_20250328
         "The ArrayList should contain the modified last element with 'add last index'");
 }
 
@@ -102,7 +114,11 @@ function testArrayListForEach0001() {
     arrayList.add("%");
     arrayList.add(`"`);
     arrayList.forEach((value) => {
+<<<<<<< HEAD
         assertTrue(arrayList.has(value), `The ArrayList should contain the value '${value}'`);
+=======
+        arktest.assertTrue(arrayList.has(value), `The ArrayList should contain the value '${value}'`);
+>>>>>>> OpenHarmony_feature_20250328
     });
 }
 
@@ -122,6 +138,7 @@ function testArrayListForEach0002() {
     let expectedValuesForArrayList = [2, 4, 5, 4];
     let expectedValuesForResult = [2, 0, 4, 1, 5, 2, 4, 3];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
@@ -130,6 +147,16 @@ function testArrayListForEach0002() {
             `The element at index ${i} should be ${expectedValuesForResult[i]}`);
     }
     assertEQ(newArrayList.length, 0, "The length of newArrayList should be 0 without adding elements");
+=======
+        arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
+            `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
+    }
+    for (let i = 0; i < result.length; i++) {
+        arktest.assertEQ(result[i], expectedValuesForResult[i],
+            `The element at index ${i} should be ${expectedValuesForResult[i]}`);
+    }
+    arktest.assertEQ(newArrayList.length, 0, "The length of newArrayList should be 0 without adding elements");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListForEach0003() {
@@ -149,6 +176,7 @@ function testArrayListForEach0003() {
     let expectedValuesForArrayList = [2, 4, 5, 4];
     let expectedValuesForResult = [2, 0, 4, 1, 5, 2, 4, 3];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
@@ -157,6 +185,16 @@ function testArrayListForEach0003() {
             `The element at index ${i} should be ${expectedValuesForResult[i]}`);
     }
     assertEQ(newArrayList.length, 1, "The length of newArrayList should be 1 after adding an element");
+=======
+        arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
+            `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
+    }
+    for (let i = 0; i < result.length; i++) {
+        arktest.assertEQ(result[i], expectedValuesForResult[i],
+            `The element at index ${i} should be ${expectedValuesForResult[i]}`);
+    }
+    arktest.assertEQ(newArrayList.length, 1, "The length of newArrayList should be 1 after adding an element");
+>>>>>>> OpenHarmony_feature_20250328
 
 }
 
@@ -172,7 +210,11 @@ function testArrayListReplaceAllElements0001() {
 
     let expectedValues = [3, 5, 6, 5];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValues[i],
+=======
+        arktest.assertEQ(arrayList[i], expectedValues[i],
+>>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
@@ -189,7 +231,11 @@ function testArrayListReplaceAllElements0002() {
 
     let expectedValues = [1, 3, 4, 3];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValues[i],
+=======
+        arktest.assertEQ(arrayList[i], expectedValues[i],
+>>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
 }
@@ -207,10 +253,17 @@ function testArrayListReplaceAllElements0003() {
 
     let expectedValues = [1, 3, 4, 3];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValues[i],
             `The element at index ${i} should be ${expectedValues[i]}`);
     }
     assertEQ(newArrayList.length, 0, "The length of newArrayList should be 0 without adding elements");
+=======
+        arktest.assertEQ(arrayList[i], expectedValues[i],
+            `The element at index ${i} should be ${expectedValues[i]}`);
+    }
+    arktest.assertEQ(newArrayList.length, 0, "The length of newArrayList should be 0 without adding elements");
+>>>>>>> OpenHarmony_feature_20250328
 }
 
 function testArrayListReplaceAllElements0004() {
@@ -230,11 +283,19 @@ function testArrayListReplaceAllElements0004() {
     let expectedValuesForArrayList = [1, 3, 4, 3];
     let expectedValuesForNew = [3, 5, 7];
     for (let i = 0; i < arrayList.length; i++) {
+<<<<<<< HEAD
         assertEQ(arrayList[i], expectedValuesForArrayList[i],
             `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
     }
     for (let i = 0; i < newArrayList.length; i++) {
         assertEQ(newArrayList[i], expectedValuesForNew[i],
+=======
+        arktest.assertEQ(arrayList[i], expectedValuesForArrayList[i],
+            `The element at index ${i} should be ${expectedValuesForArrayList[i]}`);
+    }
+    for (let i = 0; i < newArrayList.length; i++) {
+        arktest.assertEQ(newArrayList[i], expectedValuesForNew[i],
+>>>>>>> OpenHarmony_feature_20250328
             `The element at index ${i} should be ${expectedValuesForNew[i]}`);
     }
 }

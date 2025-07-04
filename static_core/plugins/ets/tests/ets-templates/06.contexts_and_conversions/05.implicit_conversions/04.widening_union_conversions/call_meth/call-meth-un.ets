@@ -35,7 +35,7 @@ class Z {
 function main() {
     let z: Z = new Z()
 {%- for t in c['values'] %}
-    assertTrue( z.meth(s{{loop.index}}) as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( z.meth(s{{loop.index}}) {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

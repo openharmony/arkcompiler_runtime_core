@@ -27,5 +27,5 @@ class A {
 }
 
 function main(): void {
-  assertTrue( A.a == 0 )
+  arktest.assertTrue( A.a == 0 )
 }
