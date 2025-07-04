@@ -27,6 +27,19 @@ config("verification_public_config") {
   ]
 }
 
+if (!ark_static_standalone_build) {
+  ohos_shared_headers("verification_headers") {
+    include_dirs = [
+      "$ark_root/verification",
+      "$target_gen_dir",
+      "$target_gen_dir/include",
+      "$target_gen_dir/../..",
+    ]
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+}
+
 ark_gen_file("verification_abs_int_inl_compat_checks_h") {
   template_file = "templates/abs_int_inl_compat_checks.h.erb"
   data = [ "$ark_root/verification/verification.yaml" ]

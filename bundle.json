@@ -262,6 +262,30 @@
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/plugins/ets/stdlib:ohos_ets_stdlib"
+                },
+		        {
+                    "name": "//arkcompiler/runtime_core/static_core/assembler:assembler_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/runtime:runtime_gen_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/bytecode_optimizer:bytecode_optimizer_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libpandabase_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/libpandafile:libpandafile_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/runtime:runtime_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/compiler:compiler_headers"
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/static_core/verification/gen:verification_headers"
                 }
             ],
             "test": [
