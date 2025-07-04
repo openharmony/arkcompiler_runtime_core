@@ -28,7 +28,7 @@ interface ChildInterface extends ParentInterface {
 
 class ChildClass implements ChildInterface {
   parentMethod(): string {
-    return("Parent method implementation");
+    return "Parent method implementation";
   }
 
   childMethod(): string {
@@ -41,6 +41,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
+  let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.parentMethod(), "Parent method implementation");
 }

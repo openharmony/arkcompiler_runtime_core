@@ -19,7 +19,7 @@ desc: Default method for child interface to override parent interface(the rewrit
 
 interface ParentInterface {
   parentMethod(): string {
-    return("Parent method implementation");
+    return "Parent method implementation";
   }
 }
 
@@ -39,7 +39,7 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
+  let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.parentMethod(), "Overridden implementation of parentMethod in ChildInterface");
   arktest.assertEQ(instance.childMethod(), "Child method implementation");
 }

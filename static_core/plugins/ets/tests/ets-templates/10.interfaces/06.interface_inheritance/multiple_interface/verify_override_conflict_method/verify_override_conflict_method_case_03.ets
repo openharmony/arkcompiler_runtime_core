@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child class must override a default method when there is a conflict between parent and child interfaces from different modules.
+desc: >-
+    Verify that a child class must override a default method when there is a conflict between parent
+    and child interfaces from different modules.
 files:
 - ./parentModule.ets
 - ./childModule.ets

@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify inheritance of multiple layers of abstract and concrete classes to ensure correct method overrides and invocations.
+desc: >-
+    Verify inheritance of multiple layers of abstract and concrete classes to ensure correct method overrides
+    and invocations.
 ---*/
 
 interface A {

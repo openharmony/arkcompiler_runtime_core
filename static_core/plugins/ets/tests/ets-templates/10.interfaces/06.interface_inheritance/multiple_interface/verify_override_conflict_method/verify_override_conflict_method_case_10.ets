@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child class can override a default method and add additional logic without affecting the parent's behavior.
+desc: >-
+    Verify that a child class can override a default method and add additional logic without affecting the parent's
+    behavior.
 ---*/
 
 interface Parent {

@@ -17,4 +17,4 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-export class Describe{};
+export class Describe {};

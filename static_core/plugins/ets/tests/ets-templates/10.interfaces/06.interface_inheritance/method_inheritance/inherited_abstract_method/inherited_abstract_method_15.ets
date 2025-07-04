@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child interface does not implement the abstract method of the parent interface (error scenario, call parentinterface).
+desc: >-
+    The child interface does not implement the abstract method of the parent interface
+    (error scenario, call parentinterface).
 tags: [compile-only, negative]
 ---*/
 
@@ -33,5 +35,5 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ParentInterface  = new ChildClass();
+  let instance: ParentInterface = new ChildClass();
 }

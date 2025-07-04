@@ -28,7 +28,7 @@ namespace A {
 }
 
 namespace A {
-    function goo(): void { bar() }    // bar() belongs to the same namespace
+    function goo(): void { bar() } // bar() belongs to the same namespace
 }
 
 namespace A.C {

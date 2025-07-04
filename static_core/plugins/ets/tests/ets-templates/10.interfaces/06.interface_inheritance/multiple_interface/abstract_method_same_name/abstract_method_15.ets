@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The method with the same name has the same type and number of parameters, but a method is asynchronous, redefine the fetchData method.
+desc: >-
+    The method with the same name has the same type and number of parameters, but a method is asynchronous,
+    redefine the fetchData method.
 ---*/
 
 interface Parent1 {

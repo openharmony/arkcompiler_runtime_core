@@ -39,5 +39,5 @@ function main(): void {
     let instance: I = new B();
 
     instance.text = "text";
-    arktest.assertEQ( instance.text, "text" )
+    arktest.assertEQ(instance.text, "text")
 }

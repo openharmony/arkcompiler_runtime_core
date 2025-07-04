@@ -21,7 +21,7 @@ interface ParentInterface {
   readonly myConstant: boolean;
 }
 
-class Parent implements ParentInterface  {
+class Parent implements ParentInterface {
   readonly myConstant: boolean = true;
 }
 

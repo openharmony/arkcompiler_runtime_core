@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that a child interface resolves method conflicts when parent interfaces have methods with different return types.
+desc: >-
+    Verify that a child interface resolves method conflicts when parent interfaces have methods with different return
+    types.
 tags: [compile-only, negative]
 ---*/
 

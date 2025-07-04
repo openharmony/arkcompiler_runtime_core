@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Test whether a child interface can change a method's parameters (overloading) and require the new signature in the implementation.
+desc: >-
+    Test whether a child interface can change a method's parameters (overloading) and require
+    the new signature in the implementation.
 tags: [compile-only, negative]
 ---*/
 

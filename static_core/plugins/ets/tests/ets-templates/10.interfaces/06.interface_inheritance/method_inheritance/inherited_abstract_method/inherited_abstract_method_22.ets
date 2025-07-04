@@ -19,7 +19,7 @@ desc: Parent interface contains default method implementation(parentinterface ca
 
 interface ParentInterface {
   parentMethod(): string {
-    return("Parent method implementation");
+    return "Parent method implementation";
   }
 }
 
@@ -34,6 +34,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ParentInterface  = new ChildClass();
+  let instance: ParentInterface = new ChildClass();
   arktest.assertEQ(instance.childMethod(), "Child method implementation");
 }

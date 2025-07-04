@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Singlelevel inheritance, child interface inherits abstract method of parent interface(validate subclass method invocation).
+desc: >-
+    Singlelevel inheritance, child interface inherits abstract method of parent interface
+    (validate subclass method invocation).
 ---*/
 
 interface ParentInterface {
@@ -36,6 +38,6 @@ class ChildClass implements ChildInterface {
 }
 
 function main(): void {
-  let instance: ChildInterface  = new ChildClass();
+  let instance: ChildInterface = new ChildClass();
   arktest.assertEQ(instance.childMethod(), "Child method implementation");
 }
