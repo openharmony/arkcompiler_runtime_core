@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Type T1 is compatible with type T2 if there is an implicit conversion (see Implicit  Conversions) that allows converting type T1 to type T2. Class does not implement  interface.
+desc: >-
+    Type T1 is compatible with type T2 if there is an implicit conversion (see Implicit  Conversions)
+    that allows converting type T1 to type T2. Class does not implement  interface.
 tags: [compile-only, negative]
 ---*/
 

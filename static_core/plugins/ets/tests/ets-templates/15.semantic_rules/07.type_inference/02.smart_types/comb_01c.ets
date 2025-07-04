@@ -21,32 +21,32 @@ desc: >-
     and allow operations which are specific to such narrowed type.
 ---*/
 class A {}
-let a: A|undefined = new A()
+let a: A | undefined = new A()
 
 let num: Number = 0;
 let str: string = "";
 let err: Error = new Error();
 let bool: Boolean = false;
 
-function foo(p: Object|undefined): number {
+function foo(p: Object | undefined): number {
     if (p === undefined) {
         a = p
         return 1
     } else {
         if (p instanceof Number) {
-            num = p * 2  // numeric operation without cast
+            num = p * 2 // numeric operation without cast
             return 2
         } else {
             if (p instanceof Error) {
                 err = p
-                str = p.message  // field access without cast
+                str = p.message // field access without cast
                 return 3
             } else {
                 if (p instanceof string) {
-                    str = p.substr(0, 1)  // string method without cast
+                    str = p.substr(0, 1) // string method without cast
                     return 4
                 } else {
-                    bool = !p  // boolean operator without cast
+                    bool = !p // boolean operator without cast
                     return 5
                 }
             }

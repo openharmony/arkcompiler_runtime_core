@@ -20,7 +20,7 @@ tags:
 - not-a-test
 ---*/
 
-export type TPL =  [Number, String];
+export type TPL = [Number, String];
 
 export function foo(): int {
     return 1;
@@ -70,7 +70,7 @@ export function foo(i: TPL): int {
     return 19;
 }
 
-export function foo<T,S>(i: T, j: S): int {
+export function foo<T, S>(i: T, j: S): int {
     return 20;
 }
 

@@ -27,7 +27,7 @@ function foo<T>(i: Gen<T>): void {
   res = 1;
 }
 
-function foo(i: Number|undefined|null): void {
+function foo(i: Number | undefined | null): void {
   res = 2;
 }
 

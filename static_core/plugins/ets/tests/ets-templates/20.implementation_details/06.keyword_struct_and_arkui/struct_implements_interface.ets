@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct as class implements an interface.
+desc: >-
+    Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct as class implements an interface
 tags: [compile-only, negative]
 ---*/
 
@@ -23,7 +24,7 @@ interface Test {
     getHalfAmount(): double
 }
 
-struct StructClass implements Test{
+struct StructClass implements Test {
     amount: double
     field: int
     constructor(f: int, a: double) {
