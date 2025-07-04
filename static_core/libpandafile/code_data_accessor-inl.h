@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,13 +43,34 @@ inline void CodeDataAccessor::TryBlock::SkipCatchBlocks()
 template <class Callback>
 inline void CodeDataAccessor::EnumerateTryBlocks(const Callback &cb)
 {
+    EnumerateTryBlocksImpl(cb);
+}
+
+template <class Callback>
+void CodeDataAccessor::EnumerateTryBlocksImpl(const Callback &cb)
+{
     auto sp = tryBlocksSp_;
+
     for (size_t i = 0; i < triesSize_; i++) {
         TryBlock tryBlock(sp);
+        uint32_t startPc = tryBlock.GetStartPc();
+        uint32_t length = tryBlock.GetLength();
+        if (codeSize_ == 0 || startPc >= codeSize_ || (startPc + length) > codeSize_) {
+            LOG(FATAL, PANDAFILE) << "Invalid TryBlock at index " << i << ": start=" << startPc << ", length=" << length
+                                  << ", codeSize=" << codeSize_;
+        }
+
+        size_t trySize = tryBlock.GetSize();
+        if (trySize > sp.Size()) {
+            LOG(FATAL, PANDAFILE) << "TryBlock size overflow at index " << i << ": trySize=" << trySize
+                                  << ", spSize=" << sp.Size();
+        }
+
         if (!cb(tryBlock)) {
             return;
         }
-        sp = sp.SubSpan(tryBlock.GetSize());
+
+        sp = sp.SubSpan(trySize);
     }
     size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - codeId_.GetOffset();
 }
