@@ -86,13 +86,8 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
  * JS Uint8ClampedArray API-compatible class
  */
 export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = 1
-    public readonly BYTES_PER_ELEMENT: number = Uint8ClampedArray.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Uint8ClampedArray.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -100,7 +95,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8ClampedArray.
@@ -130,7 +124,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -150,20 +143,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -237,7 +217,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             }
             this.lengthInt = this.byteLengthInt / Uint8ClampedArray.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -246,7 +225,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.byteLengthInt = arr.length.toInt() * Uint8ClampedArray.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).toInt()))
@@ -278,7 +256,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -287,22 +264,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @param other data initializer
      */
     public constructor(other: Uint8ClampedArray) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 
@@ -324,13 +288,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafeClamp(i, numbers[i].toInt())
         }
-    }
-
-    internal zeroIfInfinity(val: number): number {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
-        }
-        return val as number
     }
 
     /**
@@ -412,12 +369,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-<<<<<<< HEAD
-        let v = this.zeroIfInfinity(val)
-        this.$_set(index, v as int)
-=======
         this.$_set(index, val.toInt())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -1845,13 +1797,8 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Uint8Array API-compatible class
  */
 export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = 1
-    public readonly BYTES_PER_ELEMENT: number = Uint8Array.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = 1
     public readonly BYTES_PER_ELEMENT: int = Uint8Array.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -1859,7 +1806,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8Array.
@@ -1889,7 +1835,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -1909,20 +1854,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -1996,7 +1928,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint8Array.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -2005,7 +1936,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length.toInt() * Uint8Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -2037,7 +1967,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -2046,22 +1975,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Uint8Array) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 
@@ -2178,11 +2094,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as int)
-=======
         this.$_set(index, v.toInt())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -3610,13 +3522,8 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Uint16Array API-compatible class
  */
 export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = 2
-    public readonly BYTES_PER_ELEMENT: number = Uint16Array.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = 2
     public readonly BYTES_PER_ELEMENT: int = Uint16Array.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -3624,7 +3531,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint16Array.
@@ -3654,7 +3560,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -3674,20 +3579,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -3768,7 +3660,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint16Array.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -3777,7 +3668,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length.toInt() * Uint16Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toInt())
@@ -3809,7 +3699,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -3818,22 +3707,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Uint16Array) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 
@@ -3950,11 +3826,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as int)
-=======
         this.$_set(index, v.toInt())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -5378,13 +5250,8 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
  * JS Uint32Array API-compatible class
  */
 export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = 4
-    public readonly BYTES_PER_ELEMENT: number = Uint32Array.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = 4
     public readonly BYTES_PER_ELEMENT: int = Uint32Array.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -5392,7 +5259,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint32Array.
@@ -5422,7 +5288,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -5442,20 +5307,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -5536,7 +5388,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint32Array.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -5545,7 +5396,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length.toInt() * Uint32Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toLong())
@@ -5577,7 +5427,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -5586,22 +5435,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Uint32Array) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 
@@ -5718,11 +5554,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as long)
-=======
         this.$_set(index, v.toLong())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -7181,13 +7013,8 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
  * JS BigUint64Array API-compatible class
  */
 export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = 8
-    public readonly BYTES_PER_ELEMENT: number = BigUint64Array.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = 8
     public readonly BYTES_PER_ELEMENT: int = BigUint64Array.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -7195,7 +7022,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty BigUint64Array.
@@ -7225,7 +7051,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7245,20 +7070,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -7339,7 +7151,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             }
             this.lengthInt = this.byteLengthInt / BigUint64Array.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -7348,7 +7159,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.byteLengthInt = arr.length.toInt() * BigUint64Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).toLong())
@@ -7380,7 +7190,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7389,22 +7198,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @param other data initializer
      */
     public constructor(other: BigUint64Array) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 

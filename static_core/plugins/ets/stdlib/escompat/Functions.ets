@@ -182,11 +182,7 @@ export function decodeURIComponent(uriComponent: string): string {
     return unescapeImpl(
         uriComponent,
         (str: string, i: int, ret: StringBuilder, unit: int): void => {
-<<<<<<< HEAD
-            ret.append(unit as char)
-=======
             ret.append(unit.toChar())
->>>>>>> OpenHarmony_feature_20250328
         }
     )
 }
@@ -237,17 +233,9 @@ export function escape(str: string): string {
     let ret = new StringBuilder()
     for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
-<<<<<<< HEAD
-        const c = (d as int) & 0xffff
-        assertLE(0, c)
-        assertEQ(hexChars.length, 16)
-        if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
-            ret.append(c as char)
-=======
         const c = d.toInt() & 0xffff
         if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
             ret.append(c.toChar())
->>>>>>> OpenHarmony_feature_20250328
         } else {
             encodeCharAsHex(ret, c)
         }
@@ -294,11 +282,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         let chr0 = encodedURIHexAt(str, i);
         let chrsCnt: int
         if ((chr0 & 0x80) == 0) {
-<<<<<<< HEAD
-            push(str, i, ret, chr0 as char)
-=======
             push(str, i, ret, chr0.toChar())
->>>>>>> OpenHarmony_feature_20250328
             i += 2
             continue
         } else if ((chr0 & 0xe0) == 0xc0) {
@@ -324,11 +308,7 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
         i += chrsCnt * 3 - 1
 
         if (chr0 >= 0 && chr0 <= 0xd7ff || chr0 >= 0xe000 && chr0 <= 0xffff) {
-<<<<<<< HEAD
-            push(str, i, ret, chr0 as char)
-=======
             push(str, i, ret, chr0.toChar())
->>>>>>> OpenHarmony_feature_20250328
         } else {
             ret.append(Char.getHighSurrogate(chr0))
             ret.append(Char.getLowSurrogate(chr0))

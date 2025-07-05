@@ -410,11 +410,7 @@ export final class ClassValue extends reflect.Value {
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
             ValueAPISetFieldByNameObject(this.data, name, __narrowAny(val.getData())!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-<<<<<<< HEAD
-            ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData()!)
-=======
             ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as LambdaValue).getData())!)
->>>>>>> OpenHarmony_feature_20250328
         } else if (ft instanceof DoubleType && val instanceof ByteValue) {
             ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
         } else if (ft instanceof DoubleType && val instanceof ShortValue) {

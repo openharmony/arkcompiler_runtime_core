@@ -318,11 +318,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as byte)
-=======
         this.$_set(index, v.toByte())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -2060,11 +2056,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as short)
-=======
         this.$_set(index, v.toShort())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -3815,11 +3807,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public $_set(index: int, val: number): void {
         let v = this.zeroIfInfinity(val)
-<<<<<<< HEAD
-        this.$_set(index, v as int)
-=======
         this.$_set(index, v.toInt())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -7261,11 +7249,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-<<<<<<< HEAD
-        this.$_set(index, val as float)
-=======
         this.$_set(index, val.toFloat())
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**
@@ -8964,11 +8948,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: number, val: double): void {
-<<<<<<< HEAD
-        this.$_set(index as int, val)
-=======
         this.$_set(index.toInt(), val)
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**

@@ -168,13 +168,8 @@ export class JSON {
         return "false"
     }
 
-<<<<<<< HEAD
-    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
-    private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
-=======
     private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
     private static readonly NON_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
->>>>>>> OpenHarmony_feature_20250328
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     /**
@@ -553,8 +548,6 @@ export class JSON {
         return s.toString()
     }
 
-<<<<<<< HEAD
-=======
     /**
       * Converts a JsonElement to a JSON string.
      * @param elem - The JsonElement to stringify
@@ -575,7 +568,6 @@ export class JSON {
         return stringifyElementRecursively(elem, replacer, space, 0)
     }
 
->>>>>>> OpenHarmony_feature_20250328
     private static IsBoxedType(typ : Type) : boolean {
         return typ instanceof BooleanType
                 || typ instanceof ByteType
@@ -680,10 +672,7 @@ class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
     private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
-<<<<<<< HEAD
-=======
     private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
->>>>>>> OpenHarmony_feature_20250328
     private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
@@ -742,18 +731,12 @@ class JSONWriter {
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
-<<<<<<< HEAD
-            this.writeRecord(obj as Object as Record<string, NullishType>);
-        } else if (obj instanceof Map) {
-            this.buffer.append("{}")
-=======
             this.writeESCompatRecord(obj)
         } else if (obj instanceof JsonReplacer) {
             let temp: Record<String, NullishType> = obj.jsonReplacer()
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
->>>>>>> OpenHarmony_feature_20250328
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -768,14 +751,9 @@ class JSONWriter {
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
-<<<<<<< HEAD
-                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName()) {
-                this.buffer.append("{}")
-=======
                        objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
                        objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
                 this.buffer.append(JSONObject.EMPTY)
->>>>>>> OpenHarmony_feature_20250328
             } else if (objType instanceof ClassType) {
                 this.writeClassValue(obj, objType as ClassType)
             } else if (objType instanceof LambdaType) {
@@ -797,11 +775,7 @@ class JSONWriter {
 
         const objType = Type.of(obj) as ClassType
 
-<<<<<<< HEAD
-        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
-=======
         const writableFields = this.getWritableFields(objType, reflect.Value.of(obj) as ClassValue)
->>>>>>> OpenHarmony_feature_20250328
 
         let fieldDumped = false
         if (writableFields.length > 0) {
@@ -827,11 +801,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-<<<<<<< HEAD
-    private writeTupleElements(tupleFields: Array<[Field, Value]>): boolean {
-=======
     private writeTupleElements(tupleFields: Array<[Field, reflect.Value]>): boolean {
->>>>>>> OpenHarmony_feature_20250328
         const FIELD_VALUE = 1
 
         let fieldDumped = false
@@ -860,32 +830,7 @@ class JSONWriter {
         return fieldDumped
     }
 
-<<<<<<< HEAD
-    private writeRecord(rec: Record<string, NullishType>): void {
-        this.buffer.append("{");
-        this.checkReferencesCycle(rec);
-        this.path.add(rec);
-        let isFirst = true;
-        for (let key of rec.keys()) {
-            if (rec[key] !== undefined) {
-                if (!isFirst) {
-                    this.buffer.append(",");
-                } else {
-                    isFirst = false;
-                }
-                this.buffer.append(JSON.stringify(key as String));
-                this.buffer.append(":");
-                this.writeObject(rec[key]);
-            }
-        }
-        this.path.delete(rec);
-        this.buffer.append("}");
-    }
-
-    private writeClassValue(obj: Object, objType: ClassType): void {
-=======
     private writeESCompatRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
->>>>>>> OpenHarmony_feature_20250328
         const currentBuffer = this.buffer
         this.buffer = new StringBuilder("{")
 
@@ -1793,13 +1738,9 @@ class JSONValueParser {
         }
 
         let obj = classType.make()
-<<<<<<< HEAD
-        let classVal = Value.of(obj) as ClassValue
-=======
         let classVal = reflect.Value.of(obj) as ClassValue
         let hasJsonParseIgnore: boolean = false
         let hasJsonStringifyIgnore: boolean = false
->>>>>>> OpenHarmony_feature_20250328
         const jsonObjFields = jsonObj.getFields()
         for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
             let classField = classType.getField(field_num)
@@ -1833,11 +1774,7 @@ class JSONValueParser {
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
-<<<<<<< HEAD
-        let arr = aType.make(len as int) as FixedArray<NullishType>
-=======
         let arr = aType.make(len.toInt()) as FixedArray<NullishType>
->>>>>>> OpenHarmony_feature_20250328
 
         let setArrayElementFn = (a: FixedArray<NullishType>, i: int, v: NullishType) => { a[i] = v }
 

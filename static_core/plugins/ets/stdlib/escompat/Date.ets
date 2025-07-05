@@ -304,11 +304,7 @@ function ecmaMakeFullYear(year: long): long {
  * @returns returns the full year associated with the integer part of year
  */
 function ecmaMakeFullYear(year: double): long {
-<<<<<<< HEAD
-    let y = trunc(year)  as long;
-=======
     let y = trunc(year).toLong();
->>>>>>> OpenHarmony_feature_20250328
     return ecmaMakeFullYear(y)
 }
 
@@ -551,11 +547,7 @@ export class Date {
             if (isNaN(value as number)) {
                 this.ms = (maxDateOffset + 1) as long;
             } else {
-<<<<<<< HEAD
-                this.ms = trunc(value as number) as long;
-=======
                 this.ms = (trunc(value as number)).toLong();
->>>>>>> OpenHarmony_feature_20250328
             }
         }
     }
@@ -1158,11 +1150,7 @@ export class Date {
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
     public static UTC(year: number): number {
-<<<<<<< HEAD
-        return ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
-=======
         return (ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))).toDouble()
->>>>>>> OpenHarmony_feature_20250328
     }
 
     /**

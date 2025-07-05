@@ -380,11 +380,7 @@ export class Object {
         if (t instanceof StringType || t instanceof ArrayType || o instanceof Array) {
             const keys = Object.keys(o)
             const len = keys.length
-<<<<<<< HEAD
-            let res = new string[len + 1]
-=======
             let res: string[] = new string[len + 1]
->>>>>>> OpenHarmony_feature_20250328
             for (let i = 0; i < len; i++) {
                 res[i] = keys[i]
             }

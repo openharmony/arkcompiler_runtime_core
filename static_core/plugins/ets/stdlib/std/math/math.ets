@@ -212,41 +212,25 @@ export native function ceil(v: double): double;
 export native function clz64(v: long): int;
 
 export function clz64(v: int) {
-<<<<<<< HEAD
-    let extendedNum: long = (v as long);
-=======
     let extendedNum: long = v.toLong();
->>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 32) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: short) {
-<<<<<<< HEAD
-    let extendedNum: long = (v as long);
-=======
     let extendedNum: long = v.toLong();
->>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: byte) {
-<<<<<<< HEAD
-    let extendedNum: long = (v as long);
-=======
     let extendedNum: long = v.toLong();
->>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 8) - 1;
     return clz64(extendedNum & mask);
 }
 
 export function clz64(v: char) {
-<<<<<<< HEAD
-    let extendedNum: long = (v as long);
-=======
     let extendedNum: long = v.toLong();
->>>>>>> OpenHarmony_feature_20250328
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);
 }

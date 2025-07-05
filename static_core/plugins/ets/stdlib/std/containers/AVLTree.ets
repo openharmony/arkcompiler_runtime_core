@@ -19,123 +19,6 @@ export namespace containers {
 /**
  * Node for a tree
  */
-<<<<<<< HEAD
-class Node<K extends Comparable<Object>, V> {
-    left: Node<K, V> | null;
-    key: K;
-    value: V;
-    height: int;
-    right: Node<K, V> | null;
-    constructor(left: Node<K, V> | null, key: K, value: V, height: int, right: Node<K, V> | null) {
-        this.key = key;
-        this.value = value;
-        this.left = left;
-        this.right = right;
-        this.height = height;
-    }
-}
-
-/**
- * Constructs new empty Node
- *
- * @returns empty node
- */
-export function newEmpty<K extends Comparable<Object>, V>(): Node<K, V> | null {
-    return null;
-}
-
-/**
- * Checks if Node is empty
- *
- * @param n
- *
- * @returns true if Node is empty, false otherwise
- */
-export function isEmpty<K extends Comparable<Object>, V>(n: Node<K, V> | null): boolean {
-    return n == null;
-}
-
-/**
- * Checks if Node is a leaf
- *
- * @param n
- *
- * @returns true if Node is a leaf, false otherwise
- */
-export function isLeaf<K extends Comparable<Object>, V>(n: Node<K, V> | null): boolean {
-    return n != null && n!.left == null && n!.right == null;
-}
-
-/**
- * Checks if Node is a leaf
- *
- * @param n
- *
- * @returns true if Node is a leaf, false otherwise
- */
-export function isNode<K extends Comparable<Object>, V>(n: Node<K, V> | null): boolean {
-    return n != null && (n!.left != null || n!.right != null);
-}
-
-export function height<K extends Comparable<Object>, V>(node: Node<K, V> | null): int {
-    if (isEmpty<K, V>(node)) {
-        return 0;
-    } else if (isLeaf(node)) {
-        return 1;
-    } else {
-        return node!.height;
-    }
-}
-
-export function newNode<K extends Comparable<Object>, V>(left: Node<K, V> | null, k: K, v: V, height: int, right: Node<K, V> | null): Node<K, V> {
-    return new Node<K, V>(left, k, v, height, right);
-}
-
-export function newLeaf<K extends Comparable<Object>, V>(k: K, v: V): Node<K, V> {
-    return new Node<K, V>(newEmpty<K, V>(), k, v, 1, newEmpty<K, V>());
-}
-
-function legalLeftKey<K extends Comparable<Object>, V>(node: Node<K, V> | null, key: K): void {
-    if (isEmpty(node)) {
-        return;
-    }
-
-    let leftKey: K = node!.key;
-    assertLT(leftKey.compareTo(key), 0);
-}
-
-function legalRightKey<K extends Comparable<Object>, V>(node: Node<K, V> | null, key: K): void {
-    if (isEmpty(node)) {
-        return;
-    }
-
-    let rightKey: K = node!.key ;
-    assertLT(0, rightKey.compareTo(key));
-}
-
-function inv<K extends Comparable<Object>, V>(node: Node<K, V> | null): void {
-    if (isNode(node)) {
-        let hl = height(node!.left);
-        let hr = height(node!.right);
-
-        inv(node!.left);
-        inv(node!.right);
-
-        legalLeftKey(node!.left, node!.key);
-        legalRightKey(node!.right, node!.key);
-
-        assertEQ(node!.height, max(hl, hr) + 1);
-        assertLE(abs(hl - hr), 2);
-    }
-}
-
-
-function updateHeight<K extends Comparable<Object>, V>(node: Node<K, V> | null): void {
-    if (isNode(node)) {
-        let newHeight = max(height(node!.left), height(node!.right)) + 1;
-        if (newHeight != node!.height) {
-            node!.height = newHeight;
-=======
     class Node<K extends Comparable<Object>, V> {
         left: Node<K, V> | null;
         key: K;
@@ -148,7 +31,6 @@ function updateHeight<K extends Comparable<Object>, V>(node: Node<K, V> | null):
             this.left = left;
             this.right = right;
             this.height = height;
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 

@@ -51,11 +51,7 @@ class EventLoop {
     }
 
     public init() {
-<<<<<<< HEAD
-        this.pollLoop();
-=======
         launchSameWorker(() => { this.pollLoop(); } as Object);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     public registerTimer(timer: Timer) {
@@ -190,24 +186,12 @@ class Timer {
 
 class TimerTable {
     constructor() {
-<<<<<<< HEAD
-        this.nextFreeId = 0;
-=======
         // IDs must be positive integers beginning at 1.
         this.nextFreeId = 1;
->>>>>>> OpenHarmony_feature_20250328
         this.tableSpinlock = ConcurrencyHelpers.spinlockCreate();
         this.timers = new Map<TimerId, Timer>();
     }
 
-<<<<<<< HEAD
-    public createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
-        let timer: Timer;
-        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
-            let timerId = this.nextFreeId++;
-            timer = new Timer(callback, delay, repeat, timerId);
-            this.timers.set(timerId, timer);
-=======
     public createTimer(callback: Object, delay: int, repeat: boolean, linkedTimer: long): Timer {
         return this.createTimer(callback as Callback, delay, repeat, linkedTimer);
     }
@@ -226,15 +210,12 @@ class TimerTable {
         let timer: Timer | undefined;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
             timer = this.timers.get(id);
->>>>>>> OpenHarmony_feature_20250328
         });
         return timer;
     }
 
     public clearTimer(id: TimerId) {
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
-<<<<<<< HEAD
-=======
             let timer = this.timers.get(id);
             if (timer === undefined) {
                 return;
@@ -242,7 +223,6 @@ class TimerTable {
             if (timer!.hasLinkedTimer() && !CoroutineExtras.workerHasExternalScheduler()) {
                 throw new Error('Failed to clear timer. Unable to clear interop timer from non-interop worker');
             }
->>>>>>> OpenHarmony_feature_20250328
             this.timers.delete(id);
         });
     }

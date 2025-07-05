@@ -15,14 +15,7 @@
 
 package std.containers;
 
-<<<<<<< HEAD
-/**
- * ArrayBlockingQueue implementation
- */
-export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
-=======
 export namespace containers {
->>>>>>> OpenHarmony_feature_20250328
 
     /**
     * ArrayBlockingQueue implementation
@@ -260,24 +253,11 @@ export namespace containers {
             }
         }
 
-<<<<<<< HEAD
-    /**
-     * Returns the end element in a ArrayBlockingQueue.
-     *
-     * @returns return the end element or null.
-     */
-    public getEnd(): T | null {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        try {
-            if (this.isQueueEmpty) {
-                return null;
-=======
         private increaseHeadIdx(): void {
             this.curHeadIdx++;
             this.curHeadIdx = this.curHeadIdx % this.capacitySize;
             if (this.isQueueFull) {
                 this.isQueueFull = false;
->>>>>>> OpenHarmony_feature_20250328
             }
             if (this.curHeadIdx == this.curTailIdx) {
                 this.isQueueEmpty = true;

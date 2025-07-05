@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-<<<<<<<< HEAD:static_core/static_linker/tests/data/ets/sys/error_format.abc
-This file is used to mock a error format abc file.
-========
 package std.annotations
 
 @Retention("RUNTIME")
 export @interface InterfaceObjectLiteral {}
->>>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/stdlib/std/annotations/interface_object_literal.ets

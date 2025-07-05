@@ -680,17 +680,10 @@ class DataFrame {
         connectorLeft: string,
         connectorRight: string,
     ): string {
-<<<<<<< HEAD
-        const connLength: int = 
-            this._indexColumnWidth - 
-            (connectorLeft.length as int) -
-            (connectorRight.length as int);
-=======
         const connLength: int =
             this._indexColumnWidth -
             connectorLeft.length.toInt() -
             connectorRight.length.toInt();
->>>>>>> OpenHarmony_feature_20250328
         const conn: string = ch.repeat(connLength);
         let border: string = `${connectorLeft}${conn}`;
         for (const col of this.tableModel.keys()) {

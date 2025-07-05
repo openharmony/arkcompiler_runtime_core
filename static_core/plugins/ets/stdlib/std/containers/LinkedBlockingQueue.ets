@@ -15,28 +15,8 @@
 
 package std.containers;
 
-<<<<<<< HEAD
-/**
- * A node in the linked list.
- */
-final class ListNode<T> {
-    element: T;
-    prev: ListNode<T> | undefined = undefined;
-    next: ListNode<T> | undefined = undefined;
-
-    constructor(element: T) {
-        this.element = element;
-    }
-}
-
-/**
- * BlockingQueue implementation
- */
-export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
-=======
 export namespace containers {
     
->>>>>>> OpenHarmony_feature_20250328
     /**
     * A node in the linked list.
     */
@@ -244,65 +224,6 @@ export namespace containers {
             }
         }
 
-<<<<<<< HEAD
-    /**
-     * Returns the end element in a LinkedBlockingQueue.
-     *
-     * @returns return the end element or null.
-     */
-    public getEnd(): T | null {
-        ConcurrencyHelpers.mutexLock(this.pushMutex);
-        try {
-            if (this.atomicsGetSize() == 0) {
-                return null;
-            } else {
-                return this.tail!.element;
-            }
-        } finally {
-            ConcurrencyHelpers.mutexUnlock(this.pushMutex);
-        }
-    }
-
-    /**
-     * Checks if the BlockingQueue is empty.
-     *
-     * @returns boolean True if a BlockingQueue has no elements, otherwise false.
-     */
-    override isEmpty(): boolean {
-        return this.atomicsGetSize() == 0;
-    }
-
-    /**
-     * Returns the size of a BlockingQueue.
-     *
-     * @returns int The size of the BlockingQueue.
-     */
-    override get size(): int {
-        return this.atomicsGetSize();
-    }
-
-    /**
-     * Returns the capacity of a BlockingQueue.
-     *
-     * @returns int The capacity of the BlockingQueue.
-     */
-    override get capacity(): int {
-        return this.actualCapacity;
-    }
-
-    /**
-     * Returns the number of additional elements that this queue can ideally accept without blocking.
-     *
-     * @returns int The capacity of the BlockingQueue.
-     */
-    override remainingCapacity(): int {
-        return (this.actualCapacity - this.atomicsGetSize()) as int;
-    }
-
-    private waitFullQueue() {
-        while (this.atomicsGetSize() == this.actualCapacity) {
-            ConcurrencyHelpers.condVarWait(this.pushCondVar, this.pushMutex);
-=======
         /**
         * Returns the first element in a BlockingQueue.
         *
@@ -315,7 +236,6 @@ export namespace containers {
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
             }
->>>>>>> OpenHarmony_feature_20250328
         }
 
         /**

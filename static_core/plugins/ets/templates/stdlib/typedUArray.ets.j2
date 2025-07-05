@@ -102,13 +102,8 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
  * JS {{element['name']}}Array API-compatible class
  */
 export final class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
-<<<<<<< HEAD
-    public static readonly BYTES_PER_ELEMENT: number = {{element['bytes']}}
-    public readonly BYTES_PER_ELEMENT: number = {{element['name']}}Array.BYTES_PER_ELEMENT
-=======
     public static readonly BYTES_PER_ELEMENT: int = {{element['bytes']}}
     public readonly BYTES_PER_ELEMENT: int = {{element['name']}}Array.BYTES_PER_ELEMENT
->>>>>>> OpenHarmony_feature_20250328
 
     /** Underlying Buffer */
     public readonly buffer: ArrayBuffer
@@ -116,7 +111,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
-    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty {{element['name']}}Array.
@@ -152,7 +146,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -172,20 +165,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-<<<<<<< HEAD
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
-=======
         let intByteLength: int = buf.getByteLength() - intByteOffset
->>>>>>> OpenHarmony_feature_20250328
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -266,7 +246,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             }
             this.lengthInt = this.byteLengthInt / {{element['name']}}Array.BYTES_PER_ELEMENT
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -275,7 +254,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.byteLengthInt = arr.length.toInt() * {{element['name']}}Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length.toInt()
             this.buffer = new ArrayBuffer(this.byteLengthInt)
-            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if element.get('clamped', False) %}
@@ -311,7 +289,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -320,22 +297,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param other data initializer
      */
     public constructor(other: {{element['name']}}Array) {
-<<<<<<< HEAD
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
-        this.byteLengthInt = other.byteLength as int
-        this.lengthInt = other.length as int
-=======
         this.buffer = other.buffer.slice(other.byteOffset.toInt(), (other.byteOffset + other.byteLength).toInt()) as ArrayBuffer
         this.byteLengthInt = other.byteLength.toInt()
         this.lengthInt = other.length.toInt()
->>>>>>> OpenHarmony_feature_20250328
         this.byteOffsetInt = 0
     }
 
@@ -384,11 +348,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
     {%- endif %}
 
-<<<<<<< HEAD
-=======
 
 {%- if element.get('name') not in ['Uint8Clamped', 'BigUint64'] %}{#- comment: Uint8Array and others, except Uint8Clamped, BigUint64 #}
->>>>>>> OpenHarmony_feature_20250328
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
@@ -399,7 +360,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         }
         return {{ 'val' if element['subsetType'] != 'BigInt' else 'new BigInt(val)' }}
     }
-{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         if ((val == Infinity) || (val == -Infinity)) {
@@ -499,11 +459,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
-<<<<<<< HEAD
-        {%- if element['subsetType'] == 'number' %}
-=======
         {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
->>>>>>> OpenHarmony_feature_20250328
         let v = this.zeroIfInfinity(val)
         this.$_set(index, {{fromElementCompat % 'v'}})
         {%- else %}

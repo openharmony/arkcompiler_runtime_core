@@ -411,11 +411,7 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
 export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: number, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -886,21 +882,13 @@ export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, inde
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: boolean[]) => boolean): boolean {
-=======
 export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -1383,11 +1371,7 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
 export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: number, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -1858,21 +1842,13 @@ export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number, array: byte[]) => byte): byte {
-=======
 export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: number, array: FixedArray<byte>) => byte): byte {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -2355,11 +2331,7 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
 export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: number, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -2830,21 +2802,13 @@ export function map(self: FixedArray<short>, callbackfn: (value: short, index: n
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number, array: short[]) => short): short {
-=======
 export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: number, array: FixedArray<short>) => short): short {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -3327,11 +3291,7 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
 export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: number, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -3802,21 +3762,13 @@ export function map(self: FixedArray<int>, callbackfn: (value: int, index: numbe
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number, array: int[]) => int): int {
-=======
 export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: number, array: FixedArray<int>) => int): int {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -4299,11 +4251,7 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
 export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: number, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -4774,21 +4722,13 @@ export function map(self: FixedArray<long>, callbackfn: (value: long, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number, array: long[]) => long): long {
-=======
 export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: number, array: FixedArray<long>) => long): long {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -5271,11 +5211,7 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
 export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: number, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -5754,21 +5690,13 @@ export function map(self: FixedArray<float>, callbackfn: (value: float, index: n
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number, array: float[]) => float): float {
-=======
 export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: number, array: FixedArray<float>) => float): float {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -6251,11 +6179,7 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
 export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: number, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -6734,21 +6658,13 @@ export function map(self: FixedArray<double>, callbackfn: (value: double, index:
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number, array: double[]) => double): double {
-=======
 export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: number, array: FixedArray<double>) => double): double {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -7231,11 +7147,7 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
 export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: number, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }
@@ -7706,21 +7618,13 @@ export function map(self: FixedArray<char>, callbackfn: (value: char, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-<<<<<<< HEAD
-export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number, array: char[]) => char): char {
-=======
 export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: number, array: FixedArray<char>) => char): char {
->>>>>>> OpenHarmony_feature_20250328
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-<<<<<<< HEAD
-        acc = callbackfn(acc, self[i], i as number, self)
-=======
         acc = callbackfn(acc, self[i], i.toDouble(), self)
->>>>>>> OpenHarmony_feature_20250328
     }
     return acc
 }

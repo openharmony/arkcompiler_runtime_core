@@ -31,11 +31,6 @@ export class PromiseStatus{
     static readonly rejected = "rejected";
 }
 
-export class PromiseStatus{
-    static readonly fulfilled = "fulfilled";
-    static readonly rejected = "rejected";
-}
-
 /**
  * Base class for Promise.allSettled return type.
  */
@@ -47,10 +42,7 @@ class PromiseSettledResultBase {
  * The class describes fulfillment result of Promise.allSettled's argument.
  */
 export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
-<<<<<<< HEAD
-=======
     constructor(){}
->>>>>>> OpenHarmony_feature_20250328
 
     constructor(value: T) {
         this.status = PromiseStatus.fulfilled;
@@ -64,12 +56,9 @@ export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
  * The class describes rejection result of Promise.allSettled's argument.
  */
 export class PromiseRejectedResult extends PromiseSettledResultBase {
-<<<<<<< HEAD
-=======
     constructor(){
         this.reason =  new Error();
     }
->>>>>>> OpenHarmony_feature_20250328
 
     constructor(reason: Error) {
         this.status = PromiseStatus.rejected;
@@ -95,26 +84,6 @@ export final class Promise<out T> implements PromiseLike<T> {
      * Takes resolve and reject function that would complete the promise
      */
     constructor(callback: (resolve: (value: T|PromiseLike<T>) => void,
-<<<<<<< HEAD
-            reject: (error: NullishType) => void) => void) {
-        // This variable will be remove after changing of reject arg type
-        let shouldTrowCCE: boolean = false;
-        try {
-            callback((value: T|PromiseLike<T>): void => {
-                this.doResolve<T>(value);
-            }, (error: NullishType): void => {
-                if(!(error instanceof Error)) {
-                    shouldTrowCCE = true;
-                } else {
-                    this.rejectImpl(error as Error, false);
-                }
-            });
-        } catch (error: Error) {
-            this.rejectImpl(error, false);
-        }
-        if(shouldTrowCCE) {
-            throw new ClassCastError("Promise must be rejected by Error.");
-=======
             reject: (error: Error) => void) => void) {
         try {
             callback((value: T|PromiseLike<T>): void => {
@@ -124,7 +93,6 @@ export final class Promise<out T> implements PromiseLike<T> {
             });
         } catch (error: Error) {
             this.rejectImpl(error, false);
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 
@@ -142,11 +110,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 if (this.state == Promise.STATE_RESOLVED) {
                     promise.doResolve<U>(onFulfilled());
                 } else {
-<<<<<<< HEAD
-                    promise.rejectImpl(this.value, false);
-=======
                     promise.rejectImpl(this.value as Error, false);
->>>>>>> OpenHarmony_feature_20250328
                 }
             } catch (error: Error) {
                 promise.rejectImpl(error, false);
@@ -173,11 +137,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                     promise.doResolve<U>(onFulfilled(this.value as T));
                 } else {
                     if (onRejected) {
-<<<<<<< HEAD
-                        promise.doResolve<E>(onRejected(this.value));
-=======
                         promise.doResolve<E>(onRejected(this.value as Error));
->>>>>>> OpenHarmony_feature_20250328
                     } else {
                         promise.rejectImpl(this.value as Error, false);
                     }
@@ -229,17 +189,10 @@ export final class Promise<out T> implements PromiseLike<T> {
             try {
                 if (this.state == Promise.STATE_REJECTED) {
                     if (onRejected) {
-<<<<<<< HEAD
-                        let res: U|PromiseLike<U> = onRejected(this.value as Object);
-                        promise.doResolve<U>(res);
-                    } else {
-                        promise.rejectImpl(this.value, false);
-=======
                         let res: U|PromiseLike<U> = onRejected(this.value as Error);
                         promise.doResolve<U>(res);
                     } else {
                         promise.rejectImpl(this.value as Error, false);
->>>>>>> OpenHarmony_feature_20250328
                     }
                 } else {
                     promise.doResolve<T>(this.value as T);
@@ -320,15 +273,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         return p;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Create a rejected promise
      *
      * @param { Error } value value to reject promise with
      * @returns { Promise } rejected promise
      */
->>>>>>> OpenHarmony_feature_20250328
     static reject<U = never>(error: Error): Promise<U> {
         let p = new Promise<U>();
         p.rejectImpl(error, false);
@@ -390,10 +340,6 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-<<<<<<< HEAD
-    static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Object) => void): void => {
-=======
     /**
      * Create a promise that will be resolved after all promises are completed and at least one is resolved
      *
@@ -403,7 +349,6 @@ export final class Promise<out T> implements PromiseLike<T> {
      */
     static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
->>>>>>> OpenHarmony_feature_20250328
             // This temp object is needed because es2panda cannot change captured primitives
             new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
         });
@@ -424,10 +369,6 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-<<<<<<< HEAD
-    static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
-        return new Promise<U>((resolve: (value: U) => void, reject: (error: Object) => void): void => {
-=======
     /**
      * Create a promise that will be completed after at least one promise is completed
      *
@@ -436,7 +377,6 @@ export final class Promise<out T> implements PromiseLike<T> {
      */
     static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
->>>>>>> OpenHarmony_feature_20250328
             // This temp object is needed because es2panda cannot change captured primitives
             new RacePromiseConcurrency<U>(resolve, reject).race(promises);
         });
@@ -511,17 +451,10 @@ export final class Promise<out T> implements PromiseLike<T> {
             try{
                 internalPromise.then<void, void>((value: U): void => {
                     thisPromise.resolveImpl(value, true);
-<<<<<<< HEAD
-                }, (error: NullishType): void => {
-                    thisPromise.rejectImpl(error, true);
-                });
-            } catch(error) {
-=======
                 }, (error: Error): void => {
                     thisPromise.rejectImpl(error, true);
                 });
             } catch(error: Error) {
->>>>>>> OpenHarmony_feature_20250328
                 thisPromise.rejectImpl(error, true);
             }
         }
@@ -552,11 +485,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     public native awaitResolution(): T;
 
     private native resolveImpl<U>(value: U, wasLinked: boolean): void;
-<<<<<<< HEAD
-    private native rejectImpl(error: NullishType, wasLinked: boolean): void;
-=======
     private native rejectImpl(error: Object, wasLinked: boolean): void;
->>>>>>> OpenHarmony_feature_20250328
     private native submitCallback(callback: Object): void;
 
     private static STATE_PENDING = 0;
@@ -609,11 +538,7 @@ class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value, idx);
-<<<<<<< HEAD
-            }, (error: NullishType): void => {
-=======
             }, (error: Error): void => {
->>>>>>> OpenHarmony_feature_20250328
                 this.reject(error as Error);
             });
         }
@@ -650,11 +575,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T, idx);
-<<<<<<< HEAD
-            }, (error: NullishType): void => {
-=======
             }, (error: Error): void => {
->>>>>>> OpenHarmony_feature_20250328
                 this.rejectImpl(error as Error, idx);
             });
         }
@@ -704,11 +625,7 @@ class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             try {
                 this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                     this.resolveImpl(value as T);
-<<<<<<< HEAD
-                }, (error: NullishType): void => {
-=======
                 }, (error: Error): void => {
->>>>>>> OpenHarmony_feature_20250328
                     this.rejectImpl(error as Error, idx);
                 });
             } catch (e: Error) {
@@ -754,11 +671,7 @@ class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
             let idx = i;
             this.toPromiseLike(promises[idx]!).then<void, void>((value: T): void => {
                 this.resolveImpl(value as T);
-<<<<<<< HEAD
-            }, (error: NullishType): void => {
-=======
             }, (error: Error): void => {
->>>>>>> OpenHarmony_feature_20250328
                 this.rejectImpl(error as Error);
             });
         }

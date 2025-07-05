@@ -292,13 +292,8 @@ export function isSafeInteger(v: long): boolean {
 /**
  * Execute function on the next cycle.
  *
-<<<<<<< HEAD
- * @param func: Function - the function to be executed on the next cycle.
- * @returns number - timer id
-=======
  * @param { Function } func - the function to be executed on the next cycle.
  * @returns { number } timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(func: Function): number {
     return setTimeout(func, 0);
@@ -307,17 +302,6 @@ export function setTimeout(func: Function): number {
 /**
  * Execute function with parameters after the timer expires.
  *
-<<<<<<< HEAD
- * @param func: Function - the function to be executed after the timer expires.
- * @param delayMs: number - timeout in milliseconds, decimals will be rounded down.
- * @param ...args: NullishType[] - parameters passed to func.
- * @returns number - timer id
- */
-export function setTimeout(func: Function, delayMs: number, ...args: NullishType[]): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, true);
-=======
  * @param { Function } func - the function to be executed after the timer expires.
  * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
  * @param { ...NullishType } args - parameters passed to func.
@@ -325,20 +309,13 @@ export function setTimeout(func: Function, delayMs: number, ...args: NullishType
  */
 export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
     return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
  * Print error message on the next cycle.
-<<<<<<< HEAD
- * 
- * @param msg: string - the message to be printed on the next cycle.
- * @returns number - timer id
-=======
  *
  * @param { string } msg - the message to be printed on the next cycle.
  * @returns { number } timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(msg: string): number {
     return setTimeout(():void => {
@@ -349,15 +326,9 @@ export function setTimeout(msg: string): number {
 /**
  * Print error message after the timer expires.
  *
-<<<<<<< HEAD
- * @param msg: string - the message to be printed after the timer expires.
- * @param delayMs: number - timeout in milliseconds, decimals will be rounded down.
- * @returns number - timer id
-=======
  * @param { string } msg - the message to be printed after the timer expires.
  * @param { number } delayMs - timeout in milliseconds, decimals will be rounded down.
  * @returns { number } timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setTimeout(msg: string, delayMs: number): number {
     return setTimeout(():void => {
@@ -368,11 +339,7 @@ export function setTimeout(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
-<<<<<<< HEAD
- * @param timerId: number - the id of the timer returned from setTimeout.
-=======
  * @param { number } timerId - the id of the timer returned from setTimeout.
->>>>>>> OpenHarmony_feature_20250328
  */
 export function clearTimeout(timerId: number): void {
     stopTimer(timerId);
@@ -381,13 +348,8 @@ export function clearTimeout(timerId: number): void {
 /**
  * Repeatedly do asynchronous call of the function.
  *
-<<<<<<< HEAD
- * @param func: Function - the function to be executed.
- * @returns number - timer id
-=======
  * @param { Function } func - the function to be executed.
  * @returns { number } timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(func: Function): number {
     return setInterval(func, 0);
@@ -396,17 +358,6 @@ export function setInterval(func: Function): number {
 /**
  * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
  *
-<<<<<<< HEAD
- * @param func: Function - the function to be executed.
- * @param delayMs: number - timeout in milliseconds.
- * @param ...args: NullishType[] - parameters passed to func.
- * @returns number - timer id
- */
-export function setInterval(func: Function, delayMs: number, ...args: NullishType[]): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, false);
-=======
  * @param { Function } func - the function to be executed.
  * @param { number } delayMs - timeout in milliseconds.
  * @param { ...NullishType } args - parameters passed to func.
@@ -414,19 +365,13 @@ export function setInterval(func: Function, delayMs: number, ...args: NullishTyp
  */
 export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
     return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
  * Repeatedly print the error message asynchronously.
  *
-<<<<<<< HEAD
- * @param msg: string - the message to be printed.
- * @returns number - timer id
-=======
  * @param { string } msg - the message to be printed.
  * @returns { number } - timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(msg: string): number {
     return setInterval(():void => {
@@ -437,15 +382,9 @@ export function setInterval(msg: string): number {
 /**
  * Repeatedly print the error message with delayMs interval between calls. The first print will be after delayMs.
  *
-<<<<<<< HEAD
- * @param msg: string - the message to be printed.
- * @param delayMs: number - timeout in milliseconds.
- * @returns number - timer id
-=======
  * @param { string } msg - the message to be printed.
  * @param { number } delayMs - timeout in milliseconds.
  * @returns { number } timer id
->>>>>>> OpenHarmony_feature_20250328
  */
 export function setInterval(msg: string, delayMs: number): number {
     return setInterval(():void => {
@@ -456,25 +395,12 @@ export function setInterval(msg: string, delayMs: number): number {
 /**
  * Cancel the specified timer.
  *
-<<<<<<< HEAD
- * @param timerId: number - the id of the timer returned from setInterval.
-=======
  * @param { number } timerId - the id of the timer returned from setInterval.
->>>>>>> OpenHarmony_feature_20250328
  */
 export function clearInterval(timerId: number): void {
     stopTimer(timerId);
 }
 
-<<<<<<< HEAD
-function startTimer(func: () => void, delayMs: number, oneShotTimer: boolean): number
-{
-    const realDelayMs = delayMs as int; 
-    if (CoroutineExtras.isMainWorker()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, oneShotTimer) as number;
-    }
-    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, !oneShotTimer) as number;
-=======
 function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 {
     const realDelayMs = delayMs.toInt();
@@ -482,24 +408,15 @@ function startTimer(func: () => void, delayMs: number, repeat: boolean): number
         return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
     }
     return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat).toDouble();
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function stopTimer(timerId: number): void
 {
-<<<<<<< HEAD
-    if (CoroutineExtras.isMainWorker()) {
-        stopTimerImpl(timerId as int);
-        return;
-    }
-    clearTimer(timerId as int);
-=======
     if (CoroutineExtras.workerHasExternalScheduler()) {
         stopTimerImpl(timerId.toInt());
         return;
     }
     clearTimer(timerId.toInt());
->>>>>>> OpenHarmony_feature_20250328
 }
 
 native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;

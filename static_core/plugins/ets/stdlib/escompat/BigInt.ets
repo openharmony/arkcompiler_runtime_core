@@ -70,11 +70,7 @@ export final class BigInt {
     internal static fromLongHelper(val: long, bitLen: int, sign: int): FixedArray<int> {
         // get required array of Ints' size to store whole value
         // split by suported mode (baseSys)
-<<<<<<< HEAD
-        let size: int = ((bitLen + BigInt.shiftSys - 1) / BigInt.shiftSys) as int
-=======
         let size: int = ((bitLen + BigInt.shiftSys - 1) / BigInt.shiftSys).toInt()
->>>>>>> OpenHarmony_feature_20250328
 
         let digits: FixedArray<int> = new int[size]
         for (let i = 0; i < size; i++) {
@@ -364,11 +360,7 @@ export final class BigInt {
     }
 
     public static asIntN(bits: Number, num: BigInt): BigInt {
-<<<<<<< HEAD
-        return BigInt.asIntN(bits as long, num)
-=======
         return BigInt.asIntN(bits.toLong(), num)
->>>>>>> OpenHarmony_feature_20250328
     }
 
     public static asIntN(bits: long, num: BigInt): BigInt {
@@ -396,11 +388,7 @@ export final class BigInt {
     }
 
     public static asUintN(bits: Number, num: BigInt): BigInt {
-<<<<<<< HEAD
-        return BigInt.asUintN(bits as long, num)
-=======
         return BigInt.asUintN(bits.toLong(), num)
->>>>>>> OpenHarmony_feature_20250328
     }
 
     public static asUintN(bits: long, num: BigInt): BigInt {
@@ -1166,11 +1154,7 @@ export final class BigInt {
         const bytes = this.bytes
         const num = Math.min(2, bytes.length)
         for (let i = 0; i < num; ++i) {
-<<<<<<< HEAD
-            buff += ((bytes[i] as long) & BigInt.maskSys) << i * BigInt.shiftSys
-=======
             buff += (bytes[i].toLong() & BigInt.maskSys) << i * BigInt.shiftSys
->>>>>>> OpenHarmony_feature_20250328
         }
         return this.sign * buff
     }

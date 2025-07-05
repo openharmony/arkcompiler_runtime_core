@@ -142,11 +142,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
-<<<<<<< HEAD
-    public static readonly MAX_CODE_POINT = 0x10FFFF;
-=======
     public static readonly MAX_CODE_POINT = 0x10FFFF
->>>>>>> OpenHarmony_feature_20250328
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';
     public static readonly HIGH_SURROGATE_MAX: char = c'\uDBFF';
     public static readonly LOW_SURROGATE_MIN: char = c'\uDC00';
@@ -346,13 +342,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isValidCodePoint(codePoint: UTF_16_CodePoint): boolean {
         return (codePoint >= 0 && codePoint <= Char.MAX_CODE_POINT &&
-<<<<<<< HEAD
-            !(codePoint >= (Char.HIGH_SURROGATE_MIN as int) && codePoint <= (Char.LOW_SURROGATE_MAX as int)));
-     }
-=======
             !(codePoint >= (Char.HIGH_SURROGATE_MIN.toInt()) && codePoint <= (Char.LOW_SURROGATE_MAX.toInt())));
     }
->>>>>>> OpenHarmony_feature_20250328
 
     /**
      * codeUnitsToEncode(UTF_16_CodePoint) counts a number of code units to encode the UTF-16 code point.

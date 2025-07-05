@@ -59,8 +59,6 @@ export namespace taskpool {
     const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP: number = 10200102;
     const TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER: number = 10200103;
 
-<<<<<<< HEAD
-=======
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
             super(supportInterop);
@@ -111,7 +109,6 @@ export namespace taskpool {
      * @enum defines the task priority
      * @see taskpool.Task
      */
->>>>>>> OpenHarmony_feature_20250328
     export enum Priority {
         /// the task priority is high
         HIGH = 0,
@@ -295,11 +292,7 @@ export namespace taskpool {
             }
             if (!this.isDependent) {
                 throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
-<<<<<<< HEAD
-            } 
-=======
             }
->>>>>>> OpenHarmony_feature_20250328
             if (this.isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
@@ -383,14 +376,6 @@ export namespace taskpool {
         internal checkExecution(): void {
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
-<<<<<<< HEAD
-            }
-            if (this.seqId != 0) {
-                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
-            }
-            if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
-                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
-=======
             } else if (this.seqId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
             } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
@@ -438,7 +423,6 @@ export namespace taskpool {
             }
             if (this.isDependent || this.dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC, "taskpool:: the task with dependency cannot executePeriodically");
->>>>>>> OpenHarmony_feature_20250328
             }
         }
 
@@ -677,11 +661,6 @@ export namespace taskpool {
         }
 
         internal override checkExecution(): void {
-<<<<<<< HEAD
-            super.checkExecution();
-            if (this.isSubmitted) {
-                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG, "taskpool:: The long task can only be executed once");
-=======
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
             } else if (this.seqId != 0) {
@@ -692,7 +671,6 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG, "taskpool:: The long task can only be executed once");
             } else if (this.isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN, "taskpool:: the periodicTask cannot execute again");
->>>>>>> OpenHarmony_feature_20250328
             }
         }
     }
@@ -739,19 +717,7 @@ export namespace taskpool {
          *     - task executed via SequenceRunner
          */
         addTask(task: Task): void {
-<<<<<<< HEAD
-            if (task.groupId != 0) {
-                throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_GROUP, "taskpool:: taskGroup cannot add groupTask");
-            } else if (task instanceof LongTask) {
-                throw new Error(TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the long task");
-            } else if (task.isSubmitted || task.seqId != 0) {
-                throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
-            } else if (task.isDependent || task.dependentTasks.size != 0) {
-                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
-            }
-=======
             this.checkExecution(task);
->>>>>>> OpenHarmony_feature_20250328
             task.groupId = this.id;
             this.tasks.push(task);
         }
@@ -819,16 +785,6 @@ export namespace taskpool {
             task.seqId = this.impl.id;
             task.runner = this;
             taskSubmitted(task);
-<<<<<<< HEAD
-            task.enqueue();
-            const taskRunner = (value: NullishType): NullishType => {
-                return task.execute();
-            };
-            this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType>(taskRunner, (error: Error) : void => {
-                taskRunner(undefined);
-            } ));
-            return this.impl.seqPromise;
-=======
             task.isSubmitted = true;
             if (isTaskPoolUseLaunch) {
                 task.enqueue(this.priority);
@@ -854,7 +810,6 @@ export namespace taskpool {
             }
             notifyExecuteTask();
             return task.getOnReceivePromise(promise);
->>>>>>> OpenHarmony_feature_20250328
         }
 
         private static native generateSeqRunnerId(): long;
@@ -877,14 +832,6 @@ export namespace taskpool {
         private checkExecution(task: Task) {
             if (task.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP, "taskpool:: sequenceRunner cannot execute groupTask");
-<<<<<<< HEAD
-            }
-            if (task.isSubmitted || task.seqId != 0) {
-                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
-            }
-            if (task.isDependent || task.dependentTasks.size != 0) {
-                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: sequenceRunner dependent task not allowed.");
-=======
             } else if (task.isSubmitted || task.seqId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
             } else if (task.isDependent || task.dependentTasks.size != 0) {
@@ -893,7 +840,6 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER, "taskpool:: sequenceRunner cannot execute the periodicTask");
             } else if (task.isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
->>>>>>> OpenHarmony_feature_20250328
             }
         }
 

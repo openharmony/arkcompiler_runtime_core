@@ -29,10 +29,7 @@ readonly TYPED_ARR="${GEN_ESCOMPAT_PATH}/TypedArrays.ets"
 readonly TYPED_UARR="${GEN_ESCOMPAT_PATH}/TypedUArrays.ets"
 readonly FUNC="${GEN_STDCORE_PATH}/Function.ets"
 readonly TUP="${GEN_STDCORE_PATH}/Tuple.ets"
-<<<<<<< HEAD
-=======
 readonly INTEROP_TRANSFER_HELPER="${GEN_STDINTEROP_PATH}/InteropTransferHelper.ets"
->>>>>>> OpenHarmony_feature_20250328
 
 cd "$SCRIPT_DIR"
 
@@ -80,11 +77,8 @@ echo "Generating ${FUNC}"
 echo "Generating ${TUP}"
 "${JINJA_PATH}" "${SCRIPT_DIR}/Tuple.ets.j2" -o "${TUP}"
 
-<<<<<<< HEAD
-=======
 # Generate InteropTransferHelper
 echo "Generating ${INTEROP_TRANSFER_HELPER}"
 "${JINJA_PATH}" "${SCRIPT_DIR}/InteropTransferHelper.ets.j2" -o "${INTEROP_TRANSFER_HELPER}"
 
->>>>>>> OpenHarmony_feature_20250328
 exit 0

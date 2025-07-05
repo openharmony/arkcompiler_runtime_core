@@ -52,12 +52,9 @@ class AsyncLockManager {
             if (lock == undefined) {
                 throw new Error("AsyncLock " + name + " not found");
             }
-<<<<<<< HEAD
-=======
             if (name.includes("__AnonymousLockName__")) {
                 throw new Error("Lock cannot be found");
             }
->>>>>>> OpenHarmony_feature_20250328
             let state = lock.query();
             return state;
         } finally {

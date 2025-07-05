@@ -1875,11 +1875,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         for (let i = 0; i < length; i++) {
             let codeUnit = this.charCodeAt(i);
             // Currently, it is a high-level proxy item
-<<<<<<< HEAD
-            if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) { 
-=======
             if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) {
->>>>>>> OpenHarmony_feature_20250328
                 // Check if low level proxy items are paired
                 const processedChar = this.processHighSurrogatePair(i, codeUnit, length);
                 if (processedChar !== null) {
@@ -1893,11 +1889,7 @@ export final class String extends Object implements Comparable<String>, JSONable
                 res.append(REPLACEMENT_CHARACTER);
             // Regular Characters
             } else if (Char.isValidCodePoint(codeUnit)) {
-<<<<<<< HEAD
-                res.append(this.charAt(i) as char);
-=======
                 res.append(this.charAt(i).toChar());
->>>>>>> OpenHarmony_feature_20250328
             } else {
                 res.append(REPLACEMENT_CHARACTER);
             }

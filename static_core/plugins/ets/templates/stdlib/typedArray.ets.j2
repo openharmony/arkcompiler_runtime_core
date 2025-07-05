@@ -382,11 +382,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param index index to change
      */
     public $_set(index: int, val: {{elementCompat}}): void {
-<<<<<<< HEAD
-        {%- if (N != 'Float32') and (N != 'Float64') and (N != 'BigInt64') %}
-=======
         {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
->>>>>>> OpenHarmony_feature_20250328
         let v = this.zeroIfInfinity(val)
         this.$_set(index, v{{fromElementCompat}})
         {%- else %}

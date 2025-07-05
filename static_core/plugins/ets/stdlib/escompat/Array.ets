@@ -1361,11 +1361,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
         let curArrLength = this.actualLength
         for (let i = 0; i < curArrLength && i < this.actualLength; i++) {
-<<<<<<< HEAD
-            if (!predicate(this.$_get_unsafe(i), i as number, this)) {
-=======
             if (!predicate(this.$_get_unsafe(i), i.toDouble(), this)) {
->>>>>>> OpenHarmony_feature_20250328
                 return false
             }
         }
@@ -1438,11 +1434,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
-<<<<<<< HEAD
-            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
-=======
             acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
->>>>>>> OpenHarmony_feature_20250328
         }
         return acc
     }

@@ -106,9 +106,6 @@ export final class AsyncLock {
     private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
-<<<<<<< HEAD
-            return Promise.resolve<T>(callback());
-=======
             if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
                 this.counter = 1;
                 this.held.add(asyncLockInfo);
@@ -124,7 +121,6 @@ export final class AsyncLock {
                 return true;
             }
             return false;
->>>>>>> OpenHarmony_feature_20250328
         } finally {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
@@ -218,15 +214,12 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Query information about the specified lock.
      *
      * @param { string } name - name of the lock.
      * @returns { AsyncLockState } Returns an instance of AsyncLockState.
      */
->>>>>>> OpenHarmony_feature_20250328
     public static query(name: string): AsyncLockState {
         try {
             return asyncLockManager.query(name);
@@ -256,16 +249,12 @@ export final class AsyncLock {
         return state;
     }
 
-<<<<<<< HEAD
-    public readonly name: string;
-=======
     private static generateAnonymousLockName() {
         return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
     }
 
     public readonly name: string;
     private static LastAnonymousId: int = 0;
->>>>>>> OpenHarmony_feature_20250328
     private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
