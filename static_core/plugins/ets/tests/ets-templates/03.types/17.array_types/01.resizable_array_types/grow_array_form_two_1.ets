@@ -17,7 +17,6 @@
 /*---
 desc: Resizable array types
 tags: [negative]
-
 ---*/
 
 function grow(seed: int): int {
@@ -25,7 +24,6 @@ function grow(seed: int): int {
 }
 
 function main() {
-    let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
-    SyntaxFormTwo.length = grow(0) // CTE: Attempting to increase the length of the array by assignment to length causes a compile-time error
-
+  let SyntaxFormTwo: Array<String> = ["Hello", "World", "Of", "ArkTS"];
+  SyntaxFormTwo.length = grow(0) // CTE: Attempting to increase the length of the array by assignment to length => CTE
 }

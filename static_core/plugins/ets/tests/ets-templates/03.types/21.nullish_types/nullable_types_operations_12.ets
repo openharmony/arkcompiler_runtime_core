@@ -20,8 +20,8 @@ desc: Nullable types
 class A {};
 
 function main(): void {
-  let b: A|null = new A();
-  let x: A|null = b;
+  let b: A | null = new A();
+  let x: A | null = b;
 
   arktest.assertTrue(x == b)
 }

@@ -18,6 +18,6 @@ desc: Using type undefined as type annotation is not recommended, except in null
 ---*/
 
 function main(): void {
-    let i: string|undefined = undefined;
+    let i: string | undefined = undefined;
     arktest.assertTrue(i === undefined)
 }

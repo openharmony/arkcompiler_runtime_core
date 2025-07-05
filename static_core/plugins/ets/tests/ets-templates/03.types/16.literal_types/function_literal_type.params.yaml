@@ -205,12 +205,12 @@ cases:
       decl: |-
           function fooL(i: int, ...j: "some str"[]) {
               arktest.assertEQ(i, j.length)
-              for ( let m of j ) {
+              for (let m of j) {
                   arktest.assertTrue( m instanceof "some str")
               }
           }
           function fooS(...j: string[]) {
-              for ( let m of j ) {
+              for (let m of j) {
                   arktest.assertTrue( m instanceof "some str")
               }
           }

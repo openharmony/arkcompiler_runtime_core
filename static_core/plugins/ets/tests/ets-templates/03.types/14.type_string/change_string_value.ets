@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: A String object has an immutable value its value cannot be changed after it is created. Because String object is immutable it can be shared.
+desc: >-
+    A String object has an immutable value its value cannot be changed after it is created.
+    Because String object is immutable it can be shared.
 ---*/
 
 function main(): void {

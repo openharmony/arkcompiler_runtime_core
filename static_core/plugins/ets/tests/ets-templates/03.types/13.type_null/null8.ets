@@ -17,11 +17,11 @@ limitations under the License.
 desc: Function return null type
 ---*/
 
-function f(): Double|null {
+function f(): Double | null {
     return null;
 }
 
 function main(): void {
     let a = f();
-    arktest.assertTrue( a == null)
+    arktest.assertTrue(a == null)
 }

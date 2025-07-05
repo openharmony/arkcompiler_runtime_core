@@ -26,5 +26,5 @@ function main() {
         let x = 10
     }
 
-    arktest.assertEQ( x, 10 )  // CTE
+    arktest.assertEQ( x, 10 ) // CTE
 }

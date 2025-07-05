@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
 desc: >-
     Type aliases provide names for anonymous types (array, function or nullable types)
     or alternative names for existing types.

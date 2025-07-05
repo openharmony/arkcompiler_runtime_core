@@ -18,7 +18,7 @@ desc: Test the type of the second element in the joint array((string | boolean)[
 ---*/
 
 function main(): void {
-  let arr: (string | boolean)[] = ["test",false];
+  let arr: (string | boolean)[] = ["test", false];
 
   arktest.assertEQ(typeof arr[0], "string");
 }

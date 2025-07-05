@@ -14,12 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The switch expression type must be of type char, byte, short, int, long, Char, Byte, Short, Int, Long, string, or enum.
+desc: >-
+    The switch expression type must be of type char, byte, short, int, long, Char, Byte, Short, Int, Long, string,
+    or enum.
 tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let i: int|undefined = undefined;
+  let i: int | undefined = undefined;
   switch (i) {
     case undefined:
       arktest.assertTrue(true)

@@ -17,7 +17,7 @@ limitations under the License.
 desc: Using type undefined as type annotation is not recommended, except in nullish types.
 ---*/
 
-function foo(...args: (int|undefined)[] ): undefined {
+function foo(...args: (int | undefined)[] ): undefined {
   return undefined;
 }
 

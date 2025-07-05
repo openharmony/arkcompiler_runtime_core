@@ -17,7 +17,7 @@ limitations under the License.
 desc: Using type undefined as type annotation is not recommended, except in nullish types.
 ---*/
 
-type UNDEFINED = int|undefined;
+type UNDEFINED = int | undefined;
 
 function main(): void {
     let i: UNDEFINED = undefined;
