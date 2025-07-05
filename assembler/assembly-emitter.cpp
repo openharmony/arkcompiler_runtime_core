@@ -414,7 +414,8 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
         }
 
         auto &record = it->second;
-        if (!record.metadata->IsAnnotation()) {
+        // For an imported custom annotation, it will be represented as external.
+        if (!record.metadata->IsAnnotation() && !record.metadata->IsForeign()) {
             SetLastError("Record " + record_name + " isn't annotation");
             return nullptr;
         }
