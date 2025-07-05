@@ -25,7 +25,7 @@ function CheckUserExceptionError(): boolean {
     try {
         dynamicFunctionWithUserException.invoke()
         return false
-    } catch (e: Error) {
+    } catch(e) {
         return e instanceof Error
     }
 
@@ -36,8 +36,8 @@ function CheckNameUserExceptionError(): boolean {
     try {
         dynamicFunctionWithUserException.invoke()
         return false
-    } catch (e: Error) {
-        return e.name == 'CustomError1'
+    } catch(e) {
+         return (e as Error).name == 'CustomError1'
 
     }
 }
@@ -47,8 +47,8 @@ function CheckMessageUserExceptionError(): boolean {
     try {
         dynamicFunctionWithUserException.invoke()
         return false
-    } catch (e: Error) {
-        return e.message == 'This is a custom error'
+    } catch(e) {
+         return (e as Error).message == 'This is a custom error'
 
     }
 }
@@ -60,12 +60,12 @@ function CatchUserException(): boolean {
     try {
         dynamicFunctionWithCustomObject.invoke()
         return false
-    } 
-    catch (e: Error) {
-        return e instanceof ESError && e.name === 'UnknownError' &&
-            e.message == 'This is a custom object error'
 
-}
+    } catch(e) {
+        return e instanceof ESError && (e as ESError).name ==='UnknownError' &&
+               e.message == 'This is a custom object error'
+    }
+
 }
 
 //3 Dynamic function throws builtin exception E
@@ -76,7 +76,7 @@ function CatchBuiltinException(): boolean {
         dynamicFunctionWithBuiltinException.invoke()
         return false
 
-    } catch (e: Error) {
+    } catch(e) {
         return e instanceof TypeError
     }
 
@@ -87,7 +87,7 @@ function CheckNameBuiltinException(): boolean {
     try {
         dynamicFunctionWithBuiltinException.invoke()
         return false
-    } catch(e: Error) {
+    } catch(e) {
         return e.name ==='TypeError'
     }
 }
@@ -97,7 +97,7 @@ function CheckMessageBuiltinException(): boolean {
     try {
         dynamicFunctionWithBuiltinException.invoke()
         return false
-    } catch (e: Error) {
+    } catch(e) {
         return e.message == 'This is a TypeError'
     }
 }

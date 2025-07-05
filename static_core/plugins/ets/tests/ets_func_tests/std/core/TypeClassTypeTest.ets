@@ -127,26 +127,26 @@ function testGetFieldError(ct: ClassType): int {
     try {
         ct.getField(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getOwnField(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getFieldByName("nonExistingField")
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }
@@ -156,18 +156,18 @@ function testGetMethodError(ct: ClassType): int {
     try {
         ct.getMethod(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getConstructor(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }
@@ -177,10 +177,10 @@ function testGetInterfaceError(ct: ClassType): int {
     try {
         ct.getInterface(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }

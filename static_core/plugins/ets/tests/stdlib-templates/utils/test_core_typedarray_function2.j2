@@ -1208,10 +1208,12 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 function testTypedArrayGetException(array: {{.item.objectType}}, index: int): number {
   try {
     const tmp = array[index]
-  } catch (e: RangeError) {
-    return success
-  } catch (e) {
-    console.log(e)
+  }  catch (e) {
+    if (e instanceof RangeError) {
+      return success
+    } else {
+      console.log(e)
+    }
   }
   return fail
 }
@@ -1266,10 +1268,12 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 function testTypedArraySetException(array: {{.item.objectType}}, index: int, value: int): number {
   try {
     array[index] = value
-  } catch (e: RangeError) {
-    return success
   } catch (e) {
-    console.log(e)
+    if (e instanceof RangeError) {
+      return success
+    } else {
+      console.log(e)
+    }
   }
   return fail
 }

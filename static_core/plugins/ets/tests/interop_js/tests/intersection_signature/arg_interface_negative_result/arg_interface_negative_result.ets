@@ -35,7 +35,7 @@ function checkAgeNameClass(): boolean {
         AgeNameInterfaceClass.instantiate(tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
 
     }
@@ -47,7 +47,7 @@ function checkAgeNameClassMethod(): boolean {
         AgeName.invokeMethod('createUser', tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -56,7 +56,7 @@ function checkInstanceAgeNameInterfaceClass(): boolean {
         instanceAgeNameInterfaceClass.invokeMethod('createUser',tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -66,7 +66,7 @@ function checkChildAgeNameClass(): boolean {
         ChildAgeNameInterfaceClass.instantiate(tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
 
     }
@@ -78,7 +78,7 @@ function checkChildAgeNameClassMethod(): boolean {
         AgeName.invokeMethod('createUser', tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -87,7 +87,7 @@ function checkInstanceChildAgeNameInterfaceClass(): boolean {
         instanceChildAgeNameInterfaceClass.invokeMethod('createUser', tsNumber);
 
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }

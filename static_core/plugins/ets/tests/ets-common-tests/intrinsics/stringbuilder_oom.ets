@@ -22,15 +22,16 @@ function main(): int {
             let s: String = new String(c);
             sb.append(s);
             n += 100;
-        } catch (e: OutOfMemoryError) {
-            if (n != foo(i)) {
-                return 3;
-            }
-            // Expected error caught
-            return 0;
         } catch (e) {
-            // Unexpected error caught
-            return 1;
+            if (e instanceof OutOfMemoryError) {
+                if (n != foo(i)) {
+                    return 3;
+                }
+                // Expected exception caught
+                return 0;
+            } else {
+                return 1;
+            }
         }
     }
     return 2;

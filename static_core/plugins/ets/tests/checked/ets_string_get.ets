@@ -33,20 +33,24 @@ function main(): void {
     let errorFlag = 0;
     try {
         console.log(str[-1]);
-    } catch (e: StringIndexOutOfBoundsError) {
-        errorFlag = 1;
     } catch (e) {
-        errorFlag = 2;
+        if (e instanceof StringIndexOutOfBoundsError) {
+            errorFlag = 1;
+        } else {
+            errorFlag = 2;
+        }
     }
     arktest.assertEQ(1, errorFlag);
 
     errorFlag = 0;
     try {
         console.log(str[7]);
-    } catch (e: StringIndexOutOfBoundsError) {
-        errorFlag = 1;
     } catch (e) {
-        errorFlag = 2;
+        if (e instanceof StringIndexOutOfBoundsError) {
+            errorFlag = 1;
+        } else {
+            errorFlag = 2;
+        }
     }
     arktest.assertEQ(1, errorFlag);
 }

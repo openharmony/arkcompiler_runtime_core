@@ -49,9 +49,11 @@ function test(arr: FixedArray<A>, value: A | B) : int {
             iters++;
             set(arr, i, value);
         }
-    } catch (e: ClassCastError) {
-        arktest.assertNE(e.toString().match('ClassCastError: hoist_checkcast.B cannot be cast to hoist_checkcast.A'), null);
-        return -iters;
+    } catch (e) {
+        if (e instanceof ClassCastError) {
+            arktest.assertNE(e.toString().match('ClassCastError: hoist_checkcast.B cannot be cast to hoist_checkcast.A'), null);
+            return -iters;
+        }
     }
     return iters;
 }
@@ -73,7 +75,6 @@ function main(): int {
 //! EVENT        /DeoptimizationReason,hoist_checkcast.ETSGLOBAL::test2,CHECK_CAST/
 //! METHOD       "hoist_checkcast.ETSGLOBAL::test2"
 //! PASS_AFTER   "IrBuilder"
-//! INST_NOT     "CheckCast"
 //! INST_COUNT   "RefTypeCheck", 1
 //! PASS_AFTER   "LICM"
 //! PASS_AFTER_NEXT "ChecksElimination"
@@ -103,10 +104,12 @@ function test2(arr: FixedArray<Object>, value: A | B) : int {
             iters++;
             arr[i] = value
         }
-    } catch (e: ArrayStoreError) {
-        // NOTE: line number is invalid in interpreter, see #17098
-        arktest.assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
-        return -iters;
+    } catch (e) {
+        if (e instanceof ArrayStoreError) {
+            // NOTE: line number is invalid in interpreter, see #17098
+            arktest.assertNE(e.toString().match('ArrayStoreError: hoist_checkcast.B cannot be stored in an array of type \\[Lhoist_checkcast/A;'), null);
+            return -iters;
+        }
     }
     return iters;
 }

@@ -37,8 +37,10 @@ function __noinline__overflow(): int {
         i0 += 2;
       }
     }
-  } catch (expected: ArithmeticError) {
-    return 0;
+  } catch (expected) {
+    if (expected instanceof  ArithmeticError) {
+      return 0;
+    }
   }
   return 1;
 }

@@ -40,7 +40,7 @@ function asyncLockQueryNonexistentNameTest(): int {
     let lockname = "name";
     try {
         AsyncLock.query(lockname);
-    } catch (e: Error) {
+    } catch (e) {
         if(e.message != "AsyncLock " + lockname + " not found") {
             result += 1;
         }
@@ -66,7 +66,7 @@ async function asyncLockDeadLockTest(): Promise<int> {
             await lock.lockAsync((): int => {
                 return 0;
             }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 1));
-        } catch (err: Error) {
+        } catch (err) {
             return 0;
         }
         StdDebug.Logger.log("FAILED: AsyncLock dead lock test");
@@ -88,7 +88,7 @@ async function asyncLockAvailableTest(): Promise<int> {
             await lock.lockAsync((): int => {
                 return 0;
             }, AsyncLockMode.EXCLUSIVE, options);
-        } catch (err: Error) {
+        } catch (err) {
             return 0;
         }
         StdDebug.Logger.log("FAILED: AsyncLock isAvailable test");
@@ -251,7 +251,7 @@ async function check<T>(p: Promise<T>, currentTest: string): Promise<boolean> {
     try {
         await p;
         return true;
-    } catch (e: Error) {
+    } catch (e) {
         return false;
     }
 }
@@ -260,7 +260,7 @@ async function check_negative<T>(p: Promise<T>, currentTest: string): Promise<bo
     try {
         await p;
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }

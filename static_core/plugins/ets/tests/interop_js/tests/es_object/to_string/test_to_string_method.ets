@@ -55,9 +55,11 @@ function jsvalObjectToStr(): String {
     try {
         let z: String = x.toString();
         arktest.assertTrue(false);
-    } catch (z: TypeError) {
+    } catch (z) {
+        if (z instanceof TypeError) {
         let y = castToObject(x.toNumber());
         return y + 'A';
+        }
     }
     return 'Unreachable';
 }
@@ -83,8 +85,12 @@ function testNanCall(): String {
 function testThrowing(): String {
     try {
         return etsThrowing.invoke().invokeMethod('toString') + 'A';
-    } catch (e: ESError) {
-        return e.getValue().toNumber() + 'A';
+    } catch (e) {
+        if (e instanceof ESError) {
+            return e.getValue().toNumber() + 'A';
+        } else {
+            return e.message;
+        }
     }
 }
 
@@ -108,7 +114,11 @@ function concatNanToString(): String {
 function explicitOptionalToString(): String {
     try {
         return etsOptional.invoke(true).toString() + 'A';
-    } catch (e: NullPointerError) {
-        return 'NPE';
+    } catch (e) {
+        if (e instanceof NullPointerError) {
+            return 'NPE';
+        } else {
+            return e.message;
+        }
     }
 }

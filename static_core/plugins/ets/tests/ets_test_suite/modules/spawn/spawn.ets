@@ -52,7 +52,7 @@ function abilityExpectFailure(cb: (e: Error) => void) {
     loadLibrary(getNativeLibName())
     try {
         loadAndInvokeAbility(getAppMainAbilityClassName())
-    } catch (e: Error) {
+    } catch (e) {
         cb(e)
         return 0
     }

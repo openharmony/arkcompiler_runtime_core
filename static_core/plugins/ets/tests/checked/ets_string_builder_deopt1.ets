@@ -72,7 +72,7 @@ function throws(str: string, arg: int) {
 function __noinline__caller(str: string, arg: int) {
   try {
     return throws(str, arg);
-  } catch (e: Error) {
+  } catch (e) {
     // if NullPointerError occurs, returns empty string
     return e.message;
   }

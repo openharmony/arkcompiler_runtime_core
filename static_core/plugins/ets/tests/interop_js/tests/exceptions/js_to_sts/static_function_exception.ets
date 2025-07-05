@@ -28,10 +28,10 @@ let createCustomErrorA = module2.getProperty('createCustomErrorA');
 //Test 1.1 catch and check  
 function CheckCustomException(): boolean {
     try {
-        staticFunctionWithCustomException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e instanceof Error;
+        staticFunctionWithCustomException.invoke()
+        return false
+    } catch(e) {
+        return e instanceof Error
     }
 
 }
@@ -39,10 +39,10 @@ function CheckCustomException(): boolean {
 // Test 1.2 Check exception name
 function CheckNameCustomException(): boolean {
     try {
-        staticFunctionWithCustomException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e.name == 'CustomErrorA';
+        staticFunctionWithCustomException.invoke()
+        return false
+    } catch(e) {
+        return e.name == 'CustomErrorA'
 
     }
 }
@@ -50,10 +50,10 @@ function CheckNameCustomException(): boolean {
 // Test 1.3 Check exception message
 function CheckMessageCustomException(): boolean {
     try {
-        staticFunctionWithCustomException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e.message == 'This is a custom error(from static function)';
+        staticFunctionWithCustomException.invoke()
+        return false
+    } catch(e) {
+        return e.message == 'This is a custom error(from static function)'
     }
 }
 
@@ -62,10 +62,10 @@ function CheckMessageCustomException(): boolean {
 //Test 2.1 catch and check  
 function CheckBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e instanceof TypeError;
+        staticFunctionWithBuiltinException.invoke()
+        return false
+    } catch(e) {
+        return e instanceof TypeError
     }
 
 }
@@ -73,10 +73,10 @@ function CheckBuiltinExceptionInStatic(): boolean {
 // Test 2.2 Check exception name
 function CheckNameBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e.name == 'TypeError';
+        staticFunctionWithBuiltinException.invoke()
+        return false
+    } catch(e) {
+        return e.name == 'TypeError'
     }
 }
 
@@ -84,10 +84,10 @@ function CheckNameBuiltinExceptionInStatic(): boolean {
 
 function CheckMessageBuiltinExceptionInStatic(): boolean {
     try {
-        staticFunctionWithBuiltinException.invoke();
-        return false;
-    } catch(e: Error) {
-        return e.message == 'This is a TypeError';
+        staticFunctionWithBuiltinException.invoke()
+        return false
+    } catch(e) {
+        return e.message == 'This is a TypeError'
     }
 }
 
@@ -96,7 +96,7 @@ function CheckMessageBuiltinExceptionInStatic(): boolean {
 function ThrowCustomError(): boolean {
     try {
         throw CustomError.instantiate('This is a custom error(from static function)').unwrap() as Error;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -107,7 +107,7 @@ function CheckThrowNewError(): boolean {
     try {
         const myError = createError.invoke('NewError', 'New error message');
         throw myError.unwrap() as Error;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -118,7 +118,7 @@ function throwTSCustomExceptionWithImportType(): boolean {
     try {
         const myErrorA = createCustomErrorA.invoke('NewError', 500);
         throw myErrorA.unwrap() as Error;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }

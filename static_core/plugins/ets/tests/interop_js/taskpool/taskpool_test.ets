@@ -22,7 +22,7 @@ function RunTasksWithJsCallTest(): void {
         try {
             arktest.assertEQ(val, 2);
         }
-        catch(e: Error) {
+        catch(e) {
             console.log("RunTasksWithJsCallTest failed");
             return 1;
         }

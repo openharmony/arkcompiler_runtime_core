@@ -55,7 +55,7 @@ function __noinline__next2(str: string, arg: int) {
     } else {
       return __noinline__next1(str) + 'ok';
     }
-  } catch (e: Error) {
+  } catch (e) {
     return e.message;
   }
 }

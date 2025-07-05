@@ -28,14 +28,14 @@ function throwError(): Error {
 }
 
 function checkEtsError(): boolean {
-    try { throwEtsError.invoke(throwError); } catch (e: Error) {
+    try { throwEtsError.invoke(throwError); } catch (e) {
         return e.message === 'Error From ETS';
     }
     return false;
 }
 
 function checkNumError(): boolean {
-    try { throwNum.invoke(); } catch (e: Error) {
+    try { throwNum.invoke(); } catch (e) {
         let errObj: ESValue = (e as ESError).getValue();
         return errObj.toNumber() === 0;
     }
@@ -43,7 +43,7 @@ function checkNumError(): boolean {
 }
 
 function checkStrError(): boolean {
-    try { throwStr.invoke(); } catch (e: Error) {
+    try { throwStr.invoke(); } catch (e) {
         let errObj: ESValue = (e as ESError).getValue();
         return errObj.toString() === 'hello';
     }
@@ -51,7 +51,7 @@ function checkStrError(): boolean {
 }
 
 function checkObjError(): boolean {
-    try { throwObj.invoke(); } catch (e: Error) {
+    try { throwObj.invoke(); } catch (e) {
         let errObj: ESValue = (e as ESError).getValue();
         let a: ESValue = errObj.getProperty('a');
         let b: ESValue = errObj.getProperty('b');
@@ -64,7 +64,7 @@ function checkSubClassError(): boolean {
     let errorCaught: boolean = false;
     try { 
         throwErrorSubClass.invoke(); 
-    } catch (e: Error) {
+    } catch (e) {
         errorCaught = true;
         arktest.assertEQ(e instanceof Error, true);
     }
@@ -77,7 +77,7 @@ function checkErrorData(): boolean {
 
     try { 
         throwError1.invoke(); 
-    } catch (e: Error) {
+    } catch (e) {
         isThrowErrorCaught = true;
 
         arktest.assertEQ(e instanceof Error, true);
@@ -91,7 +91,8 @@ function checkErrorData(): boolean {
         // in the case, the message is an object in dynamic
         // so a runtime error will be thrown when accessing the message
         let msg = errorThrown?.message;
-    } catch (e: Error) {
+    } catch (e) {
+        e = e as Error;
         arktest.assertEQ(e instanceof Error, true);
 
         isGetMessageErrorCaught = true;
@@ -102,7 +103,7 @@ function checkErrorData(): boolean {
 }
 
 function checkErrorMsg(): boolean {
-    try { throwError2.invoke(); } catch (e: Error) {
+    try { throwError2.invoke(); } catch (e) {
         return e.message === 'null pointer error';
     }
     return false;
@@ -112,7 +113,7 @@ function checkErrorCause(): boolean {
     let errorCaught: boolean = false;
     try { 
         throwError3.invoke(); 
-    } catch (e: Error) {
+    } catch (e) {
         errorCaught = true;
 
         let cause = e.cause as Error;

@@ -19,7 +19,7 @@ function checkUndefinedGetProperty(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.getProperty('name');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -29,7 +29,7 @@ function checkUndefinedHasProperty(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.hasProperty('test');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -39,7 +39,7 @@ function checkUndefinedToNumber(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.toNumber();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Number expected';
     }
     return res;
@@ -49,7 +49,7 @@ function checkUndefinedToString(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.toString();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'String expected';
     }
     return res;
@@ -59,7 +59,7 @@ function checkUndefinedSetIndex(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.setProperty(1, 1);
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -69,7 +69,7 @@ function checkUndefinedInvokeMethod(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.invokeMethod('test');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -79,7 +79,7 @@ function checkUndefinedInstantiate(): boolean {
     let res: boolean = false;
     try {
         ESValue.Undefined.instantiate();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -89,7 +89,7 @@ function checkNullSetProperty(): boolean {
     let res: boolean = false;
     try {
         ESValue.Null.setProperty('name', 'value');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -99,7 +99,7 @@ function checkNullHasOwnProperty(): boolean {
     let res: boolean = false;
     try {
         ESValue.Null.hasOwnProperty('name');
-    } catch (e: Error) {
+    } catch (e) {
         console.log("checkNullHasOwnProperty", e.message)
         res = e.message === 'Need object';
     }
@@ -110,7 +110,7 @@ function checkNullToString(): boolean {
     let res: boolean = false;
     try {
         ESValue.Null.toString();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'String expected';
     }
     return res;
@@ -120,7 +120,7 @@ function checkNullGetIndex(): boolean {
     let res: boolean = false;
     try {
         ESValue.Null.getProperty(1);
-    } catch (e: Error) {
+    } catch (e) {
         console.log("checkNullGetIndex", e.message)
         res = e.message === 'Need object';
     }
@@ -131,7 +131,7 @@ function checkNullInvoke(): boolean {
     let res: boolean = false;
     try {
         ESValue.Null.invoke();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -141,7 +141,7 @@ function checkIntGetProperty(): boolean {
     let res: boolean = false;
     try {
 	    ESValue.wrapInt(123).getProperty('123');
-    } catch (e: Error) {
+    } catch (e) {
         res = true;
         res = res && e.message.includes("Field ");
         res = res && e.message.includes(" not found in ");
@@ -153,7 +153,7 @@ function checkIntToString(): boolean {
     let res: boolean = false;
     try {
 	    ESValue.wrapInt(123).toString();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'String expected';
     }
     return res;
@@ -163,7 +163,7 @@ function checkIntInvoke(): boolean {
     let res: boolean = false;
     try {
 	    ESValue.wrapInt(123).invoke();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -179,7 +179,7 @@ function checkBooleanInvokeMethod(): boolean {
     let res: boolean = false;
     try {
 	    ESValue.wrapBoolean(false).invoke('test');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -189,7 +189,7 @@ function checkBigintInstantiate(): boolean {
     let res: boolean = false;
     try {
 	    ESValue.wrapBigInt(123n).instantiate();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -199,7 +199,7 @@ function checkStringSetProperty(): boolean {
     let res: boolean = false;
     try {
         ESValue.wrapString('123').setProperty('ID', ESValue.wrapInt(456));
-    } catch (e: Error) {
+    } catch (e) {
         res = true;
         res = res && e.message.includes("Field ");
         res = res && e.message.includes(" not found in ");
@@ -211,7 +211,7 @@ function checkIntSetIndex(): boolean {
     let res: boolean = false;
     try {
         ESValue.wrapInt(123).setProperty(1, ESValue.wrapInt(456));
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -221,7 +221,7 @@ function checkTsGetProperty(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('Base').getProperty('base').getProperty('base1');
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -231,7 +231,7 @@ function checkTsInstantiate(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').instantiate();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -241,7 +241,7 @@ function checkTsInvoke(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').invoke();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need function';
     }
     return res;
@@ -251,7 +251,7 @@ function checkTsGetIndex(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').getProperty(1).getProperty(1);
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -261,7 +261,7 @@ function checkTsHasProperty(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').getProperty(1).hasProperty(ESValue.wrap(111));
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Need object';
     }
     return res;
@@ -271,7 +271,7 @@ function checkTsToBoolean(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').toBoolean();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Boolean expected';
     }
     return res;
@@ -282,7 +282,7 @@ function checkTsToPromise(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').toPromise();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Promise expected';
     }
     return res;
@@ -292,7 +292,7 @@ function checkTsToString(): boolean {
     let res: boolean = false;
     try {
         module.getProperty('base').getProperty('baseVal').toString();
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'String expected';
     }
     return res;

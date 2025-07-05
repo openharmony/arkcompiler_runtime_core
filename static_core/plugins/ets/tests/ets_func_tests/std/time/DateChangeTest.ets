@@ -87,8 +87,10 @@ function testDateChangeMonth(): int {
         let change: int = 1;
         if(month == 11) change = -change;
         testDateChangeMonthImpl(date, change);
-    } catch(ae: AssertionError) {
-        return 1;
+    } catch(ae) {
+        if (ae instanceof AssertionError) {
+            return 1;
+        }
     }
     return 0;
 
@@ -147,7 +149,7 @@ function testDateChangeSeconds(): int {
     date.setSeconds(newSeconds);
 
     if(date.getSeconds() == newSeconds) return 0;
-    return 1;    
+    return 1;
 }
 
 function testSetUTCFullYear(): int {

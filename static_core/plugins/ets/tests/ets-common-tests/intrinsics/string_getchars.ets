@@ -79,7 +79,7 @@ function main(): int {
     try {
         // end > length
         let arr: char[] = golden.getChars(1, golden.getLength() + 1);
-    } catch (e: StringIndexOutOfBoundsError) {
+    } catch (e) {
         ++hits;
         if (DUMP) {
             console.println('end > length');
@@ -90,7 +90,7 @@ function main(): int {
     try {
         // begin > end
         let arr: char[] = golden.getChars(2, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
+    } catch (e) {
         ++hits;
         if (DUMP) {
             console.println('begin > end');
@@ -101,7 +101,7 @@ function main(): int {
     try {
         // begin < 0
         let arr: char[] = golden.getChars(-1, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
+    } catch (e) {
         ++hits;
         if (DUMP) {
             console.println('begin < 0');
@@ -127,33 +127,43 @@ function main(): int {
     try {
         // end > length
         let arr: char[] = silver.getChars(1, silver.getLength() + 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('end > length');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('end > length');
+                console.println(e);
+            }
         }
     }
 
     try {
         // begin > end
         let arr: char[] = silver.getChars(2, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('begin > end');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('begin > end');
+                console.println(e);
+            }
+        } else {
+            throw e;
         }
     }
 
     try {
         // begin < 0
         let arr: char[] = silver.getChars(-1, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('begin < 0');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('begin < 0');
+                console.println(e);
+            }
+        } else {
+            throw e;
         }
     }
     // test for SlicedString
@@ -172,33 +182,45 @@ function main(): int {
     try {
         // end > length
         let arr: char[] = copper.getChars(1, copper.getLength() + 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('end > length');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('end > length');
+                console.println(e);
+            }
+        } else {
+            throw e;
         }
     }
 
     try {
         // begin > end
         let arr: char[] = copper.getChars(2, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('begin > end');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('begin > end');
+                console.println(e);
+            }
+        } else {
+            throw e;
         }
     }
 
     try {
         // begin < 0
         let arr: char[] = copper.getChars(-1, 1);
-    } catch (e: StringIndexOutOfBoundsError) {
-        ++hits;
-        if (DUMP) {
-            console.println('begin < 0');
-            console.println(e);
+    } catch (e) {
+        if (e instanceof StringIndexOutOfBoundsError) {
+            ++hits;
+            if (DUMP) {
+                console.println('begin < 0');
+                console.println(e);
+            }
+        } else {
+            throw e;
         }
     }
 

@@ -381,13 +381,15 @@ function checkThrowNullOrUndefined(): boolean {
     try {
         throwNull.invoke();
         res = false;
-    } catch (e: ESError) {
+    } catch (e) {
+        e = e as ESError;
         res = e.getValue().toNull() === null;
     }
     try {
         throwUndefined.invoke();
         res = false;
-    } catch (e: ESError) {
+    } catch (e) {
+        e = e as ESError;
         res = e.getValue().toUndefined() === undefined;
     }
     return res;

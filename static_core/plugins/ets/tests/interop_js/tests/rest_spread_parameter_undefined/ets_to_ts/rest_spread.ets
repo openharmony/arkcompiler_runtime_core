@@ -17,7 +17,7 @@ function checkRestofUndefined(...arr: Object[]): boolean {
     let result = false;
     try {
         let val: Object = arr[0];
-    } catch (e: Error) {
+    } catch (e) {
         result = e instanceof ClassCastError;
     }
     return result;
