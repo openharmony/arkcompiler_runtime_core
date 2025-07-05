@@ -189,8 +189,7 @@ immediately preceding constant plus one.
 If some but not all constants have their values set explicitly, then
 the values of the constants are set by the following rules:
 
--  The value of the first constant without an explicit value is assigned to
-   zero.
+-  The constant which is first and has no explicit value gets zero value.
 -  A constant with an explicit value has that explicit value.
 -  A constant that is not the first and has no explicit value takes the value
    of the immediately preceding constant plus one.

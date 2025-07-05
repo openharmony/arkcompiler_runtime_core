@@ -234,14 +234,14 @@ follows:
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
    :ref:`Array Indexing Expression`) throws ``RangeError``.
--  If the type of value being assigned to fixed-size array element is not
-   a subtype of array element type, then the :ref:`Assignment`
-   throws *ArrayStoreError*.
--  If a :ref:`Cast Expression` conversion cannot be performed at runtime, it
-   throws ``ClassCastError``.
--  If the right-hand expression has the zero value, then integer
-   division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
-   operators throw ``ArithmeticError``.
+-  If the type of a value being assigned to a fixed-size array element is not
+   a subtype of an array element type, then an :ref:`Assignment` throws
+   *ArrayStoreError*.
+-  If a :ref:`Cast Expression` conversion cannot be performed at runtime, then
+   it throws ``ClassCastError``.
+-  If a right-hand expression has the zero value, then integer division or
+   integer remainder (see :ref:`Division` and :ref:`Remainder`) operators throw
+   ``ArithmeticError``.
 
 .. index::
    predefined operator
@@ -1202,8 +1202,8 @@ override-compatible signatures (see :ref:`Override-Compatible Signatures`):
     o.method (new Base) // compile-time error
 
 If a class or an interface has some method implementation, then its object
-literal can skip providing a new implementation of this method or provide its
-own version:
+literal can either skip providing a new method implementation, or
+provide its own version of method implementatino:
 
 .. code-block:: typescript
    :linenos:
@@ -1253,7 +1253,7 @@ the type of the object literal - the class defined above.
 
 A :index:`compile-time error` occurs if:
 
--  Type of an object literal cannot be inferred from the context;
+-  Type of an object literal cannot be inferred from the context (see an example in :ref:`Type of Expression`);
 -  The inferred type is not a class or interface type;
 -  The context is a union type, and an object literal can be treated
    as value of several of union component types; or
@@ -1880,21 +1880,20 @@ The syntax of *this expression* is presented below:
         'this'
         ;
 
-Keyword ``this`` can be used as an expression in the body of an instance
+The keyword ``this`` can be used as an expression in the body of an instance
 method of a class (see :ref:`Method Body`) or an interface (see
-:ref:`Default Interface Method Declarations`). The type of *this* expression is
-the appropriate class or interface type. In the method declared in the object
-literal (see :ref:Object Literal), type of ``this`` is the type of the object
-literal.
+:ref:`Default Interface Method Declarations`). A corresponding class or
+interface type is the type of *this* expression. If a method is declared in an
+object literal (see :ref:`Object Literal`), then the type of the object literal
+is the type of ``this``.
 
+The keyword ``this`` can be used in a lambda expression only if it is allowed
+in the context in which the lambda expression occurs. The type of ``this`` is
+the type of a class or an interface in which it is declared, but not the type
+of the surrounding object literal type, if any.
 
-Keyword ``this`` can be used in a lambda expression only if it is allowed
-in the context in which the lambda expression occurs. And the type of ``this``
-is a class or interface type it wasa declared in but not the type of the
-surrounding object literal type if any.
-
-The keyword ``this`` in a *direct call* ``this(`` *arguments* ``)`` expression
-can only be used in the explicit constructor call statement (see
+The keyword ``this`` in a *direct call* expression ``this(`` *arguments* ``)``
+can only be used in an explicit constructor call statement (see
 :ref:`Explicit Constructor Call`).
 
 The keyword ``this`` can also be used in the body of a function with receiver
@@ -1941,7 +1940,8 @@ a class type, or a subclass of ``T`` (see :ref:`Subtyping`) .
    class type
    class
 
-Example below present the semantics of ``this`` in different contexts:
+The semantics of ``this`` in different contexts is represented in the example
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -2581,8 +2581,7 @@ An array indexing expression evaluated at runtime behaves as follows:
 -  If the evaluation completes normally, then the index expression is evaluated.
    The resultant value of the object reference expression refers to an array.
 -  If the index expression value of an array is less than zero, greater than
-   or equal to that array’s *length*, then the ``RangeError``
-   is thrown.
+   or equal to that array’s *length*, then ``RangeError`` is thrown.
 -  Otherwise, the result of the array access is a type ``T`` variable within
    the array selected by the value of the index expression.
 
@@ -2620,9 +2619,8 @@ String Indexing Expression
 :ref:`Numeric Types`). The same rules apply as those for
 :ref:`Array Indexing Expression`.
 
-If the index expression value of an array is less than zero, greater than
-or equal to that string’s *length*, then the ``RangeError``
-is thrown.
+If the index expression value of a string is less than zero, greater than
+or equal to that string’s *length*, then ``RangeError`` is thrown.
 
 .. index::
    string indexing
@@ -3064,9 +3062,9 @@ The ``type`` of an ``instanceof`` expression is used for *smart typing*
 .. meta:
     frontend_status: Done
 
-*Cast expression* in the form ``expr as target`` applies *cast operator* ``as``
-to an ``expr`` by issuing a value of a specified ``target`` type. The syntax of
-*cast expression* is as follows:
+*Cast expression* in the form ``expr as target`` applies the *cast operator*
+``as`` to ``expr`` by issuing the value of a specified ``target`` type. The
+syntax of *cast expression* is as follows:
 
 .. code-block:: abnf
 
@@ -3093,9 +3091,6 @@ The following cases are considered for an *expr as T* in a sequence as follows:
 - If ``expr`` is a constant expression (see :ref:`Constant Expressions`),
   :ref:`Array literal`, or :ref:`Object Literal`, then an attempt is made to
   apply :ref:`Type Inference in Cast Expression`;
-
-- If the ``target`` type is an enumeration type (see :ref:`Enumerations`),
-  then an attempt is made to apply :ref:`Casting to Enumeration`;
 
 - Otherwise, :ref:`Runtime Checking in Cast Expression` is applied.
 
@@ -3216,44 +3211,6 @@ below:
 **Note.** *Assignability* check is applied to the elements of an array literal.
 
 Examples with object literals are provided in :ref:`Object literal`.
-
-|
-
-.. _Casting to Enumeration:
-
-Casting to Enumeration
-======================
-
-.. meta:
-    frontend_status: Done
-
-There are two cases where an ``expr as target`` expression is used to convert
-an expression value to the ``target`` enumeration type:
-
--  If the *enumeration base type* is an integer type, and the
-   expression is of integer type; or
-
--  If the *enumeration base type* is type ``string``, and the
-   expression is of string type.
-
-In both cases, the check is performed at runtime:
-
--  If the value of ``expr`` is the value of some constant of the enumeration
-   type, then the value is converted to the enumeration type;
-
--  Otherwise, a runtime error occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    enum NumE {A, B}
-
-    function foo(x: int): NumE {
-        return x as NumE
-    }
-
-    foo(1) // ok
-    foo(2) // runtime error occurs in 'foo' when 'as' is applied
 
 |
 
@@ -3425,9 +3382,12 @@ is defined as follows:
 | ``long``, ``float``             |                         |  ...                        |
 +---------------------------------+-------------------------+-----------------------------+
 
+|
 
 2. **Expression type determined at runtime**
-For the following expression types, result is a name of actual type used at runtime.
+
+The result is a name of the actual type used at runtime for the following
+expression types:
 
 +------------------------+-----------------------------+
 |   Type of Expression   |   Code Example              |
@@ -5093,9 +5053,9 @@ Equality operators group left-to-right.
 Equality operators are commutative if operand expressions cause no side
 effects.
 
-Like relational operators, equality operators return true or false but  the latter have
-lower precedence (:math:`a < b==c < d` is ``true`` if both :math:`a < b`
-and :math:`c < d` have the same ``truth`` value).
+Similarly to relational operators, equality operators return ``true`` or
+``false`` but the latter have a lower precedence (:math:`a < b==c < d` is
+``true`` if both :math:`a < b` and :math:`c < d` have the same ``truth`` value).
 
 Any equality expression is of type ``boolean``.
 
@@ -5105,39 +5065,39 @@ Any equality expression is of type ``boolean``.
    boolean type
    relational operator
 
-In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
-``a !== b`` produces the same result as ``!(a === b)``.
+The results produced by ``a != b`` and ``!(a == b)`` is the same in all cases.
+The results produced by ``a !== b`` and as ``!(a === b)`` is the same.
 
-The result of operators '``==``' and '``===``' is the same in all cases,
+The result of the operators '``==``' and '``===``' is the same in all cases
 except when comparing the values ``null`` and ``undefined`` (see
 :ref:`Extended Equality with null or undefined`).
 
-Comparison using operators '``==``' and '``===``' of these values
-is evaluated to true:
+A comparison that uses the operators '``==``' and '``===``' is evaluated to
+``true`` with the following:
 
-- operands of :ref:`Type boolean` of the same value;
+- Operands of :ref:`Type boolean` of the same value;
 
-- operands of :ref:`Type string` or string literal type
-  (see :ref:`String Literal Types`) of the same contents;
+- Operands of :ref:`Type string` or string literal type
+  (see :ref:`String Literal Types`) with the same contents;
 
-- operands of :ref:`Type bigint` of the same value;
+- Operands of :ref:`Type bigint` of the same value;
 
-- operands of :ref:`Type char`, of the same value (both operands
-  represent the same Unicode code point);
+- Operands of :ref:`Type char` of the same value (both operands represent the
+  same Unicode code point);
 
-- operands of :ref:`Numeric Types` of the same value, except ``NaN``
+- Operands of :ref:`Numeric Types` of the same value except ``NaN``
   (see :ref:`Numerical Equality Operators` for details);
 
-- operands of the same enumeration type (see :ref:`Enumerations`)
-  that have the same numeric value or the same string contents
+- Operands of the same enumeration type (see :ref:`Enumerations`)
+  that have the same numeric values or the same string contents,
   depending on the type of enumeration constant values;
 
-- function references, which refer to the same functional object,
-  see :ref:`Function Type Equality Operators` for details.
+- Function references that refer to the same functional object (see details in
+  :ref:`Function Type Equality Operators`).
 
-If none of the above applies, operands are compared as references.
+In all other cases operands are compared as references.
 
-This semantics is illustrated by the example below:
+This semantics is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -5156,12 +5116,10 @@ This semantics is illustrated by the example below:
    new Number(5) === new Number(5) // true, values are equal
    new Number(5) == new Number(6) // false, values are not equal
 
-If it is known at compile-time, that comparison of values of types
-``A`` and ``B`` always evaluates to false, a :index:`compile-time error` occurs.
-In other words, a :index:`compile-time error` occurs 
-if there is no values of types ``A`` and ``B`` that are compared to true.
-
-This semantics is illustrated by the example below:
+A :index:`compile-time error` occurs if a comparison of values of types ``A``
+and ``B``  is known at compile time to always evaluate to ``false``, i.e., if
+no value of types ``A`` and ``B`` ever compares to ``true``. This semantics is
+represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -5173,8 +5131,8 @@ This semantics is illustrated by the example below:
 
    new X() == new Y() // compile-time error
 
-Evaluation of equality expression always use the actual type of operands,
-see the example below:
+An evaluation of equality expressions always uses the actual types of operands
+as in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -5186,10 +5144,10 @@ see the example below:
     equ(1, 1) // true, values are compared
     equ(1, 2) // false, value are compared
 
-    equ("aa", "aa") // true, string context are compared
+    equ("aa", "aa") // true, string contexts are compared
     equ(1, "aa") // false, not compatible types
 
-The following example illustrates an equality with values of two union types:
+An equality with values of two union types is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -5310,7 +5268,7 @@ Function Type Equality Operators
 If both operands refer to the same function object, then the comparison
 returns ``true``. 
 When comparing method references, not only the same method must be used, 
-but its bounded instances must be equal.
+but also its bounded instances must be equal.
 
 .. code-block:: typescript
    :linenos:
@@ -5355,8 +5313,9 @@ Extended Equality with ``null`` or ``undefined``
 |LANG| provides extended semantics for equalities with ``null`` and ``undefined``
 to ensure better alignment with |TS|.
 
-If one operand in equality expression is ``null`` and other is ``undefined``,
-then operator '``!=``' returns ``true``, operator '``!==``' returns ``false``:
+If one operand in an equality expression is ``null``, and other is ``undefined``,
+then the operator '``!=``' returns ``true``, and the operator '``!==``' returns
+``false``:
 
 .. code-block-meta:
 
@@ -5371,7 +5330,7 @@ then operator '``!=``' returns ``true``, operator '``!==``' returns ``false``:
     foo(null, null)      // output: true, true
 
 
-Direct comparison of values ``null`` and ``undefined`` is also allowed:
+Comparison the values ``null`` and ``undefined`` directly is also allowed:
 
 .. code-block-meta:
 
@@ -5531,8 +5490,8 @@ The *conditional-and* operator '``&&``' is similar to '``&``' (see
 :ref:`Bitwise and Logical Expressions`) but evaluates its right-hand-side
 operand only if the value of the left-hand-side operand is ``true``.
 
-The results of computation of '``&&``' and '``&``' on ``boolean`` operands are
-the same, but the right-hand-side operand in '``&&``' will not necessarily be evaluated.
+The computation results of '``&&``' and '``&``' on ``boolean`` operands are
+the same. The right-hand-side operand of '``&&``' is not necessarily evaluated.
 
 The syntax of *conditional-and expression* is presented below:
 
@@ -5740,11 +5699,11 @@ Simple Assignment Operator
 
 The form of a simple assignment expression is ``lhsExpression = rhsExpression``.
 
-A :index:`compile-time error` occurs 
+A :index:`compile-time error` occurs in the following situations:
 
-   - if type of *rhsExpression* is not assignable (see :ref:`Assignability`) to
-     the type of the variable or,
-   - if type of *lhsExpression* is one of the following:
+   - Type of *rhsExpression* is not assignable (see :ref:`Assignability`) to
+     the type of the variable; or
+   - Type of *lhsExpression* is one of the following:
 
        - ``readonly`` array (see :ref:`Readonly Parameters`), while the
          converted type of *rhsExpression* is a non-``readonly`` array;
@@ -5762,8 +5721,8 @@ following ways:
    #. *rhsExpression* is evaluated: if the evaluation completes abruptly, then
       so does the assignment expression.
    #. If that evaluation completes normally, then the value of *rhsExpression*
-      is converted to the type of the field. In that case, the field is
-      assinged with the result of the conversion.
+      is converted to the type of the field. In that case, the result of the
+      conversion is assigned to the field.
 
 .. index::
    simple assignment operator
@@ -5784,26 +5743,26 @@ following ways:
    #. Array reference subexpression of *lhsExpression* is evaluated. If this
       evaluation completes abruptly, then so does the assignment expression. In
       that case, *rhsExpression* and the index subexpression are not evaluated,
-      and the assignment does not occur.
+      and no assignment occurs.
    #. If the evaluation completes normally, then the index subexpression of
       *lhsExpression* is evaluated. If this evaluation completes abruptly, then
       so does the assignment expression. In that case, *rhsExpression* is not
-      evaluated, and the assignment does not occur.
+      evaluated, and no assignment occurs.
    #. If the evaluation completes normally, then *rhsExpression* is evaluated.
       If this evaluation completes abruptly, then so does the assignment
-      expression, and the assignment does not occur.
+      expression, and no assignment occurs.
    #. If the evaluation completes normally, but the value of the index
       subexpression is less than zero, or greater than, or equal to the
       *length* of the array, then ``RangeError`` is thrown,
-      and the assignment does not occur.
-   #. If *lhsExpression* denotes indexing of *fixed-size array* and
+      and no assignment occurs.
+   #. If *lhsExpression* denotes indexing of *fixed-size array*, and
       the type of *rhsExpression* is not a subtype of array element type,
-      then *ArrayStoreError* is thrown, and the assignment does not occur.
+      then *ArrayStoreError* is thrown, and no assignment occurs.
    #. Otherwise, the value of the index subexpression is used to select an
       element of the array referred to by the value of the array reference
       subexpression and the value of *rhsExpression* is converted to the type
-      of the array element. In that case, the array element is assinged with
-      the result of the conversion.
+      of the array element. In that case, the result of the conversion is
+      assigned to the array element.
 
 .. index::
    operand
@@ -5834,14 +5793,14 @@ following ways:
    #. Object reference subexpression of *lhsExpression* is evaluated.
       If this evaluation completes abruptly, then so does the assignment 
       expression. In that case, *rhsExpression* and the index subexpression are
-      not evaluated, and the assignment does not occur.
+      not evaluated, and no assignment occurs.
    #. If the evaluation completes normally, the index subexpression of
       *lhsExpression* is evaluated. If this evaluation completes abruptly,
       then so does the assignment expression. In that case, *rhsExpression* is
-      not evaluated, and the assignment does not occur.
+      not evaluated, and no assignment occurs.
    #. If the evaluation completes normally, *rhsExpression* is evaluated. If
       this evaluation completes abruptly, then so does the assignment
-      expression. In that case, the assignment does not occur.
+      expression. In that case, no assignment occurs.
    #. Otherwise, the value of the index subexpression is used as the ``key``,
       and the value of *rhsExpression* converted to the type of the record
       value is used as the ``value``. In that case, the assignment results in
@@ -5869,15 +5828,15 @@ If none of the above is true, then the following three steps are performed:
 
 #. *lhsExpression* is evaluated to produce a variable. If the evaluation
    completes abruptly, then so does the assignment expression. In that case,
-   *rhsExpression* is not evaluated, and the assignment does not occur.
+   *rhsExpression* is not evaluated, and no assignment occurs.
 
 #. If the evaluation completes normally, then *rhsExpression* is evaluated. If
    the evaluation completes abruptly, then so does the assignment expression.
-   In that case, the assignment does not occur.
+   In that case, no assignment occurs.
 
 #. If that evaluation completes normally, then the value of *rhsExpression*
    is converted to the type of the left-hand-side variable. In that case, the
-   variable is assinged with the result of the conversion.
+   result of the conversion is assigned to the variable.
 
 .. index::
    evaluation

@@ -245,10 +245,10 @@ the following occurs:
 - Method ``m`` with an override-compatible signature (see
   :ref:`Override-Compatible Signatures`) declared within the current interface
   overrides all other ``m`` methods inherited from superinterfaces; or
-- All methods from superinterfaces refer to the same implementation, and this default
-  implementation is the current interface method; or
-- There is one method ``m`` in some superinterface which overrides all other
-  methods from other superinterfaces.
+- All methods inherited from superinterfaces refer to the same implementation,
+  and this default implementation is the current interface method; or
+- One method ``m`` in some superinterface overrides all other methods from
+  other superinterfaces.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -402,6 +402,15 @@ The syntax of *interface property* is presented below:
         | 'set' identifier '(' parameter ')'
         ;
 
+
+An interface property is *required property* (see :ref:`Required Interface Properties`)
+if it is defined as
+
+- Explicit getter or setter; or 
+- In form of a field and does not have a '``?``'.
+
+Otherwise, it is an *optional property* (see :ref:`Optional Interface Properties`)
+
 If '``?``' is used after the name of the property, then the property type is
 semantically equivalent to ``type | undefined``.
 
@@ -417,10 +426,22 @@ semantically equivalent to ``type | undefined``.
     }
 
 
-A property defined in the form of a field implicitly defines the following:
+.. _Required Interface Properties:
+
+Required Interface Properties
+=============================
+
+.. meta:
+    frontend_status: Done
+
+A *requied property* defined in the form of a field implicitly
+defines the following:
 
 -  A getter, if the property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
+
+A type annotation for the field defines return type for the getter
+and type of parameter for the setter.
 
 As a result, the following definitions have the same effect:
 
@@ -446,8 +467,12 @@ As a result, the following definitions have the same effect:
         set color(s: string)
     }
 
+**Note.** A *requied property* defined in a form of accessors does not
+define any additional entities in the interface.
+
 A class that implements an interface with properties can also use a field or
-an accessor notation (see :ref:`Implementing Interface Properties`).
+an accessor notation (see :ref:`Implementing Required Interface Properties`,
+:ref:`Implementing Optional Interface Properties`).
 
 .. index::
    implementation
@@ -458,6 +483,55 @@ an accessor notation (see :ref:`Implementing Interface Properties`).
    property
 
 |
+
+.. _Optional Interface Properties:
+
+Optional Interface Properties
+=============================
+
+.. meta:
+    frontend_status: Done
+
+An *optional property* can be defined in two forms:
+
+-  short form: ``identifier '?' ':' T``
+-  explicit form: ``identifier ':' T | undefined``
+
+In both cases, ``identifier`` has effective type ``T | undefined``.
+
+The *optional property* implicitly defines the following:
+
+-  A getter (if the property is marked as ``readonly``);
+-  Otherwise, both a getter and a setter with the same name.
+
+Accessors have implicitly defined bodies, in this aspect they are
+similar to :ref:`Default Interface Method Declarations`.
+However, |LANG| does not support explicitly defined accessors with bodies.
+
+The following definition:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        num?: number
+    }
+    
+implicitly defines accessors:
+    
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        get num(): number | undefined { return undefined }
+        set num(x: number | undefined) { throw new InvalidStoreAccessError }
+    }
+
+
+If the default setter is not redefined in a class that implements the interface,
+``InvalidStoreAccessError`` is thrown at attempt to set value of an optional
+property. See also :ref:`Implementing Optional Interface Properties`.
+
 
 .. _Interface Method Declarations:
 
