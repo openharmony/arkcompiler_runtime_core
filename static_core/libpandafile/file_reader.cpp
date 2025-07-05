@@ -555,6 +555,10 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
 {
     auto it = itemsDone_.find(debugInfoId);
     if (it != itemsDone_.end()) {
+        auto itemType = it->second->GetBaseItemType();
+        if (itemType != ItemTypes::DEBUG_INFO_ITEM) {
+            LOG(FATAL, PANDAFILE) << "ItemType Error " << static_cast<int>(itemType);
+        }
         return static_cast<DebugInfoItem *>(it->second);
     }
 
@@ -583,7 +587,7 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
         auto *stringItem = container_.GetOrCreateStringItem(itemStr);
         debugInfoItem->AddParameter(stringItem);
     });
-
+    debugInfoItem->SetBaseItemType(ItemTypes::DEBUG_INFO_ITEM);
     return debugInfoItem;
 }
 
