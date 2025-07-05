@@ -15,14 +15,13 @@
 
 import { launch } from "std/concurrency"
 
-let counter = 0;
+type L = StdDebug.Logger
 
 function body(): Object {
     return new Object();
 }
 
-export function main(): int {
-    // call Logger.enableLogging to get the debug messages...
+function testLaunchOOM(): void {
     try {
         const veryBigNumberOfCoroutines: int = 500000000;
         for (let i = 0; i < veryBigNumberOfCoroutines; ++i) {
@@ -30,13 +29,19 @@ export function main(): int {
         }
     } catch (e) {
         if (e instanceof CoroutinesLimitExceedError) {
-            StdDebug.Logger.log("Successfully caught: " + e);
-            return 0;
+            L.log('Successfully caught: ' + e);
+            return;
         } else {
-            StdDebug.Logger.log("Wrong exception thrown: " + e);
-            return 1;
+            arktest.assertTrue(false, 'Wrong exception thrown: ' + e);
+            return;
         }
     }
-    StdDebug.Logger.log("No exception thrown but should be!");
-    return 1;
+    arktest.assertTrue(false, 'No exception thrown but should be!');
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_oom');
+    testSuite.addTest('testLaunchOOM', testLaunchOOM);
+    let res = testSuite.run();
+    return res;
 }

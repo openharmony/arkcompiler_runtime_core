@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-import {AtomicFlag} from 'std/debug/concurrency'
+import {AtomicFlag} from "std/debug/concurrency"
+
+type L = StdDebug.Logger
 
 class Event {
     constructor() {
@@ -64,25 +66,33 @@ function Handler(obj: Object): void {
     }
 }
 
-function main(): void {
+function testUnhandledRejection(): void {
     StdProcess.on('unhandledJobRejection', (obj: Object): void => {
-        arktest.assertTrue(false, "Job handler didn't switch");
+        arktest.assertTrue(false, 'Job handler not switched');
     });
+    
     StdProcess.on('unhandledPromiseRejection', (obj: Object): void => {
-        arktest.assertTrue(false, "Promise handler didn't switch");
+        arktest.assertTrue(false, 'Promise handler not switched');
     });
-
+    
     StdProcess.on('unhandledJobRejection', Handler);
     StdProcess.on('unhandledPromiseRejection', Handler);
-
+    
     let g = launch<string, () => string>(Failing);
     launch<Promise<string>, () => Promise<string>>(AsyncFailing);
     AsyncFailing();
     let p = Promise.reject(new Error('promise1'));
     let q = p.then(() => {
-        console.println('Test failed: Unreachable code');
+        L.log('Test failed: Unreachable code');
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);
     })
     Promise.reject(new Error('promise2'));
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
+    testSuite.addTest('testUnhandledRejection', testUnhandledRejection);
+    let res = testSuite.run();
+    return res;
 }

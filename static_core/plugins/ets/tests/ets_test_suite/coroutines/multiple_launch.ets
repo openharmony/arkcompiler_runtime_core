@@ -16,81 +16,94 @@
 import { launch } from "std/concurrency"
 import { Job } from "std/core"
 
-function return_value(i: int): String {
-    return "value " + i;
+type L = StdDebug.Logger
+
+function returnValue(i: int): String {
+    return 'value ' + i;
 }
 
-function n_cor_launch(n_cor: int): int {
+function launchCoroutines(n_cor: int): int {
     let p: (Job<String> | undefined)[] = new (Job<String> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch<String, (i: int) => String>(return_value, i);
+        p[i] = launch<String, (i: int) => String>(returnValue, i);
     }
     for (let i = 0; i < n_cor; ++i) {
         let val = (p[i]!).Await();
-        if(val != return_value(i)) {
-            console.println("p[" + i + "] = \"" + val + "\" instead of \"" + return_value(i) + "\"");
+        if(val != returnValue(i)) {
+            L.log('p[' + i + '] = ' + val + ' instead of ' + returnValue(i));
             return 1;
         }
     }
     return 0;
 }
 
-function throw_exception(): Object {
+function throwException(): Object {
     throw new Error();
 }
 
-function n_cor_exection_launch(n_cor: int): int { 
+function launchCoroutinesWithException(n_cor: int): int { 
     let p: (Job<Object> | undefined)[] = new (Job<Object> | undefined)[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch<Object, () => Object>(throw_exception);
+        p[i] = launch<Object, () => Object>(throwException);
     }
     for (let i = 0; i < n_cor; ++i) {
         try {
             (p[i]!).Await();
         } catch (e) {
             if (!(e instanceof Error)) {
-              console.println("Expected Error but another exception has been thrown!: " + e);
+              L.log('Expected Error but another exception has been thrown!: ' + e);
               return 1;
             }
             continue;
         }
-        console.println("Was no error throwing");
+        L.log('Was no error throwing');
         return 1;
     }
     return 0;
 }
 
 // !1581, molotkovmikhail - test should be start with coroutine pool to test it
-export function main(): int {
+function testMultipleLaunch(): void {
     // Create 5 coroutines and save 5 coroutines
-    if(n_cor_launch(5) != 0) {
-        console.println("First launch of 5 coroutines failed!!");
-        return -1;
-    }
+    if(launchCoroutines(5) != 0) {
+        arktest.assertTrue(false, 'First launch of 5 coroutines failed!!');
+        return;
+    }    
+
     // Reuse 5 coroutines
-    if(n_cor_launch(5) != 0) {
-        console.println("Second launch of 5 coroutines failed!!");
-        return -1;
+    if(launchCoroutines(5) != 0) {
+        arktest.assertTrue(false, 'Second launch of 5 coroutines failed!!');
+        return;
     }
+
     // Create 10 coroutines: reuse 5 coroutines and create new 5 ones. Save 10 coroutines 
-    if(n_cor_launch(10) != 0) {
-        console.println("First launch of 10 coroutines failed!!");
-        return -1;
+    if(launchCoroutines(10) != 0) {
+        arktest.assertTrue(false, 'First launch of 10 coroutines failed!!');
+        return;
     }
+
     // Reuse 10 coroutines
-    if(n_cor_launch(10) != 0) {
-        console.println("Second launch of 10 coroutines failed!!");
-        return -1;
+    if(launchCoroutines(10) != 0) {
+        arktest.assertTrue(false, 'Second launch of 10 coroutines failed!!');
+        return;
     }
+
     // Reuse 5 coroutines and throw exception in them
-    if(n_cor_exection_launch(5) != 0) {
-        console.println("First launch of 5 throw-error coroutines failed!!");
-        return -1;
+    if(launchCoroutinesWithException(5) != 0) {
+        arktest.assertTrue(false, 'First launch of 5 throw-error coroutines failed!!');
+        return;
     }
+
     // Reuse 10 coroutines
-    if(n_cor_launch(10) != 0) {
-        console.println("First launch of 10 coroutines after 5 throw-error ones failed!!");
-        return -1;
+    if(launchCoroutines(10) != 0) {
+        arktest.assertTrue(false, 'First launch of 10 coroutines after 5 throw-error ones failed!!');
+        return;
     }
-    return 0;
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.multiple_launch');
+    testSuite.addTest('testMultipleLaunch', testMultipleLaunch);
+    let res = testSuite.run();
+    return res;
 }

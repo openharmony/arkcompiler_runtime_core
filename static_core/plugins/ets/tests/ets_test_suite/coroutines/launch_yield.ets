@@ -19,15 +19,20 @@ let counter = 0;
 
 function add(a: int): String {
     counter += a;
-    return "Some dummy string"
+    return 'Some dummy string'
 }
 
-export function main(): int {
+function testLaunchYield(): void {
     launch<String, (i: int) => String>(add, 5);
     Coroutine.Schedule();
     if (counter != 5) {
-        console.println("Invalid counter: expected 5 but was " + counter);
-        return 1;
+        arktest.assertTrue(false, 'Invalid counter: expected 5 but was ' + counter);
     }
-    return 0;
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_yield');
+    testSuite.addTest('testLaunchYield', testLaunchYield);
+    let res = testSuite.run();
+    return res;
 }

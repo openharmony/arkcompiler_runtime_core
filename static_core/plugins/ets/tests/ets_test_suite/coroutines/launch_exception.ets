@@ -17,53 +17,73 @@ import { launch } from "std/concurrency"
 
 let counter = 0;
 
-function stack_eater(): void {
-    stack_eater();
+type L = StdDebug.Logger
+
+function stackEater(): void {
+    stackEater();
 }
 
-function coro_stack_overflow(): Object | null {
-    stack_eater();
+function coroStackOverflow(): Object | null {
+    stackEater();
     return null;
 }
 
-function coro_error(): Object {
+function coroError(): Object {
     throw new Error();
 }
 
-function test_stack_overflow(): boolean {
+function launchStackOverflow(): boolean {
+    let overflow: boolean = false;
+
     try {
-        launch<Object | null, () => Object | null>(coro_stack_overflow).Await();
-        console.println("No exceptions thrown by coro_stack_overflow() but should be!")
-        return false;
+        launch<Object | null, () => Object | null>(coroStackOverflow).Await();
+        L.log('No exceptions thrown by coroStackOverflow() but should be!')
+        overflow = false;
     } catch (e) {
         if (!(e instanceof StackOverflowError)) {
-            console.println("Expected StackOverflowError but another exception has been thrown!");
-            return false;
+            L.log('Expected StackOverflowError but another exception has been thrown!');
+            overflow = false;
+        } else {
+            overflow = true;
         }
-        return true;
     }
+
+    return overflow;
 }
 
-function test_error(): boolean {
+function launchError(): boolean {
+    let hasError: boolean = false;
+
     try {
-        launch<Object, () => Object>(coro_error).Await();
-        console.println("No exceptions thrown by coro_error() but should be!")
-        return false;
+        launch<Object, () => Object>(coroError).Await();
+        L.log('No exceptions thrown by coroError() but should be!')
+        hasError = false;
     } catch (e) {
         if (!(e instanceof Error)) {
-            console.println("Expected Error but another exception has been thrown!");
-            return false;
+            L.log('Expected Error but another exception has been thrown!');
+            hasError = false;
+        } else {
+            hasError = true;
         }
-        return true;
     }
+
+    return hasError;
 }
 
-export function main(): int {
-    if (!test_stack_overflow()) {
-        return 1;
-    }
-    if (!test_error()) {
-        return 1;
-    }
-    return 0;
+function testLaunchStackOverflow() {
+    let res: boolean = launchStackOverflow();
+    arktest.assertEQ(res, true);
+}
+
+function testLaunchError() {
+    let res: boolean = launchError();
+    arktest.assertEQ(res, true);
+}
+
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite('coroutines.launch_exception');
+    testSuite.addTest('testLaunchStackOverflow', testLaunchStackOverflow);
+    testSuite.addTest('testLaunchError', testLaunchError);
+    let res = testSuite.run();
+    return res;
 }
