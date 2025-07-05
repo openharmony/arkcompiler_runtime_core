@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-package Test;
-
-class TestBacktrace {
-    static { loadLibrary("call_backtrace") }
-    native callBacktrace(): int;
-}
+native function callBacktrace(): int;
 
 function TestBacktrace_entry_simple(): int {
     return TestBacktrace_func1();
@@ -29,9 +24,7 @@ function TestBacktrace_func1(): int {
 }
 
 function TestBacktrace_func2(): int {
-    loadLibrary("call_backtrace");
-    let test = new TestBacktrace();
-    return test.callBacktrace();
+    return callBacktrace();
 }
 
 function TestBacktrace_entry_complex(): int {
@@ -87,9 +80,7 @@ function getFileDate(): int {
       dataStr: 'This is a test data!'
     }
   }];
-  loadLibrary("call_backtrace");
-  let test = new TestBacktrace();
-  return test.callBacktrace();
+  return callBacktrace();
 }
 
 function getOperationFactory(): int {
@@ -101,4 +92,10 @@ function getOperationFactory(): int {
   return getFileDate();
 }
 
-
+function main(): void {
+  loadLibrary("call_backtrace");
+  let res = TestBacktrace_entry_simple();
+  arktest.assertEQ(res, 1);
+  let res2 = TestBacktrace_entry_complex();
+  arktest.assertEQ(res, 1);
+}
