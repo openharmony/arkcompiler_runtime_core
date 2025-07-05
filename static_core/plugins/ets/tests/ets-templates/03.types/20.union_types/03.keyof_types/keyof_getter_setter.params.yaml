@@ -21,7 +21,7 @@ cases:
     check: |-
       type t = keyof A
       let a: t = "foo"
-      arktest.assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, "string")
 
   - decl: |-
       class A {
@@ -43,7 +43,7 @@ cases:
     check: |-
       type t = keyof A
       let a: t = "foo"
-      arktest.assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, "string")
 
   - decl: |-
       final class A {
@@ -54,7 +54,7 @@ cases:
     check: |-
       type t = keyof A
       let a: t = "foo"
-      arktest.assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, "string")
 
   - decl: |-
       interface I {
@@ -64,4 +64,4 @@ cases:
     check: |-
       type t = keyof I
       let a: t = "foo"
-      arktest.assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, "string")

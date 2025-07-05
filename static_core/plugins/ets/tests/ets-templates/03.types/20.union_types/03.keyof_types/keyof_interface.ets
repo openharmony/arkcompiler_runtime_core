@@ -38,7 +38,7 @@ function main() {
         {% for i in case.check %}{% if i != case.check[0] %}union2 = {{i}}{% endif %}
         {% endfor %}
         union1 = union2
-        arktest.assertEQ(typeof union2, string)
+        arktest.assertEQ(typeof union2, "string")
       {% endif %}
     {% endif %}
 }
