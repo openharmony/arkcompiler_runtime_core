@@ -499,7 +499,7 @@ export final class Console {
         let dat = data[0]!
 
         const isSimple = (dat == undefined) || (dat == null)
-                || (dat instanceof String) || (Object.keys(dat!).length == 0)
+                || (dat instanceof String) || (Object.keys(__narrowAny(dat)!).length == 0)
         if (isSimple) {
             this.log(dat)
             return

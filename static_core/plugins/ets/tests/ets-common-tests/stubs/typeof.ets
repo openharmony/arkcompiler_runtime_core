@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function erase<T>(v: T): Object | null | undefined {
+function erase<T>(v: T): Any {
     return v;
 }
 

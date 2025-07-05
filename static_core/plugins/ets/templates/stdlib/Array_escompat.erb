@@ -697,7 +697,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                         strArr[idxNonUndef] = "null"
                     } else {
                         this.$_set_unsafe(idxNonUndef, vl)
-                        strArr[idxNonUndef] = vl.toString()
+                        strArr[idxNonUndef] = (vl as object).toString() // #26217
                     }
                     idxNonUndef++
                 }

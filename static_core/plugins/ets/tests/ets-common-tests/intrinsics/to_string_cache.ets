@@ -117,7 +117,7 @@ class Worker<T> {
             let randomInt = (state >>> 33) as int;
             let index = randomInt % this.values.length;
             let value = this.values[index]!;
-            let str = value.toString();
+            let str = (value as object).toString();
             if (check) {
                 // assertTrue(isEqual(str, value), `not equal: string ${str}, number ${value}`)
                 strings.push(str);
@@ -127,7 +127,7 @@ class Worker<T> {
         // defer check to increase cache pressure
         if (check) {
             for (let i = 0; i < iters; i++) {
-                let expected = numbers[i]!.toString();
+                let expected = (numbers[i]! as object).toString();
                 assertEQ(strings[i], expected, `results of toString differ: expected ${expected}, got ${strings[i]}`);
                 assertTrue(isEqual(strings[i], numbers[i]), `not equal: string ${strings[i]}, number ${numbers[i]}`)
             }
