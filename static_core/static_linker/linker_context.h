@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,6 +230,11 @@ private:
     void ProcessCodeData(CodePatcher &p, CodeData *data);
 
     void MakeChangeWithId(CodePatcher &p, CodeData *data);
+
+    void HandleStringId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr);
+
+    void HandleLiteralArrayId(CodePatcher &p, const BytecodeInstruction &inst, const panda_file::File *filePtr,
+                              const std::map<panda_file::File::EntityId, panda_file::BaseItem *> *items);
 
     void AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
                         const panda_file::FileReader &reader);
