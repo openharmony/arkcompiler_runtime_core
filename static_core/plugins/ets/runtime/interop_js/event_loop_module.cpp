@@ -47,6 +47,7 @@ uv_loop_t *EventLoop::GetEventLoop()
 
 void EventLoop::RunEventLoop(EventLoopRunMode mode)
 {
+    ark::ets::interop::js::InteropCtx::Current(EtsCoroutine::GetCurrent())->UpdateInteropStackInfoIfNeeded();
     auto *loop = GetEventLoop();
     switch (mode) {
         case EventLoopRunMode::RUN_DEFAULT:
