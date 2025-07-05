@@ -843,6 +843,7 @@ static ani_string StdCoreIntlDateTimeFormatFormatRangeImpl(ani_env *env, ani_obj
 {
     auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
 
+    ASSERT(formattedIntervalVal != nullptr);
     UErrorCode status = U_ZERO_ERROR;
     UStr formattedInterval = formattedIntervalVal->toString(status);
     if (U_FAILURE(status) == TRUE) {
@@ -858,6 +859,7 @@ static ani_array_ref StdCoreIntlDateTimeFormatFormatRangeToPartsImpl(ani_env *en
 {
     auto formattedIntervalVal = FormatDateInterval(env, self, start, end);
 
+    ASSERT(formattedIntervalVal != nullptr);
     UErrorCode status = U_ZERO_ERROR;
     UStr formattedInterval = formattedIntervalVal->toString(status);
     if (U_FAILURE(status) == TRUE) {

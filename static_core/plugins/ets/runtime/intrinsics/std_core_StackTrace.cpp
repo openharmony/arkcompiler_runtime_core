@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,9 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
     if (sourceFile == nullptr) {
         sourceFile = "<unknown>";
     }
-
-    auto element = EtsHandle<EtsStackTraceElement>(coroutine, EtsStackTraceElement::Create(coroutine));
+    auto *stackTraceElement = EtsStackTraceElement::Create(coroutine);
+    ASSERT(stackTraceElement != nullptr);
+    auto element = EtsHandle<EtsStackTraceElement>(coroutine, stackTraceElement);
     element->SetClassName(className.GetPtr());
     element->SetMethodName(methodName.GetPtr());
 
@@ -73,7 +74,9 @@ extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
 
     const auto linesSize = static_cast<uint32_t>(stackTraceElements.size());
 
-    EtsHandle<EtsObjectArray> resultArrayHandle(coroutine, EtsObjectArray::Create(stackTraceElementClass, linesSize));
+    auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize);
+    ASSERT(resultArray != nullptr);
+    EtsHandle<EtsObjectArray> resultArrayHandle(coroutine, resultArray);
     for (uint32_t i = 0; i < linesSize; i++) {
         resultArrayHandle.GetPtr()->Set(i, stackTraceElements[i]->AsObject());
     }
