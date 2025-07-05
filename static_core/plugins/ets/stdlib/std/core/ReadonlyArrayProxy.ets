@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
+export namespace proxy
+{
 export interface ReadonlyArrayProxyHandler<T> {
 	get(target: ReadonlyArray<T>, name: string): NullishType
 
@@ -156,4 +158,5 @@ class ReadonlyArrayProxy<T> implements ReadonlyArray<T> {
 
         throw new TypeError("unexpected ReadonlyArray.length value type: " + Type.of(length))
     }
+}
 }

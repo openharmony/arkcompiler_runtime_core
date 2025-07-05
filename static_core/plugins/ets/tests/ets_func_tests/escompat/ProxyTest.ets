@@ -49,7 +49,7 @@ class ObjWithProps extends Base {
     }
 }
 
-class ObjProxyHandler extends DefaultProxyHandler<ObjWithProps> {
+class ObjProxyHandler extends proxy.DefaultProxyHandler<ObjWithProps> {
     getTrapped: boolean = false
     setTrapped: boolean = false
     getIdTrapped: boolean = false
@@ -86,7 +86,7 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
     arktest.assertFalse(objProxyHandler.getTrapped)
     arktest.assertFalse(objProxyHandler.setTrapped)
 
-    const objProxy = Proxy.create(obj, objProxyHandler)
+    const objProxy = proxy.Proxy.create(obj, objProxyHandler)
 
     objProxy.name = "foo"
     arktest.assertTrue(objProxyHandler.setTrapped)
@@ -108,8 +108,8 @@ function verifyObjectProxyOps(obj: ObjWithProps, objProxyHandler: ObjProxyHandle
     const id = objProxy.getId()
     arktest.assertTrue(objProxyHandler.getIdTrapped)
 
-    arktest.assertEQ(Proxy.tryGetTarget(objProxy), obj)
-    arktest.assertEQ(Proxy.tryGetHandler(objProxy), objProxyHandler)
+    arktest.assertEQ(proxy.Proxy.tryGetTarget(objProxy), obj)
+    arktest.assertEQ(proxy.Proxy.tryGetHandler(objProxy), objProxyHandler)
 }
 
 function testObjectProxyOps(): void {
@@ -119,8 +119,8 @@ function testObjectProxyOps(): void {
 function testStdLibClassesProxying(): void {
     const map = new Map<string, string>()
 
-    class Handler extends DefaultProxyHandler<Map<string, string>> {}
-    const mapProxy = Proxy.create(map, new Handler())
+    class Handler extends proxy.DefaultProxyHandler<Map<string, string>> {}
+    const mapProxy = proxy.Proxy.create(map, new Handler())
 
     arktest.assertTrue(map === mapProxy)
 }

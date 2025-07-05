@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
+
+export namespace proxy {
 
 export final class Proxy {
     private constructor() {}
@@ -707,4 +709,6 @@ abstract class ArrayProxy<T> extends Array<T> {
 
         throw new AssertionError("Array.unshift() unexpected result type: " + Type.of(result))
     }
+}
+
 }
