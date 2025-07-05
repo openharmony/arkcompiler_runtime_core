@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos.gni")
+
 action("build_declgen") {
   sources = [
     "package.json",
@@ -39,4 +41,12 @@ action("build_declgen") {
   ]
 
   outputs = [ "${target_out_dir}/panda-declgen-1.0.0.tgz" ]
+}
+
+ohos_copy("declgen_ts2sts_compile_declgen") {
+  deps = [ ":build_declgen" ]
+  sources = [ "${target_out_dir}/panda-declgen-1.0.0.tgz" ]
+  outputs=[ "${root_out_dir}/ohos_ets/panda-declgen/panda-declgen-1.0.0.tgz" ]
+  subsystem_name = "arkcompiler"
+  part_name = "runtime_core"
 }
