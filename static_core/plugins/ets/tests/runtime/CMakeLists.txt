@@ -25,8 +25,6 @@ panda_ets_add_gtest(
     TEST_GROUP ets_tests_runtime_gtests
 )
 
-<<<<<<< HEAD
-=======
 panda_ets_add_gtest(
     NO_CORES
     NAME static_object_accessor_test
@@ -39,7 +37,6 @@ panda_ets_add_gtest(
     TEST_GROUP ets_tests_runtime_gtests
 )
 
->>>>>>> OpenHarmony_feature_20250328
 panda_add_gtest_with_ani(ets_vm_init_prealloc_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.ets
@@ -48,8 +45,6 @@ panda_add_gtest_with_ani(ets_vm_init_prealloc_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
-<<<<<<< HEAD
-=======
 if (NOT PANDA_QEMU_BUILD)
     panda_add_gtest_with_ani(ets_vm_postfork_aot_load_test
         CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.cpp
@@ -72,6 +67,5 @@ panda_ets_add_gtest(
     TEST_GROUP ets_tests_runtime_gtests
 )
 
->>>>>>> OpenHarmony_feature_20250328
 add_subdirectory(types)
 add_subdirectory(tooling)

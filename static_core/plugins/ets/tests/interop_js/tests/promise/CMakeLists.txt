@@ -319,16 +319,6 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_proxy_reject
     LAUNCHER_ARGS "testProxyPromiseReject"
 )
 
-<<<<<<< HEAD
-# NOTE: #23100
-# panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_proxy_with_then_await_reject_fail
-#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.ets
-#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
-#     JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test_exports.js
-#     ETS_CONFIG ${ETS_CONFIG}
-#     LAUNCHER_ARGS ".testAwaitPromiseProxyThenRejectShouldFail"
-# )
-=======
 panda_ets_interop_js_test(ets_interop_js_test_promise_proxy_with_await_reject
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/promise_proxy_test.js
@@ -352,7 +342,6 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_proxy_with_then_await_reje
     ETS_CONFIG ${ETS_CONFIG}
     LAUNCHER_ARGS "testAwaitPromiseProxyThenRejectShouldFail"
 )
->>>>>>> OpenHarmony_feature_20250328
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_then_on_rejection
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets

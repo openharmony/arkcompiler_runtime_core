@@ -47,12 +47,8 @@ set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
     --load-runtimes=ets
-<<<<<<< HEAD
-    --sampling-profiler-enable
-=======
     --sampling-profiler-create
     --sampling-profiler-startup-run
->>>>>>> OpenHarmony_feature_20250328
     --sampling-profiler-interval=200
 )
 

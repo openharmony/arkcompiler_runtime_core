@@ -341,8 +341,6 @@ function testSetIntervalWithString(): void {
     }, delay)
     globalTest!.checkpoint(1);
 }
-<<<<<<< HEAD
-=======
 
 function testClearTimerCrossWorker()
 {
@@ -375,4 +373,3 @@ function testClearTimerCrossWorker()
         arktest.assertTrue(triedToClear);
     }
 }
->>>>>>> OpenHarmony_feature_20250328

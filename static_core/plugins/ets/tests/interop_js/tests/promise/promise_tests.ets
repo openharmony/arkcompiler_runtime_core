@@ -760,14 +760,9 @@ function testPromiseThenOnRejection(): void {
         globalTest!.fail();
     }, (error: Error): string => {
         return "correct flow";
-<<<<<<< HEAD
-    }).then<string, void>((value: Object): void => {
-        globalTest!.success();
-=======
     }).then<string, void>((value): string => {
         globalTest!.success();
         return value as string
->>>>>>> OpenHarmony_feature_20250328
     }, (error: Error): void => {
         globalTest!.fail();
     });

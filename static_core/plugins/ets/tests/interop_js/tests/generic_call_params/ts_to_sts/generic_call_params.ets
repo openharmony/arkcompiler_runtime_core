@@ -33,11 +33,7 @@ type TupleT = [string, int];
 const etsInt = 1;
 const etsUnion: Union = etsInt;
 const etsString = 'string';
-<<<<<<< HEAD
-const arrForLoop: int[] = [0, 1, 2]
-=======
 const arrForLoop: FixedArray<int> = [0, 1, 2]
->>>>>>> OpenHarmony_feature_20250328
 const etsTuple: TupleT = [etsString, etsInt];
 class EtsUser {
     age = etsInt;

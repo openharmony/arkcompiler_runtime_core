@@ -8,13 +8,6 @@ std/core/SortInternalTestShort.ets
 
 #20525
 std/concurrency/AsyncLockTest.ets
-<<<<<<< HEAD
-#22500
-std/containers/ArrayTestChecked.ets
-
-#25162
-std/math/RoundTest.ets
-=======
 
 #24088
 std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
@@ -38,4 +31,3 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
 spec/03.types/References_Types/Tuples_type/tuple_write_3.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
->>>>>>> OpenHarmony_feature_20250328

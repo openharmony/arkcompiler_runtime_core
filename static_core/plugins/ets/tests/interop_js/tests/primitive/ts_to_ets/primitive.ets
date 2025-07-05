@@ -66,19 +66,11 @@ function checkLongBoxed(val: Long) {
 }
 
 function checkFloat(val: float) {
-<<<<<<< HEAD
-     assertTrue(val == 2.1f)
-}
-
-function checkFloatBoxed(val: Float) {
-    assertTrue(val == 2.1f)
-=======
      arktest.assertTrue(val == 2.1f)
 }
 
 function checkFloatBoxed(val: Float) {
     arktest.assertTrue(val == 2.1f)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function checkFloatOverflow(val: float, oriVal: number) {

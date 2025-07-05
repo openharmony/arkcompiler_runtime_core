@@ -95,13 +95,7 @@ public:
         return std::vector<MirrorFieldInfo> {
             MirrorFieldInfo("buffer", ark::cross_values::GetTypedArrayBufferOffset(RUNTIME_ARCH)),
             MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedArrayLengthOffset(RUNTIME_ARCH)),
-<<<<<<< HEAD
-            MirrorFieldInfo("byteOffset", ark::cross_values::GetTypedArrayByteOffsetOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("arrayBufferBacked",
-                            ark::cross_values::GetTypedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
-=======
             MirrorFieldInfo("byteOffset", ark::cross_values::GetTypedArrayByteOffsetOffset(RUNTIME_ARCH))};
->>>>>>> OpenHarmony_feature_20250328
     }
 
     static std::vector<MirrorFieldInfo> GetUArrayMembers()
@@ -109,13 +103,7 @@ public:
         return std::vector<MirrorFieldInfo> {
             MirrorFieldInfo("buffer", ark::cross_values::GetTypedUnsignedArrayBufferOffset(RUNTIME_ARCH)),
             MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedUnsignedArrayLengthOffset(RUNTIME_ARCH)),
-<<<<<<< HEAD
-            MirrorFieldInfo("byteOffsetInt", ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("arrayBufferBacked",
-                            ark::cross_values::GetTypedUnsignedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
-=======
             MirrorFieldInfo("byteOffsetInt", ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(RUNTIME_ARCH))};
->>>>>>> OpenHarmony_feature_20250328
     }
 
     static std::vector<MirrorFieldInfo> GetArrayBufferMembers()

@@ -10,15 +10,6 @@ koala-related-benchmarks/arkts-phase1.ets
 #19807
 regression/12581_custom_class_Engine_array.ets
 
-<<<<<<< HEAD
-#25112
-regression/25112.ets
-
-#25425
-regression/15278_0.ets
-regression/15278_1.ets
-
-=======
 #25425
 regression/15278_1.ets
 
@@ -32,7 +23,6 @@ regression/23652.ets
 regression/23659_0.ets
 regression/23659_1.ets
 
->>>>>>> OpenHarmony_feature_20250328
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
@@ -380,14 +370,6 @@ std/math/std_math_clz64_long.ets
 #18766
 spec/partial_type/partialType_main.ets
 
-<<<<<<< HEAD
-std/containers/concurrent_hash_map/ConcurrentHashMap_MoreTypeTest.ets
-
-#25053
-std/core/IntlPluralRulesTest.ets
-std/core/dateformat/IntlDateFormatRangeToPartsOptionsTest.ets
-std/core/dateformat/IntlDateFormatToPartsOptionsTest.ets
-=======
 #25752
 float32array_newFloat32Array_newArrayBuffer_2_Float32Array_BYTES_PER_ELEMENT___1_0_pars_0.ets
 #25740
@@ -559,4 +541,3 @@ regression/15278_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
 std/core/IntlNumberFormatResolvedOptionsTest.ets
 std/core/dateformat/IntlDateFormatRangeOptionsTest.ets
->>>>>>> OpenHarmony_feature_20250328

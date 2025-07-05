@@ -19,29 +19,17 @@ native function spinlockIsHeld(spinlock: Object): boolean;
 
 function runConcurrently(coroutinesCount: number, callback: () => void) {
     let spinlock = spinlockCreate();
-<<<<<<< HEAD
-    let jobs = new Array<Promise<boolean>>;
-=======
     let jobs = new Array<Job<boolean>>;
->>>>>>> OpenHarmony_feature_20250328
     let guard = () => {
         spinlockGuard(spinlock, callback);
         return true;
     };
     for (let i = 0; i < coroutinesCount; ++i) {
-<<<<<<< HEAD
-        let j = launch guard();
-        jobs.push(j);
-    }
-    for (let job of jobs) {
-        await job;
-=======
         let j = launch<boolean, () => boolean>(guard);
         jobs.push(j);
     }
     for (let job of jobs) {
         job.Await();
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -54,11 +42,7 @@ function exclusiveAccess(): void {
             count++;
         }
     });
-<<<<<<< HEAD
-    assertTrue(count == workload * coroutinesCount);
-=======
     arktest.assertTrue(count == workload * coroutinesCount);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function objectAllocationsUnderLock() {
@@ -80,13 +64,7 @@ function throwingExceptionUnderLock() {
         spinlockGuard(spinlock, () => { throw new Error(); });
     } catch (e: Error) {
         errorCatched = true;
-<<<<<<< HEAD
-        assertTrue(!spinlockIsHeld(spinlock));
-    }
-    assertTrue(errorCatched);
-=======
         arktest.assertTrue(!spinlockIsHeld(spinlock));
     }
     arktest.assertTrue(errorCatched);
->>>>>>> OpenHarmony_feature_20250328
 }

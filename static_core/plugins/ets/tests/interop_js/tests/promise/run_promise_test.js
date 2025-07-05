@@ -29,10 +29,6 @@ function runTest(test) {
 	const etsOpts = {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
-<<<<<<< HEAD
-		'coroutine-enable-external-scheduling': 'true',
-=======
->>>>>>> OpenHarmony_feature_20250328
 		'xgc-trigger-type': 'never',
 	};
 	if (!etsVm.createRuntime(etsOpts)) {

@@ -21,12 +21,6 @@ type TupleT = [int, boolean];
 const etsInt = 1;
 const etsString = 'string';
 const etsBool = true;
-<<<<<<< HEAD
-const etsArr: int[] = [etsInt];
-const etsObj: object = {};
-const etsUnion: Union = etsInt;
-const etsTuple: TupleT = [etsInt, etsBool];
-=======
 const etsArr: FixedArray<int>;
 const etsObj: object;
 const etsUnion: Union;
@@ -37,7 +31,6 @@ static {
     etsUnion = etsInt;
     etsTuple = [etsInt, etsBool];
 }
->>>>>>> OpenHarmony_feature_20250328
 
 
 // NOTE: issue (1835) enable this after fix Literal type
@@ -194,11 +187,7 @@ function genericExtendClassFromEts(): User {
     return genericExtendClass(obj as User);
 }
 
-<<<<<<< HEAD
-function tupleGeneric<T, U>(arg: (T|U)[]): [U, T] {
-=======
 function tupleGeneric<T, U>(arg: FixedArray<T|U>): [U, T] {
->>>>>>> OpenHarmony_feature_20250328
     return [arg[1] as U, arg[0] as T]
 }
 

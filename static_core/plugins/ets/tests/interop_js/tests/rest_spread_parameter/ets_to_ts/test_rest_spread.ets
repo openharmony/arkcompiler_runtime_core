@@ -35,11 +35,7 @@ function checkRestOfString(obj: FixedArray<string>, ...strs: FixedArray<string>)
     return true;
 }
 
-<<<<<<< HEAD
-function checkRestOfTuple(obj: ((number | string)[])[], ...tupleArr: ((number | string)[])[]) {
-=======
 function checkRestOfTuple(obj: FixedArray<FixedArray<number | string>>, ...tupleArr: FixedArray<FixedArray<number | string>>) {
->>>>>>> OpenHarmony_feature_20250328
     if(obj.length !== tupleArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {

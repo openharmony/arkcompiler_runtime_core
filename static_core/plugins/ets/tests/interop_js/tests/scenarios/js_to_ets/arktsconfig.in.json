@@ -9,11 +9,7 @@
 			"decl_js": {
 				"language": "js",
 				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/js_suites/scenarios",
-<<<<<<< HEAD
-				"declPath": "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.ets"
-=======
 				"path": "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.ets"
->>>>>>> OpenHarmony_feature_20250328
 			},
 			"pure_js": {
 				"language": "js",
