@@ -1076,6 +1076,7 @@ void SimplifyStringBuilder::HoistInstructionsToPostExit(const ConcatenationLoopM
     auto loopBlock = match.exit.toStringCall->GetBasicBlock();
     loopBlock->EraseInst(match.exit.toStringCall, true);
 
+    ASSERT(saveState != nullptr);
     if (!saveState->HasUsers()) {
         // First use of save state, insert toString-call after it
         match.exit.toStringCall->SetSaveState(saveState);
