@@ -137,16 +137,28 @@ public:
 
     static void SetClass(ObjectHeader *obj, BaseClass *newClass);
 
-    static bool IsHeapObject(ObjectPointerType v)
+    template <LangTypeT LANGUAGE_TYPE>
+    static bool IsHeapObject(
+        std::conditional_t<LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC, ObjectPointerType, coretypes::TaggedType> v)
     {
-        return reinterpret_cast<ObjectHeader *>(v) != nullptr;
+        if constexpr (LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC) {
+            return reinterpret_cast<ObjectHeader *>(v) != nullptr;
+        } else {
+            return coretypes::TaggedValue(v).IsHeapObject();
+        }
     }
 
-    static ObjectHeader *DecodeNotNull(ObjectPointerType v)
+    template <LangTypeT LANGUAGE_TYPE>
+    static ObjectHeader *DecodeNotNull(
+        std::conditional_t<LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC, ObjectPointerType, coretypes::TaggedType> v)
     {
-        auto *p = reinterpret_cast<ObjectHeader *>(v);
-        ASSERT(p != nullptr);
-        return p;
+        if constexpr (LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC) {
+            auto *p = reinterpret_cast<ObjectHeader *>(v);
+            ASSERT(p != nullptr);
+            return p;
+        } else {
+            return coretypes::TaggedValue(v).GetHeapObject();
+        }
     }
 
     template <typename P>
@@ -161,28 +173,17 @@ public:
         return AtomicLoad(p, std::memory_order_relaxed);
     }
 
-    static void Store(ObjectPointerType *ref, ObjectHeader *val)
+    template <LangTypeT LANGUAGE_TYPE>
+    static void Store(
+        std::conditional_t<LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC, ObjectPointerType, coretypes::TaggedType> *ref,
+        ObjectHeader *val)
     {
-        *ref = EncodeObjectPointerType(val);
+        if constexpr (LANGUAGE_TYPE == LangTypeT::LANG_TYPE_STATIC) {
+            *ref = EncodeObjectPointerType(val);
+        } else {
+            *ref = EncodeTaggedType(val);
+        }
     }
-
-// NOTE(ipetrov): Hack for 128 bit ObjectHeader
-#if !defined(ARK_HYBRID)
-    static bool IsHeapObject(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).IsHeapObject();
-    }
-
-    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).GetHeapObject();
-    }
-
-    static void Store(coretypes::TaggedType *ref, ObjectHeader *val)
-    {
-        *ref = EncodeTaggedType(val);
-    }
-#endif
 
 private:
     template <class T, bool IS_VOLATILE>
