@@ -90,7 +90,9 @@ void RegAllocResolver::ResolveInputs(Inst *inst)
     inputLocations_.clear();
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
         auto inputInterval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-        inputLocations_.push_back(inputInterval->FindSiblingAt(insLn)->GetLocation());
+        auto sibling = inputInterval->FindSiblingAt(insLn);
+        ASSERT(sibling != nullptr);
+        inputLocations_.push_back(sibling->GetLocation());
     }
 
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
@@ -220,10 +222,13 @@ void RegAllocResolver::PropagateCallerMasks(SaveStateInst *saveState)
     // Get location of save state inputs at the save state user (note that at this point
     // all inputs will have the same location at all users (excluding ReturnInlined that should be skipped)).
     FillSaveStateRootsMask(saveState, user, saveState);
-    for (auto callerInst = saveState->GetCallerInst(); callerInst != nullptr;
-         callerInst = callerInst->GetSaveState()->GetCallerInst()) {
+
+    for (auto callerInst = saveState->GetCallerInst(); callerInst != nullptr;) {
         auto callerSs = callerInst->GetSaveState();
         FillSaveStateRootsMask(callerSs, user, saveState);
+        auto saveStateTmp = callerInst->GetSaveState();
+        ASSERT(saveStateTmp != nullptr);
+        callerInst = saveStateTmp->GetCallerInst();
     }
 }
 

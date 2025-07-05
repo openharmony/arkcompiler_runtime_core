@@ -1137,6 +1137,7 @@ void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *cal
         // Otherwise we remove call instruction
         auto saveState = callInst->GetSaveState();
         // Remove SaveState if it has only Call instruction in the users
+        ASSERT(saveState != nullptr);
         if (saveState->GetUsers().Front().GetNext() == nullptr) {
             saveState->GetBasicBlock()->RemoveInst(saveState);
         }
@@ -1269,6 +1270,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     auto graphInl = GetGraph()->CreateChildGraph(ctx->method);
 
     // Propagate instruction id counter to inlined graph, thereby avoid instructions id duplication
+    ASSERT(graphInl != nullptr);
     graphInl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
 
     auto stats = GetGraph()->GetPassManager()->GetStatistics();

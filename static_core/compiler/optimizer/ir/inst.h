@@ -3957,6 +3957,7 @@ public:
     {
         ASSERT(rootsStackMask_ == nullptr);
         rootsStackMask_ = allocator->New<ArenaBitVector>(allocator);
+        ASSERT(rootsStackMask_ != nullptr);
         rootsStackMask_->Reset();
     }
 
@@ -4656,6 +4657,7 @@ public:
         if (imms_ == nullptr) {
             imms_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
         }
+        ASSERT(imms_ != nullptr);
         imms_->push_back(imm);
     }
 

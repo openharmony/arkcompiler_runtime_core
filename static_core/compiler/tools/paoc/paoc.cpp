@@ -1048,6 +1048,7 @@ void Paoc::MakeAotData(CompilingContext *ctx, uintptr_t codeAddress)
                                aotBuilder_->GetGotString()},
                               {aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon()}});
 
+    ASSERT(aotData != nullptr);
     aotData->SetUseCha(paocOptions_->IsPaocUseCha());
     aotData->SetHasProfileData(ctx->method->GetProfilingData() != nullptr);
     ctx->graph->SetAotData(aotData);
