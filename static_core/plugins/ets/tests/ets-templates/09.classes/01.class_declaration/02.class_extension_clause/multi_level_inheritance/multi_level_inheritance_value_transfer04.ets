@@ -30,7 +30,7 @@ class B extends A {
     super();
   }
 
-  test(){
+  test() {
   }
 }
 

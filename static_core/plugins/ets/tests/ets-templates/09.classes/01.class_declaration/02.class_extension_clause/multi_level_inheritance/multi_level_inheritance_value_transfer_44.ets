@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Whether the public member variable _public_var passed from class a to class f through a multi-level inheritance chain is correctly initialized to null.
+desc: >-
+    Whether the public member variable _public_var passed from class a to class f through a multi-level inheritance
+    chain is correctly initialized to null.
 ---*/
 
 class A {

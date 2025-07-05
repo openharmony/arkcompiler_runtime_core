@@ -33,12 +33,12 @@ class CB extends CA {
 }
 
 function main(): void {
-  if(iteration_number < 1) {
-    arktest.assertEQ( CA.f, 3 );
+  if (iteration_number < 1) {
+    arktest.assertEQ(CA.f, 3);
   } else {
-    arktest.assertEQ( CA.f, 7 );
+    arktest.assertEQ(CA.f, 7);
   }
   let a = new CB();
-  arktest.assertEQ( CA.f, 7 );
+  arktest.assertEQ(CA.f, 7);
   iteration_number += 1;
 }

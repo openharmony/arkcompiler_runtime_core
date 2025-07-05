@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Test whether class d indirectly inherits class b through class c to correctly obtain the initial value of the public variable _publicVar in class b.
+desc: >-
+    Test whether class d indirectly inherits class b through class c to correctly obtain the initial value
+    of the public variable _publicVar in class b.
 ---*/
 
 class A {
@@ -33,7 +35,7 @@ class C extends B {
 }
 
 class D extends C {
-  test(){
+  test() {
   }
 }
 

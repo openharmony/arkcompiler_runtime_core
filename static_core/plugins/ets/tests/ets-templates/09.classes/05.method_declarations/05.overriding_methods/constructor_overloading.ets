@@ -15,7 +15,9 @@
 
 /*---
 desc: Class constructors overloading
-assert: Overloading of constructors is identical in behavior to overloading of methods. The overloading is resolved at compile time by each class instance creation expression.
+assert: >-
+    Overloading of constructors is identical in behavior to overloading of methods.
+    The overloading is resolved at compile time by each class instance creation expression.
 ---*/
 
 class A {

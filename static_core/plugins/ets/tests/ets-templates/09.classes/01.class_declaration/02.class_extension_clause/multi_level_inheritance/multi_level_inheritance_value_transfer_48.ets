@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Change the protected property _public_var inherited from class a to'aa' in class d, and verify that the property value is'aa' in the test method of class e.
+desc: >-
+    Change the protected property _public_var inherited from class a to'aa' in class d, and verify that the property
+    value is'aa' in the test method of class e.
 ---*/
 
 class A {

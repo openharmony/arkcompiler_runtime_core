@@ -21,7 +21,7 @@ class A {
   static a: int
 
   static {
-    switch(A.a) {
+    switch (A.a) {
       case 0: A.a = 1; break
       default: A.a = 2
     }
@@ -29,5 +29,5 @@ class A {
 }
 
 function main(): void {
-  arktest.assertEQ( A.a, 1 );
+  arktest.assertEQ(A.a, 1);
 }

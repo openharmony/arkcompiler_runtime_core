@@ -15,7 +15,9 @@
 
 /*---
 desc: A class inherits from its direct superinterface.
-assert: A class inherits from its direct superclass and direct superinterfaces all non-private fields of the superclass and superinterfaces that are both accessible to code in the class and not hidden by a declaration in the class.
+assert: >-
+    A class inherits from its direct superclass and direct superinterfaces all non-private fields of the superclass
+    and superinterfaces that are both accessible to code in the class and not hidden by a declaration in the class.
 ---*/
 
 interface A {
@@ -26,7 +28,7 @@ interface C {
   y: boolean;
 }
 
-class B implements A, C{
+class B implements A, C {
   x: int;
   y: boolean;
 }

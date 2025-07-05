@@ -17,7 +17,9 @@
 
 /*---
 desc: Use variables that not declare in an inner class, and don't have readonly modifier.
-assert: Any local variable, formal parameter, or exception and panic parameter used but not declared in an inner class must be declared readonly, or a compile-time error occurs where the use is attempted.
+assert: >-
+    Any local variable, formal parameter, or exception and panic parameter used but not declared in an inner class
+    must be declared readonly, or a compile-time error occurs where the use is attempted.
 tags: [compile-only, negative]
 ---*/
 

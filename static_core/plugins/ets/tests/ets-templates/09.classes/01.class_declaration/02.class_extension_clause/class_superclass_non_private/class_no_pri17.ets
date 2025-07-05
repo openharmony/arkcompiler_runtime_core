@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the parent class method uses the static method overridden by the child class.
+desc: >-
+    The child class calls the parent class method, and the parent class method uses the static method
+    overridden by the child class.
 ---*/
 
 class Parent {

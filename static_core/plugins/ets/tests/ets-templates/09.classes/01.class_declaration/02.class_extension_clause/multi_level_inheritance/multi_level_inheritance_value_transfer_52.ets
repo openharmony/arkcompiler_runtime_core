@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Whether the protected member variable _public_var passed from class b to class d through a multi-level inheritance chain is correctly initialized to the value two.
+desc: >-
+    Whether the protected member variable _public_var passed from class b to class d through a multi-level inheritance
+    chain is correctly initialized to the value two.
 ---*/
 
 class A {

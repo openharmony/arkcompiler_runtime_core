@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the new setter of the child class is used in the parent class method.
+desc: >-
+    The child class calls the parent class method, and the new setter of the child class
+    is used in the parent class method.
 ---*/
 
 class Parent {

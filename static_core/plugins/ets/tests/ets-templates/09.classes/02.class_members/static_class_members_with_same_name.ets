@@ -14,7 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: All names in both static and non-static class declaration scopes (see Scopes) must be unique, i.e., fields and methods cannot have the same name.
+desc: >-
+    All names in both static and non-static class declaration scopes (see Scopes) must be unique,
+    i.e., fields and methods cannot have the same name.
 ---*/
 
 class A {

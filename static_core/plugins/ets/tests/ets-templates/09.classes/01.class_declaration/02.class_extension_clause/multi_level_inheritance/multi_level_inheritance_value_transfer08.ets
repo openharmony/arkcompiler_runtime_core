@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Check whether the instance of class f can accurately obtain the initial value of the public variable _publicVar in class a after multiple layers of inheritance.
+desc: >-
+    Check whether the instance of class f can accurately obtain the initial value of the public variable
+    _publicVar in class a after multiple layers of inheritance.
 ---*/
 
 class A {

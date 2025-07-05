@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Multi-level inheritance verifies the correctness of the protected array member variable _publicVar inherited from parent class A after being overridden in subclass D.
+desc: >-
+    Multi-level inheritance verifies the correctness of the protected array member variable _publicVar inherited
+    from parent class A after being overridden in subclass D.
 ---*/
 
 class A {

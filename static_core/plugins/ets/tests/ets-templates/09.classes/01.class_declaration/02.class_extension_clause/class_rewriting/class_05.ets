@@ -33,5 +33,5 @@ function main(): void {
   let cat = new Cat();
   let result = cat.speak();
   let result1 = cat.speak();
-  arktest.assertEQ(result,'Meow!');
+  arktest.assertEQ(result, 'Meow!');
 }

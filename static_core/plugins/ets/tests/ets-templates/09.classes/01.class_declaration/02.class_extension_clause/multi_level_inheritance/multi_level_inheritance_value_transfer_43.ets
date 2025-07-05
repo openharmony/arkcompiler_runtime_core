@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: Verify that class e inherits from class d and accesses the protected property _public_var through the inheritance chain to be null.
+desc: >-
+    Verify that class e inherits from class d and accesses the protected property _public_var through
+    the inheritance chain to be null.
 ---*/
 
 class A {

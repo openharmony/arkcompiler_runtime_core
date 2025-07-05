@@ -14,14 +14,16 @@
  */
 
 /*---
-desc: An example of verifying that subclasses can correctly override and access public member variables defined in the parent class under a multi-level inheritance structure.
+desc: >-
+    An example of verifying that subclasses can correctly override and access public member variables
+    defined in the parent class under a multi-level inheritance structure.
 ---*/
 
 class A {
   public _publicVar: boolean;
 
   constructor() {
-    this._publicVar =  true;
+    this._publicVar = true;
   }
 }
 

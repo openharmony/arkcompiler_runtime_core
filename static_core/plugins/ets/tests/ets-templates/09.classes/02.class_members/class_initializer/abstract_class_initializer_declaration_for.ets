@@ -21,12 +21,12 @@ abstract class A {
   static a: int;
 
   static {
-    for(let i=0; i< 10; i++) {
+    for(let i = 0; i < 10; i++) {
       A.a += i
     }
   }
 }
 
 function main(): void {
-  arktest.assertEQ( A.a, 45 );
+  arktest.assertEQ(A.a, 45 );
 }

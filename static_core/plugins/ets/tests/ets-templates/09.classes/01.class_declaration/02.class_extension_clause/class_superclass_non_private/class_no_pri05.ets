@@ -20,7 +20,7 @@ desc: A subclass calls a method of its superclass, and the superclass method ret
 class KeyValuePair {
   key: string = '';
   value: number = 0;
-  constructor( key: string,  value: number) {
+  constructor(key: string, value: number) {
     this.value = value;
     this.key = key;
   }

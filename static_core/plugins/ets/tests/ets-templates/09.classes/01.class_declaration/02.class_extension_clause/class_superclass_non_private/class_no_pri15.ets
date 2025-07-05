@@ -14,7 +14,9 @@
  */
 
 /*---
-desc: The child class calls the parent class method, and the properties overridden by the child class are used in the parent class method.
+desc: >-
+    The child class calls the parent class method, and the properties overridden by the child class
+    are used in the parent class method.
 tags: [compile-only, negative]
 ---*/
 
