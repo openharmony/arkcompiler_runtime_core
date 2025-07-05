@@ -18,24 +18,6 @@
 void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
 void BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-<<<<<<< HEAD
-void BuildEscompatArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-void BuildEscompatArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-void BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
-                                        bool accRead);
-void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
-                                 ark::compiler::DataType::Type type, bool accRead);
-void BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-// CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
-std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadDataAndOffset(
-    const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-// CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
-std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedUnsignedArrayLoadDataAndOffset(
-    const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-void BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(ark::compiler::Inst *typedArrayInst, size_t bcAddr,
-                                                     ark::compiler::SaveStateInst *saveState, size_t fieldOffset);
-=======
 void BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
@@ -74,7 +56,6 @@ std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadData
 // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
 std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedUnsignedArrayLoadDataAndOffset(
     const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead, bool needBoundCheck);
->>>>>>> OpenHarmony_feature_20250328
 void BuildTypedArrayDeoptimizeIfExternalData(ark::compiler::Inst *dataInst, size_t bcAddr,
                                              ark::compiler::SaveStateInst *saveState);
 void BuildTypedArrayDeoptimizeIfOutOfRange(ark::compiler::Inst *posInst, ark::compiler::Inst *lengthInst, size_t bcAddr,

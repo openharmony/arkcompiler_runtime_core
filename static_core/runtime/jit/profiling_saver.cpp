@@ -20,11 +20,7 @@ namespace ark {
 void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInlineCache *ic,
                                         std::vector<Class *> &runtimeClasses, pgo::AotProfilingData *profileData)
 {
-<<<<<<< HEAD
-    for (uint32_t i = 0; i < runtimeClasses.size();) {
-=======
     for (uint32_t i = 0; i < runtimeClasses.size(); i++) {
->>>>>>> OpenHarmony_feature_20250328
         auto storedClass = ic->classes[i];
 
         auto runtimeCls = runtimeClasses[i];
@@ -43,10 +39,6 @@ void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInline
         auto clsIdx = runtimeCls->GetFileId().GetOffset();
 
         ic->classes[i] = {clsIdx, pfIdx};
-<<<<<<< HEAD
-        i++;
-=======
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -136,12 +128,8 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, Pand
 }
 
 void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
-<<<<<<< HEAD
-                                 PandaVector<const Method *> profiledMethods,
-=======
                                  PandaList<Method *> &profiledMethods,
                                  PandaList<Method *>::const_iterator profiledMethodsFinal,
->>>>>>> OpenHarmony_feature_20250328
                                  PandaUnorderedSet<std::string_view> &profiledPandaFiles)
 {
     ProfilingLoader profilingLoader;

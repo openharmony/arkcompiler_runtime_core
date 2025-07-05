@@ -160,12 +160,9 @@ public:
     {
         uint32_t count = pandaFileMap_.size();
         for (auto &pandaFile : profiledPandaFiles) {
-<<<<<<< HEAD
-=======
             if (pandaFileMap_.find(pandaFile) != pandaFileMap_.end()) {
                 continue;
             }
->>>>>>> OpenHarmony_feature_20250328
             pandaFileMap_[pandaFile] = count;
             pandaFileMapRev_[count] = pandaFile;
             count++;

@@ -93,12 +93,6 @@ void InstBuilder::BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction
     UpdateDefinitionAcc(result);
 }
 
-<<<<<<< HEAD
-void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
-{
-    auto *value = GetArgDefinition(bcInst, 2, accRead);
-    BuildTypedArraySetIntrinsic(bcInst, value, type, accRead);
-=======
 void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
@@ -116,7 +110,6 @@ void InstBuilder::BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction
     AddInstruction(buffer);
     auto *result = GetGraph()->CreateInstStoreArray(DataType::REFERENCE, bcAddr, buffer, pos, value, true);
     AddInstruction(result);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst,
@@ -134,34 +127,6 @@ void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *
     clamped->SetInput(0, clamped0);
     clamped->SetInput(1, graph->FindOrCreateConstant(MAX_VALUE));
     AddInstruction(clamped);
-<<<<<<< HEAD
-    BuildTypedArraySetIntrinsic(bcInst, clamped, type, accRead);
-}
-
-void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, Inst *value, DataType::Type type,
-                                              bool accRead)
-{
-    const size_t valueIndex = 2;
-    auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = DataType::IsTypeSigned(type)
-                                              ? BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead)
-                                              : BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
-
-    auto *storeInst = GetGraph()->CreateInstStoreNative(type, bcAddr);
-    storeInst->SetInput(0, loadDataInst);
-    storeInst->SetInput(1, dataOffsetInst);
-    if (!DataType::IsInt32Bit(type) && DataType::IsInt32Bit(value->GetType())) {
-        auto *cast = GetGraph()->CreateInstCast(type, bcAddr, value, value->GetType());
-        storeInst->SetInput(valueIndex, cast);
-        AddInstruction(cast);
-    } else {
-        storeInst->SetInput(valueIndex, value);
-    }
-    AddInstruction(storeInst);
-}
-
-void InstBuilder::BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
-=======
     BuildTypedUnsignedArraySetIntrinsic(bcInst, clamped, type, accRead);
 }
 
@@ -202,7 +167,6 @@ void InstBuilder::BuildTypedArraySet(const BytecodeInstruction *bcInst, Inst *va
 }
 
 void InstBuilder::BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
->>>>>>> OpenHarmony_feature_20250328
 {
     auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, true);
     auto *value = GetArgDefinition(bcInst, 2, accRead);
@@ -233,25 +197,8 @@ void InstBuilder::BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst,
 {
     ASSERT(type != DataType::INT64);
     auto bcAddr = GetPc(bcInst->GetAddress());
-<<<<<<< HEAD
-    auto [loadDataInst, dataOffsetInst] = DataType::IsTypeSigned(type)
-                                              ? BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead)
-                                              : BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
-
-    auto *loadInst = GetGraph()->CreateInstLoadNative(type, bcAddr);
-    loadInst->SetInput(0, loadDataInst);
-    loadInst->SetInput(1, dataOffsetInst);
-    AddInstruction(loadInst);
-
-    if (type == DataType::INT64 || type == DataType::UINT64) {
-        UpdateDefinitionAcc(loadInst);
-        return;
-    }
-
-=======
     auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead, true);
     auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
->>>>>>> OpenHarmony_feature_20250328
     auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
     AddInstruction(result);
     UpdateDefinitionAcc(result);
@@ -329,10 +276,6 @@ void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcI
     1. typedArray
     2. pos
     3. NullCheck v1
-<<<<<<< HEAD
-    4. DeoptimizeIf v3.arrayBufferBacked != 1
-=======
->>>>>>> OpenHarmony_feature_20250328
     5. LoadNative v3, TYPED_ARRAY_BUFFER_OFFSET
     6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
     7. DeoptimizeIf v6 == 0
@@ -345,12 +288,8 @@ void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcI
     Returns (v6, v14)
  */
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
-<<<<<<< HEAD
-                                                                         DataType::Type type, bool accRead)
-=======
                                                                          DataType::Type type, bool accRead,
                                                                          bool needBoundCheck)
->>>>>>> OpenHarmony_feature_20250328
 {
     ASSERT(DataType::IsTypeSigned(type));
     auto bcAddr = GetPc(bcInst->GetAddress());
@@ -363,12 +302,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
 
-<<<<<<< HEAD
-    BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(
-        nullCheck, bcAddr, saveState, ark::cross_values::GetTypedArrayArrayBufferBackedOffset(graph->GetArch()));
-
-=======
->>>>>>> OpenHarmony_feature_20250328
     auto *loadBufferInst =
         graph->CreateInstLoadNative(DataType::REFERENCE, bcAddr, nullCheck,
                                     graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayBufferOffset(arch)));
@@ -389,14 +322,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
         graph->CreateInstCast(DataType::INT32, bcAddr, loadDataOffsetFloat64Inst, loadDataOffsetFloat64Inst->GetType());
     AddInstruction(loadDataOffsetInst);
 
-<<<<<<< HEAD
-    auto *loadLengthInst =
-        graph->CreateInstLoadNative(DataType::INT32, bcAddr, nullCheck,
-                                    graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayLengthOffset(arch)));
-    AddInstruction(loadLengthInst);
-
-    BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
-=======
     if (needBoundCheck) {
         auto *loadLengthInst = graph->CreateInstLoadNative(
             DataType::INT32, bcAddr, nullCheck,
@@ -404,7 +329,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
         AddInstruction(loadLengthInst);
         BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
     }
->>>>>>> OpenHarmony_feature_20250328
 
     auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());
@@ -418,25 +342,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
-<<<<<<< HEAD
-void InstBuilder::BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(Inst *typedArrayInst, size_t bcAddr,
-                                                                  SaveStateInst *saveState, size_t fieldOffset)
-{
-    auto *graph = GetGraph();
-    auto *loadArrayBufferBackedInst =
-        graph->CreateInstLoadNative(DataType::INT8, bcAddr, typedArrayInst, graph->FindOrCreateConstant(fieldOffset));
-    AddInstruction(loadArrayBufferBackedInst);
-    auto *zeroInst = GetGraph()->FindOrCreateConstant(0);
-    auto *isNotArrayBufferBackedInst = graph->CreateInstCompare(DataType::BOOL, bcAddr, loadArrayBufferBackedInst,
-                                                                zeroInst, DataType::INT8, ConditionCode::CC_EQ);
-    AddInstruction(isNotArrayBufferBackedInst);
-    auto *deoptIsNotArrayBufferBackedInst =
-        graph->CreateInstDeoptimizeIf(bcAddr, isNotArrayBufferBackedInst, saveState, DeoptimizeType::ZERO_CHECK);
-    AddInstruction(deoptIsNotArrayBufferBackedInst);
-}
-
-=======
->>>>>>> OpenHarmony_feature_20250328
 void InstBuilder::BuildTypedArrayDeoptimizeIfExternalData(Inst *dataInst, size_t bcAddr, SaveStateInst *saveState)
 {
     auto *graph = GetGraph();
@@ -465,10 +370,6 @@ void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *len
     1. typedUArray
     2. pos
     3. NullCheck v1
-<<<<<<< HEAD
-    4. DeoptimizeIf v3.arrayBufferBacked != 1
-=======
->>>>>>> OpenHarmony_feature_20250328
     5. LoadNative v3, TYPED_U_ARRAY_BUFFER_OFFSET
     6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
     7. DeoptimizeIf v6 == 0
@@ -480,15 +381,9 @@ void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *len
     Returns (v6, v14)
  */
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
-<<<<<<< HEAD
-                                                                                 DataType::Type type, bool accRead)
-{
-    ASSERT(!DataType::IsTypeSigned(type));
-=======
                                                                                  DataType::Type type, bool accRead,
                                                                                  bool needBoundCheck)
 {
->>>>>>> OpenHarmony_feature_20250328
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
     auto *pos = GetArgDefinition(bcInst, 1, accRead);
@@ -499,13 +394,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
 
-<<<<<<< HEAD
-    BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(
-        nullCheck, bcAddr, saveState,
-        ark::cross_values::GetTypedUnsignedArrayArrayBufferBackedOffset(graph->GetArch()));
-
-=======
->>>>>>> OpenHarmony_feature_20250328
     auto *loadBufferInst = graph->CreateInstLoadNative(
         DataType::REFERENCE, bcAddr, nullCheck,
         graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayBufferOffset(arch)));
@@ -523,14 +411,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
         graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(arch)));
     AddInstruction(loadDataOffsetInst);
 
-<<<<<<< HEAD
-    auto *loadLengthInst = graph->CreateInstLoadNative(
-        DataType::INT32, bcAddr, nullCheck,
-        graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayLengthOffset(arch)));
-    AddInstruction(loadLengthInst);
-
-    BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
-=======
     if (needBoundCheck) {
         auto *loadLengthInst = graph->CreateInstLoadNative(
             DataType::INT32, bcAddr, nullCheck,
@@ -538,7 +418,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
         AddInstruction(loadLengthInst);
         BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
     }
->>>>>>> OpenHarmony_feature_20250328
 
     auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());
@@ -552,8 +431,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
     return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
-<<<<<<< HEAD
-=======
 template <bool LOAD>
 void InstBuilder::BuildUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
@@ -623,5 +500,4 @@ void InstBuilder::BuildStringSizeInBytes(const BytecodeInstruction *bcInst, bool
     UpdateDefinitionAcc(result);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 }  // namespace ark::compiler

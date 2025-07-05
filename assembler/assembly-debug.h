@@ -36,14 +36,7 @@ struct Ins {
     }
 
     Ins() = default;
-<<<<<<< HEAD
-    Ins(size_t l_n)
-        : line_number(l_n)
-    {
-    }
-=======
     Ins(size_t l_n, std::string &f_c, size_t b_l, size_t b_r) : line_number(l_n), bound_left(b_l), bound_right(b_r) {}
->>>>>>> OpenHarmony_feature_20250328
 };
 
 struct LocalVariable {

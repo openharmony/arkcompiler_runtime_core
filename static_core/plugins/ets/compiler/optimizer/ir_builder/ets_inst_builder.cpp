@@ -338,8 +338,6 @@ void InstBuilder::BuildCallByName(const BytecodeInstruction *bcInst)
 template void InstBuilder::BuildCallByName<true>(const BytecodeInstruction *bcInst);
 template void InstBuilder::BuildCallByName<false>(const BytecodeInstruction *bcInst);
 
-<<<<<<< HEAD
-=======
 void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
 {
     auto pc = GetPc(bcInst->GetAddress());
@@ -366,5 +364,4 @@ void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
     }
 }
 
->>>>>>> OpenHarmony_feature_20250328
 }  // namespace ark::compiler

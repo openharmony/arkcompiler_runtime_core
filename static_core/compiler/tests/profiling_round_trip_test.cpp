@@ -14,10 +14,7 @@
  */
 
 #include <algorithm>
-<<<<<<< HEAD
-=======
 #include <filesystem>
->>>>>>> OpenHarmony_feature_20250328
 #include <utility>
 #include "include/class.h"
 #include "jit/profiling_data.h"
@@ -175,10 +172,7 @@ class ProfilingRoundTripTest : public ::testing::Test {
 public:
     PandaRunner &CreateRunner()
     {
-<<<<<<< HEAD
-=======
         runner_.GetRuntimeOptions().SetIncrementalProfilesaverEnabled(false);
->>>>>>> OpenHarmony_feature_20250328
         runner_.GetRuntimeOptions().SetShouldLoadBootPandaFiles(false);
         runner_.GetRuntimeOptions().SetShouldInitializeIntrinsics(false);
         runner_.GetRuntimeOptions().SetCompilerProfilingThreshold(0U);
@@ -193,17 +187,6 @@ public:
 
     void SaveProfile()
     {
-<<<<<<< HEAD
-        pgoFilePath_ = CreateTmpFileName();
-        auto *runtime = Runtime::GetCurrent();
-
-        ProfilingSaver profileSaver;
-        classCtxStr_ = runtime->GetClassLinker()->GetClassContextForAot(true);
-        auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
-        auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-        profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
-                                 profiledPandaFiles);
-=======
         auto *runtime = Runtime::GetCurrent();
         if (!runtime->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
             return;
@@ -222,7 +205,6 @@ public:
     {
         auto profileCtxOrError = profilingLoader.LoadProfile(PandaString(pgoFilePath_));
         ASSERT_FALSE(profileCtxOrError.HasValue());
->>>>>>> OpenHarmony_feature_20250328
     }
 
     void LoadProfile(ProfilingLoader &profilingLoader)
@@ -290,8 +272,6 @@ public:
         }
     }
 
-<<<<<<< HEAD
-=======
     void InitPGOFilePath()
     {
         pgoFilePath_ = CreateTmpFileName();
@@ -300,7 +280,6 @@ public:
         }
     }
 
->>>>>>> OpenHarmony_feature_20250328
 private:
     PandaRunner runner_;
     std::map<std::string, ark::Class *> classMap_;
@@ -312,10 +291,7 @@ private:
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 {
-<<<<<<< HEAD
-=======
     InitPGOFilePath();
->>>>>>> OpenHarmony_feature_20250328
     CreateRunner().GetRuntimeOptions().SetInterpreterType("cpp");
     CollectProfile();
     SaveProfile();
@@ -331,10 +307,7 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCpp)
 
 TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
 {
-<<<<<<< HEAD
-=======
     InitPGOFilePath();
->>>>>>> OpenHarmony_feature_20250328
     CreateRunner();
     CollectProfile();
     SaveProfile();
@@ -348,10 +321,6 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSave)
     Runtime::Destroy();
 }
 
-<<<<<<< HEAD
-// NOLINTEND(readability-magic-numbers)
-}  // namespace ark::test
-=======
 TEST_F(ProfilingRoundTripTest, ProfilingFileSaveCppWithProfiler)
 {
     InitPGOFilePath();
@@ -463,4 +432,3 @@ TEST_F(ProfilingRoundTripTest, ProfilingFileSaveWithoutJitAndProfiler)
 
 // NOLINTEND(readability-magic-numbers)
 }  // namespace ark::test
->>>>>>> OpenHarmony_feature_20250328
