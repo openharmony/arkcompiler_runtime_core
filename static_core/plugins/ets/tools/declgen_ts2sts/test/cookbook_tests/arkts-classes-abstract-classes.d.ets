@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 'use static'
->>>>>>> OpenHarmony_feature_20250328
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

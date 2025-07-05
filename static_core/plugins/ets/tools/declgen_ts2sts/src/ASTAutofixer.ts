@@ -20,16 +20,10 @@ import { visitVisitResult } from './utils/ASTHelpers';
 import { 
   ETSKeyword,
   FINAL_CLASS,
-<<<<<<< HEAD
-  JSValue, 
-  KitPrefix, 
-  UtilityTypes, 
-=======
   JSValue,
   KitPrefix,
   LIMIT_DECORATOR,
   UtilityTypes,
->>>>>>> OpenHarmony_feature_20250328
   SpecificTypes,
   BuiltInType
 } from '../utils/lib/TypeUtils';
@@ -1143,8 +1137,6 @@ export class Autofixer {
 
     return node;
   }
-<<<<<<< HEAD
-=======
 
   /**
    * Rule: `arkts:add-declare-to-top-level-interfaces`
@@ -1203,7 +1195,6 @@ export class Autofixer {
 
     return node;
   }
->>>>>>> OpenHarmony_feature_20250328
 }
 
 /**
