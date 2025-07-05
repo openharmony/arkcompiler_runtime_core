@@ -110,18 +110,18 @@ function testWritableCloseState() {
     arktest.assertEQ(writableStream.writableEnded, true);
 }
 
+class MyWritable1 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall(new Error());
+        arktest.assertEQ(this.writable, false);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritable003
 function testWritableAttributeState() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall(new Error());
-            arktest.assertEQ(this.writable, false);
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable1();
     arktest.assertEQ(writableStream.writable, true);
     writableStream.write('test');
     arktest.assertEQ(writableStream.writable, false);
@@ -129,19 +129,19 @@ function testWritableAttributeState() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable2 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        arktest.assertEQ((chunk as string).toString(), 'write content');
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritable004
 function testWritableWriteData() {
     let param: Object[] = [];
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            arktest.assertEQ((chunk as string).toString(), 'write content');
-            callback.unsafeCall();
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable2();
     writableStream.write('write content', 'utf8', (...param: Object[]): void => {
         if (param.length > 0 && param[0] instanceof Error) {
             const error = param[0] as Error;
@@ -151,37 +151,38 @@ function testWritableWriteData() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable3 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => { }
+        let wrappedFn = mustCallUint8Array(fn, 0);
+        wrappedFn(chunk, encoding, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritable005
 function testWritableDoWriteNotCalled() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            let fn = (chunk: string | Uint8Array, encoding: string, callback: Function) => { }
-            let wrappedFn = mustCallUint8Array(fn, 0);
-            wrappedFn(chunk, encoding, callback);
-        }
-    }
-    let writableStream = new MyWritable();
+    let writableStream = new MyWritable3();
     arktest.assertEQ(writableStream.writable, true);
     writableStream.end();
     arktest.assertEQ(writableStream.writable, false);
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable4 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall(new Error());
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableCbError001
 function testWritableWriteDataFailed() {
     let callbackCalled = false;
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall(new Error());
-        }
-    }
-    let writable = new MyWritable();
+
+    let writable = new MyWritable4();
     writable.on('error', mustCallNoArgs((): void => {
         arktest.assertTrue(callbackCalled);
     }));
@@ -191,17 +192,18 @@ function testWritableWriteDataFailed() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class MyWritable5 extends stream.Writable {
+    constructor() {
+        super();
+    }
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+        callback.unsafeCall(new Error());
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamWritableCbError002
 function testWritableErrorOnWrite() {
-    class MyWritable extends stream.Writable {
-        constructor() {
-            super();
-        }
-        doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
-            callback.unsafeCall(new Error());
-        }
-    }
-    let writableStream = new MyWritable();
+
+    let writableStream = new MyWritable5();
     writableStream.on('error', (): void => {
     })
     let num = 0;

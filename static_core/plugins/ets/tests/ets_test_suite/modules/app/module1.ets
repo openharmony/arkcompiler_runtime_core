@@ -99,10 +99,10 @@ function testStdCoreType() {
     arktest.assertEQ((method!.getType().getReceiverType() as ClassType).getName(), classType.getName(), "method 'foo' must be declared in interface 'Base'");
 }
 
+class Handler extends proxy.DefaultProxyHandler<Map<string, string>> { };
 function testStdCoreProxy() {
     const map = new Map<string, string>();
 
-    class Handler extends proxy.DefaultProxyHandler<Map<string, string>> { };
     const mapProxy = proxy.Proxy.create(map, new Handler());
 
     arktest.assertTrue(map === mapProxy, "std.core.Proxy must work correctly in application context");

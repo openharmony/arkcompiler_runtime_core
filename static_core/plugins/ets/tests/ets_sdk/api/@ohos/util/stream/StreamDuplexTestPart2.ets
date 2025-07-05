@@ -108,22 +108,22 @@ function testDuplexReadableHighWatermarkProperty() {
     arktest.assertEQ(duplex.readableHighWatermark, 16 * 1024);
 }
 
+class CustomDuplex1 extends stream.Duplex {
+    data: string;
+    constructor() {
+        super();
+        this.data = '';
+    }
+    doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+        for (const chunk of chunks) {
+            this.data += chunk
+        }
+        callback.unsafeCall();
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev001
 function testDuplexDoWritevConcatenatesChunks() {
-    class CustomDuplex extends stream.Duplex {
-        data: string;
-        constructor() {
-            super();
-            this.data = '';
-        }
-        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-            for (const chunk of chunks) {
-                this.data += chunk
-            }
-            callback.unsafeCall();
-        }
-    }
-    let duplex = new CustomDuplex();
+    let duplex = new CustomDuplex1();
     let func: Function = mustCallNoArgs((): void => {
         arktest.assertEQ(duplex.data, 'Hello World');
     })
@@ -132,17 +132,17 @@ function testDuplexDoWritevConcatenatesChunks() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class CustomDuplex2 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+        callback.unsafeCall(new Error('dowritev error'));
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev002
 function testDuplexDoWritevErrorHandling() {
-    class CustomDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-            callback.unsafeCall(new Error('dowritev error'));
-        }
-    }
-    let duplex = new CustomDuplex();
+    let duplex = new CustomDuplex2();
     duplex.write('Hello ');
     duplex.on('error', mustCall((err: Error): void => {
         arktest.assertEQ(err.message, 'dowritev error');
@@ -150,23 +150,23 @@ function testDuplexDoWritevErrorHandling() {
     arktest.expectNoThrow(() => { await mustCallCheckAll(); });
 }
 
+class CustomDuplex3 extends stream.Duplex {
+    constructor() {
+        super();
+    }
+    doWritev(chunks: string[] | Uint8Array[], callback: Function) {
+        let fn = (chunks: string[] | Uint8Array[], callback: Function) => {
+            callback.unsafeCall();
+            callback.unsafeCall();
+        }
+        let wrappedFn = mustCallTwoArgs(fn);
+        wrappedFn(chunks, callback);
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamDuplexDoWritev003
 function testDuplexDoWritevCallbackMultipleCalls() {
-    class CustomDuplex extends stream.Duplex {
-        constructor() {
-            super();
-        }
-        doWritev(chunks: string[] | Uint8Array[], callback: Function) {
-            let fn = (chunks: string[] | Uint8Array[], callback: Function) => {
-                callback.unsafeCall();
-                callback.unsafeCall();
-            }
-            let wrappedFn = mustCallTwoArgs(fn);
-            wrappedFn(chunks, callback);
-        }
-    }
 
-    let duplex = new CustomDuplex();
+    let duplex = new CustomDuplex3();
     duplex.write('test', 'utf8', mustCallNoArgs());
     duplex.on('error', mustCall((error: Error): void => {
         arktest.assertEQ(error.name, 'BusinessError');

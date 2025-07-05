@@ -110,13 +110,13 @@ function testSymbolIteratorNonEmptySet() {
     arktest.assertEQ(hashSet.length, 3);
 }
 
+class Temp {
+    age: number = 0
+    name: string = ""
+}
+
 //Test cases ported from ArkTS 1.0:HASHSET_CUSTOM_0100
 function testCustomObjectSetBasicOperations() {
-    class Temp {
-        age: number = 0
-        name: string = ""
-    }
-
     const hashSet = new HashSet<Temp>();
     let temp: Temp = {
         age: 18, name: "zhang san"

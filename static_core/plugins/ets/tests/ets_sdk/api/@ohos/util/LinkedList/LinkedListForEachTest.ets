@@ -131,18 +131,10 @@ function testLinkedListSetWithConvertToArray() {
 // Test cases ported from ArkTS 1.0: LINKED_LIST_SET_0500
 function testLinkedListSetAndGetFirst() {
     let linkList = new LinkedList<number | string | boolean | undefined | null | Object>();
-    class Temp {
-        age: number = 0;
-        name: string = "";
 
-        constructor(age: number, name: string) {
-            this.age = age;
-            this.name = name;
-        }
-    }
     linkList.add("zhang san");
     linkList.add(1);
-    let param: Temp = new Temp(10, "zhang");
+    let param: Temp1 = new Temp1(10, "zhang");
     linkList.add(param);
     linkList.add(undefined);
     linkList.add(null);

@@ -64,17 +64,17 @@ function mustCall(fn?: Function, times: number = 1) {
     return wrappedFn;
 }
 
+class MyRead1 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadablePauseAndResume001
 function testReadablePauseAndResume() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead1();
     readable.setEncoding('utf8');
     readable.on('readable', (): void => {
     });
@@ -85,16 +85,16 @@ function testReadablePauseAndResume() {
     }, 0);
 }
 
+class MyRead2 extends stream.Readable {
+    constructor() {
+        super();
+    }
+    doRead(size: number) {
+    }
+}
 // Test cases ported from ArkTS 1.0:testStreamReadableReadable001
 function testReadablePropertyReadable() {
-    class MyRead extends stream.Readable {
-        constructor() {
-            super();
-        }
-        doRead(size: number) {
-        }
-    }
-    let readable = new MyRead();
+    let readable = new MyRead2();
     let testMustNotCall = mustNotCall();
     arktest.assertEQ(readable.readable, true);
     readable.on('end', testMustNotCall);
