@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "macros.h"
 #include "utils/bit_helpers.h"
 #include "utils/leb128.h"
+#include "utils/logger.h"
 #include "utils/span.h"
 
 #include <cstdint>
@@ -88,7 +89,9 @@ inline uint32_t ReadULeb128(Span<const uint8_t> *sp)
     size_t n;
     [[maybe_unused]] bool isFull;
     std::tie(result, n, isFull) = leb128::DecodeUnsigned<uint32_t>(sp->data());
-    ASSERT(isFull);
+    if (!isFull) {
+        LOG(FATAL, PANDAFILE) << "ULEB128 decode failed: input truncated or malformed";
+    }
     *sp = sp->SubSpan(n);
     return result;
 }

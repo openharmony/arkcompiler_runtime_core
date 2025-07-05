@@ -57,7 +57,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t 
         return {d0, 1};
     }
 
-    if (maxBytes < CONST_2) {
+    if (maxBytes < CONST_2 || sp[1] == 0) {
         return {d0, 1};
     }
     uint8_t d1 = sp[1];
@@ -65,7 +65,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t 
         return {((d0 & MASK_5BIT) << DATA_WIDTH) | (d1 & MASK_6BIT), 2};
     }
 
-    if (maxBytes < CONST_3) {
+    if (maxBytes < CONST_3 || sp[CONST_2] == 0) {
         return {d0, 1};
     }
     uint8_t d2 = sp[CONST_2];
@@ -74,7 +74,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t 
                 CONST_3};
     }
 
-    if (maxBytes < CONST_4) {
+    if (maxBytes < CONST_4 || sp[CONST_3] == 0) {
         return {d0, 1};
     }
     uint8_t d3 = sp[CONST_3];
