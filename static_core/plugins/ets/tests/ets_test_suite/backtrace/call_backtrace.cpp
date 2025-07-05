@@ -17,12 +17,10 @@
 #include <array>
 #include <iostream>
 #include <filesystem>
-#include "plugins/ets/runtime/interop_js/jsbacktrace/backtrace.h"
+#include "runtime/tooling/backtrace/backtrace.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/thread.h"
-
-extern "C" {
-namespace ark::ets::interop::js::testing {
+#include "libpandabase/utils/logger.h"
 
 static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value, bool isRead32)
 {
@@ -42,8 +40,9 @@ static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_
 static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
 {
     uintptr_t fileHeader = 0;
-    const char *zipPath = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ABC_PATH");
+    const char *zipPath = std::getenv("ARK_GTEST_ABC_PATH");
     if (zipPath == nullptr) {
+        LOG(INFO, TOOLING) << "abc file is not find";
         return 0;
     }
     std::unique_ptr<const ark::panda_file::File> pf = ark::panda_file::OpenPandaFileOrZip(zipPath);
@@ -68,14 +67,14 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     uintptr_t sp = 0;
     uintptr_t pc = 0;
     uintptr_t bcCode = 0;
-    std::vector<panda::ecmascript::JsFunction> frames;
+    std::vector<ark::tooling::Function> frames;
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    while (fp != 0 && panda::ecmascript::Backtrace::EtsStepArk(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
-        panda::ecmascript::JsFunction function;
-        if (panda::ecmascript::Backtrace::EtsSymbolize(pc, fileHeader, bcCode, abcBuffer.data(), abcSize, &function) ==
-            1) {
+    while (fp != 0 && ark::tooling::Backtrace::StepArk(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
+        ark::tooling::Function function;
+        if (ark::tooling::Backtrace::Symbolize(pc, fileHeader, bcCode, abcBuffer.data(), abcSize, &function) == 1) {
             frames.emplace_back(function);
         } else {
+            LOG(INFO, TOOLING) << "Symbolize failed";
             return 0;
         }
     }
@@ -89,6 +88,7 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
             ssSrc << frames[i].url << ":" << frames[i].line;
             if (ssFunction.str() != frames[i].functionName ||
                 ssSrc.str() != ark::PandaStringToStd(method->GetLineNumberAndSourceFile(bytecodePC))) {
+                LOG(INFO, TOOLING) << "Function name or source file mismatch";
                 return 0;
             }
         }
@@ -103,27 +103,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
         return ANI_ERROR;
     }
-
-    static const char *className = "LTest/TestBacktrace;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        std::cerr << "Not found '" << className << "'" << std::endl;
+    std::array methods = {
+        ani_native_function {"callBacktrace", nullptr, reinterpret_cast<void *>(CallBacktrace)},
+    };
+    ani_module module;
+    if (env->FindModule("call_backtrace", &module) != ANI_OK) {
+        LOG(ERROR, TOOLING) << "Cannot find module!";
         return ANI_ERROR;
     }
-
-    std::array methods = {
-        ani_native_function {"callBacktrace", ":I", reinterpret_cast<void *>(CallBacktrace)},
-    };
-
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
-        std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
+    if (env->Module_BindNativeFunctions(module, methods.data(), methods.size()) != ANI_OK) {
+        LOG(ERROR, TOOLING) << "Cannot bind native functions!";
         return ANI_ERROR;
     };
 
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
-
-}  // namespace ark::ets::interop::js::testing
-
-}  // extern "C"

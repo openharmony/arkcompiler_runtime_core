@@ -23,13 +23,12 @@
 #include "runtime/include/class_helper.h"
 #include "runtime/include/stack_walker.h"
 
-namespace panda::ecmascript {
+namespace ark::tooling {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 // CC-OFFNXT(readability-function-size_parameters)
-int Backtrace::EtsStepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc,
-                          uintptr_t *bcOffset)
+int Backtrace::StepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc, uintptr_t *bcOffset)
 {
     if (*fp == 0) {
         LOG(ERROR, RUNTIME) << "fp is invalid";
@@ -61,8 +60,8 @@ int Backtrace::EtsStepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr
 }
 
 // CC-OFFNXT(readability-function-size_parameters, huge_depth[C++])
-int Backtrace::EtsSymbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData, uint64_t abcSize,
-                            JsFunction *function)
+int Backtrace::Symbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData, uint64_t abcSize,
+                         Function *function)
 {
     if (function == nullptr || abcData == nullptr) {
         LOG(ERROR, RUNTIME) << "parameter invalid!";
@@ -145,5 +144,4 @@ std::vector<MethodInfo> Backtrace::ReadAllMethodInfos(const panda_file::File *fi
     std::sort(result.begin(), result.end());
     return result;
 }
-
-}  // namespace panda::ecmascript
+}  // namespace ark::tooling
