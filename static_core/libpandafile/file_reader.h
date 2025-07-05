@@ -167,7 +167,7 @@ private:
         if (file_->IsExternal(methodId)) {
             return CreateForeignMethodItem(classItem, methodId);
         }
-        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Internal methods do not support foreign class";
+        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Non-foreign methods should not belong to foreign class.";
         return CreateMethodItem(static_cast<ClassItem *>(classItem), methodId);
     }
 
@@ -177,7 +177,7 @@ private:
         if (file_->IsExternal(fieldId)) {
             return CreateForeignFieldItem(classItem, fieldId);
         }
-        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Internal fields do not support foreign class";
+        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Non-foreign fields should not belong to foreign class.";
         return CreateFieldItem(static_cast<ClassItem *>(classItem), fieldId);
     }
 
