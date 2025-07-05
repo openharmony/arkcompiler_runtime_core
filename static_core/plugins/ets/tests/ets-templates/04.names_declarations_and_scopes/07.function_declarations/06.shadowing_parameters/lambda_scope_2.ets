@@ -20,11 +20,11 @@ desc: >-
     then the local definition shadows outer entity.
 ---*/
 
-type TShader = (shade: number)  => number // Shade refers to lambda parameter
+type TShader = (shade: number) => number // Shade refers to lambda parameter
 
 let shade: number = 11;
 
 function main() {
-    let si: TShader = (shade: number)  => shade
+    let si: TShader = (shade: number) => shade
     arktest.assertEQ(12, si(12))
 }
