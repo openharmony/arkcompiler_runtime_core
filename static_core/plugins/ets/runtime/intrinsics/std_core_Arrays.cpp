@@ -63,7 +63,9 @@ extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len, EtsObject *sample
     } else {
         klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
     }
-    return EtsObjectArray::Create(klass, len)->GetCoreType();
+    auto *array = EtsObjectArray::Create(klass, len);
+    ASSERT(array != nullptr);
+    return array->GetCoreType();
 }
 
 extern "C" void StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,

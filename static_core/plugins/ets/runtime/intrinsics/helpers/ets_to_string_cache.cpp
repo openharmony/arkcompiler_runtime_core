@@ -106,6 +106,7 @@ public:
     {
         ASSERT(!IsLocked(oldData.flag));
         Data newData {string, oldData.flag + FLAG_MASK};
+        ASSERT(coro != nullptr);
         auto *barrierSet = coro->GetBarrierSet();
 
         if (UNLIKELY(barrierSet->IsPreBarrierEnabled())) {
@@ -203,6 +204,7 @@ template <typename T>
 void EtsToStringCacheElement<T>::SetString(EtsCoroutine *coro, EtsString *string)
 {
     static_assert(STRING_OFFSET == sizeof(ObjectPointerType) * 2U);
+    ASSERT(string != nullptr);
     // Atomic with relaxed order reason: used only on newly-created object before store-release into array
     ObjectAccessor::SetObject(coro, this, STRING_OFFSET, string->GetCoreType());
 }

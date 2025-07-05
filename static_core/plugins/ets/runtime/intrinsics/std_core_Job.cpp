@@ -90,6 +90,7 @@ void EtsFailJob(EtsJob *job, EtsObject *error)
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsJob> hjob(coro, job);
+    ASSERT(error != nullptr);
     EtsHandle<EtsObject> herror(coro, error);
     EtsMutex::LockHolder lh(hjob);
 

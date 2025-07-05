@@ -136,6 +136,7 @@ EtsClass *TypeAPIGetClass(EtsString *td, EtsRuntimeLinker *contextLinker)
     auto *klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(typeDesc.c_str(), true,
                                                                        contextLinker->GetClassLinkerContext());
     auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (coro->HasPendingException()) {
         ASSERT(klass == nullptr);
         coro->ClearException();
@@ -183,7 +184,9 @@ EtsBoolean TypeAPIIsValueType(EtsString *td, EtsRuntimeLinker *contextLinker)
 
 EtsString *TypeAPIGetNullTypeDescriptor()
 {
-    const auto *nullObject = EtsObject::FromCoreType(EtsCoroutine::GetCurrent()->GetNullValue());
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    const auto *nullObject = EtsObject::FromCoreType(coro->GetNullValue());
     return EtsString::CreateFromMUtf8(nullObject->GetClass()->GetDescriptor());
 }
 
@@ -226,7 +229,9 @@ static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field
     EtsHandle ownerTypeHandle(coroutine, ownerType);
 
     // Make the instance of Type API Field
-    EtsHandle<EtsTypeAPIField> typeapiField(coroutine, EtsTypeAPIField::Create(coroutine));
+    auto *apiField = EtsTypeAPIField::Create(coroutine);
+    ASSERT(apiField != nullptr);
+    EtsHandle<EtsTypeAPIField> typeapiField(coroutine, apiField);
 
     // Set field's type, field's owner class type and name
     typeapiField->SetFieldType(fieldTypeHandle.GetPtr());
@@ -405,7 +410,10 @@ static EtsTypeAPIMethod *CreateMethodUnderHandleScope(EtsHandle<EtsTypeAPIType> 
     ASSERT(sourceClass != nullptr);
 
     auto *coroutine = EtsCoroutine::GetCurrent();
-    EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, EtsTypeAPIMethod::Create(coroutine));
+    ASSERT(coroutine != nullptr);
+    auto *apiMethod = EtsTypeAPIMethod::Create(coroutine);
+    ASSERT(apiMethod != nullptr);
+    EtsHandle<EtsTypeAPIMethod> typeapiMethod(coroutine, apiMethod);
 
     // Set Type
     typeapiMethod->SetMethodType(methodTypeHandle.GetPtr());
@@ -559,7 +567,9 @@ EtsString *TypeAPIGetParameterDescriptor(ObjectHeader *functionType, EtsLong i)
     }
     // 0 is recevier type
     i = function->IsStatic() ? i : i + 1;
-    const auto *desc = function->ResolveArgType(i)->GetDescriptor();
+    const auto *argType = function->ResolveArgType(i);
+    ASSERT(argType != nullptr);
+    const auto *desc = argType->GetDescriptor();
     return EtsString::CreateFromMUtf8(desc);
 }
 
@@ -616,6 +626,7 @@ EtsString *TypeAPIGetReceiverTypeDescriptor(ObjectHeader *functionType)
         return nullptr;
     }
     auto type = function->ResolveArgType(0);
+    ASSERT(type != nullptr);
     return EtsString::CreateFromMUtf8(type->GetDescriptor());
 }
 

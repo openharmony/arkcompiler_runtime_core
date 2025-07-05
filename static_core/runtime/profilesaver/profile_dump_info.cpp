@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -516,7 +516,8 @@ bool ProfileDumpInfo::Save(const PandaString &filename, uint64_t *bytesWritten, 
     if (result) {
         if (bytesWritten != nullptr) {
             LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
-            *bytesWritten = GetFileSizeBytes(filename);
+            int64_t writedBytes = GetFileSizeBytes(filename);
+            *bytesWritten = writedBytes < 0 ? 0 : static_cast<uint64_t>(writedBytes);
         }
     } else {
         LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;
