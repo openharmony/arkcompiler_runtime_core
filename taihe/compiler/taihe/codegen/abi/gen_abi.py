@@ -458,7 +458,7 @@ class ABISourcesGenerator:
         pkg_abi_info = PackageABIInfo.get(self.am, pkg)
         with CSourceWriter(
             self.om,
-            f"src/{pkg_abi_info.src}",
+            f"src/{pkg_abi_info.source}",
             FileKind.C_SOURCE,
         ) as pkg_abi_src_target:
             for iface in pkg.interfaces:

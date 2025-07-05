@@ -14,7 +14,7 @@
  */
 #include "inner.impl.hpp"
 
-#include "inner.Color.proj.0.hpp"
+#include "inner.Color.proj.1.hpp"
 #include "inner.ErrorResponse.proj.1.hpp"
 #include "inner.Mystruct.proj.1.hpp"
 #include "inner.Test1.proj.2.hpp"

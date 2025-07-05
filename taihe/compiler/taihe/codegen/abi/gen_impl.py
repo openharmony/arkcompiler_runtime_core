@@ -15,7 +15,9 @@
 
 from taihe.codegen.abi.analyses import (
     GlobFuncABIInfo,
+    GlobFuncCImplInfo,
     PackageABIInfo,
+    PackageCImplInfo,
     TypeABIInfo,
 )
 from taihe.codegen.abi.writer import CHeaderWriter, CSourceWriter
@@ -24,21 +26,8 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
 )
-from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
+from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
-
-
-class PackageCImplInfo(AbstractAnalysis[PackageDecl]):
-    def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
-        self.header = f"{p.name}.impl.h"
-        self.source = f"{p.name}.impl.c"
-
-
-class GlobFuncCImplInfo(AbstractAnalysis[GlobFuncDecl]):
-    def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
-        super().__init__(am, f)
-        self.macro = f"TH_EXPORT_C_API_{f.name}"
 
 
 class CImplHeadersGenerator:

@@ -18,6 +18,7 @@ import * as test from "inject_test";
 loadLibrary("ani_inject");
 
 function main() {
-    let foo = test.makeFoo();
-    foo.with_this();
+    let foo = new test.Foo();
+    foo.callWithThis();
+    foo.callWithThis();
 }

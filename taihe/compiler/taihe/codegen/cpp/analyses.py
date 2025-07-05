@@ -49,20 +49,27 @@ from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
 
 class PackageCppInfo(AbstractAnalysis[PackageDecl]):
     def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
         self.header = f"{p.name}.proj.hpp"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, p: PackageDecl) -> "PackageCppInfo":
+        return PackageCppInfo(am, p)
 
 
 class IfaceMethodCppInfo(AbstractAnalysis[IfaceMethodDecl]):
     def __init__(self, am: AnalysisManager, f: IfaceMethodDecl) -> None:
-        super().__init__(am, f)
         self.call_name = f.name
         self.impl_name = f.name
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: IfaceMethodDecl) -> "IfaceMethodCppInfo":
+        return IfaceMethodCppInfo(am, f)
 
 
 class EnumCppInfo(AbstractAnalysis[EnumDecl]):
     def __init__(self, am: AnalysisManager, d: EnumDecl) -> None:
-        super().__init__(am, d)
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.proj.0.hpp"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.proj.1.hpp"
 
@@ -73,10 +80,14 @@ class EnumCppInfo(AbstractAnalysis[EnumDecl]):
         self.as_owner = self.full_name
         self.as_param = self.full_name
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: EnumDecl) -> "EnumCppInfo":
+        return EnumCppInfo(am, d)
+
 
 class StructCppInfo(AbstractAnalysis[StructDecl]):
     def __init__(self, am: AnalysisManager, d: StructDecl) -> None:
-        super().__init__(am, d)
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.proj.0.hpp"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.proj.1.hpp"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.proj.2.hpp"
@@ -87,11 +98,15 @@ class StructCppInfo(AbstractAnalysis[StructDecl]):
 
         self.as_owner = self.full_name
         self.as_param = self.full_name + " const&"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: StructDecl) -> "StructCppInfo":
+        return StructCppInfo(am, d)
 
 
 class UnionCppInfo(AbstractAnalysis[UnionDecl]):
     def __init__(self, am: AnalysisManager, d: UnionDecl) -> None:
-        super().__init__(am, d)
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.proj.0.hpp"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.proj.1.hpp"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.proj.2.hpp"
@@ -103,10 +118,14 @@ class UnionCppInfo(AbstractAnalysis[UnionDecl]):
         self.as_owner = self.full_name
         self.as_param = self.full_name + " const&"
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: UnionDecl) -> "UnionCppInfo":
+        return UnionCppInfo(am, d)
+
 
 class IfaceCppInfo(AbstractAnalysis[IfaceDecl]):
     def __init__(self, am: AnalysisManager, d: IfaceDecl) -> None:
-        super().__init__(am, d)
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.proj.0.hpp"
         self.defn_header = f"{d.parent_pkg.name}.{d.name}.proj.1.hpp"
         self.impl_header = f"{d.parent_pkg.name}.{d.name}.proj.2.hpp"
@@ -122,13 +141,23 @@ class IfaceCppInfo(AbstractAnalysis[IfaceDecl]):
         self.as_owner = self.full_norm_name
         self.as_param = self.full_weak_name
 
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, d: IfaceDecl) -> "IfaceCppInfo":
+        return IfaceCppInfo(am, d)
 
-class AbstractTypeCppInfo(metaclass=ABCMeta):
+
+class TypeCppInfo(AbstractAnalysis[Type], metaclass=ABCMeta):
     decl_headers: list[str]
     defn_headers: list[str]
     impl_headers: list[str]
     as_owner: str
     as_param: str
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, t: Type) -> "TypeCppInfo":
+        return TypeCppInfoDispatcher(am).handle_type(t)
 
     def return_from_abi(self, val):
         return f"::taihe::from_abi<{self.as_owner}>({val})"
@@ -143,9 +172,8 @@ class AbstractTypeCppInfo(metaclass=ABCMeta):
         return f"::taihe::into_abi<{self.as_param}>({val})"
 
 
-class EnumTypeCppInfo(AbstractAnalysis[EnumType], AbstractTypeCppInfo):
+class EnumTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: EnumType):
-        super().__init__(am, t)
         enum_cpp_info = EnumCppInfo.get(am, t.ty_decl)
         self.decl_headers = [enum_cpp_info.decl_header]
         self.defn_headers = [enum_cpp_info.defn_header]
@@ -154,9 +182,8 @@ class EnumTypeCppInfo(AbstractAnalysis[EnumType], AbstractTypeCppInfo):
         self.as_param = enum_cpp_info.as_param
 
 
-class UnionTypeCppInfo(AbstractAnalysis[UnionType], AbstractTypeCppInfo):
+class UnionTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: UnionType):
-        super().__init__(am, t)
         union_cpp_info = UnionCppInfo.get(am, t.ty_decl)
         self.decl_headers = [union_cpp_info.decl_header]
         self.defn_headers = [union_cpp_info.defn_header]
@@ -165,9 +192,8 @@ class UnionTypeCppInfo(AbstractAnalysis[UnionType], AbstractTypeCppInfo):
         self.as_param = union_cpp_info.as_param
 
 
-class StructTypeCppInfo(AbstractAnalysis[StructType], AbstractTypeCppInfo):
+class StructTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: StructType):
-        super().__init__(am, t)
         struct_cpp_info = StructCppInfo.get(am, t.ty_decl)
         self.decl_headers = [struct_cpp_info.decl_header]
         self.defn_headers = [struct_cpp_info.defn_header]
@@ -176,9 +202,8 @@ class StructTypeCppInfo(AbstractAnalysis[StructType], AbstractTypeCppInfo):
         self.as_param = struct_cpp_info.as_param
 
 
-class IfaceTypeCppInfo(AbstractAnalysis[IfaceType], AbstractTypeCppInfo):
+class IfaceTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: IfaceType):
-        super().__init__(am, t)
         iface_cpp_info = IfaceCppInfo.get(am, t.ty_decl)
         self.decl_headers = [iface_cpp_info.decl_header]
         self.defn_headers = [iface_cpp_info.defn_header]
@@ -187,9 +212,8 @@ class IfaceTypeCppInfo(AbstractAnalysis[IfaceType], AbstractTypeCppInfo):
         self.as_param = iface_cpp_info.as_param
 
 
-class ScalarTypeCppInfo(AbstractAnalysis[ScalarType], AbstractTypeCppInfo):
+class ScalarTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: ScalarType):
-        super().__init__(am, t)
         res = {
             ScalarKind.BOOL: "bool",
             ScalarKind.F32: "float",
@@ -212,9 +236,8 @@ class ScalarTypeCppInfo(AbstractAnalysis[ScalarType], AbstractTypeCppInfo):
         self.as_owner = res
 
 
-class OpaqueTypeCppInfo(AbstractAnalysis[OpaqueType], AbstractTypeCppInfo):
+class OpaqueTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: OpaqueType) -> None:
-        super().__init__(am, t)
         self.decl_headers = []
         self.defn_headers = []
         self.impl_headers = []
@@ -222,9 +245,8 @@ class OpaqueTypeCppInfo(AbstractAnalysis[OpaqueType], AbstractTypeCppInfo):
         self.as_owner = "uintptr_t"
 
 
-class StringTypeCppInfo(AbstractAnalysis[StringType], AbstractTypeCppInfo):
+class StringTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: StringType):
-        super().__init__(am, t)
         self.decl_headers = ["taihe/string.hpp"]
         self.defn_headers = ["taihe/string.hpp"]
         self.impl_headers = ["taihe/string.hpp"]
@@ -232,9 +254,8 @@ class StringTypeCppInfo(AbstractAnalysis[StringType], AbstractTypeCppInfo):
         self.as_param = "::taihe::string_view"
 
 
-class ArrayTypeCppInfo(AbstractAnalysis[ArrayType], AbstractTypeCppInfo):
+class ArrayTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: ArrayType) -> None:
-        super().__init__(am, t)
         arg_ty_cpp_info = TypeCppInfo.get(am, t.item_ty)
         self.decl_headers = ["taihe/array.hpp", *arg_ty_cpp_info.decl_headers]
         self.defn_headers = ["taihe/array.hpp", *arg_ty_cpp_info.decl_headers]
@@ -243,9 +264,8 @@ class ArrayTypeCppInfo(AbstractAnalysis[ArrayType], AbstractTypeCppInfo):
         self.as_param = f"::taihe::array_view<{arg_ty_cpp_info.as_owner}>"
 
 
-class OptionalTypeCppInfo(AbstractAnalysis[OptionalType], AbstractTypeCppInfo):
+class OptionalTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: OptionalType) -> None:
-        super().__init__(am, t)
         arg_ty_cpp_info = TypeCppInfo.get(am, t.item_ty)
         self.decl_headers = ["taihe/optional.hpp", *arg_ty_cpp_info.decl_headers]
         self.defn_headers = ["taihe/optional.hpp", *arg_ty_cpp_info.decl_headers]
@@ -254,9 +274,8 @@ class OptionalTypeCppInfo(AbstractAnalysis[OptionalType], AbstractTypeCppInfo):
         self.as_param = f"::taihe::optional_view<{arg_ty_cpp_info.as_owner}>"
 
 
-class VectorTypeCppInfo(AbstractAnalysis[VectorType], AbstractTypeCppInfo):
+class VectorTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: VectorType) -> None:
-        super().__init__(am, t)
         val_ty_cpp_info = TypeCppInfo.get(am, t.val_ty)
         self.decl_headers = ["taihe/vector.hpp", *val_ty_cpp_info.decl_headers]
         self.defn_headers = ["taihe/vector.hpp", *val_ty_cpp_info.decl_headers]
@@ -265,9 +284,8 @@ class VectorTypeCppInfo(AbstractAnalysis[VectorType], AbstractTypeCppInfo):
         self.as_param = f"::taihe::vector_view<{val_ty_cpp_info.as_owner}>"
 
 
-class MapTypeCppInfo(AbstractAnalysis[MapType], AbstractTypeCppInfo):
+class MapTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: MapType) -> None:
-        super().__init__(am, t)
         key_ty_cpp_info = TypeCppInfo.get(am, t.key_ty)
         val_ty_cpp_info = TypeCppInfo.get(am, t.val_ty)
         self.decl_headers = [
@@ -293,9 +311,8 @@ class MapTypeCppInfo(AbstractAnalysis[MapType], AbstractTypeCppInfo):
         )
 
 
-class SetTypeCppInfo(AbstractAnalysis[SetType], AbstractTypeCppInfo):
+class SetTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: SetType) -> None:
-        super().__init__(am, t)
         key_ty_cpp_info = TypeCppInfo.get(am, t.key_ty)
         self.decl_headers = ["taihe/set.hpp", *key_ty_cpp_info.decl_headers]
         self.defn_headers = ["taihe/set.hpp", *key_ty_cpp_info.decl_headers]
@@ -304,11 +321,10 @@ class SetTypeCppInfo(AbstractAnalysis[SetType], AbstractTypeCppInfo):
         self.as_param = f"::taihe::set_view<{key_ty_cpp_info.as_owner}>"
 
 
-class CallbackTypeCppInfo(AbstractAnalysis[CallbackType], AbstractTypeCppInfo):
+class CallbackTypeCppInfo(TypeCppInfo):
     def __init__(self, am: AnalysisManager, t: CallbackType) -> None:
-        super().__init__(am, t)
-        if return_ty := t.return_ty:
-            return_ty_cpp_info = TypeCppInfo.get(am, return_ty)
+        if return_ty_ref := t.ty_ref.return_ty_ref:
+            return_ty_cpp_info = TypeCppInfo.get(am, return_ty_ref.resolved_ty)
             return_ty_decl_headers = return_ty_cpp_info.decl_headers
             return_ty_impl_headers = return_ty_cpp_info.impl_headers
             return_ty_as_owner = return_ty_cpp_info.as_owner
@@ -319,11 +335,11 @@ class CallbackTypeCppInfo(AbstractAnalysis[CallbackType], AbstractTypeCppInfo):
         params_ty_decl_headers = []
         params_ty_impl_headers = []
         params_ty_as_param = []
-        for param_ty in t.params_ty:
-            param_ty_cpp_info = TypeCppInfo.get(am, param_ty)
+        for param in t.ty_ref.params:
+            param_ty_cpp_info = TypeCppInfo.get(am, param.ty_ref.resolved_ty)
             params_ty_decl_headers.extend(param_ty_cpp_info.decl_headers)
             params_ty_impl_headers.extend(param_ty_cpp_info.impl_headers)
-            params_ty_as_param.append(param_ty_cpp_info.as_param)
+            params_ty_as_param.append(f"{param_ty_cpp_info.as_param} {param.name}")
         params_fmt = ", ".join(params_ty_as_param)
         self.decl_headers = [
             "taihe/callback.hpp",
@@ -344,76 +360,101 @@ class CallbackTypeCppInfo(AbstractAnalysis[CallbackType], AbstractTypeCppInfo):
         self.as_param = f"::taihe::callback_view<{return_ty_as_owner}({params_fmt})>"
 
 
-class TypeCppInfo(TypeVisitor[AbstractTypeCppInfo]):
+class TypeCppInfoDispatcher(TypeVisitor[TypeCppInfo]):
     def __init__(self, am: AnalysisManager):
         self.am = am
 
-    @staticmethod
-    def get(am: AnalysisManager, t: Type) -> AbstractTypeCppInfo:
-        return TypeCppInfo(am).handle_type(t)
+    @override
+    def visit_enum_type(self, t: EnumType) -> TypeCppInfo:
+        return EnumTypeCppInfo(self.am, t)
 
     @override
-    def visit_enum_type(self, t: EnumType) -> AbstractTypeCppInfo:
-        return EnumTypeCppInfo.get(self.am, t)
+    def visit_union_type(self, t: UnionType) -> TypeCppInfo:
+        return UnionTypeCppInfo(self.am, t)
 
     @override
-    def visit_union_type(self, t: UnionType) -> AbstractTypeCppInfo:
-        return UnionTypeCppInfo.get(self.am, t)
+    def visit_struct_type(self, t: StructType) -> TypeCppInfo:
+        return StructTypeCppInfo(self.am, t)
 
     @override
-    def visit_struct_type(self, t: StructType) -> AbstractTypeCppInfo:
-        return StructTypeCppInfo.get(self.am, t)
+    def visit_iface_type(self, t: IfaceType) -> TypeCppInfo:
+        return IfaceTypeCppInfo(self.am, t)
 
     @override
-    def visit_iface_type(self, t: IfaceType) -> AbstractTypeCppInfo:
-        return IfaceTypeCppInfo.get(self.am, t)
+    def visit_scalar_type(self, t: ScalarType) -> TypeCppInfo:
+        return ScalarTypeCppInfo(self.am, t)
 
     @override
-    def visit_scalar_type(self, t: ScalarType) -> AbstractTypeCppInfo:
-        return ScalarTypeCppInfo.get(self.am, t)
+    def visit_opaque_type(self, t: OpaqueType) -> TypeCppInfo:
+        return OpaqueTypeCppInfo(self.am, t)
 
     @override
-    def visit_opaque_type(self, t: OpaqueType) -> AbstractTypeCppInfo:
-        return OpaqueTypeCppInfo.get(self.am, t)
+    def visit_string_type(self, t: StringType) -> TypeCppInfo:
+        return StringTypeCppInfo(self.am, t)
 
     @override
-    def visit_string_type(self, t: StringType) -> AbstractTypeCppInfo:
-        return StringTypeCppInfo.get(self.am, t)
+    def visit_array_type(self, t: ArrayType) -> TypeCppInfo:
+        return ArrayTypeCppInfo(self.am, t)
 
     @override
-    def visit_array_type(self, t: ArrayType) -> AbstractTypeCppInfo:
-        return ArrayTypeCppInfo.get(self.am, t)
+    def visit_optional_type(self, t: OptionalType) -> TypeCppInfo:
+        return OptionalTypeCppInfo(self.am, t)
 
     @override
-    def visit_optional_type(self, t: OptionalType) -> AbstractTypeCppInfo:
-        return OptionalTypeCppInfo.get(self.am, t)
+    def visit_vector_type(self, t: VectorType) -> TypeCppInfo:
+        return VectorTypeCppInfo(self.am, t)
 
     @override
-    def visit_vector_type(self, t: VectorType) -> AbstractTypeCppInfo:
-        return VectorTypeCppInfo.get(self.am, t)
+    def visit_map_type(self, t: MapType) -> TypeCppInfo:
+        return MapTypeCppInfo(self.am, t)
 
     @override
-    def visit_map_type(self, t: MapType) -> AbstractTypeCppInfo:
-        return MapTypeCppInfo.get(self.am, t)
+    def visit_set_type(self, t: SetType) -> TypeCppInfo:
+        return SetTypeCppInfo(self.am, t)
 
     @override
-    def visit_set_type(self, t: SetType) -> AbstractTypeCppInfo:
-        return SetTypeCppInfo.get(self.am, t)
-
-    @override
-    def visit_callback_type(self, t: CallbackType) -> AbstractTypeCppInfo:
-        return CallbackTypeCppInfo.get(self.am, t)
+    def visit_callback_type(self, t: CallbackType) -> TypeCppInfo:
+        return CallbackTypeCppInfo(self.am, t)
 
 
 class PackageCppUserInfo(AbstractAnalysis[PackageDecl]):
     def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
         self.header = f"{p.name}.user.hpp"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, p: PackageDecl) -> "PackageCppUserInfo":
+        return PackageCppUserInfo(am, p)
 
 
 class GlobFuncCppUserInfo(AbstractAnalysis[GlobFuncDecl]):
     def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
-        super().__init__(am, f)
         self.namespace = "::".join(f.parent_pkg.segments)
         self.call_name = f.name
         self.full_name = "::" + self.namespace + "::" + self.call_name
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: GlobFuncDecl) -> "GlobFuncCppUserInfo":
+        return GlobFuncCppUserInfo(am, f)
+
+
+class PackageCppImplInfo(AbstractAnalysis[PackageDecl]):
+    def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
+        self.header = f"{p.name}.impl.hpp"
+        self.source = f"{p.name}.impl.cpp"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, p: PackageDecl) -> "PackageCppImplInfo":
+        return PackageCppImplInfo(am, p)
+
+
+class GlobFuncCppImplInfo(AbstractAnalysis[GlobFuncDecl]):
+    def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
+        self.macro = f"TH_EXPORT_CPP_API_{f.name}"
+
+    @classmethod
+    @override
+    def create(cls, am: AnalysisManager, f: GlobFuncDecl) -> "GlobFuncCppImplInfo":
+        return GlobFuncCppImplInfo(am, f)

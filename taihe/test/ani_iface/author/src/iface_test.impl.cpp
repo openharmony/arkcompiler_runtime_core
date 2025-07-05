@@ -25,7 +25,7 @@ namespace {
 class Foo {
     string name_ {"foo"};
 
-    public:
+public:
     void Bar()
     {
         std::cout << "Fooimpl: " << __func__ << std::endl;
@@ -82,6 +82,7 @@ public:
 class BaseElemImpl {
 public:
     string base = "base";
+
     BaseElemImpl() {}
 
     ::taihe::string GetBase()
@@ -98,6 +99,7 @@ public:
 class SubBaseElemImpl {
 public:
     string base = "SubBaseElem";
+
     SubBaseElemImpl() {}
 
     ::taihe::string Sub()

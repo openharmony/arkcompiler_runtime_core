@@ -23,9 +23,10 @@ namespace {
 
 class MyInterfaceImpl {
 public:
-    static const int ten = 10;
-    static const int hundred = 100;
-    static const long long tenBillion = 1000000000LL;
+    static int const ten = 10;
+    static int const hundred = 100;
+    static long long const tenBillion = 1000000000LL;
+
     MyInterfaceImpl() {}
 
     ::taihe::string TestCbIntString(::taihe::callback_view<void(int8_t, int32_t)> f)
@@ -54,7 +55,7 @@ void TestCbV(callback_view<void()> f)
 
 void TestCbI(callback_view<void(int32_t)> f)
 {
-    static const int one = 1;
+    static int const one = 1;
     f(one);
 }
 

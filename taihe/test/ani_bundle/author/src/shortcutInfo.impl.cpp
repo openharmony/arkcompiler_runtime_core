@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "shortcutInfo.proj.hpp"
 #include "shortcutInfo.impl.hpp"
-#include "taihe/runtime.hpp"
+#include "shortcutInfo.proj.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 
 using namespace taihe;
 using namespace shortcutInfo;
@@ -27,6 +26,7 @@ namespace {
 class ShortcutInfoImpl {
 public:
     int32_t shortcutInfoImpl = 4096;
+
     ShortcutInfoImpl() {}
 
     string GetId()

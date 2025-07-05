@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "customizeData.ani.hpp"
-#include "ohos_app_ability_want.ani.hpp"
-#include "moduleInfo.ani.hpp"
-#include "elementName.ani.hpp"
-#include "taihe.platform.ani.ani.hpp"
 #include "abilityInfo.ani.hpp"
-#include "shortcutInfo.ani.hpp"
-#include "ohos_bundle.ani.hpp"
-#include "hapModuleInfo.ani.hpp"
 #include "applicationInfo.ani.hpp"
 #include "bundleInfo.ani.hpp"
+#include "customizeData.ani.hpp"
+#include "elementName.ani.hpp"
+#include "hapModuleInfo.ani.hpp"
+#include "moduleInfo.ani.hpp"
+#include "ohos_app_ability_want.ani.hpp"
+#include "ohos_bundle.ani.hpp"
+#include "shortcutInfo.ani.hpp"
 #if __has_include(<ani.h>)
 #include <ani.h>
 #elif __has_include(<ani/ani.h>)
@@ -30,7 +29,8 @@
 #else
 #error "ani.h not found. Please ensure the Ani SDK is correctly installed."
 #endif
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
@@ -49,10 +49,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
     }
     if (ANI_OK != elementName::ANIRegister(env)) {
         std::cerr << "Error from elementName::ANIRegister" << std::endl;
-        return ANI_ERROR;
-    }
-    if (ANI_OK != taihe::platform::ani::ANIRegister(env)) {
-        std::cerr << "Error from taihe::platform::ani::ANIRegister" << std::endl;
         return ANI_ERROR;
     }
     if (ANI_OK != abilityInfo::ANIRegister(env)) {

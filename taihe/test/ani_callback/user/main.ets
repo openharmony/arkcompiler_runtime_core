@@ -55,28 +55,28 @@ function test_struct_input() {
     });
 }
 
-function test_int_string_return_value(){
+function test_int_string_return_value() {
     let instance: lib.MyInterface = lib.getInterface();
-    let result =instance.testCbIntString((a,b)=>{
+    let result = instance.testCbIntString((a, b) => {
         arktest.assertEQ(a, 10);
         arktest.assertEQ(b, 100);
     });
     arktest.assertEQ(result, "testCbIntString");
 }
 
-function test_int_bool_return_value(){
+function test_int_bool_return_value() {
     let instance: lib.MyInterface = lib.getInterface();
-    let result =instance.testCbIntBool((a,b)=>{
+    let result = instance.testCbIntBool((a, b) => {
         arktest.assertEQ(a, 100);
         arktest.assertEQ(b, 1000000000 as double);
     });
     arktest.assertEQ(result, true);
 }
 
-function test_int_enum_return_value(){
+function test_int_enum_return_value() {
     let instance: lib.MyInterface = lib.getInterface();
-    let result = instance.testCbEnum((a)=>{
-        arktest.assertEQ(a,10);
+    let result = instance.testCbEnum((a) => {
+        arktest.assertEQ(a, 10);
     })
     arktest.assertEQ(result.toString(), "123");
 }
