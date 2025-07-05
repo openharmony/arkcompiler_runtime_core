@@ -621,32 +621,42 @@ template <bool IS_STATIC_METHOD>
 static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
 {
     ASSERT_MANAGED_CODE();
+    // Note: Remove CheckUniqueMethod once FE #ICIITH is solved
     if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
-
+    std::optional<std::string> replacedSignature;
+    if (signature != nullptr) {
+        replacedSignature = ReplaceArrayInSignature(signature);
+        signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+    }
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     auto *method = [klass, name, signature]() -> EtsMethod * {
-        if (signature == nullptr) {
-            if constexpr (IS_STATIC_METHOD) {
-                return klass->GetStaticMethod(name, signature, true);
-            } else {
-                return klass->GetInstanceMethod(name, signature, true);
-            }
+        if constexpr (IS_STATIC_METHOD) {
+            return klass->GetStaticMethod(name, signature, true);
+        } else {
+            return klass->GetInstanceMethod(name, signature, true);
         }
-        auto optSignature = ReplaceArrayInSignature(signature);
-        if (optSignature) {
-            if constexpr (IS_STATIC_METHOD) {
-                return klass->GetStaticMethod(name, optSignature.value().c_str(), true);
-            } else {
-                return klass->GetInstanceMethod(name, optSignature.value().c_str(), true);
-            }
-        }
-        return nullptr;
     }();
-    if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
+
+    if (method != nullptr && method->IsStatic() == IS_STATIC_METHOD) {
+        *result = method;
+        return ANI_OK;
+    }
+    PandaVector<EtsMethod *> methodVec;
+    if constexpr (IS_STATIC_METHOD) {
+        methodVec = klass->GetStaticMethodOverload(name, signature, true);
+    } else {
+        methodVec = klass->GetInstanceMethodOverload(name, signature, true);
+    }
+    if (methodVec.empty()) {
         return ANI_NOT_FOUND;
     }
+    if (methodVec.size() > 1U) {
+        return ANI_AMBIGUOUS;
+    }
+    method = methodVec[0];
+    ASSERT(method->IsStatic() == IS_STATIC_METHOD);
     *result = method;
     return ANI_OK;
 }
@@ -1867,20 +1877,31 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
     EtsNamespace *etsNs = s.ToInternalType(ns);
     PandaVector<EtsMethod *> etsMethods;
     etsMethods.reserve(nrFunctions);
-    for (ani_size i = 0; i < nrFunctions; ++i) {
+    for (const auto &fn : Span(functions, nrFunctions)) {
+        const char *name = fn.name;
+        const char *signature = fn.signature;
+        std::optional<std::string> replacedSignature;
+        if (signature != nullptr) {
+            replacedSignature = ReplaceArrayInSignature(signature);
+            signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+        }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (functions[i].signature == nullptr) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            etsMethods.push_back(etsNs->GetFunction(functions[i].name, functions[i].signature));
+        EtsMethod *method = etsNs->GetFunction(name, signature, true);
+        if (method != nullptr) {
+            etsMethods.push_back(method);
             continue;
         }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto optSignature = ReplaceArrayInSignature(functions[i].signature);
-        if (!optSignature) {
-            return ANI_INVALID_ARGS;
+        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, signature, true);
+        if (methodVec.size() == 1U) {
+            etsMethods.push_back(methodVec[0]);
+            continue;
         }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        etsMethods.push_back(etsNs->GetFunction(functions[i].name, optSignature.value().c_str(), true));
+        if (methodVec.empty()) {
+            return ANI_NOT_FOUND;
+        }
+        if (methodVec.size() > 1U) {
+            return ANI_AMBIGUOUS;
+        }
     }
     return DoBindNative(s, etsMethods, functions, nrFunctions);
 }
@@ -2072,15 +2093,34 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
     for (ani_size i = 0; i < nrMethods; ++i) {
         ani_native_function m = methods[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const char *signature = m.signature;
+        std::optional<std::string> replacedSignature;
+        if (signature != nullptr) {
+            replacedSignature = ReplaceArrayInSignature(signature);
+            signature = replacedSignature.has_value() ? replacedSignature->c_str() : signature;
+        }
+        const char *name = m.name;
+        EtsMethod *method = nullptr;
 
-        // CC-OFFNXT(G.FMT.14-CPP) project code style
-        auto *method = [klass, name = m.name, signature]() -> EtsMethod * {
-            if (signature == nullptr) {
-                return klass->GetDirectMethod(name);
-            }
-            return klass->GetDirectMethod(name, signature, true);
-        }();
-        etsMethods.push_back(method);
+        if (signature == nullptr) {
+            method = klass->GetDirectMethod(name);
+        } else {
+            method = klass->GetDirectMethod(name, signature, true);
+        }
+        if (method != nullptr) {
+            etsMethods.push_back(method);
+            continue;
+        }
+        PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature, true);
+        if (methodVec.size() == 1U) {
+            etsMethods.push_back(methodVec[0]);
+            continue;
+        }
+        if (methodVec.empty()) {
+            return ANI_NOT_FOUND;
+        }
+        if (methodVec.size() > 1U) {
+            return ANI_AMBIGUOUS;
+        }
     }
     return DoBindNative(s, etsMethods, methods, nrMethods);
 }

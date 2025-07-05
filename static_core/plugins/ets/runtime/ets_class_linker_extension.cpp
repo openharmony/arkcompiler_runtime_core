@@ -86,6 +86,7 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
+        case ClassLinker::Error::INVALID_CLASS_OVERLOAD:
             return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
@@ -470,6 +471,7 @@ void EtsClassLinkerExtension::FreeClass(Class *klass)
 {
     ASSERT(IsInitialized());
 
+    EtsClass::FromRuntimeClass(klass)->RemoveOverloadMap();
     RemoveCreatedClass(klass);
 }
 

@@ -58,6 +58,7 @@ public:
         MULTIPLE_OVERRIDE,
         MULTIPLE_IMPLEMENT,
         INVALID_LAMBDA_CLASS,
+        INVALID_CLASS_OVERLOAD,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -91,6 +92,9 @@ public:
 
     Method *GetMethod(const Method &caller, panda_file::File::EntityId id,
                       ClassLinkerErrorHandler *errorHandler = nullptr);
+
+    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
+                      ClassLinkerErrorHandler *errorHandler);
 
     Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, bool isStatic,
                     ClassLinkerContext *context = nullptr, ClassLinkerErrorHandler *errorHandler = nullptr);
@@ -337,9 +341,6 @@ private:
 
     Field *GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
                                ClassLinkerErrorHandler *errorHandler, bool isStatic);
-
-    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
-                      ClassLinkerErrorHandler *errorHandler);
 
     bool LinkBootClass(Class *klass);
 

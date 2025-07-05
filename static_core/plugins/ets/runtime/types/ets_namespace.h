@@ -44,6 +44,11 @@ public:
     {
         return GetStaticMethod(name, signature, isANIFormat);
     }
+
+    PandaVector<EtsMethod *> GetFunctionOverload(const char *name, const char *signature, bool isANIFormat = false)
+    {
+        return GetStaticMethodOverload(name, signature, isANIFormat);
+    }
 };
 
 static_assert(sizeof(EtsNamespace) == sizeof(EtsClass));
