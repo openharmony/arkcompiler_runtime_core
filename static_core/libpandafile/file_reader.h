@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,6 +167,7 @@ private:
         if (file_->IsExternal(methodId)) {
             return CreateForeignMethodItem(classItem, methodId);
         }
+        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Non-foreign methods should not belong to foreign class.";
         return CreateMethodItem(static_cast<ClassItem *>(classItem), methodId);
     }
 
@@ -176,6 +177,7 @@ private:
         if (file_->IsExternal(fieldId)) {
             return CreateForeignFieldItem(classItem, fieldId);
         }
+        LOG_IF(classItem->IsForeign(), FATAL, PANDAFILE) << "Non-foreign fields should not belong to foreign class.";
         return CreateFieldItem(static_cast<ClassItem *>(classItem), fieldId);
     }
 
