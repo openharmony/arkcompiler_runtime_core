@@ -191,6 +191,7 @@ public:
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // Generate Array class name  "[L<object_class>;"
         EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+        ASSERT(objectClass != nullptr);
         PandaString arrayClassName = PandaString("[") + objectClass->GetDescriptor();
         EtsClass *arrayClass = classLinker->GetClass(arrayClassName.c_str(), true, objectClass->GetLoadContext());
         if (arrayClass == nullptr) {

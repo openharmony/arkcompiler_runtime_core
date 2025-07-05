@@ -90,7 +90,7 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
         // Remember the new buffer
         sb->SetFieldObject(SB_BUFFER_OFFSET, EtsObject::FromCoreType(buf->GetCoreType()));
     }
-
+    ASSERT(arr != nullptr);
     // Append array to the buf
     buf->Set(index, EtsObject::FromCoreType(arr->GetCoreType()));
     // Increment the index
@@ -189,6 +189,7 @@ static inline EtsCharArray *NullToCharArray()
                                                                  0x6900, 0x6e00, 0x6500, 0x6400};
 
     EtsCharArray *arr = EtsCharArray::Create(UNDEFINED_UTF16.size());
+    ASSERT(arr != nullptr);
     if (memcpy_s(arr->GetData<uint16_t>(), UNDEFINED_UTF16.size(), UNDEFINED_UTF16.data(), UNDEFINED_UTF16.size()) !=
         EOK) {
         UNREACHABLE();
@@ -200,6 +201,7 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 {
     auto arrLen = v != 0U ? std::char_traits<char>::length("true") : std::char_traits<char>::length("false");
     EtsCharArray *arr = EtsCharArray::Create(arrLen);
+    ASSERT(arr != nullptr);
     auto *data = arr->GetData<uint64_t>();
     if (v != 0U) {
         *data = TRUE_CODE;
@@ -214,6 +216,7 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 static inline EtsCharArray *CharToCharArray(EtsChar v)
 {
     EtsCharArray *arr = EtsCharArray::Create(1U);
+    ASSERT(arr != nullptr);
     *arr->GetData<EtsChar>() = v;
     return arr;
 }
@@ -700,6 +703,7 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
+    ASSERT(sbHandle.GetPtr() != nullptr);
 
     auto index = sbHandle->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto compress = sbHandle->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);

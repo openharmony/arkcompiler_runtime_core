@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,11 +73,18 @@ compiler::RuntimeInterface::IntrinsicId GetInteropRefReturnValueConvertIntrinsic
     auto vm = reinterpret_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
     auto classLinker = vm->GetClassLinker();
     auto klass = GetClass(method, GetMethodReturnTypeId(method));
+    const char *jsValueDesc = panda_file_items::class_descriptors::JS_VALUE.data();
+    const char *stringDesc = panda_file_items::class_descriptors::STRING.data();
+    auto *jsValueClass = classLinker->GetClass(jsValueDesc);
+    auto *stringClass = classLinker->GetClass(stringDesc);
+    ASSERT(jsValueClass != nullptr);
+    ASSERT(stringClass != nullptr);
+
     // start fastpath
-    if (klass == classLinker->GetClass(panda_file_items::class_descriptors::JS_VALUE.data())->GetRuntimeClass()) {
+    if (klass == jsValueClass->GetRuntimeClass()) {
         return IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_JS_VALUE;
     }
-    if (klass == classLinker->GetClass(panda_file_items::class_descriptors::STRING.data())->GetRuntimeClass()) {
+    if (klass == stringClass->GetRuntimeClass()) {
         return IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_STRING;
     }
     return IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_REF_TYPE;

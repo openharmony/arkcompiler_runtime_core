@@ -61,21 +61,25 @@ public:
 
     void SetName(EtsCoroutine *coro, EtsString *name)
     {
+        ASSERT(name != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, name_), name->GetCoreType());
     }
 
     void SetMessage(EtsCoroutine *coro, EtsString *msg)
     {
+        ASSERT(msg != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, message_), msg->GetCoreType());
     }
 
     void SetStack(EtsCoroutine *coro, EtsString *stack)
     {
+        ASSERT(stack != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, stack_), stack->GetCoreType());
     }
 
     void SetStackLines(EtsCoroutine *coro, EtsTypedObjectArray<EtsStackTraceElement> *stackLines)
     {
+        ASSERT(stackLines != nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, stackLines_), stackLines->GetCoreType());
     }
 
@@ -113,6 +117,7 @@ public:
         auto oomH = EtsHandle<EtsOutOfMemoryError>(
             coro, FromError(Error::Create(coro, PlatformTypes(coro)->coreOutOfMemoryError)));
 
+        ASSERT(oomH.GetPtr() != nullptr);
         auto *name = EtsString::CreateFromMUtf8(OOM_ERROR_NAME.data());
         oomH->SetName(coro, name);
 

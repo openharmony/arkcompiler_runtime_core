@@ -48,22 +48,26 @@ public:
 
     bool IsInstanceOf(EtsClass *klass) const
     {
+        ASSERT(klass != nullptr);
         return klass->IsAssignableFrom(GetClass());
     }
 
     bool HasField(EtsField *field) const
     {
+        ASSERT(field != nullptr);
         return field->GetDeclaringClass()->IsAssignableFrom(field->GetDeclaringClass());
     }
 
     EtsObject *GetAndSetFieldObject(size_t offset, EtsObject *value, std::memory_order memoryOrder)
     {
+        ASSERT(value != nullptr);
         return FromCoreType(GetCoreType()->GetAndSetFieldObject(offset, value->GetCoreType(), memoryOrder));
     }
 
     template <class T>
     T GetFieldPrimitive(EtsField *field)
     {
+        ASSERT(field != nullptr);
         ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
         ASSERT(HasField(field));
         return GetCoreType()->GetFieldPrimitive<T>(*field->GetRuntimeField());
@@ -87,6 +91,7 @@ public:
     template <class T>
     void SetFieldPrimitive(EtsField *field, T value)
     {
+        ASSERT(field != nullptr);
         ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
         ASSERT(HasField(field));
         GetCoreType()->SetFieldPrimitive<T>(*field->GetRuntimeField(), value);
@@ -110,6 +115,7 @@ public:
     template <bool NEED_READ_BARRIER = true>
     PANDA_PUBLIC_API EtsObject *GetFieldObject(EtsField *field) const
     {
+        ASSERT(field != nullptr);
         ASSERT(field->GetEtsType() == EtsType::OBJECT);
         ASSERT(HasField(field));
         return reinterpret_cast<EtsObject *>(
@@ -133,6 +139,7 @@ public:
     template <bool NEED_WRITE_BARRIER = true>
     void SetFieldObject(EtsField *field, EtsObject *value)
     {
+        ASSERT(field != nullptr);
         ASSERT(field->GetEtsType() == EtsType::OBJECT);
         ASSERT(HasField(field));
         GetCoreType()->SetFieldObject<NEED_WRITE_BARRIER>(*field->GetRuntimeField(),

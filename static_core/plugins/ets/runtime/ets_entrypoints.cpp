@@ -389,6 +389,7 @@ extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
 extern "C" void BeginGeneralNativeMethod()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
@@ -402,6 +403,7 @@ extern "C" void BeginGeneralNativeMethod()
 extern "C" void EndGeneralNativeMethodPrim()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     coroutine->NativeCodeEnd();
@@ -411,6 +413,7 @@ extern "C" void EndGeneralNativeMethodPrim()
 extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     coroutine->NativeCodeEnd();
@@ -428,6 +431,7 @@ extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::mem::Reference *ref)
 extern "C" void BeginQuickNativeMethod()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
@@ -439,6 +443,7 @@ extern "C" void BeginQuickNativeMethod()
 extern "C" void EndQuickNativeMethodPrim()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     storage->PopLocalEtsFrame(nullptr);
@@ -447,6 +452,7 @@ extern "C" void EndQuickNativeMethodPrim()
 extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
     auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
 
     ObjectHeader *ret = nullptr;

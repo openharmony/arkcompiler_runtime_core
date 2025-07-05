@@ -40,7 +40,9 @@ Expected<PandaEtsNapiEnv *, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *
 
 PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
 {
-    return EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    return coro->GetEtsNapiEnv();
 }
 
 PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
