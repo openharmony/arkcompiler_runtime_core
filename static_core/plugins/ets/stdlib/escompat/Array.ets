@@ -749,7 +749,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 idxNonUndef++
             }
         }
-        let sortTo = idxNonUndef
+        let sortTo: int = idxNonUndef
         for (let i = idxNonUndef; i < this.actualLength; i++) {
             this.$_set_unsafe(i, undefined as T)
         }
@@ -795,7 +795,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return this
         }
 
-        const compareTo = this.move_undefined_end()
+        const compareTo: int = this.move_undefined_end()
         let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
             return comparator!(l as T, r as T)
         }

@@ -24,6 +24,7 @@ const IS_LITTLE_ENDIAN: boolean;
                     {'name': 'Uint16',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 2, 'primitiveTypeWide': 'int'},
                     {'name': 'Uint32',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'long', 'bytes': 4, 'primitiveTypeWide': 'long'},
                     {'name': 'BigUint64',    'subsetType': 'BigInt', 'subsetTypeValues': 'BigInt', 'primitiveType': 'long', 'bytes': 8, 'primitiveTypeWide': 'long'}] %}
+
     {%- set _ = element.update({'subsetTypeBoxed':  element['subsetType'][0].upper() + element['subsetType'][1:], 'primitiveTypeBoxed':  element['primitiveType'][0].upper() + element['primitiveType'][1:]}) %}
     {%- set asElementCompat = ('%s.toDouble()') if element['subsetType'] != 'BigInt' else 'new BigInt(%s)' %}
     {%- set fromElementCompat = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
@@ -1408,10 +1409,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.sort()
             return this
         }
-        let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
                 return (l - r).toDouble()
@@ -1431,13 +1428,24 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<{{element['primitiveTypeBoxed']}}> = new {{element['primitiveTypeBoxed']}}[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
