@@ -28,6 +28,7 @@ set(SOURCES
     class_linker.cpp
     class_linker_extension.cpp
     class_initializer.cpp
+    tooling/backtrace/backtrace.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
     tooling/pt_default_lang_extension.cpp

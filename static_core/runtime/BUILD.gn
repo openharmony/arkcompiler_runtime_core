@@ -273,6 +273,7 @@ ohos_source_set("libarkruntime_set_static") {
     "thread.cpp",
     "time_utils.cpp",
     "timing.cpp",
+    "tooling/backtrace/backtrace.cpp",
     "tooling/debug_inf.cpp",
     "tooling/debugger.cpp",
     "tooling/evaluation/expression_loader.cpp",

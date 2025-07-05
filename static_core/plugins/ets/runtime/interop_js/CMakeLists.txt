@@ -74,7 +74,6 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
         ${ETS_EXT_SOURCES}/interop_js/sts_vm_interface_impl.cpp
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc.cpp
-        ${ETS_EXT_SOURCES}/interop_js/jsbacktrace/backtrace.cpp
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc_vm_adaptor.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}

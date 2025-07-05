@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_JSBACKTRACE_BACKTRACE_H
-#define PANDA_RUNTIME_JSBACKTRACE_BACKTRACE_H
+#ifndef PANDA_RUNTIME_TOOLING_BACKTRACE_BACKTRACE_H
+#define PANDA_RUNTIME_TOOLING_BACKTRACE_BACKTRACE_H
 
 #include <cstdint>
 #include <vector>
@@ -27,14 +27,14 @@
 #include "runtime/include/class_helper.h"
 #include "runtime/include/stack_walker.h"
 
-namespace panda::ecmascript {
+namespace ark::tooling {
 
 constexpr uint16_t FUNCTIONNAME_MAX = 1024;
 constexpr uint16_t PACKAGENAME_MAX = 1024;
 constexpr uint16_t URL_MAX = 1024;
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-struct JsFunction {
+struct Function {
     char functionName[FUNCTIONNAME_MAX];  // NOLINT(modernize-avoid-c-arrays)
     char packageName[PACKAGENAME_MAX];    // NOLINT(modernize-avoid-c-arrays)
     char url[URL_MAX];                    // NOLINT(modernize-avoid-c-arrays)
@@ -59,14 +59,14 @@ class Backtrace {
 public:
     using ReadMemFunc = bool (*)(void *, uintptr_t, uintptr_t *, bool);
     // CC-OFFNXT(readability-function-size_parameters)
-    static int EtsStepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc,
-                          uintptr_t *bcOffset);
+    static int StepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc,
+                       uintptr_t *bcOffset);
     // CC-OFFNXT(readability-function-size_parameters)
-    static int EtsSymbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData, uint64_t abcSize,
-                            JsFunction *function);
-    static std::vector<MethodInfo> ReadAllMethodInfos(const ark::panda_file::File *jsPandaFile);
+    static int Symbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData, uint64_t abcSize,
+                         Function *function);
+    static std::vector<MethodInfo> ReadAllMethodInfos(const ark::panda_file::File *pandaFile);
     static std::optional<MethodInfo> ReadMethodInfo(ark::panda_file::MethodDataAccessor &mda);
 };
 
-}  // namespace panda::ecmascript
-#endif  // PANDA_RUNTIME_JSBACKTRACE_BACKTRACE_H
+}  // namespace ark::tooling
+#endif  // PANDA_RUNTIME_TOOLING_BACKTRACE_BACKTRACE_H
