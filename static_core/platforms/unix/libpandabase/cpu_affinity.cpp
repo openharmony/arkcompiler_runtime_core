@@ -212,7 +212,8 @@ CpuSet::CpuSet()  // NOLINT(cppcoreguidelines-pro-type-member-init)
 
 void CpuSet::Set(int cpu)
 {
-    CPU_SET(cpu, &cpuset_);
+    ASSERT(cpu >= 0);
+    CPU_SET(static_cast<size_t>(cpu), &cpuset_);
 }
 
 void CpuSet::Clear()
@@ -222,7 +223,8 @@ void CpuSet::Clear()
 
 void CpuSet::Remove(int cpu)
 {
-    CPU_CLR(cpu, &cpuset_);
+    ASSERT(cpu >= 0);
+    CPU_CLR(static_cast<size_t>(cpu), &cpuset_);
 }
 
 size_t CpuSet::Count() const
@@ -232,7 +234,8 @@ size_t CpuSet::Count() const
 
 bool CpuSet::IsSet(int cpu) const
 {
-    return CPU_ISSET(cpu, &cpuset_);
+    ASSERT(cpu >= 0);
+    return CPU_ISSET(static_cast<size_t>(cpu), &cpuset_);
 }
 
 bool CpuSet::IsEmpty() const

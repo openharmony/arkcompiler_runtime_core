@@ -300,6 +300,7 @@ public:
             fromIndex = 0;
         }
         auto prefixLen = prefix->GetLength();
+        ASSERT(prefixLen >= 0);
         if (fromIndex > GetLength() - prefixLen) {
             return ToEtsBoolean(prefix->IsEmpty());
         }

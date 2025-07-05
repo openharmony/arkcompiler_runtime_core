@@ -50,6 +50,7 @@ static_assert(std::is_same_v<EtsChar, uint16_t> &&
 // The following implementation is based on ObjectHeader::ShallowCopy
 static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, uint32_t bufLen)
 {
+    ASSERT(bufHandle.GetPtr() != nullptr);
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
     /* nothing prevents this assertion from failing! */
@@ -235,8 +236,10 @@ ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     VMHandle<EtsObject> sbHandle(coroutine, sb);
+    VMHandle<EtsObject> sbAppendNullStringHandle = StringBuilderAppendNullString(sbHandle);
+    ASSERT(sbAppendNullStringHandle.GetPtr() != nullptr);
 
-    return StringBuilderAppendNullString(sbHandle)->GetCoreType();
+    return sbAppendNullStringHandle->GetCoreType();
 }
 
 /**
