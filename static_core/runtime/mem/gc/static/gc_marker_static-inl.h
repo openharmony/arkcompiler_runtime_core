@@ -160,6 +160,7 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *object
     } else if (cls->IsClassClass()) {
         // Handle Class handles static fields only, so we need to Handle regular fields explicitly too
         auto objectCls = ark::Class::FromClassObject(object);
+        ASSERT(objectCls != nullptr);
         if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
             HandleClass(objectsStack, objectCls);
         }

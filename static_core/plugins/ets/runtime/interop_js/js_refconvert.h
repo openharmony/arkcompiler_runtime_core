@@ -160,9 +160,11 @@ template <bool ALLOW_INIT = false>
 // CC-OFFNXT(G.FUD.06) perf critical
 inline bool CheckClassInitialized(Class *klass)
 {
+    ASSERT(klass != nullptr);
     if constexpr (ALLOW_INIT) {
         if (UNLIKELY(!klass->IsInitialized())) {
             auto coro = EtsCoroutine::GetCurrent();
+            ASSERT(coro != nullptr);
             auto classLinker = coro->GetPandaVM()->GetClassLinker();
             if (!classLinker->InitializeClass(coro, EtsClass::FromRuntimeClass(klass))) {
                 INTEROP_LOG(ERROR) << "Class " << klass->GetDescriptor() << " cannot be initialized";

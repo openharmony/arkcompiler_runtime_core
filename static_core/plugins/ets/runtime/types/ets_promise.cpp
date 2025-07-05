@@ -29,6 +29,7 @@ EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto *klass = PlatformTypes(coro)->corePromise;
     auto hPromise = EtsHandle<EtsPromise>(coro, EtsPromise::FromEtsObject(EtsObject::Create(coro, klass)));
+    ASSERT(hPromise.GetPtr() != nullptr);
     auto *mutex = EtsMutex::Create(coro);
     hPromise->SetMutex(coro, mutex);
     auto *event = EtsEvent::Create(coro);

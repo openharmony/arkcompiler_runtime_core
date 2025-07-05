@@ -218,6 +218,7 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
 
     Class *proxyCls = classLinker->BuildClass(descriptor, true, accessFlags, proxyMethods, fields, baseClass,
                                               interfacesSpan, context, false);
+    ASSERT(proxyCls != nullptr);
     proxyCls->SetState(Class::State::INITIALIZING);
     proxyCls->SetState(Class::State::INITIALIZED);
 

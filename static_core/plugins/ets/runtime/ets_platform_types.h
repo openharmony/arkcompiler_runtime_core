@@ -147,6 +147,7 @@ private:
 // Obtain EtsPlatformTypes pointer cached in the coroutine
 ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(EtsCoroutine *coro)
 {
+    ASSERT(coro != nullptr);
     return coro->GetLocalStorage().Get<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR, EtsPlatformTypes *>();
 }
 

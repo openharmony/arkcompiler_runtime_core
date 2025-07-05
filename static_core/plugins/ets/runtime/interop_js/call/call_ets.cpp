@@ -74,6 +74,7 @@ private:
 };
 
 template <bool IS_STATIC>
+// CC-OFFNXT(huge_method) solid logic
 ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 {
     HandleScope<ObjectHeader *> etsHandleScope(coro_);
@@ -81,7 +82,11 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
         return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
     };
 
-    [[maybe_unused]] ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
+    [[maybe_unused]] ObjectHeader **thisObjRoot = nullptr;
+    if (!IS_STATIC) {
+        ASSERT(thisObj_ != nullptr);
+        thisObjRoot = createRoot(thisObj_->GetCoreType());
+    }
 
     using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
     auto const numArgs = protoReader_.GetMethod()->GetNumArgs() - !IS_STATIC;
@@ -122,6 +127,7 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 
     // Unbox values
     if constexpr (!IS_STATIC) {
+        ASSERT(thisObjRoot != nullptr);
         etsArgs[0] = Value(*thisObjRoot);
     }
     static constexpr size_t ETS_ARGS_DISP = IS_STATIC ? 0 : 1;

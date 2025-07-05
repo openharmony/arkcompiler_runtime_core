@@ -35,6 +35,8 @@ namespace ark::ets {
 
 static bool VerifyLambdaClass(EtsClass *etsClass, Method *method, ClassLinkerErrorHandler *errorHandler)
 {
+    ASSERT(etsClass != nullptr);
+    ASSERT(method != nullptr);
     auto fields = etsClass->GetFields();
     if (method->IsStatic()) {
         return fields.empty();
@@ -855,7 +857,9 @@ EtsObject *EtsClass::CreateInstance()
     }
 
     if (IsStringClass()) {
-        return EtsString::CreateNewEmptyString()->AsObject();
+        auto emptyString = EtsString::CreateNewEmptyString();
+        ASSERT(emptyString != nullptr);
+        return emptyString->AsObject();
     }
 
     EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");

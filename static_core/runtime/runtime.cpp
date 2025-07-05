@@ -1176,6 +1176,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     PandaString aotCtx;
     {
         ScopedManagedCodeThread smct(ManagedThread::GetCurrent());
+        ASSERT(appContext_.ctx != nullptr);
         appContext_.ctx->EnumeratePandaFiles(
             compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
     }
