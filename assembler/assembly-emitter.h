@@ -167,18 +167,8 @@ private:
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
         const Type &type, const Program &program);
 
-<<<<<<< HEAD
     static bool MakeItemsForSingleProgram(panda_file::ItemContainer *items, const Program &program,
         bool emit_debug_info, AsmEntityCollections &entities,
-=======
-    static void SetLastError(const std::string &message)
-    {
-        last_error = message;
-    }
-
-    static bool MakeItemsForSingleProgram(
-        panda_file::ItemContainer *items, const Program &program, bool emit_debug_info, AsmEntityCollections &entities,
->>>>>>> OpenHarmony_feature_20250328
         std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> primitive_types);
 
     static std::string GetMethodSignatureFromProgram(const std::string &name, const Program &program);
