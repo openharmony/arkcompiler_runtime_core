@@ -23,7 +23,7 @@ export function logValues(...values: NumberOrString[]): NumberOrString[] {
 }
 
 function main(): void {
-    let tmp: NumberOrString[]=[1, "1"];
+    let tmp: NumberOrString[] = [1, "1"];
     let tmp1 = logValues(...tmp);
     arktest.assertEQ(tmp1[0], 1);
 }
