@@ -121,6 +121,8 @@ public:
         return allocBuffer_;
     }
 
+    void ReleaseAllocBuffer();
+
     JSThread* GetJSThread() const
     {
         return jsThread_;
