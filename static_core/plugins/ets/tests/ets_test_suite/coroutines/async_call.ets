@@ -192,11 +192,7 @@ async function crasher(): Promise<Int> {
 try {
     let x = crasher();
 } catch (e) {
-<<<<<<< HEAD
-    assertTrue(e instanceof InvalidCoroutineOperationError);
-=======
     arktest.assertTrue(e instanceof InvalidCoroutineOperationError);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): void {

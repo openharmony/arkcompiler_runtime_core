@@ -23,11 +23,6 @@ function main() {
     arktest.assertNE(mainId, workerId);
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
-<<<<<<< HEAD
-    workerId = await launch () => { return CoroutineExtras.getWorkerId(); }();
-    assertEQ(mainId, workerId);
-=======
     workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
     arktest.assertEQ(mainId, workerId);
->>>>>>> OpenHarmony_feature_20250328
 }

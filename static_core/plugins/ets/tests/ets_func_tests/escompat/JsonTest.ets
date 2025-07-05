@@ -87,11 +87,7 @@ function testString03(): int {
         test(JSON.parse<Object>(s1, stringType) as String == s, msg)
 }
 
-<<<<<<< HEAD
-function equalObjectArrays(a: Object[], b: Object[]): boolean {
-=======
 function equalObjectArrays(a: FixedArray<Object>, b: FixedArray<Object>): boolean {
->>>>>>> OpenHarmony_feature_20250328
     if (a.length != b.length) {
         return false
     }

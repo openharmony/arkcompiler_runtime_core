@@ -94,17 +94,10 @@ def _check_decl_confilct_with_namespace(
                 break
 
     for p in pg.packages:
-<<<<<<< HEAD
-        for d in p.decls.values():
-            name = '%s.%s' % (p.name, d.name)
-            if name in namespaces:
-                diag.emit(SymbolConflictWithNamespaceError(d, p))
-=======
         for d in p.declarations:
             name = p.name + "." + d.name
             if packages := namespaces.get(name, []):
                 diag.emit(SymbolConflictWithNamespaceError(d, name, packages))
->>>>>>> OpenHarmony_feature_20250328
 
 
 class _ResolveImportsPass(RecursiveDeclVisitor):

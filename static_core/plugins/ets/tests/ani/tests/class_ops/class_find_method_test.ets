@@ -508,11 +508,7 @@ class SubCalculator extends BasicCalculator {
     }
     private width: int;
     private height: int;
-<<<<<<< HEAD
-};
-=======
 }
->>>>>>> OpenHarmony_feature_20250328
 
 class AllFunctions {
     static foo (): int {
@@ -545,10 +541,7 @@ class NotOverloaded {
         return 1
     }
 };
-<<<<<<< HEAD
-=======
 
 class FindNativeMethods {
     native foo(): int;
 }
->>>>>>> OpenHarmony_feature_20250328

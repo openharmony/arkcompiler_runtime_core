@@ -45,11 +45,7 @@ cases:
           arktest.assertEQ( A.globl, 13.0 )
 
           A.foo(10.0)
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/17.experimental_features/13.trailing_lambda/trlambda_static_met.params.yaml
-          assertEQ( A.globl, 23.0 )
-=======
           arktest.assertEQ( A.globl, 23.0 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/17.experimental_features/14.trailing_lambdas/trlambda_static_met.params.yaml
 
     # trailing lambda cases
     - decl: |-
@@ -84,11 +80,7 @@ cases:
           arktest.assertEQ( A.globl, 13.0 )
 
           A.foo(10.0)
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/17.experimental_features/13.trailing_lambda/trlambda_static_met.params.yaml
-          assertEQ( A.globl, 23.0 )
-=======
           arktest.assertEQ( A.globl, 23.0 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/17.experimental_features/14.trailing_lambdas/trlambda_static_met.params.yaml
 
     # regular lambda cases with extra block afterwards
     - decl: |-
@@ -178,8 +170,4 @@ cases:
       use: |-
           A.globl = 1.0
           A.foo(10.0); { A.globl = 4.0 } // no last function parameter
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/17.experimental_features/13.trailing_lambda/trlambda_static_met.params.yaml
-          assertEQ( A.globl, 4.0 )
-=======
           arktest.assertEQ( A.globl, 4.0 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/17.experimental_features/14.trailing_lambdas/trlambda_static_met.params.yaml

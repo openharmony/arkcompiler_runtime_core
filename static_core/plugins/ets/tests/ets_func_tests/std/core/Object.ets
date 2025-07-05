@@ -247,31 +247,19 @@ function objectEntries(): int {
     arrVal[0] = ["0", new Number(10)] as TupleT
     arrVal[1] = ["1", new Number(20)] as TupleT
     arrVal[2] = ["2", new Number(30)] as TupleT
-<<<<<<< HEAD
-    result += tupleAreEqual(Object.entries(arr), arrVal) ? 0 : 1
-=======
     result += tupleAreEqual(Object.entries(arr) as Object as NullishTuple[], arrVal) ? 0 : 1
->>>>>>> OpenHarmony_feature_20250328
 
     let strVal: NullishTuple[] = new NullishTuple[3]
     strVal[0] = ["0", "a"] as TupleT
     strVal[1] = ["1", "b"] as TupleT
     strVal[2] = ["2", "c"] as TupleT
-<<<<<<< HEAD
-    result += tupleAreEqual(Object.entries(str), strVal) ? 0 : 1
-=======
     result += tupleAreEqual(Object.entries(str) as Object as NullishTuple[], strVal) ? 0 : 1
->>>>>>> OpenHarmony_feature_20250328
 
     let clVal: NullishTuple[] = new NullishTuple[3]
     clVal[0] = ["x", new Number(10)] as TupleT
     clVal[1] = ["y", null] as TupleT
     clVal[2] = ["z", new Number(30)] as TupleT
-<<<<<<< HEAD
-    result += tupleAreEqual(Object.entries(cl), clVal) ? 0 : 1
-=======
     result += tupleAreEqual(Object.entries(cl) as Object as NullishTuple[], clVal) ? 0 : 1
->>>>>>> OpenHarmony_feature_20250328
 
     result += tupleAreEqual(Object.entries(lambda) as Object as NullishTuple[], emptyTuple) ? 0 : 1
 

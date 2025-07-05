@@ -25,11 +25,7 @@ tox == 4.20.0
 # mypy
 mypy==1.15.0
 mypy-extensions==1.0.0
-<<<<<<< HEAD
-tomli==2.0.1
-=======
 tomli==2.2.1
->>>>>>> OpenHarmony_feature_20250328
 typing-extensions==4.13.2
 types-PyYAML==6.0.12.4
 types-pytz==2025.2.0.20250326

@@ -99,16 +99,6 @@ void DebuggableThread::SetSkipAllPauses(bool skip)
 }
 
 void DebuggableThread::SetMixedDebugEnabled(bool mixedDebugEnabled)
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/debuggable_thread.cpp
-{
-    os::memory::LockHolder lock(mutex_);
-    state_.SetMixedDebugEnabled(mixedDebugEnabled);
-}
-
-std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
-                                                            const std::string *condition)
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/debuggable_thread.cpp
 {
     os::memory::LockHolder lock(mutex_);
     state_.SetMixedDebugEnabled(mixedDebugEnabled);

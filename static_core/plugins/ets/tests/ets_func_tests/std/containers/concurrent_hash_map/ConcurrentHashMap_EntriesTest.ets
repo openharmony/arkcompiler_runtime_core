@@ -33,16 +33,6 @@ function main(): int {
 
     concurrentHashMapTestsuite.addTest("entriesTest_001", () =>
     {
-<<<<<<< HEAD
-        let concurrentHashMapNull: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iterEntries: IterableIterator<[Number, string]> = concurrentHashMapNull.entries();
-        assertEQ(iterEntries.next().value, undefined);
-        assertEQ(iterEntries.next().value, undefined);
-    });
-    concurrentHashMapTestsuite.addTest("entriesTest_002", () =>
-    {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-=======
         let concurrentHashMapNull: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iterEntries: IterableIterator<[Number, string]> = concurrentHashMapNull.entries();
         arktest.assertEQ(iterEntries.next().value, undefined);
@@ -51,7 +41,6 @@ function main(): int {
     concurrentHashMapTestsuite.addTest("entriesTest_002", () =>
     {
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
->>>>>>> OpenHarmony_feature_20250328
         let iterEntries: IterableIterator<[Number, string]> = concurrentHashMap.entries();
         let str = "";
         for (let i: int = 0; i < 10; i++) {
@@ -65,15 +54,9 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("entriesTest_003", () =>
     {
-<<<<<<< HEAD
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iterEntries: IterableIterator<[Number, string]> = concurrentHashMap.entries();
-        assertEQ(iterEntries.next().value, undefined);
-=======
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iterEntries: IterableIterator<[Number, string]> = concurrentHashMap.entries();
         arktest.assertEQ(iterEntries.next().value, undefined);
->>>>>>> OpenHarmony_feature_20250328
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);
         }

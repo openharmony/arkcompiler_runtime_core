@@ -11,15 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/stubs/CMakeLists.txt
-set(stubs_tests
-    typeof
-    istrue
-    equals
-=======
 set(functions_tests
     name
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets_test_suite/functions/CMakeLists.txt
 )
 
 set(functions_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")

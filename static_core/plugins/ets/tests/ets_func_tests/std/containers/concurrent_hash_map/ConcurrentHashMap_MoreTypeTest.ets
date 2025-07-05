@@ -259,11 +259,7 @@ function main(): int {
     });
     concurrentHashMapTestsuite.addTest("entriesOfNumber", () =>
     {
-<<<<<<< HEAD
-        let concurrentHashMap: ConcurrentHashMap<string, string> = new ConcurrentHashMap<string, string>();
-=======
         let concurrentHashMap: containers.ConcurrentHashMap<string, string> = new containers.ConcurrentHashMap<string, string>();
->>>>>>> OpenHarmony_feature_20250328
         for (let i: int = 0; i < 10 ; i++) {
             concurrentHashMap.set(arrValues[i], arrValues[i]);
         }

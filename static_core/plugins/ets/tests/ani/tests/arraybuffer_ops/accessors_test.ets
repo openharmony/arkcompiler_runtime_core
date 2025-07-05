@@ -22,9 +22,5 @@ export function createSlicedArrayBuffer(buff: ArrayBuffer, begin: int, end: int)
 }
 
 export function getLength(buff: ArrayBuffer): int {
-<<<<<<< HEAD
-    return buff.byteLength as int;
-=======
     return buff.byteLength.toInt();
->>>>>>> OpenHarmony_feature_20250328
 }

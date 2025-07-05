@@ -33,11 +33,7 @@ Promise.allSettled<string>([thenable]).then<void, void>((result: PromiseSettledR
         return;
     }
     if (result[0].status != PromiseStatus.rejected) {
-<<<<<<< HEAD
-        console.log("Test failed. Expected status 'rejected', but got ' + result[0].status + '.");
-=======
         console.log('Test failed. Expected status \'rejected\', but got ' + result[0].status + '.');
->>>>>>> OpenHarmony_feature_20250328
         return;
     }
     if ((result[0] as PromiseRejectedResult).reason != error) {

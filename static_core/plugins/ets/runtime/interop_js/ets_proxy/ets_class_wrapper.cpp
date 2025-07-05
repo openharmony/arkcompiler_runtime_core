@@ -391,15 +391,9 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
     ASSERT(!etsClass->IsPrimitive() && etsClass->GetComponentType() == nullptr);
     ASSERT(ctx->GetRefConvertCache()->Lookup(etsClass->GetRuntimeClass()) == nullptr);
 
-<<<<<<< HEAD
-    if (IsStdClass(etsClass) && !etsClass->IsInterface() &&
-        !etsClass->IsEtsEnum()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
-        ctx->Fatal(std::string("ets_proxy requested for ") + etsClass->GetDescriptor() + " must add or forbid");
-=======
     if (IsStdClass(etsClass) && !etsClass->IsInterface() && !etsClass->IsEtsEnum() &&
         !IsSubClassOfError(etsClass)) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
         return nullptr;
->>>>>>> OpenHarmony_feature_20250328
     }
     ASSERT(!js_proxy::JSProxy::IsProxyClass((etsClass->GetRuntimeClass())));
 

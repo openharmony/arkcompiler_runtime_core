@@ -477,8 +477,6 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
     UNREACHABLE();
 }
 
-<<<<<<< HEAD
-=======
 extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
 {
     auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
@@ -490,5 +488,4 @@ extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t 
     return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
->>>>>>> OpenHarmony_feature_20250328
 }  // namespace ark::ets

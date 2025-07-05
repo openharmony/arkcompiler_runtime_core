@@ -25,25 +25,6 @@
 
 namespace ark::ets {
 
-<<<<<<< HEAD
-constexpr uint64_t UTF16_HEX_SHIFT = 4U;
-constexpr uint64_t UTF16_TECHNICAL_CODE_START = 0xD800;
-constexpr uint64_t UTF16_TECHNICAL_CODE_END = 0xDFFF;
-constexpr uint8_t UTF16_BYTE_SHIFT = 8U;
-constexpr uint8_t UTF16_BYTE_MAX = 0xFF;
-constexpr uint64_t UTF16_BYTE5_START = 0x10000;
-constexpr uint8_t UTF16_BYTE5_ZONE1_START = 0xD8;
-constexpr uint8_t UTF16_BYTE5_ZONE2_START = 0xDC;
-constexpr uint64_t UTF16_BYTE5_MIN = 1U >> 20U;
-constexpr uint8_t UTF16_BYTE5_ZONE1_BYTE1_SHIFT = 18U;
-constexpr uint8_t UTF16_BYTE5_ZONE1_BYTE2_SHIFT = 10U;
-constexpr uint8_t UTF16_BYTE5_ZONE2_BYTE1_SHIFT = 8U;
-constexpr uint8_t UTF16_BYTE5_ZONE2_BYTE1_NEEDED_BITS = 0x3;
-constexpr size_t UTF16_WIDTH = 2;
-constexpr uint8_t DIRECT_UNICODE_BYTES = 4U;
-
-=======
->>>>>>> OpenHarmony_feature_20250328
 bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16, const int len)
 {
     utf16_ |= isUtf16;
@@ -66,20 +47,6 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16,
     if (flagVnicode_) {
         flags |= PCRE2_UCP;
     }
-<<<<<<< HEAD
-    int length = len;
-    if (preparedPattern.size() != pattern.size()) {
-        if (utf16_) {
-            length = preparedPattern.size() / UTF16_WIDTH - 1;
-        } else {
-            length = preparedPattern.size() - 1;
-        }
-    }
-    if (utf16_) {
-        re_ = RegExp16::CreatePcre2Object(reinterpret_cast<const uint16_t *>(preparedPattern.data()), flags, length);
-    } else {
-        re_ = RegExp8::CreatePcre2Object(preparedPattern.data(), flags, length);
-=======
     flags |= PCRE2_MATCH_UNSET_BACKREF;
     flags |= PCRE2_ALLOW_EMPTY_CLASS;
     uint32_t extraFlags = 0U;
@@ -89,7 +56,6 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16,
         re_ = RegExp16::CreatePcre2Object(reinterpret_cast<const uint16_t *>(pattern.data()), flags, extraFlags, len);
     } else {
         re_ = RegExp8::CreatePcre2Object(pattern.data(), flags, extraFlags, len);
->>>>>>> OpenHarmony_feature_20250328
     }
     return re_ != nullptr;
 }

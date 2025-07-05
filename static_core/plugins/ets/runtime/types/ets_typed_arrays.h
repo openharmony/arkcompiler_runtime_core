@@ -20,14 +20,11 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
-<<<<<<< HEAD
-=======
 
 namespace test {
 class EtsEscompatTypedArrayBaseTest;
 }  // namespace test
 
->>>>>>> OpenHarmony_feature_20250328
 class EtsEscompatTypedArrayBase : public EtsObject {
 public:
     EtsEscompatTypedArrayBase() = delete;
@@ -35,26 +32,20 @@ public:
 
     NO_COPY_SEMANTIC(EtsEscompatTypedArrayBase);
     NO_MOVE_SEMANTIC(EtsEscompatTypedArrayBase);
-<<<<<<< HEAD
-=======
 
     static constexpr size_t GetClassSize()
     {
         return sizeof(EtsEscompatTypedArrayBase);
     }
->>>>>>> OpenHarmony_feature_20250328
 
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, buffer_);
-<<<<<<< HEAD
-=======
     }
 
     static constexpr size_t GetBytesPerElementOffset()
     {
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, bytesPerElement_);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     static constexpr size_t GetByteOffsetOffset()
@@ -79,11 +70,7 @@ public:
 
     ObjectPointer<EtsObject> GetBuffer() const
     {
-<<<<<<< HEAD
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, arrayBufferBacked_);
-=======
         return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetBufferOffset()));
->>>>>>> OpenHarmony_feature_20250328
     }
 
     void SetBuffer(ObjectPointer<EtsObject> buffer)
@@ -146,20 +133,12 @@ public:
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
-<<<<<<< HEAD
-    EtsDouble bytesPerElement_;
-=======
->>>>>>> OpenHarmony_feature_20250328
     EtsDouble byteOffset_;
     EtsDouble byteLength_;
     EtsInt bytesPerElement_;
     EtsInt lengthInt_;
-<<<<<<< HEAD
-    EtsBoolean arrayBufferBacked_;
-=======
 
     friend class test::EtsEscompatTypedArrayBaseTest;
->>>>>>> OpenHarmony_feature_20250328
 };
 
 template <typename T>

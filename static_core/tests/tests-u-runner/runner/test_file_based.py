@@ -105,16 +105,8 @@ class TestFileBased(Test):
         if self.test_env.config.general.coverage.use_lcov and coverage_per_binary:
             gcov_prefix, gcov_prefix_strip = self.coverage.lcov_tool.get_gcov_prefix(name)
             params = deepcopy(params)
-<<<<<<< HEAD
-            if self.test_env.config.general.coverage.llvm_cov_report_by_components:
-                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths(name)
-            else:
-                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
-            params.env['LLVM_PROFILE_FILE'] = profraw_file
-=======
             params.env['GCOV_PREFIX'] = gcov_prefix
             params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
->>>>>>> OpenHarmony_feature_20250328
 
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)

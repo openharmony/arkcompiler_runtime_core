@@ -78,11 +78,7 @@ TEST_F(ModuleFindEnumTest, invalid_args)
     ASSERT_EQ(env_->Module_FindEnum(module, nullptr, &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, "", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, "#BColor;", &aniEnum), ANI_INVALID_ARGS);
-<<<<<<< HEAD
-    ASSERT_EQ(env_->Module_FindEnum(module, "LBColor;", &aniEnum), ANI_NOT_FOUND);
-=======
     ASSERT_EQ(env_->Module_FindEnum(module, "BColor", &aniEnum), ANI_NOT_FOUND);
->>>>>>> OpenHarmony_feature_20250328
     ASSERT_EQ(env_->Module_FindEnum(module, "LBColor", &aniEnum), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Module_FindEnum(module, "BColor", nullptr), ANI_INVALID_ARGS);
 }

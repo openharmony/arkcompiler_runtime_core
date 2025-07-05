@@ -236,11 +236,7 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
         return nullptr;
     }
 
-<<<<<<< HEAD
-    double objValue = helpers::GetStdDoubleArgument(obj);
-=======
     EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
->>>>>>> OpenHarmony_feature_20250328
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");

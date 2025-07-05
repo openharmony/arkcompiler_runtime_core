@@ -1235,11 +1235,7 @@ bool BaseFunctionTest60(map_view<int64_t, bool> param1)
 
 }  // namespace
 
-<<<<<<< HEAD
-// The macros used below are automatically generated code
-=======
 // because these macros are auto-generate, lint will cause false positive.
->>>>>>> OpenHarmony_feature_20250328
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_BaseFunctionTest1(BaseFunctionTest1);
 TH_EXPORT_CPP_API_BaseFunctionTest2(BaseFunctionTest2);

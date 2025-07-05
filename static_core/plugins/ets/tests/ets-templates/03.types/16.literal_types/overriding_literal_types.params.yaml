@@ -28,13 +28,8 @@ cases:
       }
     use: |-
       let i: Derived = new Derived()
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/03.types/15.literal_types/overriding_literal_types.params.yaml
-      assertEQ( i.foo("some str"), 2 )
-      assertEQ( i.foo(new String("some str")), 2 )
-=======
       arktest.assertEQ( i.foo("some str"), 2 )
       arktest.assertEQ( i.foo(new String("some str")), 2 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/16.literal_types/overriding_literal_types.params.yaml
 
   - tags: negative, compile-only
     doc: |-
@@ -85,10 +80,5 @@ cases:
       }
     use: |-
       let i: Derived = new Derived()
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/03.types/15.literal_types/overriding_literal_types.params.yaml
-      assertEQ( i.foo("some str"), 2 )
-      assertEQ( i.foo(new String("another str")), 2 )
-=======
       arktest.assertEQ( i.foo("some str"), 2 )
       arktest.assertEQ( i.foo(new String("another str")), 2 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/16.literal_types/overriding_literal_types.params.yaml

@@ -14,17 +14,6 @@
  */
 
 class A {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method.ets
-  foo(v: String): String { return ("A:" + v) }
-}
-
-class B extends A {
-  foo(v: String): String { return ("B:" + v) }
-}
-
-class C {
-  foo(v: String): String { return ("C:" + v) }
-=======
   foo(v: String): String { return ('A:' + v) }
 }
 
@@ -34,30 +23,11 @@ class B extends A {
 
 class C {
   foo(v: String): String { return ('C:' + v) }
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method.ets
 }
 
 class D extends C {}
 
 function test1(v: A | C): String {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method.ets
-  return v.foo("123")
-}
-
-function test2(v: B | C): String {
-  return v.foo("123")
-}
-
-function test3(v: B | D): String {
-  return v.foo("123")
-}
-
-function main() {
-  assertEQ(test1(new A()), "A:123");
-  assertEQ(test1(new C()), "C:123");
-  assertEQ(test2(new B()), "B:123");
-  assertEQ(test3(new D()), "C:123");
-=======
   return v.foo('123')
 }
 
@@ -74,5 +44,4 @@ function main() {
   arktest.assertEQ(test1(new C()), 'C:123');
   arktest.assertEQ(test2(new B()), 'B:123');
   arktest.assertEQ(test3(new D()), 'C:123');
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method.ets
 }

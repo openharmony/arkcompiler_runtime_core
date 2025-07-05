@@ -27,14 +27,7 @@ function testPromise() {
      */
     this.setup = function () {
         let stsVm = initEtsVm();
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/promise/bu_j2a/bench_promise_j2a.js
-
-        this.promise = stsVm.getFunction('Lbench_promise_j2a/ETSGLOBAL;', 'promise');
-
-        return 0;
-=======
         this.promise = stsVm.getFunction('LlibImport/ETSGLOBAL;', 'promise');
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/promise/bu_d2s/promise_j2a.js
     };
 
     async function checkPromise() {

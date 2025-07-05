@@ -28,13 +28,8 @@ function main() {
     const objects: RefType[] = [new RefType(), new RefType()]
     const obj = objects[1]
     obj.field = 777            // change the field in the array element
-<<<<<<< HEAD
-    assertTrue( objects[0].field == 666 )
-    assertTrue( objects[1].field == 777 )
-=======
     arktest.assertTrue( objects[0].field == 666 )
     arktest.assertTrue( objects[1].field == 777 )
->>>>>>> OpenHarmony_feature_20250328
     // console.log(objects[0].filed) // prints 666
     // console.log(objects[1].filed) // prints 777
 }

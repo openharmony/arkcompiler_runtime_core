@@ -709,8 +709,6 @@ void Inspector::ReplyNativeCalling(PtThread thread)
     Continue(thread);
 }
 
-<<<<<<< HEAD
-=======
 void Inspector::ProfilerSetSamplingInterval(uint32_t interval)
 {
     os::memory::ReadLockHolder lock(vmDeathLock_);
@@ -773,7 +771,6 @@ void Inspector::DebuggerEnable()
     });
 }
 
->>>>>>> OpenHarmony_feature_20250328
 void Inspector::RegisterMethodHandlers()
 {
     // NOLINTBEGIN(modernize-avoid-bind)

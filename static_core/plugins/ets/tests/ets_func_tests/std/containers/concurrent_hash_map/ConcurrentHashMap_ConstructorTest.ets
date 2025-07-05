@@ -36,13 +36,8 @@ function main(): int {
             array[i] = arrKV;
         }
         let arrayLike = array as ArrayLike<[Number, string]>;
-<<<<<<< HEAD
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(arrayLike);
-        assertEQ(concurrentHashMap.size, 10);
-=======
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(arrayLike);
         arktest.assertEQ(concurrentHashMap.size, 10);
->>>>>>> OpenHarmony_feature_20250328
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(concurrentHashMap.get(arrKeys[i]), arrValues[i]);
         }

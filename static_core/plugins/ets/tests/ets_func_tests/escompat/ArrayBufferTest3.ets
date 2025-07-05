@@ -86,17 +86,6 @@ function resizeArrayBuffer(): void {
     arktest.assertEQ(a.byteLength, 5)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-<<<<<<< HEAD
-    expectThrow((): void throws => { a.set(5, 0 as byte) }, errorCheck)
-    expectThrow((): void throws => { a.at(5) }, errorCheck)
-
-    // Return previous length
-    a.resize(10);
-    assertEQ(a.byteLength, 10)
-    const VALUE = 42 as byte
-    a.set(5, VALUE)
-    assertEQ(a.at(5), VALUE)
-=======
     arktest.expectThrow((): void => { a.set(5, 0 .toByte()) }, errorCheck)
     arktest.expectThrow((): void => { a.at(5) }, errorCheck)
 
@@ -106,7 +95,6 @@ function resizeArrayBuffer(): void {
     const VALUE = 42 .toByte()
     a.set(5, VALUE)
     arktest.assertEQ(a.at(5), VALUE)
->>>>>>> OpenHarmony_feature_20250328
 
     errorCheck = (e: Error | Exception) => { return (e instanceof RangeError) }
     arktest.expectThrow((): void => { a.resize(11) }, errorCheck)
@@ -114,21 +102,12 @@ function resizeArrayBuffer(): void {
 
     a = new ArrayBuffer(10, 12)
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-<<<<<<< HEAD
-    expectThrow((): void throws => { a.set(10, 0 as byte) }, errorCheck)
-    expectThrow((): void throws => { a.at(10) }, errorCheck)
-
-    a.resize(11)
-    a.set(10, VALUE)
-    assertEQ(a.at(10), VALUE)
-=======
     arktest.expectThrow((): void => { a.set(10, 0 .toByte()) }, errorCheck)
     arktest.expectThrow((): void => { a.at(10) }, errorCheck)
 
     a.resize(11)
     a.set(10, VALUE)
     arktest.assertEQ(a.at(10), VALUE)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testManagedAccessors(): void {
@@ -137,40 +116,24 @@ function testManagedAccessors(): void {
     let a = new ArrayBuffer(FULL_LENGTH, FULL_LENGTH)
     const expectedBytes = new byte[a.getByteLength()]
     for (let i = 0; i < a.getByteLength(); i++) {
-<<<<<<< HEAD
-        expectedBytes[i] = i as byte
-=======
         expectedBytes[i] = i .toByte()
->>>>>>> OpenHarmony_feature_20250328
     }
 
     for (let i = 0; i < a.getByteLength(); i++) {
         a.set(i, expectedBytes[i])
-<<<<<<< HEAD
-        assertEQ(a.at(i), expectedBytes[i])
-=======
         arktest.assertEQ(a.at(i), expectedBytes[i])
->>>>>>> OpenHarmony_feature_20250328
     }
 
     // Shrink length and check that non-shrinked bytes were not changed
     a.resize(REDUCED_LENGTH)
     for (let i = 0; i < a.getByteLength(); i++) {
-<<<<<<< HEAD
-        assertEQ(a.at(i), expectedBytes[i])
-=======
         arktest.assertEQ(a.at(i), expectedBytes[i])
->>>>>>> OpenHarmony_feature_20250328
     }
 
     // Return the initial length, check that only previously kept (5) bytes were not changed
     a.resize(FULL_LENGTH)
     for (let i = 0; i < REDUCED_LENGTH; i++) {
-<<<<<<< HEAD
-        assertEQ(a.at(i), expectedBytes[i])
-=======
         arktest.assertEQ(a.at(i), expectedBytes[i])
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 

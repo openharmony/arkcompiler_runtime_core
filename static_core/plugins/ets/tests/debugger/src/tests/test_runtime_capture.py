@@ -32,11 +32,7 @@ async def test_assert_in_capture(
     code = """\
 function main(): int {
     console.log("START")
-<<<<<<< HEAD
-    assertTrue(false)
-=======
     arktest.assertTrue(false)
->>>>>>> OpenHarmony_feature_20250328
     console.log("TEST_END")
     return 0
 }\

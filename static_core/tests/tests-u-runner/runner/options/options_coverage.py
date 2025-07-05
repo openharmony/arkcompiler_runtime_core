@@ -28,18 +28,12 @@ class CoverageOptions:
     def to_dict(self) -> Dict[str, object]:
         return {
             "use-llvm-cov": self.use_llvm_cov,
-<<<<<<< HEAD
-            "llvm-cov-profdata-out-path": self.llvm_profdata_out_path,
-            "llvm-cov-html-out-path": self.llvm_cov_html_out_path,
-            "llvm-cov-report-by-components": self.llvm_cov_report_by_components,
-=======
             "use-lcov": self.use_lcov,
             "profdata-files-dir": self.profdata_files_dir,
             "coverage-html-report-dir": self.coverage_html_report_dir,
             "coverage-per-binary": self.coverage_per_binary,
             "llvm-cov-exclude": self.llvm_cov_exclude,
             "lcov-exclude": self.lcov_exclude,
->>>>>>> OpenHarmony_feature_20250328
         }
 
     @cached_property
@@ -115,13 +109,6 @@ class CoverageOptions:
     def get_command_line(self) -> str:
         options = [
             '--use-llvm-cov' if self.use_llvm_cov else '',
-<<<<<<< HEAD
-            f'--llvm-profdata-out-path="{self.llvm_profdata_out_path}"'
-            if self.llvm_profdata_out_path is not None else '',
-            f'--llvm-cov-html-out-path="{self.llvm_cov_html_out_path}"'
-            if self.llvm_cov_html_out_path is not None else '',
-            '--llvm-cov-report-by-components' if self.llvm_cov_report_by_components else '',
-=======
 
             '--use-lcov' if self.use_lcov else '',
 
@@ -138,6 +125,5 @@ class CoverageOptions:
 
             f'--lcov-exclude="{self.lcov_exclude}"'
             if self.lcov_exclude is not None else '',
->>>>>>> OpenHarmony_feature_20250328
         ]
         return ' '.join(options)

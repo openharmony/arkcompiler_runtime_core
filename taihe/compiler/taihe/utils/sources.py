@@ -40,11 +40,7 @@ class SourceBase(ABC):
         ...
 
     @abstractmethod
-<<<<<<< HEAD
-    def read(self) -> list[str]: 
-=======
     def read(self) -> str:
->>>>>>> OpenHarmony_feature_20250328
         ...
 
 

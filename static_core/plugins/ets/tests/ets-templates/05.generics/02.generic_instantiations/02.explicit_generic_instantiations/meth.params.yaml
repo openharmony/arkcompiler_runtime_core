@@ -31,11 +31,7 @@ cases:
         arktest.assertTrue(y[0] instanceof Error && y[1] == "abc")
 
         let x = cls.foo<[Number, Boolean], [Error, string]>(z, y)
-<<<<<<< HEAD
-        assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
-=======
         arktest.assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
->>>>>>> OpenHarmony_feature_20250328
 
         let w = cls.foo<null, undefined>(null, undefined)
         arktest.assertTrue(w[0] === null && w[1] === undefined)

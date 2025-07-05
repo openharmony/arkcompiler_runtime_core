@@ -48,11 +48,7 @@ function testGetParameterError(lambdaType: LambdaType): boolean {
 function testLambdaToString(): int {
     let lambda = () => {}; 
     let result = lambda.toLocaleString();
-<<<<<<< HEAD
-    assertEQ(result,"Cannot get source code of function");
-=======
     arktest.assertEQ(result,"Cannot get source code of function");
->>>>>>> OpenHarmony_feature_20250328
     return 0
 }
 

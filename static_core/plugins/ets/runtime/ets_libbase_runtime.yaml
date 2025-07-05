@@ -638,173 +638,6 @@ intrinsics:
       - std.core.String
       - i32
     impl: ark::ets::intrinsics::StdConsolePrintString
-<<<<<<< HEAD
-
-  - name: StdConsolePrintStringError
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - std.core.String
-    impl: ark::ets::intrinsics::StdConsolePrintStringError
-
-  - name: StdConsolePrintU1
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - u1
-    impl: ark::ets::intrinsics::StdConsolePrintBool
-
-  - name: StdConsolePrintU1Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - u1
-    impl: ark::ets::intrinsics::StdConsolePrintBoolError
-
-  - name: StdConsolePrintI8
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i8
-    impl: ark::ets::intrinsics::StdConsolePrintI8
-
-  - name: StdConsolePrintI8Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i8
-    impl: ark::ets::intrinsics::StdConsolePrintI8Error
-
-  - name: StdConsolePrintI16
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i16
-    impl: ark::ets::intrinsics::StdConsolePrintI16
-
-  - name: StdConsolePrintI16Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i16
-    impl: ark::ets::intrinsics::StdConsolePrintI16Error
-
-  - name: StdConsolePrintU16
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - u16
-    impl: ark::ets::intrinsics::StdConsolePrintChar
-
-  - name: StdConsolePrintU16Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - u16
-    impl: ark::ets::intrinsics::StdConsolePrintCharError
-
-  - name: StdConsolePrintI32
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i32
-    impl: ark::ets::intrinsics::StdConsolePrintI32
-
-  - name: StdConsolePrintI32Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i32
-    impl: ark::ets::intrinsics::StdConsolePrintI32Error
-
-  - name: StdConsolePrintI64
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i64
-    impl: ark::ets::intrinsics::StdConsolePrintI64
-
-  - name: StdConsolePrintI64Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i64
-    impl: ark::ets::intrinsics::StdConsolePrintI64Error
-
-  - name: StdConsolePrintln
-    space: ets
-    class_name: std.core.Console
-    method_name: println
-    static: false
-    signature:
-      ret: void
-      args: []
-    impl: ark::ets::intrinsics::StdConsolePrintln
-
-  - name: StdConsolePrintlnError
-    space: ets
-    class_name: std.core.Console
-    method_name: printlnError
-    static: false
-    signature:
-      ret: void
-      args: []
-    impl: ark::ets::intrinsics::StdConsolePrintlnError
-
-=======
->>>>>>> OpenHarmony_feature_20250328
 
 ####################
 
@@ -1898,8 +1731,6 @@ intrinsics:
       args: [escompat.Int8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Int8ArraySort
     space: ets
     class_name: escompat.Int8Array
@@ -1933,7 +1764,6 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayJoin
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Int16ArraySetInt
     space: ets
     class_name: escompat.Int16Array
@@ -1964,8 +1794,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: Int16ArrayGetUnsafe
     space: ets
     class_name: escompat.Int16Array
@@ -1976,7 +1804,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Int16ArraySetValues
     space: ets
     class_name: escompat.Int16Array
@@ -1997,8 +1824,6 @@ intrinsics:
       args: [escompat.Int16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Int16ArraySort
     space: ets
     class_name: escompat.Int16Array
@@ -2032,7 +1857,6 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt16ArrayFillInternal
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Int32ArraySetInt
     space: ets
     class_name: escompat.Int32Array
@@ -2053,8 +1877,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: Int32ArrayGetUnsafe
     space: ets
     class_name: escompat.Int32Array
@@ -2065,7 +1887,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Int32ArraySetValues
     space: ets
     class_name: escompat.Int32Array
@@ -2086,8 +1907,6 @@ intrinsics:
       args: [escompat.Int32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Int32ArraySort
     space: ets
     class_name: escompat.Int32Array
@@ -2121,7 +1940,6 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt32ArrayFillInternal
 
->>>>>>> OpenHarmony_feature_20250328
   - name: BigInt64ArraySetLong
     space: ets
     class_name: escompat.BigInt64Array
@@ -2142,8 +1960,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: BigInt64ArrayGetUnsafe
     space: ets
     class_name: escompat.BigInt64Array
@@ -2154,7 +1970,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: BigInt64ArraySetValues
     space: ets
     class_name: escompat.BigInt64Array
@@ -2175,8 +1990,6 @@ intrinsics:
       args: [escompat.BigInt64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: BigInt64ArraySort
     space: ets
     class_name: escompat.BigInt64Array
@@ -2210,7 +2023,6 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigInt64ArrayFillInternal
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Float32ArraySetFloat
     space: ets
     class_name: escompat.Float32Array
@@ -2231,8 +2043,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: Float32ArrayGetUnsafe
     space: ets
     class_name: escompat.Float32Array
@@ -2243,7 +2053,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Float32ArraySetValues
     space: ets
     class_name: escompat.Float32Array
@@ -2264,8 +2073,6 @@ intrinsics:
       args: [escompat.Float32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Float32ArraySort
     space: ets
     class_name: escompat.Float32Array
@@ -2309,7 +2116,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayContainsNaN
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Float64ArraySetDouble
     space: ets
     class_name: escompat.Float64Array
@@ -2330,8 +2136,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: Float64ArrayGetUnsafe
     space: ets
     class_name: escompat.Float64Array
@@ -2342,7 +2146,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: Float64ArraySetValues
     space: ets
     class_name: escompat.Float64Array
@@ -2363,8 +2166,6 @@ intrinsics:
       args: [escompat.Float64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Float64ArraySort
     space: ets
     class_name: escompat.Float64Array
@@ -2408,7 +2209,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayContainsNaN
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt8ClampedArraySetInt
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -2429,8 +2229,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGet
 
-<<<<<<< HEAD
-=======
   - name: UInt8ClampedArrayGetUnsafe
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -2441,7 +2239,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt8ClampedArraySetValues
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -2462,8 +2259,6 @@ intrinsics:
       args: [escompat.Uint8ClampedArray, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Uint8ClampedArraySort
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -2497,7 +2292,6 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayJoin
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt8ArraySetInt
     space: ets
     class_name: escompat.Uint8Array
@@ -2518,8 +2312,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: UInt8ArrayGetUnsafe
     space: ets
     class_name: escompat.Uint8Array
@@ -2530,7 +2322,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt8ArraySetValues
     space: ets
     class_name: escompat.Uint8Array
@@ -2551,8 +2342,6 @@ intrinsics:
       args: [escompat.Uint8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: Uint8ArraySort
     space: ets
     class_name: escompat.Uint8Array
@@ -2586,7 +2375,6 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatUint8ArrayJoin
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt16ArraySetInt
     space: ets
     class_name: escompat.Uint16Array
@@ -2607,8 +2395,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: UInt16ArrayGetUnsafe
     space: ets
     class_name: escompat.Uint16Array
@@ -2619,7 +2405,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt16ArraySetValues
     space: ets
     class_name: escompat.Uint16Array
@@ -2640,8 +2425,6 @@ intrinsics:
       args: [escompat.Uint16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: UInt16ArrayFillInternal
     space: ets
     class_name: escompat.Uint16Array
@@ -2675,7 +2458,6 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatUint16ArrayJoin
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt32ArraySetInt
     space: ets
     class_name: escompat.Uint32Array
@@ -2706,8 +2488,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: UInt32ArrayGetUnsafe
     space: ets
     class_name: escompat.Uint32Array
@@ -2718,7 +2498,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: UInt32ArraySetValues
     space: ets
     class_name: escompat.Uint32Array
@@ -2739,8 +2518,6 @@ intrinsics:
       args: [escompat.Uint32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValuesWithOffset
 
-<<<<<<< HEAD
-=======
   - name: UInt32ArrayFillInternal
     space: ets
     class_name: escompat.Uint32Array
@@ -2774,7 +2551,6 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatUint32ArrayJoin
 
->>>>>>> OpenHarmony_feature_20250328
   - name: BigUInt64ArraySetInt
     space: ets
     class_name: escompat.BigUint64Array
@@ -2805,8 +2581,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGet
 
-<<<<<<< HEAD
-=======
   - name: BigUInt64ArrayGetUnsafe
     space: ets
     class_name: escompat.BigUint64Array
@@ -2817,7 +2591,6 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGetUnsafe
 
->>>>>>> OpenHarmony_feature_20250328
   - name: BigUInt64ArraySetValues
     space: ets
     class_name: escompat.BigUint64Array
@@ -2837,8 +2610,6 @@ intrinsics:
       ret: void
       args: [escompat.BigUint64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
-<<<<<<< HEAD
-=======
 #################################
 # escompat.TypedArray.slice     #
 #################################    
@@ -3968,7 +3739,6 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateBigUint64ArrayWith
     llvm_codegen_func: EmitBigUint64ArrayWith
->>>>>>> OpenHarmony_feature_20250328
 
 ########################
 # escompat.taskpool #
@@ -5321,23 +5091,6 @@ intrinsics:
 # std.core.QueueSpinlock #
 ######################
   - name: StdQueueSpinlockGuard
-<<<<<<< HEAD
-    space: ets
-    class_name: std.core.QueueSpinlock
-    method_name: guard
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
-
-############################
-#   escompat.SharedMemory  #
-############################
-
-  - name: SharedMemoryCreate
-=======
->>>>>>> OpenHarmony_feature_20250328
     space: ets
     class_name: std.core.QueueSpinlock
     method_name: guard

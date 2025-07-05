@@ -37,17 +37,9 @@ function test(v: A | B): number {
 }
 
 function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method_virtual.ets
-  assertEQ(test(new A()), 21.0);
-  assertEQ(test(new B()), 32.0);
-  assertEQ(test(new C()), 43.0);
-  assertEQ(test(new D()), 54.0);
-  assertEQ(test(new E()), 43.0);
-=======
   arktest.assertEQ(test(new A()), 21.0);
   arktest.assertEQ(test(new B()), 32.0);
   arktest.assertEQ(test(new C()), 43.0);
   arktest.assertEQ(test(new D()), 54.0);
   arktest.assertEQ(test(new E()), 43.0);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method_virtual.ets
 }

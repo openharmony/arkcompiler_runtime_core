@@ -18,22 +18,14 @@
 desc: A value of type Object can be compared to a value of any reference type.
 ---*/
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne1.ets
-function eq<P>(p: P, q: Object, ps: string, qs: string): string {
-=======
 function eq(p: {{c.type}}, q: Object, ps: string, qs: string): string {
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/object_type_equality_operators/ne1.ets
     if (p == q || q == p) {
         return '\n' + ps + ' == ' + qs + ', expected false, got true'
     } else {
         return ''
     }
 }
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne1.ets
-function ne<P>(p: P, q: Object, ps: string, qs: string): string {
-=======
 function ne(p: {{c.type}}, q: Object, ps: string, qs: string): string {
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/object_type_equality_operators/ne1.ets
     if (p != q && q != p) {
         return ''
     } else {
@@ -48,20 +40,11 @@ function main() {
 {%- for p in c['case1'] %}
 {%- for q in c['case2'] %}
 {%- if p != q %}
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne1.ets
-    failed += eq<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endif %}
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
     failed += eq({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
     failed += ne({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
 {%- endif %}
 {%- endfor %}
 {%- endfor %}
     arktest.assertTrue(failed == '', 'Failed operations: ' + failed)
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/object_type_equality_operators/ne1.ets
 }
 {%- endfor %}

@@ -104,15 +104,12 @@ public:
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
     }
 
-<<<<<<< HEAD
-=======
     EtsEscompatArray *ToInternalType(ani_array array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsEscompatArray *>(GetInternalType(array));
     }
 
->>>>>>> OpenHarmony_feature_20250328
     EtsEscompatArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
     {
         ASSERT(!IsNullishValue(arraybuffer));

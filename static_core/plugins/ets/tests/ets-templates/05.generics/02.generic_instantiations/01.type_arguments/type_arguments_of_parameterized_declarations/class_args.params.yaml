@@ -123,18 +123,10 @@ cases:
   # not a reference type
   - use: |-
       let v: A<Color> = new A<Color>(Color.Red)
-<<<<<<< HEAD
-      assertTrue(v != null)
-=======
       arktest.assertTrue(v != null)
->>>>>>> OpenHarmony_feature_20250328
 
   - use: |-
       let v: A<B> = new A<B>([new A<X|null>(new X())])
     decl: |-
       type B = A<X|null>[]
-<<<<<<< HEAD
     bound: ' extends Object|null'
-=======
-    bound: ' extends Object|null'
->>>>>>> OpenHarmony_feature_20250328

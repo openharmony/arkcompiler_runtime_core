@@ -32,20 +32,8 @@ function mapCallback() {
      */
     this.setup = function () {
         let stsVm = initEtsVm();
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/call_import_function/bu_j2a/bench_call_import_function_j2a.js
-
-        this.etsVoid = stsVm.getFunction('Lbench_call_import_function_j2a/ETSGLOBAL;', 'stsVoid');
-        this.returnAnonymous = stsVm.getFunction('Lbench_call_import_function_j2a/ETSGLOBAL;', 'returnAnonymous');
-        return 0;
-    };
-
-    function callFunction(fun, target) {
-        fun(1000000, 1000000);
-        return;
-=======
         this.addPrefix = stsVm.getFunction('LlibImport/ETSGLOBAL;', 'addPrefix');
         generateRandomArray(arrayLength, stringLength, testArray);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/array_map_reduce/map/bu_d2s/map_callback_j2a.js
     };
 
     /**

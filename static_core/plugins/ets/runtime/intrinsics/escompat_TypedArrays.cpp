@@ -20,10 +20,7 @@
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
-<<<<<<< HEAD
-=======
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
->>>>>>> OpenHarmony_feature_20250328
 #include "intrinsics.h"
 #include "cross_values.h"
 #include "types/ets_object.h"
@@ -43,8 +40,6 @@ static void *GetNativeData(T *array)
     return arrayBuffer->GetData();
 }
 
-<<<<<<< HEAD
-=======
 static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
                                                            const uint8_t *data = nullptr)
 {
@@ -59,7 +54,6 @@ static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, E
     return newBuffer;
 }
 
->>>>>>> OpenHarmony_feature_20250328
 template <typename T>
 static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementType val)
 {
@@ -80,13 +74,9 @@ static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::Eleme
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
         return;
     }
-<<<<<<< HEAD
-    ObjectAccessor::SetPrimitive(
-=======
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ObjectAccessor::SetPrimitive(
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
->>>>>>> OpenHarmony_feature_20250328
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()), val);
 }
 
@@ -98,8 +88,6 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
         return 0;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * False-positive static-analyzer report:
      * GC can happen only on ThrowException in GetNativeData.
@@ -107,14 +95,11 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
      * us from proceeding
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
->>>>>>> OpenHarmony_feature_20250328
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
         return 0;
     }
-<<<<<<< HEAD
-=======
     /**
      * False-positive static-analyzer report:
      * GC can happen only on ThrowException in GetNativeData.
@@ -137,7 +122,6 @@ typename T::ElementType EtsEscompatTypedArrayGetUnsafe(T *thisArray, EtsInt pos)
         return 0;
     }
 
->>>>>>> OpenHarmony_feature_20250328
     return ObjectAccessor::GetPrimitive<typename T::ElementType>(
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
 }
@@ -155,14 +139,11 @@ extern "C" void EtsEscompatInt8ArraySetByte(ark::ets::EtsEscompatInt8Array *this
 extern "C" EtsDouble EtsEscompatInt8ArrayGet(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
-<<<<<<< HEAD
-=======
 }
 
 extern "C" EtsByte EtsEscompatInt8ArrayGetUnsafe(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 template <typename T>
@@ -221,8 +202,6 @@ extern "C" void EtsEscompatInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatInt
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 template <typename T, typename V>
 static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin, EtsInt end)
 {
@@ -251,7 +230,6 @@ extern "C" void EtsEscompatInt8ArrayFillInternal(ark::ets::EtsEscompatInt8Array 
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatInt16ArraySetInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -267,14 +245,11 @@ extern "C" EtsDouble EtsEscompatInt16ArrayGet(ark::ets::EtsEscompatInt16Array *t
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsShort EtsEscompatInt16ArrayGetUnsafe(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatInt16ArraySetValues(ark::ets::EtsEscompatInt16Array *thisArray,
                                                ark::ets::EtsEscompatInt16Array *srcArray)
 {
@@ -287,15 +262,12 @@ extern "C" void EtsEscompatInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatIn
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatInt16ArrayFillInternal(ark::ets::EtsEscompatInt16Array *thisArray, EtsShort val,
                                                   EtsInt begin, EtsInt end)
 {
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatInt32ArraySetInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -306,14 +278,11 @@ extern "C" EtsDouble EtsEscompatInt32ArrayGet(ark::ets::EtsEscompatInt32Array *t
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsInt EtsEscompatInt32ArrayGetUnsafe(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatInt32ArraySetValues(ark::ets::EtsEscompatInt32Array *thisArray,
                                                ark::ets::EtsEscompatInt32Array *srcArray)
 {
@@ -326,15 +295,12 @@ extern "C" void EtsEscompatInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatIn
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatInt32ArrayFillInternal(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt val, EtsInt begin,
                                                   EtsInt end)
 {
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatBigInt64ArraySetLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos, EtsLong val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -345,14 +311,11 @@ extern "C" EtsLong EtsEscompatBigInt64ArrayGet(ark::ets::EtsEscompatBigInt64Arra
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsLong EtsEscompatBigInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatBigInt64ArraySetValues(ark::ets::EtsEscompatBigInt64Array *thisArray,
                                                   ark::ets::EtsEscompatBigInt64Array *srcArray)
 {
@@ -365,15 +328,12 @@ extern "C" void EtsEscompatBigInt64ArraySetValuesWithOffset(ark::ets::EtsEscompa
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatBigInt64ArrayFillInternal(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsLong val,
                                                      EtsInt begin, EtsInt end)
 {
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatFloat32ArraySetFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos, EtsFloat val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -384,14 +344,11 @@ extern "C" EtsDouble EtsEscompatFloat32ArrayGet(ark::ets::EtsEscompatFloat32Arra
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsFloat EtsEscompatFloat32ArrayGetUnsafe(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatFloat32ArraySetValues(ark::ets::EtsEscompatFloat32Array *thisArray,
                                                  ark::ets::EtsEscompatFloat32Array *srcArray)
 {
@@ -404,8 +361,6 @@ extern "C" void EtsEscompatFloat32ArraySetValuesWithOffset(ark::ets::EtsEscompat
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatFloat32ArrayFillInternal(ark::ets::EtsEscompatFloat32Array *thisArray, EtsFloat val,
                                                     EtsInt begin, EtsInt end)
 {
@@ -418,7 +373,6 @@ extern "C" void EtsEscompatFloat32ArrayFillInternalInt(ark::ets::EtsEscompatFloa
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatFloat64ArraySetDouble(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos,
                                                  EtsDouble val)
 {
@@ -430,14 +384,11 @@ extern "C" EtsDouble EtsEscompatFloat64ArrayGet(ark::ets::EtsEscompatFloat64Arra
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsDouble EtsEscompatFloat64ArrayGetUnsafe(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Array *thisArray,
                                                  ark::ets::EtsEscompatFloat64Array *srcArray)
 {
@@ -450,8 +401,6 @@ extern "C" void EtsEscompatFloat64ArraySetValuesWithOffset(ark::ets::EtsEscompat
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatFloat64ArrayFillInternal(ark::ets::EtsEscompatFloat64Array *thisArray, EtsDouble val,
                                                     EtsInt begin, EtsInt end)
 {
@@ -464,7 +413,6 @@ extern "C" void EtsEscompatFloat64ArrayFillInternalInt(ark::ets::EtsEscompatFloa
     EtsEscompatTypedArrayFillInternal(thisArray, val, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt8ClampedArraySetInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos,
                                                    EtsInt val)
 {
@@ -481,14 +429,11 @@ extern "C" EtsDouble EtsEscompatUInt8ClampedArrayGet(ark::ets::EtsEscompatUInt8C
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsInt EtsEscompatUInt8ClampedArrayGetUnsafe(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt8ClampedArraySetValues(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
                                                       ark::ets::EtsEscompatUInt8ClampedArray *srcArray)
 {
@@ -502,8 +447,6 @@ extern "C" void EtsEscompatUInt8ClampedArraySetValuesWithOffset(ark::ets::EtsEsc
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatUInt8ClampedArrayFillInternal(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt val,
                                                          EtsInt begin, EtsInt end)
 {
@@ -511,7 +454,6 @@ extern "C" void EtsEscompatUInt8ClampedArrayFillInternal(ark::ets::EtsEscompatUI
     EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt8ArraySetInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -522,14 +464,11 @@ extern "C" EtsDouble EtsEscompatUInt8ArrayGet(ark::ets::EtsEscompatUInt8Array *t
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsInt EtsEscompatUInt8ArrayGetUnsafe(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt8ArraySetValues(ark::ets::EtsEscompatUInt8Array *thisArray,
                                                ark::ets::EtsEscompatUInt8Array *srcArray)
 {
@@ -542,8 +481,6 @@ extern "C" void EtsEscompatUInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatUI
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatUInt8ArrayFillInternal(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt val, EtsInt begin,
                                                   EtsInt end)
 {
@@ -551,7 +488,6 @@ extern "C" void EtsEscompatUInt8ArrayFillInternal(ark::ets::EtsEscompatUInt8Arra
     EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt16ArraySetInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -562,14 +498,11 @@ extern "C" EtsDouble EtsEscompatUInt16ArrayGet(ark::ets::EtsEscompatUInt16Array 
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsInt EtsEscompatUInt16ArrayGetUnsafe(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt16ArraySetValues(ark::ets::EtsEscompatUInt16Array *thisArray,
                                                 ark::ets::EtsEscompatUInt16Array *srcArray)
 {
@@ -582,8 +515,6 @@ extern "C" void EtsEscompatUInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatU
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatUInt16ArrayFillInternal(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt val,
                                                    EtsInt begin, EtsInt end)
 {
@@ -591,7 +522,6 @@ extern "C" void EtsEscompatUInt16ArrayFillInternal(ark::ets::EtsEscompatUInt16Ar
     EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt32ArraySetInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -607,14 +537,11 @@ extern "C" EtsDouble EtsEscompatUInt32ArrayGet(ark::ets::EtsEscompatUInt32Array 
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsLong EtsEscompatUInt32ArrayGetUnsafe(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatUInt32ArraySetValues(ark::ets::EtsEscompatUInt32Array *thisArray,
                                                 ark::ets::EtsEscompatUInt32Array *srcArray)
 {
@@ -627,8 +554,6 @@ extern "C" void EtsEscompatUInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatU
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
-<<<<<<< HEAD
-=======
 extern "C" void EtsEscompatUInt32ArrayFillInternal(ark::ets::EtsEscompatUInt32Array *thisArray, EtsLong val,
                                                    EtsInt begin, EtsInt end)
 {
@@ -636,7 +561,6 @@ extern "C" void EtsEscompatUInt32ArrayFillInternal(ark::ets::EtsEscompatUInt32Ar
     EtsEscompatTypedArrayFillInternal(thisArray, static_cast<ElementType>(val), begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatBigUInt64ArraySetInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -653,14 +577,11 @@ extern "C" EtsLong EtsEscompatBigUInt64ArrayGet(ark::ets::EtsEscompatBigUInt64Ar
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
-<<<<<<< HEAD
-=======
 extern "C" EtsLong EtsEscompatBigUInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 extern "C" void EtsEscompatBigUInt64ArraySetValues(ark::ets::EtsEscompatBigUInt64Array *thisArray,
                                                    ark::ets::EtsEscompatBigUInt64Array *srcArray)
 {
@@ -673,8 +594,6 @@ extern "C" void EtsEscompatBigUInt64ArraySetValuesWithOffset(ark::ets::EtsEscomp
 {
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
-<<<<<<< HEAD
-=======
 
 extern "C" void EtsEscompatBigUInt64ArrayFillInternal(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsLong val,
                                                       EtsInt begin, EtsInt end)
@@ -1732,5 +1651,4 @@ extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArrayS
     return EtsEscompatTypedArraySliceImpl(thisArray, begin, end);
 }
 
->>>>>>> OpenHarmony_feature_20250328
 }  // namespace ark::ets::intrinsics

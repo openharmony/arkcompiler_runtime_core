@@ -483,14 +483,11 @@ public:
         return (GetFlags() & IS_FUNCTION) != 0;
     }
 
-<<<<<<< HEAD
-=======
     [[nodiscard]] bool IsFunctionReference() const
     {
         return (GetFlags() & IS_FUNCTION_REFERENCE) != 0;
     }
 
->>>>>>> OpenHarmony_feature_20250328
     [[nodiscard]] bool IsEtsEnum() const
     {
         return (GetFlags() & IS_ETS_ENUM) != 0;
@@ -626,11 +623,8 @@ private:
     constexpr static uint32_t IS_MODULE = 1U << 24U;
     // Class is enum
     constexpr static uint32_t IS_ETS_ENUM = 1U << 25U;
-<<<<<<< HEAD
-=======
     // Class is Function Reference
     constexpr static uint32_t IS_FUNCTION_REFERENCE = 1U << 26U;
->>>>>>> OpenHarmony_feature_20250328
 
     ark::ObjectHeader header_;  // EtsObject
 

@@ -121,11 +121,7 @@ public:
         return (state_ == STATE_LINKED);
     }
 
-<<<<<<< HEAD
-    bool IsProxy()
-=======
     bool IsProxy() const
->>>>>>> OpenHarmony_feature_20250328
     {
         return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
     }

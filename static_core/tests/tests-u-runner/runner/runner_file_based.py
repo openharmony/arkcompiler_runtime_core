@@ -130,11 +130,7 @@ class RunnerFileBased(Runner):
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
-<<<<<<< HEAD
-        self.coverage = LlvmCov(Path(self.build_dir), self.work_dir.coverage_dir)
-=======
         self.coverage_manager = CoverageManager(Path(self.build_dir), self.work_dir.coverage_dir)
->>>>>>> OpenHarmony_feature_20250328
 
         self.__set_test_list_options()
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
@@ -230,17 +226,6 @@ class RunnerFileBased(Runner):
 
     def create_coverage_html(self) -> None:
         Log.all(_LOGGER, "Create html report for coverage")
-<<<<<<< HEAD
-        if self.test_env.config.general.coverage.llvm_cov_report_by_components:
-            self.coverage.make_profdata_list_files_by_components()
-            self.coverage.merge_all_profdata_files_by_components()
-            self.coverage.llvm_cov_export_to_info_file_by_components()
-        else:
-            self.coverage.make_profdata_list_file()
-            self.coverage.merge_all_profdata_files()
-            self.coverage.llvm_cov_export_to_info_file()
-        self.coverage.genhtml()
-=======
         coverage_configs = self.test_env.config.general.coverage
         llvm_tool = self.test_env.coverage.llvm_cov_tool
         lcov_tool = self.test_env.coverage.lcov_tool
@@ -262,7 +247,6 @@ class RunnerFileBased(Runner):
             else:
                 lcov_tool.generate_dot_info_file(coverage_configs.lcov_exclude)
                 lcov_tool.generage_html_report()
->>>>>>> OpenHarmony_feature_20250328
 
     def summarize(self) -> int:
         Log.all(_LOGGER, "Processing run statistics")

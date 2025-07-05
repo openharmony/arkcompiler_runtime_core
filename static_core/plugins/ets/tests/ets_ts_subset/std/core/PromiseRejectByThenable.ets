@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let error = new Error("abc");
-let p = new Promise<string>((_: (v: string) => void, reject: (error: Object) => void) => {
-=======
 let error = new Error('abc');
 let p = new Promise<string>((_: (v: string) => void, reject: (error: Error) => void) => {
->>>>>>> OpenHarmony_feature_20250328
     reject(error);
 });
 

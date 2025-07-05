@@ -463,12 +463,8 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-<<<<<<< HEAD
-    bool launchResult = coroManager->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
-=======
     bool launchResult = coroManager->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER,
                                                        EtsCoroutine::ASYNC_CALL, false);
->>>>>>> OpenHarmony_feature_20250328
     if (UNLIKELY(!launchResult)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch

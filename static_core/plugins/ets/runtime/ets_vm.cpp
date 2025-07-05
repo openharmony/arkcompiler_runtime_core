@@ -289,20 +289,6 @@ bool PandaEtsVM::Initialize()
         coro->GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
             ToUintPtr(classLinker_->GetEtsClassLinkerExtension()->GetPlatformTypes()));
         ASSERT(PlatformTypes(coro) != nullptr);
-<<<<<<< HEAD
-
-        // Should be invoked after PlatformTypes is initialized in coroutine.
-        oomObjRef_ = PreallocOOMError(this);
-        nullValueRef_ = PreallocSpecialReference(this, NULL_VALUE.data(), true);
-        finalizableWeakRefList_ = PreallocSpecialReference(this, FINALIZABLE_WEAK_REF.data());
-
-        coro->SetupNullValue(GetNullValue());
-
-        doubleToStringCache_ = DoubleToStringCache::Create(coro);
-        floatToStringCache_ = FloatToStringCache::Create(coro);
-        longToStringCache_ = LongToStringCache::Create(coro);
-
-=======
 
         // Should be invoked after PlatformTypes is initialized in coroutine.
         oomObjRef_ = PreallocOOMError(this);
@@ -317,7 +303,6 @@ bool PandaEtsVM::Initialize()
             longToStringCache_ = LongToStringCache::Create(coro);
         }
 
->>>>>>> OpenHarmony_feature_20250328
         referenceProcessor_->Initialize();
     }
     [[maybe_unused]] bool cachesCreated =

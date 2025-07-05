@@ -111,19 +111,11 @@ function fixedArrayTest() {
     compareArray(Reflect.ownKeys(arr2), ['0', '1', 'length'])
 }
 
-<<<<<<< HEAD
-    let arr: number[] = [10, 20, 30]
-    let emptyarr: number[] = []
-
-    let str: string = "abc"
-    let emptystr: string = ""
-=======
 function arrayTest() {
     let arr: Array<number> = []
     compareArray(Reflect.ownKeys(arr), ['length'])
     arr = [1.0, 12.5, 5.0]
     compareArray(Reflect.ownKeys(arr), ['0', '1', '2', 'length'])
->>>>>>> OpenHarmony_feature_20250328
 
     let arr2: Array<Point2D> = [new Point2D(0, 1), new Point3D(0, 1, 2)]
     compareArray(Reflect.ownKeys(arr2), ['0', '1', 'length'])
@@ -141,31 +133,7 @@ function lambdaTest() {
     }
     compareArray(Reflect.ownKeys(lambda), ["length", "name"])
 
-<<<<<<< HEAD
-    let emptyArr: string[] = []
-
-    result += arraysAreEqual(Reflect.ownKeys(c), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(bo), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(bt), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(sh), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(i), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(lo), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(fl), emptyArr) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(dou), emptyArr) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(arr), ["0", "1", "2", "length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(emptyarr), ["length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(str), ["0", "1", "2", "length"]) ? 0 : 1
-    result += arraysAreEqual(Reflect.ownKeys(emptystr), ["length"]) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(cl), ["x", "y", "z"]) ? 0 : 1
-
-    result += arraysAreEqual(Reflect.ownKeys(lambda), ["length", "name"]) ? 0 : 1
-
-    return result
-=======
     compareArray(Reflect.ownKeys(arrayTest), ["length", "name"])
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function main(): int {

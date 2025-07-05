@@ -96,8 +96,6 @@ static constexpr std::string_view FUNCTION15                           = "Lstd/c
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
-<<<<<<< HEAD
-=======
 // varargs Functional interfaces
 static constexpr std::string_view FUNCTIONR0                            = "Lstd/core/FunctionR0;";
 static constexpr std::string_view FUNCTIONR1                            = "Lstd/core/FunctionR1;";
@@ -117,7 +115,6 @@ static constexpr std::string_view FUNCTIONR14                           = "Lstd/
 static constexpr std::string_view FUNCTIONR15                           = "Lstd/core/FunctionR15;";
 static constexpr std::string_view FUNCTIONR16                           = "Lstd/core/FunctionR16;";
 
->>>>>>> OpenHarmony_feature_20250328
 // Tuple classes
 static constexpr std::string_view TUPLE                                = "Lstd/core/Tuple;";
 static constexpr std::string_view TUPLE0                               = "Lstd/core/Tuple0;";
@@ -220,13 +217,10 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 
 // Module annotation class
 static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
-<<<<<<< HEAD
-=======
 static constexpr std::string_view ANNOTATION_MODULE_EXPORTED           = "exported";
 
 // Interface object literal annotation class
 static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
->>>>>>> OpenHarmony_feature_20250328
 
 // escompat
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";

@@ -124,11 +124,7 @@ ets_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int del
     uv_loop_t *loop = ark::ets::interop::js::EventLoop::GetEventLoop();
     uv_timer_init(loop, timer);
     uv_update_time(loop);
-<<<<<<< HEAD
-    ani_int intervalMs = !static_cast<bool>(oneShotTimer)
-=======
     ani_int intervalMs = static_cast<bool>(repeat)
->>>>>>> OpenHarmony_feature_20250328
                              ? (delayMs > TimerModule::MIN_INTERVAL_MS ? delayMs : TimerModule::MIN_INTERVAL_MS)
                              : 0;
     uv_timer_start(timer, TimerCallback, delayMs, intervalMs);

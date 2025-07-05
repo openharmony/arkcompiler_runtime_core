@@ -39,20 +39,8 @@ function reduceCallback() {
      */
     this.setup = function () {
         let stsVm = initEtsVm();
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/get_value/get_numeric_value/bu_j2a/bench_get_numeric_j2a.js
-
-        if (!stsRT) {
-            console.error('Failed to create ETS runtime');
-            return 1;
-        }
-
-        this.getObj = stsVm.getFunction('Lbench_get_numeric_j2a/ETSGLOBAL;', 'getStsObj');
-
-        return 0;
-=======
         this.sumFunction = stsVm.getFunction('LlibImport/ETSGLOBAL;', 'sumFunction');
         generateRandomArray(arrayLength, min, max, testArray);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/array_map_reduce/reduce/bu_d2s/reduce_callback_j2a.js
     };
 
     /**

@@ -113,10 +113,7 @@ if (!(ark_standalone_build ||
       "./sdk/api/@ohos.util.PlainArray.ets",
       "./sdk/api/@ohos.util.Queue.ets",
       "./sdk/api/@ohos.util.Stack.ets",
-<<<<<<< HEAD
-=======
       "./sdk/api/@ohos.util.stream.ets",
->>>>>>> OpenHarmony_feature_20250328
       "./sdk/api/@ohos.util.ets",
       "./sdk/api/@ohos.util.TreeMap.ets",
       "./sdk/api/@ohos.util.TreeSet.ets",
@@ -136,14 +133,10 @@ if (!(ark_standalone_build ||
 
   generate_static_abc("ets2abc_commonsdk_arkts") {
     base_url = "./sdk/arkts"
-<<<<<<< HEAD
-    files = [ "./sdk/arkts/@arkts.math.Decimal.ets" ]
-=======
     files = [
       "./sdk/arkts/@arkts.math.Decimal.ets",
       "./sdk/arkts/@arkts.collections.ets",
     ]
->>>>>>> OpenHarmony_feature_20250328
     is_boot_abc = "True"
     device_dst_file = "/system/framework/ets2abc_commonsdk_arkts.abc"
   }
@@ -159,10 +152,7 @@ if (!(ark_standalone_build ||
     ]
     sources = [
       "$ark_root/plugins/ets/sdk/native/api/Util.cpp",
-<<<<<<< HEAD
-=======
       "$ark_root/plugins/ets/sdk/native/api/ani_stringdecoder.cpp",
->>>>>>> OpenHarmony_feature_20250328
       "$ark_root/plugins/ets/sdk/native/api/ani_textdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder_helper.cpp",

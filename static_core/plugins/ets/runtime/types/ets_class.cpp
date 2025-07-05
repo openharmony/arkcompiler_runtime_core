@@ -489,12 +489,9 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (UNLIKELY(GetBase() != nullptr && GetBase()->IsEtsEnum())) {
         flags |= (IS_ETS_ENUM | IS_VALUE_TYPED);
     }
-<<<<<<< HEAD
-=======
     if (UNLIKELY(GetRuntimeClass()->IsXRefClass())) {
         flags |= IS_VALUE_TYPED;
     }
->>>>>>> OpenHarmony_feature_20250328
 
     auto *runtimeClass = GetRuntimeClass();
     auto *pfile = runtimeClass->GetPandaFile();

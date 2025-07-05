@@ -21,19 +21,10 @@ class B {
   meth(p: number): number { return p + 33.0 }
 }
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method_common.ets
-let u1: A|B = new A
-let u2: A|B = new B
-
-function main() {
-  assertEQ(u1.meth(1.0), 43.0);
-  assertEQ(u2.meth(2.0), 35.0);
-=======
 let u1: A | B = new A
 let u2: A | B = new B
 
 function main() {
   arktest.assertEQ(u1.meth(1.0), 43.0);
   arktest.assertEQ(u2.meth(2.0), 35.0);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method_common.ets
 }

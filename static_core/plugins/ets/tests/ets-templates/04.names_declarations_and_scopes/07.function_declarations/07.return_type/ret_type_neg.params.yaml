@@ -48,8 +48,4 @@ function_decls:
             i += 1
         }
       call: |-
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_neg.params.yaml
         let x = foo();  // CTE, Cannot use type 'void' as value
-=======
-        let x = foo();  // CTE, Cannot use type 'void' as value
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_neg.params.yaml

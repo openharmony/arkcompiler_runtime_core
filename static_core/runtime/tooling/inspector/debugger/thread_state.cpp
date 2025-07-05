@@ -34,12 +34,6 @@ void ThreadState::Reset()
     methodEntered_ = false;
     skipAllPauses_ = false;
     mixedDebugEnabled_ = false;
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/thread_state.cpp
-    nextBreakpointId_ = 0;
-    breakpointLocations_.clear();
-    breakpointConditions_.Clear();
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/thread_state.cpp
     pauseOnExceptionsState_ = PauseOnExceptionsState::NONE;
 }
 
@@ -106,14 +100,6 @@ void ThreadState::SetSkipAllPauses(bool skip)
 
 // NOTE(fangting, #25108): implement "NativeOut" events when in mixed debug mode
 void ThreadState::SetMixedDebugEnabled(bool mixedDebugEnabled)
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/thread_state.cpp
-{
-    mixedDebugEnabled_ = mixedDebugEnabled;
-}
-
-BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/thread_state.cpp
 {
     mixedDebugEnabled_ = mixedDebugEnabled;
 }

@@ -103,34 +103,6 @@ TEST_F(RegExpTest, UnicodeTest)
 {
     RegExpParser parser = RegExpParser();
     {
-<<<<<<< HEAD
-        PandaString source = u8"A";  // u8前缀确保UTF-8编码
-        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
-        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
-        PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
-    }
-    {
-        PandaString source = u8"¢";  // u8前缀确保UTF-8编码
-        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
-        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
-        PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
-    }
-    {
-        PandaString source = u8"€";  // u8前缀确保UTF-8编码
-        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
-        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
-        PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
-    }
-    {
-        PandaString source = u8"𐍈";  // u8前缀确保UTF-8编码
-        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
-        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
-        PandaString name {};
-        parser.ParseGroupSpecifier(&p, name);
-=======
         PandaString source = u8"A";
         parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
@@ -157,7 +129,6 @@ TEST_F(RegExpTest, UnicodeTest)
         const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
         PandaString name {};
         ASSERT_FALSE(parser.ParseGroupSpecifier(&p, name));
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 

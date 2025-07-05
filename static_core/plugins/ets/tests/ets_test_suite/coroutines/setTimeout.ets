@@ -42,13 +42,8 @@ function setTimeoutTest() {
     let flag = false;
     let start = Date.now();
     setTimeout(() => {
-<<<<<<< HEAD
-        assertTrue(flag);
-        assertTrue(Date.now() - start >= shortTimeout);
-=======
         arktest.assertTrue(flag);
         arktest.assertTrue(Date.now() - start >= shortTimeout);
->>>>>>> OpenHarmony_feature_20250328
     }, shortTimeout);
     flag = true;
 }

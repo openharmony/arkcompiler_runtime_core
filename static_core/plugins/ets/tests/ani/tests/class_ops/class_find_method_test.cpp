@@ -1076,21 +1076,6 @@ TEST_F(ClassFindMethodTest, static_duplicate_no_signature)
 TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 {
     ani_class cls {};
-<<<<<<< HEAD
-    ASSERT_EQ(env_->FindClass("Ltest/AllFunctions;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":V", &ctor), ANI_OK);
-    ASSERT_NE(ctor, nullptr);
-
-    ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":I", &staticMethod), ANI_OK);
-    ASSERT_NE(staticMethod, nullptr);
-
-    ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_OK);
-=======
     ASSERT_EQ(env_->FindClass("test.AllFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
@@ -1104,7 +1089,6 @@ TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":i", &method), ANI_OK);
->>>>>>> OpenHarmony_feature_20250328
     ASSERT_NE(method, nullptr);
 
     ani_object object {};
@@ -1123,16 +1107,6 @@ TEST_F(ClassFindMethodTest, same_name_static_virtual_function)
 TEST_F(ClassFindMethodTest, no_static_virtual_function)
 {
     ani_class cls {};
-<<<<<<< HEAD
-    ASSERT_EQ(env_->FindClass("Ltest/MixedFunctions;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    ani_static_method staticMethod {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "bar", ":I", &staticMethod), ANI_NOT_FOUND);
-
-    ani_method method {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":I", &method), ANI_NOT_FOUND);
-=======
     ASSERT_EQ(env_->FindClass("test.MixedFunctions", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
@@ -1141,17 +1115,12 @@ TEST_F(ClassFindMethodTest, no_static_virtual_function)
 
     ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "foo", ":i", &method), ANI_NOT_FOUND);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 TEST_F(ClassFindMethodTest, static_no_duplicate)
 {
     ani_class baseCls {};
-<<<<<<< HEAD
-    ASSERT_EQ(env_->FindClass("Ltest/NotOverloaded;", &baseCls), ANI_OK);
-=======
     ASSERT_EQ(env_->FindClass("test.NotOverloaded", &baseCls), ANI_OK);
->>>>>>> OpenHarmony_feature_20250328
     ASSERT_NE(baseCls, nullptr);
 
     ani_static_method smethod {};
@@ -1161,8 +1130,6 @@ TEST_F(ClassFindMethodTest, static_no_duplicate)
     ASSERT_EQ(env_->Class_FindMethod(baseCls, "notOverloaded", nullptr, &method), ANI_OK);
 }
 
-<<<<<<< HEAD
-=======
 TEST_F(ClassFindMethodTest, check_initalization)
 {
     ani_class cls {};
@@ -1174,6 +1141,5 @@ TEST_F(ClassFindMethodTest, check_initalization)
     ASSERT_FALSE(IsRuntimeClassInitialized("test.NotOverloaded"));
 }
 
->>>>>>> OpenHarmony_feature_20250328
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

@@ -16,13 +16,7 @@
 /**
  * @State
  */
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/type_conversion_primitives/char/bu_a2j/bench_conversion_char_a2j.ets
-class ConversionCharA2j {
-    ch: string = "A";
-    result: string = '';
-=======
 class WithParams {
->>>>>>> OpenHarmony_feature_20250328:static_core/tests/vm-benchmarks/examples/benchmarks/ts/WithParams.ts
 
     /**
      * @Param 1, 2
@@ -38,12 +32,7 @@ class WithParams {
      * @Benchmark
      */
     test(): string {
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/type_conversion_primitives/char/bu_a2j/bench_conversion_char_a2j.ets
-        this.result = charToNumberToString(this.ch)
-        return this.result;
-=======
         return this.value + this.size.toString();
->>>>>>> OpenHarmony_feature_20250328:static_core/tests/vm-benchmarks/examples/benchmarks/ts/WithParams.ts
     }
 
 }

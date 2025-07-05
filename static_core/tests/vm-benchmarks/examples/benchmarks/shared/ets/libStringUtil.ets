@@ -1,10 +1,5 @@
-<<<<<<< HEAD:static_core/plugins/ets/tests/interop_js/tests/scenarios/ets_to_js/js_suites/test_function_arg_type_conflict_object.js
 /**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
-=======
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
->>>>>>> OpenHarmony_feature_20250328:static_core/tests/vm-benchmarks/examples/benchmarks/shared/ets/libStringUtil.ets
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<< HEAD:static_core/plugins/ets/tests/interop_js/tests/scenarios/ets_to_js/js_suites/test_function_arg_type_conflict_object.js
-const { etsVm, getTestModule } = require('../scenarios.test.abc');
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/tests/vm-benchmarks/examples/benchmarks/shared/ets/libStringUtil.ets
 
 export class StringUtil {
 

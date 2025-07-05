@@ -964,21 +964,10 @@ function check_array(arr: BigUint64Array, expected: BigUint64Array) {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_int8array_set_byte_cpp(): void {
     let ar = new Int8Array(10)
-<<<<<<< HEAD
-    ar[2] = -128 as byte
-    ar[3] = -129 as byte
-    ar[4] = 127 as byte
-    ar[5] = 128 as byte
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
-    assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
-=======
     ar[2] = (-128).toByte()
     ar[4] = (127).toByte()
     assertEquals(-128, ar[2])
     assertEquals(127, ar[4])
->>>>>>> OpenHarmony_feature_20250328
 }
 
 //! CHECKER       Int8Array $_set byte/$_get IR intrinsic
@@ -990,18 +979,6 @@ function test_int8array_set_byte_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-function test_int8array_set_byte_ir(): void {
-    let ar = new Int8Array(10)
-    ar[2] = -128 as byte
-    ar[3] = -129 as byte
-    ar[4] = 127 as byte
-    ar[5] = 128 as byte
-    assertEquals(-128, ar[2])
-    assertEquals(127, ar[3])
-    assertEquals(127, ar[4])
-    assertEquals(-128, ar[5])
-=======
 //! EVENT_NOT     /Deoptimization/
 function test_int8array_set_byte_ir(): void {
     let ar = new Int8Array(10)
@@ -1009,7 +986,6 @@ function test_int8array_set_byte_ir(): void {
     ar[4] = (127).toByte()
     assertEquals(-128, ar[2])
     assertEquals(127, ar[4])
->>>>>>> OpenHarmony_feature_20250328
 }
 
 //! CHECKER       Int8Array $_set int/$_get cpp intrinsic
@@ -1042,10 +1018,7 @@ function test_int8array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_int8array_set_int_ir(): void {
     let ar = new Int8Array(10)
     ar[2] = -128
@@ -1058,8 +1031,6 @@ function test_int8array_set_int_ir(): void {
     assertEquals(-128, ar[5])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Int8Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt8ArrayGetUnsafe"
 //! METHOD        "escompat_Int8Array::at"
@@ -1082,7 +1053,6 @@ function testInt8ArrayGetUnsafe(): void {
     arktest.assertEQ(127, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Int8Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_int8array_set_rangeerror_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_set_rangeerror_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_set_rangeerror_cpp"
@@ -1126,21 +1096,10 @@ function test_int8array_set_number_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_int16array_set_short_cpp(): void {
     let ar = new Int16Array(10)
-<<<<<<< HEAD
-    ar[2] = -32768 as short
-    ar[3] = -32769 as short
-    ar[4] = 32767 as short
-    ar[5] = 32768 as short
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
-    assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
-=======
     ar[2] = (-32768).toShort()
     ar[4] = (32767).toShort()
     assertEquals(-32768, ar[2])
     assertEquals(32767, ar[4])
->>>>>>> OpenHarmony_feature_20250328
 }
 
 //! CHECKER       Int16Array $_set short/$_get IR intrinsic
@@ -1152,18 +1111,6 @@ function test_int16array_set_short_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-function test_int16array_set_short_ir(): void {
-    let ar = new Int16Array(10)
-    ar[2] = -32768 as short
-    ar[3] = -32769 as short
-    ar[4] = 32767 as short
-    ar[5] = 32768 as short
-    assertEquals(-32768, ar[2])
-    assertEquals(32767, ar[3])
-    assertEquals(32767, ar[4])
-    assertEquals(-32768, ar[5])
-=======
 //! EVENT_NOT     /Deoptimization/
 function test_int16array_set_short_ir(): void {
     let ar = new Int16Array(10)
@@ -1171,7 +1118,6 @@ function test_int16array_set_short_ir(): void {
     ar[4] = (32767).toShort()
     assertEquals(-32768, ar[2])
     assertEquals(32767, ar[4])
->>>>>>> OpenHarmony_feature_20250328
 }
 
 //! CHECKER       Int16Array $_set int/$_get cpp intrinsic
@@ -1204,10 +1150,7 @@ function test_int16array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_int16array_set_int_ir(): void {
     let ar = new Int16Array(10)
     ar[2] = -32768
@@ -1220,8 +1163,6 @@ function test_int16array_set_int_ir(): void {
     assertEquals(-32768, ar[5])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Int16Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt16ArrayGetUnsafe"
 //! METHOD        "escompat_Int16Array::at"
@@ -1248,7 +1189,6 @@ function testInt16ArrayGetUnsafe(): void {
     arktest.assertEQ(-32768, ar.at(5))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Int16Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_int16array_set_rangeerror_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_set_rangeerror_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_set_rangeerror_cpp"
@@ -1305,10 +1245,7 @@ function test_int32array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_int32array_set_int_ir(): void {
     let ar = new Int32Array(10)
     ar[2] = -2147483648
@@ -1317,8 +1254,6 @@ function test_int32array_set_int_ir(): void {
     assertEquals(2147483647, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Int32Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Int32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testInt32ArrayGetUnsafe"
 //! METHOD        "escompat_Int32Array::at"
@@ -1341,7 +1276,6 @@ function testInt32ArrayGetUnsafe(): void {
     arktest.assertEQ(2147483647, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Int32Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_int32array_set_rangeerror_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_set_rangeerror_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_set_rangeerror_cpp"
@@ -1376,13 +1310,6 @@ function test_int32array_set_number_cpp(): void {
 
 //! CHECKER       BigInt64Array $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false --compiler-regex=.*BigInt64Array::.*", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_set_int_cpp"
-<<<<<<< HEAD
-//! METHOD        "escompat_BigInt64Array::__set"
-//! PASS_AFTER    "IrBuilder"
-//! INST          "Intrinsic.BigInt64ArraySetLong "
-//! INST_NOT      /Call.*Array::\$_set/
-=======
->>>>>>> OpenHarmony_feature_20250328
 //! METHOD        "escompat_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayGet "
@@ -1427,10 +1354,7 @@ function test_bigint64array_set_long_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_bigint64array_set_long_ir(): void {
     let ar = new BigInt64Array(10)
     ar[2] = 9223372036854775807n
@@ -1443,8 +1367,6 @@ function test_bigint64array_set_long_ir(): void {
     assertEquals(-2n, ar[5])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       BigInt64Array getUnsafe IR intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=escompat\.BigInt64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testBigInt64ArrayGetUnsafe"
 //! METHOD        "escompat_BigInt64Array::at"
@@ -1464,7 +1386,6 @@ function testBigInt64ArrayGetUnsafe(): void {
     arktest.assertEQ(-2n, ar.at(5))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       BigInt64Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false --compiler-regex=.*BigInt64Array::.*", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_set_rangeerror_cpp"
 //! METHOD        "escompat_BigInt64Array::__set"
@@ -1504,10 +1425,7 @@ function test_float32array_set_float_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_float32array_set_float_ir(): void {
     let ar = new Float32Array(10)
     ar[2] = -3.4028235e+38f
@@ -1516,8 +1434,6 @@ function test_float32array_set_float_ir(): void {
     assertEquals(3.4028235e+38f, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Float32Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Float32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat32ArrayGetUnsafe"
 //! METHOD        "escompat_Float32Array::at"
@@ -1540,7 +1456,6 @@ function testFloat32ArrayGetUnsafe(): void {
     arktest.assertEQ(3.4028235e+38f, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Float32Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_float32array_set_rangeerror_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_set_rangeerror_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_set_rangeerror_cpp"
@@ -1580,10 +1495,7 @@ function test_float64array_set_double_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_float64array_set_double_ir(): void {
     let ar = new Float64Array(10)
     ar[2] = -3.4028235e+38
@@ -1592,8 +1504,6 @@ function test_float64array_set_double_ir(): void {
     assertEquals(3.4028235e+38, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Float64Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Float64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testFloat64ArrayGetUnsafe"
 //! METHOD        "escompat_Float64Array::at"
@@ -1616,7 +1526,6 @@ function testFloat64ArrayGetUnsafe(): void {
     arktest.assertEQ(3.4028235e+38, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Float64Array $_set cpp intrinsic rangeerror
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_float64array_set_rangeerror_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_set_rangeerror_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_set_rangeerror_cpp"
@@ -1693,10 +1602,7 @@ function test_uint8array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_uint8array_set_int_ir(): void {
     let ar = new Uint8Array(10)
     ar[2] = -1
@@ -1707,8 +1613,6 @@ function test_uint8array_set_int_ir(): void {
     assertEquals(1, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Uint8Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint8Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ArrayGetUnsafe"
 //! METHOD        "escompat_Uint8Array::at"
@@ -1733,7 +1637,6 @@ function testUint8ArrayGetUnsafe(): void {
     arktest.assertEQ(1, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Uint8ClampedArray $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_uint8clampedarray_set_int_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_set_int_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_set_int_cpp"
@@ -1776,10 +1679,7 @@ function test_uint8clampedarray_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_uint8clampedarray_set_int_ir(): void {
     let ar = new Uint8ClampedArray(10)
     ar.fill(77)
@@ -1791,8 +1691,6 @@ function test_uint8clampedarray_set_int_ir(): void {
     assertEquals(255, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Uint8ClampedArray getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint8ClampedArray::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint8ClampedArrayGetUnsafe"
 //! METHOD        "escompat_Uint8ClampedArray::at"
@@ -1818,7 +1716,6 @@ function testUint8ClampedArrayGetUnsafe(): void {
     arktest.assertEQ(255, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Uint16Array $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_uint16array_set_int_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_set_int_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_set_int_cpp"
@@ -1860,10 +1757,7 @@ function test_uint16array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_uint16array_set_int_ir(): void {
     let ar = new Uint16Array(10)
     ar[2] = -1
@@ -1874,8 +1768,6 @@ function test_uint16array_set_int_ir(): void {
     assertEquals(1, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Uint16Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint16Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint16ArrayGetUnsafe"
 //! METHOD        "escompat_Uint16Array::at"
@@ -1900,7 +1792,6 @@ function testUint16ArrayGetUnsafe(): void {
     arktest.assertEQ(1, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       Uint32Array $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=.*::test_uint32array_set_int_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_set_int_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_set_int_cpp"
@@ -1943,10 +1834,7 @@ function test_uint32array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_uint32array_set_int_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1
@@ -1966,11 +1854,7 @@ function test_uint32array_set_int_ir(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_uint32array_set_long_cpp(): void {
     let ar = new Uint32Array(10)
-<<<<<<< HEAD
-    ar[2] = -1 as long
-=======
     ar[2] = (-1).toLong()
->>>>>>> OpenHarmony_feature_20250328
     ar[3] = 4294967295
     ar[4] = 4294967297
     assertEquals(4294967295, ar[2])
@@ -1987,16 +1871,10 @@ function test_uint32array_set_long_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-function test_uint32array_set_long_ir(): void {
-    let ar = new Uint32Array(10)
-    ar[2] = -1 as long
-=======
 //! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_long_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = (-1).toLong()
->>>>>>> OpenHarmony_feature_20250328
     ar[3] = 4294967295
     ar[4] = 4294967297
     assertEquals(4294967295, ar[2])
@@ -2004,8 +1882,6 @@ function test_uint32array_set_long_ir(): void {
     assertEquals(1, ar[4])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       Uint32Array getUnsafe cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat\.Uint32Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testUint32ArrayGetUnsafe"
 //! METHOD        "escompat_Uint32Array::at"
@@ -2030,7 +1906,6 @@ function testUint32ArrayGetUnsafe(): void {
     arktest.assertEQ(1, ar.at(4))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 //! CHECKER       BigUint64Array $_set int/$_get cpp intrinsic
 //! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false --compiler-regex=.*::test_biguint64array_set_int_cpp", entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_set_int_cpp"
 //! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_set_int_cpp"
@@ -2055,10 +1930,7 @@ function test_biguint64array_set_int_cpp(): void {
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_biguint64array_set_int_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = -1
@@ -2117,10 +1989,7 @@ function test_biguint64array_set_rangeerror_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-<<<<<<< HEAD
-=======
 //! EVENT_NOT     /Deoptimization/
->>>>>>> OpenHarmony_feature_20250328
 function test_biguint64array_set_long_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = 18446744073709551618n
@@ -2133,8 +2002,6 @@ function test_biguint64array_set_long_ir(): void {
     assertEquals(18446744073709551615n, ar[5])
 }
 
-<<<<<<< HEAD
-=======
 //! CHECKER       BigUint64Array getUnsafe IR intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=escompat\.BigUint64Array::at", entry: "ets_escompat_typed_arrays.ETSGLOBAL::testBigUint64ArrayGetUnsafe"
 //! METHOD        "escompat_BigUint64Array::at"
@@ -2154,7 +2021,6 @@ function testBigUint64ArrayGetUnsafe(): void {
     arktest.assertEQ(18446744073709551615n, ar.at(5))
 }
 
->>>>>>> OpenHarmony_feature_20250328
 function assertEquals(expected: number, actual: number): void {
     if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
 }
@@ -2166,8 +2032,6 @@ function assertEquals(expected: float, actual: float): void {
 function assertEquals(expected: BigInt, actual: BigInt): void {
     if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
 }
-<<<<<<< HEAD
-=======
 
 //! CHECKER       Int8Array copyWithin
 //! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_copy_within"
@@ -2698,4 +2562,3 @@ function test_uint8clampedarray_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(3., -1),  4.);
     arktest.assertEQ(array.lastIndexOf(3., -7), -1.);
 }
->>>>>>> OpenHarmony_feature_20250328

@@ -15,17 +15,10 @@
 
 function testModifyErrorCode() {
     let err = new Error();
-<<<<<<< HEAD
-    assertEQ(err.code, 0);
-
-    err.code = 10 as number;
-    assertEQ(err.code, 10);
-=======
     arktest.assertEQ(err.code, 0);
 
     err.code = 10 as number;
     arktest.assertEQ(err.code, 10);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testConstructor01() {
@@ -34,43 +27,25 @@ function testConstructor01() {
     try {
         throw new Error();
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, '');
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error(message);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, message);
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error(message, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, message);
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -81,43 +56,25 @@ function testConstructor02() {
     try {
         throw new Error(code);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, '');
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error(code, message);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, message);
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error(code, message, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, message);
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -127,57 +84,33 @@ function testConstructor03() {
     try {
         throw new Error('name', undefined, undefined);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, '');
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', message, undefined);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, message);
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', undefined, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, '');
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', message, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, 0);
-        assertEQ(err.message, message);
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
@@ -188,66 +121,38 @@ function testConstructor04() {
     try {
         throw new Error('name', code, undefined, undefined);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, '');
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', code, message, undefined);
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, message);
-        assertTrue(err.cause === undefined);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', code, undefined, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, '');
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 
     try {
         throw new Error('name', code, message, new ErrorOptions(cause));
     } catch (err: Error) {
-<<<<<<< HEAD
-        assertEQ(err.code, code);
-        assertEQ(err.message, message);
-        assertEQ(err.cause, cause);
-=======
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
->>>>>>> OpenHarmony_feature_20250328
     }
 }
 
 function main(): int {
-<<<<<<< HEAD
-    const suite = new ArkTestsuite('Error code tests');
-=======
     const suite = new arktest.ArkTestsuite('Error code tests');
->>>>>>> OpenHarmony_feature_20250328
     suite.addTest('Test modify error code', testModifyErrorCode);
     suite.addTest('Test constructor01', testConstructor01);
     suite.addTest('Test constructor02', testConstructor02);

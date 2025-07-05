@@ -85,29 +85,17 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
 static void AppStateCallback(int state, int64_t timeStamp)
 {
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
-<<<<<<< HEAD
-    auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
-    pandaVm->UpdateAppState(appState);
-    switch (static_cast<AppState::State>(state)) {
-        case AppState::State::SENSITIVE_START:
-            pandaVm->GetGC()->PostponeGCStart();
-=======
     auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
     AppStateManager::GetCurrent()->UpdateAppState(appState);
     etsVm->GetGC()->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
     switch (static_cast<AppState::State>(state)) {
         case AppState::State::SENSITIVE_START:
             etsVm->GetGC()->PostponeGCStart();
->>>>>>> OpenHarmony_feature_20250328
             break;
         case AppState::State::SENSITIVE_END:
             [[fallthrough]];
         case AppState::State::COLD_START_FINISHED:
-<<<<<<< HEAD
-            pandaVm->GetGC()->PostponeGCEnd();
-=======
             etsVm->GetGC()->PostponeGCEnd();
->>>>>>> OpenHarmony_feature_20250328
             break;
         default:
             break;

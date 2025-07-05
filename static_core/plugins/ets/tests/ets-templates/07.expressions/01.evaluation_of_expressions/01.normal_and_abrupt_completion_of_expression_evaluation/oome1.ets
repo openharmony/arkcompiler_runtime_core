@@ -41,8 +41,5 @@ function main() {
     arktest.assertTrue(e instanceof OutOfMemoryError)
     return
   }
-<<<<<<< HEAD
-=======
   arktest.assertTrue(false, 'OutOfMemoryError expected')
->>>>>>> OpenHarmony_feature_20250328
 }

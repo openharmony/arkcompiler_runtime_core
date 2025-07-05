@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let p = Promise.reject<number>(new Error("5"));
-
-p.then<void, void>((value: number): void => {
-    console.log('Test failed. The promise should not be fulfilled.');
-}, (err: Object): void => {
-    if (!(err instanceof Error) || (err as Error).message != "5") {
-=======
 let p = Promise.reject<number>(new Error('5'));
 
 p.then<void, void>((value: number): void => {
     console.log('Test failed. The promise should not be fulfilled.');
 }, (err: Error): void => {
     if (!(err instanceof Error) || (err as Error).message != '5') {
->>>>>>> OpenHarmony_feature_20250328
         console.log('Test failed. The promise should be rejected with the provided value.');
         return;
     }

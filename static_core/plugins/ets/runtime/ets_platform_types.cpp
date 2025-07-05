@@ -80,29 +80,13 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     return klass;
 }
 
-<<<<<<< HEAD
-template <bool IS_STATIC>
-static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *signature)
-=======
 static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *signature, bool isStatic)
->>>>>>> OpenHarmony_feature_20250328
 {
     if (klass == nullptr) {
         return nullptr;
     }
 
-<<<<<<< HEAD
-    EtsMethod *method = [&]() {
-        if constexpr (IS_STATIC) {
-            return klass->GetStaticMethod(name, signature);
-        } else {
-            return klass->GetInstanceMethod(name, signature);
-        }
-    }();
-
-=======
     EtsMethod *method = isStatic ? klass->GetStaticMethod(name, signature) : klass->GetInstanceMethod(name, signature);
->>>>>>> OpenHarmony_feature_20250328
     if (method == nullptr) {
         LOG(ERROR, RUNTIME) << "Method " << name << " is not found in class " << klass->GetDescriptor();
         return nullptr;
@@ -172,26 +156,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreFloat, BOX_FLOAT);
     findType(&EtsPlatformTypes::coreDouble, BOX_DOUBLE);
 
-<<<<<<< HEAD
-    corePromise = findType(PROMISE);
-    corePromiseSubscribeOnAnotherPromise =
-        FindMethod<false>(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
-    corePromiseRef = findType(PROMISE_REF);
-    coreJob = findType(JOB);
-    coreWaitersList = findType(WAITERS_LIST);
-    coreMutex = findType(MUTEX);
-    coreEvent = findType(EVENT);
-    coreCondVar = findType(COND_VAR);
-    coreQueueSpinlock = findType(QUEUE_SPINLOCK);
-
-    coreException = findType(EXCEPTION);
-    escompatError = findType(ERROR);
-    coreOutOfMemoryError = findType(OUT_OF_MEMORY_ERROR);
-    escompatArrayBuffer = findType(ARRAY_BUFFER);
-    coreStringBuilder = findType(STRING_BUILDER);
-    containersArrayAsListInt = findType(ARRAY_AS_LIST_INT);
-    escompatArray = findType(ARRAY);
-=======
     findType(&EtsPlatformTypes::escompatBigint, BIG_INT);
     findType(&EtsPlatformTypes::escompatError, ERROR);
     findType(&EtsPlatformTypes::coreFunction, FUNCTION);
@@ -206,7 +170,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
         PreloadType(classLinker, &coreFunctionRs[i], descr);
         updateOffset(&coreFunctionRs[i]);
     }
->>>>>>> OpenHarmony_feature_20250328
 
     findType(&EtsPlatformTypes::coreTupleN, TUPLEN);
 
@@ -216,16 +179,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreMemoryRuntimeLinker, MEMORY_RUNTIME_LINKER);
     findType(&EtsPlatformTypes::coreAbcFile, ABC_FILE);
 
-<<<<<<< HEAD
-    coreTupleN = findType(TUPLEN);
-
-    coreStackTraceElement = findType(STACK_TRACE_ELEMENT);
-
-    coreFinalizableWeakRef = findType(FINALIZABLE_WEAK_REF);
-    coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
-    coreFinalizationRegistryExecCleanup =
-        FindMethod<true>(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");
-=======
     findType(&EtsPlatformTypes::coreOutOfMemoryError, OUT_OF_MEMORY_ERROR);
     findType(&EtsPlatformTypes::coreException, EXCEPTION);
     findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
@@ -277,7 +230,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         InitializeCaches();
     }
->>>>>>> OpenHarmony_feature_20250328
 }
 
 }  // namespace ark::ets

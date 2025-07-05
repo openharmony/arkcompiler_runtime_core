@@ -19,12 +19,7 @@
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
-<<<<<<< HEAD
-#include "plugins/ets/runtime/types/ets_base_enum.h"
-#include "plugins/ets/runtime/types/ets_bigint.h"
-=======
 #include "plugins/ets/runtime/types/ets_method.h"
->>>>>>> OpenHarmony_feature_20250328
 #include "plugins/ets/runtime/types/ets_string.h"
 
 #ifdef PANDA_ETS_INTEROP_JS
@@ -155,27 +150,16 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         return num2.has_value() && num2.value() == num1.value();
     }
     if (cls1->IsEtsEnum()) {
-<<<<<<< HEAD
-        if (UNLIKELY(!cls2->IsEtsEnum())) {
-            return false;
-        }
-        auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
-        auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
-        if (UNLIKELY(value1->GetClass()->IsEtsEnum() || value2->GetClass()->IsEtsEnum())) {
-=======
         auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
         auto *value2 = obj2;
         if (LIKELY(cls2->IsEtsEnum())) {
             value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
         }
         if (!EqualityResursionAllowed(value1) || !EqualityResursionAllowed(value2)) {
->>>>>>> OpenHarmony_feature_20250328
             return false;
         }
         return EtsReferenceEquals(coro, value1, value2);
     }
-<<<<<<< HEAD
-=======
 
     if (cls1->IsFunctionReference()) {
         if (UNLIKELY(!cls2->IsFunctionReference())) {
@@ -210,7 +194,6 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
             return jsObj1->StrictEquals(jsObj2);
         });
     }
->>>>>>> OpenHarmony_feature_20250328
     UNREACHABLE();
 }
 
@@ -254,8 +237,6 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
         }
         return EtsGetTypeof(coro, EtsBaseEnum::FromEtsObject(obj)->GetValue());
     }
-<<<<<<< HEAD
-=======
     if (cls->IsFunctionReference()) {
         return EtsString::CreateFromMUtf8("function");
     }
@@ -265,7 +246,6 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
             return EtsString::CreateFromMUtf8(JSValue::FromEtsObject(obj)->TypeOf().c_str());
         });
     }
->>>>>>> OpenHarmony_feature_20250328
 
     ASSERT(cls->IsBoxed());
 

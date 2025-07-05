@@ -20,35 +20,6 @@ desc: >-
     while T1, T2, or both are a union type, then a compile-time error occurs
     if T1 and T2 have no overlap
 ---*/
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq.ets
-
-function eq(p: Object, q: Object, ps: string, qs: string): string {
-    if (p == q && q == p) {
-        return ''
-    } else {
-        return '\n' + ps + ' == ' + qs + ', expected true, got false'
-    }
-}
-function ne(p: Object, q: Object, ps: string, qs: string): string {
-    if (p != q || q != p) {
-        return '\n' + ps + ' != ' + qs + ', expected false, got true'
-    } else {
-        return ''
-    }
-}
-
-{{c.decl}}
-
-function main() {
-    let failed: string = ''
-{%- for p in c['case1'] %}
-{%- for q in c['case2'] %}
-    failed += eq({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
 {{c.decl}}
 
 function foo(p: {{c.type1}}, q: {{c.type2}}): boolean {
@@ -58,6 +29,5 @@ function foo(p: {{c.type1}}, q: {{c.type2}}): boolean {
 function main(): int {
     {{c.code|indent}}
     return 0
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/cte.ets
 }
 {%- endfor %}

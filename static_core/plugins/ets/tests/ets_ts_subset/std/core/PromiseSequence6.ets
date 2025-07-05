@@ -33,11 +33,7 @@ let p = new Promise<number>((_: (v: number) => void, _reject: (error: Error) => 
 });
 
 sequence.push(1);
-<<<<<<< HEAD
-reject!(new Error("abc"));
-=======
 reject!(new Error('abc'));
->>>>>>> OpenHarmony_feature_20250328
 
 p.then<void, void>((valule: number): void => {
     console.log('Test failed. The promise should not be resolved.')

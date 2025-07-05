@@ -79,9 +79,4 @@ cases:
             callee(1)
           }
       use: |-
-<<<<<<< HEAD
-          bar((): void => {}) // CTE: No matching call signature
-
-=======
           bar((a: int, b: int): void => {}) // CTE: No matching call signature
->>>>>>> OpenHarmony_feature_20250328

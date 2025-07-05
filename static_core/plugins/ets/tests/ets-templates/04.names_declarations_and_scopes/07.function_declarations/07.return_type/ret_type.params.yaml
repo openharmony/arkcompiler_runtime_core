@@ -211,11 +211,7 @@ function_decls:
 
     - decl: |-
         let i = 1
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type.params.yaml
-        function foo() throws {
-=======
         function foo() {
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type.params.yaml
             i += 1
             throw new Exception()
             return i;

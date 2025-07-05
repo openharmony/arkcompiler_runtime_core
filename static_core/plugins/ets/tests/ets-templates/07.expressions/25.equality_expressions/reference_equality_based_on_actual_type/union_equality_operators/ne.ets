@@ -47,10 +47,6 @@ function main() {
 {%- endif %}
 {%- endfor %}
 {%- endfor %}
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne.ets
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
     arktest.assertTrue(failed == '', 'Failed operations: ' + failed)
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/ne.ets
 }
 {%- endfor %}

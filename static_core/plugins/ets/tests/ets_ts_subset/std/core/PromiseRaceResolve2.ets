@@ -22,25 +22,13 @@ let p2 = new Promise<string>((_: (v: string)=>void, _reject: (err: Error)=>void)
     reject = _reject;
 });
 Promise.race<string>([p1, p2]).then<void, void>((value: Object): void => {
-<<<<<<< HEAD
-    console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
-    if (!(err instanceof Error) || (err as Error).message != "xyz") {
-        console.log("Test failed. The promise should be rejected by the specified value.");
-=======
     console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
     if (!(err instanceof Error) || (err as Error).message != 'xyz') {
         console.log('Test failed. The promise should be rejected by the specified value.');
->>>>>>> OpenHarmony_feature_20250328
         return;
     }
     console.log('Test passed.');
 });
-<<<<<<< HEAD
-reject!(new Error("xyz"));
-resolve!("abc");
-=======
 reject!(new Error('xyz'));
 resolve!('abc');
->>>>>>> OpenHarmony_feature_20250328

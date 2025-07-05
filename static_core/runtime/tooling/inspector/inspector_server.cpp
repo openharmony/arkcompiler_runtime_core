@@ -574,11 +574,6 @@ void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::functi
             auto response = std::make_unique<CustomUrlBreakpointLocations>();
             for (const auto &req : *optRequests) {
                 auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
-<<<<<<< HEAD
-                response->Add(optResponse.HasValue()
-                    ? optResponse.Value()->ToCustomUrlBreakpointResponse()
-                    : CustomUrlBreakpointResponse(req.GetLineNumber()));
-=======
                 if (!optResponse.HasValue()) {
                     response->Add(CustomUrlBreakpointResponse(req.GetLineNumber()));
                     continue;
@@ -591,7 +586,6 @@ void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::functi
                     resp.SetBreakpointId(optResponse.Value()->GetBreakpointId());
                     response->Add(std::move(resp));
                 }
->>>>>>> OpenHarmony_feature_20250328
             }
             return std::unique_ptr<JsonSerializable>(std::move(response));
         });

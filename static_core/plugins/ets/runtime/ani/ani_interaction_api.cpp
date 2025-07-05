@@ -502,11 +502,7 @@ static ani_status DoFind(PandaEnv *pandaEnv, const char *descriptor, ScopedManag
 {
     PandaString desc = Mangle::ConvertDescriptor(descriptor);
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-<<<<<<< HEAD
-    EtsClass *klass = classLinker->GetClass(desc.c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
-=======
     EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetCoroutine()));
->>>>>>> OpenHarmony_feature_20250328
     if (UNLIKELY(pandaEnv->HasPendingException())) {
         EtsThrowable *currentException = pandaEnv->GetThrowable();
         std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
@@ -629,16 +625,6 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
-<<<<<<< HEAD
-    EtsMethod *method = [&]() {
-        if constexpr (IS_STATIC_METHOD) {
-            return klass->GetStaticMethod(name, signature, true);
-        } else {
-            return klass->GetInstanceMethod(name, signature, true);
-        }
-    }();
-    if (method == nullptr) {
-=======
 
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     auto *method = [klass, name, signature]() -> EtsMethod * {
@@ -660,7 +646,6 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
         return nullptr;
     }();
     if (method == nullptr || method->IsStatic() != IS_STATIC_METHOD) {
->>>>>>> OpenHarmony_feature_20250328
         return ANI_NOT_FOUND;
     }
     *result = method;
@@ -975,13 +960,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindNamespace(ani_env *env, ani_names
 
     auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-<<<<<<< HEAD
-    EtsNamespace *etsNs {};
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-=======
     EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
->>>>>>> OpenHarmony_feature_20250328
     std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
     ASSERT(nsDescriptor.size() > 2U);
 
@@ -1011,13 +990,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindClass(ani_env *env, ani_namespace
 
     auto pandaEnv = PandaEtsNapiEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
-<<<<<<< HEAD
-    EtsNamespace *etsNs {};
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-=======
     EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
->>>>>>> OpenHarmony_feature_20250328
     std::string_view nsDescriptor = etsNs->AsClass()->GetDescriptor();
     ASSERT(nsDescriptor.size() > 2U);
 
@@ -6425,11 +6398,7 @@ NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enumDescript
 
     PandaString enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
     // NOTE: Check that result is enum, #22400
-<<<<<<< HEAD
-    return DoFind<false>(env, enumDescriptor, result);
-=======
     return DoFind<false>(env, enumDesc.c_str(), result);
->>>>>>> OpenHarmony_feature_20250328
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -6444,13 +6413,7 @@ NO_UB_SANITIZE static ani_status Namespace_FindEnum(ani_env *env, ani_namespace 
 
     PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(env);
-<<<<<<< HEAD
-    EtsNamespace *etsNs;
-    ani_status status = GetInternalNamespace(s, ns, &etsNs);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-=======
     EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
->>>>>>> OpenHarmony_feature_20250328
 
     PandaString enumDescriptorPandStr = Mangle::ConvertDescriptor(enumDescriptor);
     if (!enumDescriptorPandStr.empty() && enumDescriptorPandStr[0] == 'L') {

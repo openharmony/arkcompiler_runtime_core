@@ -325,11 +325,7 @@ private:
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
      */
-<<<<<<< HEAD
-    bool DoBoundaryCheck(EtsInt pos)
-=======
     bool DoBoundaryCheck(EtsInt pos) const
->>>>>>> OpenHarmony_feature_20250328
     {
         if (pos < 0 || pos >= byteLength_) {
             PandaString message = "ArrayBuffer position ";

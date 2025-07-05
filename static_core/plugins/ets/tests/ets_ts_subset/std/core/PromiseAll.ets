@@ -13,23 +13,14 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let reject: ((err: Error)=>void)|null = null;
-=======
 let reject: ((err: Error)=>void) | null = null;
->>>>>>> OpenHarmony_feature_20250328
 let error = new Error();
 let p1 = Promise.resolve<number>(3);
 let p2 = new Promise<number>((_: (value:number)=>void, _reject: (err: Error)=>void) => {
     reject = _reject;
 });
-<<<<<<< HEAD
-Promise.all([p1, p2]).then<void, void>((values: Array<number>): void => {
-    console.log("Test failed. The promise should not be resolved.");
-=======
 Promise.all([p1, p2]).then<void, void>((values): void => {
     console.log('Test failed. The promise should not be resolved.');
->>>>>>> OpenHarmony_feature_20250328
 }, (err: Error): void => {
     if (err != error) {
         console.log('Test failed. The promise should be rejected by the specified value.');

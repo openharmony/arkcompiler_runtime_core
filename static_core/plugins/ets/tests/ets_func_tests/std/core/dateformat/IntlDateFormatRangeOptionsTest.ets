@@ -22,13 +22,8 @@ function addFormatResult(locale: string | undefined, options: Intl.DateTimeForma
     FORMAT_RESULTS.push(res)
 }
 
-<<<<<<< HEAD
-const TEST_RANGE_BEGIN = new Date("2024-10-11T10:20:30Z")
-const TEST_RANGE_END = new Date("2024-10-12T20:35:50Z")
-=======
 const TEST_RANGE_BEGIN = new Date("2024-10-11T10:20:30")
 const TEST_RANGE_END = new Date("2024-10-12T07:35:50")
->>>>>>> OpenHarmony_feature_20250328
 
 function initFormatResults(): void {
     if (FORMAT_RESULTS.length > 0) {

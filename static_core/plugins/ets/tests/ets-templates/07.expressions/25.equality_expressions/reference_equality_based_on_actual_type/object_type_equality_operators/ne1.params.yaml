@@ -90,12 +90,6 @@ cases:
           enum Color { Red, Green, Blue }
       case1:
           - Color.Red
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne1.params.yaml
-      case2:
-          - Color.Green
-          - 1
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/object_type_equality_operators/ne1.params.yaml
 
     - type: Size
       decl: |-

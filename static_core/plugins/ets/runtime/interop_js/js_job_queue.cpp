@@ -130,9 +130,6 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         } else {
             auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
             ASSERT(refconv != nullptr);
-<<<<<<< HEAD
-            auto error = refconv->Unwrap(ctx, value);
-=======
             bool isInstanceof = false;
             EtsObject *error = nullptr;
             NAPI_CHECK_FATAL(napi_is_error(env, value, &isInstanceof));
@@ -144,7 +141,6 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
             } else {
                 error = refconv->Unwrap(ctx, value);
             }
->>>>>>> OpenHarmony_feature_20250328
             ASSERT(error != nullptr);
             ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), error, ark::ets::ToEtsBoolean(false));
         }

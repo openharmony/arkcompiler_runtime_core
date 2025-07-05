@@ -25,9 +25,5 @@ function main(): void {
     let a = new Base();
     let b = new Derived();
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/03.types/19.union_types/01.union_types_normalization/utn07.ets
-    assertEQ(a instanceof A, true);
-=======
     arktest.assertEQ(a instanceof A, true);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/20.union_types/01.union_types_normalization/utn07.ets
 }

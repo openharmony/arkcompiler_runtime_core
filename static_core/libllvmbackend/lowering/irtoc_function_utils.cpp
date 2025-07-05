@@ -40,12 +40,6 @@ constexpr std::array NOALIAS_IRTOC_FUNC = {
     "AnyCallNewRange"sv,
     "AnyCallNewShort"sv,
 #ifdef PANDA_WITH_ETS
-<<<<<<< HEAD
-    "LaunchFromInterpreterShort"sv,        "LaunchFromInterpreterLong"sv,        "LaunchFromInterpreterRange"sv,
-    "LookupGetterByNameShortEntrypoint"sv, "LookupGetterByNameLongEntrypoint"sv, "LookupGetterByNameObjEntrypoint"sv,
-    "LookupSetterByNameShortEntrypoint"sv, "LookupSetterByNameLongEntrypoint"sv, "LookupSetterByNameObjEntrypoint"sv,
-    "LookupFieldByNameEntrypoint"sv,       "EtsGetTypeofEntrypoint"sv,           "EtsGetIstrueEntrypoint"sv,
-=======
     "LookupGetterByNameShortEntrypoint"sv,
     "LookupGetterByNameLongEntrypoint"sv,
     "LookupGetterByNameObjEntrypoint"sv,
@@ -55,7 +49,6 @@ constexpr std::array NOALIAS_IRTOC_FUNC = {
     "LookupFieldByNameEntrypoint"sv,
     "EtsGetTypeofEntrypoint"sv,
     "EtsGetIstrueEntrypoint"sv,
->>>>>>> OpenHarmony_feature_20250328
     "LookupMethodByNameEntrypoint"sv,
 #endif
 };

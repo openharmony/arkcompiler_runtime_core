@@ -17,57 +17,6 @@ function id<T>(v: T): T {
     return v;
 }
 
-<<<<<<< HEAD
-Promise.resolve<string|undefined|null>(null)
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.resolve<string|undefined|null>(undefined)
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.all<string|undefined|null>([Promise.resolve<string|undefined|null>(undefined)])
-    .then<Array<string|undefined|null>>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.all<string|undefined|null>([Promise.resolve<string|undefined|null>(null)])
-    .then<Array<string|undefined|null>>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.allSettled<string|undefined|null>([Promise.resolve<string|undefined|null>(undefined)])
-    .then<PromiseSettledResult<string|undefined|null>[]>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.allSettled<string|undefined|null>([Promise.resolve<string|undefined|null>(null)])
-    .then<PromiseSettledResult<string|undefined|null>[]>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.race<string|undefined|null>([Promise.resolve<string|undefined|null>(undefined)])
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.race<string|undefined|null>([Promise.resolve<string|undefined|null>(null)])
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.any<string|undefined|null>([Promise.resolve<string|undefined|null>(undefined)])
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-    });
-Promise.any<string|undefined|null>([Promise.resolve<string|undefined|null>(null)])
-    .then<string|undefined|null>(id)
-    .catch((e: Object): void => {
-        console.log("Test failed: " + e);
-=======
 Promise.resolve<string | undefined | null>(null)
     .then<string | undefined | null>(id)
     .catch((e: Error): void => {
@@ -117,5 +66,4 @@ Promise.any<string | undefined | null>([Promise.resolve<string | undefined | nul
     .then<string | undefined | null>(id)
     .catch((e: Error): void => {
         console.log('Test failed: ' + e);
->>>>>>> OpenHarmony_feature_20250328
     });

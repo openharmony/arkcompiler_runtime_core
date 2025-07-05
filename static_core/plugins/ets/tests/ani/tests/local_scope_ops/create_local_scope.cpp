@@ -395,19 +395,11 @@ TEST_F(CreateLocalScopeTest, scope_test5)
     ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
 
     ani_class cls {};
-<<<<<<< HEAD
-    ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Student;", &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &ctor), ANI_OK);
-=======
     ASSERT_EQ(env_->FindClass("create_local_scope.Student", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "i:", &ctor), ANI_OK);
->>>>>>> OpenHarmony_feature_20250328
     ASSERT_NE(ctor, nullptr);
 
     ani_object objectA {};

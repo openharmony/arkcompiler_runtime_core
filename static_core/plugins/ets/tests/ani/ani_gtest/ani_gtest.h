@@ -251,8 +251,6 @@ private:
         ASSERT_EQ(status, ANI_OK);
 
         result->emplace(value);
-<<<<<<< HEAD
-=======
     }
     // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
@@ -268,7 +266,6 @@ private:
             return method->GetClass()->GetLoadContext();
         }
         return nullptr;
->>>>>>> OpenHarmony_feature_20250328
     }
     // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 

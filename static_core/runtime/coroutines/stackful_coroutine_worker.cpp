@@ -123,11 +123,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
             if (!canMigrateAwait) {
                 os::memory::LockHolder lockR(runnablesLock_);
                 unblockedCoro->RequestUnblock();
-<<<<<<< HEAD
-                PushToRunnableQueue(unblockedCoro);
-=======
                 PushToRunnableQueue(unblockedCoro, unblockedCoro->GetPriority());
->>>>>>> OpenHarmony_feature_20250328
             } else {
                 // (wangyuzhong,#24880): in case of IsMigrateAwakenedCorosEnabled() we need to correctly issue the
                 // external scheduler request from the correct worker. Here the coroutine becomes Active on one

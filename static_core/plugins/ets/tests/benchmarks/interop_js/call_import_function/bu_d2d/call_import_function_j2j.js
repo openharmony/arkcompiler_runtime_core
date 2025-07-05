@@ -18,14 +18,7 @@
  * @Import { jsVoid, returnAnonymous } from '../../shared/js/libFunctions.js'
  * @Tags interop, d2d
  */
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/type_conversion_primitives/char/bu_a2a/bench_conversion_char_a2a.ets
-class ConversionCharA2a {
-    seed: number = 123;
-    ch: string = 'A';
-    result: string = '';
-=======
 function callImportFunction() {
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/call_import_function/bu_d2d/call_import_function_j2j.js
 
     function callFunction(fun) {
         return fun(1000000, 1000000);
@@ -36,12 +29,6 @@ function callImportFunction() {
     /**
      * @Benchmark
      */
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/type_conversion_primitives/char/bu_a2a/bench_conversion_char_a2a.ets
-    test(): string {
-        this.result = this.charToNumberToString(this.ch);
-        return this.result;
-    }
-=======
     this.callFun = function() {
         callFunction(jsVoid);
     };
@@ -53,5 +40,4 @@ function callImportFunction() {
         callFunction(anonymous);
     };
 
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/call_import_function/bu_d2d/call_import_function_j2j.js
 }

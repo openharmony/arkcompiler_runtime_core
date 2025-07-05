@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let error = new Error("abc");
-let reject: ((err: Object) => void)|null = null;
-let p1 = new Promise<string>((_: (value: string) => void, _reject: (err: Object) => void): void => {
-=======
 let error = new Error('abc');
 let reject: ((err: Error) => void) | null = null;
 let p1 = new Promise<string>((_: (value: string) => void, _reject: (err: Error) => void): void => {
->>>>>>> OpenHarmony_feature_20250328
     reject = _reject;
 });
 let p2 = Promise.resolve<Object>(p1);

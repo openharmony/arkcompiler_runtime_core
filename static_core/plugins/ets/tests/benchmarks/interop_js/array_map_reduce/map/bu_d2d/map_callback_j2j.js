@@ -30,16 +30,7 @@ function mapCallback() {
      * @Setup
      */
     this.setup = function () {
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/get_value/get_string_value/bu_j2a/bench_get_string_j2a.js
-        console.log('Starting...');
-        let stsVm = initEtsVm();
-
-        this.getObj = stsVm.getFunction('Lbench_get_string_j2a/ETSGLOBAL;', 'getStsObj');
-
-        return 0;
-=======
         generateRandomArray(arrayLength, stringLength, testArray);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/benchmarks/interop_js/array_map_reduce/map/bu_d2d/map_callback_j2j.js
     };
 
     /**

@@ -39,10 +39,7 @@ set(intrinsics_tests
     string_indexof
     string_repeat
     string_compare_to
-<<<<<<< HEAD
-=======
     typed_arrays_reverse
->>>>>>> OpenHarmony_feature_20250328
     char_isuppercase
     abs
     min
@@ -83,10 +80,6 @@ foreach(test ${intrinsics_tests})
         set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-enable-osr=false")
     endif()
 
-<<<<<<< HEAD
-    if ("${test}" STREQUAL "stringbuilder" OR
-        "${test}" STREQUAL "string_compare_to")
-=======
     # enable heap-verifier to check the TLB cleanup before going to the slow path
     if ("${test}" STREQUAL "string_from_char_code")
         set(extra_options RUNTIME_EXTRA_OPTIONS "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post")
@@ -95,7 +88,6 @@ foreach(test ${intrinsics_tests})
     if ("${test}" STREQUAL "stringbuilder" OR
         "${test}" STREQUAL "string_compare_to" OR
         "${test}" STREQUAL "string_from_char_code")
->>>>>>> OpenHarmony_feature_20250328
         run_int_jit_aot_ets_code_foreach_gc(ets_test_suite_intrinsics ${test_in} ${test_out_dir} ${target})
     else()
         run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})

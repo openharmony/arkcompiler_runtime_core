@@ -25,13 +25,8 @@ cases:
     - to_type: |-
         [int, long, double]
       value: |-
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/15.semantic_rules/05.compatibility_call_args/tuple_rest_params.params.yaml
-        [0b0 as short, Byte.MIN_VALUE, 3.4028234663852886e38 as float]
-      result: 
-=======
         [0b0 as short, Byte.MIN_VALUE, 3.4028234663852886e38f as float]
       result:
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/15.semantic_rules/06.compatibility_call_args/tuple_rest_params.params.yaml
         - 0
         - -128 as long
         - 3.4028234663852886e38 as double

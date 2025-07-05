@@ -14,11 +14,7 @@
  */
 
 let error = new Error();
-<<<<<<< HEAD
-let p = new Promise<string>((_: (v: string) => void, reject: (error: Object) => void) => {
-=======
 let p = new Promise<string>((_: (v: string) => void, reject: (error: Error) => void) => {
->>>>>>> OpenHarmony_feature_20250328
     reject(error);
 });
 

@@ -23,19 +23,11 @@ enum OnPause {
 }
 
 function runState0(state?: OnPause) {
-<<<<<<< HEAD
-    assertEQ(undefined, state)
-}
-
-function runState1(state?: OnPause) {
-    assertEQ(OnPause.Nothing, state)
-=======
     arktest.assertEQ(undefined, state)
 }
 
 function runState1(state?: OnPause) {
     arktest.assertEQ(OnPause.Nothing, state)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function main() {

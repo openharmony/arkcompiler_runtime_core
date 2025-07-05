@@ -555,8 +555,6 @@ TEST(linkertests, Mix)
 #endif
 }
 
-<<<<<<< HEAD
-=======
 TEST(linkertests, ClassCallNoDeleteDependency)
 {
 #ifdef TEST_STATIC_LINKER_WITH_STS
@@ -662,7 +660,6 @@ TEST(linkertests, CallDeleteDependencyNoStripUnusedArg)
 #endif
 }
 
->>>>>>> OpenHarmony_feature_20250328
 #ifdef TEST_STATIC_LINKER_WITH_STS
 std::string GenLinkCmd(const std::string &param)
 {

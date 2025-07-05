@@ -20,36 +20,6 @@ files: ['./pkg_a/pkg_{{loop.index0}}.ets']
 tags: [{{c.tags}}]
 ---*/
 
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne.ets
-function eq(p: Object, q: Object, ps: string, qs: string): string {
-    if (p == q || q == p) {
-        return '\n' + ps + ' == ' + qs + ', expected false, got true'
-    } else {
-        return ''
-    }
-}
-function ne(p: Object, q: Object, ps: string, qs: string): string {
-    if (p != q && q != p) {
-        return ''
-    } else {
-        return '\n' + ps + ' != ' + qs + ', expected true, got false'
-    }
-}
-
-{{c.decl}}
-
-function main() {
-    let failed: string = ''
-{%- for p in c['case'] %}
-{%- for q in c['case'] %}
-{%- if p != q %}
-    failed += eq({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endif %}
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
 import { foo{{loop.index0}} } from './pkg_a/pkg_{{loop.index0}}.ets'
 
 {{c.decl}}
@@ -63,6 +33,5 @@ function main(): void {
     let v2 = foo{{loop.index0}}({{c.arg2}})
     arktest.assertEQ(v1, 1)
     arktest.assertEQ(v2, 2)
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/17.experimental_features/16.packages/import_and_overloading_of_function_names/pkgs_a.ets
 }
 {%- endfor %}

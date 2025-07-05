@@ -185,11 +185,7 @@ class BenchGenerator:
                 dest_file = dest_dir.joinpath(f.name)
                 with open(f, 'r', encoding='utf-8') as t:
                     native_tpl = t.read()
-<<<<<<< HEAD
-                tpl = Template(native_tpl)
-=======
                 tpl = StringTemplate(native_tpl)
->>>>>>> OpenHarmony_feature_20250328
                 with create_file(dest_file) as d:
                     d.write(tpl.substitute(values))
         return True
@@ -230,11 +226,7 @@ class BenchGenerator:
         values.imports = BenchGenerator.process_imports(
             lang_impl, values.imports, bench_dir, src)
         values.common = BenchGenerator.check_common_files(
-<<<<<<< HEAD
-            src.full, lang_impl.short_name)
-=======
             src.full, lang_impl.short_name, values.includes)
->>>>>>> OpenHarmony_feature_20250328
         tpl_values = asdict(values)
         # create links to extra dirs if any
         custom_values = {
@@ -367,93 +359,5 @@ def generate_main(args: Args,
     return bus
 
 
-<<<<<<< HEAD
-def generate_mode(mode: str, lang: str,
-                  generator: BenchGenerator,
-                  settings: Optional[GenSettings] = None, arkjs_suffix: str = '') -> List[BenchUnit]:
-    """Generate benchmark sources for requested language."""
-    log.trace("Interop GEN for mode: %s", mode)
-    bus: List[BenchUnit] = []
-    lang_impl = generator.get_lang(lang)
-    src_ext = lang_impl.src
-    out_ext = lang_impl.ext
-    template_name = f'Template{lang_impl.ext}'
-    if settings:  # override if set in platform
-        src_ext = settings.src
-        out_ext = settings.out
-        template_name = settings.template
-    template = generator.get_template(template_name)
-    for src in BenchGenerator.search_test_files(generator.paths, ext=src_ext, allowed_dir_name=mode):
-        for variant in generator.process_source_file(src.full, lang_impl):
-            bu = generator.add_bu(bus, template, lang_impl, src,
-                                  variant, settings, out_ext)
-            if mode == 'bu_a2j' and lang == 'ets':
-                create_interop_runner(generator, variant, bu, arkjs_suffix=arkjs_suffix)
-    return tags_workaround(bus, mode)
-
-
-def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit, arkjs_suffix: str = ''):
-    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.tpl_js')
-    runner_js = runner_template.substitute({'METHOD': variant.method_name,
-                                            'STATE': variant.state_name,
-                                            'NAME': variant.bench_name})
-    runner_file = bu.path.joinpath('InteropRunner.js')
-    log.trace("Generating %s", str(runner_file))
-    with create_file(runner_file) as f:
-        f.write(runner_js)
-
-
-def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:
-    if not bus:
-        return bus
-    for bu in bus:
-        if hasattr(bu, 'tags') and bu.tags:
-            continue  # Note need to find out why this is sometimes not the case
-        tags: Set[str] = set()
-        tags.add(mode)
-        bu.tags = tags
-    return bus
-
-
-@log_time
-def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> List[BenchUnit]:
-    """Command: Generate benches from doclets."""
-    log.info("Starting interop GEN phase...",)
-    bus: List[BenchUnit] = []
-    if not generator:
-        log.warning("Generator for interop is not defined, stop")
-        return bus  # empty
-    # Note a2a and a2j templates are like in arkts_host
-    bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
-                         out='.ets',
-                         link_to_src=False))
-    bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
-                         out='.ets',
-                         link_to_src=False), arkjs_suffix=arkjs_suffix)
-    bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='TemplateInteropJ2A' + arkjs_suffix + '.tpl_js',
-                         out='.js',
-                         link_to_src=False))
-    bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='Template.tpl_js',
-                         out='.js',
-                         link_to_src=False))
-    log.passed('Generated %d bench units', len(bus))
-    return sorted(bus, key=lambda x: x.path)
-
-
-def generate_main(args: Args,
-                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
-    if args.langs and 'interop' in args.langs:
-        return generate_main_interop(BenchGenerator(args))
-    if args.langs and 'interop_arkjs' in args.langs:
-        return generate_main_interop(BenchGenerator(args), arkjs_suffix='_arkjs')
-    return generate_main_regular(args, settings)
-
-
-=======
->>>>>>> OpenHarmony_feature_20250328
 if __name__ == '__main__':
     generate_main(Args())

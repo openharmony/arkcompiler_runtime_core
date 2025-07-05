@@ -19,11 +19,7 @@ class PoisonedIterable<T> implements Iterable<T> {
 }
 
 Promise.all<Object>(new PoisonedIterable<Object>()).then<void, void>((value: Array<Object>): void => {
-<<<<<<< HEAD
-    console.log("Test failed. The promise should not be resolved.");
-=======
     console.log('Test failed. The promise should not be resolved.');
->>>>>>> OpenHarmony_feature_20250328
 }, (err: Error): void => {
     if (!(err instanceof Error)) {
         console.log('Test failed. The promise should be rejected by the Error.');

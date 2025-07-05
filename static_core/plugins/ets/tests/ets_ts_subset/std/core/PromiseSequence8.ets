@@ -27,11 +27,7 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 }
 
 let sequence = new Array<number>();
-<<<<<<< HEAD
-let p = Promise.reject<number>(new Error("start error"));
-=======
 let p = Promise.reject<number>(new Error('start error'));
->>>>>>> OpenHarmony_feature_20250328
 
 p.finally((): void => {
     sequence.push(1);

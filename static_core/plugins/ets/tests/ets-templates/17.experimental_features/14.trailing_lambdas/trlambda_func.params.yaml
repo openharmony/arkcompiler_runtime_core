@@ -151,11 +151,7 @@ cases:
       use: |-
           globl = 1.0
           foo(10.0); { globl = 4.0 } // no last function parameter
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/17.experimental_features/13.trailing_lambda/trlambda_func.params.yaml
-          assertEQ( globl, 4.0 )
-=======
           arktest.assertEQ( globl, 4.0 )
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/17.experimental_features/14.trailing_lambdas/trlambda_func.params.yaml
 
     # trailing lambda as function argument
     - decl: |-

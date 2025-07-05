@@ -91,24 +91,6 @@ public:
 
     // Enables or disables mixdebug && mixstack
     void SetMixedDebugEnabled(bool mixedDebugEnabled);
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/debuggable_thread.h
-
-    /**
-     * @brief Set a breakpoint with optional condition.
-     * @param locations to set breakpoint at, all will have the same BreakpointId.
-     * @param condition pointer to string with panda bytecode, will not be saved.
-     * @returns BreakpointId of set breakpoint on success, empty otherwise.
-     * NOTE: current implementation supports setting a condition only for a single location.
-     */
-    std::optional<BreakpointId> SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition);
-
-    // Removes the breakpoint by ID
-    void RemoveBreakpoint(BreakpointId id);
-
-    // Removes all breakpoints with matching location
-    void RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter);
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/debuggable_thread.h
 
     // Tells when stops should be made on exceptions
     void SetPauseOnExceptions(PauseOnExceptionsState state);

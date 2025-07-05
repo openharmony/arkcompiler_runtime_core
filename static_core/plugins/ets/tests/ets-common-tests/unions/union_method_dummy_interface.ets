@@ -18,21 +18,6 @@ interface I2 {}
 interface I3 extends I1, I2 {}
 
 class Dummy {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method_dummy_interface.ets
-  m(p: I3): String { return ("Dummy") }
-}
-
-class A1 {
-  m(p: I3): String { return ("A1") }
-}
-
-class A2 extends A1 {
-  m(p: I1): String { return ("A2") }
-}
-
-class A3 extends A2 {
-  m(p: I2): String { return ("A3") }
-=======
   m(p: I3): String { return ('Dummy') }
 }
 
@@ -46,19 +31,12 @@ class A2 extends A1 {
 
 class A3 extends A2 {
   m(p: I2): String { return ('A3') }
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method_dummy_interface.ets
 }
 
 function test(c: A1 | Dummy, a: I3): String { return c.m(a) }
 
 function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets_test_suite/unions/union_method_dummy_interface.ets
-  assertEQ(test(new A1(), {}), "A1");
-  assertEQ(test(new A2(), {}), "A2");
-  assertEQ(test(new A3(), {}), "A2");
-=======
   arktest.assertEQ(test(new A1(), {}), 'A1');
   arktest.assertEQ(test(new A2(), {}), 'A2');
   arktest.assertEQ(test(new A3(), {}), 'A2');
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-common-tests/unions/union_method_dummy_interface.ets
 }

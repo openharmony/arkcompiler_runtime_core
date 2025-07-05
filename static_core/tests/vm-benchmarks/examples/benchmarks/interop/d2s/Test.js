@@ -27,18 +27,9 @@ function Test() {
      */
     this.setup = function () {
         let stsVm = initEtsVm();
-<<<<<<< HEAD:static_core/plugins/ets/tests/benchmarks/interop_js/stringify/array/bu_j2a/bench_stringify_array_j2a.js
-
-        const getArray = stsVm.getFunction('Lbench_stringify_array_j2a/ETSGLOBAL;', 'getArray');
-
-        this.array = getArray();
-
-        return 0;
-=======
         const State = stsVm.getClass('LTestImport/TestImport;');
         this.bench = new State();
         this.bench.setup();
->>>>>>> OpenHarmony_feature_20250328:static_core/tests/vm-benchmarks/examples/benchmarks/interop/d2s/Test.js
     };
 
     /**

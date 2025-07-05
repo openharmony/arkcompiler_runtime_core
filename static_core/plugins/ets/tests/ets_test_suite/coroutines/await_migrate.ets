@@ -53,10 +53,6 @@ function main() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
-<<<<<<< HEAD
-    assertEQ(res, true);
-=======
     arktest.assertEQ(res, true);
->>>>>>> OpenHarmony_feature_20250328
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }

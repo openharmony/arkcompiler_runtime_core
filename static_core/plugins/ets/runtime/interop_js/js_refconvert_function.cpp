@@ -43,11 +43,8 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
-<<<<<<< HEAD
-=======
     method = method == nullptr ? etsThis->GetClass()->GetInstanceMethod(STD_CORE_FUNCTION_UNSAFECALL_METHOD, nullptr)
                                : method;
->>>>>>> OpenHarmony_feature_20250328
     ASSERT(method != nullptr);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
@@ -60,12 +57,6 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto env = ctx->GetJSEnv();
 
     ASSERT(obj->GetClass() == klass_);
-<<<<<<< HEAD
-    [[maybe_unused]] EtsMethod *method = klass_->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
-    method = method == nullptr ? klass_->GetStaticMethod(INVOKE_METHOD_NAME, nullptr) : method;
-    ASSERT(method != nullptr);
-=======
->>>>>>> OpenHarmony_feature_20250328
 
     JSValue *jsValue;
     {

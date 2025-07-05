@@ -20,8 +20,6 @@ cases:
       }
     value: |-
       = 100
-<<<<<<< HEAD
-=======
 
   - decl: |-
       @SomeAnnotation({field2: "Some string" })
@@ -30,4 +28,3 @@ cases:
       }
     value: |-
       = 100
->>>>>>> OpenHarmony_feature_20250328

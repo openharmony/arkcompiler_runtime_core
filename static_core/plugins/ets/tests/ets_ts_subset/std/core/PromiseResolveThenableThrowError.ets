@@ -13,18 +13,11 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let error = new Error("error");
-
-class Thenable implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
-=======
 let error = new Error('error');
 
 class Thenable implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
             (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
->>>>>>> OpenHarmony_feature_20250328
         throw error;
     }
 };
@@ -36,15 +29,6 @@ let promise = new Promise<string>((_resolve) =>{
 });
 
 promise.then(() : void => {
-<<<<<<< HEAD
-    console.log("Test failed. The promise shouldn`t be fulfilled.");
-}, (val: Error) :void => {
-    if(val == error) {
-        console.log("Test passed.");
-    } else {
-        console.log("Test failed. The promise should be rejected with the provided value.");
-    } 
-=======
     console.log('Test failed. The promise shouldn`t be fulfilled.');
 }, (val: Error) :void => {
     if(val == error) {
@@ -52,7 +36,6 @@ promise.then(() : void => {
     } else {
         console.log('Test failed. The promise should be rejected with the provided value.');
     }
->>>>>>> OpenHarmony_feature_20250328
 })
 
 resolve(poisonedThen);

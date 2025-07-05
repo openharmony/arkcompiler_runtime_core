@@ -714,11 +714,7 @@ cases:
       use: |-
           // use generics
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-<<<<<<< HEAD
-          assertTrue(new Z<Long, Error>(...a1).fld == false)
-=======
           arktest.assertTrue(new Z<Long, Error>(...a1).fld == false)
->>>>>>> OpenHarmony_feature_20250328
 
     - decl: |-
           let a2: [int, int] = [6, 5]

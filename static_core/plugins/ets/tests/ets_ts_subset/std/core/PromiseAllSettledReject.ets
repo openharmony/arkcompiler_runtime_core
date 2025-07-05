@@ -27,19 +27,11 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
         return;
     }
     if (values[0].status != PromiseStatus.rejected) {
-<<<<<<< HEAD
-        console.log("Test failed. Expected all elements has status 'rejected'.");
-        return;
-    }
-    if ((values[0] as PromiseRejectedResult).reason != "xyz") {
-        console.log("Test failed. Unexpected reason of the first elements.");
-=======
         console.log('Test failed. Expected all elements has status \'rejected\'.');
         return;
     }
     if ((values[0] as PromiseRejectedResult).reason.message != 'xyz') {
         console.log('Test failed. Unexpected reason of the first elements.');
->>>>>>> OpenHarmony_feature_20250328
         return;
     }
     console.log('Test passed.');

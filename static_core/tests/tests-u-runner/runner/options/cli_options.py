@@ -526,11 +526,7 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
         type=make_dir_if_not_exist,
         help='Stacks files in the specified directory')
     parser.add_argument(
-<<<<<<< HEAD
-        '--llvm-cov-report-by-components', action='store_true', dest='llvm_cov_report_by_components',
-=======
         '--coverage-per-binary', action='store_true', dest='coverage_per_binary',
->>>>>>> OpenHarmony_feature_20250328
         default=None, help='Creates a separate coverage report for each binary running')
 
 

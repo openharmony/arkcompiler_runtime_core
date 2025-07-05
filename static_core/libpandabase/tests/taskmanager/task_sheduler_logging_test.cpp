@@ -19,10 +19,6 @@
 #include <cstdio>
 
 #include <regex>
-<<<<<<< HEAD
-#include <streambuf>
-=======
->>>>>>> OpenHarmony_feature_20250328
 #include <sstream>
 #include <gtest/gtest.h>
 

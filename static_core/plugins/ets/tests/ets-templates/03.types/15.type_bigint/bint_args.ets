@@ -19,35 +19,6 @@ desc: >-
     Numeric type values, by using a call to the standard library
     (see Standard Library) class BigInt methods or constructors.
 ---*/
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq.ets
-
-function eq<P, Q>(p: P, q: Q, ps: string, qs: string): string {
-    if (p == q && q == p) {
-        return ''
-    } else {
-        return '\n' + ps + ' == ' + qs + ', expected true, got false'
-    }
-}
-function ne<P, Q>(p: P, q: Q, ps: string, qs: string): string {
-    if (p != q || q != p) {
-        return '\n' + ps + ' != ' + qs + ', expected false, got true'
-    } else {
-        return ''
-    }
-}
-
-{{c.decl}}
-
-function main() {
-    let failed: string = ''
-{%- for p in c['case1'] %}
-{%- for q in c['case2'] %}
-    failed += eq<Object, Object>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne<Object, Object>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
 function foo(p: bigint): bigint {
     return p + 1n
 }
@@ -57,6 +28,5 @@ function main() {
     let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     arktest.assertTrue( foo(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
 {%- endfor %}
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/15.type_bigint/bint_args.ets
 }
 {%- endfor %}

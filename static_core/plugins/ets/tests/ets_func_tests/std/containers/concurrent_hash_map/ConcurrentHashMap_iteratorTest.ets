@@ -32,15 +32,6 @@ function main(): int {
 
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_001", () =>
     {
-<<<<<<< HEAD
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
-        assertEQ(iter_$.next().value, undefined);
-    });
-    concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_002", () =>
-    {
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-=======
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         arktest.assertEQ(iter_$.next().value, undefined);
@@ -48,7 +39,6 @@ function main(): int {
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_002", () =>
     {
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
->>>>>>> OpenHarmony_feature_20250328
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         let str = "";
         for (let i: int = 0; i < 10; i++) {
@@ -62,15 +52,9 @@ function main(): int {
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_003", () =>
     {
-<<<<<<< HEAD
-        let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
-        assertEQ(iter_$.next().value, undefined);
-=======
         let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
         arktest.assertEQ(iter_$.next().value, undefined);
->>>>>>> OpenHarmony_feature_20250328
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);
         }

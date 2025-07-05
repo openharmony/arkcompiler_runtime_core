@@ -43,11 +43,7 @@ new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) =>
     sequence.push(2);
 });
 
-<<<<<<< HEAD
-reject!(new Error("abc"));
-=======
 reject!(new Error('abc'));
->>>>>>> OpenHarmony_feature_20250328
 resolve!(7);
 
 sequence.push(1);

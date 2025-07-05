@@ -52,20 +52,11 @@ private:
     static void RepeatTimer(uv_timer_t *timer, uint64_t timerId);
     static bool CheckMainThread(ani_env *env);
 
-<<<<<<< HEAD
-    static pid_t mainTid_;
-    static ani_env *mainAniEnv_;
-    static napi_env jsEnv_;
-    static std::unordered_map<uint32_t, uv_timer_t *> timers_;
-    static uint32_t nextTimerId_;
-    static const ani_int MIN_INTERVAL_MS = 1;
-=======
     static ani_object GetTimerTable(ani_env *env);
     static std::pair<ani_object, bool> FindTimerInfo(ani_env *env, ani_int timerId);
     static void ClearTimerInfo(ani_env *env, ani_int timerId);
 
     static constexpr ani_int MIN_INTERVAL_MS = 1;
->>>>>>> OpenHarmony_feature_20250328
 };
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TIMER_MODULE_H

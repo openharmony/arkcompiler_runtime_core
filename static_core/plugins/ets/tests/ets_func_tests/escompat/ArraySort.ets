@@ -14,11 +14,7 @@
  */
 
 function main(): int {
-<<<<<<< HEAD
-    let arrayTestsuite = new ArkTestsuite("arrayTestsuite")
-=======
     let arrayTestsuite = new arktest.ArkTestsuite("arrayTestsuite")
->>>>>>> OpenHarmony_feature_20250328
     arrayTestsuite.addTest("SortWithUndefined", SortWithUndefined)
     arrayTestsuite.addTest("SortWithUndefinedAndNull", SortWithUndefinedAndNull)
     return arrayTestsuite.run()
@@ -36,15 +32,6 @@ function SortWithUndefined() {
     }
     let x: Array<number | undefined> = new Array<number | undefined>(undefined, 1., undefined, 5., 2., 3.)
     x.sort(myComparefn_1)
-<<<<<<< HEAD
-    assertEQ(x.length, 6)
-    assertEQ(x[0], 1)
-    assertEQ(x[1], 5)
-    assertEQ(x[2], 2)
-    assertEQ(x[3], 3)
-    assertEQ(x[4], undefined)
-    assertEQ(x[5], undefined)
-=======
     arktest.assertEQ(x.length, 6)
     arktest.assertEQ(x[0], 1)
     arktest.assertEQ(x[1], 5)
@@ -52,7 +39,6 @@ function SortWithUndefined() {
     arktest.assertEQ(x[3], 3)
     arktest.assertEQ(x[4], undefined)
     arktest.assertEQ(x[5], undefined)
->>>>>>> OpenHarmony_feature_20250328
     let y: Array<int | undefined> = new Array<int | undefined>(3, undefined, 1, undefined, 5, 2)
     let myComparefn_2 = (x: int | undefined, y: int | undefined) => {
         if (x == undefined) {
@@ -64,15 +50,6 @@ function SortWithUndefined() {
         return 0.
     }
     y.sort(myComparefn_2)
-<<<<<<< HEAD
-    assertEQ(y.length, 6)
-    assertEQ(y[0], 3)
-    assertEQ(y[1], 1)
-    assertEQ(y[2], 5)
-    assertEQ(y[3], 2)
-    assertEQ(y[4], undefined)
-    assertEQ(y[5], undefined)
-=======
     arktest.assertEQ(y.length, 6)
     arktest.assertEQ(y[0], 3)
     arktest.assertEQ(y[1], 1)
@@ -80,23 +57,11 @@ function SortWithUndefined() {
     arktest.assertEQ(y[3], 2)
     arktest.assertEQ(y[4], undefined)
     arktest.assertEQ(y[5], undefined)
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function SortWithUndefinedAndNull() {
     let arr: Array<number | undefined | null> = new Array<number | undefined | null>(1., 1000., 3., null, undefined, -2., undefined, 0.)
     arr.sort()
-<<<<<<< HEAD
-    assertEQ(arr.length, 8)
-    assertEQ(arr[0], -2)
-    assertEQ(arr[1], 0)
-    assertEQ(arr[2], 1)
-    assertEQ(arr[3], 1000)
-    assertEQ(arr[4], 3)
-    assertEQ(arr[5], null)
-    assertEQ(arr[6], undefined)
-    assertEQ(arr[7], undefined)
-=======
     arktest.assertEQ(arr.length, 8)
     arktest.assertEQ(arr[0], -2)
     arktest.assertEQ(arr[1], 0)
@@ -106,5 +71,4 @@ function SortWithUndefinedAndNull() {
     arktest.assertEQ(arr[5], null)
     arktest.assertEQ(arr[6], undefined)
     arktest.assertEQ(arr[7], undefined)
->>>>>>> OpenHarmony_feature_20250328
 }

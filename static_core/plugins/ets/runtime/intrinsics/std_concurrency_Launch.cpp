@@ -106,14 +106,6 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postTo
                           "Cannot launch coroutines in the current context!");
         return nullptr;
     }
-<<<<<<< HEAD
-
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    VMHandle<EtsArray> array(coro, arr->GetCoreType());
-    VMHandle<EtsObject> function(coro, func->GetCoreType());
-
-=======
->>>>>>> OpenHarmony_feature_20250328
     if (arr == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);

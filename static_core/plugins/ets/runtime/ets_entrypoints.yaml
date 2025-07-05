@@ -1458,8 +1458,6 @@
   - const ark::Method*
   - ark::ObjectHeader*
   - size_t
-<<<<<<< HEAD
-=======
 
 - name: Int8ArrayFillInternalFastPath
   entrypoint: Int8ArrayFillInternalFastPath
@@ -2071,4 +2069,3 @@
     - ark::ObjectHeader*       # src array  
     - int32_t                  # begin idx
     - int32_t                  # end idx
->>>>>>> OpenHarmony_feature_20250328

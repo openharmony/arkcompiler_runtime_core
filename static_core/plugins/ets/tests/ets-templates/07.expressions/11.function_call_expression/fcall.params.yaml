@@ -162,11 +162,7 @@ cases:
           arktest.assertEQ( v as number, 3.14 )
           v = (): number => { return globl }
           globl = 9.81
-<<<<<<< HEAD
-          assertEQ( (v as NumberFunc)(), 9.81 )
-=======
           arktest.assertEQ( (v as NumberFunc)(), 9.81 )
->>>>>>> OpenHarmony_feature_20250328
 
     - decl: |-
           function foo(): int { return 1 }
@@ -178,12 +174,6 @@ cases:
             method(): int { return 3 }
           }
       use: |-
-<<<<<<< HEAD
-          assertEQ(call(foo), 1)
-          assertEQ(call(A.method), 2)
-          assertEQ(call((new A).method), 3)
-=======
           arktest.assertEQ(call(foo), 1)
           arktest.assertEQ(call(A.method), 2)
           arktest.assertEQ(call((new A).method), 3)
->>>>>>> OpenHarmony_feature_20250328

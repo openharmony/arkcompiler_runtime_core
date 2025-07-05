@@ -103,11 +103,6 @@ cases:
         class B {
             static foo(array: readonly int[]) {}
         }
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly.params.yaml
-        function foo(i: int, array?: readonly Array<number>) { }
-        function foo(i: int, array?: readonly number[]) { }
-      check: |-
-=======
         function foo(i: int, array?: readonly number[]) { }
       check: |-
 
@@ -167,4 +162,3 @@ cases:
       check: |-
         let rw: readonly [number, string] = [1, "abc"]
         arktest.assertEQ(1, foo(rw));
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly.params.yaml

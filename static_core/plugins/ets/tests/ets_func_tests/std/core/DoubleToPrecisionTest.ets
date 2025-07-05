@@ -14,17 +14,10 @@
  */
 
 function main() {
-<<<<<<< HEAD
-    let myTestsuite = new ArkTestsuite('myTestsuite');
-    myTestsuite.addTest('testDecimal', testDecimal);
-    myTestsuite.addTest('testFullDigit', testFullDigit);
-    myTestsuite.addTest('testScientific', testScientific);
-=======
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
     myTestsuite.addTest("testDecimal", testDecimal);
     myTestsuite.addTest("testFullDigit", testFullDigit);
     myTestsuite.addTest("testScientific", testScientific);
->>>>>>> OpenHarmony_feature_20250328
     myTestsuite.run();
 }
 
@@ -47,16 +40,6 @@ function testDecimal() {
     const str7 = num7.toPrecision(7);
     const str8 = num8.toPrecision(8);
 
-<<<<<<< HEAD
-    assertEQ(str1, '0.1');
-    assertEQ(str2, '0.010');
-    assertEQ(str3, '0.00100');
-    assertEQ(str4, '0.0001000');
-    assertEQ(str5, '0.000010000');
-    assertEQ(str6, '0.00000100000');
-    assertEQ(str7, '1.000000e-7');
-    assertEQ(str8, '1.0000000e-8');
-=======
     arktest.assertEQ(str1, "0.1");
     arktest.assertEQ(str2, "0.010");
     arktest.assertEQ(str3, "0.00100");
@@ -65,7 +48,6 @@ function testDecimal() {
     arktest.assertEQ(str6, "0.00000100000");
     arktest.assertEQ(str7, "1.000000e-7");
     arktest.assertEQ(str8, "1.0000000e-8");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testFullDigit() {
@@ -87,16 +69,6 @@ function testFullDigit() {
     const str7 = num7.toPrecision(7);
     const str8 = num8.toPrecision(8);
 
-<<<<<<< HEAD
-    assertEQ(str1, '1');
-    assertEQ(str2, '12');
-    assertEQ(str3, '123');
-    assertEQ(str4, '1234');
-    assertEQ(str5, '12345');
-    assertEQ(str6, '123456');
-    assertEQ(str7, '1234567');
-    assertEQ(str8, '12345678');
-=======
     arktest.assertEQ(str1, "1");
     arktest.assertEQ(str2, "12");
     arktest.assertEQ(str3, "123");
@@ -105,7 +77,6 @@ function testFullDigit() {
     arktest.assertEQ(str6, "123456");
     arktest.assertEQ(str7, "1234567");
     arktest.assertEQ(str8, "12345678");
->>>>>>> OpenHarmony_feature_20250328
 }
 
 function testScientific() {
@@ -124,20 +95,6 @@ function testScientific() {
     const str11 = num.toPrecision(11);
     const str12 = num.toPrecision(12);
 
-<<<<<<< HEAD
-    assertEQ(str1, '1e+9');
-    assertEQ(str2, '1.2e+9');
-    assertEQ(str3, '1.23e+9');
-    assertEQ(str4, '1.235e+9');
-    assertEQ(str5, '1.2346e+9');
-    assertEQ(str6, '1.23457e+9');
-    assertEQ(str7, '1.234568e+9');
-    assertEQ(str8, '1.2345679e+9');
-    assertEQ(str9, '1.23456789e+9');
-    assertEQ(str10, '1234567890');
-    assertEQ(str11, '1234567890.0');
-    assertEQ(str12, '1234567890.00');
-=======
     arktest.assertEQ(str1, "1e+9");
     arktest.assertEQ(str2, "1.2e+9");
     arktest.assertEQ(str3, "1.23e+9");
@@ -150,6 +107,5 @@ function testScientific() {
     arktest.assertEQ(str10, "1234567890");
     arktest.assertEQ(str11, "1234567890.0");
     arktest.assertEQ(str12, "1234567890.00");
->>>>>>> OpenHarmony_feature_20250328
 }
 

@@ -13,26 +13,6 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-function main(): int {
-    let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
-
-    asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
-        let failures = 0;
-        failures += asyncLockQueryTest();
-        failures += asyncLockDeadLockTest();
-        failures += asyncLockAvailableTest();
-        failures += asyncLockExclusiveModeTest();
-        failures += asyncLockQueryNonexistentNameTest();
-
-        assertEQ(failures, 0);
-    });
-
-    return asyncLockTestsuite.run();
-}
-
-=======
->>>>>>> OpenHarmony_feature_20250328
 /**
  *  Check if lock returns information about current execution state.
  */
@@ -62,11 +42,7 @@ function asyncLockQueryNonexistentNameTest(): int {
         AsyncLock.query(lockname);
     } catch (e: Error) {
         if(e.message != "AsyncLock " + lockname + " not found") {
-<<<<<<< HEAD
-            result += 1; 
-=======
             result += 1;
->>>>>>> OpenHarmony_feature_20250328
         }
     }
 

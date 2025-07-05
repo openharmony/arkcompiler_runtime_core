@@ -32,10 +32,6 @@ class B extends A {
 
 function main(): void {
   let b: A = new B();
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/09.classes/06.method_declarations/06.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
-  assertEQ(b.run(), 10);
-=======
   arktest.assertEQ(b.run(), 10);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/09.classes/05.method_declarations/05.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
 }
 

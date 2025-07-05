@@ -37,19 +37,11 @@ break_statements:
         for (;;) {
           if (true) { break; }
         }
-<<<<<<< HEAD
-        assertEQ(i, 2)
-=======
         arktest.assertEQ(i, 2)
->>>>>>> OpenHarmony_feature_20250328
   - use: |
         let i = 2;
           while (i > 0) {
             break;
             i--;
           }
-<<<<<<< HEAD
-        assertEQ(i, 2)
-=======
         arktest.assertEQ(i, 2)
->>>>>>> OpenHarmony_feature_20250328

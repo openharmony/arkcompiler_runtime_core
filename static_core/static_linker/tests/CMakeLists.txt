@@ -96,10 +96,7 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         fmethod_overloaded_2
         hello_world
         mix
-<<<<<<< HEAD
-=======
         singlefile
->>>>>>> OpenHarmony_feature_20250328
         sys
     )
     set(STS_TESTS_OUTPUT_SUBDIRS "")
@@ -139,14 +136,11 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         hello_world/1.ets
         mix/1.ets
         mix/2.ets
-<<<<<<< HEAD
-=======
         singlefile/classExtension.ets
         singlefile/interImpl.ets
         singlefile/lambda_test.ets
         singlefile/ObjectLiteral.ets
         singlefile/teserror.ets
->>>>>>> OpenHarmony_feature_20250328
         sys/1.ets
         sys/2.ets
     )

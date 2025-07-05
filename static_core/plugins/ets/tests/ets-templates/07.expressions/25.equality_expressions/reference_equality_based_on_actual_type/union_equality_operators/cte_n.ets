@@ -21,35 +21,6 @@ desc: >-
     if T1 and T2 have no overlap
 tags: [compile-only, negative]
 ---*/
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1.ets
-
-function eq<P>(p: P, q: Object, ps: string, qs: string): string {
-    if (p == q && q == p) {
-        return ''
-    } else {
-        return '\n' + ps + ' == ' + qs + ', expected true, got false'
-    }
-}
-function ne<P>(p: P, q: Object, ps: string, qs: string): string {
-    if (p != q || q != p) {
-        return '\n' + ps + ' != ' + qs + ', expected false, got true'
-    } else {
-        return ''
-    }
-}
-
-{{c.decl}}
-
-function main() {
-    let failed: string = ''
-{%- for p in c['case1'] %}
-{%- for q in c['case2'] %}
-    failed += eq<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
 {{c.decl}}
 
 function foo(p: {{c.type1}}, q: {{c.type2}}): boolean {
@@ -59,6 +30,5 @@ function foo(p: {{c.type1}}, q: {{c.type2}}): boolean {
 function main(): int {
     {{c.code|indent}}
     return 0
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/reference_equality_based_on_actual_type/union_equality_operators/cte_n.ets
 }
 {%- endfor %}

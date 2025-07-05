@@ -19,37 +19,6 @@ desc: >-
     Numeric type values, by using a call to the standard library
     (see Standard Library) class BigInt methods or constructors.
 ---*/
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne1.ets
-
-function eq(p: {{c.type}}, q: Object, ps: string, qs: string): string {
-    if (p == q || q == p) {
-        return '\n' + ps + ' == ' + qs + ', expected false, got true'
-    } else {
-        return ''
-    }
-}
-function ne(p: {{c.type}}, q: Object, ps: string, qs: string): string {
-    if (p != q && q != p) {
-        return ''
-    } else {
-        return '\n' + ps + ' != ' + qs + ', expected true, got false'
-    }
-}
-
-{{c.decl}}
-
-function main() {
-    let failed: string = ''
-{%- for p in c['case1'] %}
-{%- for q in c['case2'] %}
-{%- if p != q %}
-    failed += eq({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-    failed += ne({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
-{%- endif %}
-{%- endfor %}
-{%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
-=======
 class A {
     private _fld: bigint = 0n
     set(p: {{c.from_type}}) {
@@ -66,6 +35,5 @@ function main() {
     a.set({{t.expr|safe}})
     arktest.assertTrue( a.fld == {{t.val}})
 {%- endfor %}
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/15.type_bigint/bint_fld.ets
 }
 {%- endfor %}

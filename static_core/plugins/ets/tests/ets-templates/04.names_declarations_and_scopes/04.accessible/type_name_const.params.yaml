@@ -19,11 +19,7 @@ cases:
       const a: T = 0x80 as byte;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 1);
-=======
           arktest.assertEQ(foo(a), 1);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -31,11 +27,7 @@ cases:
       const a: T = 0x7FFF as short;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 2);
-=======
           arktest.assertEQ(foo(a), 2);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -43,11 +35,7 @@ cases:
       const a: T = 127 as int;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 3);
-=======
           arktest.assertEQ(foo(a), 3);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -55,11 +43,7 @@ cases:
       const a: T = 127 as long;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 4);
-=======
           arktest.assertEQ(foo(a), 4);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -67,11 +51,7 @@ cases:
       const a: T = -0.0 as float;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 5);
-=======
           arktest.assertEQ(foo(a), 5);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -79,11 +59,7 @@ cases:
       const a: T = -0.0 as double;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 6); // double is an alias to number
-=======
           arktest.assertEQ(foo(a), 6); // double is an alias to number
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -91,11 +67,7 @@ cases:
       const a: T = -0.0 as number;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 6);
-=======
           arktest.assertEQ(foo(a), 6);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -103,11 +75,7 @@ cases:
       const a: T = c'a';
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 7);
-=======
           arktest.assertEQ(foo(a), 7);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   #8
@@ -116,11 +84,7 @@ cases:
       const a: T = true;
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 8);
-=======
           arktest.assertEQ(foo(a), -1);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   # Boxed
@@ -129,11 +93,7 @@ cases:
       const a: T = new Byte(0x7F as byte);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 11);
-=======
           arktest.assertEQ(foo(a), 1);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -141,11 +101,7 @@ cases:
       const a: T = new Short(2 as short);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 12);
-=======
           arktest.assertEQ(foo(a), 2);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -153,11 +109,7 @@ cases:
       const a: T = new Int(3 as int);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 13);
-=======
           arktest.assertEQ(foo(a), 3);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -165,11 +117,7 @@ cases:
       const a: T = new Long(4 as long);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 14);
-=======
           arktest.assertEQ(foo(a), 4);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -177,11 +125,7 @@ cases:
       const a: T = new Float(0.1 as float);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 15);
-=======
           arktest.assertEQ(foo(a), 5);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -189,11 +133,7 @@ cases:
       const a: T = new Double(0.1 as double);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 16); // Double is an alias to Number
-=======
           arktest.assertEQ(foo(a), 6); // Double is an alias to Number
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -201,11 +141,7 @@ cases:
       const a: T = new Number(0.1 as number);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 16);
-=======
           arktest.assertEQ(foo(a), 6);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -213,11 +149,7 @@ cases:
       const a: T = new Char(c'b');
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 17);
-=======
           arktest.assertEQ(foo(a), 7);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -225,11 +157,7 @@ cases:
       const a: T = "some string";
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 18); // string is an alias to String
-=======
           arktest.assertEQ(foo(a), 8); // string is an alias to String
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -237,11 +165,7 @@ cases:
       const a: T = new String("some string");
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 18);
-=======
           arktest.assertEQ(foo(a), 8);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -249,11 +173,7 @@ cases:
       const a: T = new Boolean(false);
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 19);
-=======
           arktest.assertEQ(foo(a), -1);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
     # Custom
@@ -262,11 +182,7 @@ cases:
       const a: T = [1, -2];
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 21);
-=======
           arktest.assertEQ(foo(a), 21);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
@@ -274,20 +190,12 @@ cases:
       const a: T = [[new Int(1)], [new Int(-2)]];
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 22);
-=======
           arktest.assertEQ(foo(a), 22);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }
 
   - decl: |-
       const a: TPL = [1.4, "str"];
     check: |-
       function main() {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/05.accessible/type_name_const.params.yaml
-          assertEQ(foo(a), 24);
-=======
           arktest.assertEQ(foo(a), 24);
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/04.accessible/type_name_const.params.yaml
       }

@@ -13,25 +13,6 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let reject: ((err: Error) => void)|null = null;
-let error = new Error("error")
-let p1 = new Promise<number>((_resolve: (value: number) => void, _reject: (err: Error) => void): void => {
-    reject = _reject;
-});
-let p2 = new Promise<number>((_resolve: (value: number| PromiseLike<number>) => void, _reject: (err: Error) => void): void => {
-    _resolve(p1);
-    _reject(new Error("NotMe"));
-    _resolve(7);
-});
-p2.then((v:number): void => {
-    console.log("Test failed. The promise should not be fulfilled.");
-}, (err: Error): void => {
-    if(err == error) {
-        console.log("Test passed.")
-    } else {
-        console.log("Test failed. The promise should be rejected with the provided value.")
-=======
 let reject: ((err: Error) => void) | null = null;
 let error = new Error('error')
 let p1 = new Promise<number>((_resolve: (value: number) => void, _reject: (err: Error) => void): void => {
@@ -50,7 +31,6 @@ p2.then((v:number): void => {
         console.log('Test passed.')
     } else {
         console.log('Test failed. The promise should be rejected with the provided value.')
->>>>>>> OpenHarmony_feature_20250328
     }
 })
 reject!(error);

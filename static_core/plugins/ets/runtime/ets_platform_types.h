@@ -37,16 +37,10 @@ public:
     static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
     static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
-<<<<<<< HEAD
-    EtsClass *escompatError;
-    EtsClass *coreOutOfMemoryError;
-    EtsClass *coreException;
-=======
     /* Core runtime type system */
     EtsClass *coreObject {};  // IsObjectClass
     EtsClass *coreClass {};   // IsClassClass
     EtsClass *coreString {};  // IsStringClass
->>>>>>> OpenHarmony_feature_20250328
 
     /* ets numeric classes */
     EtsClass *coreBoolean {};
@@ -58,17 +52,6 @@ public:
     EtsClass *coreFloat {};
     EtsClass *coreDouble {};
 
-<<<<<<< HEAD
-    EtsClass *corePromise;
-    EtsClass *coreJob;
-    EtsMethod *corePromiseSubscribeOnAnotherPromise;
-    EtsClass *corePromiseRef;
-    EtsClass *coreWaitersList;
-    EtsClass *coreMutex;
-    EtsClass *coreEvent;
-    EtsClass *coreCondVar;
-    EtsClass *coreQueueSpinlock;
-=======
     /* ets base language classes */
     EtsClass *escompatBigint {};
     EtsClass *escompatError {};
@@ -76,7 +59,6 @@ public:
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
     EtsClass *coreTupleN {};
->>>>>>> OpenHarmony_feature_20250328
 
     /* Runtime linkage classes */
     EtsClass *coreRuntimeLinker {};
@@ -90,18 +72,8 @@ public:
     EtsClass *coreException {};
     EtsClass *coreStackTraceElement {};
 
-<<<<<<< HEAD
-    EtsClass *coreTupleN;
-
-    EtsClass *coreStackTraceElement;
-
-    EtsClass *coreFinalizableWeakRef;
-    EtsClass *coreFinalizationRegistry;
-    EtsMethod *coreFinalizationRegistryExecCleanup;
-=======
     /* StringBuilder */
     EtsClass *coreStringBuilder {};
->>>>>>> OpenHarmony_feature_20250328
 
     /* Concurrency classes */
     EtsClass *corePromise {};

@@ -62,26 +62,6 @@ public:
     void Pause();
     void SetSkipAllPauses(bool skip);
     void SetMixedDebugEnabled(bool mixedDebugEnabled);
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/thread_state.h
-    /**
-     * @brief Set a breakpoint with optional condition.
-     * @param locations to set breakpoint at, all will have the same BreakpointId.
-     * @param condition pointer to string with panda bytecode, will not be saved.
-     * @returns BreakpointId of set breakpoint.
-     */
-    BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition = nullptr);
-    void RemoveBreakpoint(BreakpointId id);
-
-    template <typename F>
-    void EnumerateBreakpoints(const F &func)
-    {
-        for (const auto &[loc, id] : breakpointLocations_) {
-            func(loc, id);
-        }
-    }
-
-=======
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/thread_state.h
     void SetPauseOnExceptions(PauseOnExceptionsState state);
 
     void OnException(bool uncaught);
@@ -142,12 +122,9 @@ private:
     bool paused_ {false};
     bool skipAllPauses_ {false};
     bool mixedDebugEnabled_ {false};
-<<<<<<< HEAD:static_core/runtime/tooling/inspector/thread_state.h
-=======
     bool breakOnStart_ {false};
     std::set<std::string_view> sourceFiles_;
     PauseReason pauseReason_ {PauseReason::OTHER};
->>>>>>> OpenHarmony_feature_20250328:static_core/runtime/tooling/inspector/debugger/thread_state.h
 };
 }  // namespace ark::tooling::inspector
 

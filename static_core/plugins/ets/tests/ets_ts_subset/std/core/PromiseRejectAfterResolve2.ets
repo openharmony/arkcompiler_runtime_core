@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-let thenable = new Error("abc");
-let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {
-    resolve("abc");
-=======
 let thenable = new Error('abc');
 let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Error) => void): void => {
     resolve('abc');
->>>>>>> OpenHarmony_feature_20250328
     reject(thenable);
 });
 

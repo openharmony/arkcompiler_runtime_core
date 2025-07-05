@@ -36,11 +36,7 @@ let p2 = new Promise<number>((_: (v: number) => void, _reject: (error: Error) =>
     reject = _reject;
 });
 
-<<<<<<< HEAD
-reject!(new Error("abc"));
-=======
 reject!(new Error('abc'));
->>>>>>> OpenHarmony_feature_20250328
 resolve!(7);
 
 p1.then<void>((): void => {

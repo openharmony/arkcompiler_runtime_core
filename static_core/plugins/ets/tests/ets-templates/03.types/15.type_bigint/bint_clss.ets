@@ -20,13 +20,9 @@ desc: >-
     (see Standard Library) class BigInt methods or constructors.
 ---*/
 class A {
-<<<<<<< HEAD:static_core/plugins/ets/tests/ets-templates/06.contexts_and_conversions/05.implicit_conversions/06.char_to_string_conversions/comp-clss.ets
-    fld: string = ""
-=======
 {%- for t in c['values'] %}
     fld{{loop.index}}: bigint = 0n
 {%- endfor %}
->>>>>>> OpenHarmony_feature_20250328:static_core/plugins/ets/tests/ets-templates/03.types/15.type_bigint/bint_clss.ets
 }
 {%- for t in c['values'] %}
 let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}

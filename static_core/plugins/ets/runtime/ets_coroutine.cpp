@@ -197,15 +197,6 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
         intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc), ToEtsBoolean(false));
         return;
     }
-<<<<<<< HEAD
-    if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
-        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
-        if (retObject == nullptr) {
-            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
-        }
-    }
-=======
->>>>>>> OpenHarmony_feature_20250328
     intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject, ToEtsBoolean(false));
 }
 

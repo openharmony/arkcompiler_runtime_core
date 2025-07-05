@@ -152,15 +152,6 @@ function testDateChangeSeconds(): int {
 
 function testSetUTCFullYear(): int {
     let date: Date =  new Date(Date.UTC(96, 1, 2, 3, 4, 5));
-<<<<<<< HEAD
-    assertEQ(date.getUTCFullYear(), 1996);
-    assertEQ(date.valueOf(), 823230245000);
-    assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
-    date.setUTCFullYear(96);
-    assertEQ(date.getUTCFullYear(), 96);
-    assertEQ(date.valueOf(), -59134913755000);
-    assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
-=======
     arktest.assertEQ(date.getUTCFullYear(), 1996);
     arktest.assertEQ(date.valueOf(), 823230245000);
     arktest.assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
@@ -168,6 +159,5 @@ function testSetUTCFullYear(): int {
     arktest.assertEQ(date.getUTCFullYear(), 96);
     arktest.assertEQ(date.valueOf(), -59134913755000);
     arktest.assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
->>>>>>> OpenHarmony_feature_20250328
     return 0;
 }

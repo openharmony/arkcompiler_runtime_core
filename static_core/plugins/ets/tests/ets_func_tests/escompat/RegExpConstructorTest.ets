@@ -75,8 +75,6 @@ function main(): int {
     printTestVerdict(testResult, "test110")
     failCounter += testResult
 
-<<<<<<< HEAD
-=======
     let regExpObj120 = RegExp("Brawn Fox");
     testResult = checkTestResult(regExpObj120, "Brawn Fox", "", false, false, false, false, false, false, false, false)
     printTestVerdict(testResult, "test120")
@@ -132,7 +130,6 @@ function main(): int {
     printTestVerdict(testResult, "test220")
     failCounter += testResult
 
->>>>>>> OpenHarmony_feature_20250328
     let regExpObj230 = new RegExp("(?:\u{23456})");
     testResult = checkTestResult(regExpObj230, "(?:𣑖)", "", false, false, false, false, false, false, false, false)
     printTestVerdict(testResult, "test230")
