@@ -30,18 +30,6 @@
 #include "headers/literal_array.h"
 #include "headers/type.h"
 
-<<<<<<< HEAD:libabckit/include/cpp/abckit_cpp.h
-#include "headers/core/annotation_element.h"
-#include "headers/core/annotation_interface_field.h"
-#include "headers/core/annotation_interface.h"
-#include "headers/core/annotation.h"
-#include "headers/core/class.h"
-#include "headers/core/export_descriptor.h"
-#include "headers/core/function.h"
-#include "headers/core/import_descriptor.h"
-#include "headers/core/module.h"
-#include "headers/core/namespace.h"
-=======
 #include "./headers/core/annotation_element.h"
 #include "./headers/core/annotation_interface_field.h"
 #include "./headers/core/annotation_interface.h"
@@ -55,7 +43,6 @@
 #include "./headers/core/import_descriptor.h"
 #include "./headers/core/module.h"
 #include "./headers/core/namespace.h"
->>>>>>> OpenHarmony_feature_20250328:libabckit/include/libabckit/cpp/abckit_cpp.h
 
 #include "headers/arkts/annotation_element.h"
 #include "headers/arkts/annotation_interface_field.h"
@@ -73,18 +60,6 @@
 #include "headers/js/module.h"
 
 // implementations
-<<<<<<< HEAD:libabckit/include/cpp/abckit_cpp.h
-#include "headers/core/annotation_interface_field_impl.h"
-#include "headers/core/annotation_interface_impl.h"
-#include "headers/core/annotation_element_impl.h"
-#include "headers/core/annotation_impl.h"
-#include "headers/core/module_impl.h"
-#include "headers/core/namespace_impl.h"
-#include "headers/core/class_impl.h"
-#include "headers/core/function_impl.h"
-#include "headers/core/export_descriptor_impl.h"
-#include "headers/core/import_descriptor_impl.h"
-=======
 #include "./headers/core/annotation_interface_field_impl.h"
 #include "./headers/core/annotation_interface_impl.h"
 #include "./headers/core/annotation_element_impl.h"
@@ -98,7 +73,6 @@
 #include "./headers/core/field_impl.h"
 #include "./headers/core/export_descriptor_impl.h"
 #include "./headers/core/import_descriptor_impl.h"
->>>>>>> OpenHarmony_feature_20250328:libabckit/include/libabckit/cpp/abckit_cpp.h
 
 #include "headers/arkts/annotation_interface_field_impl.h"
 #include "headers/arkts/annotation_interface_impl.h"

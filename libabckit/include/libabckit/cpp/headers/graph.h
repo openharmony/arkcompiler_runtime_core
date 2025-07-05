@@ -16,19 +16,11 @@
 #ifndef CPP_ABCKIT_GRAPH_H
 #define CPP_ABCKIT_GRAPH_H
 
-<<<<<<< HEAD:libabckit/include/cpp/headers/graph.h
 #include "base_classes.h"
 #include "basic_block.h"
 #include "dynamic_isa.h"
 #include "instruction.h"
-#include "../../../src/include_v2/cpp/headers/static_isa.h"
-=======
-#include "./base_classes.h"
-#include "./basic_block.h"
-#include "./dynamic_isa.h"
-#include "./instruction.h"
-#include "./static_isa.h"
->>>>>>> OpenHarmony_feature_20250328:libabckit/include/libabckit/cpp/headers/graph.h
+#include "static_isa.h"
 
 #include <memory>
 #include <vector>

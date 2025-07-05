@@ -17,20 +17,13 @@
 #define CPP_ABCKIT_CORE_MODULE_H
 
 #include "../base_classes.h"
-<<<<<<< HEAD:libabckit/include/cpp/headers/core/module.h
 #include "class.h"
 #include "export_descriptor.h"
 #include "namespace.h"
 #include "annotation_interface.h"
-=======
-#include "./class.h"
-#include "./interface.h"
-#include "./enum.h"
-#include "./field.h"
-#include "./export_descriptor.h"
-#include "./namespace.h"
-#include "./annotation_interface.h"
->>>>>>> OpenHarmony_feature_20250328:libabckit/include/libabckit/cpp/headers/core/module.h
+#include "interface.h"
+#include "enum.h"
+#include "field.h"
 
 namespace abckit::core {
 
