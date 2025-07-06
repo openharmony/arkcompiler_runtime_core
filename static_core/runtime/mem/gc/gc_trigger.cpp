@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -339,8 +339,7 @@ void SchedGCOnNthAllocTrigger::TriggerGcIfNeeded(GC *gc)
         value = counter_.load(std::memory_order_relaxed);
     }
     if (trigger) {
-        auto task = MakePandaUnique<GCTask>(cause_);
-        gc->WaitForGCInManaged(*task);
+        gc->WaitForGCInManaged(GCTask(cause_));
         isTriggered_ = true;
     } else {
         origin_->TriggerGcIfNeeded(gc);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -397,6 +397,7 @@ void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
     // clear because we have move all objects in it to pygote space
     // NOTE(dtrubenkov): FIX clean object_allocator_
     objectAllocator_.reset(new (std::nothrow) ObjectAllocator(memStats_, &heapSpaces_));
+    ASSERT(objectAllocator_.get() != nullptr);
 }
 
 template <MTModeT MT_MODE>
