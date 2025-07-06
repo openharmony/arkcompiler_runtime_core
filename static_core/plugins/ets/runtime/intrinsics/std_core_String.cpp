@@ -44,15 +44,11 @@ constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
 constexpr const uint16_t CHAR0XD800 = 0xd800;
 constexpr const uint16_t CHAR0XDC00 = 0xdc00;
 
-static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
+static ObjectHeader *StdCoreStringDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
 {
     ASSERT(s != nullptr);
     ets_int length = s->GetLength();
-    if (UNLIKELY(begin > end)) {
-        ark::ThrowStringIndexOutOfBoundsException(begin, length);
-        return nullptr;
-    }
-    if (UNLIKELY(begin > length || begin < 0)) {
+    if (UNLIKELY(begin > end || begin > length || begin < 0)) {
         ark::ThrowStringIndexOutOfBoundsException(begin, length);
         return nullptr;
     }
@@ -64,6 +60,7 @@ static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, et
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> sHandle(thread, s->GetCoreType());
+    ASSERT(sHandle.GetPtr() != nullptr);
     ets_int n = end - begin;
     void *array = nullptr;
     if (isUtf16) {
@@ -102,12 +99,12 @@ static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, et
 
 ObjectHeader *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringGetDataAsArray(s, begin, end, true);
+    return StdCoreStringDataAsArray(s, begin, end, true);
 }
 
 ObjectHeader *StdCoreStringGetBytes(EtsString *s, ets_int begin, ets_int end)
 {
-    return StdCoreStringGetDataAsArray(s, begin, end, false);
+    return StdCoreStringDataAsArray(s, begin, end, false);
 }
 
 EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
