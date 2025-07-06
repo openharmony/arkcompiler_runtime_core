@@ -40,15 +40,8 @@
                 "c_utils",
                 "openssl",
                 "libuv",
-<<<<<<< HEAD
                 "pcre2",
                 "json",
-=======
-                "node"
-            ],
-            "third_party": [
-                "openssl",
->>>>>>> OpenHarmony_feature_20250328
                 "musl",
                 "openssl",
                 "elfio",
@@ -272,10 +265,7 @@
             ],
             "test": [
                 "//arkcompiler/runtime_core/tests/fuzztest:fuzztest",
-<<<<<<< HEAD
-=======
                 "//arkcompiler/runtime_core/static_core/plugins/ets/tests/ani/fuzztest:fuzztest",
->>>>>>> OpenHarmony_feature_20250328
                 "//arkcompiler/runtime_core/static_core/plugins/ets/tests/ets_sdk/fuzztest:fuzztest",
                 "//arkcompiler/runtime_core:runtime_core_unittest"
             ]

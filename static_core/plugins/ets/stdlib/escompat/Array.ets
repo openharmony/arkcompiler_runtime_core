@@ -1942,15 +1942,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
-<<<<<<< HEAD
-        let res = new NullishType[len];
-        for (let i = 0; i < this.actualLength; i++) {
-            res[i] = callbackfn(this.$_get_unsafe(i), i as number, this);
-=======
         let res : FixedArray<NullishType> = new NullishType[len];
         for (let i = 0; i < this.actualLength; i++) {
             res[i] = callbackfn(this.$_get_unsafe(i), i.toDouble(), this);
->>>>>>> OpenHarmony_feature_20250328
         }
         return new Array<U>(FROM_BUFFER, res);
     }
@@ -1969,11 +1963,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
         for (let i = this.actualLength - 2; i >= 0; i--) {
             if (this.actualLength > i) {
-<<<<<<< HEAD
-                acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
-=======
                 acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
->>>>>>> OpenHarmony_feature_20250328
             }
         }
         return acc
