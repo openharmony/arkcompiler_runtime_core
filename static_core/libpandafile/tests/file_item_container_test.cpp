@@ -1029,6 +1029,9 @@ TEST(ItemContainer, GettersTest)
     std::function<bool(BaseItem *)> testField = [&](BaseItem *field) {
         auto *fieldItem = static_cast<panda_file::FieldItem *>(field);
         ASSERT(fieldItem != nullptr && fieldItem->GetItemType() == ItemTypes::FIELD_ITEM);
+        ASSERT(fieldItem->GetBaseItemType() == ItemTypes::ANNOTATION_ITEM);
+        fieldItem->SetBaseItemType(ItemTypes::FIELD_ITEM);
+        ASSERT(fieldItem->GetBaseItemType() == ItemTypes::FIELD_ITEM);
         fName = fieldItem->GetNameItem()->GetData();
         fName.pop_back();  // remove '\0'
         ASSERT(fName == "field");

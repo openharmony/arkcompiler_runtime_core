@@ -257,6 +257,16 @@ public:
         return originalRank_;
     }
 
+    ItemTypes GetBaseItemType() const
+    {
+        return type_;
+    }
+
+    void SetBaseItemType(ItemTypes type)
+    {
+        type_ = type;
+    }
+
 private:
     bool needsEmit_ {true};
     uint32_t offset_ {0};
@@ -264,6 +274,7 @@ private:
     std::list<IndexedItem *> indexDeps_;
     uint32_t pgoRank_ {0};
     uint32_t originalRank_ {0};
+    ItemTypes type_ = ItemTypes::ANNOTATION_ITEM;
 };
 
 class IndexedItem : public BaseItem {
