@@ -28,6 +28,7 @@ EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
     auto *klass = PlatformTypes(coro)->coreMutex;
     auto hMutex = EtsHandle<EtsMutex>(coro, EtsMutex::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
+    ASSERT(hMutex.GetPtr() != nullptr);
     hMutex->SetWaitersList(coro, waitersList);
     return hMutex.GetPtr();
 }
@@ -95,6 +96,7 @@ EtsEvent *EtsEvent::Create(EtsCoroutine *coro)
     auto *klass = PlatformTypes(coro)->coreEvent;
     auto hEvent = EtsHandle<EtsEvent>(coro, EtsEvent::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
+    ASSERT(hEvent.GetPtr() != nullptr);
     hEvent->SetWaitersList(coro, waitersList);
     return hEvent.GetPtr();
 }
@@ -132,6 +134,7 @@ EtsCondVar *EtsCondVar::Create(EtsCoroutine *coro)
     auto *klass = PlatformTypes(coro)->coreCondVar;
     auto hCondVar = EtsHandle<EtsCondVar>(coro, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
+    ASSERT(hCondVar.GetPtr() != nullptr);
     hCondVar->SetWaitersList(coro, waitersList);
     return hCondVar.GetPtr();
 }
@@ -219,11 +222,13 @@ bool EtsQueueSpinlock::IsHeld() const
 
 EtsQueueSpinlock::Guard::Guard(EtsHandle<EtsQueueSpinlock> &spinlock) : spinlock_(spinlock)
 {
+    ASSERT(spinlock_.GetPtr() != nullptr);
     spinlock_->Acquire(this);
 }
 
 EtsQueueSpinlock::Guard::~Guard()
 {
+    ASSERT(spinlock_.GetPtr() != nullptr);
     spinlock_->Release(this);
 }
 
