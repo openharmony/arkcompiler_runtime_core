@@ -46,3 +46,10 @@
 
 #25054
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
+
+#27197
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_6.ets
+
+#27449
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_0.ets
+
