@@ -25,11 +25,7 @@
 #include "base/common.h"
 #include "thread/thread_holder.h"
 
-<<<<<<< HEAD
 namespace common {
-=======
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 
 class ThreadHolderManager final {
 public:
@@ -54,9 +50,5 @@ private:
     void ResumeAllImpl(ThreadHolder *current);
 };
 
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_MANAGER_H

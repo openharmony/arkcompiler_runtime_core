@@ -18,14 +18,9 @@
 
 #include "thread/thread_holder-inl.h"
 #include "thread/thread_holder_manager.h"
-<<<<<<< HEAD
 #include "base_runtime.h"
 
 namespace common {
-=======
-
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 
 // Fixme: T is a temporary mock impl to adapt the current JSThread callback when transfer to RUNNING,
 // actually it should always be ThreadHolder, and need to be removed later.
@@ -117,11 +112,7 @@ public:
     {
 #if defined(TODO_MACRO)
         TRACE_GC(GCStats::Scope::ScopeId::SuspendAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-<<<<<<< HEAD
         ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "SuspendAll", "");
-=======
-        ECMA_BYTRACE_NAME(HITRACE_TAG_ARK, "SuspendAll");
->>>>>>> OpenHarmony_feature_20250328
 #endif
         BaseRuntime::GetInstance()->GetThreadHolderManager().SuspendAll(self_);
     }
@@ -130,11 +121,7 @@ public:
     {
 #if defined(TODO_MACRO)
         TRACE_GC(GCStats::Scope::ScopeId::ResumeAll, SharedHeap::GetInstance()->GetEcmaGCStats());
-<<<<<<< HEAD
         ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "ResumeAll", "");
-=======
-        ECMA_BYTRACE_NAME(HITRACE_TAG_ARK, "ResumeAll");
->>>>>>> OpenHarmony_feature_20250328
 #endif
         BaseRuntime::GetInstance()->GetThreadHolderManager().ResumeAll(self_);
     }
@@ -144,9 +131,5 @@ private:
     ThreadStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
     NO_COPY_SEMANTIC_CC(SuspendAllScope);
 };
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H

@@ -21,14 +21,9 @@
 
 #include "base/common.h"
 
-<<<<<<< HEAD
 namespace common {
 
-=======
-namespace panda {
-
 // NOLINTBEGIN(hicpp-signed-bitwise)
->>>>>>> OpenHarmony_feature_20250328
 enum ThreadFlag : uint16_t {
     NO_FLAGS = 0 << 0,
     SUSPEND_REQUEST = 1 << 0,
@@ -37,10 +32,7 @@ enum ThreadFlag : uint16_t {
 
 constexpr uint32_t THREAD_STATE_OFFSET = 16;
 constexpr uint32_t THREAD_FLAGS_MASK = (0x1 << THREAD_STATE_OFFSET) - 1;
-<<<<<<< HEAD
-=======
 // NOLINTEND(hicpp-signed-bitwise)
->>>>>>> OpenHarmony_feature_20250328
 enum class ThreadState : uint16_t {
     CREATED = 0,
     RUNNING = 1,
@@ -50,10 +42,7 @@ enum class ThreadState : uint16_t {
     TERMINATED = 5,
 };
 
-<<<<<<< HEAD
-=======
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
->>>>>>> OpenHarmony_feature_20250328
 union ThreadStateAndFlags {
     explicit ThreadStateAndFlags(uint32_t val = 0) : asInt(val) {}
     struct {
@@ -90,9 +79,5 @@ public:
 private:
     std::atomic<int32_t> passBarrierCount_;
 };
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_H

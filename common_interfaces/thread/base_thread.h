@@ -16,18 +16,11 @@
 #ifndef COMMON_INTERFACES_THREAD_BASE_THREAD_H
 #define COMMON_INTERFACES_THREAD_BASE_THREAD_H
 
-<<<<<<< HEAD
 #include "thread/thread_holder-inl.h"
 
 #include "base/common.h"
 
 namespace common {
-=======
-#include "base/common.h"
-#include "thread/thread_holder-inl.h"
-
-namespace panda {
->>>>>>> OpenHarmony_feature_20250328
 // Fixme: replace with real RootVisitor
 using MockRootVisitor = void (*)();
 
@@ -61,9 +54,5 @@ private:
     BaseThreadType threadType_ {};
     ThreadHolder *threadHolder_ {};
 };
-<<<<<<< HEAD
 }  // namespace common
-=======
-}  // namespace panda
->>>>>>> OpenHarmony_feature_20250328
 #endif  // COMMON_INTERFACES_THREAD_BASE_THREAD_H
