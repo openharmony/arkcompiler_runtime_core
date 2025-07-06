@@ -58,7 +58,6 @@
 03.types/20.union_types/ut_n2_9.ets
 
 # primitives
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_arr/comp-arr_0.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_0.ets
@@ -69,13 +68,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_3.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_1.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_3.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_19.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_20.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_21.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_22.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_23.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_24.ets
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_25.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_32.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_33.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_34.ets
@@ -134,7 +126,7 @@
 17.experimental_features/02.fixed_array_types/far3_6.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_8.ets
-06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+
 
 # Runtime Fail Exclude list (Type changes from byte -> std.core.Byte)
 20.implementation_details/03.getting_type_via_reflection/how_to_get_type_via_reflection_ext_13.ets

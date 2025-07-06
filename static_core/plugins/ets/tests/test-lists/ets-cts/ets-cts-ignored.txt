@@ -158,6 +158,26 @@
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_14.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_15.ets
 
+#27058
+06.contexts_and_conversions/01.type_of_expression/standalone_expression_n_1.ets
+
+#27123
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_minus_14.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/unary_plus_14.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_75.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_76.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_77.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_80.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_81.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
+06.contexts_and_conversions/04.numeric_operator_contexts/unary_numeric_promotion/bitwise_complement_10.ets
+
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
 
@@ -750,8 +770,9 @@
 05.generics/generic_declarations/generic_in_out/generic_in_out_2.ets
 05.generics/generic_declarations/generic_in_out/generic_in_out_5.ets
 
-# 52 ES2PANDA_NEG_FAIL missed cte: implicit cast T -> primitive
-06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+# 51 ASSERT IN ES2PANDA 'SyntaxError: Invalid number.' This line should be unreachable: lexer/token/number.h:169
+07.expressions/20.unary_expressions/07.bitwise_complement/bitwise_complement_neg.ets
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_13.ets
 
 # 54 RUNTIME_FAIL ClassCastError: std.core.Float cannot be cast to std.core.Double
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-un_2.ets
