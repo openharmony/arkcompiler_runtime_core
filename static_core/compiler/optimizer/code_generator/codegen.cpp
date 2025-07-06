@@ -211,6 +211,7 @@ void Codegen::CreateFrameInfo()
     auto frame = GetGraph()->GetLocalAllocator()->New<FrameInfo>(
         FrameInfo::PositionedCallers::Encode(true) | FrameInfo::PositionedCallees::Encode(true) |
         FrameInfo::CallersRelativeFp::Encode(false) | FrameInfo::CalleesRelativeFp::Encode(true));
+    ASSERT(frame != nullptr);
     frame->SetFrameSize(fl.GetFrameSize<CFrameLayout::OffsetUnit::BYTES>());
     frame->SetSpillsCount(fl.GetSpillsCount());
 
@@ -1109,6 +1110,7 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
 
 void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
 {
+    ASSERT(inst->GetSaveState() != nullptr);
     auto &rootsMask = inst->GetSaveState()->GetRootsRegsMask();
     for (auto i = 0U; i < inst->GetInputsCount(); i++) {
         auto input = inst->GetDataFlowInput(i);
@@ -1707,6 +1709,7 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     auto method = GetCallerOfUnresolvedMethod(resolver);
     ScopedTmpReg tmp(GetEncoder());
     auto utypes = GetRuntime()->GetUnresolvedTypes();
+    ASSERT(utypes != nullptr);
     auto skind = UnresolvedTypesInterface::SlotKind::METHOD;
     auto methodAddr = utypes->GetTableSlot(method, resolver->GetCallMethodId(), skind);
     GetEncoder()->EncodeMov(tmp.GetReg(), Imm(methodAddr));
@@ -1957,6 +1960,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
     PostWriteBarrier pwb(this, inst);
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
+    ASSERT(val != nullptr);
     ASSERT(secondValue == nullptr || reg2 != INVALID_REGISTER);
     if (val->GetOpcode() == Opcode::NullPtr) {
         // We can don't encode Post barrier for nullptr

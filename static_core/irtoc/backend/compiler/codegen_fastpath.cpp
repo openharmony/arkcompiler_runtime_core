@@ -181,6 +181,7 @@ void CodegenFastPath::CreateFrameInfo()
         FrameInfo::PositionedCallers::Encode(true) | FrameInfo::PositionedCallees::Encode(false) |
         FrameInfo::CallersRelativeFp::Encode(true) | FrameInfo::CalleesRelativeFp::Encode(false) |
         FrameInfo::PushCallers::Encode(true));
+    ASSERT(frame != nullptr);
     frame->SetSpillsCount(GetGraph()->GetStackSlotsCount());
     CFrameLayout fl(GetGraph()->GetArch(), GetGraph()->GetStackSlotsCount(), false);
 

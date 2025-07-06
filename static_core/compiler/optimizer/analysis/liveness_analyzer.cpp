@@ -528,7 +528,7 @@ void LivenessAnalyzer::AdjustCatchPhiInputsLifetime(Inst *inst)
 {
     auto catchPhi = inst->CastToCatchPhi();
 
-    for (ssize_t inputIdx = catchPhi->GetInputsCount() - 1; inputIdx >= 0; inputIdx--) {
+    for (auto inputIdx = static_cast<ssize_t>(catchPhi->GetInputsCount() - 1); inputIdx >= 0; inputIdx--) {
         auto inputInst = catchPhi->GetDataFlowInput(inputIdx);
         auto throwableInst = const_cast<Inst *>(catchPhi->GetThrowableInst(inputIdx));
 
@@ -923,6 +923,7 @@ void LifeIntervals::SplitAroundUses(ArenaAllocator *alloc)
         split->SplitAroundUses(alloc);
     } else if (use < GetEnd() - 1) {
         auto split = SplitAt(use + 1, alloc);
+        ASSERT(split != nullptr);
         split->SplitAroundUses(alloc);
     }
 }
@@ -1014,6 +1015,7 @@ static float GetSpillWeightAt(const LivenessAnalyzer &la, LifeNumber ln)
 {
     static constexpr float LOOP_MULT = 10.0;
     auto block = la.GetBlockCoversPoint(ln);
+    ASSERT(block != nullptr);
     return std::pow<float>(LOOP_MULT, block->GetLoop()->GetDepth());
 }
 

@@ -158,7 +158,7 @@ public:
     template <typename Rng>
     void AddPandaFiles(Rng &&profiledPandaFiles)
     {
-        uint32_t count = pandaFileMap_.size();
+        int32_t count = pandaFileMap_.size();
         for (auto &pandaFile : profiledPandaFiles) {
             if (pandaFileMap_.find(pandaFile) != pandaFileMap_.end()) {
                 continue;
