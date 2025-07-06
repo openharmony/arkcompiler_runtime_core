@@ -21,6 +21,7 @@ native function NativeCall(id: int): void;
 
 export function TestMain(): int {
     let ea = new EAWorker();
+    ea.start();
     let id = ea.run<int>(callback).Await();
     NativeCall(id);
     ea.join();

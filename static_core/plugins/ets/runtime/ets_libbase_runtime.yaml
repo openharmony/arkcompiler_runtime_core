@@ -7994,8 +7994,8 @@ intrinsics:
     method_name: elaunch
     static: true
     signature:
-      ret: void
-      args: [std.core.Object, u1]
+      ret: i32
+      args: [std.core.Object, u1, std.core.String, i32]
     impl: ark::ets::intrinsics::ExclusiveLaunch
 
 ###################
@@ -8015,8 +8015,46 @@ intrinsics:
         - u1
     impl: ark::ets::intrinsics::PostToMainThread
 
+  - name: EtsEAWorkerCalculateEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: calculateEAWorkerCount
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::CalculateEAworkerCount
+
+  - name: EtsEAWorkerGetEAWorkerCount
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: getEAWorkerNumFromThread
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::GetEAWorkerNumFromThread
+
+  - name: EtsEAWorkerCreateMainWorker
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: createMainWorker
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::CreateMainWorker
 
 
+  - name: EtsEAWorkerSetPriority
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: setCurrentWorkerPriority
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::SetCurrentWorkerPriority
 ###############################
 # std.core.TaskPoster #
 ###############################

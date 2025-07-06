@@ -31,6 +31,7 @@
 #include <type_traits>
 
 namespace ark::ets::intrinsics {
+
 static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> func)
 {
     if (func.GetPtr() == nullptr) {

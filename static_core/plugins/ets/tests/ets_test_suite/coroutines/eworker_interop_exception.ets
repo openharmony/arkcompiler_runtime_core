@@ -17,6 +17,7 @@ function testEworkerInteropException() {
     let exceptionWasCaught = false;
     try {
         let eaw : EAWorker = new EAWorker(true);
+        eaw.start();
         eaw.join();
     } catch (e) {
         if (e instanceof RuntimeException) {

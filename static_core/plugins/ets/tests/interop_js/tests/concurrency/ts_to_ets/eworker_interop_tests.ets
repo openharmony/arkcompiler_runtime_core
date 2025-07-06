@@ -252,6 +252,7 @@ function testCustomThrowError() {
 function testEAWorkerNestedExecute() {
     let callback = ():boolean => {
         let innerWorker = new EAWorker(true);
+        innerWorker.start();
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
         let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
@@ -329,7 +330,120 @@ function testEAWorkerSerializeNull() {
     arktest.assertEQ(res, true);
 }
 
+function testEAWorkerMessageCancellation() {
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message)=>{
+        if (msg.getObject() != undefined) {
+            console.log("msg.getObject() " + msg.getObject());
+        }
+        if (msg.getCallback() != undefined) {
+            console.log("callback");
+            let callback = msg.getCallback() as () => void;
+            callback();
+        }
+    }, eaw);
+
+    let msg1 = new concurrency.Message(1, handler);
+    let msg2 = new concurrency.Message(2, "msg2", handler);
+    let cb = ()=>{
+        arktest.assertEQ(handler.removeMessages(1), true);
+        arktest.assertEQ(handler.removeMessages(2, "msg2"), true);
+        arktest.assertEQ(handler.hasMessages(1), false);
+        arktest.assertEQ(handler.hasMessages(2, "msg2"), false);
+    }
+    let msg3 = new concurrency.Message(cb, handler);
+
+    arktest.assertEQ(handler.sendMessage(msg3), true);
+    arktest.assertEQ(handler.sendMessage(msg2), true);
+    arktest.assertEQ(handler.sendMessage(msg1), true);
+}
+class Event {
+    public Wait() {
+        while (this.flag.get() != true) {
+            Coroutine.Schedule();
+        }
+    }
+
+    public Fire() {
+        this.flag.set(true);
+    }
+
+    private flag = new AtomicFlag(false);
+};
+
+type Callback = () => void;
+enum MessageType {
+    EMPTY,
+    STRING,
+    NUMBER,
+    BOOLEAN,
+    ARRAY,
+}
+function removeMessageHandlerTest() {
+    let waiter = new Event();
+    let handler: concurrency.MessageHandler;
+    let restExecuted = false;
+    handler = new concurrency.MessageHandler((msg: concurrency.Message)=>{
+        if (msg.getWhat() == 1) {
+            restExecuted = true;
+        }
+        if (msg.getCallback() != undefined) {
+            let callback = msg.getCallback() as Callback;
+            callback();
+        }
+    }, eaw);
+
+    let msg = new concurrency.Message(1, handler);
+    let callback = () => {
+        handler.removeMessages(1);
+        waiter.Fire();
+    }
+    let msg2 = new concurrency.Message(callback, handler);
+
+    handler.sendMessage(msg2);
+    handler.sendMessage(msg);
+
+    waiter.Wait();
+    arktest.assertEQ(restExecuted, false);
+}
+
+function testEAWorkerCommmunicateWithMessage()
+{
+    let eaw2 = new EAWorker();
+    let waiter = new Event();
+    eaw2.start();
+
+    let eaw1Tag = 1111;
+    let eaw2Tag = 2222;
+    let messageGot = false;
+
+    let handler1 : concurrency.MessageHandler;
+    let handler2 : concurrency.MessageHandler;
+
+    handler1 = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        arktest.assertEQ(msg.getWhat(), eaw2Tag);
+        if (msg.getObject() != undefined) {
+            let obj = msg.getObject() as string;
+            arktest.assertEQ(obj, "message from eaw2");
+            handler2.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2));
+        }
+    }, eaw);
+
+    handler2 = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        arktest.assertEQ(msg.getWhat(), eaw1Tag);
+        arktest.assertEQ(msg.getObject(), "message from eaw1");
+        messageGot = true;
+        waiter.Fire();
+    }, eaw2);
+
+    handler1.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1));
+
+    waiter.Wait();
+    arktest.assertEQ(messageGot, true);
+    eaw2.join();
+}
+
 function eworkerInteropTest() {
+    eaw.start();
     let eworkerInteropSuite = new arktest.ArkTestsuite('eworker.InteropTest');
     eworkerInteropSuite.addTest('testProcessInput', testProcessInput);
     eworkerInteropSuite.addTest('testCreateArray', testCreateArray);
@@ -353,6 +467,9 @@ function eworkerInteropTest() {
     eworkerInteropSuite.addTest('testEAWorkerSerialize', testEAWorkerSerialize);
     eworkerInteropSuite.addTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
     eworkerInteropSuite.addTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
+    eworkerInteropSuite.addTest('testEAWorkerMessageCancellation', testEAWorkerMessageCancellation);
+    eworkerInteropSuite.addTest('testRemoveMessageHandlerTest', removeMessageHandlerTest);
+    eworkerInteropSuite.addTest('testEAWorkerCommmunicateWithMessage', testEAWorkerCommmunicateWithMessage);
     eworkerInteropSuite.run();
     eaw.join();
     return true;

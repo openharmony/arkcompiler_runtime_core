@@ -18,7 +18,9 @@ function testEworkersReachedLimit() {
     let eaWorkers = new Array<EAWorker>();
     try {
         while (true) {
-            eaWorkers.push(new EAWorker());
+            let eaWorker = new EAWorker();
+            eaWorker.start();
+            eaWorkers.push(eaWorker);
         }
     } catch (e) {
         arktest.assertEQ(e.toString(), 'CoroutinesLimitExceedError: The limit of Exclusive Workers has been reached');

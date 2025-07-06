@@ -21,7 +21,9 @@ const NUM_EWORKERS: int = 63;
 function CreateWorkers(): Array<EAWorker> {
     let workers = new Array<EAWorker>();
     for (let i = 0; i < NUM_EWORKERS; i++) {
-        workers.push(new EAWorker());
+        let eaWorker = new EAWorker();
+        eaWorker.start();
+        workers.push(eaWorker);
     }
     return workers;
 }
@@ -30,6 +32,7 @@ function CheckLimitReached() {
     let catched = false;
     try {
         let w = new EAWorker();
+        w.start();
         w.join();
     } catch(e) {
         catched = true;

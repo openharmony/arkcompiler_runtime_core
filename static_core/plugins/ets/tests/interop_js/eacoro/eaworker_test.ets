@@ -16,6 +16,7 @@
 function RunTasksTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
+    w.start();
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         arktest.assertNE(runId, mainId);
@@ -35,6 +36,7 @@ function RunTasksTest(): void {
 function RunTasksWithJsCallTest(): void {
     let mainId = CoroutineExtras.getWorkerId();
     let w = new EAWorker(true);
+    w.start();
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
@@ -60,6 +62,7 @@ function RunTasksWithJsCallTest(): void {
 
 function RunTasksWithJsAsyncCallTest(): void {
     let w = new EAWorker(true);
+    w.start();
     let callback = ():int => {
         let module = JSRuntime.loadModule("./eaworker_test_helpers_js");
         let modified = false;
@@ -92,6 +95,7 @@ function RunTasksWithJsAsyncCallTest(): void {
 
 function CreateEAWorkerWithoutInterop(): void {
     let eaw = new EAWorker();
+    eaw.start();
     let res = false;
     try {
         let callback = () => {
