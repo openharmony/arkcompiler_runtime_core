@@ -971,6 +971,7 @@ static void ListUnhandledImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
+    ASSERT(herrors.GetPtr() != nullptr);
     std::array args = {Value(herrors->GetCoreType())};
     method->InvokeVoid(coro, args.data());
     LOG(DEBUG, COROUTINES) << "List unhandled rejections end";
@@ -983,6 +984,7 @@ void PandaEtsVM::AddUnhandledFailedJob(EtsJob *job)
 
 void PandaEtsVM::RemoveUnhandledFailedJob(EtsJob *job)
 {
+    ASSERT(job != nullptr);
     RemoveUnhandledObjectImpl(unhandledFailedJobs_, job->AsObject());
 }
 
@@ -1015,6 +1017,7 @@ void PandaEtsVM::AddUnhandledRejectedPromise(EtsPromise *promise)
 
 void PandaEtsVM::RemoveUnhandledRejectedPromise(EtsPromise *promise)
 {
+    ASSERT(promise != nullptr);
     RemoveUnhandledObjectImpl(unhandledRejectedPromises_, promise->AsObject());
 }
 
