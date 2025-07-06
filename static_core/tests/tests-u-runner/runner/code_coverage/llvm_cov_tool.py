@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Optional, List, Dict
 from runner.code_coverage.coverage_dir import CoverageDir
 from runner.code_coverage.cmd_executor import CmdExecutor
-from runner.utils import write_list_to_file
+from runner.utils import write_list_to_file, get_opener
 from runner.logger import Log
 
 _LOGGER = logging.getLogger("runner.code_coverage.llvm_cov_tool")
@@ -135,7 +135,8 @@ class LlvmCovTool():
 
         command.extend(llvm_cov_export_command_args)
 
-        with os.fdopen(os.open(_dot_info_file_path, os.O_WRONLY | os.O_CREAT, 0o755), 'w', encoding='utf-8') as file:
+        custom_opener = get_opener(0o644)
+        with open(_dot_info_file_path, mode='w+', encoding='utf-8', opener=custom_opener) as file:
             self.cmd_executor.run_command(command, stdout=file)
 
     def export_to_info_file_by_components(self, exclude_regex: Optional[str] = None) -> None:

@@ -21,7 +21,7 @@ from pathlib import Path
 import pytz
 
 from runner import utils
-from runner.code_coverage.coverage import LlvmCov
+from runner.code_coverage.coverage_manager import CoverageManager
 from runner.common_exceptions import InvalidConfiguration
 from runner.cpumask import CPUMask
 from runner.enum_types.params import TestEnv
@@ -52,7 +52,7 @@ class RunnerStandardFlow(RunnerFileBased):
             timestamp=int(datetime.timestamp(datetime.now(pytz.UTC))),
             report_formats={self.config.general.report_format},
             work_dir=WorkDir(config, self.default_work_dir_root),
-            coverage=LlvmCov(self.config.general.build, self.work_dir),
+            coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir),
         )
 
         self.__remove_intermediate_files()
@@ -76,7 +76,53 @@ class RunnerStandardFlow(RunnerFileBased):
         _LOGGER.default(self.config.workflow.pretty_str())
 
     def create_coverage_html(self) -> None:
-        pass
+        """
+        Generate HTML coverage reports based on the selected coverage tool and configuration.
+
+        This method determines which coverage tool to use (LLVM or LCOV), and whether to generate
+        coverage per binary or as a single report. It orchestrates the creation of intermediate
+        coverage files, merging them, exporting to `.info` format, and finally generating the HTML report.
+
+        Uses:
+            - `use_llvm_cov`: If True, uses LLVM-based tools (`profdata`, `llvm-cov`) for coverage.
+            - `use_lcov`: If True, uses LCOV-based tools (`lcov`, `genhtml`) for coverage.
+            - `coverage_per_binary`: If True, generates separate reports per component/binary.
+
+        Steps for LLVM:
+            1. Create list of `.profdata` files.
+            2. Merge `.profdata` files.
+            3. Export to `.info` file using `llvm-cov`.
+            4. Generate HTML report using `genhtml`.
+
+        Steps for LCOV:
+            1. Generate `.info` file(s) using `lcov`.
+            2. Generate HTML report using `genhtml`.
+
+        Returns:
+            None
+        """
+        _LOGGER.default("Create html report for coverage")
+        coverage_configs = self.test_env.config.general.coverage
+        llvm_tool = self.test_env.coverage.llvm_cov_tool
+        lcov_tool = self.test_env.coverage.lcov_tool
+
+        if coverage_configs.use_llvm_cov:
+            if coverage_configs.coverage_per_binary:
+                llvm_tool.make_profdata_list_files_by_components()
+                llvm_tool.merge_all_profdata_files_by_components()
+                llvm_tool.export_to_info_file_by_components(coverage_configs.llvm_cov_exclude)
+            else:
+                llvm_tool.make_profdata_list_file()
+                llvm_tool.merge_all_profdata_files()
+                llvm_tool.export_to_info_file(exclude_regex=coverage_configs.llvm_cov_exclude)
+            llvm_tool.generate_html_report()
+        elif coverage_configs.use_lcov:
+            if coverage_configs.coverage_per_binary:
+                lcov_tool.generate_dot_info_file_by_components(coverage_configs.lcov_exclude)
+                lcov_tool.generate_html_report_by_components()
+            else:
+                lcov_tool.generate_dot_info_file(coverage_configs.lcov_exclude)
+                lcov_tool.generate_html_report()
 
     def before_suite(self) -> None:
         if self.cpu_mask:
