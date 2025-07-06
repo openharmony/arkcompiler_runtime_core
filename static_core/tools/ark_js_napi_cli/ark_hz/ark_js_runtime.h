@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ namespace panda {
 
 class ArkJsRuntime : public JsRuntime {
 public:
+    ~ArkJsRuntime();
+
     bool ProcessOptions(int argc, const char **argv, arg_list_t *filenames) override;
 
     bool Init() override;
@@ -39,13 +41,13 @@ public:
 
     NativeEngine *GetNativeEngine() override
     {
-        return engine_.get();
+        return engine_;
     }
 
 private:
     ecmascript::JSRuntimeOptions options_;
     ecmascript::EcmaVM *vm_ {nullptr};
-    std::unique_ptr<ArkNativeEngine> engine_;
+    ArkNativeEngine *engine_;
 };
 
 }  // namespace panda
