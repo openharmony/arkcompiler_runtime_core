@@ -45,8 +45,9 @@ constexpr char UTF8_FIRST_CODE[] = {
 int FromUtf8(int c, int l, const uint8_t *p, const uint8_t **pp)
 {
     uint32_t b;
+    uint32_t cc = c;
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    c &= UTF8_FIRST_CODE[l - 1];
+    cc &= UTF8_FIRST_CODE[l - 1];
     for (int i = 0; i < l; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         b = *p++;
@@ -54,13 +55,13 @@ int FromUtf8(int c, int l, const uint8_t *p, const uint8_t **pp)
             return INVALID_UNICODE_FROM_UTF8;
         }
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        c = (c << 6) | (b & ark::utf::UTF8_2B_THIRD);  // 6: Maximum Unicode range
+        cc = (cc << 6) | (b & ark::utf::UTF8_2B_THIRD);  // 6: Maximum Unicode range
     }
-    if (c < UTF8_MIN_CODE[l - 1]) {
+    if (cc < static_cast<uint32_t>(UTF8_MIN_CODE[l - 1])) {
         return INVALID_UNICODE_FROM_UTF8;
     }
     *pp = p;
-    return c;
+    return static_cast<int>(cc);
 }
 
 int UnicodeFromUtf8(const uint8_t *p, int maxLen, const uint8_t **pp)
@@ -365,7 +366,7 @@ void RegExpParser::ParsePatternCharacter(bool isBackward)
     if (c0_ > (INT8_MAX + 1)) {
         Prev();
         int i = 0;
-        UChar32 c;
+        UChar32 c = 0;
         int32_t length = end_ - pc_ + 1;
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
         U8_NEXT(pc_, i, length, c);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -1302,7 +1303,7 @@ int RegExpParser::ParseCharacterEscape()
             break;
         }
     }
-    return result;
+    return static_cast<int>(result);
 }
 
 void RegExpParser::ParseCharacterEscapeDefault(uint32_t &result)
