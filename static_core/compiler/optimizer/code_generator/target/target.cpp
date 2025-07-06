@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@ Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arenaAllocator, [[mayb
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         case Arch::AARCH32: {
             aarch32::Aarch32Encoder *enc = arenaAllocator->New<aarch32::Aarch32Encoder>(arenaAllocator);
+            ASSERT(enc != nullptr);
             enc->SetIsJsNumberCast(jsNumberCast);
             if (printAsm) {
                 return arenaAllocator->New<aarch32::Aarch32Assembly>(arenaAllocator, enc);
@@ -83,6 +84,7 @@ Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arenaAllocator, [[mayb
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         case Arch::AARCH64: {
             aarch64::Aarch64Encoder *enc = arenaAllocator->New<aarch64::Aarch64Encoder>(arenaAllocator);
+            ASSERT(enc != nullptr);
             enc->SetIsJsNumberCast(jsNumberCast);
             if (printAsm) {
                 return arenaAllocator->New<aarch64::Aarch64Assembly>(arenaAllocator, enc);
@@ -94,6 +96,7 @@ Encoder *Encoder::Create([[maybe_unused]] ArenaAllocator *arenaAllocator, [[mayb
         case Arch::X86_64: {
             amd64::Amd64Encoder *enc =
                 arenaAllocator->New<amd64::Amd64Encoder>(arenaAllocator, Arch::X86_64, jsNumberCast);
+            ASSERT(enc != nullptr);
             enc->SetIsJsNumberCast(jsNumberCast);
             if (printAsm) {
                 return arenaAllocator->New<amd64::Amd64Assembly>(arenaAllocator, enc);

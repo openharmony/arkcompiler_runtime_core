@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -547,7 +547,7 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::AddSymbol(const std::string &name, ElfWord s
 {
     uint8_t symbolType = IS_FUNCTION ? STT_FUNC : STT_OBJECT;
     auto nameIdx = dynstrSection_.AddString(name);
-    constexpr int LOW_BITS_MASK = 0b1111;
+    constexpr uint8_t LOW_BITS_MASK = 0b1111;
     auto stInfo =
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
         static_cast<uint8_t>((STB_GLOBAL << 4U) + (symbolType & LOW_BITS_MASK));

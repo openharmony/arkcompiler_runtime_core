@@ -755,6 +755,7 @@ public:
     void ScaleThreadPool(size_t numberOfThreads)
     {
         // Required for testing
+        ASSERT(GetThreadPool() != nullptr);
         GetThreadPool()->Scale(numberOfThreads);
     }
 

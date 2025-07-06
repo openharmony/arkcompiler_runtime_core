@@ -326,6 +326,7 @@ bool ObjectTypePropagationVisitor::RunImpl()
         UNREACHABLE();
     }
     auto *graph = GetGraph();
+    ASSERT(graph != nullptr);
     graph->RunPass<LoopAnalyzer>();
     MarkerHolder holder(graph);
     visited_ = holder.GetMarker();
