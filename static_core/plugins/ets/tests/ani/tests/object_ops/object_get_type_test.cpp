@@ -96,7 +96,7 @@ TEST_F(ObjectGetTypeTest, invalid_object)
     ASSERT_EQ(env_->Object_GetType(object, &type), ANI_INVALID_ARGS);
 }
 
-TEST_F(ObjectGetTypeTest, class_obect_type_loop)
+TEST_F(ObjectGetTypeTest, class_object_type_loop)
 {
     ani_class classA {};
     ani_object objectA {};
@@ -109,6 +109,19 @@ TEST_F(ObjectGetTypeTest, class_obect_type_loop)
         ASSERT_EQ(env_->Object_InstanceOf(objectA, type, &res), ANI_OK);
         ASSERT_EQ(res, ANI_TRUE);
     }
+}
+
+TEST_F(ObjectGetTypeTest, eq_obj_type_enum)
+{
+    ani_enum enmColor {};
+    ASSERT_EQ(env_->FindEnum("object_get_type_test.Color", &enmColor), ANI_OK);
+    ani_enum_item itemRed {};
+    ASSERT_EQ(env_->Enum_GetEnumItemByName(enmColor, "RED", &itemRed), ANI_OK);
+    ani_type typeColor {};
+    ASSERT_EQ(env_->Object_GetType(itemRed, &typeColor), ANI_OK);
+    ani_boolean res {};
+    ASSERT_EQ(env_->Reference_Equals(enmColor, typeColor, &res), ANI_OK);
+    ASSERT_EQ(res, ANI_TRUE);
 }
 }  // namespace ark::ets::ani::testing
 
