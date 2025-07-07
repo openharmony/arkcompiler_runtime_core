@@ -24,7 +24,6 @@ function main() {
 
     suite.addTest("Verify if bit vector correctly identifies bit values within a specified range.", BitVector_has_Func_001);
     suite.addTest("Verify that bit vector throws an error when toIndex is negative.", BitVector_has_Func_002);
-    suite.addTest("Verify that bit vector throws an error when fromIndex is not an integer.", BitVector_has_Func_003);
     suite.addTest("Verify that bit vector throws an error when both fromIndex and toIndex are negative.", BitVector_has_Func_004);
     suite.addTest("Verify that bit vector throws an error when fromIndex is negative while toIndex is valid.", BitVector_has_Func_005);
     suite.addTest("Verify if bit vector correctly identifies bit values in a large range spanning multiple buffer elements.", BitVector_has_Func_006);
@@ -84,32 +83,6 @@ function BitVector_has_Func_002() {
                 (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     }
     arktest.expectThrow(() => { bitVector.has(0, 8, -3); }, exceptionCheck);
-}
-
-/**
- * @tc.number    : BITVECTOR_TEST_010
- * @tc.name      : BitVector_has_Func_003
- * @tc.desc      : Check if bit vector throws an error for non-integer 'fromIndex'.
- * @tc.size      : MediumTest
- * @tc.type      : Function
- * @tc.level     : Level 2
- */
-function BitVector_has_Func_003() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            ((e as BusinessError).code === TypeErrorCodeId &&
-                (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 0.1`);
-    }
-    arktest.expectThrow(() => { bitVector.has(0, 0.1, 6.1); }, exceptionCheck);
 }
 
 /**

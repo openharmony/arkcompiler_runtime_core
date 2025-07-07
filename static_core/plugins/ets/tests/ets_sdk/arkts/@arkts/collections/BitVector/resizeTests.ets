@@ -26,7 +26,6 @@ function main() {
     suite.addTest("Resize the bitVector to the same length.", BitVector_resize_Func_002);
     suite.addTest("Resize the bitVector to a larger length with default values.", BitVector_resize_Func_003);
     suite.addTest("Check if resizing to a negative length throws an error.", BitVector_resize_Func_004);
-    suite.addTest("Check if resizing to a non-integer length throws an error.", BitVector_resize_Func_005);
     suite.addTest("Resize the bitVector to a smaller length and verify.", BitVector_resize_Func_006);
     suite.addTest("Resize the bitVector to the same length and verify.", BitVector_resize_Func_007);
     suite.addTest("Resize the bitVector to a larger length and verify default values.", BitVector_resize_Func_008);
@@ -124,32 +123,6 @@ function BitVector_resize_Func_004() {
             (e as BusinessError).code === OutOfBoundsErrorCodeId;
     };
     arktest.expectThrow(() => { bitVector.resize(-4); }, exceptionCheck);
-}
-
-/**
- * @tc.number    : BITVECTOR_TEST_033
- * @tc.name      : BitVector_resize_Func_005
- * @tc.desc      : Check if resizing to a non-integer length throws an error.
- * @tc.size      : MediumTest
- * @tc.type      : Function
- * @tc.level     : Level 2
- */
-function BitVector_resize_Func_005() {
-    let bitVector = new collections.BitVector(0);
-    bitVector.push(1);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    bitVector.push(0);
-    bitVector.push(1);
-    bitVector.push(0);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return e instanceof BusinessError &&
-            (e as BusinessError).message === `The type of "size" must be integer. Received value is: 6.1` &&
-            (e as BusinessError).code === TypeErrorCodeId;
-    };
-    arktest.expectThrow(() => { bitVector.resize(6.1); }, exceptionCheck);
 }
 
 /**

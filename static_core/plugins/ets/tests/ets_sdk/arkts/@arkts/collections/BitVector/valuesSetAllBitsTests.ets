@@ -46,7 +46,7 @@ function BitVector_Values_Func_001() {
     let vec: Array<number> = new Array<number>();
     let a: number[] = [1, 1, 0, 1, 0];
     let itr = bitVector.values();
-    let tmp: IteratorResult<number> = itr.next();
+    let tmp: IteratorResult<int> = itr.next();
     while (!tmp.done) {
         vec.push(tmp.value!);
         tmp = itr.next();
@@ -75,7 +75,7 @@ function BitVector_Values_Func_002() {
     arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
     let vec: Array<number> = new Array<number>();
     let itr = bitVector.values();
-    let tmp: IteratorResult<number> = itr.next();
+    let tmp: IteratorResult<int> = itr.next();
     while (!tmp.done) {
         vec.push(tmp.value!);
         tmp = itr.next();
@@ -104,7 +104,7 @@ function BitVector_Values_Func_003() {
     arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
     let vec: Array<number> = new Array<number>();
     let itr = bitVector.values();
-    let tmp: IteratorResult<number> = itr.next();
+    let tmp: IteratorResult<int> = itr.next();
     while (!tmp.done) {
         vec.push(tmp.value!);
         tmp = itr.next();
